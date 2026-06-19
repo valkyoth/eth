@@ -1,6 +1,6 @@
 # eth 0.2.0 Release Notes
 
-Status: release candidate
+Status: implementation complete; pending external pentest input
 
 ## Summary
 
