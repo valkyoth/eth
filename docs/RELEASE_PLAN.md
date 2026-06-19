@@ -2,11 +2,18 @@
 
 Status: planning document
 
+This plan is intentionally granular. `eth` is security-sensitive Ethereum
+protocol software, so each milestone must be small enough to review, test,
+pentest, and stop cleanly before tagging.
+
+The list below is not a maximum. Add patch releases or split a milestone before
+implementation if the work no longer fits in one safe review pass.
+
 Tags use:
 
 ```text
 v0.N.0      milestone release
-v0.N.P      patch/fix release
+v0.N.P      patch/fix release for milestone N
 v1.0.0      first serious production-ready Ethereum crate
 ```
 
@@ -14,18 +21,45 @@ v1.0.0      first serious production-ready Ethereum crate
 
 Every release must have:
 
-- definition of done;
-- local verification command;
+- a clear definition of done;
+- a local verification command;
 - security review notes;
 - known limitations;
 - release notes;
 - dependency-policy evidence;
+- completed pentest evidence for the exact commit being tagged;
 - no hidden dependency on one developer machine.
 
-## Clean Stop And Pentest Rule
+Every release should prefer:
 
-Each version has a deliberate clean stop. When implementation criteria are done,
-the work stops before tagging and the maintainer is told:
+- one protocol boundary at a time;
+- fixtures before broad implementation;
+- negative and adversarial tests with each parser;
+- explicit fork and chain context over global "latest" behavior;
+- no default networking, signing, Reth, P2P, or local key storage.
+
+## Pentest Before Tags
+
+Every version must pass a security review and pentest before it is tagged. This
+applies to `v0.N.P` patch tags as well as milestone tags.
+
+A version is not tag-ready until:
+
+- `scripts/checks.sh` passes;
+- `cargo deny check` passes;
+- `cargo audit` passes;
+- `scripts/generate-sbom.sh` succeeds;
+- release notes exist at `release-notes/RELEASE_NOTES_X.Y.Z.md`;
+- a pentest report exists at `security/pentest/vX.Y.Z.md`;
+- the pentest report names the exact `Commit:` being tagged;
+- the pentest report has `Status: PASS`;
+- the pentest report has non-blank `Tester:` and `Scope:` fields;
+- the pentest report has a `Date: YYYY-MM-DD` field;
+- `sbom/eth.spdx.json` exists and is non-empty;
+- the tag does not already exist locally;
+- `scripts/validate-release-readiness.sh vX.Y.Z` passes.
+
+When a version's implementation criteria are done, stop and say:
 
 ```text
 vX.Y.Z implementation stop reached. Run pentest for this exact commit.
@@ -33,19 +67,29 @@ vX.Y.Z implementation stop reached. Run pentest for this exact commit.
 
 No tag is created at that point.
 
-Pentest flow:
+### Pentest Handoff Flow
+
+Use this loop for every version:
 
 1. Implementation reaches the version stop point.
 2. Local gates pass: `scripts/checks.sh`, `cargo deny check`, and `cargo audit`.
-3. The maintainer runs pentest and writes findings to root `PENTEST.md`.
+3. The maintainer runs pentest and writes temporary findings to root
+   `PENTEST.md`.
 4. Findings are reviewed and fixed.
-5. `PENTEST.md` is removed after findings are handled.
-6. Local gates are run again.
-7. A permanent report is written at `security/pentest/<tag>.md` only when the
+5. Documentation, tests, and release notes are updated for the fixes.
+6. `PENTEST.md` is removed after findings are handled.
+7. Local gates are run again.
+8. GitHub CI and CodeQL default setup are checked after the fix commit.
+9. A permanent report is written at `security/pentest/vX.Y.Z.md` only when the
    exact commit is ready to tag and the result is `Status: PASS`.
-8. Tagging and pushing tags happen only when explicitly requested.
+10. `scripts/validate-release-readiness.sh vX.Y.Z` passes.
+11. Tagging and pushing tags happen only when explicitly requested.
 
-## v0.1.0 - Repository Foundation
+Root `PENTEST.md` is temporary scratch input. It must not be committed.
+
+## Phase 0: Repository And Release Discipline
+
+### v0.1.0 - Repository Foundation
 
 Goal: initialize the serious Rust workspace and policy baseline.
 
@@ -54,7 +98,6 @@ Deliverables:
 - Rust stable `1.96.0` pinned.
 - Rust `1.90.0` through `1.96.0` compatibility policy.
 - Focused no_std workspace crates.
-- `scripts/checks.sh`.
 - CI, dependency policy, security policy, release notes.
 - Implementation, release, scope, threat-model, modularity, toolchain,
   unsafe, spec, and supply-chain docs.
@@ -63,167 +106,721 @@ Verification:
 
 - `scripts/checks.sh`
 - `scripts/release_0_1_gate.sh`
-- `cargo test --workspace`
 
-## v0.2.0 - Primitives And Decode Budgets
+Exit criteria:
 
-Goal: make Ethereum domain types and decoder budgets explicit.
+- A new contributor can understand the scope, security posture, and release
+  process from the repository docs.
 
-Deliverables:
+### v0.2.0 - Release Readiness Gate
 
-- chain, block, gas, nonce, timestamp, address, hash, and fork primitives;
-- decode-budget types;
-- checked arithmetic policy for lengths and allocations;
-- exact-consumption helpers;
-- negative tests for budget violations.
-
-## v0.3.0 - Canonical RLP Foundation
-
-Goal: implement bounded canonical RLP decoding.
+Goal: make the pentest-before-tag process enforceable by local tooling.
 
 Deliverables:
 
-- admitted codec dependency or reviewed local implementation;
-- canonical integer rejection;
-- list and nesting limits;
-- exact-consumption decoding;
-- fuzz target for RLP.
+- `scripts/validate-release-readiness.sh`;
+- release-note metadata checks;
+- permanent pentest-report metadata checks;
+- SBOM presence checks;
+- tag-exists guard.
 
-## v0.4.0 - Typed Transaction Envelopes
+Verification:
 
-Goal: parse and classify typed Ethereum transactions safely.
+- `scripts/checks.sh`
+- negative tests for missing release and pentest metadata where practical.
+
+Exit criteria:
+
+- The project can refuse a tag-ready claim when pentest or release evidence is
+  missing.
+
+## Phase 1: Primitive And Error Foundation
+
+### v0.3.0 - Domain Newtypes
+
+Goal: make Ethereum numeric and byte domains explicit.
 
 Deliverables:
 
-- EIP-2718 envelope model;
-- legacy and admitted typed transaction shells;
-- unsupported type errors;
-- round-trip and malformed-input tests.
+- chain, block, gas, nonce, timestamp, address, hash, wei, and transaction type
+  primitives;
+- bounded constructors where values have protocol limits;
+- tests for all constructors and conversions.
 
-## v0.5.0 - Fork Model And Chain Specs
+Verification:
 
-Goal: make validation fork context explicit.
+- `cargo test --workspace --all-features`
+
+Exit criteria:
+
+- Public APIs no longer use unqualified integers for core protocol concepts.
+
+### v0.4.0 - Stable Error Model
+
+Goal: establish non-panicking error categories for protocol operations.
+
+Deliverables:
+
+- codec, protocol, verification, feature, fork, and resource-exhaustion errors;
+- no secret-bearing error payloads;
+- tests for error stability and formatting.
+
+Verification:
+
+- `scripts/checks.sh`
+
+Exit criteria:
+
+- Malformed input and unsupported protocol data return errors, not panics.
+
+### v0.5.0 - Decode Budget Model
+
+Goal: make resource limits mandatory for untrusted bytes.
+
+Deliverables:
+
+- byte, list, nesting, allocation, proof-node, and item-count limits;
+- checked arithmetic helpers for lengths and offsets;
+- adversarial tests for budget rejection.
+
+Verification:
+
+- `cargo test -p eth-codec`
+
+Exit criteria:
+
+- No decoder entry point can be designed without an explicit budget parameter.
+
+## Phase 2: RLP Codec In Small Passes
+
+### v0.6.0 - RLP Scalar Decoder
+
+Goal: decode RLP bytes and strings with exact consumption.
+
+Deliverables:
+
+- scalar RLP item model;
+- short and long string handling;
+- trailing-data rejection;
+- malformed length tests.
+
+Verification:
+
+- `cargo test -p eth-codec`
+
+Exit criteria:
+
+- Scalar RLP inputs are accepted or rejected deterministically.
+
+### v0.7.0 - RLP List Decoder
+
+Goal: decode nested RLP lists under resource limits.
+
+Deliverables:
+
+- list header parsing;
+- nested traversal without recursive stack growth where practical;
+- item-count and nesting-depth enforcement;
+- adversarial nesting tests.
+
+Verification:
+
+- `cargo test -p eth-codec`
+
+Exit criteria:
+
+- Deep or oversized RLP lists fail closed.
+
+### v0.8.0 - Canonical RLP Integers
+
+Goal: enforce Ethereum canonical integer rules.
+
+Deliverables:
+
+- leading-zero rejection;
+- zero representation policy;
+- bounded integer conversion helpers;
+- official and negative vector tests.
+
+Verification:
+
+- `cargo test -p eth-codec -p eth-primitives`
+
+Exit criteria:
+
+- Noncanonical integer encodings cannot reach protocol validation.
+
+### v0.9.0 - RLP Encoding Round Trips
+
+Goal: add canonical encoding for admitted RLP values.
+
+Deliverables:
+
+- encoding helpers;
+- decode-then-encode canonicality tests;
+- property tests or table-driven round trips.
+
+Verification:
+
+- `cargo test -p eth-codec`
+
+Exit criteria:
+
+- Canonical values round-trip without accepting noncanonical forms.
+
+### v0.10.0 - RLP Fuzz Harness
+
+Goal: continuously fuzz every RLP parser.
+
+Deliverables:
+
+- cargo-fuzz workspace;
+- RLP fuzz target;
+- seed corpus from unit fixtures;
+- crash reproduction docs.
+
+Verification:
+
+- fuzz target builds;
+- `scripts/checks.sh`
+
+Exit criteria:
+
+- Every future RLP parser change has a fuzz target to update.
+
+## Phase 3: Transaction Envelopes
+
+### v0.11.0 - Transaction Envelope Shell
+
+Goal: classify legacy and typed transaction envelopes safely.
+
+Deliverables:
+
+- EIP-2718 envelope type model;
+- unsupported transaction type errors;
+- exact-consumption tests.
+
+Verification:
+
+- `cargo test -p eth-protocol -p eth-codec`
+
+Exit criteria:
+
+- Unknown transaction types are rejected or represented explicitly without
+  panics.
+
+### v0.12.0 - Legacy Transaction Decode
+
+Goal: decode legacy Ethereum transactions without sender recovery.
+
+Deliverables:
+
+- field model;
+- gas, value, nonce, input, and signature field bounds;
+- malformed field tests.
+
+Verification:
+
+- `cargo test -p eth-protocol`
+
+Exit criteria:
+
+- Legacy transactions can be decoded into an unvalidated state only.
+
+### v0.13.0 - Access List Transaction Decode
+
+Goal: decode EIP-2930 access-list transactions.
+
+Deliverables:
+
+- access-list structure;
+- address and storage-key limits;
+- duplicate and oversize policy;
+- negative tests.
+
+Verification:
+
+- `cargo test -p eth-protocol`
+
+Exit criteria:
+
+- Access lists are bounded before validation.
+
+### v0.14.0 - Dynamic Fee Transaction Decode
+
+Goal: decode EIP-1559 dynamic-fee transactions.
+
+Deliverables:
+
+- max-fee and priority-fee fields;
+- fee ordering checks deferred to validation state;
+- malformed transaction tests.
+
+Verification:
+
+- `cargo test -p eth-protocol`
+
+Exit criteria:
+
+- Dynamic-fee transactions parse without implying they are valid for a fork.
+
+### v0.15.0 - Blob Transaction Decode
+
+Goal: decode EIP-4844 blob transaction structure.
+
+Deliverables:
+
+- blob versioned-hash list;
+- blob fee fields;
+- list size limits;
+- malformed and oversize tests.
+
+Verification:
+
+- `cargo test -p eth-protocol`
+
+Exit criteria:
+
+- Blob transaction data remains bounded and fork-unvalidated.
+
+### v0.16.0 - Transaction Encoding
+
+Goal: encode admitted transaction envelopes canonically.
+
+Deliverables:
+
+- canonical envelope encoding;
+- round-trip tests for each admitted type;
+- unsupported type behavior documented.
+
+Verification:
+
+- `cargo test -p eth-protocol -p eth-codec`
+
+Exit criteria:
+
+- Transaction encoding cannot produce known noncanonical forms.
+
+## Phase 4: Fork And Validation States
+
+### v0.17.0 - Chain And Fork Specs
+
+Goal: make chain and fork activation rules explicit.
 
 Deliverables:
 
 - `ChainSpec` and `ForkSpec`;
 - block-number and timestamp activation;
-- unsupported fork handling;
-- tests for fork boundary transitions.
+- unsupported fork errors;
+- tests for boundary transitions.
 
-## v0.6.0 - Transaction Validation Typestates
+Verification:
+
+- `cargo test -p eth-protocol`
+
+Exit criteria:
+
+- Consensus-sensitive operations require explicit chain and fork context.
+
+### v0.18.0 - Transaction Validation Typestates
 
 Goal: separate decode, canonicality, fork validation, and sender recovery.
 
 Deliverables:
 
-- transaction validation states;
-- no partial mutation on failure;
-- deterministic error categories;
-- tests for every transition and invalid transition.
+- transaction state markers;
+- invalid transition tests;
+- no partial mutation on failed validation.
 
-## v0.7.0 - Signature And Replay Verification
+Verification:
 
-Goal: verify transaction replay domains and sender recovery.
+- `cargo test -p eth-protocol`
+
+Exit criteria:
+
+- Callers cannot accidentally treat decoded bytes as fork-valid transactions.
+
+### v0.19.0 - Replay Domain Validation
+
+Goal: validate transaction chain binding before signatures are trusted.
 
 Deliverables:
 
-- secp256k1 dependency admission;
+- EIP-155 chain checks;
+- typed transaction chain checks;
+- wrong-chain test vectors.
+
+Verification:
+
+- `cargo test -p eth-verify -p eth-protocol`
+
+Exit criteria:
+
+- Wrong-chain transactions fail before sender recovery results are accepted.
+
+### v0.20.0 - Sender Recovery
+
+Goal: recover senders through an admitted secp256k1 dependency.
+
+Deliverables:
+
+- dependency admission record;
 - low-s and recovery-id policy;
-- wrong-chain rejection;
-- EIP-155 and typed transaction replay tests.
+- valid and invalid signature fixtures.
 
-## v0.8.0 - EIP-712 Safety Rules
+Verification:
 
-Goal: validate structured-data signing domains safely.
+- `cargo test -p eth-verify`
+- `cargo deny check`
+- `cargo audit`
+
+Exit criteria:
+
+- Sender recovery has deterministic failure modes and dependency evidence.
+
+### v0.21.0 - EIP-712 Domain Safety
+
+Goal: prevent structured-data domain confusion.
 
 Deliverables:
 
-- complete domain requirement helpers;
+- complete-domain helpers;
 - expected chain and verifying-contract checks;
-- no raw-digest signing as the primary public API;
-- tests for domain confusion.
+- tests for missing or wrong domain fields.
 
-## v0.9.0 - MPT Proof Verification
+Verification:
 
-Goal: verify transaction, receipt, and account/storage proofs.
+- `cargo test -p eth-verify`
 
-Deliverables:
+Exit criteria:
 
-- trie dependency admission;
-- proof size and node-count limits;
-- invalid proof rejection;
-- fixture-backed tests.
+- Raw digest signing is not the primary safe signing interface.
 
-## v0.10.0 - Header And Receipt Validation
+## Phase 5: Blocks, Receipts, And Proofs
 
-Goal: validate block header and receipt relationships.
+### v0.22.0 - Header Decode And Hashing
+
+Goal: parse and hash execution-layer block headers.
 
 Deliverables:
 
-- header hash consistency;
-- receipts root checks;
-- logs bloom policy;
-- fork-specific header fields.
+- header field model;
+- fork-specific optional field handling;
+- hash consistency tests.
 
-## v0.11.0 - REVM Adapter Preview
+Verification:
 
-Goal: add optional execution with explicit environment and snapshot inputs.
+- `cargo test -p eth-protocol -p eth-verify`
+
+Exit criteria:
+
+- Headers can be decoded without implying full block validity.
+
+### v0.23.0 - Receipt Decode
+
+Goal: parse legacy and typed receipts.
 
 Deliverables:
 
-- REVM dependency admission;
-- execution environment conversion;
+- receipt status/root policy;
+- log structure;
+- bloom field handling;
+- malformed receipt tests.
+
+Verification:
+
+- `cargo test -p eth-protocol`
+
+Exit criteria:
+
+- Receipt data is bounded before trie or block validation.
+
+### v0.24.0 - Withdrawal And Post-Merge Fields
+
+Goal: model post-merge execution fields explicitly.
+
+Deliverables:
+
+- withdrawal structures;
+- withdrawals-root input model;
+- timestamp/fork interaction tests.
+
+Verification:
+
+- `cargo test -p eth-protocol`
+
+Exit criteria:
+
+- Post-merge fields are not bolted onto pre-merge validation paths.
+
+### v0.25.0 - MPT Node Decoder
+
+Goal: decode trie nodes with strict limits.
+
+Deliverables:
+
+- trie node representation;
+- proof-node count and byte limits;
+- malformed node tests.
+
+Verification:
+
+- `cargo test -p eth-verify`
+
+Exit criteria:
+
+- Trie proof input cannot allocate or recurse without limits.
+
+### v0.26.0 - Inclusion Proof Verification
+
+Goal: verify transaction and receipt inclusion proofs.
+
+Deliverables:
+
+- transaction proof verification;
+- receipt proof verification;
+- invalid proof fixtures.
+
+Verification:
+
+- `cargo test -p eth-verify`
+
+Exit criteria:
+
+- Inclusion proof APIs distinguish malformed, absent, and wrong-root proofs.
+
+### v0.27.0 - Account And Storage Proofs
+
+Goal: verify account and storage proofs against trusted roots.
+
+Deliverables:
+
+- account proof verification;
+- storage proof verification;
+- missing-node and wrong-value tests.
+
+Verification:
+
+- `cargo test -p eth-verify`
+
+Exit criteria:
+
+- Verified RPC state has a cryptographic proof path separate from trusted RPC.
+
+## Phase 6: Conformance And Test Infrastructure
+
+### v0.28.0 - Spec Lock And Fixture Import
+
+Goal: pin official Ethereum specification and fixture revisions.
+
+Deliverables:
+
+- populated `spec-lock.toml`;
+- fixture import or download process;
+- fixture license notes;
+- reproducible fixture path.
+
+Verification:
+
+- `scripts/checks.sh`
+
+Exit criteria:
+
+- Every conformance claim names exact upstream revisions.
+
+### v0.29.0 - Execution Test Harness
+
+Goal: run applicable Ethereum execution tests through protocol validation.
+
+Deliverables:
+
+- fixture runner;
+- pass/fail report;
+- known unsupported fixture list.
+
+Verification:
+
+- conformance runner command documented and passing for claimed fixtures.
+
+Exit criteria:
+
+- Validation behavior is tested against external Ethereum material.
+
+### v0.30.0 - Differential Test Harness
+
+Goal: compare selected behavior against independent implementations.
+
+Deliverables:
+
+- differential test plan;
+- adapter for at least one independent reference path;
+- mismatch reporting.
+
+Verification:
+
+- differential test command documented.
+
+Exit criteria:
+
+- The project is not only testing wrappers against themselves.
+
+## Phase 7: Optional Execution
+
+### v0.31.0 - REVM Dependency Admission
+
+Goal: admit REVM behind `eth-evm` with reviewed features.
+
+Deliverables:
+
+- dependency review;
+- no default feature expansion;
+- minimal compile-only adapter.
+
+Verification:
+
+- `cargo check --workspace --all-features`
+- `cargo deny check`
+
+Exit criteria:
+
+- REVM is optional and cannot enter the default core graph.
+
+### v0.32.0 - Explicit Execution Environment
+
+Goal: execute with explicit fork, block, transaction, and snapshot inputs.
+
+Deliverables:
+
+- environment conversion;
 - state snapshot trait;
-- bounded execution result model.
+- execution result model.
 
-## v0.12.0 - Gas Estimation And Trace Bounds
+Verification:
 
-Goal: make simulation bounded and auditable.
+- `cargo test -p eth-evm`
+
+Exit criteria:
+
+- Simulation reports the exact state and fork configuration used.
+
+### v0.33.0 - Bounded Gas Estimation
+
+Goal: make gas estimation bounded and auditable.
 
 Deliverables:
 
-- maximum executions;
+- maximum execution count;
 - gas cap;
-- timeout or worker policy;
-- trace-step limits;
-- adversarial performance tests.
+- timeout or worker isolation policy;
+- deterministic error classification.
 
-## v0.13.0 - RPC Trust Policy
+Verification:
 
-Goal: add optional RPC with explicit endpoint and response-trust policy.
+- adversarial gas-estimation tests.
 
-Deliverables:
+Exit criteria:
 
-- no default public endpoints;
-- trusted, quorum, and verified modes;
-- request/response size limits;
-- retry policy by method class;
-- redaction tests.
+- Gas estimation cannot become an unbounded execution loop.
 
-## v0.14.0 - Signer Boundary
+## Phase 8: Optional RPC And Signer Boundaries
 
-Goal: add optional signer isolation without making local signing a default.
+### v0.34.0 - RPC Dependency Admission
+
+Goal: admit provider/transport crates behind `eth-rpc`.
 
 Deliverables:
 
-- domain-specific transaction signing trait;
-- external signer process model;
-- secret redaction tests;
-- local keystore only as a separate fallback feature.
+- dependency review;
+- no hardcoded public endpoints;
+- endpoint policy types.
 
-## v0.15.0 - Conformance Harness
+Verification:
 
-Goal: pin official Ethereum test-suite revisions and report status.
+- `cargo check --workspace --all-features`
+- `cargo deny check`
+
+Exit criteria:
+
+- RPC support is optional and policy-first.
+
+### v0.35.0 - RPC Trust Models
+
+Goal: implement trusted, quorum, and verified response models.
 
 Deliverables:
 
-- `spec-lock.toml`;
-- fixture download or import process;
-- pass/fail matrix;
-- regression handling docs.
+- trust model APIs;
+- chain/genesis verification at connection setup;
+- response size and batch limits.
 
-## v0.16.0 - Reth Adapter Preview
+Verification:
+
+- malicious RPC fixture tests.
+
+Exit criteria:
+
+- TLS endpoint trust is documented as separate from Ethereum state trust.
+
+### v0.36.0 - RPC Retry And Redaction
+
+Goal: make network behavior and logs safe by default.
+
+Deliverables:
+
+- method-class retry policy;
+- no automatic transaction rebroadcast;
+- URL credential, calldata, and transaction redaction tests.
+
+Verification:
+
+- `cargo test -p eth-rpc`
+
+Exit criteria:
+
+- RPC errors and logs do not leak sensitive payloads by default.
+
+### v0.37.0 - Signer Interface
+
+Goal: add domain-specific signer APIs without local keys by default.
+
+Deliverables:
+
+- transaction signing trait;
+- EIP-712 signing trait;
+- no raw digest primary API;
+- external signer model.
+
+Verification:
+
+- `cargo test -p eth-signer`
+
+Exit criteria:
+
+- Signing APIs make domain separation explicit.
+
+### v0.38.0 - Local Signer Fallback
+
+Goal: add optional local signing only after secret-handling review.
+
+Deliverables:
+
+- dependency review for secret handling;
+- no-debug secret wrappers;
+- redaction tests;
+- local signer feature remains non-default.
+
+Verification:
+
+- `cargo test -p eth-signer --all-features`
+- `cargo deny check`
+
+Exit criteria:
+
+- Local key material cannot enter default builds.
+
+## Phase 9: Optional Reth And P2P Decisions
+
+### v0.39.0 - Reth Dependency Admission
 
 Goal: integrate selected Reth concepts without leaking node internals.
 
@@ -231,10 +828,19 @@ Deliverables:
 
 - exact dependency review;
 - type conversion boundary;
-- direct database or transaction-pool adapter skeleton;
-- no default graph expansion.
+- no default graph expansion;
+- adapter threat-model update.
 
-## v0.17.0 - P2P Threat Model Expansion
+Verification:
+
+- `cargo check --workspace --all-features`
+- `cargo deny check`
+
+Exit criteria:
+
+- Reth remains an adapter, not a protocol-core foundation.
+
+### v0.40.0 - P2P Threat Model Decision
 
 Goal: decide whether P2P belongs in this crate family.
 
@@ -244,6 +850,93 @@ Deliverables:
 - message-size and RLPx policy;
 - process-isolation plan;
 - defer or implement decision.
+
+Verification:
+
+- security review of the decision document.
+
+Exit criteria:
+
+- P2P is either explicitly deferred or split into its own future release plan.
+
+## Phase 10: Production Hardening
+
+### v0.41.0 - Platform Matrix
+
+Goal: verify supported operating systems and targets.
+
+Deliverables:
+
+- Linux, Windows, BSD, macOS, Android, and iOS build notes;
+- no_std target checks;
+- CI matrix expansion where practical.
+
+Verification:
+
+- documented platform check commands.
+
+Exit criteria:
+
+- Platform support claims match tested evidence.
+
+### v0.42.0 - Public API Stability Pass
+
+Goal: stabilize the public API shape before 1.0.
+
+Deliverables:
+
+- API stability policy update;
+- deprecation policy;
+- feature compatibility matrix;
+- migration notes for all breaking changes.
+
+Verification:
+
+- docs and examples compile.
+
+Exit criteria:
+
+- The remaining 1.0 work is hardening, not API invention.
+
+### v0.43.0 - Independent Audit Remediation
+
+Goal: fix findings from external review.
+
+Deliverables:
+
+- audit report reference;
+- remediation register;
+- tests for fixed findings;
+- risk acceptance for any residual issue.
+
+Verification:
+
+- `scripts/checks.sh`
+- audit remediation review.
+
+Exit criteria:
+
+- No unresolved critical or high findings remain.
+
+### v0.44.0 - Release Evidence Dry Run
+
+Goal: prove the release-evidence process before 1.0.
+
+Deliverables:
+
+- signed release manifest draft;
+- SBOM;
+- provenance notes;
+- conformance report;
+- dependency compatibility matrix.
+
+Verification:
+
+- release-readiness script for `v0.44.0`.
+
+Exit criteria:
+
+- 1.0 release mechanics have already been exercised.
 
 ## v1.0.0 - Production Ethereum Toolkit
 
@@ -259,3 +952,15 @@ Deliverables:
 - independent security review report;
 - migration guide;
 - no unresolved critical or high findings.
+
+Verification:
+
+- `scripts/checks.sh`
+- `cargo deny check`
+- `cargo audit`
+- `scripts/generate-sbom.sh`
+- `scripts/validate-release-readiness.sh v1.0.0`
+
+Exit criteria:
+
+- `v1.0.0 implementation stop reached. Run pentest for this exact commit.`

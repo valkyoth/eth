@@ -14,6 +14,9 @@ Status: planned
 - Security, threat model, modularity, supply-chain, implementation, and release
   planning docs.
 - Local check and release-gate scripts.
+- Granular release plan through `v0.44.0` before `v1.0.0`, with explicit exit
+  criteria for each milestone.
+- Release-readiness validation for permanent pentest evidence before tags.
 - GitHub CI, Dependabot, CODEOWNERS, funding, issue, and pull request metadata.
 
 ## Security Notes
