@@ -1,0 +1,38 @@
+[package]
+name = "eth"
+description = "no_std-first Ethereum execution-layer protocol toolkit facade."
+version.workspace = true
+edition.workspace = true
+rust-version.workspace = true
+license.workspace = true
+homepage.workspace = true
+repository.workspace = true
+readme.workspace = true
+
+[features]
+default = []
+std = [
+    "eth-codec/std",
+    "eth-primitives/std",
+    "eth-protocol/std",
+    "eth-verify/std",
+]
+evm = ["dep:eth-evm"]
+rpc = ["dep:eth-rpc"]
+signer = ["dep:eth-signer"]
+reth = ["dep:eth-reth"]
+testkit = ["dep:eth-testkit"]
+
+[dependencies]
+eth-codec.workspace = true
+eth-primitives.workspace = true
+eth-protocol.workspace = true
+eth-verify.workspace = true
+eth-evm = { workspace = true, optional = true }
+eth-reth = { workspace = true, optional = true }
+eth-rpc = { workspace = true, optional = true }
+eth-signer = { workspace = true, optional = true }
+eth-testkit = { workspace = true, optional = true }
+
+[lints]
+workspace = true

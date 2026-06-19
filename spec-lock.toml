@@ -1,0 +1,10 @@
+# Pinned upstream specification and fixture revisions.
+#
+# This file is intentionally empty for v0.1.0 because no Ethereum conformance
+# suite is claimed yet.
+
+[ethereum]
+execution_specs = ""
+execution_tests = ""
+json_rpc_api = ""
+consensus_specs = ""

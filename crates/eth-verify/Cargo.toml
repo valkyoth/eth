@@ -1,0 +1,19 @@
+[package]
+name = "eth-verify"
+description = "no_std Ethereum verification boundaries."
+version.workspace = true
+edition.workspace = true
+rust-version.workspace = true
+license.workspace = true
+homepage.workspace = true
+repository.workspace = true
+
+[features]
+default = []
+std = ["eth-primitives/std"]
+
+[dependencies]
+eth-primitives.workspace = true
+
+[lints]
+workspace = true

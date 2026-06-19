@@ -1,0 +1,16 @@
+[package]
+name = "eth-rpc"
+description = "Future RPC trust-policy boundary for eth."
+version.workspace = true
+edition.workspace = true
+rust-version.workspace = true
+license.workspace = true
+homepage.workspace = true
+repository.workspace = true
+
+[features]
+default = []
+std = []
+
+[lints]
+workspace = true

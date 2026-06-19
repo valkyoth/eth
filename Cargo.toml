@@ -1,0 +1,51 @@
+[workspace]
+members = [
+    "crates/eth",
+    "crates/eth-codec",
+    "crates/eth-evm",
+    "crates/eth-primitives",
+    "crates/eth-protocol",
+    "crates/eth-reth",
+    "crates/eth-rpc",
+    "crates/eth-signer",
+    "crates/eth-testkit",
+    "crates/eth-verify",
+]
+default-members = ["crates/eth"]
+resolver = "3"
+
+[workspace.package]
+version = "0.1.0"
+edition = "2024"
+rust-version = "1.90"
+license = "EUPL-1.2"
+homepage = "https://github.com/eldryoth/eth"
+repository = "https://github.com/eldryoth/eth"
+readme = "README.md"
+
+[workspace.lints.rust]
+unsafe_code = "forbid"
+unsafe_op_in_unsafe_fn = "forbid"
+unused_must_use = "deny"
+missing_docs = "warn"
+
+[workspace.lints.clippy]
+panic = "forbid"
+unwrap_used = "forbid"
+expect_used = "forbid"
+undocumented_unsafe_blocks = "forbid"
+
+[workspace.dependencies]
+eth-codec = { path = "crates/eth-codec", version = "0.1.0" }
+eth-evm = { path = "crates/eth-evm", version = "0.1.0" }
+eth-primitives = { path = "crates/eth-primitives", version = "0.1.0" }
+eth-protocol = { path = "crates/eth-protocol", version = "0.1.0" }
+eth-reth = { path = "crates/eth-reth", version = "0.1.0" }
+eth-rpc = { path = "crates/eth-rpc", version = "0.1.0" }
+eth-signer = { path = "crates/eth-signer", version = "0.1.0" }
+eth-testkit = { path = "crates/eth-testkit", version = "0.1.0" }
+eth-verify = { path = "crates/eth-verify", version = "0.1.0" }
+
+[profile.release]
+overflow-checks = true
+panic = "abort"
