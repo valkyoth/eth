@@ -1,0 +1,55 @@
+# eth Spec Source Policy
+
+`eth` must not implement consensus-sensitive Ethereum behavior from memory.
+
+Every milestone that changes Ethereum protocol behavior must start by checking
+the current official source material, pinning exact revisions, and recording
+the evidence used by tests.
+
+## Official Sources
+
+Use these as primary sources:
+
+- Execution layer: `https://github.com/ethereum/execution-specs`
+- EIPs: `https://github.com/ethereum/EIPs`
+- Execution APIs: `https://github.com/ethereum/execution-apis`
+- Consensus specs: `https://github.com/ethereum/consensus-specs`
+
+Use consensus specs only when the milestone touches SSZ, beacon-chain concepts,
+Engine API context, post-merge consensus boundaries, or consensus-layer proof
+material.
+
+## Required Workflow
+
+Before implementing or changing consensus-sensitive behavior:
+
+1. Check the current official source repositories.
+2. Select the exact tags, releases, or commit hashes relevant to the milestone.
+3. Record those revisions in `spec-lock.toml`.
+4. Download or import only the required fixtures/spec files into
+   `/home/eldryoth/Work/test/eth`.
+5. Add or update tests that use those pinned materials.
+6. Update `docs/SPEC_MATRIX.md` with the claimed status and evidence.
+7. State in release notes which spec and fixture revisions were used.
+
+If the official sources disagree, are ambiguous, or have no fixture for the
+behavior, stop and document the ambiguity before implementing. Do not silently
+choose behavior based on memory, blog posts, or a single client implementation.
+
+## Local Reference Store
+
+External Ethereum reference material belongs outside this repository at:
+
+```text
+/home/eldryoth/Work/test/eth
+```
+
+This repository should record revision metadata and test expectations, not copy
+large upstream repositories unless a release explicitly requires vendored
+fixtures.
+
+## Dependency And Tool Review
+
+When a spec milestone requires third-party crates or tooling, review the latest
+versions at the same time as the official Ethereum sources. Dependency
+admission still follows [Supply-Chain Security](supply-chain-security.md).

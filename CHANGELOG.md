@@ -10,3 +10,5 @@ All notable changes to `eth` are documented here.
 - Added local check and release-gate scripts.
 - Expanded the release plan into smaller milestone tags with explicit exit
   criteria and mandatory pentest-before-tag readiness checks.
+- Added a spec-source policy requiring current official Ethereum sources,
+  pinned revisions, and local fixture evidence before consensus-sensitive work.

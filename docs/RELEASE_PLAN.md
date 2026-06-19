@@ -27,6 +27,7 @@ Every release must have:
 - known limitations;
 - release notes;
 - dependency-policy evidence;
+- spec-source evidence for protocol behavior;
 - completed pentest evidence for the exact commit being tagged;
 - no hidden dependency on one developer machine.
 
@@ -34,6 +35,7 @@ Every release should prefer:
 
 - one protocol boundary at a time;
 - fixtures before broad implementation;
+- pinned official Ethereum source revisions before consensus-sensitive code;
 - negative and adversarial tests with each parser;
 - explicit fork and chain context over global "latest" behavior;
 - no default networking, signing, Reth, P2P, or local key storage.
@@ -122,6 +124,7 @@ Deliverables:
 - release-note metadata checks;
 - permanent pentest-report metadata checks;
 - SBOM presence checks;
+- spec-source policy document;
 - tag-exists guard.
 
 Verification:
@@ -133,6 +136,7 @@ Exit criteria:
 
 - The project can refuse a tag-ready claim when pentest or release evidence is
   missing.
+- Future protocol milestones have an explicit source-check workflow.
 
 ## Phase 1: Primitive And Error Foundation
 
@@ -199,6 +203,7 @@ Goal: decode RLP bytes and strings with exact consumption.
 
 Deliverables:
 
+- official execution-spec and EIP source revisions pinned in `spec-lock.toml`;
 - scalar RLP item model;
 - short and long string handling;
 - trailing-data rejection;
@@ -296,6 +301,7 @@ Goal: classify legacy and typed transaction envelopes safely.
 
 Deliverables:
 
+- EIP-2718 and execution-spec revisions pinned in `spec-lock.toml`;
 - EIP-2718 envelope type model;
 - unsupported transaction type errors;
 - exact-consumption tests.
@@ -409,6 +415,8 @@ Goal: make chain and fork activation rules explicit.
 
 Deliverables:
 
+- execution-spec and relevant hardfork/EIP revisions pinned in
+  `spec-lock.toml`;
 - `ChainSpec` and `ForkSpec`;
 - block-number and timestamp activation;
 - unsupported fork errors;
@@ -619,6 +627,7 @@ Deliverables:
 - fixture import or download process;
 - fixture license notes;
 - reproducible fixture path.
+- `/home/eldryoth/Work/test/eth` documented as the local reference store.
 
 Verification:
 

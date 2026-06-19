@@ -2,9 +2,16 @@
 #
 # This file is intentionally empty for v0.1.0 because no Ethereum conformance
 # suite is claimed yet.
+# See docs/spec-source-policy.md for the required source-check workflow.
 
 [ethereum]
-execution_specs = ""
-execution_tests = ""
-json_rpc_api = ""
-consensus_specs = ""
+execution_specs_repo = "https://github.com/ethereum/execution-specs"
+execution_specs_rev = ""
+execution_tests_rev = ""
+eips_repo = "https://github.com/ethereum/EIPs"
+eips_rev = ""
+execution_apis_repo = "https://github.com/ethereum/execution-apis"
+execution_apis_rev = ""
+consensus_specs_repo = "https://github.com/ethereum/consensus-specs"
+consensus_specs_rev = ""
+local_reference_store = "/home/eldryoth/Work/test/eth"

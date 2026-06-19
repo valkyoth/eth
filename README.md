@@ -91,6 +91,7 @@ cargo audit
 - [Scope](docs/SCOPE.md)
 - [Threat Model](docs/threat-model.md)
 - [Spec Matrix](docs/SPEC_MATRIX.md)
+- [Spec Source Policy](docs/spec-source-policy.md)
 - [Modularity Policy](docs/modularity-policy.md)
 - [Supply-Chain Security](docs/supply-chain-security.md)
 - [Unsafe Policy](docs/unsafe-policy.md)

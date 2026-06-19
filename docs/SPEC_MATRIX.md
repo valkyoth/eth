@@ -2,6 +2,10 @@
 
 Status: initial placeholder for `v0.1.0`.
 
+Official source and fixture revisions are governed by
+[Spec Source Policy](spec-source-policy.md). Consensus-sensitive behavior must
+not be implemented from memory.
+
 | Area | Status | Evidence |
 | --- | --- | --- |
 | Execution RLP | planned | fixture revision to be pinned |

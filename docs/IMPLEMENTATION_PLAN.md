@@ -30,6 +30,9 @@ The first production value is:
 - Rust stable `1.96.0`, edition 2024, workspace resolver `3`.
 - MSRV is Rust `1.90.0`; compatibility must be checked through `1.96.0`.
 - Latest crate and tool versions are checked before dependency or tooling edits.
+- Official Ethereum sources are checked before consensus-sensitive
+  implementation work; exact revisions are pinned in `spec-lock.toml`.
+- Consensus-sensitive behavior is never implemented from memory.
 - Core crates are `#![no_std]` and do not depend on network, filesystem, clock,
   TLS, async runtime, signer, Reth, or P2P code.
 - Main crate `eth` is a facade over focused crates.
@@ -58,6 +61,17 @@ The first production value is:
 - `eth-testkit`: fixtures, adversarial inputs, conformance helpers, and
   regression utilities.
 - `eth`: facade crate that re-exports stable admitted surfaces.
+
+## Spec Source Discipline
+
+Every protocol milestone begins with a source check against the official
+Ethereum repositories documented in [Spec Source Policy](spec-source-policy.md).
+The milestone must pin exact upstream revisions in `spec-lock.toml`, import
+only required fixtures or spec files into `/home/eldryoth/Work/test/eth`, and
+update [Spec Matrix](SPEC_MATRIX.md) before claiming support.
+
+If a behavior is consensus-sensitive and no pinned source or fixture exists,
+implementation stops until the ambiguity is documented and reviewed.
 
 ## Phase 1: Repository Foundation
 
@@ -88,6 +102,7 @@ transaction envelopes, canonical integer rejection, and trailing-data rejection.
 
 Release gate:
 
+- relevant execution-spec and EIP revisions are pinned in `spec-lock.toml`;
 - official and adversarial RLP fixtures pass;
 - fuzz targets exist for every decoder;
 - malformed input never panics.
@@ -100,6 +115,7 @@ context.
 
 Release gate:
 
+- relevant execution-spec and EIP revisions are pinned in `spec-lock.toml`;
 - wrong-chain, wrong-fork, unsupported type, and noncanonical encodings are
   rejected deterministically;
 - public protocol APIs do not infer "latest" rules globally.
@@ -112,6 +128,8 @@ verification.
 
 Release gate:
 
+- relevant execution-spec, EIP, and fixture revisions are pinned in
+  `spec-lock.toml`;
 - official and independent proof fixtures pass;
 - invalid proofs fail closed;
 - signature and domain errors never expose secret material.
