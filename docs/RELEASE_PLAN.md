@@ -48,6 +48,7 @@ applies to `v0.N.P` patch tags as well as milestone tags.
 A version is not tag-ready until:
 
 - `scripts/checks.sh` passes;
+- `scripts/check_latest_tools.sh` passes;
 - `cargo deny check` passes;
 - `cargo audit` passes;
 - `scripts/generate-sbom.sh` succeeds;
@@ -107,6 +108,7 @@ Deliverables:
 Verification:
 
 - `scripts/checks.sh`
+- `scripts/check_latest_tools.sh`
 - `scripts/release_0_1_gate.sh`
 
 Exit criteria:

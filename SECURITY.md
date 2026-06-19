@@ -10,6 +10,7 @@ Run these regularly and before releases:
 
 ```bash
 scripts/checks.sh
+scripts/check_latest_tools.sh
 scripts/release_0_1_gate.sh
 cargo deny check
 cargo audit

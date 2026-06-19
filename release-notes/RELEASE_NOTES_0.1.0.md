@@ -23,6 +23,8 @@ Status: planned
   matching, advisory policy, global backtrace removal, and foundational lints.
 - Secret-handling policy plus placeholder API hardening for hash comparison and
   timestamp-required fork activation.
+- Latest-tool release gate for `cargo-deny`, `cargo-audit`, `cargo-sbom`, and
+  `actions/checkout`.
 - GitHub CI, Dependabot, CODEOWNERS, funding, issue, and pull request metadata.
 
 ## Security Notes

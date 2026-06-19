@@ -6,6 +6,7 @@ test -f LICENSE
 test -f SECURITY.md
 test -f CHANGELOG.md
 test -x scripts/validate-release-readiness.sh
+test -x scripts/check_latest_tools.sh
 test -f release-notes/RELEASE_NOTES_0.1.0.md
 test -f docs/spec-source-policy.md
 grep -q 'execution_specs_repo' spec-lock.toml

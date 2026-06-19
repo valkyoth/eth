@@ -16,3 +16,5 @@ All notable changes to `eth` are documented here.
   policy, release readiness, lints, and metadata validation.
 - Added explicit secret-handling policy and hardened current placeholder
   primitives/protocol helpers flagged during pentest.
+- Added release-gate checks that fail when pinned CI tools or GitHub Actions
+  are not the latest upstream versions.
