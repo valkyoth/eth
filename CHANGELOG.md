@@ -20,3 +20,4 @@ All notable changes to `eth` are documented here.
   are not the latest upstream versions.
 - Started `0.2.0` by moving support crates to the `eth-valkyoth-*` namespace
   and adding a crates.io release-order helper.
+- Added release-readiness negative tests for missing or stale release evidence.

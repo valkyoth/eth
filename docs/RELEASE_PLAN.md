@@ -89,6 +89,10 @@ Use this loop for every version:
 11. Tagging and pushing tags happen only when explicitly requested.
 
 Root `PENTEST.md` is temporary scratch input. It must not be committed.
+The permanent `security/pentest/vX.Y.Z.md` report may remain local at tag time:
+committing a report that contains the current commit hash would change the
+commit being reviewed. Commit the report in the next development pass after the
+tagged commit is fixed.
 
 ## Phase 0: Repository And Release Discipline
 
