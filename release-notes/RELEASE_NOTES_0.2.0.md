@@ -1,6 +1,6 @@
 # eth 0.2.0 Release Notes
 
-Status: implementation complete; pending pentest report for final tag candidate
+Status: release candidate
 
 ## Summary
 
