@@ -2,6 +2,8 @@
 #![forbid(unsafe_code)]
 //! Bounded decoding policy for untrusted Ethereum wire inputs.
 
+use core::cmp::Ordering;
+
 /// Resource limits required by every untrusted decoder.
 #[derive(Clone, Copy, Debug, Eq, PartialEq)]
 pub struct DecodeLimits {
@@ -40,16 +42,18 @@ pub enum DecodeError {
     InputTooLarge,
     /// The input contains trailing bytes after a decoded value.
     TrailingBytes,
+    /// A decoder reported consuming more bytes than the input contains.
+    DecoderOverread,
     /// The input is malformed for the selected wire format.
     Malformed,
 }
 
 /// Ensures a decoder consumed the whole input.
 pub fn require_exact_consumption(consumed: usize, input_len: usize) -> Result<(), DecodeError> {
-    if consumed == input_len {
-        Ok(())
-    } else {
-        Err(DecodeError::TrailingBytes)
+    match consumed.cmp(&input_len) {
+        Ordering::Equal => Ok(()),
+        Ordering::Less => Err(DecodeError::TrailingBytes),
+        Ordering::Greater => Err(DecodeError::DecoderOverread),
     }
 }
 
@@ -71,6 +75,14 @@ mod tests {
         assert_eq!(
             require_exact_consumption(1, 2),
             Err(DecodeError::TrailingBytes)
+        );
+    }
+
+    #[test]
+    fn detects_decoder_overread() {
+        assert_eq!(
+            require_exact_consumption(3, 2),
+            Err(DecodeError::DecoderOverread)
         );
     }
 }

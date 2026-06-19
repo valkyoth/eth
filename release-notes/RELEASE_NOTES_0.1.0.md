@@ -19,6 +19,10 @@ Status: planned
 - Release-readiness validation for permanent pentest evidence before tags.
 - Spec-source policy requiring official Ethereum revision checks before
   consensus-sensitive implementation.
+- Pentest remediation for CI action/tool pinning, release readiness commit
+  matching, advisory policy, global backtrace removal, and foundational lints.
+- Secret-handling policy plus placeholder API hardening for hash comparison and
+  timestamp-required fork activation.
 - GitHub CI, Dependabot, CODEOWNERS, funding, issue, and pull request metadata.
 
 ## Security Notes

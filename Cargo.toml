@@ -27,13 +27,17 @@ readme = "README.md"
 unsafe_code = "forbid"
 unsafe_op_in_unsafe_fn = "forbid"
 unused_must_use = "deny"
-missing_docs = "warn"
+missing_docs = "deny"
 
 [workspace.lints.clippy]
 panic = "forbid"
 unwrap_used = "forbid"
 expect_used = "forbid"
 undocumented_unsafe_blocks = "forbid"
+indexing_slicing = "forbid"
+arithmetic_side_effects = "forbid"
+cast_possible_truncation = "deny"
+cast_sign_loss = "deny"
 
 [workspace.dependencies]
 eth-codec = { path = "crates/eth-codec", version = "0.1.0" }

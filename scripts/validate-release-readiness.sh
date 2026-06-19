@@ -40,7 +40,14 @@ if [ ! -f "$pentest_report" ]; then
 fi
 
 grep -q '^Status: PASS$' "$pentest_report"
-grep -Eq '^Commit: [0-9a-f]{7,40}$' "$pentest_report"
+grep -Eq '^Commit: [0-9a-f]{40}$' "$pentest_report"
 grep -Eq '^Tester: .+' "$pentest_report"
 grep -Eq '^Scope: .+' "$pentest_report"
 grep -Eq '^Date: [0-9]{4}-[0-9]{2}-[0-9]{2}$' "$pentest_report"
+
+head_commit="$(git rev-parse HEAD)"
+report_commit="$(sed -n 's/^Commit: //p' "$pentest_report")"
+if [ "$report_commit" != "$head_commit" ]; then
+    echo "pentest report commit ${report_commit} does not match HEAD ${head_commit}" >&2
+    exit 1
+fi

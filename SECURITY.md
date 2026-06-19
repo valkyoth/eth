@@ -19,6 +19,8 @@ scripts/generate-sbom.sh
 GitHub Actions run CI. GitHub CodeQL default setup should be enabled in the
 repository security settings. Do not add an advanced CodeQL workflow while
 default setup is active.
+The verification steps are documented in
+[GitHub Security Settings](docs/github-security-settings.md).
 
 ## Dependency Policy
 

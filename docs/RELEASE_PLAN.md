@@ -53,7 +53,7 @@ A version is not tag-ready until:
 - `scripts/generate-sbom.sh` succeeds;
 - release notes exist at `release-notes/RELEASE_NOTES_X.Y.Z.md`;
 - a pentest report exists at `security/pentest/vX.Y.Z.md`;
-- the pentest report names the exact `Commit:` being tagged;
+- the pentest report names the exact full 40-character `Commit:` being tagged;
 - the pentest report has `Status: PASS`;
 - the pentest report has non-blank `Tester:` and `Scope:` fields;
 - the pentest report has a `Date: YYYY-MM-DD` field;

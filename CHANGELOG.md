@@ -12,3 +12,7 @@ All notable changes to `eth` are documented here.
   criteria and mandatory pentest-before-tag readiness checks.
 - Added a spec-source policy requiring current official Ethereum sources,
   pinned revisions, and local fixture evidence before consensus-sensitive work.
+- Addressed v0.1.0 pentest release-gate findings for CI pinning, advisory
+  policy, release readiness, lints, and metadata validation.
+- Added explicit secret-handling policy and hardened current placeholder
+  primitives/protocol helpers flagged during pentest.

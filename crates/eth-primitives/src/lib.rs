@@ -49,6 +49,9 @@ impl Address {
 }
 
 /// Fixed-width 256-bit hash bytes.
+///
+/// `PartialEq` is suitable for ordinary public hash comparisons. Use
+/// [`B256::ct_eq`] when comparison timing is part of a security boundary.
 #[derive(Clone, Copy, Debug, Eq, Hash, PartialEq)]
 pub struct B256([u8; 32]);
 
@@ -63,6 +66,16 @@ impl B256 {
     #[must_use]
     pub const fn to_bytes(self) -> [u8; 32] {
         self.0
+    }
+
+    /// Compares two hashes without early exit.
+    #[must_use]
+    pub fn ct_eq(&self, other: &Self) -> bool {
+        let mut diff = 0_u8;
+        for (left, right) in self.0.iter().zip(other.0.iter()) {
+            diff |= left ^ right;
+        }
+        diff == 0
     }
 }
 
@@ -79,5 +92,14 @@ mod tests {
     fn address_round_trips() {
         let bytes = [7_u8; 20];
         assert_eq!(Address::from_bytes(bytes).to_bytes(), bytes);
+    }
+
+    #[test]
+    fn b256_constant_time_equality_result_matches_equality() {
+        let left = B256::from_bytes([1_u8; 32]);
+        let same = B256::from_bytes([1_u8; 32]);
+        let different = B256::from_bytes([2_u8; 32]);
+        assert!(left.ct_eq(&same));
+        assert!(!left.ct_eq(&different));
     }
 }

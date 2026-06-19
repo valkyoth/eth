@@ -13,7 +13,6 @@ permissions:
 
 env:
   CARGO_TERM_COLOR: always
-  RUST_BACKTRACE: 1
 
 jobs:
   checks:
@@ -23,18 +22,18 @@ jobs:
 
     steps:
       - name: Checkout repository
-        uses: actions/checkout@v6.0.3
+        uses: actions/checkout@df4cb1c069e1874edd31b4311f1884172cec0e10 # v6.0.3
 
       - name: Install Rust toolchain
         run: rustup show
 
       - name: Install security tools
         run: |
-          cargo install --locked cargo-deny
-          cargo install --locked cargo-audit
+          cargo install --locked cargo-deny --version 0.19.9
+          cargo install --locked cargo-audit --version 0.22.2
 
       - name: Install SBOM tool
-        run: cargo install --locked cargo-sbom
+        run: cargo install --locked cargo-sbom --version 0.10.0
 
       - name: Run local check gate
         run: scripts/checks.sh

@@ -67,8 +67,8 @@ The first production value is:
 Every protocol milestone begins with a source check against the official
 Ethereum repositories documented in [Spec Source Policy](spec-source-policy.md).
 The milestone must pin exact upstream revisions in `spec-lock.toml`, import
-only required fixtures or spec files into `/home/eldryoth/Work/test/eth`, and
-update [Spec Matrix](SPEC_MATRIX.md) before claiming support.
+only required fixtures or spec files into the configured external reference
+store, and update [Spec Matrix](SPEC_MATRIX.md) before claiming support.
 
 If a behavior is consensus-sensitive and no pinned source or fixture exists,
 implementation stops until the ambiguity is documented and reviewed.
