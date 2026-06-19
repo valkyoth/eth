@@ -1,20 +1,20 @@
 {
   "SPDXID": "SPDXRef-DOCUMENT",
   "creationInfo": {
-    "created": "2026-06-19T10:13:56Z",
+    "created": "2026-06-19T10:41:32Z",
     "creators": [
       "Tool: cargo-sbom-v0.10.0"
     ]
   },
   "dataLicense": "CC0-1.0",
-  "documentNamespace": "https://spdx.org/spdxdocs/eth-4396347b-ed99-4017-bf16-e7ddf5655494",
+  "documentNamespace": "https://spdx.org/spdxdocs/eth-b51500df-f5aa-4c01-bc5d-dddbcc230cc9",
   "files": [
     {
       "SPDXID": "SPDXRef-File-eth",
       "checksums": [
         {
           "algorithm": "SHA1",
-          "checksumValue": "330fdde2d4a554b251876b13753c871806cceb8c"
+          "checksumValue": "9e52cee3be14456fdaa7afc316d402305b2651f4"
         }
       ],
       "fileName": "./Cargo.lock",
@@ -24,11 +24,11 @@
       ]
     },
     {
-      "SPDXID": "SPDXRef-File-eth_codec",
+      "SPDXID": "SPDXRef-File-eth_valkyoth_codec",
       "checksums": [
         {
           "algorithm": "SHA1",
-          "checksumValue": "330fdde2d4a554b251876b13753c871806cceb8c"
+          "checksumValue": "9e52cee3be14456fdaa7afc316d402305b2651f4"
         }
       ],
       "fileName": "./Cargo.lock",
@@ -38,11 +38,11 @@
       ]
     },
     {
-      "SPDXID": "SPDXRef-File-eth_evm",
+      "SPDXID": "SPDXRef-File-eth_valkyoth_evm",
       "checksums": [
         {
           "algorithm": "SHA1",
-          "checksumValue": "330fdde2d4a554b251876b13753c871806cceb8c"
+          "checksumValue": "9e52cee3be14456fdaa7afc316d402305b2651f4"
         }
       ],
       "fileName": "./Cargo.lock",
@@ -52,11 +52,11 @@
       ]
     },
     {
-      "SPDXID": "SPDXRef-File-eth_primitives",
+      "SPDXID": "SPDXRef-File-eth_valkyoth_primitives",
       "checksums": [
         {
           "algorithm": "SHA1",
-          "checksumValue": "330fdde2d4a554b251876b13753c871806cceb8c"
+          "checksumValue": "9e52cee3be14456fdaa7afc316d402305b2651f4"
         }
       ],
       "fileName": "./Cargo.lock",
@@ -66,11 +66,11 @@
       ]
     },
     {
-      "SPDXID": "SPDXRef-File-eth_protocol",
+      "SPDXID": "SPDXRef-File-eth_valkyoth_protocol",
       "checksums": [
         {
           "algorithm": "SHA1",
-          "checksumValue": "330fdde2d4a554b251876b13753c871806cceb8c"
+          "checksumValue": "9e52cee3be14456fdaa7afc316d402305b2651f4"
         }
       ],
       "fileName": "./Cargo.lock",
@@ -80,11 +80,11 @@
       ]
     },
     {
-      "SPDXID": "SPDXRef-File-eth_reth",
+      "SPDXID": "SPDXRef-File-eth_valkyoth_reth",
       "checksums": [
         {
           "algorithm": "SHA1",
-          "checksumValue": "330fdde2d4a554b251876b13753c871806cceb8c"
+          "checksumValue": "9e52cee3be14456fdaa7afc316d402305b2651f4"
         }
       ],
       "fileName": "./Cargo.lock",
@@ -94,11 +94,11 @@
       ]
     },
     {
-      "SPDXID": "SPDXRef-File-eth_rpc",
+      "SPDXID": "SPDXRef-File-eth_valkyoth_rpc",
       "checksums": [
         {
           "algorithm": "SHA1",
-          "checksumValue": "330fdde2d4a554b251876b13753c871806cceb8c"
+          "checksumValue": "9e52cee3be14456fdaa7afc316d402305b2651f4"
         }
       ],
       "fileName": "./Cargo.lock",
@@ -108,11 +108,11 @@
       ]
     },
     {
-      "SPDXID": "SPDXRef-File-eth_signer",
+      "SPDXID": "SPDXRef-File-eth_valkyoth_signer",
       "checksums": [
         {
           "algorithm": "SHA1",
-          "checksumValue": "330fdde2d4a554b251876b13753c871806cceb8c"
+          "checksumValue": "9e52cee3be14456fdaa7afc316d402305b2651f4"
         }
       ],
       "fileName": "./Cargo.lock",
@@ -122,11 +122,11 @@
       ]
     },
     {
-      "SPDXID": "SPDXRef-File-eth_testkit",
+      "SPDXID": "SPDXRef-File-eth_valkyoth_testkit",
       "checksums": [
         {
           "algorithm": "SHA1",
-          "checksumValue": "330fdde2d4a554b251876b13753c871806cceb8c"
+          "checksumValue": "9e52cee3be14456fdaa7afc316d402305b2651f4"
         }
       ],
       "fileName": "./Cargo.lock",
@@ -136,11 +136,11 @@
       ]
     },
     {
-      "SPDXID": "SPDXRef-File-eth_verify",
+      "SPDXID": "SPDXRef-File-eth_valkyoth_verify",
       "checksums": [
         {
           "algorithm": "SHA1",
-          "checksumValue": "330fdde2d4a554b251876b13753c871806cceb8c"
+          "checksumValue": "9e52cee3be14456fdaa7afc316d402305b2651f4"
         }
       ],
       "fileName": "./Cargo.lock",
@@ -153,146 +153,176 @@
   "name": "eth",
   "packages": [
     {
-      "SPDXID": "SPDXRef-Package-eth-rpc-0.1.0",
-      "description": "Future RPC trust-policy boundary for eth.",
+      "SPDXID": "SPDXRef-Package-eth-valkyoth-codec-0.2.0",
+      "description": "Bounded no_std Ethereum wire codec policy.",
       "downloadLocation": "NONE",
       "homepage": "https://github.com/eldryoth/eth",
       "licenseConcluded": "EUPL-1.2",
       "licenseDeclared": "EUPL-1.2",
-      "name": "eth-rpc",
-      "versionInfo": "0.1.0"
+      "name": "eth-valkyoth-codec",
+      "versionInfo": "0.2.0"
     },
     {
-      "SPDXID": "SPDXRef-Package-eth-signer-0.1.0",
-      "description": "Future signer isolation boundary for eth.",
+      "SPDXID": "SPDXRef-Package-eth-valkyoth-reth-0.2.0",
+      "description": "Future Reth integration boundary for eth.",
       "downloadLocation": "NONE",
       "homepage": "https://github.com/eldryoth/eth",
       "licenseConcluded": "EUPL-1.2",
       "licenseDeclared": "EUPL-1.2",
-      "name": "eth-signer",
-      "versionInfo": "0.1.0"
+      "name": "eth-valkyoth-reth",
+      "versionInfo": "0.2.0"
     },
     {
-      "SPDXID": "SPDXRef-Package-eth-testkit-0.1.0",
+      "SPDXID": "SPDXRef-Package-eth-valkyoth-testkit-0.2.0",
       "description": "Testing helpers and future Ethereum conformance fixtures for eth.",
       "downloadLocation": "NONE",
       "homepage": "https://github.com/eldryoth/eth",
       "licenseConcluded": "EUPL-1.2",
       "licenseDeclared": "EUPL-1.2",
-      "name": "eth-testkit",
-      "versionInfo": "0.1.0"
+      "name": "eth-valkyoth-testkit",
+      "versionInfo": "0.2.0"
     },
     {
-      "SPDXID": "SPDXRef-Package-eth-protocol-0.1.0",
-      "description": "Fork-aware no_std Ethereum protocol validation state.",
+      "SPDXID": "SPDXRef-Package-eth-valkyoth-rpc-0.2.0",
+      "description": "Future RPC trust-policy boundary for eth.",
       "downloadLocation": "NONE",
       "homepage": "https://github.com/eldryoth/eth",
       "licenseConcluded": "EUPL-1.2",
       "licenseDeclared": "EUPL-1.2",
-      "name": "eth-protocol",
-      "versionInfo": "0.1.0"
+      "name": "eth-valkyoth-rpc",
+      "versionInfo": "0.2.0"
     },
     {
-      "SPDXID": "SPDXRef-Package-eth-evm-0.1.0",
-      "description": "Future REVM adapter boundary for eth.",
-      "downloadLocation": "NONE",
-      "homepage": "https://github.com/eldryoth/eth",
-      "licenseConcluded": "EUPL-1.2",
-      "licenseDeclared": "EUPL-1.2",
-      "name": "eth-evm",
-      "versionInfo": "0.1.0"
-    },
-    {
-      "SPDXID": "SPDXRef-Package-eth-verify-0.1.0",
-      "description": "no_std Ethereum verification boundaries.",
-      "downloadLocation": "NONE",
-      "homepage": "https://github.com/eldryoth/eth",
-      "licenseConcluded": "EUPL-1.2",
-      "licenseDeclared": "EUPL-1.2",
-      "name": "eth-verify",
-      "versionInfo": "0.1.0"
-    },
-    {
-      "SPDXID": "SPDXRef-Package-eth-0.1.0",
+      "SPDXID": "SPDXRef-Package-eth-0.2.0",
       "description": "no_std-first Ethereum execution-layer protocol toolkit facade.",
       "downloadLocation": "NONE",
       "homepage": "https://github.com/eldryoth/eth",
       "licenseConcluded": "EUPL-1.2",
       "licenseDeclared": "EUPL-1.2",
       "name": "eth",
-      "versionInfo": "0.1.0"
+      "versionInfo": "0.2.0"
     },
     {
-      "SPDXID": "SPDXRef-Package-eth-primitives-0.1.0",
+      "SPDXID": "SPDXRef-Package-eth-valkyoth-primitives-0.2.0",
       "description": "Core no_std Ethereum protocol primitives.",
       "downloadLocation": "NONE",
       "homepage": "https://github.com/eldryoth/eth",
       "licenseConcluded": "EUPL-1.2",
       "licenseDeclared": "EUPL-1.2",
-      "name": "eth-primitives",
-      "versionInfo": "0.1.0"
+      "name": "eth-valkyoth-primitives",
+      "versionInfo": "0.2.0"
     },
     {
-      "SPDXID": "SPDXRef-Package-eth-codec-0.1.0",
-      "description": "Bounded no_std Ethereum wire codec policy.",
+      "SPDXID": "SPDXRef-Package-eth-valkyoth-evm-0.2.0",
+      "description": "Future REVM adapter boundary for eth.",
       "downloadLocation": "NONE",
       "homepage": "https://github.com/eldryoth/eth",
       "licenseConcluded": "EUPL-1.2",
       "licenseDeclared": "EUPL-1.2",
-      "name": "eth-codec",
-      "versionInfo": "0.1.0"
+      "name": "eth-valkyoth-evm",
+      "versionInfo": "0.2.0"
     },
     {
-      "SPDXID": "SPDXRef-Package-eth-reth-0.1.0",
-      "description": "Future Reth integration boundary for eth.",
+      "SPDXID": "SPDXRef-Package-eth-valkyoth-signer-0.2.0",
+      "description": "Future signer isolation boundary for eth.",
       "downloadLocation": "NONE",
       "homepage": "https://github.com/eldryoth/eth",
       "licenseConcluded": "EUPL-1.2",
       "licenseDeclared": "EUPL-1.2",
-      "name": "eth-reth",
-      "versionInfo": "0.1.0"
+      "name": "eth-valkyoth-signer",
+      "versionInfo": "0.2.0"
+    },
+    {
+      "SPDXID": "SPDXRef-Package-eth-valkyoth-protocol-0.2.0",
+      "description": "Fork-aware no_std Ethereum protocol validation state.",
+      "downloadLocation": "NONE",
+      "homepage": "https://github.com/eldryoth/eth",
+      "licenseConcluded": "EUPL-1.2",
+      "licenseDeclared": "EUPL-1.2",
+      "name": "eth-valkyoth-protocol",
+      "versionInfo": "0.2.0"
+    },
+    {
+      "SPDXID": "SPDXRef-Package-eth-valkyoth-verify-0.2.0",
+      "description": "no_std Ethereum verification boundaries.",
+      "downloadLocation": "NONE",
+      "homepage": "https://github.com/eldryoth/eth",
+      "licenseConcluded": "EUPL-1.2",
+      "licenseDeclared": "EUPL-1.2",
+      "name": "eth-valkyoth-verify",
+      "versionInfo": "0.2.0"
     }
   ],
   "relationships": [
     {
-      "relatedSpdxElement": "SPDXRef-Package-eth-signer-0.1.0",
+      "relatedSpdxElement": "SPDXRef-Package-eth-valkyoth-primitives-0.2.0",
       "relationshipType": "DEPENDS_ON",
-      "spdxElementId": "SPDXRef-Package-eth-0.1.0"
+      "spdxElementId": "SPDXRef-Package-eth-valkyoth-signer-0.2.0"
     },
     {
-      "relatedSpdxElement": "SPDXRef-Package-eth-reth-0.1.0",
+      "relatedSpdxElement": "SPDXRef-File-eth_valkyoth_codec",
+      "relationshipType": "DESCRIBES",
+      "spdxElementId": "SPDXRef-DOCUMENT"
+    },
+    {
+      "relatedSpdxElement": "SPDXRef-Package-eth-valkyoth-verify-0.2.0",
+      "relationshipType": "DEPENDS_ON",
+      "spdxElementId": "SPDXRef-Package-eth-0.2.0"
+    },
+    {
+      "relatedSpdxElement": "SPDXRef-File-eth_valkyoth_evm",
+      "relationshipType": "DESCRIBES",
+      "spdxElementId": "SPDXRef-DOCUMENT"
+    },
+    {
+      "relatedSpdxElement": "SPDXRef-Package-eth-valkyoth-evm-0.2.0",
+      "relationshipType": "DEPENDS_ON",
+      "spdxElementId": "SPDXRef-Package-eth-0.2.0"
+    },
+    {
+      "relatedSpdxElement": "SPDXRef-File-eth_valkyoth_rpc",
+      "relationshipType": "DESCRIBES",
+      "spdxElementId": "SPDXRef-DOCUMENT"
+    },
+    {
+      "relatedSpdxElement": "SPDXRef-Package-eth-valkyoth-codec-0.2.0",
+      "relationshipType": "DEPENDS_ON",
+      "spdxElementId": "SPDXRef-Package-eth-0.2.0"
+    },
+    {
+      "relatedSpdxElement": "SPDXRef-Package-eth-valkyoth-rpc-0.2.0",
+      "relationshipType": "DEPENDS_ON",
+      "spdxElementId": "SPDXRef-Package-eth-0.2.0"
+    },
+    {
+      "relatedSpdxElement": "SPDXRef-Package-eth-valkyoth-primitives-0.2.0",
+      "relationshipType": "DEPENDS_ON",
+      "spdxElementId": "SPDXRef-Package-eth-0.2.0"
+    },
+    {
+      "relatedSpdxElement": "SPDXRef-Package-eth-valkyoth-rpc-0.2.0",
       "relationshipType": "GENERATED_FROM",
-      "spdxElementId": "SPDXRef-File-eth_reth"
+      "spdxElementId": "SPDXRef-File-eth_valkyoth_rpc"
     },
     {
-      "relatedSpdxElement": "SPDXRef-File-eth_verify",
+      "relatedSpdxElement": "SPDXRef-File-eth_valkyoth_verify",
       "relationshipType": "DESCRIBES",
       "spdxElementId": "SPDXRef-DOCUMENT"
     },
     {
-      "relatedSpdxElement": "SPDXRef-Package-eth-verify-0.1.0",
+      "relatedSpdxElement": "SPDXRef-Package-eth-valkyoth-verify-0.2.0",
       "relationshipType": "GENERATED_FROM",
-      "spdxElementId": "SPDXRef-File-eth_verify"
+      "spdxElementId": "SPDXRef-File-eth_valkyoth_verify"
     },
     {
-      "relatedSpdxElement": "SPDXRef-Package-eth-rpc-0.1.0",
+      "relatedSpdxElement": "SPDXRef-Package-eth-valkyoth-signer-0.2.0",
       "relationshipType": "DEPENDS_ON",
-      "spdxElementId": "SPDXRef-Package-eth-0.1.0"
+      "spdxElementId": "SPDXRef-Package-eth-0.2.0"
     },
     {
-      "relatedSpdxElement": "SPDXRef-File-eth_codec",
-      "relationshipType": "DESCRIBES",
-      "spdxElementId": "SPDXRef-DOCUMENT"
-    },
-    {
-      "relatedSpdxElement": "SPDXRef-File-eth_rpc",
-      "relationshipType": "DESCRIBES",
-      "spdxElementId": "SPDXRef-DOCUMENT"
-    },
-    {
-      "relatedSpdxElement": "SPDXRef-Package-eth-primitives-0.1.0",
+      "relatedSpdxElement": "SPDXRef-Package-eth-valkyoth-primitives-0.2.0",
       "relationshipType": "DEPENDS_ON",
-      "spdxElementId": "SPDXRef-Package-eth-verify-0.1.0"
+      "spdxElementId": "SPDXRef-Package-eth-valkyoth-protocol-0.2.0"
     },
     {
       "relatedSpdxElement": "SPDXRef-File-eth",
@@ -300,119 +330,89 @@
       "spdxElementId": "SPDXRef-DOCUMENT"
     },
     {
-      "relatedSpdxElement": "SPDXRef-Package-eth-codec-0.1.0",
-      "relationshipType": "DEPENDS_ON",
-      "spdxElementId": "SPDXRef-Package-eth-0.1.0"
+      "relatedSpdxElement": "SPDXRef-Package-eth-valkyoth-testkit-0.2.0",
+      "relationshipType": "GENERATED_FROM",
+      "spdxElementId": "SPDXRef-File-eth_valkyoth_testkit"
     },
     {
-      "relatedSpdxElement": "SPDXRef-File-eth_protocol",
+      "relatedSpdxElement": "SPDXRef-Package-eth-valkyoth-signer-0.2.0",
+      "relationshipType": "GENERATED_FROM",
+      "spdxElementId": "SPDXRef-File-eth_valkyoth_signer"
+    },
+    {
+      "relatedSpdxElement": "SPDXRef-File-eth_valkyoth_testkit",
       "relationshipType": "DESCRIBES",
       "spdxElementId": "SPDXRef-DOCUMENT"
     },
     {
-      "relatedSpdxElement": "SPDXRef-Package-eth-primitives-0.1.0",
+      "relatedSpdxElement": "SPDXRef-Package-eth-valkyoth-reth-0.2.0",
       "relationshipType": "GENERATED_FROM",
-      "spdxElementId": "SPDXRef-File-eth_primitives"
+      "spdxElementId": "SPDXRef-File-eth_valkyoth_reth"
     },
     {
-      "relatedSpdxElement": "SPDXRef-File-eth_primitives",
-      "relationshipType": "DESCRIBES",
-      "spdxElementId": "SPDXRef-DOCUMENT"
-    },
-    {
-      "relatedSpdxElement": "SPDXRef-Package-eth-primitives-0.1.0",
-      "relationshipType": "DEPENDS_ON",
-      "spdxElementId": "SPDXRef-Package-eth-signer-0.1.0"
-    },
-    {
-      "relatedSpdxElement": "SPDXRef-File-eth_evm",
-      "relationshipType": "DESCRIBES",
-      "spdxElementId": "SPDXRef-DOCUMENT"
-    },
-    {
-      "relatedSpdxElement": "SPDXRef-Package-eth-protocol-0.1.0",
+      "relatedSpdxElement": "SPDXRef-Package-eth-valkyoth-primitives-0.2.0",
       "relationshipType": "GENERATED_FROM",
-      "spdxElementId": "SPDXRef-File-eth_protocol"
+      "spdxElementId": "SPDXRef-File-eth_valkyoth_primitives"
     },
     {
-      "relatedSpdxElement": "SPDXRef-Package-eth-signer-0.1.0",
-      "relationshipType": "GENERATED_FROM",
-      "spdxElementId": "SPDXRef-File-eth_signer"
-    },
-    {
-      "relatedSpdxElement": "SPDXRef-Package-eth-evm-0.1.0",
-      "relationshipType": "DEPENDS_ON",
-      "spdxElementId": "SPDXRef-Package-eth-0.1.0"
-    },
-    {
-      "relatedSpdxElement": "SPDXRef-Package-eth-0.1.0",
+      "relatedSpdxElement": "SPDXRef-Package-eth-0.2.0",
       "relationshipType": "GENERATED_FROM",
       "spdxElementId": "SPDXRef-File-eth"
     },
     {
-      "relatedSpdxElement": "SPDXRef-Package-eth-primitives-0.1.0",
+      "relatedSpdxElement": "SPDXRef-Package-eth-valkyoth-testkit-0.2.0",
       "relationshipType": "DEPENDS_ON",
-      "spdxElementId": "SPDXRef-Package-eth-protocol-0.1.0"
+      "spdxElementId": "SPDXRef-Package-eth-0.2.0"
     },
     {
-      "relatedSpdxElement": "SPDXRef-File-eth_reth",
+      "relatedSpdxElement": "SPDXRef-Package-eth-valkyoth-protocol-0.2.0",
+      "relationshipType": "GENERATED_FROM",
+      "spdxElementId": "SPDXRef-File-eth_valkyoth_protocol"
+    },
+    {
+      "relatedSpdxElement": "SPDXRef-Package-eth-valkyoth-codec-0.2.0",
+      "relationshipType": "GENERATED_FROM",
+      "spdxElementId": "SPDXRef-File-eth_valkyoth_codec"
+    },
+    {
+      "relatedSpdxElement": "SPDXRef-File-eth_valkyoth_protocol",
       "relationshipType": "DESCRIBES",
       "spdxElementId": "SPDXRef-DOCUMENT"
     },
     {
-      "relatedSpdxElement": "SPDXRef-Package-eth-verify-0.1.0",
+      "relatedSpdxElement": "SPDXRef-Package-eth-valkyoth-primitives-0.2.0",
       "relationshipType": "DEPENDS_ON",
-      "spdxElementId": "SPDXRef-Package-eth-0.1.0"
+      "spdxElementId": "SPDXRef-Package-eth-valkyoth-verify-0.2.0"
     },
     {
-      "relatedSpdxElement": "SPDXRef-Package-eth-codec-0.1.0",
-      "relationshipType": "GENERATED_FROM",
-      "spdxElementId": "SPDXRef-File-eth_codec"
-    },
-    {
-      "relatedSpdxElement": "SPDXRef-Package-eth-primitives-0.1.0",
-      "relationshipType": "DEPENDS_ON",
-      "spdxElementId": "SPDXRef-Package-eth-0.1.0"
-    },
-    {
-      "relatedSpdxElement": "SPDXRef-Package-eth-reth-0.1.0",
-      "relationshipType": "DEPENDS_ON",
-      "spdxElementId": "SPDXRef-Package-eth-0.1.0"
-    },
-    {
-      "relatedSpdxElement": "SPDXRef-Package-eth-rpc-0.1.0",
-      "relationshipType": "GENERATED_FROM",
-      "spdxElementId": "SPDXRef-File-eth_rpc"
-    },
-    {
-      "relatedSpdxElement": "SPDXRef-File-eth_signer",
+      "relatedSpdxElement": "SPDXRef-File-eth_valkyoth_reth",
       "relationshipType": "DESCRIBES",
       "spdxElementId": "SPDXRef-DOCUMENT"
     },
     {
-      "relatedSpdxElement": "SPDXRef-Package-eth-testkit-0.1.0",
-      "relationshipType": "GENERATED_FROM",
-      "spdxElementId": "SPDXRef-File-eth_testkit"
-    },
-    {
-      "relatedSpdxElement": "SPDXRef-File-eth_testkit",
+      "relatedSpdxElement": "SPDXRef-File-eth_valkyoth_primitives",
       "relationshipType": "DESCRIBES",
       "spdxElementId": "SPDXRef-DOCUMENT"
     },
     {
-      "relatedSpdxElement": "SPDXRef-Package-eth-protocol-0.1.0",
+      "relatedSpdxElement": "SPDXRef-Package-eth-valkyoth-reth-0.2.0",
       "relationshipType": "DEPENDS_ON",
-      "spdxElementId": "SPDXRef-Package-eth-0.1.0"
+      "spdxElementId": "SPDXRef-Package-eth-0.2.0"
     },
     {
-      "relatedSpdxElement": "SPDXRef-Package-eth-testkit-0.1.0",
-      "relationshipType": "DEPENDS_ON",
-      "spdxElementId": "SPDXRef-Package-eth-0.1.0"
-    },
-    {
-      "relatedSpdxElement": "SPDXRef-Package-eth-evm-0.1.0",
+      "relatedSpdxElement": "SPDXRef-Package-eth-valkyoth-evm-0.2.0",
       "relationshipType": "GENERATED_FROM",
-      "spdxElementId": "SPDXRef-File-eth_evm"
+      "spdxElementId": "SPDXRef-File-eth_valkyoth_evm"
+    },
+    {
+      "relatedSpdxElement": "SPDXRef-Package-eth-valkyoth-protocol-0.2.0",
+      "relationshipType": "DEPENDS_ON",
+      "spdxElementId": "SPDXRef-Package-eth-0.2.0"
+    },
+    {
+      "relatedSpdxElement": "SPDXRef-File-eth_valkyoth_signer",
+      "relationshipType": "DESCRIBES",
+      "spdxElementId": "SPDXRef-DOCUMENT"
     }
   ],
   "spdxVersion": "SPDX-2.3"

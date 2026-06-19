@@ -1,6 +1,6 @@
 [package]
-name = "eth-evm"
-description = "Future REVM adapter boundary for eth."
+name = "eth-valkyoth-primitives"
+description = "Core no_std Ethereum protocol primitives."
 version.workspace = true
 edition.workspace = true
 rust-version.workspace = true

@@ -1,6 +1,6 @@
 [package]
-name = "eth-rpc"
-description = "Future RPC trust-policy boundary for eth."
+name = "eth-valkyoth-codec"
+description = "Bounded no_std Ethereum wire codec policy."
 version.workspace = true
 edition.workspace = true
 rust-version.workspace = true

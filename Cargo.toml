@@ -1,21 +1,21 @@
 [workspace]
 members = [
     "crates/eth",
-    "crates/eth-codec",
-    "crates/eth-evm",
-    "crates/eth-primitives",
-    "crates/eth-protocol",
-    "crates/eth-reth",
-    "crates/eth-rpc",
-    "crates/eth-signer",
-    "crates/eth-testkit",
-    "crates/eth-verify",
+    "crates/eth-valkyoth-codec",
+    "crates/eth-valkyoth-evm",
+    "crates/eth-valkyoth-primitives",
+    "crates/eth-valkyoth-protocol",
+    "crates/eth-valkyoth-reth",
+    "crates/eth-valkyoth-rpc",
+    "crates/eth-valkyoth-signer",
+    "crates/eth-valkyoth-testkit",
+    "crates/eth-valkyoth-verify",
 ]
 default-members = ["crates/eth"]
 resolver = "3"
 
 [workspace.package]
-version = "0.1.0"
+version = "0.2.0"
 edition = "2024"
 rust-version = "1.90"
 license = "EUPL-1.2"
@@ -40,15 +40,15 @@ cast_possible_truncation = "deny"
 cast_sign_loss = "deny"
 
 [workspace.dependencies]
-eth-codec = { path = "crates/eth-codec", version = "0.1.0" }
-eth-evm = { path = "crates/eth-evm", version = "0.1.0" }
-eth-primitives = { path = "crates/eth-primitives", version = "0.1.0" }
-eth-protocol = { path = "crates/eth-protocol", version = "0.1.0" }
-eth-reth = { path = "crates/eth-reth", version = "0.1.0" }
-eth-rpc = { path = "crates/eth-rpc", version = "0.1.0" }
-eth-signer = { path = "crates/eth-signer", version = "0.1.0" }
-eth-testkit = { path = "crates/eth-testkit", version = "0.1.0" }
-eth-verify = { path = "crates/eth-verify", version = "0.1.0" }
+eth-valkyoth-codec = { path = "crates/eth-valkyoth-codec", version = "0.2.0" }
+eth-valkyoth-evm = { path = "crates/eth-valkyoth-evm", version = "0.2.0" }
+eth-valkyoth-primitives = { path = "crates/eth-valkyoth-primitives", version = "0.2.0" }
+eth-valkyoth-protocol = { path = "crates/eth-valkyoth-protocol", version = "0.2.0" }
+eth-valkyoth-reth = { path = "crates/eth-valkyoth-reth", version = "0.2.0" }
+eth-valkyoth-rpc = { path = "crates/eth-valkyoth-rpc", version = "0.2.0" }
+eth-valkyoth-signer = { path = "crates/eth-valkyoth-signer", version = "0.2.0" }
+eth-valkyoth-testkit = { path = "crates/eth-valkyoth-testkit", version = "0.2.0" }
+eth-valkyoth-verify = { path = "crates/eth-valkyoth-verify", version = "0.2.0" }
 
 [profile.release]
 overflow-checks = true

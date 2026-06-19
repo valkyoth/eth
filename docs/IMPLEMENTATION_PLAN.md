@@ -45,20 +45,20 @@ The first production value is:
 
 ## Workspace Shape
 
-- `eth-primitives`: no_std chain, block, gas, nonce, address, hash, fork, and
+- `eth-valkyoth-primitives`: no_std chain, block, gas, nonce, address, hash, fork, and
   bounded value primitives.
-- `eth-codec`: canonical RLP and typed-envelope decoding policy, exact
+- `eth-valkyoth-codec`: canonical RLP and typed-envelope decoding policy, exact
   consumption, and decode budgets.
-- `eth-protocol`: transaction, block, receipt, withdrawal, log, and fork
+- `eth-valkyoth-protocol`: transaction, block, receipt, withdrawal, log, and fork
   validation states.
-- `eth-verify`: sender recovery, replay-domain checks, EIP-712 validation,
+- `eth-valkyoth-verify`: sender recovery, replay-domain checks, EIP-712 validation,
   header/hash checks, and MPT proof verification.
-- `eth-evm`: optional REVM adapter boundary with explicit fork, block,
+- `eth-valkyoth-evm`: optional REVM adapter boundary with explicit fork, block,
   transaction, snapshot, limit, and commit policy.
-- `eth-rpc`: optional RPC policy over admitted provider transports.
-- `eth-signer`: optional signer isolation and domain-specific signing APIs.
-- `eth-reth`: optional Reth adapter boundary.
-- `eth-testkit`: fixtures, adversarial inputs, conformance helpers, and
+- `eth-valkyoth-rpc`: optional RPC policy over admitted provider transports.
+- `eth-valkyoth-signer`: optional signer isolation and domain-specific signing APIs.
+- `eth-valkyoth-reth`: optional Reth adapter boundary.
+- `eth-valkyoth-testkit`: fixtures, adversarial inputs, conformance helpers, and
   regression utilities.
 - `eth`: facade crate that re-exports stable admitted surfaces.
 
@@ -136,7 +136,7 @@ Release gate:
 
 ## Phase 6: Optional REVM Adapter
 
-Admit REVM behind `eth-evm`. Require explicit fork/spec ID, block environment,
+Admit REVM behind `eth-valkyoth-evm`. Require explicit fork/spec ID, block environment,
 transaction environment, state snapshot, execution limits, and commit policy.
 
 Release gate:

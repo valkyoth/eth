@@ -14,7 +14,12 @@ if [ -n "$violations" ]; then
     exit 1
 fi
 
-grep -q '"crates/eth-primitives"' Cargo.toml
-grep -q '"crates/eth-codec"' Cargo.toml
-grep -q '"crates/eth-protocol"' Cargo.toml
-grep -q '"crates/eth-verify"' Cargo.toml
+grep -q '"crates/eth-valkyoth-primitives"' Cargo.toml
+grep -q '"crates/eth-valkyoth-codec"' Cargo.toml
+grep -q '"crates/eth-valkyoth-protocol"' Cargo.toml
+grep -q '"crates/eth-valkyoth-verify"' Cargo.toml
+grep -q '"crates/eth-valkyoth-evm"' Cargo.toml
+grep -q '"crates/eth-valkyoth-rpc"' Cargo.toml
+grep -q '"crates/eth-valkyoth-signer"' Cargo.toml
+grep -q '"crates/eth-valkyoth-reth"' Cargo.toml
+grep -q '"crates/eth-valkyoth-testkit"' Cargo.toml

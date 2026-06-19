@@ -2,7 +2,7 @@
 #![forbid(unsafe_code)]
 //! Fork-aware Ethereum protocol validation state.
 
-use eth_primitives::{BlockNumber, ChainId, UnixTimestamp};
+use eth_valkyoth_primitives::{BlockNumber, ChainId, UnixTimestamp};
 
 /// Ethereum fork rules selected for a validation operation.
 #[derive(Clone, Copy, Debug, Eq, PartialEq)]

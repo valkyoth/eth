@@ -2,7 +2,7 @@
 #![forbid(unsafe_code)]
 //! Verification boundaries for Ethereum replay domains, signatures, and proofs.
 
-use eth_primitives::ChainId;
+use eth_valkyoth_primitives::ChainId;
 
 /// Verification failure categories.
 #[derive(Clone, Copy, Debug, Eq, PartialEq)]

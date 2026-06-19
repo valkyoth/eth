@@ -1,6 +1,6 @@
 [package]
-name = "eth-primitives"
-description = "Core no_std Ethereum protocol primitives."
+name = "eth-valkyoth-verify"
+description = "no_std Ethereum verification boundaries."
 version.workspace = true
 edition.workspace = true
 rust-version.workspace = true
@@ -10,7 +10,10 @@ repository.workspace = true
 
 [features]
 default = []
-std = []
+std = ["eth-valkyoth-primitives/std"]
+
+[dependencies]
+eth-valkyoth-primitives.workspace = true
 
 [lints]
 workspace = true

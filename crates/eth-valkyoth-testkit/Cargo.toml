@@ -1,6 +1,6 @@
 [package]
-name = "eth-codec"
-description = "Bounded no_std Ethereum wire codec policy."
+name = "eth-valkyoth-testkit"
+description = "Testing helpers and future Ethereum conformance fixtures for eth."
 version.workspace = true
 edition.workspace = true
 rust-version.workspace = true

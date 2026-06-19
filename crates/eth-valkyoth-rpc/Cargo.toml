@@ -1,6 +1,6 @@
 [package]
-name = "eth-protocol"
-description = "Fork-aware no_std Ethereum protocol validation state."
+name = "eth-valkyoth-rpc"
+description = "Future RPC trust-policy boundary for eth."
 version.workspace = true
 edition.workspace = true
 rust-version.workspace = true
@@ -10,10 +10,7 @@ repository.workspace = true
 
 [features]
 default = []
-std = ["eth-primitives/std"]
-
-[dependencies]
-eth-primitives.workspace = true
+std = []
 
 [lints]
 workspace = true

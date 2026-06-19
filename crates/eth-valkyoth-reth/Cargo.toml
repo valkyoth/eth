@@ -1,5 +1,5 @@
 [package]
-name = "eth-reth"
+name = "eth-valkyoth-reth"
 description = "Future Reth integration boundary for eth."
 version.workspace = true
 edition.workspace = true

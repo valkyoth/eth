@@ -1,6 +1,6 @@
 [package]
-name = "eth-testkit"
-description = "Testing helpers and future Ethereum conformance fixtures for eth."
+name = "eth-valkyoth-evm"
+description = "Future REVM adapter boundary for eth."
 version.workspace = true
 edition.workspace = true
 rust-version.workspace = true

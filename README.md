@@ -60,21 +60,21 @@ Compatibility evidence:
 | Crate | Default | Purpose |
 | --- | --- | --- |
 | `eth` | yes | Facade crate over stable protocol-core crates. |
-| `eth-primitives` | yes | Chain, fork, block, gas, nonce, and bounded value types. |
-| `eth-codec` | yes | Bounded exact-consumption wire decoding policy. |
-| `eth-protocol` | yes | Fork-aware validation states and protocol context. |
-| `eth-verify` | yes | Verification boundaries for signatures, proofs, and replay domains. |
-| `eth-evm` | no | Future REVM adapter boundary. |
-| `eth-rpc` | no | Future explicit RPC trust-policy boundary. |
-| `eth-signer` | no | Future signer isolation boundary. |
-| `eth-reth` | no | Future Reth integration boundary. |
-| `eth-testkit` | no | Test fixtures, conformance helpers, and adversarial inputs. |
+| `eth-valkyoth-primitives` | yes | Chain, fork, block, gas, nonce, and bounded value types. |
+| `eth-valkyoth-codec` | yes | Bounded exact-consumption wire decoding policy. |
+| `eth-valkyoth-protocol` | yes | Fork-aware validation states and protocol context. |
+| `eth-valkyoth-verify` | yes | Verification boundaries for signatures, proofs, and replay domains. |
+| `eth-valkyoth-evm` | no | Future REVM adapter boundary. |
+| `eth-valkyoth-rpc` | no | Future explicit RPC trust-policy boundary. |
+| `eth-valkyoth-signer` | no | Future signer isolation boundary. |
+| `eth-valkyoth-reth` | no | Future Reth integration boundary. |
+| `eth-valkyoth-testkit` | no | Test fixtures, conformance helpers, and adversarial inputs. |
 
 ## Checks
 
 ```bash
 scripts/checks.sh
-scripts/release_0_1_gate.sh
+scripts/release_0_2_gate.sh
 ```
 
 For dependency-policy checks, install `cargo-deny` and `cargo-audit`, then run:

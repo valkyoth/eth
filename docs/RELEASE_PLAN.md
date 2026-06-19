@@ -118,11 +118,15 @@ Exit criteria:
 
 ### v0.2.0 - Release Readiness Gate
 
-Goal: make the pentest-before-tag process enforceable by local tooling.
+Goal: make the pentest-before-tag process and crates.io publish order
+enforceable by local tooling.
 
 Deliverables:
 
 - `scripts/validate-release-readiness.sh`;
+- `scripts/release_crates.py`;
+- support crates renamed into the `eth-valkyoth-*` crates.io namespace while
+  `eth` remains the facade crate;
 - release-note metadata checks;
 - permanent pentest-report metadata checks;
 - SBOM presence checks;
@@ -132,6 +136,8 @@ Deliverables:
 Verification:
 
 - `scripts/checks.sh`
+- `scripts/release_0_2_gate.sh`
+- `scripts/release_crates.py --check`
 - negative tests for missing release and pentest metadata where practical.
 
 Exit criteria:
@@ -191,7 +197,7 @@ Deliverables:
 
 Verification:
 
-- `cargo test -p eth-codec`
+- `cargo test -p eth-valkyoth-codec`
 
 Exit criteria:
 
@@ -213,7 +219,7 @@ Deliverables:
 
 Verification:
 
-- `cargo test -p eth-codec`
+- `cargo test -p eth-valkyoth-codec`
 
 Exit criteria:
 
@@ -232,7 +238,7 @@ Deliverables:
 
 Verification:
 
-- `cargo test -p eth-codec`
+- `cargo test -p eth-valkyoth-codec`
 
 Exit criteria:
 
@@ -251,7 +257,7 @@ Deliverables:
 
 Verification:
 
-- `cargo test -p eth-codec -p eth-primitives`
+- `cargo test -p eth-valkyoth-codec -p eth-valkyoth-primitives`
 
 Exit criteria:
 
@@ -269,7 +275,7 @@ Deliverables:
 
 Verification:
 
-- `cargo test -p eth-codec`
+- `cargo test -p eth-valkyoth-codec`
 
 Exit criteria:
 
@@ -310,7 +316,7 @@ Deliverables:
 
 Verification:
 
-- `cargo test -p eth-protocol -p eth-codec`
+- `cargo test -p eth-valkyoth-protocol -p eth-valkyoth-codec`
 
 Exit criteria:
 
@@ -329,7 +335,7 @@ Deliverables:
 
 Verification:
 
-- `cargo test -p eth-protocol`
+- `cargo test -p eth-valkyoth-protocol`
 
 Exit criteria:
 
@@ -348,7 +354,7 @@ Deliverables:
 
 Verification:
 
-- `cargo test -p eth-protocol`
+- `cargo test -p eth-valkyoth-protocol`
 
 Exit criteria:
 
@@ -366,7 +372,7 @@ Deliverables:
 
 Verification:
 
-- `cargo test -p eth-protocol`
+- `cargo test -p eth-valkyoth-protocol`
 
 Exit criteria:
 
@@ -385,7 +391,7 @@ Deliverables:
 
 Verification:
 
-- `cargo test -p eth-protocol`
+- `cargo test -p eth-valkyoth-protocol`
 
 Exit criteria:
 
@@ -403,7 +409,7 @@ Deliverables:
 
 Verification:
 
-- `cargo test -p eth-protocol -p eth-codec`
+- `cargo test -p eth-valkyoth-protocol -p eth-valkyoth-codec`
 
 Exit criteria:
 
@@ -426,7 +432,7 @@ Deliverables:
 
 Verification:
 
-- `cargo test -p eth-protocol`
+- `cargo test -p eth-valkyoth-protocol`
 
 Exit criteria:
 
@@ -444,7 +450,7 @@ Deliverables:
 
 Verification:
 
-- `cargo test -p eth-protocol`
+- `cargo test -p eth-valkyoth-protocol`
 
 Exit criteria:
 
@@ -462,7 +468,7 @@ Deliverables:
 
 Verification:
 
-- `cargo test -p eth-verify -p eth-protocol`
+- `cargo test -p eth-valkyoth-verify -p eth-valkyoth-protocol`
 
 Exit criteria:
 
@@ -480,7 +486,7 @@ Deliverables:
 
 Verification:
 
-- `cargo test -p eth-verify`
+- `cargo test -p eth-valkyoth-verify`
 - `cargo deny check`
 - `cargo audit`
 
@@ -500,7 +506,7 @@ Deliverables:
 
 Verification:
 
-- `cargo test -p eth-verify`
+- `cargo test -p eth-valkyoth-verify`
 
 Exit criteria:
 
@@ -520,7 +526,7 @@ Deliverables:
 
 Verification:
 
-- `cargo test -p eth-protocol -p eth-verify`
+- `cargo test -p eth-valkyoth-protocol -p eth-valkyoth-verify`
 
 Exit criteria:
 
@@ -539,7 +545,7 @@ Deliverables:
 
 Verification:
 
-- `cargo test -p eth-protocol`
+- `cargo test -p eth-valkyoth-protocol`
 
 Exit criteria:
 
@@ -557,7 +563,7 @@ Deliverables:
 
 Verification:
 
-- `cargo test -p eth-protocol`
+- `cargo test -p eth-valkyoth-protocol`
 
 Exit criteria:
 
@@ -575,7 +581,7 @@ Deliverables:
 
 Verification:
 
-- `cargo test -p eth-verify`
+- `cargo test -p eth-valkyoth-verify`
 
 Exit criteria:
 
@@ -593,7 +599,7 @@ Deliverables:
 
 Verification:
 
-- `cargo test -p eth-verify`
+- `cargo test -p eth-valkyoth-verify`
 
 Exit criteria:
 
@@ -611,7 +617,7 @@ Deliverables:
 
 Verification:
 
-- `cargo test -p eth-verify`
+- `cargo test -p eth-valkyoth-verify`
 
 Exit criteria:
 
@@ -679,7 +685,7 @@ Exit criteria:
 
 ### v0.31.0 - REVM Dependency Admission
 
-Goal: admit REVM behind `eth-evm` with reviewed features.
+Goal: admit REVM behind `eth-valkyoth-evm` with reviewed features.
 
 Deliverables:
 
@@ -708,7 +714,7 @@ Deliverables:
 
 Verification:
 
-- `cargo test -p eth-evm`
+- `cargo test -p eth-valkyoth-evm`
 
 Exit criteria:
 
@@ -737,7 +743,7 @@ Exit criteria:
 
 ### v0.34.0 - RPC Dependency Admission
 
-Goal: admit provider/transport crates behind `eth-rpc`.
+Goal: admit provider/transport crates behind `eth-valkyoth-rpc`.
 
 Deliverables:
 
@@ -784,7 +790,7 @@ Deliverables:
 
 Verification:
 
-- `cargo test -p eth-rpc`
+- `cargo test -p eth-valkyoth-rpc`
 
 Exit criteria:
 
@@ -803,7 +809,7 @@ Deliverables:
 
 Verification:
 
-- `cargo test -p eth-signer`
+- `cargo test -p eth-valkyoth-signer`
 
 Exit criteria:
 
@@ -822,7 +828,7 @@ Deliverables:
 
 Verification:
 
-- `cargo test -p eth-signer --all-features`
+- `cargo test -p eth-valkyoth-signer --all-features`
 - `cargo deny check`
 
 Exit criteria:

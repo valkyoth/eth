@@ -1,5 +1,5 @@
 [package]
-name = "eth-signer"
+name = "eth-valkyoth-signer"
 description = "Future signer isolation boundary for eth."
 version.workspace = true
 edition.workspace = true
@@ -10,10 +10,10 @@ repository.workspace = true
 
 [features]
 default = []
-std = ["eth-primitives/std"]
+std = ["eth-valkyoth-primitives/std"]
 
 [dependencies]
-eth-primitives.workspace = true
+eth-valkyoth-primitives.workspace = true
 
 [lints]
 workspace = true

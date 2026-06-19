@@ -1,6 +1,6 @@
 [package]
-name = "eth-verify"
-description = "no_std Ethereum verification boundaries."
+name = "eth-valkyoth-protocol"
+description = "Fork-aware no_std Ethereum protocol validation state."
 version.workspace = true
 edition.workspace = true
 rust-version.workspace = true
@@ -10,10 +10,10 @@ repository.workspace = true
 
 [features]
 default = []
-std = ["eth-primitives/std"]
+std = ["eth-valkyoth-primitives/std"]
 
 [dependencies]
-eth-primitives.workspace = true
+eth-valkyoth-primitives.workspace = true
 
 [lints]
 workspace = true

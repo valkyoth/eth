@@ -18,3 +18,5 @@ All notable changes to `eth` are documented here.
   primitives/protocol helpers flagged during pentest.
 - Added release-gate checks that fail when pinned CI tools or GitHub Actions
   are not the latest upstream versions.
+- Started `0.2.0` by moving support crates to the `eth-valkyoth-*` namespace
+  and adding a crates.io release-order helper.

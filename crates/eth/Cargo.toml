@@ -12,27 +12,27 @@ readme.workspace = true
 [features]
 default = []
 std = [
-    "eth-codec/std",
-    "eth-primitives/std",
-    "eth-protocol/std",
-    "eth-verify/std",
+    "eth-valkyoth-codec/std",
+    "eth-valkyoth-primitives/std",
+    "eth-valkyoth-protocol/std",
+    "eth-valkyoth-verify/std",
 ]
-evm = ["dep:eth-evm"]
-rpc = ["dep:eth-rpc"]
-signer = ["dep:eth-signer"]
-reth = ["dep:eth-reth"]
-testkit = ["dep:eth-testkit"]
+evm = ["dep:eth-valkyoth-evm"]
+rpc = ["dep:eth-valkyoth-rpc"]
+signer = ["dep:eth-valkyoth-signer"]
+reth = ["dep:eth-valkyoth-reth"]
+testkit = ["dep:eth-valkyoth-testkit"]
 
 [dependencies]
-eth-codec.workspace = true
-eth-primitives.workspace = true
-eth-protocol.workspace = true
-eth-verify.workspace = true
-eth-evm = { workspace = true, optional = true }
-eth-reth = { workspace = true, optional = true }
-eth-rpc = { workspace = true, optional = true }
-eth-signer = { workspace = true, optional = true }
-eth-testkit = { workspace = true, optional = true }
+eth-valkyoth-codec.workspace = true
+eth-valkyoth-primitives.workspace = true
+eth-valkyoth-protocol.workspace = true
+eth-valkyoth-verify.workspace = true
+eth-valkyoth-evm = { workspace = true, optional = true }
+eth-valkyoth-reth = { workspace = true, optional = true }
+eth-valkyoth-rpc = { workspace = true, optional = true }
+eth-valkyoth-signer = { workspace = true, optional = true }
+eth-valkyoth-testkit = { workspace = true, optional = true }
 
 [lints]
 workspace = true

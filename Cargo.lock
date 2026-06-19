@@ -4,60 +4,60 @@ version = 4
 
 [[package]]
 name = "eth"
-version = "0.1.0"
+version = "0.2.0"
 dependencies = [
- "eth-codec",
- "eth-evm",
- "eth-primitives",
- "eth-protocol",
- "eth-reth",
- "eth-rpc",
- "eth-signer",
- "eth-testkit",
- "eth-verify",
+ "eth-valkyoth-codec",
+ "eth-valkyoth-evm",
+ "eth-valkyoth-primitives",
+ "eth-valkyoth-protocol",
+ "eth-valkyoth-reth",
+ "eth-valkyoth-rpc",
+ "eth-valkyoth-signer",
+ "eth-valkyoth-testkit",
+ "eth-valkyoth-verify",
 ]
 
 [[package]]
-name = "eth-codec"
-version = "0.1.0"
+name = "eth-valkyoth-codec"
+version = "0.2.0"
 
 [[package]]
-name = "eth-evm"
-version = "0.1.0"
+name = "eth-valkyoth-evm"
+version = "0.2.0"
 
 [[package]]
-name = "eth-primitives"
-version = "0.1.0"
+name = "eth-valkyoth-primitives"
+version = "0.2.0"
 
 [[package]]
-name = "eth-protocol"
-version = "0.1.0"
+name = "eth-valkyoth-protocol"
+version = "0.2.0"
 dependencies = [
- "eth-primitives",
+ "eth-valkyoth-primitives",
 ]
 
 [[package]]
-name = "eth-reth"
-version = "0.1.0"
+name = "eth-valkyoth-reth"
+version = "0.2.0"
 
 [[package]]
-name = "eth-rpc"
-version = "0.1.0"
+name = "eth-valkyoth-rpc"
+version = "0.2.0"
 
 [[package]]
-name = "eth-signer"
-version = "0.1.0"
+name = "eth-valkyoth-signer"
+version = "0.2.0"
 dependencies = [
- "eth-primitives",
+ "eth-valkyoth-primitives",
 ]
 
 [[package]]
-name = "eth-testkit"
-version = "0.1.0"
+name = "eth-valkyoth-testkit"
+version = "0.2.0"
 
 [[package]]
-name = "eth-verify"
-version = "0.1.0"
+name = "eth-valkyoth-verify"
+version = "0.2.0"
 dependencies = [
- "eth-primitives",
+ "eth-valkyoth-primitives",
 ]
