@@ -138,7 +138,7 @@ Verification:
 - `scripts/checks.sh`
 - `scripts/release_0_2_gate.sh`
 - `scripts/release_crates.py --check`
-- negative tests for missing release and pentest metadata where practical.
+- `scripts/test-release-readiness.sh`
 
 Exit criteria:
 

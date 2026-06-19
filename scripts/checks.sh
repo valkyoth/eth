@@ -8,5 +8,6 @@ scripts/validate-release-metadata.sh
 scripts/validate-modularity-policy.sh check
 scripts/validate-security-policy.sh
 scripts/release_crates.py --check
+scripts/test-release-readiness.sh
 cargo clippy --workspace --all-targets --all-features -- -D warnings
 cargo test --workspace --all-features

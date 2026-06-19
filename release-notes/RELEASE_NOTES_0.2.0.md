@@ -15,6 +15,7 @@ namespace.
 - Add `scripts/release_crates.py` for crates.io publish order.
 - Add a release-gate check that keeps the publish script synchronized with
   workspace metadata.
+- Add negative tests for release-readiness refusal paths.
 
 ## Verification
 
@@ -22,4 +23,5 @@ namespace.
 scripts/checks.sh
 scripts/release_0_2_gate.sh
 scripts/release_crates.py --check
+scripts/test-release-readiness.sh
 ```
