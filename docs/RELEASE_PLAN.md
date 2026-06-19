@@ -49,7 +49,6 @@ applies to `v0.N.P` patch tags as well as milestone tags.
 A version is not tag-ready until:
 
 - `scripts/checks.sh` passes;
-- `scripts/check_latest_tools.sh` passes;
 - `cargo deny check` passes;
 - `cargo audit` passes;
 - `scripts/generate-sbom.sh` succeeds;
@@ -62,6 +61,10 @@ A version is not tag-ready until:
 - `sbom/eth.spdx.json` exists and is non-empty;
 - the tag does not already exist locally;
 - `scripts/validate-release-readiness.sh vX.Y.Z` passes.
+
+`scripts/check_latest_tools.sh` is an advisory networked current-version check.
+Run it before updating pinned tools and before release when network access is
+available, but do not make tag readiness depend on live upstream state.
 
 When a version's implementation criteria are done, stop and say:
 
@@ -147,6 +150,8 @@ Verification:
 - `scripts/release_0_2_gate.sh`
 - `scripts/release_crates.py --check`
 - `scripts/test-release-readiness.sh`
+- `cargo deny check`
+- `cargo audit`
 
 Exit criteria:
 
@@ -308,6 +313,7 @@ Verification:
 Exit criteria:
 
 - Every future RLP parser change has a fuzz target to update.
+- No untrusted parser ships without a corresponding fuzz target.
 
 ## Phase 3: Transaction Envelopes
 
@@ -794,6 +800,7 @@ Deliverables:
 
 - method-class retry policy;
 - no automatic transaction rebroadcast;
+- manual redacted `Debug` for any RPC error type carrying request context;
 - URL credential, calldata, and transaction redaction tests.
 
 Verification:
@@ -813,6 +820,7 @@ Deliverables:
 - transaction signing trait;
 - EIP-712 signing trait;
 - no raw digest primary API;
+- manual redacted `Debug` for signer error types;
 - external signer model.
 
 Verification:
@@ -831,6 +839,7 @@ Deliverables:
 
 - dependency review for secret handling;
 - no-debug secret wrappers;
+- manual redacted `Debug` for all local-signer errors;
 - redaction tests;
 - local signer feature remains non-default.
 

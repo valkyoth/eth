@@ -2,6 +2,8 @@
 #![forbid(unsafe_code)]
 //! Core `no_std` Ethereum primitive types used across the `eth` workspace.
 
+use subtle::ConstantTimeEq as _;
+
 macro_rules! id_type {
     ($name:ident, $inner:ty, $doc:literal) => {
         #[doc = $doc]
@@ -68,14 +70,13 @@ impl B256 {
         self.0
     }
 
-    /// Compares two hashes without early exit.
+    /// Compares two hashes in constant time.
+    ///
+    /// Use this instead of `==` whenever the comparison result could influence
+    /// control flow observable by an untrusted caller.
     #[must_use]
     pub fn ct_eq(&self, other: &Self) -> bool {
-        let mut diff = 0_u8;
-        for (left, right) in self.0.iter().zip(other.0.iter()) {
-            diff |= left ^ right;
-        }
-        diff == 0
+        self.0.ct_eq(&other.0).into()
     }
 }
 

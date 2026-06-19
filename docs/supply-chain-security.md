@@ -24,3 +24,9 @@ Before adding a third-party crate:
 
 Core crates must not gain network, signer, filesystem, clock, TLS, Reth, or P2P
 dependencies.
+
+## Admitted Third-Party Crates
+
+| Crate | Version | License | Default Features | Reason |
+| --- | --- | --- | --- | --- |
+| `subtle` | `2.6.1` | `BSD-3-Clause` | disabled, `core_hint_black_box` enabled | Constant-time equality for security-boundary byte comparisons. |

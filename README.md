@@ -12,14 +12,15 @@ real dependencies.
 
 ## Current Status
 
-Status: repository foundation for `v0.1.0`.
+Status: `v0.2.0` implementation complete; pending external pentest input.
 
 Implemented now:
 
 - Rust workspace pinned to stable `1.96.0`.
 - MSRV policy for Rust `1.90.0` through `1.96.0`.
 - `no_std` facade and focused first-party crates.
-- No runtime dependencies and no third-party Ethereum dependencies yet.
+- One admitted `no_std` constant-time helper dependency and no third-party
+  Ethereum dependencies yet.
 - EUPL-1.2 license.
 - Security, modularity, supply-chain, implementation, and release planning docs.
 - Local check and release-gate scripts.
@@ -32,7 +33,7 @@ Implemented now:
 | MSRV | Rust `1.90.0` |
 | Pinned toolchain | Rust `1.96.0` |
 | Default target | `no_std` |
-| Runtime dependencies | zero external crates |
+| Runtime dependencies | `subtle` for constant-time equality |
 | Unsafe policy | first-party crates use `#![forbid(unsafe_code)]` |
 | Default features | protocol-core only |
 | Network/signing defaults | none |
@@ -76,6 +77,9 @@ Compatibility evidence:
 scripts/checks.sh
 scripts/release_0_2_gate.sh
 ```
+
+`scripts/check_latest_tools.sh` is an advisory networked currency check for
+maintainers. It is intentionally separate from deterministic release gates.
 
 For dependency-policy checks, install `cargo-deny` and `cargo-audit`, then run:
 

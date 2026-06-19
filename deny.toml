@@ -41,6 +41,8 @@ highlight = "all"
 [advisories]
 db-path = ".cargo-deny-advisory-dbs"
 yanked = "deny"
+# cargo-deny advisory class scopes use all/workspace/transitive/none.
+# "all" fails the check for every matching advisory in the dependency graph.
 unmaintained = "all"
 unsound = "all"
 unused-ignored-advisory = "deny"

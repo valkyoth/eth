@@ -12,5 +12,8 @@ repository.workspace = true
 default = []
 std = []
 
+[dependencies]
+subtle.workspace = true
+
 [lints]
 workspace = true

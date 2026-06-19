@@ -2,19 +2,34 @@
 #![forbid(unsafe_code)]
 //! Fork-aware Ethereum protocol validation state.
 
+use core::marker::PhantomData;
+
 use eth_valkyoth_primitives::{BlockNumber, ChainId, UnixTimestamp};
+
+/// Unambiguous fork activation rule.
+#[derive(Clone, Copy, Debug, Eq, PartialEq)]
+pub enum ForkActivation {
+    /// Block number alone determines activation.
+    BlockOnly {
+        /// Activation block for this fork view.
+        activation_block: BlockNumber,
+    },
+    /// Both block number and timestamp must be satisfied.
+    BlockAndTimestamp {
+        /// Activation block for this fork view.
+        activation_block: BlockNumber,
+        /// Activation timestamp for timestamp-based forks.
+        activation_timestamp: UnixTimestamp,
+    },
+}
 
 /// Ethereum fork rules selected for a validation operation.
 #[derive(Clone, Copy, Debug, Eq, PartialEq)]
 pub struct ForkSpec {
     /// Chain being validated.
     pub chain_id: ChainId,
-    /// Activation block for this fork view.
-    pub activation_block: BlockNumber,
-    /// Activation timestamp for timestamp-based forks.
-    pub activation_timestamp: Option<UnixTimestamp>,
-    /// Whether this fork requires timestamp activation.
-    pub requires_timestamp: bool,
+    /// Activation rule for this fork view.
+    pub activation: ForkActivation,
 }
 
 /// Validation context that must be explicit for consensus-sensitive operations.
@@ -30,37 +45,76 @@ pub struct ValidationContext {
 
 impl ValidationContext {
     /// Returns whether the configured fork is active for this context.
-    pub fn fork_is_active(self) -> Result<bool, ForkError> {
-        if self.fork.requires_timestamp && self.fork.activation_timestamp.is_none() {
-            return Err(ForkError::MissingTimestamp);
+    #[must_use]
+    pub fn fork_is_active(self) -> bool {
+        match self.fork.activation {
+            ForkActivation::BlockOnly { activation_block } => self.block_number >= activation_block,
+            ForkActivation::BlockAndTimestamp {
+                activation_block,
+                activation_timestamp,
+            } => self.block_number >= activation_block && self.timestamp >= activation_timestamp,
         }
-        let block_active = self.block_number >= self.fork.activation_block;
-        let time_active = match self.fork.activation_timestamp {
-            Some(activation) => self.timestamp >= activation,
-            None => true,
-        };
-        Ok(block_active && time_active)
     }
 }
 
-/// Fork validation configuration errors.
+/// Raw wire input was accepted by the codec.
 #[derive(Clone, Copy, Debug, Eq, PartialEq)]
-pub enum ForkError {
-    /// A timestamp-based fork was configured without an activation timestamp.
-    MissingTimestamp,
+pub struct Decoded;
+
+/// Canonical wire form and type-specific structure were checked.
+#[derive(Clone, Copy, Debug, Eq, PartialEq)]
+pub struct Canonical;
+
+/// Fork-specific validity was checked.
+#[derive(Clone, Copy, Debug, Eq, PartialEq)]
+pub struct ForkValidated;
+
+/// Sender recovery succeeded.
+#[derive(Clone, Copy, Debug, Eq, PartialEq)]
+pub struct SenderRecovered;
+
+/// A transaction token whose validation state is tracked at compile time.
+#[derive(Clone, Copy, Debug, Eq, PartialEq)]
+pub struct Transaction<State> {
+    _state: PhantomData<State>,
 }
 
-/// Transaction validation state marker.
-#[derive(Clone, Copy, Debug, Eq, PartialEq)]
-pub enum TransactionState {
-    /// Raw wire input was accepted by the codec.
-    Decoded,
-    /// Canonical wire form and type-specific structure were checked.
-    Canonical,
-    /// Fork-specific validity was checked.
-    ForkValidated,
-    /// Sender recovery succeeded.
-    SenderRecovered,
+impl Transaction<Decoded> {
+    /// Creates a token for a decoded transaction.
+    #[must_use]
+    pub const fn decoded() -> Self {
+        Self {
+            _state: PhantomData,
+        }
+    }
+
+    /// Advances to canonical form after canonical checks pass.
+    #[must_use]
+    pub const fn into_canonical(self) -> Transaction<Canonical> {
+        Transaction {
+            _state: PhantomData,
+        }
+    }
+}
+
+impl Transaction<Canonical> {
+    /// Advances after fork-specific validation passes.
+    #[must_use]
+    pub const fn into_fork_validated(self) -> Transaction<ForkValidated> {
+        Transaction {
+            _state: PhantomData,
+        }
+    }
+}
+
+impl Transaction<ForkValidated> {
+    /// Advances after sender recovery succeeds.
+    #[must_use]
+    pub const fn into_sender_recovered(self) -> Transaction<SenderRecovered> {
+        Transaction {
+            _state: PhantomData,
+        }
+    }
 }
 
 #[cfg(test)]
@@ -72,28 +126,43 @@ mod tests {
         let context = ValidationContext {
             fork: ForkSpec {
                 chain_id: ChainId::new(1),
-                activation_block: BlockNumber::new(10),
-                activation_timestamp: Some(UnixTimestamp::new(20)),
-                requires_timestamp: true,
+                activation: ForkActivation::BlockAndTimestamp {
+                    activation_block: BlockNumber::new(10),
+                    activation_timestamp: UnixTimestamp::new(20),
+                },
             },
             block_number: BlockNumber::new(10),
             timestamp: UnixTimestamp::new(19),
         };
-        assert_eq!(context.fork_is_active(), Ok(false));
+        assert!(!context.fork_is_active());
     }
 
     #[test]
-    fn timestamp_fork_requires_timestamp() {
+    fn block_only_activation_ignores_timestamp() {
         let context = ValidationContext {
             fork: ForkSpec {
                 chain_id: ChainId::new(1),
-                activation_block: BlockNumber::new(10),
-                activation_timestamp: None,
-                requires_timestamp: true,
+                activation: ForkActivation::BlockOnly {
+                    activation_block: BlockNumber::new(10),
+                },
             },
             block_number: BlockNumber::new(10),
-            timestamp: UnixTimestamp::new(20),
+            timestamp: UnixTimestamp::new(0),
         };
-        assert_eq!(context.fork_is_active(), Err(ForkError::MissingTimestamp));
+        assert!(context.fork_is_active());
+    }
+
+    #[test]
+    fn transaction_typestate_advances_in_order() {
+        let transaction = Transaction::decoded()
+            .into_canonical()
+            .into_fork_validated()
+            .into_sender_recovered();
+        assert_eq!(
+            transaction,
+            Transaction::<SenderRecovered> {
+                _state: PhantomData
+            }
+        );
     }
 }

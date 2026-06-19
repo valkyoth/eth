@@ -16,6 +16,10 @@ namespace.
 - Add a release-gate check that keeps the publish script synchronized with
   workspace metadata.
 - Add negative tests for release-readiness refusal paths.
+- Address pentest findings in primitive comparison, decode limits, fork
+  activation semantics, transaction typestate, advisory policy, and RPC trust
+  defaults.
+- Admit `subtle 2.6.1` as a `no_std` constant-time helper dependency.
 
 ## Verification
 
@@ -24,4 +28,6 @@ scripts/checks.sh
 scripts/release_0_2_gate.sh
 scripts/release_crates.py --check
 scripts/test-release-readiness.sh
+cargo deny check
+cargo audit
 ```

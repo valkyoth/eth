@@ -28,6 +28,9 @@ version = "0.2.0"
 [[package]]
 name = "eth-valkyoth-primitives"
 version = "0.2.0"
+dependencies = [
+ "subtle",
+]
 
 [[package]]
 name = "eth-valkyoth-protocol"
@@ -61,3 +64,9 @@ version = "0.2.0"
 dependencies = [
  "eth-valkyoth-primitives",
 ]
+
+[[package]]
+name = "subtle"
+version = "2.6.1"
+source = "registry+https://github.com/rust-lang/crates.io-index"
+checksum = "13c2bddecc57b384dee18652358fb23172facb8a2c51ccc10d74c157bdea3292"

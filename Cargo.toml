@@ -49,6 +49,7 @@ eth-valkyoth-rpc = { path = "crates/eth-valkyoth-rpc", version = "0.2.0" }
 eth-valkyoth-signer = { path = "crates/eth-valkyoth-signer", version = "0.2.0" }
 eth-valkyoth-testkit = { path = "crates/eth-valkyoth-testkit", version = "0.2.0" }
 eth-valkyoth-verify = { path = "crates/eth-valkyoth-verify", version = "0.2.0" }
+subtle = { version = "2.6.1", default-features = false, features = ["core_hint_black_box"] }
 
 [profile.release]
 overflow-checks = true

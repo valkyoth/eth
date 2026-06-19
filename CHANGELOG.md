@@ -16,8 +16,10 @@ All notable changes to `eth` are documented here.
   policy, release readiness, lints, and metadata validation.
 - Added explicit secret-handling policy and hardened current placeholder
   primitives/protocol helpers flagged during pentest.
-- Added release-gate checks that fail when pinned CI tools or GitHub Actions
-  are not the latest upstream versions.
+- Added advisory checks for pinned CI tools and GitHub Actions currency.
 - Started `0.2.0` by moving support crates to the `eth-valkyoth-*` namespace
   and adding a crates.io release-order helper.
 - Added release-readiness negative tests for missing or stale release evidence.
+- Addressed v0.2.0 pentest findings for constant-time equality, decode-limit
+  enforcement, fork activation semantics, typestate direction, advisory policy,
+  deterministic release gates, and RPC trust-model defaults.

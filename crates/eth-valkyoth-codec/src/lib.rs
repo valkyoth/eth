@@ -33,6 +33,30 @@ impl DecodeLimits {
         }
         Ok(())
     }
+
+    /// Validates a decoded list item count.
+    pub fn check_list_count(self, count: usize) -> Result<(), DecodeError> {
+        if count > self.max_list_items {
+            return Err(DecodeError::ListTooLong);
+        }
+        Ok(())
+    }
+
+    /// Validates the current nesting depth.
+    pub fn check_nesting_depth(self, depth: usize) -> Result<(), DecodeError> {
+        if depth > self.max_nesting_depth {
+            return Err(DecodeError::NestingTooDeep);
+        }
+        Ok(())
+    }
+
+    /// Validates a requested allocation against the total allocation budget.
+    pub fn check_allocation(self, size: usize) -> Result<(), DecodeError> {
+        if size > self.max_total_allocation {
+            return Err(DecodeError::AllocationExceeded);
+        }
+        Ok(())
+    }
 }
 
 /// Shared decode failure categories.
@@ -46,6 +70,12 @@ pub enum DecodeError {
     DecoderOverread,
     /// The input is malformed for the selected wire format.
     Malformed,
+    /// A decoded list contains more items than the active decode budget.
+    ListTooLong,
+    /// Decoding exceeded the active nesting-depth budget.
+    NestingTooDeep,
+    /// A decoder requested allocation beyond the active allocation budget.
+    AllocationExceeded,
 }
 
 /// Ensures a decoder consumed the whole input.
@@ -68,6 +98,39 @@ mod tests {
             ..DecodeLimits::STRICT
         };
         assert_eq!(limits.check_input_len(3), Err(DecodeError::InputTooLarge));
+    }
+
+    #[test]
+    fn rejects_oversized_list() {
+        let limits = DecodeLimits {
+            max_list_items: 2,
+            ..DecodeLimits::STRICT
+        };
+        assert_eq!(limits.check_list_count(3), Err(DecodeError::ListTooLong));
+    }
+
+    #[test]
+    fn rejects_excessive_nesting_depth() {
+        let limits = DecodeLimits {
+            max_nesting_depth: 2,
+            ..DecodeLimits::STRICT
+        };
+        assert_eq!(
+            limits.check_nesting_depth(3),
+            Err(DecodeError::NestingTooDeep)
+        );
+    }
+
+    #[test]
+    fn rejects_excessive_allocation() {
+        let limits = DecodeLimits {
+            max_total_allocation: 2,
+            ..DecodeLimits::STRICT
+        };
+        assert_eq!(
+            limits.check_allocation(3),
+            Err(DecodeError::AllocationExceeded)
+        );
     }
 
     #[test]
