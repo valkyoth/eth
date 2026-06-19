@@ -28,7 +28,8 @@ Every release must have:
 - release notes;
 - dependency-policy evidence;
 - spec-source evidence for protocol behavior;
-- completed pentest evidence for the exact commit being tagged;
+- completed pentest evidence for the exact implementation commit being
+  reviewed;
 - no hidden dependency on one developer machine.
 
 Every release should prefer:
@@ -54,7 +55,7 @@ A version is not tag-ready until:
 - `scripts/generate-sbom.sh` succeeds;
 - release notes exist at `release-notes/RELEASE_NOTES_X.Y.Z.md`;
 - a pentest report exists at `security/pentest/vX.Y.Z.md`;
-- the pentest report names the exact full 40-character `Commit:` being tagged;
+- the pentest report names the exact full 40-character `Reviewed-Commit:`;
 - the pentest report has `Status: PASS`;
 - the pentest report has non-blank `Tester:` and `Scope:` fields;
 - the pentest report has a `Date: YYYY-MM-DD` field;
@@ -84,15 +85,18 @@ Use this loop for every version:
 7. Local gates are run again.
 8. GitHub CI and CodeQL default setup are checked after the fix commit.
 9. A permanent report is written at `security/pentest/vX.Y.Z.md` only when the
-   exact commit is ready to tag and the result is `Status: PASS`.
-10. `scripts/validate-release-readiness.sh vX.Y.Z` passes.
-11. Tagging and pushing tags happen only when explicitly requested.
+   exact implementation commit has passed with `Status: PASS`.
+10. Commit only the permanent report as the release report commit.
+11. GitHub CI and CodeQL default setup are checked on the release report commit.
+12. `scripts/validate-release-readiness.sh vX.Y.Z` passes.
+13. Tagging and pushing tags happen only when explicitly requested.
 
 Root `PENTEST.md` is temporary scratch input. It must not be committed.
-The permanent `security/pentest/vX.Y.Z.md` report may remain local at tag time:
-committing a report that contains the current commit hash would change the
-commit being reviewed. Commit the report in the next development pass after the
-tagged commit is fixed.
+The permanent report is part of the release tag. Because committing the report
+changes `HEAD`, the report records `Reviewed-Commit:` rather than claiming to
+hash itself. The release-readiness gate requires the tag candidate commit to
+have the reviewed commit as its first parent and to change only the permanent
+report file.
 
 ## Phase 0: Repository And Release Discipline
 

@@ -4,20 +4,27 @@ set -eu
 tmp="$(mktemp -d)"
 trap 'rm -rf "$tmp"' EXIT
 
-script="$tmp/scripts/validate-release-readiness.sh"
+source_script="$(pwd)/scripts/validate-release-readiness.sh"
 
-mkdir -p "$tmp/scripts" "$tmp/release-notes" "$tmp/security/pentest" "$tmp/sbom"
-cp scripts/validate-release-readiness.sh "$script"
+make_fixture() {
+    name="$1"
+    repo="$tmp/$name"
 
-cd "$tmp"
-git init -q
-git config user.email "release-readiness@example.invalid"
-git config user.name "Release Readiness Test"
-printf 'fixture\n' >README.md
-git add README.md
-git commit -q -m "fixture"
+    mkdir -p "$repo/scripts" "$repo/release-notes" "$repo/security/pentest" "$repo/sbom"
+    cp "$source_script" "$repo/scripts/validate-release-readiness.sh"
 
-head_commit="$(git rev-parse HEAD)"
+    (
+        cd "$repo"
+        git init -q
+        git config user.email "release-readiness@example.invalid"
+        git config user.name "Release Readiness Test"
+        printf 'fixture\n' >README.md
+        git add README.md
+        git commit -q -m "fixture"
+    )
+
+    printf '%s\n' "$repo"
+}
 
 assert_fails_with() {
     expected="$1"
@@ -47,41 +54,119 @@ write_sbom() {
 
 write_pentest() {
     tag="$1"
-    commit="$2"
+    reviewed_commit="$2"
     cat >"security/pentest/${tag}.md" <<EOF
 Status: PASS
-Commit: ${commit}
+Reviewed-Commit: ${reviewed_commit}
 Tester: Release Readiness Test
 Scope: Fixture release metadata.
 Date: 2026-06-19
 EOF
 }
 
-assert_fails_with "usage: scripts/validate-release-readiness.sh vX.Y.Z" \
-    "$script" "0.2.0"
+repo="$(make_fixture bad-tag)"
+(
+    cd "$repo"
+    assert_fails_with "usage: scripts/validate-release-readiness.sh vX.Y.Z" \
+        scripts/validate-release-readiness.sh "0.2.0"
+)
 
-git tag v9.9.9
-assert_fails_with "tag already exists locally: v9.9.9" "$script" "v9.9.9"
+repo="$(make_fixture existing-tag)"
+(
+    cd "$repo"
+    git tag v9.9.9
+    assert_fails_with "tag already exists locally: v9.9.9" \
+        scripts/validate-release-readiness.sh "v9.9.9"
+)
 
-printf 'scratch\n' >PENTEST.md
-assert_fails_with "root PENTEST.md is temporary scratch input" \
-    "$script" "v0.2.0"
-rm PENTEST.md
+repo="$(make_fixture scratch-pentest)"
+(
+    cd "$repo"
+    printf 'scratch\n' >PENTEST.md
+    assert_fails_with "root PENTEST.md is temporary scratch input" \
+        scripts/validate-release-readiness.sh "v0.2.0"
+)
 
-assert_fails_with "missing release notes: release-notes/RELEASE_NOTES_0.2.0.md" \
-    "$script" "v0.2.0"
+repo="$(make_fixture missing-release-notes)"
+(
+    cd "$repo"
+    assert_fails_with "missing release notes: release-notes/RELEASE_NOTES_0.2.0.md" \
+        scripts/validate-release-readiness.sh "v0.2.0"
+)
 
-write_release_notes "0.2.0"
-assert_fails_with "missing or empty SBOM: sbom/eth.spdx.json" \
-    "$script" "v0.2.0"
+repo="$(make_fixture missing-sbom)"
+(
+    cd "$repo"
+    write_release_notes "0.2.0"
+    assert_fails_with "missing or empty SBOM: sbom/eth.spdx.json" \
+        scripts/validate-release-readiness.sh "v0.2.0"
+)
 
-write_sbom
-assert_fails_with "missing pentest report: security/pentest/v0.2.0.md" \
-    "$script" "v0.2.0"
+repo="$(make_fixture missing-report)"
+(
+    cd "$repo"
+    write_release_notes "0.2.0"
+    write_sbom
+    assert_fails_with "missing pentest report: security/pentest/v0.2.0.md" \
+        scripts/validate-release-readiness.sh "v0.2.0"
+)
 
-write_pentest "v0.2.0" "0000000000000000000000000000000000000000"
-assert_fails_with "pentest report commit 0000000000000000000000000000000000000000 does not match HEAD" \
-    "$script" "v0.2.0"
+repo="$(make_fixture uncommitted-report)"
+(
+    cd "$repo"
+    reviewed_commit="$(git rev-parse HEAD)"
+    write_release_notes "0.2.0"
+    write_sbom
+    write_pentest "v0.2.0" "$reviewed_commit"
+    assert_fails_with "pentest report must be committed in tag candidate" \
+        scripts/validate-release-readiness.sh "v0.2.0"
+)
 
-write_pentest "v0.2.0" "$head_commit"
-"$script" "v0.2.0"
+repo="$(make_fixture wrong-reviewed-commit)"
+(
+    cd "$repo"
+    base_branch="$(git symbolic-ref --short HEAD)"
+    git checkout -q -b side
+    printf 'side\n' >side.txt
+    git add side.txt
+    git commit -q -m "side"
+    side_commit="$(git rev-parse HEAD)"
+    git checkout -q "$base_branch"
+
+    write_release_notes "0.2.0"
+    write_sbom
+    write_pentest "v0.2.0" "$side_commit"
+    git add "security/pentest/v0.2.0.md"
+    git commit -q -m "report"
+
+    assert_fails_with "does not match first parent" \
+        scripts/validate-release-readiness.sh "v0.2.0"
+)
+
+repo="$(make_fixture mixed-report-commit)"
+(
+    cd "$repo"
+    reviewed_commit="$(git rev-parse HEAD)"
+    write_release_notes "0.2.0"
+    write_sbom
+    write_pentest "v0.2.0" "$reviewed_commit"
+    printf 'changed\n' >>README.md
+    git add README.md "security/pentest/v0.2.0.md"
+    git commit -q -m "report plus code"
+
+    assert_fails_with "release report commit may only change security/pentest/v0.2.0.md" \
+        scripts/validate-release-readiness.sh "v0.2.0"
+)
+
+repo="$(make_fixture ready)"
+(
+    cd "$repo"
+    reviewed_commit="$(git rev-parse HEAD)"
+    write_release_notes "0.2.0"
+    write_sbom
+    write_pentest "v0.2.0" "$reviewed_commit"
+    git add "security/pentest/v0.2.0.md"
+    git commit -q -m "report"
+
+    scripts/validate-release-readiness.sh "v0.2.0"
+)
