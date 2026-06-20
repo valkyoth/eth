@@ -6,7 +6,7 @@ Most users should depend on the facade crate instead:
 
 ```toml
 [dependencies]
-eth = "0.3"
+eth = "0.4"
 ```
 
 Crates.io: <https://crates.io/crates/eth>
@@ -18,14 +18,14 @@ the default `eth` dependency graph.
 
 ```toml
 [dependencies]
-eth-valkyoth-sanitization = "0.3"
+eth-valkyoth-sanitization = "0.4"
 ```
 
 For derive macros:
 
 ```toml
 [dependencies]
-eth-valkyoth-sanitization = { version = "0.3", features = ["derive"] }
+eth-valkyoth-sanitization = { version = "0.4", features = ["derive"] }
 ```
 
 The derive macros generate calls to `eth_valkyoth_sanitization::SecureSanitize`.
@@ -36,3 +36,6 @@ For enums, the derive requires an explicit
 `#[eth_sanitization(enum_inactive_variant_bytes = "acknowledged")]` container
 attribute because Rust does not guarantee inactive variant backing bytes are
 cleared when the active variant changes.
+
+Best-effort clearing helpers live under `best_effort` so the weaker guarantee
+is visible at the call site.

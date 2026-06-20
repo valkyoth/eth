@@ -18,9 +18,15 @@ independent crate versioning for crates.io releases.
 - Added tests for error stability and formatting.
 - Re-exported stable error types through `eth::error`.
 - Replaced lockstep support-crate publishing with per-crate release planning.
-- Marked only `eth-valkyoth-codec`, `eth-valkyoth-protocol`,
-  `eth-valkyoth-verify`, and `eth` for `0.4.0` publication.
-- Left unchanged support crates on `0.3.0`.
+- Addressed v0.4.0 pentest findings for typestate token forgery, address
+  comparison timing, allocation-budget API misuse, sanitization skip
+  acknowledgement, decode-limit naming, typed-envelope transaction
+  classification, best-effort sanitization visibility, and fuzz bootstrap.
+- Marked `eth-valkyoth-codec`, `eth-valkyoth-primitives`,
+  `eth-valkyoth-protocol`, `eth-valkyoth-verify`, `eth-valkyoth-derive`,
+  `eth-valkyoth-sanitization`, and `eth` for `0.4.0` publication.
+- Marked `eth-valkyoth-signer` for dependency-only `0.3.1` publication.
+- Left unchanged EVM, RPC, Reth, and testkit support crates on `0.3.0`.
 
 ## Verification
 

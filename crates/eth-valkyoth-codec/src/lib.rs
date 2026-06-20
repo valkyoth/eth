@@ -21,12 +21,26 @@ pub struct DecodeLimits {
 }
 
 impl DecodeLimits {
-    /// Conservative defaults for small unit and conformance fixtures.
-    pub const STRICT: Self = Self {
+    /// Limits for unit tests and conformance fixtures.
+    ///
+    /// This is not a production policy. Production decoders should choose
+    /// deployment-specific limits or start from [`Self::PRODUCTION_RECOMMENDED`].
+    pub const TEST_FIXTURE: Self = Self {
         max_input_bytes: 1 << 20,
         max_list_items: 4096,
         max_nesting_depth: 64,
         max_total_allocation: 1 << 20,
+    };
+
+    /// Recommended starting point for production wire decoders.
+    ///
+    /// Review and tighten these values per deployment context before relying
+    /// on them for externally reachable services.
+    pub const PRODUCTION_RECOMMENDED: Self = Self {
+        max_input_bytes: 2 << 20,
+        max_list_items: 16_384,
+        max_nesting_depth: 64,
+        max_total_allocation: 4 << 20,
     };
 
     /// Validates the input length before parsing starts.
@@ -58,7 +72,7 @@ impl DecodeLimits {
     /// This helper is for single-allocation checks only. Decoders that can make
     /// more than one allocation must use [`DecodeAccumulator`] to enforce the
     /// cumulative budget.
-    pub fn check_allocation(self, size: usize) -> Result<(), DecodeError> {
+    pub fn check_single_allocation_limit(self, size: usize) -> Result<(), DecodeError> {
         if size > self.max_total_allocation {
             return Err(DecodeError::AllocationExceeded);
         }
@@ -283,7 +297,7 @@ mod tests {
     fn rejects_oversized_input() {
         let limits = DecodeLimits {
             max_input_bytes: 2,
-            ..DecodeLimits::STRICT
+            ..DecodeLimits::TEST_FIXTURE
         };
         assert_eq!(limits.check_input_len(3), Err(DecodeError::InputTooLarge));
     }
@@ -292,7 +306,7 @@ mod tests {
     fn rejects_oversized_list() {
         let limits = DecodeLimits {
             max_list_items: 2,
-            ..DecodeLimits::STRICT
+            ..DecodeLimits::TEST_FIXTURE
         };
         assert_eq!(limits.check_list_count(3), Err(DecodeError::ListTooLong));
     }
@@ -301,7 +315,7 @@ mod tests {
     fn rejects_excessive_nesting_depth() {
         let limits = DecodeLimits {
             max_nesting_depth: 2,
-            ..DecodeLimits::STRICT
+            ..DecodeLimits::TEST_FIXTURE
         };
         assert_eq!(
             limits.check_nesting_depth(3),
@@ -313,12 +327,21 @@ mod tests {
     fn rejects_excessive_allocation() {
         let limits = DecodeLimits {
             max_total_allocation: 2,
-            ..DecodeLimits::STRICT
+            ..DecodeLimits::TEST_FIXTURE
         };
         assert_eq!(
-            limits.check_allocation(3),
+            limits.check_single_allocation_limit(3),
             Err(DecodeError::AllocationExceeded)
         );
+    }
+
+    #[test]
+    fn fixture_and_production_limits_are_distinct() {
+        let production = DecodeLimits::PRODUCTION_RECOMMENDED;
+        let fixture = DecodeLimits::TEST_FIXTURE;
+
+        assert!(production.max_input_bytes > fixture.max_input_bytes);
+        assert!(production.max_total_allocation > fixture.max_total_allocation);
     }
 
     #[test]
@@ -358,7 +381,7 @@ mod tests {
     fn accumulator_rejects_cumulative_allocation_over_budget() {
         let limits = DecodeLimits {
             max_total_allocation: 4,
-            ..DecodeLimits::STRICT
+            ..DecodeLimits::TEST_FIXTURE
         };
         let mut accumulator = limits.accumulator();
 
@@ -375,7 +398,7 @@ mod tests {
     fn accumulator_rejects_allocation_counter_overflow() {
         let limits = DecodeLimits {
             max_total_allocation: usize::MAX,
-            ..DecodeLimits::STRICT
+            ..DecodeLimits::TEST_FIXTURE
         };
         let mut accumulator = limits.accumulator();
 

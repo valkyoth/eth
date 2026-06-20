@@ -1,6 +1,6 @@
 # eth Secret Handling Policy
 
-Secret-bearing runtime support is optional in `v0.3.0` through
+Secret-bearing runtime support is optional from `v0.3.0` through
 `eth-valkyoth-sanitization`. This policy applies before local signing,
 keystore, ECDH, BLS, or hardware-secret integration is implemented.
 

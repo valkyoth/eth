@@ -72,6 +72,9 @@ pub enum VerifyErrorCategory {
 }
 
 /// Checks that a replay domain matches the expected chain.
+///
+/// Chain IDs are public replay-domain metadata, so this uses ordinary integer
+/// equality rather than constant-time comparison.
 pub fn require_chain(expected: ChainId, actual: ChainId) -> Result<(), VerifyError> {
     if expected == actual {
         Ok(())

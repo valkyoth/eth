@@ -10,8 +10,8 @@ use syn::{
 
 /// Derives `eth_valkyoth_sanitization::SecureSanitize` for structs and enums.
 ///
-/// Fields marked `#[eth_sanitization(skip)]` are intentionally not sanitized.
-/// Use skips only for fields that cannot carry secret material.
+/// Fields marked `#[eth_sanitization(skip, reason = "...")]` are intentionally
+/// not sanitized. Use skips only for fields that cannot carry secret material.
 ///
 /// Enums must explicitly acknowledge that inactive variant backing storage is
 /// not sanitized by Rust's active-variant match semantics:
@@ -115,7 +115,7 @@ fn sanitize_body(
 fn sanitize_struct_fields(fields: &Fields, crate_path: &Path) -> Result<TokenStream2, Error> {
     let calls = field_accesses(fields)?
         .into_iter()
-        .filter(|field| !field.skip)
+        .filter(|field| field.skip_reason.is_none())
         .map(|field| {
             let access = field.access;
             quote!(#crate_path::SecureSanitize::secure_sanitize(&mut self.#access);)
@@ -130,7 +130,7 @@ fn sanitize_variant(variant: &syn::Variant, crate_path: &Path) -> Result<TokenSt
             let bindings = fields.named.iter().map(|field| field.ident.as_ref());
             let mut calls = Vec::new();
             for field in &fields.named {
-                if !has_skip(field)? {
+                if skip_reason(field)?.is_none() {
                     let ident = field.ident.as_ref();
                     calls.push(quote!(#crate_path::SecureSanitize::secure_sanitize(#ident);));
                 }
@@ -143,7 +143,7 @@ fn sanitize_variant(variant: &syn::Variant, crate_path: &Path) -> Result<TokenSt
                 .collect::<Vec<_>>();
             let mut calls = Vec::new();
             for (field, binding) in fields.unnamed.iter().zip(bindings.iter()) {
-                if !has_skip(field)? {
+                if skip_reason(field)?.is_none() {
                     calls.push(quote!(#crate_path::SecureSanitize::secure_sanitize(#binding);));
                 }
             }
@@ -155,7 +155,7 @@ fn sanitize_variant(variant: &syn::Variant, crate_path: &Path) -> Result<TokenSt
 
 struct FieldAccess {
     access: TokenStream2,
-    skip: bool,
+    skip_reason: Option<LitStr>,
 }
 
 fn field_accesses(fields: &Fields) -> Result<Vec<FieldAccess>, Error> {
@@ -170,7 +170,7 @@ fn field_accesses(fields: &Fields) -> Result<Vec<FieldAccess>, Error> {
                     .ok_or_else(|| Error::new_spanned(field, "missing field ident"))?;
                 Ok(FieldAccess {
                     access: quote!(#ident),
-                    skip: has_skip(field)?,
+                    skip_reason: skip_reason(field)?,
                 })
             })
             .collect(),
@@ -182,7 +182,7 @@ fn field_accesses(fields: &Fields) -> Result<Vec<FieldAccess>, Error> {
                 let access = syn::Index::from(index);
                 Ok(FieldAccess {
                     access: quote!(#access),
-                    skip: has_skip(field)?,
+                    skip_reason: skip_reason(field)?,
                 })
             })
             .collect(),
@@ -228,8 +228,9 @@ fn container_attrs(input: &DeriveInput) -> Result<ContainerAttrs, Error> {
     Ok(attrs)
 }
 
-fn has_skip(field: &syn::Field) -> Result<bool, Error> {
+fn skip_reason(field: &syn::Field) -> Result<Option<LitStr>, Error> {
     let mut skip = false;
+    let mut reason = None;
     for attr in field
         .attrs
         .iter()
@@ -239,10 +240,61 @@ fn has_skip(field: &syn::Field) -> Result<bool, Error> {
             if meta.path.is_ident("skip") {
                 skip = true;
                 Ok(())
+            } else if meta.path.is_ident("reason") {
+                let value = meta.value()?;
+                let literal: LitStr = value.parse()?;
+                if literal.value().trim().is_empty() {
+                    Err(meta.error("eth_sanitization skip reason must not be empty"))
+                } else {
+                    reason = Some(literal);
+                    Ok(())
+                }
             } else {
                 Err(meta.error("unsupported eth_sanitization field attribute"))
             }
         })?;
     }
-    Ok(skip)
+    if skip && reason.is_none() {
+        return Err(Error::new_spanned(
+            field,
+            "eth_sanitization skip requires reason = \"...\" acknowledging the field is non-secret",
+        ));
+    }
+    if !skip && reason.is_some() {
+        return Err(Error::new_spanned(
+            field,
+            "eth_sanitization reason is only supported together with skip",
+        ));
+    }
+    Ok(reason)
+}
+
+#[cfg(test)]
+mod tests {
+    use super::*;
+    use syn::parse_quote;
+
+    #[test]
+    fn skip_requires_reason() {
+        let field: syn::Field = parse_quote! {
+            #[eth_sanitization(skip)]
+            label: u8
+        };
+
+        let result = skip_reason(&field);
+
+        assert!(matches!(result, Err(error) if error.to_string().contains("skip requires reason")));
+    }
+
+    #[test]
+    fn skip_accepts_non_empty_reason() {
+        let field: syn::Field = parse_quote! {
+            #[eth_sanitization(skip, reason = "non-secret label")]
+            label: u8
+        };
+
+        let reason = skip_reason(&field);
+
+        assert!(matches!(reason, Ok(Some(reason)) if reason.value() == "non-secret label"));
+    }
 }

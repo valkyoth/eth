@@ -11,10 +11,10 @@ reason = "Adds stable decode and resource-exhaustion error categories, codes, an
 
 [crates."eth-valkyoth-primitives"]
 previous_version = "0.3.0"
-version = "0.3.0"
-change = "unchanged"
-publish = false
-reason = "No 0.4.0 primitive implementation change has landed yet."
+version = "0.4.0"
+change = "code"
+publish = true
+reason = "Adds constant-time Address equality, typed-envelope TryFrom semantics, and B256 hash-map timing documentation."
 
 [crates."eth-valkyoth-protocol"]
 previous_version = "0.3.0"
@@ -32,17 +32,17 @@ reason = "Adds stable verification error categories, codes, and formatting."
 
 [crates."eth-valkyoth-derive"]
 previous_version = "0.3.0"
-version = "0.3.0"
-change = "unchanged"
-publish = false
-reason = "Derive macros have no 0.4.0 implementation change yet."
+version = "0.4.0"
+change = "code"
+publish = true
+reason = "Requires explicit non-secret reasons for skipped sanitization fields."
 
 [crates."eth-valkyoth-sanitization"]
 previous_version = "0.3.0"
-version = "0.3.0"
-change = "unchanged"
-publish = false
-reason = "Sanitization bridge has no 0.4.0 implementation change yet."
+version = "0.4.0"
+change = "code"
+publish = true
+reason = "Moves best-effort clearing helpers into an explicit best_effort module."
 
 [crates."eth-valkyoth-evm"]
 previous_version = "0.3.0"
@@ -60,10 +60,10 @@ reason = "RPC boundary remains unchanged for the start of 0.4.0."
 
 [crates."eth-valkyoth-signer"]
 previous_version = "0.3.0"
-version = "0.3.0"
-change = "unchanged"
-publish = false
-reason = "Signer boundary remains unchanged for the start of 0.4.0."
+version = "0.3.1"
+change = "dependency"
+publish = true
+reason = "Updates the primitives dependency range after eth-valkyoth-primitives moved to 0.4.0."
 
 [crates."eth-valkyoth-reth"]
 previous_version = "0.3.0"

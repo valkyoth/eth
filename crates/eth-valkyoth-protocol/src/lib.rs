@@ -230,7 +230,8 @@ pub struct Transaction<State> {
 impl Transaction<Decoded> {
     /// Creates a token for a decoded transaction.
     #[must_use]
-    pub const fn decoded() -> Self {
+    #[allow(dead_code)]
+    pub(crate) const fn decoded() -> Self {
         Self {
             _state: PhantomData,
         }

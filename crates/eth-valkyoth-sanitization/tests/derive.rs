@@ -6,7 +6,7 @@ use eth_valkyoth_sanitization::{SecretBytes32, SecureSanitize};
 #[derive(eth_valkyoth_sanitization::SecureSanitize)]
 struct KeyHolder {
     key: SecretBytes32,
-    #[eth_sanitization(skip)]
+    #[eth_sanitization(skip, reason = "non-secret label")]
     label: u8,
 }
 

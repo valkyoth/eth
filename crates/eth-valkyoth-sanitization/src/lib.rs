@@ -6,10 +6,19 @@
 //! application explicitly wants the `sanitization` crate's best-effort secret
 //! clearing APIs under the `eth-valkyoth-*` namespace.
 
-pub use sanitization::{SecretBytes, SecureSanitize, sanitize_bytes, sanitize_bytes_best_effort};
+pub use sanitization::{SecretBytes, SecureSanitize, sanitize_bytes};
 
 #[cfg(feature = "derive")]
 pub use eth_valkyoth_derive::{SecureSanitize, SecureSanitizeOnDrop};
+
+/// Best-effort clearing APIs.
+///
+/// These helpers make a best-effort attempt to clear the supplied storage, but
+/// cannot guarantee the compiler has not copied or moved the data earlier.
+/// Prefer [`sanitize_bytes`] when the stronger API applies.
+pub mod best_effort {
+    pub use sanitization::sanitize_bytes_best_effort;
+}
 
 /// Secret byte storage for 20-byte Ethereum-adjacent values.
 pub type SecretBytes20 = SecretBytes<20>;

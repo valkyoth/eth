@@ -56,7 +56,10 @@ pub enum PrimitiveError {
 }
 
 /// Fixed-width Ethereum address bytes.
-#[derive(Clone, Copy, Debug, Eq, Hash, PartialEq)]
+///
+/// Equality is constant-time because recovered sender checks appear in
+/// authentication and authorization paths.
+#[derive(Clone, Copy, Debug)]
 pub struct Address([u8; 20]);
 
 impl Address {
@@ -70,6 +73,29 @@ impl Address {
     #[must_use]
     pub const fn to_bytes(self) -> [u8; 20] {
         self.0
+    }
+
+    /// Compares two addresses in constant time.
+    ///
+    /// Returns [`Choice`] so compound comparisons can use `&` and `|` without
+    /// short-circuiting. Convert to `bool` only at the final trust boundary.
+    #[must_use]
+    pub fn ct_eq(&self, other: &Self) -> Choice {
+        self.0.ct_eq(&other.0)
+    }
+}
+
+impl PartialEq for Address {
+    fn eq(&self, other: &Self) -> bool {
+        bool::from(self.ct_eq(other))
+    }
+}
+
+impl Eq for Address {}
+
+impl Hash for Address {
+    fn hash<H: Hasher>(&self, state: &mut H) {
+        self.0.hash(state);
     }
 }
 
@@ -89,6 +115,10 @@ impl From<Address> for [u8; 20] {
 ///
 /// All equality for this type is constant-time because hashes appear in
 /// cryptographic verification paths.
+///
+/// The [`Hash`] implementation is for ordinary map/set use. Do not rely on
+/// hash-map lookup timing for secret or side-channel-sensitive verification
+/// paths; use explicit indexed structures or constant-time scans there.
 #[derive(Clone, Copy, Debug)]
 pub struct B256([u8; 32]);
 
@@ -254,6 +284,15 @@ impl TransactionType {
         }
     }
 
+    /// Creates a transaction type and accepts the legacy domain marker.
+    ///
+    /// Use this when an API explicitly accepts both legacy and typed
+    /// transaction domains. Use [`Self::try_new_typed`] when parsing an
+    /// EIP-2718 typed-envelope byte.
+    pub const fn try_new_with_legacy(value: u8) -> Result<Self, PrimitiveError> {
+        Self::try_new(value)
+    }
+
     /// Returns the raw transaction type byte.
     #[must_use]
     pub const fn get(self) -> u8 {
@@ -265,7 +304,7 @@ impl TryFrom<u8> for TransactionType {
     type Error = PrimitiveError;
 
     fn try_from(value: u8) -> Result<Self, Self::Error> {
-        Self::try_new(value)
+        Self::try_new_typed(value)
     }
 }
 
@@ -308,6 +347,18 @@ mod tests {
     fn address_round_trips() {
         let bytes = [7_u8; 20];
         assert_eq!(<[u8; 20]>::from(Address::from(bytes)), bytes);
+    }
+
+    #[test]
+    fn address_constant_time_equality_result_matches_equality() {
+        let left = Address::from_bytes([1_u8; 20]);
+        let same = Address::from_bytes([1_u8; 20]);
+        let different = Address::from_bytes([2_u8; 20]);
+
+        assert!(bool::from(left.ct_eq(&same)));
+        assert!(!bool::from(left.ct_eq(&different)));
+        assert!(left == same);
+        assert!(left != different);
     }
 
     #[test]
@@ -387,10 +438,15 @@ mod tests {
             Err(PrimitiveError::ReservedLegacyType)
         );
         assert_eq!(TransactionType::try_new_typed(1).map(u8::from), Ok(1));
+        assert_eq!(
+            TransactionType::try_from(0),
+            Err(PrimitiveError::ReservedLegacyType)
+        );
     }
 
     #[test]
     fn transaction_type_round_trips() {
         assert_eq!(TransactionType::try_new(2).map(u8::from), Ok(2));
+        assert_eq!(TransactionType::try_new_with_legacy(0).map(u8::from), Ok(0));
     }
 }

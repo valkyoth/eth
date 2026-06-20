@@ -27,14 +27,14 @@ publication when a crate is marked `unchanged`.
 | Crate | Published | Planned | Change | Publish | Reason |
 | --- | --- | --- | --- | --- | --- |
 | `eth-valkyoth-codec` | `0.3.0` | `0.4.0` | `code` | Yes | Adds stable decode and resource-exhaustion error categories, codes, and formatting. |
-| `eth-valkyoth-primitives` | `0.3.0` | `0.3.0` | `unchanged` | No | No 0.4.0 primitive implementation change has landed yet. |
+| `eth-valkyoth-primitives` | `0.3.0` | `0.4.0` | `code` | Yes | Adds constant-time Address equality, typed-envelope TryFrom semantics, and B256 hash-map timing documentation. |
 | `eth-valkyoth-protocol` | `0.3.0` | `0.4.0` | `code` | Yes | Adds stable protocol, feature, fork, and state error categories, codes, and formatting. |
 | `eth-valkyoth-verify` | `0.3.0` | `0.4.0` | `code` | Yes | Adds stable verification error categories, codes, and formatting. |
-| `eth-valkyoth-derive` | `0.3.0` | `0.3.0` | `unchanged` | No | Derive macros have no 0.4.0 implementation change yet. |
-| `eth-valkyoth-sanitization` | `0.3.0` | `0.3.0` | `unchanged` | No | Sanitization bridge has no 0.4.0 implementation change yet. |
+| `eth-valkyoth-derive` | `0.3.0` | `0.4.0` | `code` | Yes | Requires explicit non-secret reasons for skipped sanitization fields. |
+| `eth-valkyoth-sanitization` | `0.3.0` | `0.4.0` | `code` | Yes | Moves best-effort clearing helpers into an explicit best_effort module. |
 | `eth-valkyoth-evm` | `0.3.0` | `0.3.0` | `unchanged` | No | EVM boundary remains unchanged for the start of 0.4.0. |
 | `eth-valkyoth-rpc` | `0.3.0` | `0.3.0` | `unchanged` | No | RPC boundary remains unchanged for the start of 0.4.0. |
-| `eth-valkyoth-signer` | `0.3.0` | `0.3.0` | `unchanged` | No | Signer boundary remains unchanged for the start of 0.4.0. |
+| `eth-valkyoth-signer` | `0.3.0` | `0.3.1` | `dependency` | Yes | Updates the primitives dependency range after eth-valkyoth-primitives moved to 0.4.0. |
 | `eth-valkyoth-reth` | `0.3.0` | `0.3.0` | `unchanged` | No | Reth boundary remains unchanged for the start of 0.4.0. |
 | `eth-valkyoth-testkit` | `0.3.0` | `0.3.0` | `unchanged` | No | Testkit boundary remains unchanged for the start of 0.4.0. |
 | `eth` | `0.3.0` | `0.4.0` | `code` | Yes | Re-exports the stable error model through the facade crate. |

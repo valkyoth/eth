@@ -19,3 +19,12 @@ fn secret_alias_can_be_sanitized() {
 
     assert!(secret.constant_time_eq(&[0_u8; 32]));
 }
+
+#[test]
+fn best_effort_api_is_namespaced() {
+    let mut bytes = [0x24_u8; 32];
+
+    eth_valkyoth_sanitization::best_effort::sanitize_bytes_best_effort(&mut bytes);
+
+    assert_eq!(bytes, [0_u8; 32]);
+}

@@ -9,6 +9,10 @@ All notable changes to `eth` are documented here.
   crates.io publishes.
 - Added stable error codes, messages, categories, and formatting for codec,
   protocol, fork, feature, resource, and verification failures.
+- Addressed v0.4.0 pentest findings for typestate token creation, address
+  comparison timing, decode-limit API naming, sanitization skip acknowledgement,
+  typed-envelope classification, best-effort sanitization visibility, and fuzz
+  bootstrap infrastructure.
 - Added crate-local READMEs for published support crates that point users to
   the `eth` facade crate.
 - Added workspace packaging verification to local checks.
