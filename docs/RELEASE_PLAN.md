@@ -39,6 +39,8 @@ Every release should prefer:
 - pinned official Ethereum source revisions before consensus-sensitive code;
 - negative and adversarial tests with each parser;
 - explicit fork and chain context over global "latest" behavior;
+- optional local Ethereum node smoke fixtures before RPC functionality is
+  treated as complete;
 - no default networking, signing, Reth, P2P, or local key storage.
 
 ## Pentest Before Tags
@@ -760,22 +762,32 @@ Exit criteria:
 
 ### v0.34.0 - RPC Dependency Admission
 
-Goal: admit provider/transport crates behind `eth-valkyoth-rpc`.
+Goal: admit provider/transport crates behind `eth-valkyoth-rpc` and add the
+local node harness used by later live integration tests.
 
 Deliverables:
 
 - dependency review;
 - no hardcoded public endpoints;
-- endpoint policy types.
+- endpoint policy types;
+- Podman-managed local Ethereum dev node fixture;
+- start, health-check, and teardown script for the fixture;
+- localhost-only JSON-RPC binding;
+- pinned container image name/version or digest with an update note;
+- no persisted wallet/key material and no default mainnet connection.
 
 Verification:
 
 - `cargo check --workspace --all-features`
 - `cargo deny check`
+- local node smoke script starts the fixture, verifies JSON-RPC health, and
+  tears it down
 
 Exit criteria:
 
 - RPC support is optional and policy-first.
+- The project can spin up and destroy a local Ethereum node for integration
+  tests without depending on a developer's existing node.
 
 ### v0.35.0 - RPC Trust Models
 
