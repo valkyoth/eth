@@ -133,7 +133,7 @@ def run_preflight(args: argparse.Namespace) -> None:
         print("Skipping preflight checks by request.")
         return
 
-    run(["scripts/release_0_2_gate.sh"], dry_run=args.dry_run)
+    run(["scripts/release_0_3_gate.sh"], dry_run=args.dry_run)
     run(["cargo", "deny", "check"], dry_run=args.dry_run)
     run(["cargo", "audit"], dry_run=args.dry_run)
 

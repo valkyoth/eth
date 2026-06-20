@@ -174,7 +174,10 @@ Deliverables:
 
 Verification:
 
-- `cargo test --workspace --all-features`
+- `scripts/checks.sh`
+- `scripts/release_0_3_gate.sh`
+- `cargo deny check`
+- `cargo audit`
 
 Exit criteria:
 

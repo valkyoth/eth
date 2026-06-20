@@ -28,3 +28,5 @@ All notable changes to `eth` are documented here.
 - Addressed v0.2.0 pentest findings for constant-time equality, decode-limit
   enforcement, fork activation semantics, typestate direction, advisory policy,
   deterministic release gates, and RPC trust-model defaults.
+- Implemented `0.3.0` domain newtypes with explicit wei and transaction type
+  primitives, conversion coverage, and the v0.3 release gate.

@@ -12,7 +12,7 @@ real dependencies.
 
 ## Current Status
 
-Status: `v0.2.0` implementation complete; pending external pentest input.
+Status: `v0.3.0` implementation complete; pending external pentest input.
 
 Implemented now:
 
@@ -75,7 +75,7 @@ Compatibility evidence:
 
 ```bash
 scripts/checks.sh
-scripts/release_0_2_gate.sh
+scripts/release_0_3_gate.sh
 ```
 
 `scripts/check_latest_tools.sh` is an advisory networked currency check for

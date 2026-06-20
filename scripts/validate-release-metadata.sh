@@ -11,6 +11,7 @@ test -x scripts/check_latest_tools.sh
 test -x scripts/release_crates.py
 test -f release-notes/RELEASE_NOTES_0.1.0.md
 test -f release-notes/RELEASE_NOTES_0.2.0.md
+test -f release-notes/RELEASE_NOTES_0.3.0.md
 test -f docs/spec-source-policy.md
 grep -q 'execution_specs_repo' spec-lock.toml
 grep -q 'local_reference_store_env' spec-lock.toml
