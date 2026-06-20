@@ -1,3 +1,26 @@
+<p align="center">
+  <b>no_std-first Ethereum protocol building blocks for Rust.</b><br>
+  Explicit domains, bounded decode policy, constant-time primitives, and security-gated release evidence.
+</p>
+
+<div align="center">
+  <a href="https://docs.rs/eth">Docs.rs</a>
+  |
+  <a href="docs/RELEASE_PLAN.md">Release Plan</a>
+  |
+  <a href="docs/threat-model.md">Threat Model</a>
+  |
+  <a href="SECURITY.md">Security</a>
+</div>
+
+<br>
+
+<p align="center">
+  <a href="https://github.com/eldryoth/eth">
+    <img src="https://raw.githubusercontent.com/eldryoth/eth/main/.github/images/eth.png" alt="eth Rust crate overview">
+  </a>
+</p>
+
 # eth
 
 `eth` is a `no_std`-first Rust workspace for Ethereum execution-layer protocol
@@ -6,25 +29,36 @@ building blocks.
 The project target is a production-ready Ethereum crate at `1.0.0`, reached
 through small releases with explicit security, conformance, and dependency
 evidence. The first implementation work is intentionally conservative:
-bounded canonical decoding, explicit fork context, stable crate boundaries, and
-security documentation before RPC, signer, REVM, Reth, or P2P adapters become
-real dependencies.
+explicit domains, bounded decode policy, stable crate boundaries, and security
+documentation before RPC, signer, REVM, Reth, or P2P adapters become real
+dependencies.
 
 ## Current Status
 
-Status: `v0.3.0` implementation complete; pending external pentest input.
+Status: `v0.3.0` tag candidate; pentest report complete.
 
 Implemented now:
 
 - Rust workspace pinned to stable `1.96.0`.
 - MSRV policy for Rust `1.90.0` through `1.96.0`.
 - `no_std` facade and focused first-party crates.
-- Default facade dependency graph stays protocol-core only.
+- Explicit primitive domains for chain, block, gas, nonce, timestamp, address,
+  hash, wei, and transaction type values.
+- Constant-time equality composition for fixed-width hash and wei values.
+- Bounded decode limits plus stateful cumulative allocation accounting.
 - Optional sanitization and derive support crates outside the default feature
   set.
 - EUPL-1.2 license.
 - Security, modularity, supply-chain, implementation, and release planning docs.
-- Local check and release-gate scripts.
+- Local check, release-gate, dependency-policy, SBOM, and pentest evidence.
+
+Not implemented yet:
+
+- No RPC transport.
+- No signer or local key storage.
+- No EVM execution adapter.
+- No Reth or P2P integration.
+- No transaction or block parser yet.
 
 ## Trust Dashboard
 
@@ -39,14 +73,157 @@ Implemented now:
 | Unsafe policy | first-party crates use `#![forbid(unsafe_code)]` |
 | Default features | protocol-core only |
 | Network/signing defaults | none |
+| Release evidence | local gates, cargo-deny, cargo-audit, SBOM, pentest report |
 | 1.0 target | serious production-ready Ethereum execution-layer toolkit |
+
+## Install
+
+```toml
+[dependencies]
+eth = "0.3"
+```
+
+For optional sanitization support:
+
+```toml
+[dependencies]
+eth = { version = "0.3", features = ["sanitization"] }
+```
+
+## Features
+
+| Feature | Default | Purpose |
+| --- | --- | --- |
+| `std` | no | Enables `std` support in admitted core crates. |
+| `evm` | no | Future explicit EVM adapter boundary. |
+| `rpc` | no | Future explicit RPC trust-policy boundary. |
+| `sanitization` | no | Re-exports optional secret sanitization bridge APIs. |
+| `signer` | no | Future signer isolation boundary. |
+| `reth` | no | Future Reth integration boundary. |
+| `testkit` | no | Test fixtures, conformance helpers, and adversarial inputs. |
+
+Default builds do not enable networking, signing, local key storage, Reth, P2P,
+or EVM execution.
+
+## Primitive Domains
+
+Use explicit Ethereum domains instead of unqualified integers and byte arrays:
+
+```rust
+use eth::primitives::{
+    Address, B256, BlockNumber, ChainId, Gas, Nonce, TransactionType, Wei,
+};
+
+let chain = ChainId::new(1);
+let block = BlockNumber::new(19_000_000);
+let gas = Gas::new(21_000);
+let nonce = Nonce::new(7);
+let address = Address::from([0x11_u8; 20]);
+let hash = B256::from([0x22_u8; 32]);
+let value = Wei::from_u128(1_000_000_000_000_000_000);
+let tx_type = TransactionType::try_new_typed(2);
+
+assert_eq!(u64::from(chain), 1);
+assert_eq!(u64::from(block), 19_000_000);
+assert_eq!(u64::from(gas), 21_000);
+assert_eq!(u64::from(nonce), 7);
+assert_eq!(<[u8; 20]>::from(address), [0x11_u8; 20]);
+assert_eq!(<[u8; 32]>::from(hash), [0x22_u8; 32]);
+assert_eq!(value.to_be_bytes()[31], 0);
+assert_eq!(tx_type.map(u8::from), Ok(2));
+```
+
+## Constant-Time Composition
+
+`B256::ct_eq` and `Wei::ct_eq` return `subtle::Choice` so compound checks can
+use `&` and `|` without short-circuiting:
+
+```rust
+use eth::primitives::B256;
+
+let block_hash = B256::from([1_u8; 32]);
+let expected_block_hash = B256::from([1_u8; 32]);
+let receipts_root = B256::from([2_u8; 32]);
+let expected_receipts_root = B256::from([2_u8; 32]);
+
+let valid = block_hash.ct_eq(&expected_block_hash)
+    & receipts_root.ct_eq(&expected_receipts_root);
+
+assert!(bool::from(valid));
+```
+
+Convert `Choice` to `bool` only at the final trust boundary.
+
+## Decode Budgets
+
+Every future untrusted decoder is required to use explicit limits. Use
+`DecodeAccumulator` when more than one allocation can occur:
+
+```rust
+use eth::codec::{DecodeError, DecodeLimits};
+
+let limits = DecodeLimits {
+    max_input_bytes: 1024,
+    max_list_items: 16,
+    max_nesting_depth: 4,
+    max_total_allocation: 64,
+};
+
+assert_eq!(limits.check_input_len(512), Ok(()));
+
+let mut budget = limits.accumulator();
+assert_eq!(budget.check_allocation(32), Ok(()));
+assert_eq!(budget.check_allocation(32), Ok(()));
+assert_eq!(budget.check_allocation(1), Err(DecodeError::AllocationExceeded));
+```
+
+## Optional Sanitization
+
+The main facade stays small by default. Applications that handle local secret
+material can opt into the sanitization bridge:
+
+```rust,ignore
+use eth::sanitization::{SecretBytes32, SecureSanitize};
+
+let mut key = SecretBytes32::from_array([0x42_u8; 32]);
+key.secure_sanitize();
+assert!(key.constant_time_eq(&[0_u8; 32]));
+```
+
+For derive macros, depend on the support crate directly:
+
+```toml
+[dependencies]
+eth-valkyoth-sanitization = { version = "0.3", features = ["derive"] }
+```
+
+## Workspace Shape
+
+Most users should depend on the facade crate, `eth`. The support crates are
+published separately so implementation boundaries stay small, `no_std`
+friendly, and independently testable.
+
+| Crate | Default | Purpose |
+| --- | --- | --- |
+| `eth` | yes | Facade crate over stable protocol-core crates. |
+| `eth-valkyoth-primitives` | yes | Chain, fork, block, gas, nonce, address, hash, wei, and bounded value types. |
+| `eth-valkyoth-codec` | yes | Bounded exact-consumption wire decoding policy. |
+| `eth-valkyoth-protocol` | yes | Fork-aware validation states and protocol context. |
+| `eth-valkyoth-verify` | yes | Verification boundaries for signatures, proofs, and replay domains. |
+| `eth-valkyoth-sanitization` | no | Optional bridge to the `sanitization` crate for secret-bearing Ethereum data. |
+| `eth-valkyoth-derive` | no | Optional sanitization derive macros. |
+| `eth-valkyoth-evm` | no | Future REVM adapter boundary. |
+| `eth-valkyoth-rpc` | no | Future explicit RPC trust-policy boundary. |
+| `eth-valkyoth-signer` | no | Future signer isolation boundary. |
+| `eth-valkyoth-reth` | no | Future Reth integration boundary. |
+| `eth-valkyoth-testkit` | no | Test fixtures, conformance helpers, and adversarial inputs. |
 
 ## Rust Version Support
 
 The minimum supported Rust version is Rust `1.90.0`. New deployments should use
 the pinned stable Rust `1.96.0` until the toolchain policy is updated.
 
-Compatibility evidence:
+Compatibility evidence for `0.3.0`:
 
 | Rust | Local Evidence |
 | --- | --- |
@@ -56,34 +233,15 @@ Compatibility evidence:
 | `1.93.0` | `cargo check --workspace --all-features` |
 | `1.94.0` | `cargo check --workspace --all-features` |
 | `1.95.0` | `cargo check --workspace --all-features` |
-| `1.96.0` | full check gate |
-
-## Workspace Shape
-
-| Crate | Default | Purpose |
-| --- | --- | --- |
-| `eth` | yes | Facade crate over stable protocol-core crates. |
-| `eth-valkyoth-primitives` | yes | Chain, fork, block, gas, nonce, and bounded value types. |
-| `eth-valkyoth-codec` | yes | Bounded exact-consumption wire decoding policy. |
-| `eth-valkyoth-protocol` | yes | Fork-aware validation states and protocol context. |
-| `eth-valkyoth-verify` | yes | Verification boundaries for signatures, proofs, and replay domains. |
-| `eth-valkyoth-evm` | no | Future REVM adapter boundary. |
-| `eth-valkyoth-rpc` | no | Future explicit RPC trust-policy boundary. |
-| `eth-valkyoth-sanitization` | no | Optional bridge to the `sanitization` crate for secret-bearing Ethereum data. |
-| `eth-valkyoth-derive` | no | Optional sanitization derive macros. |
-| `eth-valkyoth-signer` | no | Future signer isolation boundary. |
-| `eth-valkyoth-reth` | no | Future Reth integration boundary. |
-| `eth-valkyoth-testkit` | no | Test fixtures, conformance helpers, and adversarial inputs. |
+| `1.96.0` | full release gate |
 
 ## Checks
 
 ```bash
 scripts/checks.sh
 scripts/release_0_3_gate.sh
+scripts/validate-release-readiness.sh v0.3.0
 ```
-
-`scripts/check_latest_tools.sh` is an advisory networked currency check for
-maintainers. It is intentionally separate from deterministic release gates.
 
 For dependency-policy checks, install `cargo-deny` and `cargo-audit`, then run:
 
