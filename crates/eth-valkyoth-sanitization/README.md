@@ -31,3 +31,8 @@ eth-valkyoth-sanitization = { version = "0.3", features = ["derive"] }
 The derive macros generate calls to `eth_valkyoth_sanitization::SecureSanitize`.
 They do not replace review of secret ownership, copies, logging, paging, swap,
 crash dumps, or compiler/runtime behavior.
+
+For enums, the derive requires an explicit
+`#[eth_sanitization(enum_inactive_variant_bytes = "acknowledged")]` container
+attribute because Rust does not guarantee inactive variant backing bytes are
+cleared when the active variant changes.

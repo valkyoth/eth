@@ -31,3 +31,10 @@ Supported container attribute:
 ```rust
 #[eth_sanitization(crate = "::my_sanitization_path")]
 ```
+
+Enums must also acknowledge that inactive variant backing bytes are not cleared
+by matching the active variant:
+
+```rust
+#[eth_sanitization(enum_inactive_variant_bytes = "acknowledged")]
+```

@@ -106,6 +106,7 @@ transaction envelopes, canonical integer rejection, and trailing-data rejection.
 Release gate:
 
 - relevant execution-spec and EIP revisions are pinned in `spec-lock.toml`;
+- cargo-fuzz infrastructure is bootstrapped before the first RLP parser lands;
 - official and adversarial RLP fixtures pass;
 - fuzz targets exist for every decoder;
 - malformed input never panics.

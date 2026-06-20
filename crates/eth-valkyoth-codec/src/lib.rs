@@ -50,11 +50,73 @@ impl DecodeLimits {
         Ok(())
     }
 
-    /// Validates a requested allocation against the total allocation budget.
+    /// Validates one requested allocation against the allocation budget.
+    ///
+    /// This helper is for single-allocation checks only. Decoders that can make
+    /// more than one allocation must use [`DecodeAccumulator`] to enforce the
+    /// cumulative budget.
     pub fn check_allocation(self, size: usize) -> Result<(), DecodeError> {
         if size > self.max_total_allocation {
             return Err(DecodeError::AllocationExceeded);
         }
+        Ok(())
+    }
+
+    /// Starts stateful budget accounting for a decoder invocation.
+    #[must_use]
+    pub const fn accumulator(self) -> DecodeAccumulator {
+        DecodeAccumulator {
+            limits: self,
+            total_allocated: 0,
+        }
+    }
+}
+
+/// Stateful budget accounting for one decoder invocation.
+#[derive(Clone, Copy, Debug, Eq, PartialEq)]
+pub struct DecodeAccumulator {
+    limits: DecodeLimits,
+    total_allocated: usize,
+}
+
+impl DecodeAccumulator {
+    /// Returns the active decode limits.
+    #[must_use]
+    pub const fn limits(self) -> DecodeLimits {
+        self.limits
+    }
+
+    /// Returns the cumulative allocation accounted so far.
+    #[must_use]
+    pub const fn total_allocated(self) -> usize {
+        self.total_allocated
+    }
+
+    /// Validates the input length before parsing starts.
+    pub fn check_input_len(self, len: usize) -> Result<(), DecodeError> {
+        self.limits.check_input_len(len)
+    }
+
+    /// Validates a decoded list item count.
+    pub fn check_list_count(self, count: usize) -> Result<(), DecodeError> {
+        self.limits.check_list_count(count)
+    }
+
+    /// Validates the current nesting depth.
+    pub fn check_nesting_depth(self, depth: usize) -> Result<(), DecodeError> {
+        self.limits.check_nesting_depth(depth)
+    }
+
+    /// Accounts for one allocation against the cumulative allocation budget.
+    pub fn check_allocation(&mut self, size: usize) -> Result<(), DecodeError> {
+        let new_total = self
+            .total_allocated
+            .checked_add(size)
+            .ok_or(DecodeError::AllocationExceeded)?;
+        if new_total > self.limits.max_total_allocation {
+            return Err(DecodeError::AllocationExceeded);
+        }
+        self.total_allocated = new_total;
         Ok(())
     }
 }
@@ -129,6 +191,38 @@ mod tests {
         };
         assert_eq!(
             limits.check_allocation(3),
+            Err(DecodeError::AllocationExceeded)
+        );
+    }
+
+    #[test]
+    fn accumulator_rejects_cumulative_allocation_over_budget() {
+        let limits = DecodeLimits {
+            max_total_allocation: 4,
+            ..DecodeLimits::STRICT
+        };
+        let mut accumulator = limits.accumulator();
+
+        assert_eq!(accumulator.check_allocation(3), Ok(()));
+        assert_eq!(accumulator.total_allocated(), 3);
+        assert_eq!(
+            accumulator.check_allocation(2),
+            Err(DecodeError::AllocationExceeded)
+        );
+        assert_eq!(accumulator.total_allocated(), 3);
+    }
+
+    #[test]
+    fn accumulator_rejects_allocation_counter_overflow() {
+        let limits = DecodeLimits {
+            max_total_allocation: usize::MAX,
+            ..DecodeLimits::STRICT
+        };
+        let mut accumulator = limits.accumulator();
+
+        assert_eq!(accumulator.check_allocation(usize::MAX), Ok(()));
+        assert_eq!(
+            accumulator.check_allocation(1),
             Err(DecodeError::AllocationExceeded)
         );
     }

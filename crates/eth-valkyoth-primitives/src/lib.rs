@@ -2,6 +2,8 @@
 #![forbid(unsafe_code)]
 //! Core `no_std` Ethereum primitive types used across the `eth` workspace.
 
+use core::hash::{Hash, Hasher};
+pub use subtle::Choice;
 use subtle::ConstantTimeEq as _;
 
 macro_rules! id_type {
@@ -49,6 +51,8 @@ id_type!(UnixTimestamp, u64, "Block timestamp as Unix seconds.");
 pub enum PrimitiveError {
     /// Transaction type exceeds the EIP-2718 single-byte typed envelope range.
     TransactionTypeTooLarge,
+    /// Zero is reserved for the legacy transaction domain, not a typed envelope.
+    ReservedLegacyType,
 }
 
 /// Fixed-width Ethereum address bytes.
@@ -83,9 +87,9 @@ impl From<Address> for [u8; 20] {
 
 /// Fixed-width 256-bit hash bytes.
 ///
-/// `PartialEq` is suitable for ordinary public hash comparisons. Use
-/// [`B256::ct_eq`] when comparison timing is part of a security boundary.
-#[derive(Clone, Copy, Debug, Eq, Hash, PartialEq)]
+/// All equality for this type is constant-time because hashes appear in
+/// cryptographic verification paths.
+#[derive(Clone, Copy, Debug)]
 pub struct B256([u8; 32]);
 
 impl B256 {
@@ -103,11 +107,25 @@ impl B256 {
 
     /// Compares two hashes in constant time.
     ///
-    /// Use this instead of `==` whenever the comparison result could influence
-    /// control flow observable by an untrusted caller.
+    /// Returns [`Choice`] so compound comparisons can use `&` and `|` without
+    /// short-circuiting. Convert to `bool` only at the final trust boundary.
     #[must_use]
-    pub fn ct_eq(&self, other: &Self) -> bool {
-        self.0.ct_eq(&other.0).into()
+    pub fn ct_eq(&self, other: &Self) -> Choice {
+        self.0.ct_eq(&other.0)
+    }
+}
+
+impl PartialEq for B256 {
+    fn eq(&self, other: &Self) -> bool {
+        bool::from(self.ct_eq(other))
+    }
+}
+
+impl Eq for B256 {}
+
+impl Hash for B256 {
+    fn hash<H: Hasher>(&self, state: &mut H) {
+        self.0.hash(state);
     }
 }
 
@@ -124,7 +142,7 @@ impl From<B256> for [u8; 32] {
 }
 
 /// Wei amount encoded as an unsigned 256-bit big-endian integer.
-#[derive(Clone, Copy, Debug, Eq, Hash, PartialEq)]
+#[derive(Clone, Copy, Debug)]
 pub struct Wei([u8; 32]);
 
 impl Wei {
@@ -169,6 +187,29 @@ impl Wei {
     pub const fn to_be_bytes(self) -> [u8; 32] {
         self.0
     }
+
+    /// Compares two wei values in constant time.
+    ///
+    /// Wei is usually public, but fixed-width constant-time equality keeps
+    /// proof and verification paths from accidentally choosing a weaker API.
+    #[must_use]
+    pub fn ct_eq(&self, other: &Self) -> Choice {
+        self.0.ct_eq(&other.0)
+    }
+}
+
+impl PartialEq for Wei {
+    fn eq(&self, other: &Self) -> bool {
+        bool::from(self.ct_eq(other))
+    }
+}
+
+impl Eq for Wei {}
+
+impl Hash for Wei {
+    fn hash<H: Hasher>(&self, state: &mut H) {
+        self.0.hash(state);
+    }
 }
 
 impl From<[u8; 32]> for Wei {
@@ -199,6 +240,18 @@ impl TransactionType {
             return Err(PrimitiveError::TransactionTypeTooLarge);
         }
         Ok(Self(value))
+    }
+
+    /// Creates a typed EIP-2718 transaction type.
+    ///
+    /// `0` is reserved for the legacy transaction domain. Encoders must handle
+    /// legacy transactions separately instead of prepending a zero type byte.
+    pub const fn try_new_typed(value: u8) -> Result<Self, PrimitiveError> {
+        match value {
+            0 => Err(PrimitiveError::ReservedLegacyType),
+            1..=Self::MAX_TYPED => Ok(Self(value)),
+            _ => Err(PrimitiveError::TransactionTypeTooLarge),
+        }
     }
 
     /// Returns the raw transaction type byte.
@@ -262,8 +315,20 @@ mod tests {
         let left = B256::from_bytes([1_u8; 32]);
         let same = B256::from_bytes([1_u8; 32]);
         let different = B256::from_bytes([2_u8; 32]);
-        assert!(left.ct_eq(&same));
-        assert!(!left.ct_eq(&different));
+        assert!(bool::from(left.ct_eq(&same)));
+        assert!(!bool::from(left.ct_eq(&different)));
+        assert!(left == same);
+        assert!(left != different);
+    }
+
+    #[test]
+    fn b256_constant_time_choices_compose_without_short_circuit() {
+        let left = B256::from_bytes([1_u8; 32]);
+        let same = B256::from_bytes([1_u8; 32]);
+        let different = B256::from_bytes([2_u8; 32]);
+        let composed = left.ct_eq(&same) & same.ct_eq(&different);
+
+        assert!(!bool::from(composed));
     }
 
     #[test]
@@ -276,6 +341,18 @@ mod tests {
     fn wei_round_trips() {
         let bytes = [9_u8; 32];
         assert_eq!(<[u8; 32]>::from(Wei::from(bytes)), bytes);
+    }
+
+    #[test]
+    fn wei_constant_time_equality_result_matches_equality() {
+        let left = Wei::from_be_bytes([1_u8; 32]);
+        let same = Wei::from_be_bytes([1_u8; 32]);
+        let different = Wei::from_be_bytes([2_u8; 32]);
+
+        assert!(bool::from(left.ct_eq(&same)));
+        assert!(!bool::from(left.ct_eq(&different)));
+        assert!(left == same);
+        assert!(left != different);
     }
 
     #[test]
@@ -301,6 +378,15 @@ mod tests {
             TransactionType::try_new(0x80),
             Err(PrimitiveError::TransactionTypeTooLarge)
         );
+    }
+
+    #[test]
+    fn typed_transaction_type_rejects_legacy_zero() {
+        assert_eq!(
+            TransactionType::try_new_typed(0),
+            Err(PrimitiveError::ReservedLegacyType)
+        );
+        assert_eq!(TransactionType::try_new_typed(1).map(u8::from), Ok(1));
     }
 
     #[test]

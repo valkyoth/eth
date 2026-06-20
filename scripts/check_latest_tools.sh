@@ -38,6 +38,20 @@ checkout_pin_line() {
     sed -n 's/.*uses: actions\/checkout@\([0-9a-f]\{40\}\) # \(v[0-9][0-9.]*\).*/\1 \2/p' "$ci_file" | head -n 1
 }
 
+check_all_actions_sha_pinned() {
+    sed -n 's/^[[:space:]]*uses: [^@][^@]*@\([^[:space:]]*\).*/\1/p' "$ci_file" |
+        while IFS= read -r ref; do
+            case "$ref" in
+                [0-9a-f][0-9a-f][0-9a-f][0-9a-f][0-9a-f][0-9a-f][0-9a-f][0-9a-f][0-9a-f][0-9a-f][0-9a-f][0-9a-f][0-9a-f][0-9a-f][0-9a-f][0-9a-f][0-9a-f][0-9a-f][0-9a-f][0-9a-f][0-9a-f][0-9a-f][0-9a-f][0-9a-f][0-9a-f][0-9a-f][0-9a-f][0-9a-f][0-9a-f][0-9a-f][0-9a-f][0-9a-f][0-9a-f][0-9a-f][0-9a-f][0-9a-f][0-9a-f][0-9a-f][0-9a-f][0-9a-f])
+                    ;;
+                *)
+                    echo "GitHub Actions ref is not a full 40-character SHA: ${ref}" >&2
+                    exit 1
+                    ;;
+            esac
+        done
+}
+
 latest_checkout_tag() {
     git ls-remote --tags --refs https://github.com/actions/checkout.git 'refs/tags/v*' |
         sed 's#.*refs/tags/##' |
@@ -88,4 +102,5 @@ check_checkout_action() {
 check_cargo_tool cargo-deny
 check_cargo_tool cargo-audit
 check_cargo_tool cargo-sbom
+check_all_actions_sha_pinned
 check_checkout_action

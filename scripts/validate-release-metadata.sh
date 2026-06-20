@@ -16,6 +16,11 @@ test -f docs/spec-source-policy.md
 grep -q 'execution_specs_repo' spec-lock.toml
 grep -q 'local_reference_store_env' spec-lock.toml
 grep -q 'local_reference_store_default' spec-lock.toml
+if grep -q 'spec_required = true' spec-lock.toml; then
+    grep -Eq 'execution_specs_rev = "[0-9a-f]{40}"' spec-lock.toml
+    grep -Eq 'execution_tests_rev = "[0-9a-f]{40}"' spec-lock.toml
+    grep -Eq 'eips_rev = "[0-9a-f]{40}"' spec-lock.toml
+fi
 grep -q 'EUPL-1.2' Cargo.toml
 grep -q 'channel = "1.96.0"' rust-toolchain.toml
 grep -q 'rust-version = "1.90"' Cargo.toml

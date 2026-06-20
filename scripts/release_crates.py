@@ -130,6 +130,23 @@ def check_release_tag(version: str, *, require_tag: bool) -> None:
     print(f"Release tag {tag} points at HEAD.")
 
 
+def confirm_no_verify(args: argparse.Namespace) -> int:
+    if not args.no_verify or args.dry_run:
+        return 0
+
+    print(
+        "\nWARNING: --no-verify bypasses cargo package verification.\n"
+        "Use it only with a documented release incident or crates.io issue.\n"
+        "Type 'no-verify confirmed' to continue:",
+        file=sys.stderr,
+    )
+    response = input().strip()
+    if response != "no-verify confirmed":
+        print("Aborted.", file=sys.stderr)
+        return 1
+    return 0
+
+
 def run_preflight(args: argparse.Namespace) -> None:
     if args.skip_checks:
         print("Skipping preflight checks by request.")
@@ -246,6 +263,10 @@ def main() -> int:
         if answer != args.version:
             print("Version confirmation did not match; aborting.", file=sys.stderr)
             return 1
+
+    no_verify_result = confirm_no_verify(args)
+    if no_verify_result != 0:
+        return no_verify_result
 
     run_preflight(args)
 

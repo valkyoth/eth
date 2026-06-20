@@ -32,3 +32,6 @@ All notable changes to `eth` are documented here.
   primitives, conversion coverage, and the v0.3 release gate.
 - Added optional `eth-valkyoth-sanitization` and `eth-valkyoth-derive` support
   crates outside the default `eth` feature set.
+- Addressed v0.3.0 pentest findings for constant-time primitive equality,
+  cumulative decode allocation accounting, enum sanitization acknowledgement,
+  typed transaction disambiguation, and release/tooling gates.

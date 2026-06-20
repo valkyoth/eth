@@ -11,6 +11,7 @@ struct KeyHolder {
 }
 
 #[derive(eth_valkyoth_sanitization::SecureSanitize)]
+#[eth_sanitization(enum_inactive_variant_bytes = "acknowledged")]
 enum SecretChoice {
     Key(SecretBytes32),
     Named { key: SecretBytes32 },

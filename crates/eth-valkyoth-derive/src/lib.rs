@@ -12,6 +12,10 @@ use syn::{
 ///
 /// Fields marked `#[eth_sanitization(skip)]` are intentionally not sanitized.
 /// Use skips only for fields that cannot carry secret material.
+///
+/// Enums must explicitly acknowledge that inactive variant backing storage is
+/// not sanitized by Rust's active-variant match semantics:
+/// `#[eth_sanitization(enum_inactive_variant_bytes = "acknowledged")]`.
 #[proc_macro_derive(SecureSanitize, attributes(eth_sanitization))]
 pub fn derive_secure_sanitize(input: TokenStream) -> TokenStream {
     let input = parse_macro_input!(input as DeriveInput);
@@ -33,12 +37,17 @@ pub fn derive_secure_sanitize_on_drop(input: TokenStream) -> TokenStream {
 }
 
 fn expand_secure_sanitize(input: &DeriveInput) -> Result<TokenStream2, Error> {
-    let crate_path = crate_path(input)?;
+    let attrs = container_attrs(input)?;
+    let crate_path = attrs.crate_path;
     let name = &input.ident;
     let mut generics = input.generics.clone();
     add_sanitize_bounds(&mut generics, &crate_path);
     let (impl_generics, ty_generics, where_clause) = generics.split_for_impl();
-    let body = sanitize_body(&input.data, &crate_path)?;
+    let body = sanitize_body(
+        &input.data,
+        &crate_path,
+        attrs.enum_inactive_variant_bytes_acknowledged,
+    )?;
 
     Ok(quote! {
         impl #impl_generics #crate_path::SecureSanitize for #name #ty_generics #where_clause {
@@ -50,7 +59,7 @@ fn expand_secure_sanitize(input: &DeriveInput) -> Result<TokenStream2, Error> {
 }
 
 fn expand_secure_sanitize_on_drop(input: &DeriveInput) -> Result<TokenStream2, Error> {
-    let crate_path = crate_path(input)?;
+    let crate_path = container_attrs(input)?.crate_path;
     let name = &input.ident;
     let generics = input.generics.clone();
     let (impl_generics, ty_generics, where_clause) = generics.split_for_impl();
@@ -71,10 +80,20 @@ fn add_sanitize_bounds(generics: &mut Generics, crate_path: &Path) {
     }
 }
 
-fn sanitize_body(data: &Data, crate_path: &Path) -> Result<TokenStream2, Error> {
+fn sanitize_body(
+    data: &Data,
+    crate_path: &Path,
+    enum_inactive_variant_bytes_acknowledged: bool,
+) -> Result<TokenStream2, Error> {
     match data {
         Data::Struct(data) => sanitize_struct_fields(&data.fields, crate_path),
         Data::Enum(data) => {
+            if !enum_inactive_variant_bytes_acknowledged {
+                return Err(Error::new_spanned(
+                    data.enum_token,
+                    "SecureSanitize enum derives must acknowledge inactive variant bytes with #[eth_sanitization(enum_inactive_variant_bytes = \"acknowledged\")]",
+                ));
+            }
             let arms = data
                 .variants
                 .iter()
@@ -171,8 +190,16 @@ fn field_accesses(fields: &Fields) -> Result<Vec<FieldAccess>, Error> {
     }
 }
 
-fn crate_path(input: &DeriveInput) -> Result<Path, Error> {
-    let mut path = parse_quote!(::eth_valkyoth_sanitization);
+struct ContainerAttrs {
+    crate_path: Path,
+    enum_inactive_variant_bytes_acknowledged: bool,
+}
+
+fn container_attrs(input: &DeriveInput) -> Result<ContainerAttrs, Error> {
+    let mut attrs = ContainerAttrs {
+        crate_path: parse_quote!(::eth_valkyoth_sanitization),
+        enum_inactive_variant_bytes_acknowledged: false,
+    };
     for attr in input
         .attrs
         .iter()
@@ -182,14 +209,23 @@ fn crate_path(input: &DeriveInput) -> Result<Path, Error> {
             if meta.path.is_ident("crate") {
                 let value = meta.value()?;
                 let literal: LitStr = value.parse()?;
-                path = literal.parse()?;
+                attrs.crate_path = literal.parse()?;
                 Ok(())
+            } else if meta.path.is_ident("enum_inactive_variant_bytes") {
+                let value = meta.value()?;
+                let literal: LitStr = value.parse()?;
+                if literal.value() == "acknowledged" {
+                    attrs.enum_inactive_variant_bytes_acknowledged = true;
+                    Ok(())
+                } else {
+                    Err(meta.error("enum_inactive_variant_bytes must be exactly \"acknowledged\""))
+                }
             } else {
                 Err(meta.error("unsupported eth_sanitization container attribute"))
             }
         })?;
     }
-    Ok(path)
+    Ok(attrs)
 }
 
 fn has_skip(field: &syn::Field) -> Result<bool, Error> {

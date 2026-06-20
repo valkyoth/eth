@@ -307,7 +307,7 @@ Goal: continuously fuzz every RLP parser.
 
 Deliverables:
 
-- cargo-fuzz workspace;
+- cargo-fuzz workspace before additional parser expansion;
 - RLP fuzz target;
 - seed corpus from unit fixtures;
 - crash reproduction docs.

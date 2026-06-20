@@ -15,6 +15,10 @@ transaction, signer, RPC, or EVM integration work expands the public API.
 - Add optional `eth-valkyoth-sanitization` bridge crate for users who opt into
   best-effort secret memory clearing.
 - Add optional `eth-valkyoth-derive` macros for explicit sanitization users.
+- Address v0.3.0 pentest findings for constant-time equality composition,
+  cumulative decode allocation accounting, enum sanitization acknowledgement,
+  typed transaction disambiguation, release-script `--no-verify` handling,
+  GitHub Actions pin checks, and spec-lock readiness gates.
 - Add constructor and conversion tests for all primitive domains.
 
 ## Verification
