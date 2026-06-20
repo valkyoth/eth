@@ -73,7 +73,7 @@ impl DecodeLimits {
 }
 
 /// Stateful budget accounting for one decoder invocation.
-#[derive(Clone, Copy, Debug, Eq, PartialEq)]
+#[derive(Debug, Eq, PartialEq)]
 pub struct DecodeAccumulator {
     limits: DecodeLimits,
     total_allocated: usize,
@@ -82,28 +82,28 @@ pub struct DecodeAccumulator {
 impl DecodeAccumulator {
     /// Returns the active decode limits.
     #[must_use]
-    pub const fn limits(self) -> DecodeLimits {
+    pub const fn limits(&self) -> DecodeLimits {
         self.limits
     }
 
     /// Returns the cumulative allocation accounted so far.
     #[must_use]
-    pub const fn total_allocated(self) -> usize {
+    pub const fn total_allocated(&self) -> usize {
         self.total_allocated
     }
 
     /// Validates the input length before parsing starts.
-    pub fn check_input_len(self, len: usize) -> Result<(), DecodeError> {
+    pub fn check_input_len(&self, len: usize) -> Result<(), DecodeError> {
         self.limits.check_input_len(len)
     }
 
     /// Validates a decoded list item count.
-    pub fn check_list_count(self, count: usize) -> Result<(), DecodeError> {
+    pub fn check_list_count(&self, count: usize) -> Result<(), DecodeError> {
         self.limits.check_list_count(count)
     }
 
     /// Validates the current nesting depth.
-    pub fn check_nesting_depth(self, depth: usize) -> Result<(), DecodeError> {
+    pub fn check_nesting_depth(&self, depth: usize) -> Result<(), DecodeError> {
         self.limits.check_nesting_depth(depth)
     }
 

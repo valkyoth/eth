@@ -39,17 +39,22 @@ checkout_pin_line() {
 }
 
 check_all_actions_sha_pinned() {
-    sed -n 's/^[[:space:]]*uses: [^@][^@]*@\([^[:space:]]*\).*/\1/p' "$ci_file" |
-        while IFS= read -r ref; do
-            case "$ref" in
-                [0-9a-f][0-9a-f][0-9a-f][0-9a-f][0-9a-f][0-9a-f][0-9a-f][0-9a-f][0-9a-f][0-9a-f][0-9a-f][0-9a-f][0-9a-f][0-9a-f][0-9a-f][0-9a-f][0-9a-f][0-9a-f][0-9a-f][0-9a-f][0-9a-f][0-9a-f][0-9a-f][0-9a-f][0-9a-f][0-9a-f][0-9a-f][0-9a-f][0-9a-f][0-9a-f][0-9a-f][0-9a-f][0-9a-f][0-9a-f][0-9a-f][0-9a-f][0-9a-f][0-9a-f][0-9a-f][0-9a-f])
-                    ;;
-                *)
-                    echo "GitHub Actions ref is not a full 40-character SHA: ${ref}" >&2
-                    exit 1
-                    ;;
-            esac
-        done
+    failed=0
+    while IFS= read -r ref; do
+        case "$ref" in
+            "")
+                ;;
+            [0-9a-f][0-9a-f][0-9a-f][0-9a-f][0-9a-f][0-9a-f][0-9a-f][0-9a-f][0-9a-f][0-9a-f][0-9a-f][0-9a-f][0-9a-f][0-9a-f][0-9a-f][0-9a-f][0-9a-f][0-9a-f][0-9a-f][0-9a-f][0-9a-f][0-9a-f][0-9a-f][0-9a-f][0-9a-f][0-9a-f][0-9a-f][0-9a-f][0-9a-f][0-9a-f][0-9a-f][0-9a-f][0-9a-f][0-9a-f][0-9a-f][0-9a-f][0-9a-f][0-9a-f][0-9a-f][0-9a-f])
+                ;;
+            *)
+                echo "GitHub Actions ref is not a full 40-character SHA: ${ref}" >&2
+                failed=1
+                ;;
+        esac
+    done <<EOF
+$(sed -n 's/^[[:space:]]*uses: [^@][^@]*@\([^[:space:]]*\).*/\1/p' "$ci_file")
+EOF
+    [ "$failed" -eq 0 ]
 }
 
 latest_checkout_tag() {
