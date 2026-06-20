@@ -13,8 +13,8 @@ Initial controls:
 
 Future controls:
 
-- Fuzzing for every untrusted parser, bootstrapped in `fuzz/` before the first
-  RLP parser ships.
+- Fuzzing for every untrusted parser, with decode-budget API coverage
+  bootstrapped in `fuzz/` before the first RLP parser ships.
 - Official Ethereum conformance suites.
 - Differential tests against independent implementations.
 - RPC adversarial server tests.

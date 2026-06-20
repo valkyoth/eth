@@ -21,7 +21,8 @@ independent crate versioning for crates.io releases.
 - Addressed v0.4.0 pentest findings for typestate token forgery, address
   comparison timing, allocation-budget API misuse, sanitization skip
   acknowledgement, decode-limit naming, typed-envelope transaction
-  classification, best-effort sanitization visibility, and fuzz bootstrap.
+  classification, best-effort sanitization visibility, and decode-budget fuzz
+  coverage.
 - Marked `eth-valkyoth-codec`, `eth-valkyoth-primitives`,
   `eth-valkyoth-protocol`, `eth-valkyoth-verify`, `eth-valkyoth-derive`,
   `eth-valkyoth-sanitization`, and `eth` for `0.4.0` publication.

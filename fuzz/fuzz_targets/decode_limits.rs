@@ -1,8 +1,31 @@
 #![no_main]
 
+use core::mem::size_of;
+
 use eth_valkyoth_codec::DecodeLimits;
 use libfuzzer_sys::fuzz_target;
 
 fuzz_target!(|data: &[u8]| {
-    let _ = DecodeLimits::TEST_FIXTURE.check_input_len(data.len());
+    let limits = DecodeLimits::TEST_FIXTURE;
+    let mut accumulator = limits.accumulator();
+
+    let _ = limits.check_input_len(data.len());
+    let _ = accumulator.check_input_len(data.len());
+
+    for chunk in data.chunks(size_of::<usize>()) {
+        let value = usize_from_chunk(chunk);
+
+        let _ = limits.check_list_count(value);
+        let _ = limits.check_nesting_depth(value);
+        let _ = limits.check_single_allocation_limit(value);
+        let _ = accumulator.check_list_count(value);
+        let _ = accumulator.check_nesting_depth(value);
+        let _ = accumulator.check_allocation(value);
+    }
 });
+
+fn usize_from_chunk(chunk: &[u8]) -> usize {
+    let mut bytes = [0_u8; size_of::<usize>()];
+    bytes[..chunk.len()].copy_from_slice(chunk);
+    usize::from_le_bytes(bytes)
+}
