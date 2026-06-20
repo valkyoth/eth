@@ -103,6 +103,27 @@ hash itself. The release-readiness gate requires the tag candidate commit to
 have the reviewed commit as its first parent and to change only the permanent
 report file.
 
+## Crate Versioning And Publish Order
+
+Workspace crates use independent versions from `v0.4.0` development onward.
+The facade crate remains `eth`, but support crates are not republished just
+because another crate changed.
+
+Track every release in `release-crates.toml` and
+`docs/CRATE_VERSION_MATRIX.md`:
+
+- `code`: the crate received meaningful implementation, API, or documentation
+  changes and uses the milestone version, for example `0.4.0`;
+- `dependency`: the crate only needs a manifest update because a related crate
+  changed outside its current dependency range, so it receives a patch bump on
+  its existing line, for example `0.3.0` to `0.3.1`;
+- `unchanged`: the crate stays on the previous published version and is not
+  published.
+
+`scripts/release_crates.py --check` validates the table against Cargo metadata
+and refuses accidental lockstep publication. The script still publishes in
+dependency order, but only for crates marked `publish = true`.
+
 ## Phase 0: Repository And Release Discipline
 
 ### v0.1.0 - Repository Foundation
@@ -196,14 +217,21 @@ Deliverables:
 - codec, protocol, verification, feature, fork, and resource-exhaustion errors;
 - no secret-bearing error payloads;
 - tests for error stability and formatting.
+- independent support-crate release planning through `release-crates.toml` and
+  `docs/CRATE_VERSION_MATRIX.md`;
+- release tooling that publishes only changed crates while preserving crates.io
+  dependency order.
 
 Verification:
 
 - `scripts/checks.sh`
+- `scripts/release_0_4_gate.sh`
+- `scripts/release_crates.py --check`
 
 Exit criteria:
 
 - Malformed input and unsupported protocol data return errors, not panics.
+- Unchanged support crates are not republished for the `0.4.0` release.
 
 ### v0.5.0 - Decode Budget Model
 

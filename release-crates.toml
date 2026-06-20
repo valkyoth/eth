@@ -1,0 +1,87 @@
+[release]
+version = "0.4.0"
+policy = "independent"
+
+[crates."eth-valkyoth-codec"]
+previous_version = "0.3.0"
+version = "0.3.0"
+change = "unchanged"
+publish = false
+reason = "No 0.4.0 codec implementation change has landed yet."
+
+[crates."eth-valkyoth-primitives"]
+previous_version = "0.3.0"
+version = "0.3.0"
+change = "unchanged"
+publish = false
+reason = "No 0.4.0 primitive implementation change has landed yet."
+
+[crates."eth-valkyoth-protocol"]
+previous_version = "0.3.0"
+version = "0.3.0"
+change = "unchanged"
+publish = false
+reason = "No 0.4.0 protocol implementation change has landed yet."
+
+[crates."eth-valkyoth-verify"]
+previous_version = "0.3.0"
+version = "0.3.0"
+change = "unchanged"
+publish = false
+reason = "No 0.4.0 verification implementation change has landed yet."
+
+[crates."eth-valkyoth-derive"]
+previous_version = "0.3.0"
+version = "0.3.0"
+change = "unchanged"
+publish = false
+reason = "Derive macros have no 0.4.0 implementation change yet."
+
+[crates."eth-valkyoth-sanitization"]
+previous_version = "0.3.0"
+version = "0.3.0"
+change = "unchanged"
+publish = false
+reason = "Sanitization bridge has no 0.4.0 implementation change yet."
+
+[crates."eth-valkyoth-evm"]
+previous_version = "0.3.0"
+version = "0.3.0"
+change = "unchanged"
+publish = false
+reason = "EVM boundary remains unchanged for the start of 0.4.0."
+
+[crates."eth-valkyoth-rpc"]
+previous_version = "0.3.0"
+version = "0.3.0"
+change = "unchanged"
+publish = false
+reason = "RPC boundary remains unchanged for the start of 0.4.0."
+
+[crates."eth-valkyoth-signer"]
+previous_version = "0.3.0"
+version = "0.3.0"
+change = "unchanged"
+publish = false
+reason = "Signer boundary remains unchanged for the start of 0.4.0."
+
+[crates."eth-valkyoth-reth"]
+previous_version = "0.3.0"
+version = "0.3.0"
+change = "unchanged"
+publish = false
+reason = "Reth boundary remains unchanged for the start of 0.4.0."
+
+[crates."eth-valkyoth-testkit"]
+previous_version = "0.3.0"
+version = "0.3.0"
+change = "unchanged"
+publish = false
+reason = "Testkit boundary remains unchanged for the start of 0.4.0."
+
+[crates.eth]
+previous_version = "0.3.0"
+version = "0.3.0"
+change = "unchanged"
+publish = false
+reason = "The facade will move to 0.4.0 when the 0.4.0 public API changes land."

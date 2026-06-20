@@ -35,7 +35,7 @@ dependencies.
 
 ## Current Status
 
-Status: `v0.3.0` tag candidate; pentest report complete.
+Status: `v0.4.0` in development; `v0.3.0` published.
 
 Implemented now:
 
@@ -51,6 +51,7 @@ Implemented now:
 - EUPL-1.2 license.
 - Security, modularity, supply-chain, implementation, and release planning docs.
 - Local check, release-gate, dependency-policy, SBOM, and pentest evidence.
+- Independent support-crate release planning for crates.io push limits.
 
 Not implemented yet:
 
@@ -74,6 +75,7 @@ Not implemented yet:
 | Default features | protocol-core only |
 | Network/signing defaults | none |
 | Release evidence | local gates, cargo-deny, cargo-audit, SBOM, pentest report |
+| Crate versions | tracked in [`docs/CRATE_VERSION_MATRIX.md`](docs/CRATE_VERSION_MATRIX.md) |
 | 1.0 target | serious production-ready Ethereum execution-layer toolkit |
 
 ## Install
@@ -239,8 +241,8 @@ Compatibility evidence for `0.3.0`:
 
 ```bash
 scripts/checks.sh
-scripts/release_0_3_gate.sh
-scripts/validate-release-readiness.sh v0.3.0
+scripts/release_0_4_gate.sh
+scripts/validate-release-readiness.sh v0.4.0
 ```
 
 For dependency-policy checks, install `cargo-deny` and `cargo-audit`, then run:

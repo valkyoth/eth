@@ -4,6 +4,9 @@ All notable changes to `eth` are documented here.
 
 ## Unreleased
 
+- Started `0.4.0` by adding independent support-crate version planning,
+  release-plan validation, and a crate version matrix to avoid unnecessary
+  crates.io publishes.
 - Added crate-local READMEs for published support crates that point users to
   the `eth` facade crate.
 - Added workspace packaging verification to local checks.

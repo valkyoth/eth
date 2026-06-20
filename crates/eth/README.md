@@ -67,6 +67,7 @@ Not implemented yet:
 | Default networking/signing | none |
 | Unsafe policy | first-party crates use `#![forbid(unsafe_code)]` |
 | Release evidence | local gates, cargo-deny, cargo-audit, SBOM, pentest report |
+| Crate versions | tracked in the [version matrix](https://github.com/valkyoth/eth/blob/main/docs/CRATE_VERSION_MATRIX.md) |
 
 ## Install
 
