@@ -1,21 +1,26 @@
 # eth 0.4.0 Release Notes
 
-Status: in development
+Status: implementation complete; pending external pentest input
 
 ## Summary
 
 `0.4.0` establishes the stable error model for protocol operations and starts
 independent crate versioning for crates.io releases.
 
-## Planned
+## Included
 
-- Add non-panicking error categories for codec, protocol, verification, fork,
-  feature, and resource-exhaustion boundaries.
-- Keep error payloads free of secret-bearing data.
-- Add tests for error stability and formatting.
-- Replace lockstep support-crate publishing with per-crate release planning.
-- Publish only crates that changed, with dependency-only forced bumps using a
-  patch version on the existing crate line.
+- Added stable `code()`, `message()`, category, and `Display` behavior for
+  codec, protocol, fork, feature, resource-exhaustion, and verification errors.
+- Added optional `std::error::Error` implementations behind existing `std`
+  features.
+- Kept error payloads free of input bytes, keys, signatures, and other
+  secret-bearing data.
+- Added tests for error stability and formatting.
+- Re-exported stable error types through `eth::error`.
+- Replaced lockstep support-crate publishing with per-crate release planning.
+- Marked only `eth-valkyoth-codec`, `eth-valkyoth-protocol`,
+  `eth-valkyoth-verify`, and `eth` for `0.4.0` publication.
+- Left unchanged support crates on `0.3.0`.
 
 ## Verification
 

@@ -4,7 +4,7 @@ version = 4
 
 [[package]]
 name = "eth"
-version = "0.3.0"
+version = "0.4.0"
 dependencies = [
  "eth-valkyoth-codec",
  "eth-valkyoth-evm",
@@ -20,7 +20,7 @@ dependencies = [
 
 [[package]]
 name = "eth-valkyoth-codec"
-version = "0.3.0"
+version = "0.4.0"
 
 [[package]]
 name = "eth-valkyoth-derive"
@@ -44,7 +44,7 @@ dependencies = [
 
 [[package]]
 name = "eth-valkyoth-protocol"
-version = "0.3.0"
+version = "0.4.0"
 dependencies = [
  "eth-valkyoth-primitives",
 ]
@@ -78,7 +78,7 @@ version = "0.3.0"
 
 [[package]]
 name = "eth-valkyoth-verify"
-version = "0.3.0"
+version = "0.4.0"
 dependencies = [
  "eth-valkyoth-primitives",
 ]

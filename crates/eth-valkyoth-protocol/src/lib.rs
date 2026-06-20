@@ -2,9 +2,157 @@
 #![forbid(unsafe_code)]
 //! Fork-aware Ethereum protocol validation state.
 
-use core::marker::PhantomData;
+#[cfg(feature = "std")]
+extern crate std;
+
+use core::{fmt, marker::PhantomData};
 
 use eth_valkyoth_primitives::{BlockNumber, ChainId, UnixTimestamp};
+
+/// Protocol validation failure.
+#[derive(Clone, Copy, Debug, Eq, PartialEq)]
+pub enum ProtocolError {
+    /// A feature is disabled or unsupported for the selected operation.
+    Feature(FeatureError),
+    /// Fork context is missing, unsupported, or inactive.
+    Fork(ForkError),
+    /// A validation state transition was attempted out of order.
+    InvalidStateTransition,
+}
+
+impl ProtocolError {
+    /// Stable machine-readable error code.
+    #[must_use]
+    pub const fn code(self) -> &'static str {
+        match self {
+            Self::Feature(error) => error.code(),
+            Self::Fork(error) => error.code(),
+            Self::InvalidStateTransition => "ETH_PROTOCOL_INVALID_STATE_TRANSITION",
+        }
+    }
+
+    /// Stable human-readable error message.
+    #[must_use]
+    pub const fn message(self) -> &'static str {
+        match self {
+            Self::Feature(error) => error.message(),
+            Self::Fork(error) => error.message(),
+            Self::InvalidStateTransition => {
+                "validation state transition is not allowed from the current state"
+            }
+        }
+    }
+
+    /// Stable high-level category for policy decisions.
+    #[must_use]
+    pub const fn category(self) -> ProtocolErrorCategory {
+        match self {
+            Self::Feature(_) => ProtocolErrorCategory::Feature,
+            Self::Fork(_) => ProtocolErrorCategory::Fork,
+            Self::InvalidStateTransition => ProtocolErrorCategory::State,
+        }
+    }
+}
+
+impl fmt::Display for ProtocolError {
+    fn fmt(&self, formatter: &mut fmt::Formatter<'_>) -> fmt::Result {
+        formatter.write_str(self.message())
+    }
+}
+
+#[cfg(feature = "std")]
+impl std::error::Error for ProtocolError {}
+
+/// Stable high-level protocol error categories.
+#[derive(Clone, Copy, Debug, Eq, PartialEq)]
+pub enum ProtocolErrorCategory {
+    /// Feature support or configuration failure.
+    Feature,
+    /// Fork selection or activation failure.
+    Fork,
+    /// Validation state failure.
+    State,
+}
+
+/// Feature availability failure.
+#[derive(Clone, Copy, Debug, Eq, PartialEq)]
+pub enum FeatureError {
+    /// The feature is intentionally not enabled for this build or context.
+    Disabled,
+    /// The feature is not implemented by this crate version.
+    Unsupported,
+}
+
+impl FeatureError {
+    /// Stable machine-readable error code.
+    #[must_use]
+    pub const fn code(self) -> &'static str {
+        match self {
+            Self::Disabled => "ETH_FEATURE_DISABLED",
+            Self::Unsupported => "ETH_FEATURE_UNSUPPORTED",
+        }
+    }
+
+    /// Stable human-readable error message.
+    #[must_use]
+    pub const fn message(self) -> &'static str {
+        match self {
+            Self::Disabled => "feature is disabled for this operation",
+            Self::Unsupported => "feature is not supported by this crate version",
+        }
+    }
+}
+
+impl fmt::Display for FeatureError {
+    fn fmt(&self, formatter: &mut fmt::Formatter<'_>) -> fmt::Result {
+        formatter.write_str(self.message())
+    }
+}
+
+#[cfg(feature = "std")]
+impl std::error::Error for FeatureError {}
+
+/// Fork selection or activation failure.
+#[derive(Clone, Copy, Debug, Eq, PartialEq)]
+pub enum ForkError {
+    /// The selected fork is not supported by this crate version.
+    Unsupported,
+    /// The selected fork is not active for the supplied validation context.
+    Inactive,
+    /// Fork activation data is incomplete.
+    MissingActivation,
+}
+
+impl ForkError {
+    /// Stable machine-readable error code.
+    #[must_use]
+    pub const fn code(self) -> &'static str {
+        match self {
+            Self::Unsupported => "ETH_FORK_UNSUPPORTED",
+            Self::Inactive => "ETH_FORK_INACTIVE",
+            Self::MissingActivation => "ETH_FORK_MISSING_ACTIVATION",
+        }
+    }
+
+    /// Stable human-readable error message.
+    #[must_use]
+    pub const fn message(self) -> &'static str {
+        match self {
+            Self::Unsupported => "fork is not supported by this crate version",
+            Self::Inactive => "fork is not active for the validation context",
+            Self::MissingActivation => "fork activation data is incomplete",
+        }
+    }
+}
+
+impl fmt::Display for ForkError {
+    fn fmt(&self, formatter: &mut fmt::Formatter<'_>) -> fmt::Result {
+        formatter.write_str(self.message())
+    }
+}
+
+#[cfg(feature = "std")]
+impl std::error::Error for ForkError {}
 
 /// Unambiguous fork activation rule.
 #[derive(Clone, Copy, Debug, Eq, PartialEq)]
@@ -120,6 +268,8 @@ impl Transaction<ForkValidated> {
 #[cfg(test)]
 mod tests {
     use super::*;
+    extern crate std;
+    use std::string::ToString;
 
     #[test]
     fn activation_requires_block_and_time() {
@@ -163,6 +313,33 @@ mod tests {
             Transaction::<SenderRecovered> {
                 _state: PhantomData
             }
+        );
+    }
+
+    #[test]
+    fn protocol_errors_have_stable_codes_and_categories() {
+        let error = ProtocolError::Fork(ForkError::Inactive);
+
+        assert_eq!(error.code(), "ETH_FORK_INACTIVE");
+        assert_eq!(
+            error.message(),
+            "fork is not active for the validation context"
+        );
+        assert_eq!(error.category(), ProtocolErrorCategory::Fork);
+        assert_eq!(
+            error.to_string(),
+            "fork is not active for the validation context"
+        );
+    }
+
+    #[test]
+    fn feature_errors_format_without_payloads() {
+        let error = ProtocolError::Feature(FeatureError::Unsupported);
+
+        assert_eq!(error.code(), "ETH_FEATURE_UNSUPPORTED");
+        assert_eq!(
+            FeatureError::Unsupported.to_string(),
+            "feature is not supported by this crate version"
         );
     }
 }

@@ -7,6 +7,8 @@ All notable changes to `eth` are documented here.
 - Started `0.4.0` by adding independent support-crate version planning,
   release-plan validation, and a crate version matrix to avoid unnecessary
   crates.io publishes.
+- Added stable error codes, messages, categories, and formatting for codec,
+  protocol, fork, feature, resource, and verification failures.
 - Added crate-local READMEs for published support crates that point users to
   the `eth` facade crate.
 - Added workspace packaging verification to local checks.

@@ -46,6 +46,8 @@ Implemented now:
   hash, wei, and transaction type values.
 - Constant-time equality composition for fixed-width hash and wei values.
 - Bounded decode limits plus stateful cumulative allocation accounting.
+- Stable error codes, messages, categories, and formatting for codec,
+  protocol, fork, feature, resource, and verification failures.
 - Optional sanitization and derive support crates outside the default feature
   set.
 - EUPL-1.2 license.
@@ -82,14 +84,14 @@ Not implemented yet:
 
 ```toml
 [dependencies]
-eth = "0.3"
+eth = "0.4"
 ```
 
 For optional sanitization support:
 
 ```toml
 [dependencies]
-eth = { version = "0.3", features = ["sanitization"] }
+eth = { version = "0.4", features = ["sanitization"] }
 ```
 
 ## Features
@@ -155,6 +157,22 @@ assert!(bool::from(valid));
 ```
 
 Convert `Choice` to `bool` only at the final trust boundary.
+
+## Stable Errors
+
+Error values expose stable codes, messages, and categories. They do not carry
+input bytes, keys, signatures, or other secret-bearing payloads:
+
+```rust
+use eth::error::{DecodeError, DecodeErrorCategory, ResourceError};
+
+let error = DecodeError::AllocationExceeded;
+
+assert_eq!(error.code(), "ETH_CODEC_ALLOCATION_EXCEEDED");
+assert_eq!(error.category(), DecodeErrorCategory::ResourceExhaustion);
+assert_eq!(error.resource(), Some(ResourceError::AllocationBytes));
+assert_eq!(error.to_string(), "decoder exceeded the active allocation limit");
+```
 
 ## Decode Budgets
 
@@ -225,7 +243,7 @@ friendly, and independently testable.
 The minimum supported Rust version is Rust `1.90.0`. New deployments should use
 the pinned stable Rust `1.96.0` until the toolchain policy is updated.
 
-Compatibility evidence for `0.3.0`:
+Compatibility evidence for `0.4.0`:
 
 | Rust | Local Evidence |
 | --- | --- |

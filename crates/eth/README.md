@@ -26,14 +26,15 @@
 `eth` is the public facade crate for a `no_std`-first Ethereum
 execution-layer protocol workspace.
 
-The crate is intentionally conservative at `0.3.0`: it provides explicit
-Ethereum primitive domains, bounded decode-budget policy, small first-party
-crate boundaries, optional sanitization support, and release evidence before
-RPC, signer, EVM, Reth, or P2P integrations become real dependencies.
+The crate is intentionally conservative at `0.4.0`: it provides explicit
+Ethereum primitive domains, bounded decode-budget policy, stable error
+categories, small first-party crate boundaries, optional sanitization support,
+and release evidence before RPC, signer, EVM, Reth, or P2P integrations become
+real dependencies.
 
 ## Current Status
 
-The current release candidate is `0.3.0`.
+The current release candidate is `0.4.0`.
 
 Implemented now:
 
@@ -42,6 +43,8 @@ Implemented now:
   hash, wei, and transaction type values.
 - Constant-time equality composition for fixed-width hash and wei values.
 - Bounded decode limits plus stateful cumulative allocation accounting.
+- Stable error codes, messages, categories, and formatting for codec,
+  protocol, fork, feature, resource, and verification failures.
 - Optional sanitization bridge and derive macros outside the default feature
   set.
 - Release gates for formatting, clippy, tests, packaging, MSRV compatibility,
@@ -73,21 +76,21 @@ Not implemented yet:
 
 ```toml
 [dependencies]
-eth = "0.3"
+eth = "0.4"
 ```
 
 Disable defaults explicitly for embedded or freestanding builds:
 
 ```toml
 [dependencies]
-eth = { version = "0.3", default-features = false }
+eth = { version = "0.4", default-features = false }
 ```
 
 Optional sanitization support:
 
 ```toml
 [dependencies]
-eth = { version = "0.3", features = ["sanitization"] }
+eth = { version = "0.4", features = ["sanitization"] }
 ```
 
 ## Features
@@ -158,6 +161,22 @@ assert!(bool::from(valid));
 
 Convert `Choice` to `bool` only at the final trust boundary.
 
+## Stable Errors
+
+Error values expose stable codes, messages, and categories. They do not carry
+input bytes, keys, signatures, or other secret-bearing payloads:
+
+```rust
+use eth::error::{DecodeError, DecodeErrorCategory, ResourceError};
+
+let error = DecodeError::AllocationExceeded;
+
+assert_eq!(error.code(), "ETH_CODEC_ALLOCATION_EXCEEDED");
+assert_eq!(error.category(), DecodeErrorCategory::ResourceExhaustion);
+assert_eq!(error.resource(), Some(ResourceError::AllocationBytes));
+assert_eq!(error.to_string(), "decoder exceeded the active allocation limit");
+```
+
 ## Decode Budgets
 
 Every future untrusted decoder is required to use explicit limits. Use
@@ -225,7 +244,7 @@ the workspace can keep small, auditable boundaries:
 The minimum supported Rust version is Rust `1.90.0`. New deployments should use
 the latest stable Rust verified by the release gates.
 
-Compatibility evidence for `0.3.0`:
+Compatibility evidence for `0.4.0`:
 
 | Rust | Local Evidence |
 | --- | --- |

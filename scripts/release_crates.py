@@ -48,6 +48,20 @@ def capture(command: list[str]) -> str:
     return subprocess.check_output(command, cwd=ROOT, text=True).strip()
 
 
+def try_capture(command: list[str]) -> str | None:
+    result = subprocess.run(
+        command,
+        cwd=ROOT,
+        check=False,
+        stdout=subprocess.PIPE,
+        stderr=subprocess.DEVNULL,
+        text=True,
+    )
+    if result.returncode != 0:
+        return None
+    return result.stdout.strip()
+
+
 def load_toml(path: Path) -> dict:
     with path.open("rb") as handle:
         return tomllib.load(handle)
@@ -190,10 +204,9 @@ def verify_publish_order(packages: dict[str, dict], plan: dict) -> None:
 
 def check_release_tag(version: str, *, require_tag: bool) -> None:
     tag = f"v{version}"
-    try:
-        head = capture(["git", "rev-parse", "HEAD"])
-        tagged_commit = capture(["git", "rev-list", "-n", "1", tag])
-    except subprocess.CalledProcessError:
+    head = try_capture(["git", "rev-parse", "HEAD"])
+    tagged_commit = try_capture(["git", "rev-list", "-n", "1", tag])
+    if head is None or tagged_commit is None:
         message = f"release tag {tag!r} was not found"
         if require_tag:
             print(f"Refusing to publish: {message}.", file=sys.stderr)

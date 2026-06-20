@@ -18,3 +18,12 @@ pub use eth_valkyoth_signer as signer;
 #[cfg(feature = "testkit")]
 pub use eth_valkyoth_testkit as testkit;
 pub use eth_valkyoth_verify as verify;
+
+/// Stable error types re-exported by the facade crate.
+pub mod error {
+    pub use eth_valkyoth_codec::{DecodeError, DecodeErrorCategory, ResourceError};
+    pub use eth_valkyoth_protocol::{
+        FeatureError, ForkError, ProtocolError, ProtocolErrorCategory,
+    };
+    pub use eth_valkyoth_verify::{VerifyError, VerifyErrorCategory};
+}

@@ -26,10 +26,10 @@ publication when a crate is marked `unchanged`.
 
 | Crate | Published | Planned | Change | Publish | Reason |
 | --- | --- | --- | --- | --- | --- |
-| `eth-valkyoth-codec` | `0.3.0` | `0.3.0` | `unchanged` | No | No 0.4.0 codec implementation change has landed yet. |
+| `eth-valkyoth-codec` | `0.3.0` | `0.4.0` | `code` | Yes | Adds stable decode and resource-exhaustion error categories, codes, and formatting. |
 | `eth-valkyoth-primitives` | `0.3.0` | `0.3.0` | `unchanged` | No | No 0.4.0 primitive implementation change has landed yet. |
-| `eth-valkyoth-protocol` | `0.3.0` | `0.3.0` | `unchanged` | No | No 0.4.0 protocol implementation change has landed yet. |
-| `eth-valkyoth-verify` | `0.3.0` | `0.3.0` | `unchanged` | No | No 0.4.0 verification implementation change has landed yet. |
+| `eth-valkyoth-protocol` | `0.3.0` | `0.4.0` | `code` | Yes | Adds stable protocol, feature, fork, and state error categories, codes, and formatting. |
+| `eth-valkyoth-verify` | `0.3.0` | `0.4.0` | `code` | Yes | Adds stable verification error categories, codes, and formatting. |
 | `eth-valkyoth-derive` | `0.3.0` | `0.3.0` | `unchanged` | No | Derive macros have no 0.4.0 implementation change yet. |
 | `eth-valkyoth-sanitization` | `0.3.0` | `0.3.0` | `unchanged` | No | Sanitization bridge has no 0.4.0 implementation change yet. |
 | `eth-valkyoth-evm` | `0.3.0` | `0.3.0` | `unchanged` | No | EVM boundary remains unchanged for the start of 0.4.0. |
@@ -37,7 +37,7 @@ publication when a crate is marked `unchanged`.
 | `eth-valkyoth-signer` | `0.3.0` | `0.3.0` | `unchanged` | No | Signer boundary remains unchanged for the start of 0.4.0. |
 | `eth-valkyoth-reth` | `0.3.0` | `0.3.0` | `unchanged` | No | Reth boundary remains unchanged for the start of 0.4.0. |
 | `eth-valkyoth-testkit` | `0.3.0` | `0.3.0` | `unchanged` | No | Testkit boundary remains unchanged for the start of 0.4.0. |
-| `eth` | `0.3.0` | `0.3.0` | `unchanged` | No | The facade will move to 0.4.0 when the 0.4.0 public API changes land. |
+| `eth` | `0.3.0` | `0.4.0` | `code` | Yes | Re-exports the stable error model through the facade crate. |
 
 Update this table and `release-crates.toml` in the same commit whenever a crate
 changes release state.

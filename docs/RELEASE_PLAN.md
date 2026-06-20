@@ -216,7 +216,7 @@ Deliverables:
 
 - codec, protocol, verification, feature, fork, and resource-exhaustion errors;
 - no secret-bearing error payloads;
-- tests for error stability and formatting.
+- tests for error stability and formatting;
 - independent support-crate release planning through `release-crates.toml` and
   `docs/CRATE_VERSION_MATRIX.md`;
 - release tooling that publishes only changed crates while preserving crates.io

@@ -4,10 +4,10 @@ policy = "independent"
 
 [crates."eth-valkyoth-codec"]
 previous_version = "0.3.0"
-version = "0.3.0"
-change = "unchanged"
-publish = false
-reason = "No 0.4.0 codec implementation change has landed yet."
+version = "0.4.0"
+change = "code"
+publish = true
+reason = "Adds stable decode and resource-exhaustion error categories, codes, and formatting."
 
 [crates."eth-valkyoth-primitives"]
 previous_version = "0.3.0"
@@ -18,17 +18,17 @@ reason = "No 0.4.0 primitive implementation change has landed yet."
 
 [crates."eth-valkyoth-protocol"]
 previous_version = "0.3.0"
-version = "0.3.0"
-change = "unchanged"
-publish = false
-reason = "No 0.4.0 protocol implementation change has landed yet."
+version = "0.4.0"
+change = "code"
+publish = true
+reason = "Adds stable protocol, feature, fork, and state error categories, codes, and formatting."
 
 [crates."eth-valkyoth-verify"]
 previous_version = "0.3.0"
-version = "0.3.0"
-change = "unchanged"
-publish = false
-reason = "No 0.4.0 verification implementation change has landed yet."
+version = "0.4.0"
+change = "code"
+publish = true
+reason = "Adds stable verification error categories, codes, and formatting."
 
 [crates."eth-valkyoth-derive"]
 previous_version = "0.3.0"
@@ -81,7 +81,7 @@ reason = "Testkit boundary remains unchanged for the start of 0.4.0."
 
 [crates.eth]
 previous_version = "0.3.0"
-version = "0.3.0"
-change = "unchanged"
-publish = false
-reason = "The facade will move to 0.4.0 when the 0.4.0 public API changes land."
+version = "0.4.0"
+change = "code"
+publish = true
+reason = "Re-exports the stable error model through the facade crate."

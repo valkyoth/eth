@@ -2,7 +2,10 @@
 #![forbid(unsafe_code)]
 //! Bounded decoding policy for untrusted Ethereum wire inputs.
 
-use core::cmp::Ordering;
+#[cfg(feature = "std")]
+extern crate std;
+
+use core::{cmp::Ordering, fmt};
 
 /// Resource limits required by every untrusted decoder.
 #[derive(Clone, Copy, Debug, Eq, PartialEq)]
@@ -140,6 +143,127 @@ pub enum DecodeError {
     AllocationExceeded,
 }
 
+impl DecodeError {
+    /// Stable machine-readable error code.
+    #[must_use]
+    pub const fn code(self) -> &'static str {
+        match self {
+            Self::InputTooLarge => "ETH_CODEC_INPUT_TOO_LARGE",
+            Self::TrailingBytes => "ETH_CODEC_TRAILING_BYTES",
+            Self::DecoderOverread => "ETH_CODEC_DECODER_OVERREAD",
+            Self::Malformed => "ETH_CODEC_MALFORMED",
+            Self::ListTooLong => "ETH_CODEC_LIST_TOO_LONG",
+            Self::NestingTooDeep => "ETH_CODEC_NESTING_TOO_DEEP",
+            Self::AllocationExceeded => "ETH_CODEC_ALLOCATION_EXCEEDED",
+        }
+    }
+
+    /// Stable human-readable error message.
+    #[must_use]
+    pub const fn message(self) -> &'static str {
+        match self {
+            Self::InputTooLarge => "input exceeds the active decode byte limit",
+            Self::TrailingBytes => "decoded value did not consume the full input",
+            Self::DecoderOverread => "decoder consumed more bytes than were available",
+            Self::Malformed => "input is malformed for the selected codec",
+            Self::ListTooLong => "decoded list exceeds the active item limit",
+            Self::NestingTooDeep => "decoded structure exceeds the active nesting limit",
+            Self::AllocationExceeded => "decoder exceeded the active allocation limit",
+        }
+    }
+
+    /// Stable high-level category for policy decisions.
+    #[must_use]
+    pub const fn category(self) -> DecodeErrorCategory {
+        match self {
+            Self::InputTooLarge
+            | Self::ListTooLong
+            | Self::NestingTooDeep
+            | Self::AllocationExceeded => DecodeErrorCategory::ResourceExhaustion,
+            Self::TrailingBytes | Self::DecoderOverread | Self::Malformed => {
+                DecodeErrorCategory::MalformedInput
+            }
+        }
+    }
+
+    /// Returns the resource budget that was exceeded, if this is a resource
+    /// exhaustion error.
+    #[must_use]
+    pub const fn resource(self) -> Option<ResourceError> {
+        match self {
+            Self::InputTooLarge => Some(ResourceError::InputBytes),
+            Self::ListTooLong => Some(ResourceError::ListItems),
+            Self::NestingTooDeep => Some(ResourceError::NestingDepth),
+            Self::AllocationExceeded => Some(ResourceError::AllocationBytes),
+            Self::TrailingBytes | Self::DecoderOverread | Self::Malformed => None,
+        }
+    }
+}
+
+impl fmt::Display for DecodeError {
+    fn fmt(&self, formatter: &mut fmt::Formatter<'_>) -> fmt::Result {
+        formatter.write_str(self.message())
+    }
+}
+
+#[cfg(feature = "std")]
+impl std::error::Error for DecodeError {}
+
+/// Stable high-level decode error categories.
+#[derive(Clone, Copy, Debug, Eq, PartialEq)]
+pub enum DecodeErrorCategory {
+    /// The input is malformed or internally inconsistent.
+    MalformedInput,
+    /// The input exceeded an explicit resource budget.
+    ResourceExhaustion,
+}
+
+/// Stable resource budget categories.
+#[derive(Clone, Copy, Debug, Eq, PartialEq)]
+pub enum ResourceError {
+    /// Input byte limit was exceeded.
+    InputBytes,
+    /// Decoded list item limit was exceeded.
+    ListItems,
+    /// Nesting depth limit was exceeded.
+    NestingDepth,
+    /// Cumulative allocation limit was exceeded.
+    AllocationBytes,
+}
+
+impl ResourceError {
+    /// Stable machine-readable error code.
+    #[must_use]
+    pub const fn code(self) -> &'static str {
+        match self {
+            Self::InputBytes => "ETH_RESOURCE_INPUT_BYTES",
+            Self::ListItems => "ETH_RESOURCE_LIST_ITEMS",
+            Self::NestingDepth => "ETH_RESOURCE_NESTING_DEPTH",
+            Self::AllocationBytes => "ETH_RESOURCE_ALLOCATION_BYTES",
+        }
+    }
+
+    /// Stable human-readable error message.
+    #[must_use]
+    pub const fn message(self) -> &'static str {
+        match self {
+            Self::InputBytes => "input byte budget exceeded",
+            Self::ListItems => "list item budget exceeded",
+            Self::NestingDepth => "nesting depth budget exceeded",
+            Self::AllocationBytes => "allocation byte budget exceeded",
+        }
+    }
+}
+
+impl fmt::Display for ResourceError {
+    fn fmt(&self, formatter: &mut fmt::Formatter<'_>) -> fmt::Result {
+        formatter.write_str(self.message())
+    }
+}
+
+#[cfg(feature = "std")]
+impl std::error::Error for ResourceError {}
+
 /// Ensures a decoder consumed the whole input.
 pub fn require_exact_consumption(consumed: usize, input_len: usize) -> Result<(), DecodeError> {
     match consumed.cmp(&input_len) {
@@ -152,6 +276,8 @@ pub fn require_exact_consumption(consumed: usize, input_len: usize) -> Result<()
 #[cfg(test)]
 mod tests {
     use super::*;
+    extern crate std;
+    use std::string::ToString;
 
     #[test]
     fn rejects_oversized_input() {
@@ -192,6 +318,39 @@ mod tests {
         assert_eq!(
             limits.check_allocation(3),
             Err(DecodeError::AllocationExceeded)
+        );
+    }
+
+    #[test]
+    fn decode_errors_have_stable_codes_and_messages() {
+        assert_eq!(DecodeError::Malformed.code(), "ETH_CODEC_MALFORMED");
+        assert_eq!(
+            DecodeError::Malformed.message(),
+            "input is malformed for the selected codec"
+        );
+        assert_eq!(
+            DecodeError::Malformed.category(),
+            DecodeErrorCategory::MalformedInput
+        );
+        assert_eq!(
+            DecodeError::Malformed.to_string(),
+            "input is malformed for the selected codec"
+        );
+    }
+
+    #[test]
+    fn resource_errors_are_classified_without_payloads() {
+        let error = DecodeError::AllocationExceeded;
+
+        assert_eq!(error.category(), DecodeErrorCategory::ResourceExhaustion);
+        assert_eq!(error.resource(), Some(ResourceError::AllocationBytes));
+        assert_eq!(
+            ResourceError::AllocationBytes.code(),
+            "ETH_RESOURCE_ALLOCATION_BYTES"
+        );
+        assert_eq!(
+            ResourceError::AllocationBytes.to_string(),
+            "allocation byte budget exceeded"
         );
     }
 
