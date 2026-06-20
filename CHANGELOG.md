@@ -4,6 +4,11 @@ All notable changes to `eth` are documented here.
 
 ## Unreleased
 
+- Added crate-local READMEs for published support crates that point users to
+  the `eth` facade crate.
+- Added workspace packaging verification to local checks.
+- Fixed facade crate docs to include a packaged README instead of a workspace
+  root path.
 - Initialized the `eth` Rust workspace.
 - Added first-party `no_std` crate boundaries.
 - Added security, supply-chain, modularity, implementation, and release plans.
