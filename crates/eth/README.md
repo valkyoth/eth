@@ -6,18 +6,18 @@
 <div align="center">
   <a href="https://docs.rs/eth">Docs.rs</a>
   |
-  <a href="https://github.com/eldryoth/eth/blob/main/docs/RELEASE_PLAN.md">Release Plan</a>
+  <a href="https://github.com/valkyoth/eth/blob/main/docs/RELEASE_PLAN.md">Release Plan</a>
   |
-  <a href="https://github.com/eldryoth/eth/blob/main/docs/threat-model.md">Threat Model</a>
+  <a href="https://github.com/valkyoth/eth/blob/main/docs/threat-model.md">Threat Model</a>
   |
-  <a href="https://github.com/eldryoth/eth/blob/main/SECURITY.md">Security</a>
+  <a href="https://github.com/valkyoth/eth/blob/main/SECURITY.md">Security</a>
 </div>
 
 <br>
 
 <p align="center">
-  <a href="https://github.com/eldryoth/eth">
-    <img src="https://raw.githubusercontent.com/eldryoth/eth/main/.github/images/eth.webp" alt="eth Rust crate overview">
+  <a href="https://github.com/valkyoth/eth">
+    <img src="https://raw.githubusercontent.com/valkyoth/eth/main/.github/images/eth.webp" alt="eth Rust crate overview">
   </a>
 </p>
 
