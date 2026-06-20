@@ -172,6 +172,8 @@ Deliverables:
 - chain, block, gas, nonce, timestamp, address, hash, wei, and transaction type
   primitives;
 - bounded constructors where values have protocol limits;
+- optional sanitization and derive support crate boundaries outside default
+  features;
 - tests for all constructors and conversions.
 
 Verification:

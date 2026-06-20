@@ -5,8 +5,8 @@
 Rules:
 
 - Main crate `eth` is a facade, not the implementation home.
-- Parsing, validation, verification, execution, RPC, signing, Reth, and tests
-  live in separate crates.
+- Parsing, validation, verification, execution, RPC, signing, sanitization,
+  derive macros, Reth, and tests live in separate crates.
 - Keep `lib.rs` as module wiring and public API shape.
 - Non-generated Rust source files must stay under 500 lines.
 - A file approaching 300 lines should be reviewed for splitting.

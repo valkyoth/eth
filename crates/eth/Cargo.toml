@@ -19,6 +19,7 @@ std = [
 ]
 evm = ["dep:eth-valkyoth-evm"]
 rpc = ["dep:eth-valkyoth-rpc"]
+sanitization = ["dep:eth-valkyoth-sanitization"]
 signer = ["dep:eth-valkyoth-signer"]
 reth = ["dep:eth-valkyoth-reth"]
 testkit = ["dep:eth-valkyoth-testkit"]
@@ -31,6 +32,7 @@ eth-valkyoth-verify.workspace = true
 eth-valkyoth-evm = { workspace = true, optional = true }
 eth-valkyoth-reth = { workspace = true, optional = true }
 eth-valkyoth-rpc = { workspace = true, optional = true }
+eth-valkyoth-sanitization = { workspace = true, optional = true }
 eth-valkyoth-signer = { workspace = true, optional = true }
 eth-valkyoth-testkit = { workspace = true, optional = true }
 

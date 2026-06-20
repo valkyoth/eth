@@ -11,6 +11,8 @@ pub use eth_valkyoth_protocol as protocol;
 pub use eth_valkyoth_reth as reth;
 #[cfg(feature = "rpc")]
 pub use eth_valkyoth_rpc as rpc;
+#[cfg(feature = "sanitization")]
+pub use eth_valkyoth_sanitization as sanitization;
 #[cfg(feature = "signer")]
 pub use eth_valkyoth_signer as signer;
 #[cfg(feature = "testkit")]

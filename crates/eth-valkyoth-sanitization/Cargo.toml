@@ -1,0 +1,29 @@
+[package]
+name = "eth-valkyoth-sanitization"
+description = "Optional sanitization bridge for eth secret-bearing Ethereum data."
+version.workspace = true
+edition.workspace = true
+rust-version.workspace = true
+license.workspace = true
+homepage.workspace = true
+repository.workspace = true
+readme = "README.md"
+
+[features]
+default = []
+alloc = ["sanitization/alloc"]
+std = ["sanitization/std"]
+derive = ["dep:eth-valkyoth-derive"]
+memory-lock = ["sanitization/memory-lock"]
+guard-pages = ["sanitization/guard-pages"]
+multi-pass-clear = ["sanitization/multi-pass-clear"]
+cache-flush = ["sanitization/cache-flush"]
+register-scrub = ["sanitization/register-scrub"]
+zeroize-interop = ["sanitization/zeroize-interop"]
+
+[dependencies]
+eth-valkyoth-derive = { workspace = true, optional = true }
+sanitization.workspace = true
+
+[lints]
+workspace = true

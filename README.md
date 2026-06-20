@@ -19,8 +19,9 @@ Implemented now:
 - Rust workspace pinned to stable `1.96.0`.
 - MSRV policy for Rust `1.90.0` through `1.96.0`.
 - `no_std` facade and focused first-party crates.
-- One admitted `no_std` constant-time helper dependency and no third-party
-  Ethereum dependencies yet.
+- Default facade dependency graph stays protocol-core only.
+- Optional sanitization and derive support crates outside the default feature
+  set.
 - EUPL-1.2 license.
 - Security, modularity, supply-chain, implementation, and release planning docs.
 - Local check and release-gate scripts.
@@ -33,7 +34,8 @@ Implemented now:
 | MSRV | Rust `1.90.0` |
 | Pinned toolchain | Rust `1.96.0` |
 | Default target | `no_std` |
-| Runtime dependencies | `subtle` for constant-time equality |
+| Default runtime dependencies | protocol-core support crates only |
+| Optional hardening dependencies | `sanitization` and proc-macro tooling behind opt-in crates/features |
 | Unsafe policy | first-party crates use `#![forbid(unsafe_code)]` |
 | Default features | protocol-core only |
 | Network/signing defaults | none |
@@ -67,6 +69,8 @@ Compatibility evidence:
 | `eth-valkyoth-verify` | yes | Verification boundaries for signatures, proofs, and replay domains. |
 | `eth-valkyoth-evm` | no | Future REVM adapter boundary. |
 | `eth-valkyoth-rpc` | no | Future explicit RPC trust-policy boundary. |
+| `eth-valkyoth-sanitization` | no | Optional bridge to the `sanitization` crate for secret-bearing Ethereum data. |
+| `eth-valkyoth-derive` | no | Optional sanitization derive macros. |
 | `eth-valkyoth-signer` | no | Future signer isolation boundary. |
 | `eth-valkyoth-reth` | no | Future Reth integration boundary. |
 | `eth-valkyoth-testkit` | no | Test fixtures, conformance helpers, and adversarial inputs. |

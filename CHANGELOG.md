@@ -30,3 +30,5 @@ All notable changes to `eth` are documented here.
   deterministic release gates, and RPC trust-model defaults.
 - Implemented `0.3.0` domain newtypes with explicit wei and transaction type
   primitives, conversion coverage, and the v0.3 release gate.
+- Added optional `eth-valkyoth-sanitization` and `eth-valkyoth-derive` support
+  crates outside the default `eth` feature set.

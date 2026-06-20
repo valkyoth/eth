@@ -1,0 +1,21 @@
+[package]
+name = "eth-valkyoth-derive"
+description = "Optional derive macros for eth-valkyoth-sanitization."
+version.workspace = true
+edition.workspace = true
+rust-version.workspace = true
+license.workspace = true
+homepage.workspace = true
+repository.workspace = true
+readme = "README.md"
+
+[lib]
+proc-macro = true
+
+[dependencies]
+proc-macro2.workspace = true
+quote.workspace = true
+syn.workspace = true
+
+[lints]
+workspace = true

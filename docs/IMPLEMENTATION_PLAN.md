@@ -56,6 +56,9 @@ The first production value is:
 - `eth-valkyoth-evm`: optional REVM adapter boundary with explicit fork, block,
   transaction, snapshot, limit, and commit policy.
 - `eth-valkyoth-rpc`: optional RPC policy over admitted provider transports.
+- `eth-valkyoth-sanitization`: optional bridge to the `sanitization` crate for
+  secret-bearing Ethereum data.
+- `eth-valkyoth-derive`: optional derive macros for explicit sanitization users.
 - `eth-valkyoth-signer`: optional signer isolation and domain-specific signing APIs.
 - `eth-valkyoth-reth`: optional Reth adapter boundary.
 - `eth-valkyoth-testkit`: fixtures, adversarial inputs, conformance helpers, and

@@ -1,7 +1,8 @@
 # eth Secret Handling Policy
 
-No secret-bearing type exists in `v0.1.0`. This policy applies before local
-signing, keystore, ECDH, BLS, or hardware-secret integration is implemented.
+Secret-bearing runtime support is optional in `v0.3.0` through
+`eth-valkyoth-sanitization`. This policy applies before local signing,
+keystore, ECDH, BLS, or hardware-secret integration is implemented.
 
 Secret-bearing types include private keys, seed phrases, ECDH outputs, BLS
 scalars, decrypted keystore bytes, signer credentials, and signing preimages
@@ -13,8 +14,9 @@ Rules:
 - Do not derive revealing `Debug`.
 - Do not expose ordinary `Clone` unless a security review admits it.
 - Prefer external signer boundaries over local key material.
-- Admit a no_std zeroization dependency before implementing local secret
-  storage.
+- Keep sanitization support outside the default `eth` dependency graph.
+- Use `eth-valkyoth-sanitization` for first-party secret byte containers unless
+  a security review admits a narrower alternative.
 - Redact secrets from errors, logs, panic text, metrics, and test output.
 - Document residual limits: zeroization cannot erase historical copies, stack
   spills, registers, swap, core dumps, or privileged memory reads.
