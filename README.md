@@ -17,7 +17,7 @@
 
 <p align="center">
   <a href="https://github.com/eldryoth/eth">
-    <img src="https://raw.githubusercontent.com/eldryoth/eth/main/.github/images/eth.png" alt="eth Rust crate overview">
+    <img src="https://raw.githubusercontent.com/eldryoth/eth/main/.github/images/eth.webp" alt="eth Rust crate overview">
   </a>
 </p>
 
