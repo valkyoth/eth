@@ -50,5 +50,15 @@ eth-valkyoth-sanitization = {
 The crate exposes `HARDENED_MODE` so applications can assert the selected
 feature set in their own startup checks.
 
+Applications that handle private keys or seeds should add a hard fail for the
+expected feature set:
+
+```rust
+const _: () = assert!(
+    eth_valkyoth_sanitization::HARDENED_MODE,
+    "enable memory-lock, multi-pass-clear, cache-flush, and register-scrub"
+);
+```
+
 Best-effort clearing helpers live under `best_effort` so the weaker guarantee
 is visible at the call site.

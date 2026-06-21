@@ -58,6 +58,21 @@ fn expand_secure_sanitize(input: &DeriveInput) -> Result<TokenStream2, Error> {
 
 fn expand_secure_sanitize_on_drop(input: &DeriveInput) -> Result<TokenStream2, Error> {
     let crate_path = container_attrs(input)?.crate_path;
+    match &input.data {
+        Data::Struct(_) => {}
+        Data::Enum(data) => {
+            return Err(Error::new_spanned(
+                data.enum_token,
+                "SecureSanitizeOnDrop cannot be derived for enums; use a struct wrapper",
+            ));
+        }
+        Data::Union(data) => {
+            return Err(Error::new_spanned(
+                data.union_token,
+                "SecureSanitizeOnDrop cannot be derived for unions; use a struct wrapper",
+            ));
+        }
+    }
     let name = &input.ident;
     let generics = input.generics.clone();
     let (impl_generics, ty_generics, where_clause) = generics.split_for_impl();
@@ -259,6 +274,8 @@ fn type_uses_ident(ty: &Type, ident: &Ident) -> bool {
         Type::Reference(ty) => type_uses_ident(&ty.elem, ident),
         Type::Slice(ty) => type_uses_ident(&ty.elem, ident),
         Type::Tuple(ty) => ty.elems.iter().any(|elem| type_uses_ident(elem, ident)),
+        // Conservative fallback: a spurious bound becomes a compile error, but
+        // a missing bound can silently skip sanitization of secret material.
         _ => true,
     }
 }
@@ -321,6 +338,38 @@ mod tests {
 
         assert!(
             matches!(result, Err(error) if error.to_string().contains("cannot be derived for enums"))
+        );
+    }
+
+    #[test]
+    fn enum_drop_derives_are_rejected() {
+        let input: DeriveInput = parse_quote! {
+            enum SecretChoice {
+                Key(u8),
+                Empty,
+            }
+        };
+
+        let result = expand_secure_sanitize_on_drop(&input);
+
+        assert!(
+            matches!(result, Err(error) if error.to_string().contains("SecureSanitizeOnDrop cannot be derived for enums"))
+        );
+    }
+
+    #[test]
+    fn union_drop_derives_are_rejected() {
+        let input: DeriveInput = parse_quote! {
+            union SecretChoice {
+                key: [u8; 32],
+                flag: u8,
+            }
+        };
+
+        let result = expand_secure_sanitize_on_drop(&input);
+
+        assert!(
+            matches!(result, Err(error) if error.to_string().contains("SecureSanitizeOnDrop cannot be derived for unions"))
         );
     }
 

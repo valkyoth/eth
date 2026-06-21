@@ -28,6 +28,9 @@ budgets in addition to byte, list, nesting, and allocation limits.
   hash timing caveats, removing the dead-code typestate constructor from normal
   builds, marking public error enums non-exhaustive, documenting
   `TransactionType::try_from`, and fixing skipped-field generic derive bounds.
+- Addressed follow-up pentest findings by rejecting enum and union
+  `SecureSanitizeOnDrop` derives, documenting the conservative derive-bound
+  fallback, and adding a downstream `HARDENED_MODE` assertion example.
 - Marked `eth-valkyoth-codec`, `eth-valkyoth-primitives`,
   `eth-valkyoth-protocol`, `eth-valkyoth-verify`, `eth-valkyoth-derive`,
   `eth-valkyoth-sanitization`, and `eth` for `0.5.0` publication.

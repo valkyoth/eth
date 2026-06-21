@@ -12,6 +12,9 @@ All notable changes to `eth` are documented here.
   production-template fuzzing, hash timing documentation, typestate dead code,
   non-exhaustive public errors, TryFrom transaction type documentation, and
   skipped-field generic derive bounds.
+- Addressed v0.5.0 follow-up pentest findings by making
+  `SecureSanitizeOnDrop` struct-only and documenting downstream
+  `HARDENED_MODE` assertion patterns.
 - Started `0.4.0` by adding independent support-crate version planning,
   release-plan validation, and a crate version matrix to avoid unnecessary
   crates.io publishes.
