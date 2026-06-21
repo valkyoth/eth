@@ -1,6 +1,6 @@
 # eth 0.5.0 Release Notes
 
-Status: implementation complete; pending external pentest input
+Status: implementation complete; pentest passed
 
 ## Summary
 

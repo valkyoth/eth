@@ -1,6 +1,6 @@
 # Crate Version Matrix
 
-Status: active for `v0.5.0` development
+Status: release matrix for `v0.5.0`
 
 `eth` uses independent crate versions. The facade crate remains the main user
 entry point, but support crates are published only when their own package
