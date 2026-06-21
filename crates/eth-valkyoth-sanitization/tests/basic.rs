@@ -28,3 +28,29 @@ fn best_effort_api_is_namespaced() {
 
     assert_eq!(bytes, [0_u8; 32]);
 }
+
+#[test]
+#[cfg(not(all(
+    feature = "memory-lock",
+    feature = "multi-pass-clear",
+    feature = "cache-flush",
+    feature = "register-scrub"
+)))]
+fn default_build_is_not_hardened_mode() {
+    assert!(!std::hint::black_box(
+        eth_valkyoth_sanitization::HARDENED_MODE
+    ));
+}
+
+#[test]
+#[cfg(all(
+    feature = "memory-lock",
+    feature = "multi-pass-clear",
+    feature = "cache-flush",
+    feature = "register-scrub"
+))]
+fn all_hardening_features_enable_hardened_mode() {
+    assert!(std::hint::black_box(
+        eth_valkyoth_sanitization::HARDENED_MODE
+    ));
+}

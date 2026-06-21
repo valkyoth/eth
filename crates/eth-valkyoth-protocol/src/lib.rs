@@ -10,6 +10,7 @@ use core::{fmt, marker::PhantomData};
 use eth_valkyoth_primitives::{BlockNumber, ChainId, UnixTimestamp};
 
 /// Protocol validation failure.
+#[non_exhaustive]
 #[derive(Clone, Copy, Debug, Eq, PartialEq)]
 pub enum ProtocolError {
     /// A feature is disabled or unsupported for the selected operation.
@@ -64,6 +65,7 @@ impl fmt::Display for ProtocolError {
 impl std::error::Error for ProtocolError {}
 
 /// Stable high-level protocol error categories.
+#[non_exhaustive]
 #[derive(Clone, Copy, Debug, Eq, PartialEq)]
 pub enum ProtocolErrorCategory {
     /// Feature support or configuration failure.
@@ -75,6 +77,7 @@ pub enum ProtocolErrorCategory {
 }
 
 /// Feature availability failure.
+#[non_exhaustive]
 #[derive(Clone, Copy, Debug, Eq, PartialEq)]
 pub enum FeatureError {
     /// The feature is intentionally not enabled for this build or context.
@@ -113,6 +116,7 @@ impl fmt::Display for FeatureError {
 impl std::error::Error for FeatureError {}
 
 /// Fork selection or activation failure.
+#[non_exhaustive]
 #[derive(Clone, Copy, Debug, Eq, PartialEq)]
 pub enum ForkError {
     /// The selected fork is not supported by this crate version.
@@ -228,9 +232,12 @@ pub struct Transaction<State> {
 }
 
 impl Transaction<Decoded> {
-    /// Creates a token for a decoded transaction.
+    /// Creates a token for a decoded transaction in internal tests.
+    ///
+    /// A public decoded-transaction entry point will be added only together
+    /// with the real codec output that proves the decoded state.
     #[must_use]
-    #[allow(dead_code)]
+    #[cfg(test)]
     pub(crate) const fn decoded() -> Self {
         Self {
             _state: PhantomData,

@@ -1,6 +1,7 @@
 use core::fmt;
 
 /// Shared decode failure categories.
+#[non_exhaustive]
 #[derive(Clone, Copy, Debug, Eq, PartialEq)]
 pub enum DecodeError {
     /// The byte input is larger than the active decode budget.
@@ -112,6 +113,7 @@ impl fmt::Display for DecodeError {
 impl std::error::Error for DecodeError {}
 
 /// Stable high-level decode error categories.
+#[non_exhaustive]
 #[derive(Clone, Copy, Debug, Eq, PartialEq)]
 pub enum DecodeErrorCategory {
     /// The input is malformed or internally inconsistent.
@@ -121,6 +123,7 @@ pub enum DecodeErrorCategory {
 }
 
 /// Stable resource budget categories.
+#[non_exhaustive]
 #[derive(Clone, Copy, Debug, Eq, PartialEq)]
 pub enum ResourceError {
     /// Input byte limit was exceeded.

@@ -7,6 +7,11 @@ All notable changes to `eth` are documented here.
 - Started `0.5.0` by extending the decode-budget model with proof-node and
   cumulative item budgets, checked length and range helpers, and adversarial
   tests for overflow and limit rejection.
+- Addressed v0.5.0 pentest findings for enum sanitization residual bytes,
+  sanitization hardening evidence, spec-source pinning, decode limit naming,
+  production-template fuzzing, hash timing documentation, typestate dead code,
+  non-exhaustive public errors, TryFrom transaction type documentation, and
+  skipped-field generic derive bounds.
 - Started `0.4.0` by adding independent support-crate version planning,
   release-plan validation, and a crate version matrix to avoid unnecessary
   crates.io publishes.

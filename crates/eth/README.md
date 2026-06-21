@@ -221,7 +221,7 @@ For derive macros, depend on the support crate directly:
 
 ```toml
 [dependencies]
-eth-valkyoth-sanitization = { version = "0.4", features = ["derive"] }
+eth-valkyoth-sanitization = { version = "0.5", features = ["derive"] }
 ```
 
 ## Support Crates

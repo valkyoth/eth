@@ -1,6 +1,6 @@
 # eth Specification Matrix
 
-Status: initial placeholder for `v0.1.0`.
+Status: source revisions pinned for `v0.5.0`; no consensus behavior claimed.
 
 Official source and fixture revisions are governed by
 [Spec Source Policy](spec-source-policy.md). Consensus-sensitive behavior must
@@ -8,13 +8,13 @@ not be implemented from memory.
 
 | Area | Status | Evidence |
 | --- | --- | --- |
-| Execution RLP | planned | fixture revision to be pinned |
-| EIP-2718 typed transactions | planned | fixture revision to be pinned |
-| Transaction validation | planned | execution-spec revision to be pinned |
-| Header validation | planned | execution-spec revision to be pinned |
-| Receipt validation | planned | execution-spec revision to be pinned |
-| MPT proofs | planned | proof fixtures to be pinned |
-| JSON-RPC | deferred | RPC spec revision to be pinned |
+| Execution RLP | planned | `ethereum/tests` pinned in `spec-lock.toml`; parser not implemented |
+| EIP-2718 typed transactions | planned | `ethereum/EIPs` pinned in `spec-lock.toml`; parser not implemented |
+| Transaction validation | planned | `execution-specs` pinned in `spec-lock.toml`; validation not implemented |
+| Header validation | planned | `execution-specs` pinned in `spec-lock.toml`; validation not implemented |
+| Receipt validation | planned | `execution-specs` pinned in `spec-lock.toml`; validation not implemented |
+| MPT proofs | planned | `ethereum/tests` pinned in `spec-lock.toml`; proof verification not implemented |
+| JSON-RPC | deferred | `execution-apis` pinned in `spec-lock.toml`; RPC not implemented |
 | Engine API | deferred | not part of first default scope |
 | SSZ | deferred | consensus-layer feature only if admitted |
 | DevP2P/RLPx | deferred | separate threat-model expansion required |

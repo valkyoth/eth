@@ -5,11 +5,37 @@
 //! This crate is not part of the default `eth` dependency graph. Use it when an
 //! application explicitly wants the `sanitization` crate's best-effort secret
 //! clearing APIs under the `eth-valkyoth-*` namespace.
+//!
+//! Deployment checklist for private-key or seed material:
+//!
+//! - enable `memory-lock` to reduce swap exposure;
+//! - enable `multi-pass-clear` when policy requires multiple overwrite passes;
+//! - enable `cache-flush` where supported by the target threat model;
+//! - enable `register-scrub` where supported by the target toolchain;
+//! - keep crash dumps, logs, serde, and copies outside this crate's boundary.
 
 pub use sanitization::{SecretBytes, SecureSanitize, sanitize_bytes};
 
 #[cfg(feature = "derive")]
 pub use eth_valkyoth_derive::{SecureSanitize, SecureSanitizeOnDrop};
+
+/// Whether the memory-clearing bridge was built with the hardened feature set.
+#[cfg(all(
+    feature = "memory-lock",
+    feature = "multi-pass-clear",
+    feature = "cache-flush",
+    feature = "register-scrub"
+))]
+pub const HARDENED_MODE: bool = true;
+
+/// Whether the memory-clearing bridge was built with the hardened feature set.
+#[cfg(not(all(
+    feature = "memory-lock",
+    feature = "multi-pass-clear",
+    feature = "cache-flush",
+    feature = "register-scrub"
+)))]
+pub const HARDENED_MODE: bool = false;
 
 /// Best-effort clearing APIs.
 ///

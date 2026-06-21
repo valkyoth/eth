@@ -47,6 +47,7 @@ id_type!(Nonce, u64, "Account transaction nonce.");
 id_type!(UnixTimestamp, u64, "Block timestamp as Unix seconds.");
 
 /// Primitive constructor failures.
+#[non_exhaustive]
 #[derive(Clone, Copy, Debug, Eq, PartialEq)]
 pub enum PrimitiveError {
     /// Transaction type exceeds the EIP-2718 single-byte typed envelope range.
@@ -59,6 +60,10 @@ pub enum PrimitiveError {
 ///
 /// Equality is constant-time because recovered sender checks appear in
 /// authentication and authorization paths.
+///
+/// The [`Hash`] implementation is for ordinary map/set use. Do not rely on
+/// hash-map lookup timing for secret or side-channel-sensitive access-control
+/// paths; use explicit indexed structures or constant-time scans there.
 #[derive(Clone, Copy, Debug)]
 pub struct Address([u8; 20]);
 
@@ -303,6 +308,11 @@ impl TransactionType {
 impl TryFrom<u8> for TransactionType {
     type Error = PrimitiveError;
 
+    /// Parses a typed EIP-2718 transaction type byte.
+    ///
+    /// Rejects `0` because it belongs to the legacy transaction domain. Use
+    /// [`TransactionType::try_new_with_legacy`] when the caller explicitly
+    /// accepts both legacy and typed transaction domains.
     fn try_from(value: u8) -> Result<Self, Self::Error> {
         Self::try_new_typed(value)
     }

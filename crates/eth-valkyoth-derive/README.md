@@ -6,7 +6,7 @@ Most users should depend on the facade crate instead:
 
 ```toml
 [dependencies]
-eth = "0.4"
+eth = "0.5"
 ```
 
 Crates.io: <https://crates.io/crates/eth>
@@ -17,7 +17,7 @@ and does not add runtime clearing by itself.
 
 ```toml
 [dependencies]
-eth-valkyoth-sanitization = { version = "0.4", features = ["derive"] }
+eth-valkyoth-sanitization = { version = "0.5", features = ["derive"] }
 ```
 
 Supported field attribute:
@@ -32,9 +32,6 @@ Supported container attribute:
 #[eth_sanitization(crate = "::my_sanitization_path")]
 ```
 
-Enums must also acknowledge that inactive variant backing bytes are not cleared
-by matching the active variant:
-
-```rust
-#[eth_sanitization(enum_inactive_variant_bytes = "acknowledged")]
-```
+Enum derives are rejected because inactive variant backing bytes may retain
+secret material after variant changes. Use a struct wrapper for secret-bearing
+state.

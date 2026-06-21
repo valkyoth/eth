@@ -11,38 +11,38 @@ reason = "Adds mandatory proof-node and cumulative item budgets plus checked len
 
 [crates."eth-valkyoth-primitives"]
 previous_version = "0.4.0"
-version = "0.4.0"
-change = "unchanged"
-publish = false
-reason = "Primitive domains remain unchanged for the v0.5.0 decode-budget milestone."
+version = "0.5.0"
+change = "code"
+publish = true
+reason = "Adds non-exhaustive primitive errors, transaction type TryFrom documentation, and Address hash timing documentation."
 
 [crates."eth-valkyoth-protocol"]
 previous_version = "0.4.0"
-version = "0.4.0"
-change = "unchanged"
-publish = false
-reason = "Protocol state remains unchanged for the v0.5.0 decode-budget milestone."
+version = "0.5.0"
+change = "code"
+publish = true
+reason = "Marks protocol error enums non-exhaustive and removes the dead-code typestate entry point from normal builds."
 
 [crates."eth-valkyoth-verify"]
 previous_version = "0.4.0"
-version = "0.4.0"
-change = "unchanged"
-publish = false
-reason = "Verification boundaries remain unchanged for the v0.5.0 decode-budget milestone."
+version = "0.5.0"
+change = "code"
+publish = true
+reason = "Marks verification error enums non-exhaustive."
 
 [crates."eth-valkyoth-derive"]
 previous_version = "0.4.0"
-version = "0.4.0"
-change = "unchanged"
-publish = false
-reason = "Derive macros remain unchanged for the v0.5.0 decode-budget milestone."
+version = "0.5.0"
+change = "code"
+publish = true
+reason = "Rejects enum sanitization derives and avoids bounds for skipped generic fields."
 
 [crates."eth-valkyoth-sanitization"]
 previous_version = "0.4.0"
-version = "0.4.1"
-change = "dependency"
+version = "0.5.0"
+change = "code"
 publish = true
-reason = "Updates the optional sanitization dependency to the current 1.1.1 release."
+reason = "Adds hardened-mode evidence and deployment guidance while updating sanitization to 1.1.1."
 
 [crates."eth-valkyoth-evm"]
 previous_version = "0.3.0"
@@ -60,10 +60,10 @@ reason = "RPC boundary remains unchanged for the v0.5.0 decode-budget milestone.
 
 [crates."eth-valkyoth-signer"]
 previous_version = "0.3.1"
-version = "0.3.1"
-change = "unchanged"
-publish = false
-reason = "Signer boundary remains unchanged for the v0.5.0 decode-budget milestone."
+version = "0.3.2"
+change = "dependency"
+publish = true
+reason = "Updates the primitives dependency range after eth-valkyoth-primitives moved to 0.5.0."
 
 [crates."eth-valkyoth-reth"]
 previous_version = "0.3.0"
@@ -84,4 +84,4 @@ previous_version = "0.4.0"
 version = "0.5.0"
 change = "code"
 publish = true
-reason = "Re-exports the expanded decode-budget API through the facade crate."
+reason = "Re-exports the expanded and remediated v0.5.0 API through the facade crate."

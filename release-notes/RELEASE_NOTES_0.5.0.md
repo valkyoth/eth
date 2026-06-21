@@ -22,9 +22,17 @@ budgets in addition to byte, list, nesting, and allocation limits.
 - Expanded the fuzz target to exercise the new budget APIs.
 - Split the codec crate into focused modules so source files remain below the
   500-line limit.
-- Marked `eth-valkyoth-codec` and `eth` for `0.5.0` publication.
-- Updated the optional `sanitization` dependency to `1.1.1` and marked
-  `eth-valkyoth-sanitization` for dependency-only `0.4.1` publication.
+- Addressed pentest findings by rejecting enum sanitization derives, adding
+  hardened-mode evidence, pinning official Ethereum source revisions, renaming
+  the production decode-limit template, expanding fuzz coverage, documenting
+  hash timing caveats, removing the dead-code typestate constructor from normal
+  builds, marking public error enums non-exhaustive, documenting
+  `TransactionType::try_from`, and fixing skipped-field generic derive bounds.
+- Marked `eth-valkyoth-codec`, `eth-valkyoth-primitives`,
+  `eth-valkyoth-protocol`, `eth-valkyoth-verify`, `eth-valkyoth-derive`,
+  `eth-valkyoth-sanitization`, and `eth` for `0.5.0` publication.
+- Marked `eth-valkyoth-signer` for dependency-only `0.3.2` publication.
+- Updated the optional `sanitization` dependency to `1.1.1`.
 - Left all other support crates on their previous published versions.
 
 ## Verification

@@ -21,7 +21,7 @@ impl DecodeLimits {
     /// Limits for unit tests and conformance fixtures.
     ///
     /// This is not a production policy. Production decoders should choose
-    /// deployment-specific limits or start from [`Self::PRODUCTION_RECOMMENDED`].
+    /// deployment-specific limits or start from [`Self::DEPLOYMENT_TEMPLATE`].
     pub const TEST_FIXTURE: Self = Self {
         max_input_bytes: 1 << 20,
         max_list_items: 4096,
@@ -31,11 +31,12 @@ impl DecodeLimits {
         max_total_items: 8192,
     };
 
-    /// Recommended starting point for production wire decoders.
+    /// Deployment template for externally reachable wire decoders.
     ///
-    /// Review and tighten these values per deployment context before relying
-    /// on them for externally reachable services.
-    pub const PRODUCTION_RECOMMENDED: Self = Self {
+    /// Using this constant unchanged in production is a security
+    /// misconfiguration. Copy it, review every limit against the deployment's
+    /// concurrency and memory policy, and tighten values before release.
+    pub const DEPLOYMENT_TEMPLATE: Self = Self {
         max_input_bytes: 2 << 20,
         max_list_items: 16_384,
         max_nesting_depth: 64,
@@ -274,8 +275,8 @@ mod tests {
     }
 
     #[test]
-    fn fixture_and_production_limits_are_distinct() {
-        let production = DecodeLimits::PRODUCTION_RECOMMENDED;
+    fn fixture_and_deployment_template_limits_are_distinct() {
+        let production = DecodeLimits::DEPLOYMENT_TEMPLATE;
         let fixture = DecodeLimits::TEST_FIXTURE;
 
         assert!(production.max_input_bytes > fixture.max_input_bytes);

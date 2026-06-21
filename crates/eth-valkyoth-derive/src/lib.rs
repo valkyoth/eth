@@ -3,19 +3,20 @@
 
 use proc_macro::TokenStream;
 use proc_macro2::TokenStream as TokenStream2;
-use quote::{format_ident, quote};
+use quote::quote;
 use syn::{
-    Data, DeriveInput, Error, Fields, Generics, LitStr, Path, parse_macro_input, parse_quote,
+    Data, DeriveInput, Error, Fields, GenericArgument, Generics, Ident, LitStr, Path,
+    PathArguments, Type, parse_macro_input, parse_quote,
 };
 
-/// Derives `eth_valkyoth_sanitization::SecureSanitize` for structs and enums.
+/// Derives `eth_valkyoth_sanitization::SecureSanitize` for structs.
 ///
 /// Fields marked `#[eth_sanitization(skip, reason = "...")]` are intentionally
 /// not sanitized. Use skips only for fields that cannot carry secret material.
 ///
-/// Enums must explicitly acknowledge that inactive variant backing storage is
-/// not sanitized by Rust's active-variant match semantics:
-/// `#[eth_sanitization(enum_inactive_variant_bytes = "acknowledged")]`.
+/// Enums are rejected because Rust does not clear inactive variant backing
+/// bytes when the active variant changes. Use a struct wrapper for secret
+/// material until a verified full-width clear primitive is available.
 #[proc_macro_derive(SecureSanitize, attributes(eth_sanitization))]
 pub fn derive_secure_sanitize(input: TokenStream) -> TokenStream {
     let input = parse_macro_input!(input as DeriveInput);
@@ -40,14 +41,11 @@ fn expand_secure_sanitize(input: &DeriveInput) -> Result<TokenStream2, Error> {
     let attrs = container_attrs(input)?;
     let crate_path = attrs.crate_path;
     let name = &input.ident;
+    let body = sanitize_body(&input.data, &crate_path)?;
     let mut generics = input.generics.clone();
-    add_sanitize_bounds(&mut generics, &crate_path);
+    let secret_params = sanitized_type_params(&input.data, input.generics.type_params())?;
+    add_sanitize_bounds(&mut generics, &crate_path, &secret_params);
     let (impl_generics, ty_generics, where_clause) = generics.split_for_impl();
-    let body = sanitize_body(
-        &input.data,
-        &crate_path,
-        attrs.enum_inactive_variant_bytes_acknowledged,
-    )?;
 
     Ok(quote! {
         impl #impl_generics #crate_path::SecureSanitize for #name #ty_generics #where_clause {
@@ -73,38 +71,22 @@ fn expand_secure_sanitize_on_drop(input: &DeriveInput) -> Result<TokenStream2, E
     })
 }
 
-fn add_sanitize_bounds(generics: &mut Generics, crate_path: &Path) {
+fn add_sanitize_bounds(generics: &mut Generics, crate_path: &Path, secret_params: &[Ident]) {
     for param in generics.type_params_mut() {
-        let bound = parse_quote!(#crate_path::SecureSanitize);
-        param.bounds.push(bound);
+        if secret_params.iter().any(|ident| ident == &param.ident) {
+            let bound = parse_quote!(#crate_path::SecureSanitize);
+            param.bounds.push(bound);
+        }
     }
 }
 
-fn sanitize_body(
-    data: &Data,
-    crate_path: &Path,
-    enum_inactive_variant_bytes_acknowledged: bool,
-) -> Result<TokenStream2, Error> {
+fn sanitize_body(data: &Data, crate_path: &Path) -> Result<TokenStream2, Error> {
     match data {
         Data::Struct(data) => sanitize_struct_fields(&data.fields, crate_path),
-        Data::Enum(data) => {
-            if !enum_inactive_variant_bytes_acknowledged {
-                return Err(Error::new_spanned(
-                    data.enum_token,
-                    "SecureSanitize enum derives must acknowledge inactive variant bytes with #[eth_sanitization(enum_inactive_variant_bytes = \"acknowledged\")]",
-                ));
-            }
-            let arms = data
-                .variants
-                .iter()
-                .map(|variant| sanitize_variant(variant, crate_path))
-                .collect::<Result<Vec<_>, _>>()?;
-            Ok(quote! {
-                match self {
-                    #(#arms),*
-                }
-            })
-        }
+        Data::Enum(data) => Err(Error::new_spanned(
+            data.enum_token,
+            "SecureSanitize cannot be derived for enums because inactive variant bytes may retain secrets; use a struct wrapper",
+        )),
         Data::Union(data) => Err(Error::new_spanned(
             data.union_token,
             "SecureSanitize cannot be derived for unions",
@@ -121,36 +103,6 @@ fn sanitize_struct_fields(fields: &Fields, crate_path: &Path) -> Result<TokenStr
             quote!(#crate_path::SecureSanitize::secure_sanitize(&mut self.#access);)
         });
     Ok(quote!(#(#calls)*))
-}
-
-fn sanitize_variant(variant: &syn::Variant, crate_path: &Path) -> Result<TokenStream2, Error> {
-    let name = &variant.ident;
-    match &variant.fields {
-        Fields::Named(fields) => {
-            let bindings = fields.named.iter().map(|field| field.ident.as_ref());
-            let mut calls = Vec::new();
-            for field in &fields.named {
-                if skip_reason(field)?.is_none() {
-                    let ident = field.ident.as_ref();
-                    calls.push(quote!(#crate_path::SecureSanitize::secure_sanitize(#ident);));
-                }
-            }
-            Ok(quote!(Self::#name { #(#bindings),* } => { #(#calls)* }))
-        }
-        Fields::Unnamed(fields) => {
-            let bindings = (0..fields.unnamed.len())
-                .map(|index| format_ident!("field_{index}"))
-                .collect::<Vec<_>>();
-            let mut calls = Vec::new();
-            for (field, binding) in fields.unnamed.iter().zip(bindings.iter()) {
-                if skip_reason(field)?.is_none() {
-                    calls.push(quote!(#crate_path::SecureSanitize::secure_sanitize(#binding);));
-                }
-            }
-            Ok(quote!(Self::#name(#(#bindings),*) => { #(#calls)* }))
-        }
-        Fields::Unit => Ok(quote!(Self::#name => {})),
-    }
 }
 
 struct FieldAccess {
@@ -192,13 +144,11 @@ fn field_accesses(fields: &Fields) -> Result<Vec<FieldAccess>, Error> {
 
 struct ContainerAttrs {
     crate_path: Path,
-    enum_inactive_variant_bytes_acknowledged: bool,
 }
 
 fn container_attrs(input: &DeriveInput) -> Result<ContainerAttrs, Error> {
     let mut attrs = ContainerAttrs {
         crate_path: parse_quote!(::eth_valkyoth_sanitization),
-        enum_inactive_variant_bytes_acknowledged: false,
     };
     for attr in input
         .attrs
@@ -211,15 +161,6 @@ fn container_attrs(input: &DeriveInput) -> Result<ContainerAttrs, Error> {
                 let literal: LitStr = value.parse()?;
                 attrs.crate_path = literal.parse()?;
                 Ok(())
-            } else if meta.path.is_ident("enum_inactive_variant_bytes") {
-                let value = meta.value()?;
-                let literal: LitStr = value.parse()?;
-                if literal.value() == "acknowledged" {
-                    attrs.enum_inactive_variant_bytes_acknowledged = true;
-                    Ok(())
-                } else {
-                    Err(meta.error("enum_inactive_variant_bytes must be exactly \"acknowledged\""))
-                }
             } else {
                 Err(meta.error("unsupported eth_sanitization container attribute"))
             }
@@ -269,6 +210,75 @@ fn skip_reason(field: &syn::Field) -> Result<Option<LitStr>, Error> {
     Ok(reason)
 }
 
+fn sanitized_type_params<'a>(
+    data: &Data,
+    type_params: impl Iterator<Item = &'a syn::TypeParam>,
+) -> Result<Vec<Ident>, Error> {
+    let params = type_params
+        .map(|param| param.ident.clone())
+        .collect::<Vec<_>>();
+    let fields = match data {
+        Data::Struct(data) => &data.fields,
+        Data::Enum(_) | Data::Union(_) => return Ok(Vec::new()),
+    };
+    let mut used = Vec::new();
+    for field in iter_fields(fields) {
+        if skip_reason(field)?.is_some() {
+            continue;
+        }
+        for ident in &params {
+            if type_uses_ident(&field.ty, ident) && !used.iter().any(|used| used == ident) {
+                used.push(ident.clone());
+            }
+        }
+    }
+    Ok(used)
+}
+
+fn iter_fields(fields: &Fields) -> Vec<&syn::Field> {
+    match fields {
+        Fields::Named(fields) => fields.named.iter().collect(),
+        Fields::Unnamed(fields) => fields.unnamed.iter().collect(),
+        Fields::Unit => Vec::new(),
+    }
+}
+
+fn type_uses_ident(ty: &Type, ident: &Ident) -> bool {
+    match ty {
+        Type::Array(ty) => type_uses_ident(&ty.elem, ident),
+        Type::BareFn(ty) => {
+            ty.inputs
+                .iter()
+                .any(|input| type_uses_ident(&input.ty, ident))
+                || matches!(&ty.output, syn::ReturnType::Type(_, ty) if type_uses_ident(ty, ident))
+        }
+        Type::Group(ty) => type_uses_ident(&ty.elem, ident),
+        Type::Paren(ty) => type_uses_ident(&ty.elem, ident),
+        Type::Path(ty) => path_uses_ident(&ty.path, ident),
+        Type::Ptr(ty) => type_uses_ident(&ty.elem, ident),
+        Type::Reference(ty) => type_uses_ident(&ty.elem, ident),
+        Type::Slice(ty) => type_uses_ident(&ty.elem, ident),
+        Type::Tuple(ty) => ty.elems.iter().any(|elem| type_uses_ident(elem, ident)),
+        _ => true,
+    }
+}
+
+fn path_uses_ident(path: &Path, ident: &Ident) -> bool {
+    path.segments.iter().any(|segment| {
+        segment.ident == *ident
+            || match &segment.arguments {
+                PathArguments::AngleBracketed(arguments) => arguments.args.iter().any(|arg| {
+                    matches!(arg, GenericArgument::Type(ty) if type_uses_ident(ty, ident))
+                }),
+                PathArguments::Parenthesized(arguments) => {
+                    arguments.inputs.iter().any(|ty| type_uses_ident(ty, ident))
+                        || matches!(&arguments.output, syn::ReturnType::Type(_, ty) if type_uses_ident(ty, ident))
+                }
+                PathArguments::None => false,
+            }
+    })
+}
+
 #[cfg(test)]
 mod tests {
     use super::*;
@@ -296,5 +306,40 @@ mod tests {
         let reason = skip_reason(&field);
 
         assert!(matches!(reason, Ok(Some(reason)) if reason.value() == "non-secret label"));
+    }
+
+    #[test]
+    fn enum_derives_are_rejected() {
+        let input: DeriveInput = parse_quote! {
+            enum SecretChoice {
+                Key(u8),
+                Empty,
+            }
+        };
+
+        let result = expand_secure_sanitize(&input);
+
+        assert!(
+            matches!(result, Err(error) if error.to_string().contains("cannot be derived for enums"))
+        );
+    }
+
+    #[test]
+    fn skipped_generic_fields_do_not_receive_sanitize_bounds() {
+        let input: DeriveInput = parse_quote! {
+            struct Wrapper<T, Label> {
+                secret: T,
+                #[eth_sanitization(skip, reason = "non-secret label")]
+                label: Label,
+            }
+        };
+
+        let result = expand_secure_sanitize(&input);
+        assert!(result.is_ok());
+        let rendered =
+            result.map_or_else(|_| std::string::String::new(), |output| output.to_string());
+
+        assert!(rendered.contains("T :"));
+        assert!(!rendered.contains("Label :"));
     }
 }

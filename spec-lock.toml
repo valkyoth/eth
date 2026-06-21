@@ -1,18 +1,20 @@
 # Pinned upstream specification and fixture revisions.
 #
-# This file is intentionally empty for v0.1.0 because no Ethereum conformance
-# suite is claimed yet.
+# v0.5.0 does not claim consensus-sensitive decoding or validation behavior
+# yet, but exact upstream revisions are pinned so future conformance fixtures
+# start from auditable source material.
 # See docs/spec-source-policy.md for the required source-check workflow.
 
 [ethereum]
 execution_specs_repo = "https://github.com/ethereum/execution-specs"
-execution_specs_rev = ""
-execution_tests_rev = ""
+execution_specs_rev = "b7033394dd34d44ce3045b66e487ee155dea6974"
+execution_tests_repo = "https://github.com/ethereum/tests"
+execution_tests_rev = "c67e485ff8b5be9abc8ad15345ec21aa22e290d9"
 eips_repo = "https://github.com/ethereum/EIPs"
-eips_rev = ""
+eips_rev = "843193ad6a3ca14fec26935d49e57835e2410491"
 execution_apis_repo = "https://github.com/ethereum/execution-apis"
-execution_apis_rev = ""
+execution_apis_rev = "bc78fe05591798c4f6e3f2660fda1447e709de8c"
 consensus_specs_repo = "https://github.com/ethereum/consensus-specs"
-consensus_specs_rev = ""
+consensus_specs_rev = "7d5f3348d7b947851861745be9ce0ba30e526531"
 local_reference_store_env = "ETH_REFERENCE_STORE"
 local_reference_store_default = "../../test/eth"

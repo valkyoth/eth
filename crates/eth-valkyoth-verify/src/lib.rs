@@ -9,6 +9,7 @@ use core::fmt;
 use eth_valkyoth_primitives::ChainId;
 
 /// Verification failure categories.
+#[non_exhaustive]
 #[derive(Clone, Copy, Debug, Eq, PartialEq)]
 pub enum VerifyError {
     /// The input is bound to a different chain.
@@ -61,6 +62,7 @@ impl fmt::Display for VerifyError {
 impl std::error::Error for VerifyError {}
 
 /// Stable high-level verification error categories.
+#[non_exhaustive]
 #[derive(Clone, Copy, Debug, Eq, PartialEq)]
 pub enum VerifyErrorCategory {
     /// Replay-domain or chain binding failure.
