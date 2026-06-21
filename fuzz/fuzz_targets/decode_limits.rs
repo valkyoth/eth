@@ -18,9 +18,13 @@ fuzz_target!(|data: &[u8]| {
         let _ = limits.check_list_count(value);
         let _ = limits.check_nesting_depth(value);
         let _ = limits.check_single_allocation_limit(value);
+        let _ = limits.check_proof_node_count(value);
+        let _ = limits.check_item_count(value);
         let _ = accumulator.check_list_count(value);
         let _ = accumulator.check_nesting_depth(value);
         let _ = accumulator.check_allocation(value);
+        let _ = accumulator.account_proof_nodes(value);
+        let _ = accumulator.account_items(value);
     }
 });
 

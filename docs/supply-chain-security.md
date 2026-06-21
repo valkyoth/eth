@@ -32,6 +32,6 @@ dependencies.
 | `proc-macro2` | `1.0.106` | `MIT OR Apache-2.0` | enabled | Token handling for optional derive macros. |
 | `quote` | `1.0.45` | `MIT OR Apache-2.0` | enabled | Code generation for optional derive macros. |
 | `libfuzzer-sys` | `0.4.13` | `(MIT OR Apache-2.0) AND NCSA` | fuzz-only | LLVM libFuzzer runtime for `fuzz/` targets. |
-| `sanitization` | `1.1.0` | `MIT OR Apache-2.0` | disabled | Optional best-effort secret memory clearing bridge. |
+| `sanitization` | `1.1.1` | `MIT OR Apache-2.0` | disabled | Optional best-effort secret memory clearing bridge. |
 | `subtle` | `2.6.1` | `BSD-3-Clause` | disabled, `core_hint_black_box` enabled | Constant-time equality for security-boundary byte comparisons. |
 | `syn` | `2.0.118` | `MIT OR Apache-2.0` | enabled, `full` enabled | Syntax parsing for optional derive macros. |

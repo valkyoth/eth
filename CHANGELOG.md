@@ -4,6 +4,9 @@ All notable changes to `eth` are documented here.
 
 ## Unreleased
 
+- Started `0.5.0` by extending the decode-budget model with proof-node and
+  cumulative item budgets, checked length and range helpers, and adversarial
+  tests for overflow and limit rejection.
 - Started `0.4.0` by adding independent support-crate version planning,
   release-plan validation, and a crate version matrix to avoid unnecessary
   crates.io publishes.

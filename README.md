@@ -35,7 +35,7 @@ dependencies.
 
 ## Current Status
 
-Status: `v0.4.0` in development; `v0.3.0` published.
+Status: `v0.5.0` in development; `v0.4.0` published.
 
 Implemented now:
 
@@ -45,7 +45,8 @@ Implemented now:
 - Explicit primitive domains for chain, block, gas, nonce, timestamp, address,
   hash, wei, and transaction type values.
 - Constant-time equality composition for fixed-width hash and wei values.
-- Bounded decode limits plus stateful cumulative allocation accounting.
+- Bounded decode limits plus stateful cumulative allocation, item, and proof-node
+  accounting.
 - Stable error codes, messages, categories, and formatting for codec,
   protocol, fork, feature, resource, and verification failures.
 - Optional sanitization and derive support crates outside the default feature
@@ -84,14 +85,14 @@ Not implemented yet:
 
 ```toml
 [dependencies]
-eth = "0.4"
+eth = "0.5"
 ```
 
 For optional sanitization support:
 
 ```toml
 [dependencies]
-eth = { version = "0.4", features = ["sanitization"] }
+eth = { version = "0.5", features = ["sanitization"] }
 ```
 
 ## Features
@@ -187,6 +188,8 @@ let limits = DecodeLimits {
     max_list_items: 16,
     max_nesting_depth: 4,
     max_total_allocation: 64,
+    max_proof_nodes: 8,
+    max_total_items: 32,
 };
 
 assert_eq!(limits.check_input_len(512), Ok(()));
@@ -195,6 +198,7 @@ let mut budget = limits.accumulator();
 assert_eq!(budget.check_allocation(32), Ok(()));
 assert_eq!(budget.check_allocation(32), Ok(()));
 assert_eq!(budget.check_allocation(1), Err(DecodeError::AllocationExceeded));
+assert_eq!(budget.account_items(33), Err(DecodeError::ItemCountExceeded));
 ```
 
 ## Optional Sanitization
@@ -243,7 +247,7 @@ friendly, and independently testable.
 The minimum supported Rust version is Rust `1.90.0`. New deployments should use
 the pinned stable Rust `1.96.0` until the toolchain policy is updated.
 
-Compatibility evidence for `0.4.0`:
+Compatibility evidence for `0.5.0`:
 
 | Rust | Local Evidence |
 | --- | --- |
@@ -259,8 +263,8 @@ Compatibility evidence for `0.4.0`:
 
 ```bash
 scripts/checks.sh
-scripts/release_0_4_gate.sh
-scripts/validate-release-readiness.sh v0.4.0
+scripts/release_0_5_gate.sh
+scripts/validate-release-readiness.sh v0.5.0
 ```
 
 For dependency-policy checks, install `cargo-deny` and `cargo-audit`, then run:
