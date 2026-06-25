@@ -1,8 +1,8 @@
 # Pinned upstream specification and fixture revisions.
 #
-# v0.5.0 does not claim consensus-sensitive decoding or validation behavior
-# yet, but exact upstream revisions are pinned so future conformance fixtures
-# start from auditable source material.
+# v0.6.0 starts scalar RLP decoding from pinned upstream revisions. Broader
+# consensus validation and fixture coverage remain gated by the spec-source
+# policy.
 # See docs/spec-source-policy.md for the required source-check workflow.
 
 [ethereum]

@@ -26,7 +26,7 @@ publication when a crate is marked `unchanged`.
 
 | Crate | Published | Planned | Change | Publish | Reason |
 | --- | --- | --- | --- | --- | --- |
-| `eth-valkyoth-codec` | `0.5.0` | `0.5.0` | `unchanged` | No | Codec remains on the published v0.5.0 API until the v0.6.0 RLP scalar decoder lands. |
+| `eth-valkyoth-codec` | `0.5.0` | `0.6.0` | `code` | Yes | Adds the canonical RLP scalar decoder with exact-consumption and malformed length checks. |
 | `eth-valkyoth-primitives` | `0.5.0` | `0.5.0` | `unchanged` | No | Primitive domains remain unchanged for the initial v0.6.0 dependency refresh. |
 | `eth-valkyoth-protocol` | `0.5.0` | `0.5.0` | `unchanged` | No | Protocol state remains unchanged for the initial v0.6.0 dependency refresh. |
 | `eth-valkyoth-verify` | `0.5.0` | `0.5.0` | `unchanged` | No | Verification boundaries remain unchanged for the initial v0.6.0 dependency refresh. |

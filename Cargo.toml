@@ -42,7 +42,7 @@ cast_possible_truncation = "deny"
 cast_sign_loss = "deny"
 
 [workspace.dependencies]
-eth-valkyoth-codec = { path = "crates/eth-valkyoth-codec", version = "0.5.0" }
+eth-valkyoth-codec = { path = "crates/eth-valkyoth-codec", version = "0.6.0" }
 eth-valkyoth-derive = { path = "crates/eth-valkyoth-derive", version = "0.6.0" }
 eth-valkyoth-evm = { path = "crates/eth-valkyoth-evm", version = "0.3.0" }
 eth-valkyoth-primitives = { path = "crates/eth-valkyoth-primitives", version = "0.5.0" }

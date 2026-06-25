@@ -201,6 +201,23 @@ assert_eq!(budget.check_allocation(1), Err(DecodeError::AllocationExceeded));
 assert_eq!(budget.account_items(33), Err(DecodeError::ItemCountExceeded));
 ```
 
+## RLP Scalar Decoding
+
+The first RLP pass decodes canonical byte-string scalars with exact
+consumption. List decoding is intentionally left for the next milestone:
+
+```rust
+use eth::codec::{DecodeLimits, RlpScalarForm, decode_rlp_scalar};
+
+let scalar = decode_rlp_scalar(&[0x83, b'd', b'o', b'g'], DecodeLimits::TEST_FIXTURE)?;
+
+assert_eq!(scalar.payload(), b"dog");
+assert_eq!(scalar.encoded_len(), 4);
+assert_eq!(scalar.header_len(), 1);
+assert_eq!(scalar.form(), RlpScalarForm::ShortString);
+# Ok::<(), eth::error::DecodeError>(())
+```
+
 ## Optional Sanitization
 
 The main facade stays small by default. Applications that handle local secret

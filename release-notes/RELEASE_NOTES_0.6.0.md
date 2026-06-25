@@ -4,8 +4,8 @@ Status: in development
 
 ## Summary
 
-`0.6.0` is the RLP scalar decoder milestone. The first implementation pass
-refreshes dependencies and release tooling evidence before parser code lands.
+`0.6.0` is the RLP scalar decoder milestone. It starts with dependency and
+tooling refreshes, then adds canonical scalar RLP byte-string decoding.
 
 ## Included So Far
 
@@ -13,18 +13,20 @@ refreshes dependencies and release tooling evidence before parser code lands.
 - Updated optional `sanitization` support from `1.1.1` to `1.2.2`.
 - Confirmed GitHub tooling is current with `scripts/check_latest_tools.sh`;
   no workflow pin changes were required.
+- Added borrowed RLP scalar item decoding for single-byte, short-string, and
+  long-string forms.
+- Added exact-consumption enforcement for scalar decoder entry points.
+- Added malformed length, trailing-data, list-prefix, canonical-form, and
+  budget enforcement tests.
+- Added a fuzz target for exact and prefix RLP scalar decoding paths.
 - Added the `scripts/release_0_6_gate.sh` release gate.
-- Marked `eth-valkyoth-derive`, `eth-valkyoth-sanitization`, and `eth` for
-  `0.6.0` publication.
-- Left codec, primitive, protocol, verification, signer, EVM, RPC, Reth, and
-  testkit packages on their previously published versions for this first pass.
+- Marked `eth-valkyoth-codec`, `eth-valkyoth-derive`,
+  `eth-valkyoth-sanitization`, and `eth` for `0.6.0` publication.
+- Left primitive, protocol, verification, signer, EVM, RPC, Reth, and testkit
+  packages on their previously published versions for this pass.
 
 ## Still Required Before Tag
 
-- RLP scalar item model.
-- Short and long string handling.
-- Exact-consumption and trailing-data rejection.
-- Malformed length tests.
 - External pentest and permanent `security/pentest/v0.6.0.md` report.
 
 ## Verification

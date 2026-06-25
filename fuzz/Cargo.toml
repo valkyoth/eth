@@ -11,12 +11,19 @@ license = "EUPL-1.2"
 cargo-fuzz = true
 
 [dependencies]
-eth-valkyoth-codec = { path = "../crates/eth-valkyoth-codec", version = "0.5.0" }
+eth-valkyoth-codec = { path = "../crates/eth-valkyoth-codec", version = "0.6.0" }
 libfuzzer-sys = "0.4.13"
 
 [[bin]]
 name = "decode_limits"
 path = "fuzz_targets/decode_limits.rs"
+test = false
+doc = false
+bench = false
+
+[[bin]]
+name = "rlp_scalar"
+path = "fuzz_targets/rlp_scalar.rs"
 test = false
 doc = false
 bench = false

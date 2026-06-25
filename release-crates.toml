@@ -4,10 +4,10 @@ policy = "independent"
 
 [crates."eth-valkyoth-codec"]
 previous_version = "0.5.0"
-version = "0.5.0"
-change = "unchanged"
-publish = false
-reason = "Codec remains on the published v0.5.0 API until the v0.6.0 RLP scalar decoder lands."
+version = "0.6.0"
+change = "code"
+publish = true
+reason = "Adds the canonical RLP scalar decoder with exact-consumption and malformed length checks."
 
 [crates."eth-valkyoth-primitives"]
 previous_version = "0.5.0"

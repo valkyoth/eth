@@ -8,6 +8,9 @@ All notable changes to `eth` are documented here.
   decoder work: updated `quote` to `1.0.46`, updated optional `sanitization`
   support to `1.2.2`, confirmed GitHub tooling is current, and added the
   v0.6 release gate.
+- Added canonical RLP scalar byte-string decoding with exact-consumption,
+  malformed length, list-prefix rejection, and budget enforcement tests.
+- Added fuzz coverage for exact and prefix RLP scalar decoding paths.
 - Started `0.5.0` by extending the decode-budget model with proof-node and
   cumulative item budgets, checked length and range helpers, and adversarial
   tests for overflow and limit rejection.

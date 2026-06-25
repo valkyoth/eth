@@ -12,6 +12,8 @@ pub enum DecodeError {
     DecoderOverread,
     /// The input is malformed for the selected wire format.
     Malformed,
+    /// An RLP list was encountered where a scalar byte string was required.
+    UnexpectedList,
     /// A decoded list contains more items than the active list budget.
     ListTooLong,
     /// Decoding exceeded the active nesting-depth budget.
@@ -37,6 +39,7 @@ impl DecodeError {
             Self::TrailingBytes => "ETH_CODEC_TRAILING_BYTES",
             Self::DecoderOverread => "ETH_CODEC_DECODER_OVERREAD",
             Self::Malformed => "ETH_CODEC_MALFORMED",
+            Self::UnexpectedList => "ETH_CODEC_UNEXPECTED_LIST",
             Self::ListTooLong => "ETH_CODEC_LIST_TOO_LONG",
             Self::NestingTooDeep => "ETH_CODEC_NESTING_TOO_DEEP",
             Self::AllocationExceeded => "ETH_CODEC_ALLOCATION_EXCEEDED",
@@ -55,6 +58,7 @@ impl DecodeError {
             Self::TrailingBytes => "decoded value did not consume the full input",
             Self::DecoderOverread => "decoder consumed more bytes than were available",
             Self::Malformed => "input is malformed for the selected codec",
+            Self::UnexpectedList => "RLP list encountered where scalar was required",
             Self::ListTooLong => "decoded list exceeds the active item limit",
             Self::NestingTooDeep => "decoded structure exceeds the active nesting limit",
             Self::AllocationExceeded => "decoder exceeded the active allocation limit",
@@ -78,6 +82,7 @@ impl DecodeError {
             Self::TrailingBytes
             | Self::DecoderOverread
             | Self::Malformed
+            | Self::UnexpectedList
             | Self::LengthOverflow
             | Self::OffsetOutOfBounds => DecodeErrorCategory::MalformedInput,
         }
@@ -97,6 +102,7 @@ impl DecodeError {
             Self::TrailingBytes
             | Self::DecoderOverread
             | Self::Malformed
+            | Self::UnexpectedList
             | Self::LengthOverflow
             | Self::OffsetOutOfBounds => None,
         }
@@ -235,5 +241,18 @@ mod tests {
             DecodeErrorCategory::MalformedInput
         );
         assert_eq!(DecodeError::OffsetOutOfBounds.resource(), None);
+    }
+
+    #[test]
+    fn unexpected_list_is_malformed_input() {
+        assert_eq!(
+            DecodeError::UnexpectedList.code(),
+            "ETH_CODEC_UNEXPECTED_LIST"
+        );
+        assert_eq!(
+            DecodeError::UnexpectedList.category(),
+            DecodeErrorCategory::MalformedInput
+        );
+        assert_eq!(DecodeError::UnexpectedList.resource(), None);
     }
 }
