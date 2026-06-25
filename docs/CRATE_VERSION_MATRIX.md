@@ -33,7 +33,7 @@ publication when a crate is marked `unchanged`.
 | `eth-valkyoth-derive` | `0.5.0` | `0.6.0` | `code` | Yes | Starts v0.6.0 by refreshing derive macro dependencies, including `quote` 1.0.46. |
 | `eth-valkyoth-sanitization` | `0.5.0` | `0.6.0` | `code` | Yes | Starts v0.6.0 by refreshing optional sanitization support to `sanitization` 1.2.2. |
 | `eth-valkyoth-evm` | `0.3.0` | `0.3.0` | `unchanged` | No | EVM boundary remains unchanged for the initial v0.6.0 dependency refresh. |
-| `eth-valkyoth-rpc` | `0.3.0` | `0.3.0` | `unchanged` | No | RPC boundary remains unchanged for the initial v0.6.0 dependency refresh. |
+| `eth-valkyoth-rpc` | `0.3.0` | `0.6.0` | `code` | Yes | Requires explicit acknowledgment before using the trusted RPC response model. |
 | `eth-valkyoth-signer` | `0.3.2` | `0.3.2` | `unchanged` | No | Signer remains on the published v0.3.2 dependency range. |
 | `eth-valkyoth-reth` | `0.3.0` | `0.3.0` | `unchanged` | No | Reth boundary remains unchanged for the initial v0.6.0 dependency refresh. |
 | `eth-valkyoth-testkit` | `0.3.0` | `0.3.0` | `unchanged` | No | Testkit boundary remains unchanged for the initial v0.6.0 dependency refresh. |

@@ -28,7 +28,7 @@ pub fn require_range_in_bounds(
     input_len: usize,
 ) -> Result<usize, DecodeError> {
     let end = checked_range_end(offset, len)?;
-    if offset > input_len || end > input_len {
+    if end > input_len {
         return Err(DecodeError::OffsetOutOfBounds);
     }
     Ok(end)

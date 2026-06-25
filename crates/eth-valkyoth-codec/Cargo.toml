@@ -12,6 +12,7 @@ readme = "README.md"
 [features]
 default = []
 std = []
+testing = []
 
 [lints]
 workspace = true

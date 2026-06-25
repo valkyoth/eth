@@ -85,14 +85,14 @@ Not implemented yet:
 
 ```toml
 [dependencies]
-eth = "0.5"
+eth = "0.6"
 ```
 
 For optional sanitization support:
 
 ```toml
 [dependencies]
-eth = { version = "0.5", features = ["sanitization"] }
+eth = { version = "0.6", features = ["sanitization"] }
 ```
 
 ## Features
@@ -209,7 +209,15 @@ consumption. List decoding is intentionally left for the next milestone:
 ```rust
 use eth::codec::{DecodeLimits, RlpScalarForm, decode_rlp_scalar};
 
-let scalar = decode_rlp_scalar(&[0x83, b'd', b'o', b'g'], DecodeLimits::TEST_FIXTURE)?;
+let limits = DecodeLimits {
+    max_input_bytes: 32,
+    max_list_items: 4,
+    max_nesting_depth: 4,
+    max_total_allocation: 32,
+    max_proof_nodes: 4,
+    max_total_items: 4,
+};
+let scalar = decode_rlp_scalar(&[0x83, b'd', b'o', b'g'], limits)?;
 
 assert_eq!(scalar.payload(), b"dog");
 assert_eq!(scalar.encoded_len(), 4);
@@ -235,7 +243,7 @@ For derive macros, depend on the support crate directly:
 
 ```toml
 [dependencies]
-eth-valkyoth-sanitization = { version = "0.5", features = ["derive"] }
+eth-valkyoth-sanitization = { version = "0.6", features = ["derive"] }
 ```
 
 ## Workspace Shape
@@ -264,7 +272,7 @@ friendly, and independently testable.
 The minimum supported Rust version is Rust `1.90.0`. New deployments should use
 the pinned stable Rust `1.96.0` until the toolchain policy is updated.
 
-Compatibility evidence for `0.5.0`:
+Compatibility evidence for `0.6.0`:
 
 | Rust | Local Evidence |
 | --- | --- |
@@ -280,8 +288,8 @@ Compatibility evidence for `0.5.0`:
 
 ```bash
 scripts/checks.sh
-scripts/release_0_5_gate.sh
-scripts/validate-release-readiness.sh v0.5.0
+scripts/release_0_6_gate.sh
+scripts/validate-release-readiness.sh v0.6.0
 ```
 
 For dependency-policy checks, install `cargo-deny` and `cargo-audit`, then run:

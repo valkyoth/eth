@@ -67,16 +67,19 @@ pub fn decode_rlp_scalar<'a>(
     limits: DecodeLimits,
 ) -> Result<RlpScalar<'a>, DecodeError> {
     let mut accumulator = limits.accumulator();
-    let scalar = decode_rlp_scalar_prefix(input, &mut accumulator)?;
+    let scalar = decode_rlp_scalar_partial(input, &mut accumulator)?;
     require_exact_consumption(scalar.encoded_len, input.len())?;
     Ok(scalar)
 }
 
 /// Decodes one canonical RLP scalar byte string from the start of `input`.
 ///
+/// Warning: this intentionally accepts trailing bytes. Use
+/// [`decode_rlp_scalar`] when the full input must be consumed.
+///
 /// This helper does not reject trailing bytes. It is intended for future nested
 /// decoders that need to consume one item while sharing cumulative budgets.
-pub fn decode_rlp_scalar_prefix<'a>(
+pub fn decode_rlp_scalar_partial<'a>(
     input: &'a [u8],
     accumulator: &mut DecodeAccumulator,
 ) -> Result<RlpScalar<'a>, DecodeError> {
@@ -103,11 +106,8 @@ fn decode_single_byte(input: &[u8]) -> Result<RlpScalar<'_>, DecodeError> {
 }
 
 fn decode_short_string(input: &[u8], prefix: u8) -> Result<RlpScalar<'_>, DecodeError> {
-    let payload_len = usize::from(
-        prefix
-            .checked_sub(SHORT_STRING_OFFSET)
-            .ok_or(DecodeError::Malformed)?,
-    );
+    // The public dispatcher only calls this for prefixes in 0x80..=0xb7.
+    let payload_len = usize::from(prefix.saturating_sub(SHORT_STRING_OFFSET));
     let payload = payload(input, 1, payload_len)?;
     if payload_len == 1 && payload.first().is_some_and(|byte| *byte <= 0x7f) {
         return Err(DecodeError::Malformed);
@@ -121,11 +121,8 @@ fn decode_short_string(input: &[u8], prefix: u8) -> Result<RlpScalar<'_>, Decode
 }
 
 fn decode_long_string(input: &[u8], prefix: u8) -> Result<RlpScalar<'_>, DecodeError> {
-    let len_of_len = usize::from(
-        prefix
-            .checked_sub(LONG_STRING_OFFSET)
-            .ok_or(DecodeError::Malformed)?,
-    );
+    // The public dispatcher only calls this for prefixes in 0xb8..=0xbf.
+    let len_of_len = usize::from(prefix.saturating_sub(LONG_STRING_OFFSET));
     let payload_len = parse_payload_len(input, 1, len_of_len)?;
     if payload_len <= SHORT_STRING_LIMIT {
         return Err(DecodeError::Malformed);
@@ -145,7 +142,7 @@ fn parse_payload_len(input: &[u8], offset: usize, len: usize) -> Result<usize, D
     let bytes = input
         .get(offset..end)
         .ok_or(DecodeError::OffsetOutOfBounds)?;
-    if bytes.first().is_none_or(|byte| *byte == 0) {
+    if bytes.first().is_some_and(|byte| *byte == 0) {
         return Err(DecodeError::Malformed);
     }
 
@@ -274,11 +271,11 @@ mod tests {
     }
 
     #[test]
-    fn prefix_decoder_leaves_trailing_bytes_to_caller() {
+    fn partial_decoder_leaves_trailing_bytes_to_caller() {
         let mut accumulator = DecodeLimits::TEST_FIXTURE.accumulator();
 
         assert!(matches!(
-            decode_rlp_scalar_prefix(&[0x83, b'd', b'o', b'g', 0x80], &mut accumulator),
+            decode_rlp_scalar_partial(&[0x83, b'd', b'o', b'g', 0x80], &mut accumulator),
             Ok(scalar) if scalar.payload() == b"dog" && scalar.encoded_len() == 4
         ));
         assert_eq!(accumulator.total_items(), 1);

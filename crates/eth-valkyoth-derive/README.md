@@ -6,7 +6,7 @@ Most users should depend on the facade crate instead:
 
 ```toml
 [dependencies]
-eth = "0.5"
+eth = "0.6"
 ```
 
 Crates.io: <https://crates.io/crates/eth>
@@ -17,7 +17,7 @@ and does not add runtime clearing by itself.
 
 ```toml
 [dependencies]
-eth-valkyoth-sanitization = { version = "0.5", features = ["derive"] }
+eth-valkyoth-sanitization = { version = "0.6", features = ["derive"] }
 ```
 
 Supported field attribute:

@@ -6,7 +6,7 @@ Most users should depend on the facade crate instead:
 
 ```toml
 [dependencies]
-eth = "0.5"
+eth = "0.6"
 ```
 
 Crates.io: <https://crates.io/crates/eth>
@@ -18,14 +18,14 @@ the default `eth` dependency graph.
 
 ```toml
 [dependencies]
-eth-valkyoth-sanitization = "0.5"
+eth-valkyoth-sanitization = "0.6"
 ```
 
 For derive macros:
 
 ```toml
 [dependencies]
-eth-valkyoth-sanitization = { version = "0.5", features = ["derive"] }
+eth-valkyoth-sanitization = { version = "0.6", features = ["derive"] }
 ```
 
 The derive macros generate calls to `eth_valkyoth_sanitization::SecureSanitize`.
@@ -42,13 +42,20 @@ that match the target:
 ```toml
 [dependencies]
 eth-valkyoth-sanitization = {
-    version = "0.5",
-    features = ["memory-lock", "multi-pass-clear", "cache-flush", "register-scrub"]
+    version = "0.6",
+    features = [
+        "hardened-only",
+        "memory-lock",
+        "multi-pass-clear",
+        "cache-flush",
+        "register-scrub",
+    ]
 }
 ```
 
-The crate exposes `HARDENED_MODE` so applications can assert the selected
-feature set in their own startup checks.
+The `hardened-only` feature fails compilation unless the full hardened feature
+set is present. The crate also exposes `HARDENED_MODE` so applications can
+assert the selected feature set in their own startup checks.
 
 Applications that handle private keys or seeds should add a hard fail for the
 expected feature set:

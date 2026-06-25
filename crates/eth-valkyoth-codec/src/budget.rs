@@ -18,10 +18,12 @@ pub struct DecodeLimits {
 }
 
 impl DecodeLimits {
-    /// Limits for unit tests and conformance fixtures.
+    /// Limits for unit tests, conformance fixtures, and fuzz targets.
     ///
     /// This is not a production policy. Production decoders should choose
-    /// deployment-specific limits or start from [`Self::DEPLOYMENT_TEMPLATE`].
+    /// deployment-specific limits or start from
+    /// [`Self::DEPLOYMENT_STARTING_POINT`].
+    #[cfg(any(test, feature = "testing"))]
     pub const TEST_FIXTURE: Self = Self {
         max_input_bytes: 1 << 20,
         max_list_items: 4096,
@@ -31,12 +33,13 @@ impl DecodeLimits {
         max_total_items: 8192,
     };
 
-    /// Deployment template for externally reachable wire decoders.
+    /// Starting point for externally reachable wire decoders.
     ///
     /// Using this constant unchanged in production is a security
     /// misconfiguration. Copy it, review every limit against the deployment's
     /// concurrency and memory policy, and tighten values before release.
-    pub const DEPLOYMENT_TEMPLATE: Self = Self {
+    #[doc(alias = "DEPLOYMENT_TEMPLATE")]
+    pub const DEPLOYMENT_STARTING_POINT: Self = Self {
         max_input_bytes: 2 << 20,
         max_list_items: 16_384,
         max_nesting_depth: 64,
@@ -112,6 +115,15 @@ impl DecodeLimits {
             total_items: 0,
             proof_nodes: 0,
         }
+    }
+
+    /// Rejects use of the unchanged deployment starting point as a final
+    /// production policy.
+    pub fn validate_deployment_policy(self) -> Result<(), DecodeError> {
+        if self == Self::DEPLOYMENT_STARTING_POINT {
+            return Err(DecodeError::UnreviewedDeploymentPolicy);
+        }
+        Ok(())
     }
 }
 
@@ -275,8 +287,8 @@ mod tests {
     }
 
     #[test]
-    fn fixture_and_deployment_template_limits_are_distinct() {
-        let production = DecodeLimits::DEPLOYMENT_TEMPLATE;
+    fn fixture_and_deployment_starting_point_limits_are_distinct() {
+        let production = DecodeLimits::DEPLOYMENT_STARTING_POINT;
         let fixture = DecodeLimits::TEST_FIXTURE;
 
         assert!(production.max_input_bytes > fixture.max_input_bytes);
@@ -349,5 +361,19 @@ mod tests {
             Err(DecodeError::ProofTooLarge)
         );
         assert_eq!(accumulator.proof_nodes(), 3);
+    }
+
+    #[test]
+    fn deployment_starting_point_must_be_reviewed_before_use() {
+        assert_eq!(
+            DecodeLimits::DEPLOYMENT_STARTING_POINT.validate_deployment_policy(),
+            Err(DecodeError::UnreviewedDeploymentPolicy)
+        );
+
+        let reviewed = DecodeLimits {
+            max_input_bytes: DecodeLimits::DEPLOYMENT_STARTING_POINT.max_input_bytes / 2,
+            ..DecodeLimits::DEPLOYMENT_STARTING_POINT
+        };
+        assert_eq!(reviewed.validate_deployment_policy(), Ok(()));
     }
 }

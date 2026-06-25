@@ -14,6 +14,20 @@
 //! - enable `register-scrub` where supported by the target toolchain;
 //! - keep crash dumps, logs, serde, and copies outside this crate's boundary.
 
+#[cfg(all(
+    feature = "hardened-only",
+    not(all(
+        feature = "memory-lock",
+        feature = "multi-pass-clear",
+        feature = "cache-flush",
+        feature = "register-scrub"
+    ))
+))]
+compile_error!(
+    "eth-valkyoth-sanitization: hardened-only requires memory-lock, \
+     multi-pass-clear, cache-flush, and register-scrub"
+);
+
 pub use sanitization::{SecretBytes, SecureSanitize, sanitize_bytes};
 
 #[cfg(feature = "derive")]

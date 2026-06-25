@@ -26,7 +26,7 @@
 `eth` is the public facade crate for a `no_std`-first Ethereum
 execution-layer protocol workspace.
 
-The crate is intentionally conservative at `0.5.0`: it provides explicit
+The crate is intentionally conservative at `0.6.0`: it provides explicit
 Ethereum primitive domains, bounded decode-budget policy, stable error
 categories, small first-party crate boundaries, optional sanitization support,
 and release evidence before RPC, signer, EVM, Reth, or P2P integrations become
@@ -77,21 +77,21 @@ Not implemented yet:
 
 ```toml
 [dependencies]
-eth = "0.5"
+eth = "0.6"
 ```
 
 Disable defaults explicitly for embedded or freestanding builds:
 
 ```toml
 [dependencies]
-eth = { version = "0.5", default-features = false }
+eth = { version = "0.6", default-features = false }
 ```
 
 Optional sanitization support:
 
 ```toml
 [dependencies]
-eth = { version = "0.5", features = ["sanitization"] }
+eth = { version = "0.6", features = ["sanitization"] }
 ```
 
 ## Features
@@ -212,7 +212,15 @@ consumption. List decoding is intentionally left for the next milestone:
 ```rust
 use eth::codec::{DecodeLimits, RlpScalarForm, decode_rlp_scalar};
 
-let scalar = decode_rlp_scalar(&[0x83, b'd', b'o', b'g'], DecodeLimits::TEST_FIXTURE)?;
+let limits = DecodeLimits {
+    max_input_bytes: 32,
+    max_list_items: 4,
+    max_nesting_depth: 4,
+    max_total_allocation: 32,
+    max_proof_nodes: 4,
+    max_total_items: 4,
+};
+let scalar = decode_rlp_scalar(&[0x83, b'd', b'o', b'g'], limits)?;
 
 assert_eq!(scalar.payload(), b"dog");
 assert_eq!(scalar.encoded_len(), 4);
@@ -238,7 +246,7 @@ For derive macros, depend on the support crate directly:
 
 ```toml
 [dependencies]
-eth-valkyoth-sanitization = { version = "0.5", features = ["derive"] }
+eth-valkyoth-sanitization = { version = "0.6", features = ["derive"] }
 ```
 
 ## Support Crates
@@ -265,7 +273,7 @@ the workspace can keep small, auditable boundaries:
 The minimum supported Rust version is Rust `1.90.0`. New deployments should use
 the latest stable Rust verified by the release gates.
 
-Compatibility evidence for `0.5.0`:
+Compatibility evidence for `0.6.0`:
 
 | Rust | Local Evidence |
 | --- | --- |

@@ -11,7 +11,7 @@ license = "EUPL-1.2"
 cargo-fuzz = true
 
 [dependencies]
-eth-valkyoth-codec = { path = "../crates/eth-valkyoth-codec", version = "0.6.0" }
+eth-valkyoth-codec = { path = "../crates/eth-valkyoth-codec", version = "0.6.0", features = ["testing"] }
 libfuzzer-sys = "0.4.13"
 
 [[bin]]

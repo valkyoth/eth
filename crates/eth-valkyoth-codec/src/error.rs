@@ -24,6 +24,8 @@ pub enum DecodeError {
     ProofTooLarge,
     /// A decoder visited more items than the active cumulative item budget.
     ItemCountExceeded,
+    /// A deployment used an unchanged starter budget policy.
+    UnreviewedDeploymentPolicy,
     /// Length or offset arithmetic overflowed.
     LengthOverflow,
     /// An offset or range points outside the input.
@@ -45,6 +47,7 @@ impl DecodeError {
             Self::AllocationExceeded => "ETH_CODEC_ALLOCATION_EXCEEDED",
             Self::ProofTooLarge => "ETH_CODEC_PROOF_TOO_LARGE",
             Self::ItemCountExceeded => "ETH_CODEC_ITEM_COUNT_EXCEEDED",
+            Self::UnreviewedDeploymentPolicy => "ETH_CODEC_UNREVIEWED_DEPLOYMENT_POLICY",
             Self::LengthOverflow => "ETH_CODEC_LENGTH_OVERFLOW",
             Self::OffsetOutOfBounds => "ETH_CODEC_OFFSET_OUT_OF_BOUNDS",
         }
@@ -64,6 +67,9 @@ impl DecodeError {
             Self::AllocationExceeded => "decoder exceeded the active allocation limit",
             Self::ProofTooLarge => "proof exceeds the active proof-node limit",
             Self::ItemCountExceeded => "decoder exceeded the active cumulative item limit",
+            Self::UnreviewedDeploymentPolicy => {
+                "deployment decode policy must be reviewed and tightened"
+            }
             Self::LengthOverflow => "length or offset arithmetic overflowed",
             Self::OffsetOutOfBounds => "offset or range is outside the input",
         }
@@ -78,7 +84,8 @@ impl DecodeError {
             | Self::NestingTooDeep
             | Self::AllocationExceeded
             | Self::ProofTooLarge
-            | Self::ItemCountExceeded => DecodeErrorCategory::ResourceExhaustion,
+            | Self::ItemCountExceeded
+            | Self::UnreviewedDeploymentPolicy => DecodeErrorCategory::ResourceExhaustion,
             Self::TrailingBytes
             | Self::DecoderOverread
             | Self::Malformed
@@ -99,6 +106,7 @@ impl DecodeError {
             Self::AllocationExceeded => Some(ResourceError::AllocationBytes),
             Self::ProofTooLarge => Some(ResourceError::ProofNodes),
             Self::ItemCountExceeded => Some(ResourceError::TotalItems),
+            Self::UnreviewedDeploymentPolicy => Some(ResourceError::DeploymentPolicy),
             Self::TrailingBytes
             | Self::DecoderOverread
             | Self::Malformed
@@ -144,6 +152,8 @@ pub enum ResourceError {
     ProofNodes,
     /// Cumulative decoded item limit was exceeded.
     TotalItems,
+    /// Deployment policy was not reviewed.
+    DeploymentPolicy,
 }
 
 impl ResourceError {
@@ -157,6 +167,7 @@ impl ResourceError {
             Self::AllocationBytes => "ETH_RESOURCE_ALLOCATION_BYTES",
             Self::ProofNodes => "ETH_RESOURCE_PROOF_NODES",
             Self::TotalItems => "ETH_RESOURCE_TOTAL_ITEMS",
+            Self::DeploymentPolicy => "ETH_RESOURCE_DEPLOYMENT_POLICY",
         }
     }
 
@@ -170,6 +181,7 @@ impl ResourceError {
             Self::AllocationBytes => "allocation byte budget exceeded",
             Self::ProofNodes => "proof-node budget exceeded",
             Self::TotalItems => "total item budget exceeded",
+            Self::DeploymentPolicy => "deployment policy review required",
         }
     }
 }
@@ -231,6 +243,10 @@ mod tests {
         assert_eq!(
             DecodeError::ItemCountExceeded.resource(),
             Some(ResourceError::TotalItems)
+        );
+        assert_eq!(
+            DecodeError::UnreviewedDeploymentPolicy.resource(),
+            Some(ResourceError::DeploymentPolicy)
         );
     }
 

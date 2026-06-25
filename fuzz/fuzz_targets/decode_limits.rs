@@ -7,7 +7,7 @@ use libfuzzer_sys::fuzz_target;
 
 fuzz_target!(|data: &[u8]| {
     drive_limits(data, DecodeLimits::TEST_FIXTURE);
-    drive_limits(data, DecodeLimits::DEPLOYMENT_TEMPLATE);
+    drive_limits(data, DecodeLimits::DEPLOYMENT_STARTING_POINT);
     drive_limits(
         data,
         DecodeLimits {

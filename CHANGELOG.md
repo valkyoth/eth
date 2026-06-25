@@ -11,8 +11,11 @@ All notable changes to `eth` are documented here.
 - Added canonical RLP scalar byte-string decoding with exact-consumption,
   malformed length, list-prefix rejection, and budget enforcement tests.
 - Added official scalar RLP example fixtures and long-length overflow coverage.
-- Added fuzz coverage for exact and prefix RLP scalar decoding paths.
+- Added fuzz coverage for exact and partial RLP scalar decoding paths.
 - Refreshed pinned official Ethereum source revisions for v0.6.0 parser work.
+- Addressed v0.6.0 pentest findings by gating codec test fixtures, renaming
+  ambiguous decode-limit and partial-decoder APIs, adding hardened-only
+  sanitization builds, and requiring explicit trusted-RPC acknowledgment.
 - Started `0.5.0` by extending the decode-budget model with proof-node and
   cumulative item budgets, checked length and range helpers, and adversarial
   tests for overflow and limit rejection.

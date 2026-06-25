@@ -49,14 +49,14 @@ previous_version = "0.3.0"
 version = "0.3.0"
 change = "unchanged"
 publish = false
-reason = "EVM boundary remains unchanged for the v0.5.0 decode-budget milestone."
+reason = "EVM boundary remains unchanged for the v0.6.0 RLP scalar milestone."
 
 [crates."eth-valkyoth-rpc"]
 previous_version = "0.3.0"
-version = "0.3.0"
-change = "unchanged"
-publish = false
-reason = "RPC boundary remains unchanged for the v0.5.0 decode-budget milestone."
+version = "0.6.0"
+change = "code"
+publish = true
+reason = "Requires explicit acknowledgment before using the trusted RPC response model."
 
 [crates."eth-valkyoth-signer"]
 previous_version = "0.3.2"
@@ -70,14 +70,14 @@ previous_version = "0.3.0"
 version = "0.3.0"
 change = "unchanged"
 publish = false
-reason = "Reth boundary remains unchanged for the v0.5.0 decode-budget milestone."
+reason = "Reth boundary remains unchanged for the v0.6.0 RLP scalar milestone."
 
 [crates."eth-valkyoth-testkit"]
 previous_version = "0.3.0"
 version = "0.3.0"
 change = "unchanged"
 publish = false
-reason = "Testkit boundary remains unchanged for the v0.5.0 decode-budget milestone."
+reason = "Testkit boundary remains unchanged for the v0.6.0 RLP scalar milestone."
 
 [crates.eth]
 previous_version = "0.5.0"

@@ -19,12 +19,16 @@ tooling refreshes, then adds canonical scalar RLP byte-string decoding.
 - Added malformed length, trailing-data, list-prefix, canonical-form, and
   budget enforcement tests.
 - Added official scalar RLP example fixtures and long-length overflow coverage.
-- Added a fuzz target for exact and prefix RLP scalar decoding paths.
+- Added a fuzz target for exact and partial RLP scalar decoding paths.
 - Refreshed pinned official Ethereum source revisions for v0.6.0 parser work.
+- Addressed v0.6.0 pentest findings by gating codec test fixtures, renaming
+  ambiguous decode-limit and partial-decoder APIs, adding hardened-only
+  sanitization builds, and requiring explicit trusted-RPC acknowledgment.
 - Added the `scripts/release_0_6_gate.sh` release gate.
 - Marked `eth-valkyoth-codec`, `eth-valkyoth-derive`,
-  `eth-valkyoth-sanitization`, and `eth` for `0.6.0` publication.
-- Left primitive, protocol, verification, signer, EVM, RPC, Reth, and testkit
+  `eth-valkyoth-sanitization`, `eth-valkyoth-rpc`, and `eth` for `0.6.0`
+  publication.
+- Left primitive, protocol, verification, signer, EVM, Reth, and testkit
   packages on their previously published versions for this pass.
 
 ## Still Required Before Tag
