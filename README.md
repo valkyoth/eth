@@ -35,7 +35,7 @@ dependencies.
 
 ## Current Status
 
-Status: `v0.6.0` in development; `v0.5.0` published.
+Status: `v0.6.0` release candidate; `v0.5.0` published.
 
 Implemented now:
 

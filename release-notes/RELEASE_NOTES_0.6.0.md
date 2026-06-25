@@ -1,13 +1,13 @@
 # eth 0.6.0 Release Notes
 
-Status: in development
+Status: implementation complete; pentest passed; pending GitHub green before tag
 
 ## Summary
 
 `0.6.0` is the RLP scalar decoder milestone. It starts with dependency and
 tooling refreshes, then adds canonical scalar RLP byte-string decoding.
 
-## Included So Far
+## Included
 
 - Updated `quote` from `1.0.45` to `1.0.46`.
 - Updated optional `sanitization` support from `1.1.1` to `1.2.2`.
@@ -31,10 +31,6 @@ tooling refreshes, then adds canonical scalar RLP byte-string decoding.
 - Left primitive, protocol, verification, signer, EVM, Reth, and testkit
   packages on their previously published versions for this pass.
 
-## Still Required Before Tag
-
-- External pentest and permanent `security/pentest/v0.6.0.md` report.
-
 ## Verification
 
 ```bash
@@ -43,4 +39,8 @@ scripts/release_0_6_gate.sh
 scripts/check_latest_tools.sh
 cargo deny check
 cargo audit
+cargo deny --manifest-path fuzz/Cargo.toml check
+cargo check --manifest-path fuzz/Cargo.toml
+scripts/release_crates.py --dry-run --skip-checks --yes
+scripts/validate-release-readiness.sh v0.6.0
 ```
