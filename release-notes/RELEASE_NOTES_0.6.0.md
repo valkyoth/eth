@@ -18,6 +18,7 @@ tooling refreshes, then adds canonical scalar RLP byte-string decoding.
 - Added exact-consumption enforcement for scalar decoder entry points.
 - Added malformed length, trailing-data, list-prefix, canonical-form, and
   budget enforcement tests.
+- Added official scalar RLP example fixtures and long-length overflow coverage.
 - Added a fuzz target for exact and prefix RLP scalar decoding paths.
 - Refreshed pinned official Ethereum source revisions for v0.6.0 parser work.
 - Added the `scripts/release_0_6_gate.sh` release gate.

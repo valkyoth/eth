@@ -225,6 +225,40 @@ mod tests {
     }
 
     #[test]
+    fn decodes_official_scalar_examples() {
+        let lorem = b"Lorem ipsum dolor sit amet, consectetur adipisicing elit";
+        let mut long = vec![0xb8, 0x38];
+        long.extend_from_slice(lorem);
+
+        let cases: &[(&[u8], &[u8], RlpScalarForm)] = &[
+            (
+                &[0x83, b'd', b'o', b'g'],
+                b"dog",
+                RlpScalarForm::ShortString,
+            ),
+            (&[0x80], b"", RlpScalarForm::ShortString),
+            (&[0x00], &[0x00], RlpScalarForm::SingleByte),
+            (&[0x0f], &[0x0f], RlpScalarForm::SingleByte),
+            (
+                &[0x82, 0x04, 0x00],
+                &[0x04, 0x00],
+                RlpScalarForm::ShortString,
+            ),
+            (long.as_slice(), lorem, RlpScalarForm::LongString),
+        ];
+
+        for (input, expected_payload, expected_form) in cases {
+            assert!(matches!(
+                decode_rlp_scalar(input, DecodeLimits::TEST_FIXTURE),
+                Ok(scalar)
+                    if scalar.payload() == *expected_payload
+                        && scalar.encoded_len() == input.len()
+                        && scalar.form() == *expected_form
+            ));
+        }
+    }
+
+    #[test]
     fn decodes_long_string() {
         let mut input = vec![0xb8, 56];
         input.extend_from_slice(&[b'a'; 56]);
@@ -306,6 +340,16 @@ mod tests {
         assert_eq!(
             decode_rlp_scalar(&input, DecodeLimits::TEST_FIXTURE),
             Err(DecodeError::Malformed)
+        );
+    }
+
+    #[test]
+    fn rejects_long_string_length_overflow() {
+        let input = [0xbf, 0xff, 0xff, 0xff, 0xff, 0xff, 0xff, 0xff, 0xff];
+
+        assert_eq!(
+            decode_rlp_scalar(&input, DecodeLimits::TEST_FIXTURE),
+            Err(DecodeError::LengthOverflow)
         );
     }
 
