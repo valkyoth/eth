@@ -34,7 +34,7 @@ real dependencies.
 
 ## Current Status
 
-The current release is `0.5.0`.
+The current release candidate is `0.6.0`.
 
 Implemented now:
 

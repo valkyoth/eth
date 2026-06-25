@@ -259,6 +259,7 @@ Goal: decode RLP bytes and strings with exact consumption.
 
 Deliverables:
 
+- current dependency and GitHub tooling review before parser implementation;
 - official execution-spec and EIP source revisions pinned in `spec-lock.toml`;
 - scalar RLP item model;
 - short and long string handling;
@@ -267,6 +268,7 @@ Deliverables:
 
 Verification:
 
+- `scripts/check_latest_tools.sh`
 - `cargo test -p eth-valkyoth-codec`
 
 Exit criteria:

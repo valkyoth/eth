@@ -4,6 +4,10 @@ All notable changes to `eth` are documented here.
 
 ## Unreleased
 
+- Started `0.6.0` with a dependency and tooling refresh before RLP scalar
+  decoder work: updated `quote` to `1.0.46`, updated optional `sanitization`
+  support to `1.2.2`, confirmed GitHub tooling is current, and added the
+  v0.6 release gate.
 - Started `0.5.0` by extending the decode-budget model with proof-node and
   cumulative item budgets, checked length and range helpers, and adversarial
   tests for overflow and limit rejection.

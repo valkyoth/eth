@@ -1,48 +1,48 @@
 [release]
-version = "0.5.0"
+version = "0.6.0"
 policy = "independent"
 
 [crates."eth-valkyoth-codec"]
-previous_version = "0.4.0"
+previous_version = "0.5.0"
 version = "0.5.0"
-change = "code"
-publish = true
-reason = "Adds mandatory proof-node and cumulative item budgets plus checked length and offset helpers."
+change = "unchanged"
+publish = false
+reason = "Codec remains on the published v0.5.0 API until the v0.6.0 RLP scalar decoder lands."
 
 [crates."eth-valkyoth-primitives"]
-previous_version = "0.4.0"
+previous_version = "0.5.0"
 version = "0.5.0"
-change = "code"
-publish = true
-reason = "Adds non-exhaustive primitive errors, transaction type TryFrom documentation, and Address hash timing documentation."
+change = "unchanged"
+publish = false
+reason = "Primitive domains remain unchanged for the initial v0.6.0 dependency refresh."
 
 [crates."eth-valkyoth-protocol"]
-previous_version = "0.4.0"
+previous_version = "0.5.0"
 version = "0.5.0"
-change = "code"
-publish = true
-reason = "Marks protocol error enums non-exhaustive and removes the dead-code typestate entry point from normal builds."
+change = "unchanged"
+publish = false
+reason = "Protocol state remains unchanged for the initial v0.6.0 dependency refresh."
 
 [crates."eth-valkyoth-verify"]
-previous_version = "0.4.0"
+previous_version = "0.5.0"
 version = "0.5.0"
-change = "code"
-publish = true
-reason = "Marks verification error enums non-exhaustive."
+change = "unchanged"
+publish = false
+reason = "Verification boundaries remain unchanged for the initial v0.6.0 dependency refresh."
 
 [crates."eth-valkyoth-derive"]
-previous_version = "0.4.0"
-version = "0.5.0"
+previous_version = "0.5.0"
+version = "0.6.0"
 change = "code"
 publish = true
-reason = "Rejects enum sanitization derives and avoids bounds for skipped generic fields."
+reason = "Starts v0.6.0 by refreshing derive macro dependencies, including quote 1.0.46."
 
 [crates."eth-valkyoth-sanitization"]
-previous_version = "0.4.0"
-version = "0.5.0"
+previous_version = "0.5.0"
+version = "0.6.0"
 change = "code"
 publish = true
-reason = "Adds hardened-mode evidence and deployment guidance while updating sanitization to 1.1.1."
+reason = "Starts v0.6.0 by refreshing optional sanitization support to sanitization 1.2.2."
 
 [crates."eth-valkyoth-evm"]
 previous_version = "0.3.0"
@@ -59,11 +59,11 @@ publish = false
 reason = "RPC boundary remains unchanged for the v0.5.0 decode-budget milestone."
 
 [crates."eth-valkyoth-signer"]
-previous_version = "0.3.1"
+previous_version = "0.3.2"
 version = "0.3.2"
-change = "dependency"
-publish = true
-reason = "Updates the primitives dependency range after eth-valkyoth-primitives moved to 0.5.0."
+change = "unchanged"
+publish = false
+reason = "Signer remains on the published v0.3.2 dependency range."
 
 [crates."eth-valkyoth-reth"]
 previous_version = "0.3.0"
@@ -80,8 +80,8 @@ publish = false
 reason = "Testkit boundary remains unchanged for the v0.5.0 decode-budget milestone."
 
 [crates.eth]
-previous_version = "0.4.0"
-version = "0.5.0"
+previous_version = "0.5.0"
+version = "0.6.0"
 change = "code"
 publish = true
-reason = "Re-exports the expanded and remediated v0.5.0 API through the facade crate."
+reason = "Starts v0.6.0 by exposing the refreshed optional sanitization dependency range."

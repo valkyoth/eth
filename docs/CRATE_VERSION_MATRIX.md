@@ -1,6 +1,6 @@
 # Crate Version Matrix
 
-Status: release matrix for `v0.5.0`
+Status: active for `v0.6.0` development
 
 `eth` uses independent crate versions. The facade crate remains the main user
 entry point, but support crates are published only when their own package
@@ -22,22 +22,22 @@ in a way that the published dependency range cannot cover.
 workspace manifests before release. The script refuses accidental lockstep
 publication when a crate is marked `unchanged`.
 
-## v0.5.0 Tracking Table
+## v0.6.0 Tracking Table
 
 | Crate | Published | Planned | Change | Publish | Reason |
 | --- | --- | --- | --- | --- | --- |
-| `eth-valkyoth-codec` | `0.4.0` | `0.5.0` | `code` | Yes | Adds mandatory proof-node and cumulative item budgets plus checked length and offset helpers. |
-| `eth-valkyoth-primitives` | `0.4.0` | `0.5.0` | `code` | Yes | Adds non-exhaustive primitive errors, transaction type TryFrom documentation, and Address hash timing documentation. |
-| `eth-valkyoth-protocol` | `0.4.0` | `0.5.0` | `code` | Yes | Marks protocol error enums non-exhaustive and removes the dead-code typestate entry point from normal builds. |
-| `eth-valkyoth-verify` | `0.4.0` | `0.5.0` | `code` | Yes | Marks verification error enums non-exhaustive. |
-| `eth-valkyoth-derive` | `0.4.0` | `0.5.0` | `code` | Yes | Rejects enum sanitization derives and avoids bounds for skipped generic fields. |
-| `eth-valkyoth-sanitization` | `0.4.0` | `0.5.0` | `code` | Yes | Adds hardened-mode evidence and deployment guidance while updating sanitization to 1.1.1. |
-| `eth-valkyoth-evm` | `0.3.0` | `0.3.0` | `unchanged` | No | EVM boundary remains unchanged for the v0.5.0 decode-budget milestone. |
-| `eth-valkyoth-rpc` | `0.3.0` | `0.3.0` | `unchanged` | No | RPC boundary remains unchanged for the v0.5.0 decode-budget milestone. |
-| `eth-valkyoth-signer` | `0.3.1` | `0.3.2` | `dependency` | Yes | Updates the primitives dependency range after eth-valkyoth-primitives moved to 0.5.0. |
-| `eth-valkyoth-reth` | `0.3.0` | `0.3.0` | `unchanged` | No | Reth boundary remains unchanged for the v0.5.0 decode-budget milestone. |
-| `eth-valkyoth-testkit` | `0.3.0` | `0.3.0` | `unchanged` | No | Testkit boundary remains unchanged for the v0.5.0 decode-budget milestone. |
-| `eth` | `0.4.0` | `0.5.0` | `code` | Yes | Re-exports the expanded and remediated v0.5.0 API through the facade crate. |
+| `eth-valkyoth-codec` | `0.5.0` | `0.5.0` | `unchanged` | No | Codec remains on the published v0.5.0 API until the v0.6.0 RLP scalar decoder lands. |
+| `eth-valkyoth-primitives` | `0.5.0` | `0.5.0` | `unchanged` | No | Primitive domains remain unchanged for the initial v0.6.0 dependency refresh. |
+| `eth-valkyoth-protocol` | `0.5.0` | `0.5.0` | `unchanged` | No | Protocol state remains unchanged for the initial v0.6.0 dependency refresh. |
+| `eth-valkyoth-verify` | `0.5.0` | `0.5.0` | `unchanged` | No | Verification boundaries remain unchanged for the initial v0.6.0 dependency refresh. |
+| `eth-valkyoth-derive` | `0.5.0` | `0.6.0` | `code` | Yes | Starts v0.6.0 by refreshing derive macro dependencies, including `quote` 1.0.46. |
+| `eth-valkyoth-sanitization` | `0.5.0` | `0.6.0` | `code` | Yes | Starts v0.6.0 by refreshing optional sanitization support to `sanitization` 1.2.2. |
+| `eth-valkyoth-evm` | `0.3.0` | `0.3.0` | `unchanged` | No | EVM boundary remains unchanged for the initial v0.6.0 dependency refresh. |
+| `eth-valkyoth-rpc` | `0.3.0` | `0.3.0` | `unchanged` | No | RPC boundary remains unchanged for the initial v0.6.0 dependency refresh. |
+| `eth-valkyoth-signer` | `0.3.2` | `0.3.2` | `unchanged` | No | Signer remains on the published v0.3.2 dependency range. |
+| `eth-valkyoth-reth` | `0.3.0` | `0.3.0` | `unchanged` | No | Reth boundary remains unchanged for the initial v0.6.0 dependency refresh. |
+| `eth-valkyoth-testkit` | `0.3.0` | `0.3.0` | `unchanged` | No | Testkit boundary remains unchanged for the initial v0.6.0 dependency refresh. |
+| `eth` | `0.5.0` | `0.6.0` | `code` | Yes | Starts v0.6.0 by exposing the refreshed optional sanitization dependency range. |
 
 Update this table and `release-crates.toml` in the same commit whenever a crate
 changes release state.

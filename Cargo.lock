@@ -4,7 +4,7 @@ version = 4
 
 [[package]]
 name = "eth"
-version = "0.5.0"
+version = "0.6.0"
 dependencies = [
  "eth-valkyoth-codec",
  "eth-valkyoth-evm",
@@ -24,7 +24,7 @@ version = "0.5.0"
 
 [[package]]
 name = "eth-valkyoth-derive"
-version = "0.5.0"
+version = "0.6.0"
 dependencies = [
  "proc-macro2",
  "quote",
@@ -59,7 +59,7 @@ version = "0.3.0"
 
 [[package]]
 name = "eth-valkyoth-sanitization"
-version = "0.5.0"
+version = "0.6.0"
 dependencies = [
  "eth-valkyoth-derive",
  "sanitization",
@@ -94,18 +94,18 @@ dependencies = [
 
 [[package]]
 name = "quote"
-version = "1.0.45"
+version = "1.0.46"
 source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "41f2619966050689382d2b44f664f4bc593e129785a36d6ee376ddf37259b924"
+checksum = "dfbc457d0c7a0759a614551b11a6409e5951f6c7537be1f1b7682b9ae9230368"
 dependencies = [
  "proc-macro2",
 ]
 
 [[package]]
 name = "sanitization"
-version = "1.1.1"
+version = "1.2.2"
 source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "f5f360c902bb70ea8117190534eba6aaa60b7c9dd10f40b7111f120a52f39c38"
+checksum = "e917ba6e3d60c9756acda8f7e4b5958984b2fb1d7eb501c71e07f04da8c20413"
 dependencies = [
  "zeroize",
 ]
