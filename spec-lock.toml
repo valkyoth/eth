@@ -7,14 +7,14 @@
 
 [ethereum]
 execution_specs_repo = "https://github.com/ethereum/execution-specs"
-execution_specs_rev = "b7033394dd34d44ce3045b66e487ee155dea6974"
+execution_specs_rev = "3f888bc71f2d30d48b6f5a92c618ab283a6c98d5"
 execution_tests_repo = "https://github.com/ethereum/tests"
 execution_tests_rev = "c67e485ff8b5be9abc8ad15345ec21aa22e290d9"
 eips_repo = "https://github.com/ethereum/EIPs"
-eips_rev = "843193ad6a3ca14fec26935d49e57835e2410491"
+eips_rev = "378d36bc69bcee7e1452abbb1ff09f728f825f9d"
 execution_apis_repo = "https://github.com/ethereum/execution-apis"
-execution_apis_rev = "bc78fe05591798c4f6e3f2660fda1447e709de8c"
+execution_apis_rev = "b14c23c70422cffd1c116e112001e51fb20ac7f8"
 consensus_specs_repo = "https://github.com/ethereum/consensus-specs"
-consensus_specs_rev = "7d5f3348d7b947851861745be9ce0ba30e526531"
+consensus_specs_rev = "42b96716a39ddea2d610c0b615d625318a09d278"
 local_reference_store_env = "ETH_REFERENCE_STORE"
 local_reference_store_default = "../../test/eth"

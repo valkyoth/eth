@@ -3,8 +3,9 @@
 Status: source revisions pinned for `v0.6.0`; scalar RLP decoding in progress.
 
 Official source and fixture revisions are governed by
-[Spec Source Policy](spec-source-policy.md). Consensus-sensitive behavior must
-not be implemented from memory.
+[Spec Source Policy](spec-source-policy.md). Revisions were checked against
+upstream `HEAD` on 2026-06-25. Consensus-sensitive behavior must not be
+implemented from memory.
 
 | Area | Status | Evidence |
 | --- | --- | --- |
