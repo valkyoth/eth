@@ -21,6 +21,15 @@ fn decodes_empty_list() {
 }
 
 #[test]
+fn list_equality_ignores_decode_policy() -> Result<(), DecodeError> {
+    let fixture = decode_rlp_list(&[0xc0], DecodeLimits::TEST_FIXTURE)?;
+    let deployment = decode_rlp_list(&[0xc0], DecodeLimits::DEPLOYMENT_STARTING_POINT)?;
+
+    assert_eq!(fixture, deployment);
+    Ok(())
+}
+
+#[test]
 fn decodes_short_list_with_scalars() {
     let input = [0xc8, 0x83, b'c', b'a', b't', 0x83, b'd', b'o', b'g'];
 

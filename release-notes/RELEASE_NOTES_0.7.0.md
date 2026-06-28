@@ -30,6 +30,8 @@ payload traversal under explicit resource limits.
 - Addressed v0.7.0 pentest findings for budgeted nested list iteration,
   recursive iterator fuzzing, traversal-cap documentation, partial-decoder
   slicing documentation, fuzz policy comments, and long-prefix naming clarity.
+- Addressed v0.7.0 pentest re-test findings for list equality semantics,
+  iterator recount-budget documentation, and explicit bounds-check expressions.
 - Refreshed pinned official Ethereum source revisions for v0.7.0 parser work.
 - Confirmed dependency and GitHub tooling currency for the v0.7.0 start slice.
 - Corrected the public crate license metadata and repository license files to
@@ -39,7 +41,7 @@ payload traversal under explicit resource limits.
 
 ## Still Required Before Tag
 
-- External pentest and permanent `security/pentest/v0.7.0.md` report.
+- GitHub checks must pass on the final release commit.
 
 ## Verification
 

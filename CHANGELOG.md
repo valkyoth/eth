@@ -19,6 +19,9 @@ All notable changes to `eth` are documented here.
   re-counting use the original decode limits, deepening list iterator fuzz
   coverage, documenting the RLP traversal hard cap and partial-decoder slicing
   contract, and clarifying long-list/string prefix constants.
+- Addressed v0.7.0 pentest re-test findings by making `RlpList` equality
+  ignore private decode policy, documenting independent iterator recount
+  budgets, and simplifying list bounds-check expressions.
 - Aligned every public workspace crate to `0.7.0` publication so crates.io
   receives corrected `MIT OR Apache-2.0` license metadata for all packages.
 - Refreshed pinned official Ethereum source revisions for v0.7.0 parser work.

@@ -24,7 +24,7 @@ pub enum RlpListForm {
 }
 
 /// Borrowed RLP list payload.
-#[derive(Clone, Copy, Debug, Eq, PartialEq)]
+#[derive(Clone, Copy, Debug)]
 pub struct RlpList<'a> {
     payload: &'a [u8],
     encoded_len: usize,
@@ -82,6 +82,18 @@ impl<'a> RlpList<'a> {
         }
     }
 }
+
+impl PartialEq for RlpList<'_> {
+    fn eq(&self, other: &Self) -> bool {
+        self.payload == other.payload
+            && self.encoded_len == other.encoded_len
+            && self.header_len == other.header_len
+            && self.item_count == other.item_count
+            && self.form == other.form
+    }
+}
+
+impl Eq for RlpList<'_> {}
 
 /// Borrowed RLP item yielded by [`RlpListItems`].
 #[derive(Clone, Copy, Debug, Eq, PartialEq)]
@@ -414,7 +426,7 @@ fn parse_item(
         }
         SHORT_LIST_OFFSET..=LONG_LIST_OFFSET => {
             let payload_len = usize::from(prefix.saturating_sub(SHORT_LIST_OFFSET));
-            let _payload = payload(local, 1, payload_len)?;
+            payload(local, 1, payload_len)?;
             (ParsedItemKind::List(RlpListForm::ShortList), 1, payload_len)
         }
         0xf8..=0xff => {
@@ -424,7 +436,7 @@ fn parse_item(
                 return Err(DecodeError::Malformed);
             }
             let header_len = checked_len_add(1, len_of_len)?;
-            let _payload = payload(local, header_len, payload_len)?;
+            payload(local, header_len, payload_len)?;
             (
                 ParsedItemKind::List(RlpListForm::LongList),
                 header_len,
@@ -450,6 +462,8 @@ fn parse_item(
 }
 
 fn count_immediate_items(input: &[u8], limits: DecodeLimits) -> Result<usize, DecodeError> {
+    // Iteration-phase recounting is bounded independently from the
+    // decode-phase accumulator used by partial streaming callers.
     let mut accumulator = limits.accumulator();
     accumulator.check_input_len(input.len())?;
     let mut count = 0usize;
