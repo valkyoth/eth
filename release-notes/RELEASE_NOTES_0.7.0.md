@@ -1,6 +1,6 @@
 # eth 0.7.0 Release Notes
 
-Status: pentest findings addressed
+Status: release candidate ready; final GitHub checks required before tag
 
 ## Summary
 

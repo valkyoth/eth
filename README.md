@@ -35,7 +35,8 @@ dependencies.
 
 ## Current Status
 
-Status: `v0.7.0` pentest findings addressed; `v0.6.0` published.
+Status: `v0.7.0` release candidate ready; waiting for final GitHub checks before
+tagging. `v0.6.0` is the latest published release.
 
 Implemented now:
 
