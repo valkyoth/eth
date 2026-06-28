@@ -35,7 +35,7 @@ dependencies.
 
 ## Current Status
 
-Status: `v0.7.0` in development; `v0.6.0` published.
+Status: `v0.7.0` ready for external pentest; `v0.6.0` published.
 
 Implemented now:
 

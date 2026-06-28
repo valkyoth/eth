@@ -1,6 +1,6 @@
 # eth 0.7.0 Release Notes
 
-Status: in development
+Status: ready for external pentest
 
 ## Summary
 
