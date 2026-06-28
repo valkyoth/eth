@@ -150,6 +150,51 @@ fn iterates_nested_list_items() -> Result<(), DecodeError> {
 }
 
 #[test]
+fn item_accessors_return_expected_variant() -> Result<(), DecodeError> {
+    let input = [0xc3, 0x80, 0xc1, 0x01];
+    let list = decode_rlp_list(&input, DecodeLimits::TEST_FIXTURE)?;
+    let mut items = list.items();
+
+    let Some(Ok(scalar_item)) = items.next() else {
+        return Err(DecodeError::Malformed);
+    };
+    assert!(scalar_item.is_scalar());
+    assert!(!scalar_item.is_list());
+    assert_eq!(scalar_item.header_len(), 1);
+    assert!(scalar_item.as_list().is_none());
+    assert!(matches!(
+        scalar_item.as_scalar(),
+        Some(scalar) if scalar.payload().is_empty()
+    ));
+
+    let Some(Ok(list_item)) = items.next() else {
+        return Err(DecodeError::Malformed);
+    };
+    assert!(list_item.is_list());
+    assert!(!list_item.is_scalar());
+    assert_eq!(list_item.header_len(), 1);
+    assert!(list_item.as_scalar().is_none());
+    assert!(matches!(
+        list_item.as_list(),
+        Some(child) if child.item_count() == 1
+    ));
+    Ok(())
+}
+
+#[test]
+fn list_item_iterator_is_fused() -> Result<(), DecodeError> {
+    fn assert_fused<I: core::iter::FusedIterator>(_iterator: &I) {}
+
+    let list = decode_rlp_list(&[0xc0], DecodeLimits::TEST_FIXTURE)?;
+    let mut items = list.items();
+    assert_fused(&items);
+
+    assert!(items.next().is_none());
+    assert!(items.next().is_none());
+    Ok(())
+}
+
+#[test]
 fn decodes_long_list() {
     let mut input = vec![0xf8, 56];
     input.extend_from_slice(&[0x80; 56]);

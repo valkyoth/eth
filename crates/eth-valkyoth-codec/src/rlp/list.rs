@@ -96,6 +96,15 @@ impl<'a> RlpItem<'a> {
         }
     }
 
+    /// Returns the RLP header length in bytes.
+    #[must_use]
+    pub const fn header_len(self) -> usize {
+        match self {
+            Self::Scalar(scalar) => scalar.header_len(),
+            Self::List(list) => list.header_len(),
+        }
+    }
+
     /// Returns true when this item is a scalar byte string.
     #[must_use]
     pub const fn is_scalar(self) -> bool {
@@ -106,6 +115,24 @@ impl<'a> RlpItem<'a> {
     #[must_use]
     pub const fn is_list(self) -> bool {
         matches!(self, Self::List(_))
+    }
+
+    /// Returns the scalar item, if this item is a scalar byte string.
+    #[must_use]
+    pub const fn as_scalar(&self) -> Option<RlpScalar<'a>> {
+        match self {
+            Self::Scalar(scalar) => Some(*scalar),
+            Self::List(_) => None,
+        }
+    }
+
+    /// Returns the list item, if this item is a list.
+    #[must_use]
+    pub const fn as_list(&self) -> Option<RlpList<'a>> {
+        match self {
+            Self::Scalar(_) => None,
+            Self::List(list) => Some(*list),
+        }
     }
 }
 
@@ -154,6 +181,8 @@ impl<'a> Iterator for RlpListItems<'a> {
 }
 
 impl ExactSizeIterator for RlpListItems<'_> {}
+
+impl core::iter::FusedIterator for RlpListItems<'_> {}
 
 /// Decodes exactly one canonical RLP list.
 pub fn decode_rlp_list<'a>(

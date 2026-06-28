@@ -16,6 +16,8 @@ payload traversal under explicit resource limits.
   cumulative item-budget enforcement.
 - Added no-allocation immediate-child iteration through `RlpList::items`,
   `RlpListItems`, and `RlpItem`.
+- Added `RlpItem` variant accessors, common header-length access, and fused
+  iterator behavior for list item iteration.
 - Split scalar and list RLP tests into separate modules to keep parser test
   files below the 500-line limit.
 - Added official nested-list example coverage and a deeper canonical nesting

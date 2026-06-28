@@ -9,6 +9,8 @@ All notable changes to `eth` are documented here.
   depth enforcement, and adversarial malformed-list tests.
 - Added no-allocation immediate-child iteration for decoded RLP lists through
   `RlpList::items`, `RlpListItems`, and `RlpItem`.
+- Added `RlpItem::header_len`, `RlpItem::as_scalar`, `RlpItem::as_list`, and
+  fused iterator behavior for `RlpListItems`.
 - Split scalar and list RLP tests into separate modules and added official
   nested-list fixtures plus deeper canonical nesting budget regression coverage.
 - Added fuzz coverage for exact and partial RLP list decoding paths, including
