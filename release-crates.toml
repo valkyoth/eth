@@ -7,81 +7,81 @@ previous_version = "0.6.0"
 version = "0.7.0"
 change = "code"
 publish = true
-reason = "Adds bounded canonical RLP list decoding with nesting and item-count enforcement."
+reason = "Adds bounded canonical RLP list decoding with nesting, item-count enforcement, and immediate child iteration."
 
 [crates."eth-valkyoth-primitives"]
 previous_version = "0.5.0"
-version = "0.5.0"
-change = "unchanged"
-publish = false
-reason = "Primitive domains remain unchanged for the v0.7.0 RLP list milestone."
+version = "0.7.0"
+change = "metadata"
+publish = true
+reason = "Republishes corrected MIT OR Apache-2.0 license metadata for crates.io."
 
 [crates."eth-valkyoth-protocol"]
 previous_version = "0.5.0"
-version = "0.5.0"
-change = "unchanged"
-publish = false
-reason = "Protocol state remains unchanged for the v0.7.0 RLP list milestone."
+version = "0.7.0"
+change = "metadata"
+publish = true
+reason = "Republishes corrected MIT OR Apache-2.0 license metadata for crates.io."
 
 [crates."eth-valkyoth-verify"]
 previous_version = "0.5.0"
-version = "0.5.0"
-change = "unchanged"
-publish = false
-reason = "Verification boundaries remain unchanged for the v0.7.0 RLP list milestone."
+version = "0.7.0"
+change = "metadata"
+publish = true
+reason = "Republishes corrected MIT OR Apache-2.0 license metadata for crates.io."
 
 [crates."eth-valkyoth-derive"]
 previous_version = "0.6.0"
-version = "0.6.0"
-change = "unchanged"
-publish = false
-reason = "Derive macro support remains unchanged for the v0.7.0 RLP list milestone."
+version = "0.7.0"
+change = "metadata"
+publish = true
+reason = "Republishes corrected MIT OR Apache-2.0 license metadata for crates.io."
 
 [crates."eth-valkyoth-sanitization"]
 previous_version = "0.6.0"
-version = "0.6.0"
-change = "unchanged"
-publish = false
-reason = "Sanitization support remains unchanged for the v0.7.0 RLP list milestone."
+version = "0.7.0"
+change = "metadata"
+publish = true
+reason = "Republishes corrected MIT OR Apache-2.0 license metadata for crates.io."
 
 [crates."eth-valkyoth-evm"]
 previous_version = "0.3.0"
-version = "0.3.0"
-change = "unchanged"
-publish = false
-reason = "EVM boundary remains unchanged for the v0.7.0 RLP list milestone."
+version = "0.7.0"
+change = "metadata"
+publish = true
+reason = "Republishes corrected MIT OR Apache-2.0 license metadata for crates.io."
 
 [crates."eth-valkyoth-rpc"]
 previous_version = "0.6.0"
-version = "0.6.0"
-change = "unchanged"
-publish = false
-reason = "RPC trust-model support remains unchanged for the v0.7.0 RLP list milestone."
+version = "0.7.0"
+change = "metadata"
+publish = true
+reason = "Republishes corrected MIT OR Apache-2.0 license metadata for crates.io."
 
 [crates."eth-valkyoth-signer"]
 previous_version = "0.3.2"
-version = "0.3.2"
-change = "unchanged"
-publish = false
-reason = "Signer remains on the published v0.3.2 dependency range."
+version = "0.7.0"
+change = "metadata"
+publish = true
+reason = "Republishes corrected MIT OR Apache-2.0 license metadata for crates.io."
 
 [crates."eth-valkyoth-reth"]
 previous_version = "0.3.0"
-version = "0.3.0"
-change = "unchanged"
-publish = false
-reason = "Reth boundary remains unchanged for the v0.7.0 RLP list milestone."
+version = "0.7.0"
+change = "metadata"
+publish = true
+reason = "Republishes corrected MIT OR Apache-2.0 license metadata for crates.io."
 
 [crates."eth-valkyoth-testkit"]
 previous_version = "0.3.0"
-version = "0.3.0"
-change = "unchanged"
-publish = false
-reason = "Testkit boundary remains unchanged for the v0.7.0 RLP list milestone."
+version = "0.7.0"
+change = "metadata"
+publish = true
+reason = "Republishes corrected MIT OR Apache-2.0 license metadata for crates.io."
 
 [crates.eth]
 previous_version = "0.6.0"
 version = "0.7.0"
 change = "code"
 publish = true
-reason = "Exposes bounded canonical RLP list decoding through the facade crate."
+reason = "Exposes bounded canonical RLP list decoding and item iteration through the facade crate."

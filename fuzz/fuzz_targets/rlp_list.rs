@@ -7,6 +7,9 @@ use libfuzzer_sys::fuzz_target;
 
 fuzz_target!(|data: &[u8]| {
     drive_list(data, DecodeLimits::TEST_FIXTURE);
+    // Fuzzing intentionally exercises the deployment template directly.
+    // Production callers must use a reviewed policy or call
+    // validate_deployment_policy() before decoding externally reachable input.
     drive_list(data, DecodeLimits::DEPLOYMENT_STARTING_POINT);
     drive_list(
         data,
@@ -23,25 +26,36 @@ fuzz_target!(|data: &[u8]| {
 
 fn drive_list(data: &[u8], limits: DecodeLimits) {
     if let Ok(list) = decode_rlp_list(data, limits) {
-        drive_items(list);
+        drive_items_recursive(list, 8);
     }
 
     let mut accumulator = limits.accumulator();
     if let Ok(list) = decode_rlp_list_partial(data, &mut accumulator) {
-        drive_items(list);
+        drive_items_recursive(list, 8);
     }
 }
 
-fn drive_items(list: RlpList<'_>) {
-    for item in list.items() {
+fn drive_items_recursive(list: RlpList<'_>, depth: usize) {
+    if depth == 0 {
+        return;
+    }
+
+    let mut repeated = list.items();
+    let _ = repeated.next();
+
+    let mut items = list.items();
+    let hint = items.size_hint();
+    assert_eq!(hint.0, hint.1.unwrap_or(hint.0));
+
+    for item in items.by_ref() {
         let Ok(item) = item else {
-            continue;
+            assert!(items.next().is_none());
+            return;
         };
         let _ = item.encoded_len();
         if let RlpItem::List(child) = item {
-            for nested in child.items() {
-                let _ = nested.map(RlpItem::encoded_len);
-            }
+            drive_items_recursive(child, depth - 1);
         }
     }
+    assert!(items.next().is_none());
 }

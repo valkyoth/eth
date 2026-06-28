@@ -24,7 +24,7 @@ version = "0.7.0"
 
 [[package]]
 name = "eth-valkyoth-derive"
-version = "0.6.0"
+version = "0.7.0"
 dependencies = [
  "proc-macro2",
  "quote",
@@ -33,33 +33,33 @@ dependencies = [
 
 [[package]]
 name = "eth-valkyoth-evm"
-version = "0.3.0"
+version = "0.7.0"
 
 [[package]]
 name = "eth-valkyoth-primitives"
-version = "0.5.0"
+version = "0.7.0"
 dependencies = [
  "subtle",
 ]
 
 [[package]]
 name = "eth-valkyoth-protocol"
-version = "0.5.0"
+version = "0.7.0"
 dependencies = [
  "eth-valkyoth-primitives",
 ]
 
 [[package]]
 name = "eth-valkyoth-reth"
-version = "0.3.0"
+version = "0.7.0"
 
 [[package]]
 name = "eth-valkyoth-rpc"
-version = "0.6.0"
+version = "0.7.0"
 
 [[package]]
 name = "eth-valkyoth-sanitization"
-version = "0.6.0"
+version = "0.7.0"
 dependencies = [
  "eth-valkyoth-derive",
  "sanitization",
@@ -67,18 +67,18 @@ dependencies = [
 
 [[package]]
 name = "eth-valkyoth-signer"
-version = "0.3.2"
+version = "0.7.0"
 dependencies = [
  "eth-valkyoth-primitives",
 ]
 
 [[package]]
 name = "eth-valkyoth-testkit"
-version = "0.3.0"
+version = "0.7.0"
 
 [[package]]
 name = "eth-valkyoth-verify"
-version = "0.5.0"
+version = "0.7.0"
 dependencies = [
  "eth-valkyoth-primitives",
 ]

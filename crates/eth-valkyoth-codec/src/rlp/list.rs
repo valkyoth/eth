@@ -8,7 +8,11 @@ use super::{
     decode_long_string, decode_short_string, parse_payload_len, payload,
 };
 
-const MAX_TRAVERSAL_STACK: usize = 128;
+/// Hard cap on RLP list traversal depth regardless of the active decode limits.
+///
+/// Inputs nested deeper than this return [`DecodeError::NestingTooDeep`] even
+/// when [`DecodeLimits::max_nesting_depth`] is higher.
+pub const MAX_RLP_LIST_TRAVERSAL_DEPTH: usize = 128;
 
 /// Canonical RLP list form used by the decoder.
 #[derive(Clone, Copy, Debug, Eq, PartialEq)]
@@ -27,6 +31,7 @@ pub struct RlpList<'a> {
     header_len: usize,
     item_count: usize,
     form: RlpListForm,
+    limits: DecodeLimits,
 }
 
 impl<'a> RlpList<'a> {
@@ -73,6 +78,7 @@ impl<'a> RlpList<'a> {
             input: self.payload,
             cursor: 0,
             remaining: self.item_count,
+            limits: self.limits,
         }
     }
 }
@@ -142,6 +148,7 @@ pub struct RlpListItems<'a> {
     input: &'a [u8],
     cursor: usize,
     remaining: usize,
+    limits: DecodeLimits,
 }
 
 impl<'a> RlpListItems<'a> {
@@ -161,7 +168,7 @@ impl<'a> Iterator for RlpListItems<'a> {
         }
 
         match parse_item(self.input, self.cursor, self.input.len())
-            .and_then(|item| item.into_rlp_item(self.input, self.cursor))
+            .and_then(|item| item.into_rlp_item(self.input, self.cursor, self.limits))
         {
             Ok((item, next_cursor)) => {
                 self.cursor = next_cursor;
@@ -199,6 +206,10 @@ pub fn decode_rlp_list<'a>(
 ///
 /// Warning: this intentionally accepts trailing bytes. Use [`decode_rlp_list`]
 /// when the full input must be consumed.
+///
+/// The input-length budget check applies to the full `input` slice, not only
+/// the consumed list bytes. Callers that decode from a larger outer buffer must
+/// pre-slice before calling this helper.
 pub fn decode_rlp_list_partial<'a>(
     input: &'a [u8],
     accumulator: &mut DecodeAccumulator,
@@ -209,8 +220,10 @@ pub fn decode_rlp_list_partial<'a>(
 
     let prefix = *input.first().ok_or(DecodeError::Malformed)?;
     let list = match prefix {
-        SHORT_LIST_OFFSET..=LONG_LIST_OFFSET => decode_short_list(input, prefix)?,
-        0xf8..=0xff => decode_long_list(input, prefix)?,
+        SHORT_LIST_OFFSET..=LONG_LIST_OFFSET => {
+            decode_short_list(input, prefix, accumulator.limits())?
+        }
+        0xf8..=0xff => decode_long_list(input, prefix, accumulator.limits())?,
         0x00..=0xbf => return Err(DecodeError::UnexpectedScalar),
     };
     let item_count = validate_list_payload(list.payload, accumulator)?;
@@ -218,7 +231,11 @@ pub fn decode_rlp_list_partial<'a>(
     Ok(RlpList { item_count, ..list })
 }
 
-fn decode_short_list(input: &[u8], prefix: u8) -> Result<RlpList<'_>, DecodeError> {
+fn decode_short_list(
+    input: &[u8],
+    prefix: u8,
+    limits: DecodeLimits,
+) -> Result<RlpList<'_>, DecodeError> {
     let payload_len = usize::from(prefix.saturating_sub(SHORT_LIST_OFFSET));
     let payload = payload(input, 1, payload_len)?;
     Ok(RlpList {
@@ -227,10 +244,15 @@ fn decode_short_list(input: &[u8], prefix: u8) -> Result<RlpList<'_>, DecodeErro
         header_len: 1,
         item_count: 0,
         form: RlpListForm::ShortList,
+        limits,
     })
 }
 
-fn decode_long_list(input: &[u8], prefix: u8) -> Result<RlpList<'_>, DecodeError> {
+fn decode_long_list(
+    input: &[u8],
+    prefix: u8,
+    limits: DecodeLimits,
+) -> Result<RlpList<'_>, DecodeError> {
     let len_of_len = usize::from(prefix.saturating_sub(LONG_LIST_OFFSET));
     let payload_len = parse_payload_len(input, 1, len_of_len)?;
     if payload_len <= SHORT_STRING_LIMIT {
@@ -244,6 +266,7 @@ fn decode_long_list(input: &[u8], prefix: u8) -> Result<RlpList<'_>, DecodeError
         header_len,
         item_count: 0,
         form: RlpListForm::LongList,
+        limits,
     })
 }
 
@@ -257,7 +280,7 @@ fn validate_list_payload(
     input: &[u8],
     accumulator: &mut DecodeAccumulator,
 ) -> Result<usize, DecodeError> {
-    let mut stack = [ListFrame { end: 0, count: 0 }; MAX_TRAVERSAL_STACK];
+    let mut stack = [ListFrame { end: 0, count: 0 }; MAX_RLP_LIST_TRAVERSAL_DEPTH];
     let root = stack.get_mut(0).ok_or(DecodeError::NestingTooDeep)?;
     *root = ListFrame {
         end: input.len(),
@@ -293,7 +316,7 @@ fn validate_list_payload(
         if matches!(item.kind, ParsedItemKind::List(_)) {
             let next_depth = checked_len_add(depth, 1)?;
             accumulator.check_nesting_depth(next_depth)?;
-            if next_depth > MAX_TRAVERSAL_STACK {
+            if next_depth > MAX_RLP_LIST_TRAVERSAL_DEPTH {
                 return Err(DecodeError::NestingTooDeep);
             }
             let child_index = next_depth
@@ -327,6 +350,7 @@ impl ParsedItem {
         self,
         input: &'a [u8],
         offset: usize,
+        limits: DecodeLimits,
     ) -> Result<(RlpItem<'a>, usize), DecodeError> {
         let payload = input
             .get(self.payload_start..self.payload_end)
@@ -346,8 +370,9 @@ impl ParsedItem {
                 payload,
                 encoded_len,
                 header_len: self.header_len,
-                item_count: count_immediate_items(payload)?,
+                item_count: count_immediate_items(payload, limits)?,
                 form,
+                limits,
             }),
         };
         Ok((item, self.item_end))
@@ -388,19 +413,22 @@ fn parse_item(
             )
         }
         SHORT_LIST_OFFSET..=LONG_LIST_OFFSET => {
-            let list = decode_short_list(local, prefix)?;
-            (
-                ParsedItemKind::List(list.form()),
-                list.header_len(),
-                list.payload().len(),
-            )
+            let payload_len = usize::from(prefix.saturating_sub(SHORT_LIST_OFFSET));
+            let _payload = payload(local, 1, payload_len)?;
+            (ParsedItemKind::List(RlpListForm::ShortList), 1, payload_len)
         }
         0xf8..=0xff => {
-            let list = decode_long_list(local, prefix)?;
+            let len_of_len = usize::from(prefix.saturating_sub(LONG_LIST_OFFSET));
+            let payload_len = parse_payload_len(local, 1, len_of_len)?;
+            if payload_len <= SHORT_STRING_LIMIT {
+                return Err(DecodeError::Malformed);
+            }
+            let header_len = checked_len_add(1, len_of_len)?;
+            let _payload = payload(local, header_len, payload_len)?;
             (
-                ParsedItemKind::List(list.form()),
-                list.header_len(),
-                list.payload().len(),
+                ParsedItemKind::List(RlpListForm::LongList),
+                header_len,
+                payload_len,
             )
         }
     };
@@ -421,12 +449,16 @@ fn parse_item(
     })
 }
 
-fn count_immediate_items(input: &[u8]) -> Result<usize, DecodeError> {
+fn count_immediate_items(input: &[u8], limits: DecodeLimits) -> Result<usize, DecodeError> {
+    let mut accumulator = limits.accumulator();
+    accumulator.check_input_len(input.len())?;
     let mut count = 0usize;
     let mut cursor = 0usize;
     while cursor < input.len() {
         let item = parse_item(input, cursor, input.len())?;
         count = checked_len_add(count, 1)?;
+        accumulator.account_items(1)?;
+        accumulator.check_list_count(count)?;
         cursor = item.item_end;
     }
     if cursor == input.len() {

@@ -19,7 +19,7 @@ except ModuleNotFoundError:  # pragma: no cover - release host guard.
 
 ROOT = Path(__file__).resolve().parents[1]
 DEFAULT_PLAN = ROOT / "release-crates.toml"
-CHANGE_KINDS = ("code", "dependency", "unchanged")
+CHANGE_KINDS = ("code", "dependency", "metadata", "unchanged")
 
 PUBLISH_ORDER = (
     "eth-valkyoth-primitives",
@@ -139,6 +139,15 @@ def validate_plan_entry(package_name: str, entry: dict, release: str) -> None:
             )
         if not publish:
             raise RuntimeError(f"{package_name} has code changes but publish is false")
+    elif change == "metadata":
+        if planned_version != release_parts:
+            raise RuntimeError(
+                f"{package_name} has metadata changes, so version must be {release}"
+            )
+        if not publish:
+            raise RuntimeError(
+                f"{package_name} has metadata changes but publish is false"
+            )
     elif change == "dependency":
         same_line = planned_version[:2] == previous_version[:2]
         patch_bump = planned_version[2] > previous_version[2]

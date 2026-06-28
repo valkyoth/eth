@@ -35,7 +35,7 @@ dependencies.
 
 ## Current Status
 
-Status: `v0.7.0` ready for external pentest; `v0.6.0` published.
+Status: `v0.7.0` pentest findings addressed; `v0.6.0` published.
 
 Implemented now:
 
@@ -253,7 +253,7 @@ For derive macros, depend on the support crate directly:
 
 ```toml
 [dependencies]
-eth-valkyoth-sanitization = { version = "0.6", features = ["derive"] }
+eth-valkyoth-sanitization = { version = "0.7", features = ["derive"] }
 ```
 
 ## Workspace Shape

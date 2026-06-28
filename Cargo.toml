@@ -43,16 +43,16 @@ cast_sign_loss = "deny"
 
 [workspace.dependencies]
 eth-valkyoth-codec = { path = "crates/eth-valkyoth-codec", version = "0.7.0" }
-eth-valkyoth-derive = { path = "crates/eth-valkyoth-derive", version = "0.6.0" }
-eth-valkyoth-evm = { path = "crates/eth-valkyoth-evm", version = "0.3.0" }
-eth-valkyoth-primitives = { path = "crates/eth-valkyoth-primitives", version = "0.5.0" }
-eth-valkyoth-protocol = { path = "crates/eth-valkyoth-protocol", version = "0.5.0" }
-eth-valkyoth-reth = { path = "crates/eth-valkyoth-reth", version = "0.3.0" }
-eth-valkyoth-rpc = { path = "crates/eth-valkyoth-rpc", version = "0.6.0" }
-eth-valkyoth-sanitization = { path = "crates/eth-valkyoth-sanitization", version = "0.6.0" }
-eth-valkyoth-signer = { path = "crates/eth-valkyoth-signer", version = "0.3.2" }
-eth-valkyoth-testkit = { path = "crates/eth-valkyoth-testkit", version = "0.3.0" }
-eth-valkyoth-verify = { path = "crates/eth-valkyoth-verify", version = "0.5.0" }
+eth-valkyoth-derive = { path = "crates/eth-valkyoth-derive", version = "0.7.0" }
+eth-valkyoth-evm = { path = "crates/eth-valkyoth-evm", version = "0.7.0" }
+eth-valkyoth-primitives = { path = "crates/eth-valkyoth-primitives", version = "0.7.0" }
+eth-valkyoth-protocol = { path = "crates/eth-valkyoth-protocol", version = "0.7.0" }
+eth-valkyoth-reth = { path = "crates/eth-valkyoth-reth", version = "0.7.0" }
+eth-valkyoth-rpc = { path = "crates/eth-valkyoth-rpc", version = "0.7.0" }
+eth-valkyoth-sanitization = { path = "crates/eth-valkyoth-sanitization", version = "0.7.0" }
+eth-valkyoth-signer = { path = "crates/eth-valkyoth-signer", version = "0.7.0" }
+eth-valkyoth-testkit = { path = "crates/eth-valkyoth-testkit", version = "0.7.0" }
+eth-valkyoth-verify = { path = "crates/eth-valkyoth-verify", version = "0.7.0" }
 proc-macro2 = "1.0.106"
 quote = "1.0.46"
 sanitization = { version = "1.2.2", default-features = false }

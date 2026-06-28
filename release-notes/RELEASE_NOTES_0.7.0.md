@@ -1,6 +1,6 @@
 # eth 0.7.0 Release Notes
 
-Status: ready for external pentest
+Status: pentest findings addressed
 
 ## Summary
 
@@ -27,14 +27,15 @@ payload traversal under explicit resource limits.
   overflow.
 - Added fuzz coverage for exact and partial RLP list decoding paths, including
   immediate child iteration on successfully decoded lists.
+- Addressed v0.7.0 pentest findings for budgeted nested list iteration,
+  recursive iterator fuzzing, traversal-cap documentation, partial-decoder
+  slicing documentation, fuzz policy comments, and long-prefix naming clarity.
 - Refreshed pinned official Ethereum source revisions for v0.7.0 parser work.
 - Confirmed dependency and GitHub tooling currency for the v0.7.0 start slice.
 - Corrected the public crate license metadata and repository license files to
   `MIT OR Apache-2.0`, matching the `sanitization` project license model.
-- Marked `eth-valkyoth-codec` and `eth` for `0.7.0` publication.
-- Left primitives, protocol, verification, derive, sanitization, RPC, signer,
-  EVM, Reth, and testkit packages on their previously published versions for
-  this pass.
+- Marked every public workspace crate for `0.7.0` publication so crates.io
+  receives corrected `MIT OR Apache-2.0` package metadata everywhere.
 
 ## Still Required Before Tag
 

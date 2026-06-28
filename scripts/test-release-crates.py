@@ -120,6 +120,34 @@ def test_unchanged_crates_are_not_published() -> None:
     )
 
 
+def test_metadata_changes_use_milestone_version() -> None:
+    entry = {
+        "previous_version": "0.3.0",
+        "version": "0.4.0",
+        "change": "metadata",
+        "publish": True,
+        "reason": "test",
+    }
+    release_crates.validate_plan_entry("eth", entry, "0.4.0")
+
+
+def test_metadata_changes_must_be_published() -> None:
+    entry = {
+        "previous_version": "0.3.0",
+        "version": "0.4.0",
+        "change": "metadata",
+        "publish": False,
+        "reason": "test",
+    }
+    assert_fails(
+        "metadata changes but publish is false",
+        release_crates.validate_plan_entry,
+        "eth",
+        entry,
+        "0.4.0",
+    )
+
+
 def test_publish_plan_skips_unchanged_crates() -> None:
     plan = base_plan()
     plan["crates"]["eth-valkyoth-codec"] = {
@@ -138,6 +166,8 @@ def run_tests() -> None:
         test_code_changes_must_use_milestone_version,
         test_dependency_only_changes_must_patch_bump,
         test_unchanged_crates_are_not_published,
+        test_metadata_changes_use_milestone_version,
+        test_metadata_changes_must_be_published,
         test_publish_plan_skips_unchanged_crates,
     )
     for test in tests:

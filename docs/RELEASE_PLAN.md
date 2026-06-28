@@ -117,6 +117,8 @@ Track every release in `release-crates.toml` and
 - `dependency`: the crate only needs a manifest update because a related crate
   changed outside its current dependency range, so it receives a patch bump on
   its existing line, for example `0.3.0` to `0.3.1`;
+- `metadata`: the crate must be republished with the milestone version to
+  correct immutable crates.io package metadata such as the license expression;
 - `unchanged`: the crate stays on the previous published version and is not
   published.
 

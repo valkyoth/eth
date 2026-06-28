@@ -9,12 +9,19 @@ use crate::{
 };
 
 pub use list::{
-    RlpItem, RlpList, RlpListForm, RlpListItems, decode_rlp_list, decode_rlp_list_partial,
+    MAX_RLP_LIST_TRAVERSAL_DEPTH, RlpItem, RlpList, RlpListForm, RlpListItems, decode_rlp_list,
+    decode_rlp_list_partial,
 };
 
 pub(super) const SHORT_STRING_OFFSET: u8 = 0x80;
+/// Base for computing `len_of_len` in long-string encoding.
+///
+/// This is the last short-string prefix, not the first long-string prefix.
 pub(super) const LONG_STRING_OFFSET: u8 = 0xb7;
 pub(super) const SHORT_LIST_OFFSET: u8 = 0xc0;
+/// Base for computing `len_of_len` in long-list encoding.
+///
+/// This is the last short-list prefix, not the first long-list prefix.
 pub(super) const LONG_LIST_OFFSET: u8 = 0xf7;
 pub(super) const SHORT_STRING_LIMIT: usize = 55;
 pub(super) const LENGTH_RADIX: usize = 256;
@@ -86,6 +93,10 @@ pub fn decode_rlp_scalar<'a>(
 ///
 /// Warning: this intentionally accepts trailing bytes. Use
 /// [`decode_rlp_scalar`] when the full input must be consumed.
+///
+/// The input-length budget check applies to the full `input` slice, not only
+/// the consumed scalar bytes. Callers that decode from a larger outer buffer
+/// must pre-slice before calling this helper.
 ///
 /// This helper does not reject trailing bytes. It is intended for nested
 /// decoders that need to consume one item while sharing cumulative budgets.

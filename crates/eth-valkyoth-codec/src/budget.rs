@@ -8,6 +8,10 @@ pub struct DecodeLimits {
     /// Maximum items accepted in any single decoded list.
     pub max_list_items: usize,
     /// Maximum nested list depth.
+    ///
+    /// RLP list decoding is also capped by
+    /// [`crate::MAX_RLP_LIST_TRAVERSAL_DEPTH`], even when this configured limit
+    /// is higher.
     pub max_nesting_depth: usize,
     /// Maximum total allocation a decoder may request.
     pub max_total_allocation: usize,
@@ -65,6 +69,9 @@ impl DecodeLimits {
     }
 
     /// Validates the current nesting depth.
+    ///
+    /// RLP list decoding also enforces [`crate::MAX_RLP_LIST_TRAVERSAL_DEPTH`]
+    /// as a hard traversal-stack cap.
     pub fn check_nesting_depth(self, depth: usize) -> Result<(), DecodeError> {
         if depth > self.max_nesting_depth {
             return Err(DecodeError::NestingTooDeep);

@@ -17,7 +17,7 @@ and does not add runtime clearing by itself.
 
 ```toml
 [dependencies]
-eth-valkyoth-sanitization = { version = "0.6", features = ["derive"] }
+eth-valkyoth-sanitization = { version = "0.7", features = ["derive"] }
 ```
 
 Supported field attribute:

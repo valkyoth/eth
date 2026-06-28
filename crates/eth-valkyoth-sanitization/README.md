@@ -25,7 +25,7 @@ For derive macros:
 
 ```toml
 [dependencies]
-eth-valkyoth-sanitization = { version = "0.6", features = ["derive"] }
+eth-valkyoth-sanitization = { version = "0.7", features = ["derive"] }
 ```
 
 The derive macros generate calls to `eth_valkyoth_sanitization::SecureSanitize`.
@@ -42,7 +42,7 @@ that match the target:
 ```toml
 [dependencies]
 eth-valkyoth-sanitization = {
-    version = "0.6",
+    version = "0.7",
     features = [
         "hardened-only",
         "memory-lock",
