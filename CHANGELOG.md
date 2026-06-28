@@ -4,6 +4,11 @@ All notable changes to `eth` are documented here.
 
 ## Unreleased
 
+- Started `0.7.0` with bounded canonical RLP list decoding, including short
+  and long list headers, nested traversal, list item-count enforcement, nesting
+  depth enforcement, and adversarial malformed-list tests.
+- Added fuzz coverage for exact and partial RLP list decoding paths.
+- Refreshed pinned official Ethereum source revisions for v0.7.0 parser work.
 - Started `0.6.0` with a dependency and tooling refresh before RLP scalar
   decoder work: updated `quote` to `1.0.46`, updated optional `sanitization`
   support to `1.2.2`, confirmed GitHub tooling is current, and added the

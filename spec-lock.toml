@@ -1,6 +1,6 @@
 # Pinned upstream specification and fixture revisions.
 #
-# v0.6.0 starts scalar RLP decoding from pinned upstream revisions. Broader
+# v0.7.0 continues RLP decoding from pinned upstream revisions. Broader
 # consensus validation and fixture coverage remain gated by the spec-source
 # policy.
 # See docs/spec-source-policy.md for the required source-check workflow.
@@ -11,10 +11,10 @@ execution_specs_rev = "3f888bc71f2d30d48b6f5a92c618ab283a6c98d5"
 execution_tests_repo = "https://github.com/ethereum/tests"
 execution_tests_rev = "c67e485ff8b5be9abc8ad15345ec21aa22e290d9"
 eips_repo = "https://github.com/ethereum/EIPs"
-eips_rev = "378d36bc69bcee7e1452abbb1ff09f728f825f9d"
+eips_rev = "171cece4aed833493f00d976f7053f1db6596fdd"
 execution_apis_repo = "https://github.com/ethereum/execution-apis"
 execution_apis_rev = "b14c23c70422cffd1c116e112001e51fb20ac7f8"
 consensus_specs_repo = "https://github.com/ethereum/consensus-specs"
-consensus_specs_rev = "42b96716a39ddea2d610c0b615d625318a09d278"
+consensus_specs_rev = "99cc40f9317a15ea185690cee6095297fc571dda"
 local_reference_store_env = "ETH_REFERENCE_STORE"
 local_reference_store_default = "../../test/eth"

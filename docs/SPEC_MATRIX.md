@@ -1,15 +1,15 @@
 # eth Specification Matrix
 
-Status: source revisions pinned for `v0.6.0`; scalar RLP decoding implemented.
+Status: source revisions pinned for `v0.7.0`; scalar and list RLP decoding implemented.
 
 Official source and fixture revisions are governed by
 [Spec Source Policy](spec-source-policy.md). Revisions were checked against
-upstream `HEAD` on 2026-06-25. Consensus-sensitive behavior must not be
+upstream `HEAD` on 2026-06-28. Consensus-sensitive behavior must not be
 implemented from memory.
 
 | Area | Status | Evidence |
 | --- | --- | --- |
-| Execution RLP | partial | `ethereum/tests` pinned in `spec-lock.toml`; scalar byte-string decoder implemented, list decoder planned |
+| Execution RLP | partial | `ethereum/tests` pinned in `spec-lock.toml`; scalar byte-string and list decoders implemented, integer helpers planned |
 | EIP-2718 typed transactions | planned | `ethereum/EIPs` pinned in `spec-lock.toml`; parser not implemented |
 | Transaction validation | planned | `execution-specs` pinned in `spec-lock.toml`; validation not implemented |
 | Header validation | planned | `execution-specs` pinned in `spec-lock.toml`; validation not implemented |

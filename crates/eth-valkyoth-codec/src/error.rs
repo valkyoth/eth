@@ -14,6 +14,8 @@ pub enum DecodeError {
     Malformed,
     /// An RLP list was encountered where a scalar byte string was required.
     UnexpectedList,
+    /// An RLP scalar was encountered where a list was required.
+    UnexpectedScalar,
     /// A decoded list contains more items than the active list budget.
     ListTooLong,
     /// Decoding exceeded the active nesting-depth budget.
@@ -42,6 +44,7 @@ impl DecodeError {
             Self::DecoderOverread => "ETH_CODEC_DECODER_OVERREAD",
             Self::Malformed => "ETH_CODEC_MALFORMED",
             Self::UnexpectedList => "ETH_CODEC_UNEXPECTED_LIST",
+            Self::UnexpectedScalar => "ETH_CODEC_UNEXPECTED_SCALAR",
             Self::ListTooLong => "ETH_CODEC_LIST_TOO_LONG",
             Self::NestingTooDeep => "ETH_CODEC_NESTING_TOO_DEEP",
             Self::AllocationExceeded => "ETH_CODEC_ALLOCATION_EXCEEDED",
@@ -62,6 +65,7 @@ impl DecodeError {
             Self::DecoderOverread => "decoder consumed more bytes than were available",
             Self::Malformed => "input is malformed for the selected codec",
             Self::UnexpectedList => "RLP list encountered where scalar was required",
+            Self::UnexpectedScalar => "RLP scalar encountered where list was required",
             Self::ListTooLong => "decoded list exceeds the active item limit",
             Self::NestingTooDeep => "decoded structure exceeds the active nesting limit",
             Self::AllocationExceeded => "decoder exceeded the active allocation limit",
@@ -90,6 +94,7 @@ impl DecodeError {
             | Self::DecoderOverread
             | Self::Malformed
             | Self::UnexpectedList
+            | Self::UnexpectedScalar
             | Self::LengthOverflow
             | Self::OffsetOutOfBounds => DecodeErrorCategory::MalformedInput,
         }
@@ -111,6 +116,7 @@ impl DecodeError {
             | Self::DecoderOverread
             | Self::Malformed
             | Self::UnexpectedList
+            | Self::UnexpectedScalar
             | Self::LengthOverflow
             | Self::OffsetOutOfBounds => None,
         }
@@ -270,5 +276,18 @@ mod tests {
             DecodeErrorCategory::MalformedInput
         );
         assert_eq!(DecodeError::UnexpectedList.resource(), None);
+    }
+
+    #[test]
+    fn unexpected_scalar_is_malformed_input() {
+        assert_eq!(
+            DecodeError::UnexpectedScalar.code(),
+            "ETH_CODEC_UNEXPECTED_SCALAR"
+        );
+        assert_eq!(
+            DecodeError::UnexpectedScalar.category(),
+            DecodeErrorCategory::MalformedInput
+        );
+        assert_eq!(DecodeError::UnexpectedScalar.resource(), None);
     }
 }

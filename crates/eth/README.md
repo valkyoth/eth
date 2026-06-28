@@ -26,7 +26,7 @@
 `eth` is the public facade crate for a `no_std`-first Ethereum
 execution-layer protocol workspace.
 
-The crate is intentionally conservative at `0.6.0`: it provides explicit
+The crate is intentionally conservative at `0.7.0`: it provides explicit
 Ethereum primitive domains, bounded decode-budget policy, stable error
 categories, small first-party crate boundaries, optional sanitization support,
 and release evidence before RPC, signer, EVM, Reth, or P2P integrations become
@@ -34,7 +34,7 @@ real dependencies.
 
 ## Current Status
 
-The current release candidate is `0.6.0`.
+The current release candidate is `0.7.0`.
 
 Implemented now:
 
@@ -77,21 +77,21 @@ Not implemented yet:
 
 ```toml
 [dependencies]
-eth = "0.6"
+eth = "0.7"
 ```
 
 Disable defaults explicitly for embedded or freestanding builds:
 
 ```toml
 [dependencies]
-eth = { version = "0.6", default-features = false }
+eth = { version = "0.7", default-features = false }
 ```
 
 Optional sanitization support:
 
 ```toml
 [dependencies]
-eth = { version = "0.6", features = ["sanitization"] }
+eth = { version = "0.7", features = ["sanitization"] }
 ```
 
 ## Features
@@ -204,13 +204,15 @@ assert_eq!(budget.check_allocation(1), Err(DecodeError::AllocationExceeded));
 assert_eq!(budget.account_items(33), Err(DecodeError::ItemCountExceeded));
 ```
 
-## RLP Scalar Decoding
+## RLP Decoding
 
-The first RLP pass decodes canonical byte-string scalars with exact
-consumption. List decoding is intentionally left for the next milestone:
+The RLP decoder admits canonical byte-string scalars and lists with exact
+consumption. Every entry point requires explicit decode limits:
 
 ```rust
-use eth::codec::{DecodeLimits, RlpScalarForm, decode_rlp_scalar};
+use eth::codec::{
+    DecodeLimits, RlpListForm, RlpScalarForm, decode_rlp_list, decode_rlp_scalar,
+};
 
 let limits = DecodeLimits {
     max_input_bytes: 32,
@@ -226,6 +228,11 @@ assert_eq!(scalar.payload(), b"dog");
 assert_eq!(scalar.encoded_len(), 4);
 assert_eq!(scalar.header_len(), 1);
 assert_eq!(scalar.form(), RlpScalarForm::ShortString);
+
+let list = decode_rlp_list(&[0xc8, 0x83, b'c', b'a', b't', 0x83, b'd', b'o', b'g'], limits)?;
+
+assert_eq!(list.item_count(), 2);
+assert_eq!(list.form(), RlpListForm::ShortList);
 # Ok::<(), eth::error::DecodeError>(())
 ```
 
@@ -273,7 +280,7 @@ the workspace can keep small, auditable boundaries:
 The minimum supported Rust version is Rust `1.90.0`. New deployments should use
 the latest stable Rust verified by the release gates.
 
-Compatibility evidence for `0.6.0`:
+Compatibility evidence for `0.7.0`:
 
 | Rust | Local Evidence |
 | --- | --- |

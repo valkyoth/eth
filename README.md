@@ -35,7 +35,7 @@ dependencies.
 
 ## Current Status
 
-Status: `v0.6.0` release candidate; `v0.5.0` published.
+Status: `v0.7.0` in development; `v0.6.0` published.
 
 Implemented now:
 
@@ -85,14 +85,14 @@ Not implemented yet:
 
 ```toml
 [dependencies]
-eth = "0.6"
+eth = "0.7"
 ```
 
 For optional sanitization support:
 
 ```toml
 [dependencies]
-eth = { version = "0.6", features = ["sanitization"] }
+eth = { version = "0.7", features = ["sanitization"] }
 ```
 
 ## Features
@@ -201,13 +201,15 @@ assert_eq!(budget.check_allocation(1), Err(DecodeError::AllocationExceeded));
 assert_eq!(budget.account_items(33), Err(DecodeError::ItemCountExceeded));
 ```
 
-## RLP Scalar Decoding
+## RLP Decoding
 
-The first RLP pass decodes canonical byte-string scalars with exact
-consumption. List decoding is intentionally left for the next milestone:
+The RLP decoder admits canonical byte-string scalars and lists with exact
+consumption. Every entry point requires explicit decode limits:
 
 ```rust
-use eth::codec::{DecodeLimits, RlpScalarForm, decode_rlp_scalar};
+use eth::codec::{
+    DecodeLimits, RlpListForm, RlpScalarForm, decode_rlp_list, decode_rlp_scalar,
+};
 
 let limits = DecodeLimits {
     max_input_bytes: 32,
@@ -223,6 +225,11 @@ assert_eq!(scalar.payload(), b"dog");
 assert_eq!(scalar.encoded_len(), 4);
 assert_eq!(scalar.header_len(), 1);
 assert_eq!(scalar.form(), RlpScalarForm::ShortString);
+
+let list = decode_rlp_list(&[0xc8, 0x83, b'c', b'a', b't', 0x83, b'd', b'o', b'g'], limits)?;
+
+assert_eq!(list.item_count(), 2);
+assert_eq!(list.form(), RlpListForm::ShortList);
 # Ok::<(), eth::error::DecodeError>(())
 ```
 
@@ -272,7 +279,7 @@ friendly, and independently testable.
 The minimum supported Rust version is Rust `1.90.0`. New deployments should use
 the pinned stable Rust `1.96.0` until the toolchain policy is updated.
 
-Compatibility evidence for `0.6.0`:
+Compatibility evidence for `0.7.0`:
 
 | Rust | Local Evidence |
 | --- | --- |
@@ -288,8 +295,8 @@ Compatibility evidence for `0.6.0`:
 
 ```bash
 scripts/checks.sh
-scripts/release_0_6_gate.sh
-scripts/validate-release-readiness.sh v0.6.0
+scripts/release_0_7_gate.sh
+scripts/validate-release-readiness.sh v0.7.0
 ```
 
 For dependency-policy checks, install `cargo-deny` and `cargo-audit`, then run:

@@ -1,0 +1,27 @@
+#![no_main]
+
+use eth_valkyoth_codec::{DecodeLimits, decode_rlp_list, decode_rlp_list_partial};
+use libfuzzer_sys::fuzz_target;
+
+fuzz_target!(|data: &[u8]| {
+    drive_list(data, DecodeLimits::TEST_FIXTURE);
+    drive_list(data, DecodeLimits::DEPLOYMENT_STARTING_POINT);
+    drive_list(
+        data,
+        DecodeLimits {
+            max_input_bytes: usize::MAX,
+            max_list_items: usize::MAX,
+            max_nesting_depth: usize::MAX,
+            max_total_allocation: usize::MAX,
+            max_proof_nodes: usize::MAX,
+            max_total_items: usize::MAX,
+        },
+    );
+});
+
+fn drive_list(data: &[u8], limits: DecodeLimits) {
+    let _ = decode_rlp_list(data, limits);
+
+    let mut accumulator = limits.accumulator();
+    let _ = decode_rlp_list_partial(data, &mut accumulator);
+}

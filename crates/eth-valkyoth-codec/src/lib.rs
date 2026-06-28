@@ -15,4 +15,7 @@ pub use error::{DecodeError, DecodeErrorCategory, ResourceError};
 pub use exact::{
     checked_len_add, checked_range_end, require_exact_consumption, require_range_in_bounds,
 };
-pub use rlp::{RlpScalar, RlpScalarForm, decode_rlp_scalar, decode_rlp_scalar_partial};
+pub use rlp::{
+    RlpList, RlpListForm, RlpScalar, RlpScalarForm, decode_rlp_list, decode_rlp_list_partial,
+    decode_rlp_scalar, decode_rlp_scalar_partial,
+};

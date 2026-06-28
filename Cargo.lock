@@ -4,7 +4,7 @@ version = 4
 
 [[package]]
 name = "eth"
-version = "0.6.0"
+version = "0.7.0"
 dependencies = [
  "eth-valkyoth-codec",
  "eth-valkyoth-evm",
@@ -20,7 +20,7 @@ dependencies = [
 
 [[package]]
 name = "eth-valkyoth-codec"
-version = "0.6.0"
+version = "0.7.0"
 
 [[package]]
 name = "eth-valkyoth-derive"

@@ -1,62 +1,62 @@
 [release]
-version = "0.6.0"
+version = "0.7.0"
 policy = "independent"
 
 [crates."eth-valkyoth-codec"]
-previous_version = "0.5.0"
-version = "0.6.0"
+previous_version = "0.6.0"
+version = "0.7.0"
 change = "code"
 publish = true
-reason = "Adds the canonical RLP scalar decoder with exact-consumption and malformed length checks."
+reason = "Adds bounded canonical RLP list decoding with nesting and item-count enforcement."
 
 [crates."eth-valkyoth-primitives"]
 previous_version = "0.5.0"
 version = "0.5.0"
 change = "unchanged"
 publish = false
-reason = "Primitive domains remain unchanged for the initial v0.6.0 dependency refresh."
+reason = "Primitive domains remain unchanged for the v0.7.0 RLP list milestone."
 
 [crates."eth-valkyoth-protocol"]
 previous_version = "0.5.0"
 version = "0.5.0"
 change = "unchanged"
 publish = false
-reason = "Protocol state remains unchanged for the initial v0.6.0 dependency refresh."
+reason = "Protocol state remains unchanged for the v0.7.0 RLP list milestone."
 
 [crates."eth-valkyoth-verify"]
 previous_version = "0.5.0"
 version = "0.5.0"
 change = "unchanged"
 publish = false
-reason = "Verification boundaries remain unchanged for the initial v0.6.0 dependency refresh."
+reason = "Verification boundaries remain unchanged for the v0.7.0 RLP list milestone."
 
 [crates."eth-valkyoth-derive"]
-previous_version = "0.5.0"
+previous_version = "0.6.0"
 version = "0.6.0"
-change = "code"
-publish = true
-reason = "Starts v0.6.0 by refreshing derive macro dependencies, including quote 1.0.46."
+change = "unchanged"
+publish = false
+reason = "Derive macro support remains unchanged for the v0.7.0 RLP list milestone."
 
 [crates."eth-valkyoth-sanitization"]
-previous_version = "0.5.0"
+previous_version = "0.6.0"
 version = "0.6.0"
-change = "code"
-publish = true
-reason = "Starts v0.6.0 by refreshing optional sanitization support to sanitization 1.2.2."
+change = "unchanged"
+publish = false
+reason = "Sanitization support remains unchanged for the v0.7.0 RLP list milestone."
 
 [crates."eth-valkyoth-evm"]
 previous_version = "0.3.0"
 version = "0.3.0"
 change = "unchanged"
 publish = false
-reason = "EVM boundary remains unchanged for the v0.6.0 RLP scalar milestone."
+reason = "EVM boundary remains unchanged for the v0.7.0 RLP list milestone."
 
 [crates."eth-valkyoth-rpc"]
-previous_version = "0.3.0"
+previous_version = "0.6.0"
 version = "0.6.0"
-change = "code"
-publish = true
-reason = "Requires explicit acknowledgment before using the trusted RPC response model."
+change = "unchanged"
+publish = false
+reason = "RPC trust-model support remains unchanged for the v0.7.0 RLP list milestone."
 
 [crates."eth-valkyoth-signer"]
 previous_version = "0.3.2"
@@ -70,18 +70,18 @@ previous_version = "0.3.0"
 version = "0.3.0"
 change = "unchanged"
 publish = false
-reason = "Reth boundary remains unchanged for the v0.6.0 RLP scalar milestone."
+reason = "Reth boundary remains unchanged for the v0.7.0 RLP list milestone."
 
 [crates."eth-valkyoth-testkit"]
 previous_version = "0.3.0"
 version = "0.3.0"
 change = "unchanged"
 publish = false
-reason = "Testkit boundary remains unchanged for the v0.6.0 RLP scalar milestone."
+reason = "Testkit boundary remains unchanged for the v0.7.0 RLP list milestone."
 
 [crates.eth]
-previous_version = "0.5.0"
-version = "0.6.0"
+previous_version = "0.6.0"
+version = "0.7.0"
 change = "code"
 publish = true
-reason = "Starts v0.6.0 by exposing the refreshed optional sanitization dependency range."
+reason = "Exposes bounded canonical RLP list decoding through the facade crate."
