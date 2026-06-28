@@ -208,7 +208,7 @@ consumption. Every entry point requires explicit decode limits:
 
 ```rust
 use eth::codec::{
-    DecodeLimits, RlpListForm, RlpScalarForm, decode_rlp_list, decode_rlp_scalar,
+    DecodeLimits, RlpItem, RlpListForm, RlpScalarForm, decode_rlp_list, decode_rlp_scalar,
 };
 
 let limits = DecodeLimits {
@@ -230,6 +230,15 @@ let list = decode_rlp_list(&[0xc8, 0x83, b'c', b'a', b't', 0x83, b'd', b'o', b'g
 
 assert_eq!(list.item_count(), 2);
 assert_eq!(list.form(), RlpListForm::ShortList);
+let mut items = list.items();
+assert!(matches!(
+    items.next(),
+    Some(Ok(RlpItem::Scalar(item))) if item.payload() == b"cat"
+));
+assert!(matches!(
+    items.next(),
+    Some(Ok(RlpItem::Scalar(item))) if item.payload() == b"dog"
+));
 # Ok::<(), eth::error::DecodeError>(())
 ```
 

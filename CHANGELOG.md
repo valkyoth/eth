@@ -7,7 +7,10 @@ All notable changes to `eth` are documented here.
 - Started `0.7.0` with bounded canonical RLP list decoding, including short
   and long list headers, nested traversal, list item-count enforcement, nesting
   depth enforcement, and adversarial malformed-list tests.
-- Added fuzz coverage for exact and partial RLP list decoding paths.
+- Added no-allocation immediate-child iteration for decoded RLP lists through
+  `RlpList::items`, `RlpListItems`, and `RlpItem`.
+- Added fuzz coverage for exact and partial RLP list decoding paths, including
+  immediate child iteration on successfully decoded lists.
 - Refreshed pinned official Ethereum source revisions for v0.7.0 parser work.
 - Corrected the public crate license metadata and repository license files to
   `MIT OR Apache-2.0`.

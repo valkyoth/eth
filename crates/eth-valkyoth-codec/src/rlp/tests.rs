@@ -270,6 +270,73 @@ fn decodes_nested_short_lists() {
 }
 
 #[test]
+fn iterates_empty_list_items() -> Result<(), DecodeError> {
+    let list = decode_rlp_list(&[0xc0], DecodeLimits::TEST_FIXTURE)?;
+    let mut items = list.items();
+
+    assert_eq!(items.remaining(), 0);
+    assert_eq!(items.size_hint(), (0, Some(0)));
+    assert!(items.next().is_none());
+    Ok(())
+}
+
+#[test]
+fn iterates_scalar_list_items() -> Result<(), DecodeError> {
+    let input = [0xc8, 0x83, b'c', b'a', b't', 0x83, b'd', b'o', b'g'];
+    let list = decode_rlp_list(&input, DecodeLimits::TEST_FIXTURE)?;
+    let mut items = list.items();
+
+    assert_eq!(items.remaining(), 2);
+    assert!(matches!(
+        items.next(),
+        Some(Ok(RlpItem::Scalar(scalar)))
+            if scalar.payload() == b"cat"
+                && scalar.encoded_len() == 4
+                && scalar.form() == RlpScalarForm::ShortString
+    ));
+    assert_eq!(items.remaining(), 1);
+    assert!(matches!(
+        items.next(),
+        Some(Ok(RlpItem::Scalar(scalar)))
+            if scalar.payload() == b"dog"
+                && scalar.encoded_len() == 4
+                && scalar.form() == RlpScalarForm::ShortString
+    ));
+    assert!(items.next().is_none());
+    Ok(())
+}
+
+#[test]
+fn iterates_nested_list_items() -> Result<(), DecodeError> {
+    let input = [0xc4, 0xc0, 0xc2, 0x80, 0x01];
+    let list = decode_rlp_list(&input, DecodeLimits::TEST_FIXTURE)?;
+    let mut items = list.items();
+
+    assert!(matches!(
+        items.next(),
+        Some(Ok(RlpItem::List(child))) if child.is_empty() && child.item_count() == 0
+    ));
+
+    let Some(Ok(RlpItem::List(child))) = items.next() else {
+        return Err(DecodeError::Malformed);
+    };
+    assert_eq!(child.item_count(), 2);
+    let mut child_items = child.items();
+    assert!(matches!(
+        child_items.next(),
+        Some(Ok(RlpItem::Scalar(scalar)))
+            if scalar.payload().is_empty() && scalar.form() == RlpScalarForm::ShortString
+    ));
+    assert!(matches!(
+        child_items.next(),
+        Some(Ok(RlpItem::Scalar(scalar)))
+            if scalar.payload() == [0x01] && scalar.form() == RlpScalarForm::SingleByte
+    ));
+    assert!(items.next().is_none());
+    Ok(())
+}
+
+#[test]
 fn decodes_long_list() {
     let mut input = vec![0xf8, 56];
     input.extend_from_slice(&[0x80; 56]);

@@ -14,10 +14,13 @@ payload traversal under explicit resource limits.
 - Added exact-consumption and partial list-decoder entry points.
 - Added nested list traversal with explicit item-count, nesting-depth, and
   cumulative item-budget enforcement.
+- Added no-allocation immediate-child iteration through `RlpList::items`,
+  `RlpListItems`, and `RlpItem`.
 - Added malformed list tests for missing payloads, missing length bytes,
   leading-zero lengths, long-form lengths for short payloads, and length
   overflow.
-- Added fuzz coverage for exact and partial RLP list decoding paths.
+- Added fuzz coverage for exact and partial RLP list decoding paths, including
+  immediate child iteration on successfully decoded lists.
 - Refreshed pinned official Ethereum source revisions for v0.7.0 parser work.
 - Confirmed dependency and GitHub tooling currency for the v0.7.0 start slice.
 - Corrected the public crate license metadata and repository license files to

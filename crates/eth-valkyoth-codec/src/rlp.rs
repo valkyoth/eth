@@ -8,7 +8,9 @@ use crate::{
     require_range_in_bounds,
 };
 
-pub use list::{RlpList, RlpListForm, decode_rlp_list, decode_rlp_list_partial};
+pub use list::{
+    RlpItem, RlpList, RlpListForm, RlpListItems, decode_rlp_list, decode_rlp_list_partial,
+};
 
 pub(super) const SHORT_STRING_OFFSET: u8 = 0x80;
 pub(super) const LONG_STRING_OFFSET: u8 = 0xb7;

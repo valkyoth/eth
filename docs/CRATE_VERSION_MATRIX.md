@@ -26,7 +26,7 @@ publication when a crate is marked `unchanged`.
 
 | Crate | Published | Planned | Change | Publish | Reason |
 | --- | --- | --- | --- | --- | --- |
-| `eth-valkyoth-codec` | `0.6.0` | `0.7.0` | `code` | Yes | Adds bounded canonical RLP list decoding with nesting and item-count enforcement. |
+| `eth-valkyoth-codec` | `0.6.0` | `0.7.0` | `code` | Yes | Adds bounded canonical RLP list decoding with nesting, item-count enforcement, and immediate child iteration. |
 | `eth-valkyoth-primitives` | `0.5.0` | `0.5.0` | `unchanged` | No | Primitive domains remain unchanged for the v0.7.0 RLP list milestone. |
 | `eth-valkyoth-protocol` | `0.5.0` | `0.5.0` | `unchanged` | No | Protocol state remains unchanged for the v0.7.0 RLP list milestone. |
 | `eth-valkyoth-verify` | `0.5.0` | `0.5.0` | `unchanged` | No | Verification boundaries remain unchanged for the v0.7.0 RLP list milestone. |
@@ -37,7 +37,7 @@ publication when a crate is marked `unchanged`.
 | `eth-valkyoth-signer` | `0.3.2` | `0.3.2` | `unchanged` | No | Signer remains on the published v0.3.2 dependency range. |
 | `eth-valkyoth-reth` | `0.3.0` | `0.3.0` | `unchanged` | No | Reth boundary remains unchanged for the v0.7.0 RLP list milestone. |
 | `eth-valkyoth-testkit` | `0.3.0` | `0.3.0` | `unchanged` | No | Testkit boundary remains unchanged for the v0.7.0 RLP list milestone. |
-| `eth` | `0.6.0` | `0.7.0` | `code` | Yes | Exposes bounded canonical RLP list decoding through the facade crate. |
+| `eth` | `0.6.0` | `0.7.0` | `code` | Yes | Exposes bounded canonical RLP list decoding and item iteration through the facade crate. |
 
 Update this table and `release-crates.toml` in the same commit whenever a crate
 changes release state.

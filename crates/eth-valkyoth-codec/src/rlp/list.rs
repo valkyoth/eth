@@ -4,8 +4,8 @@ use crate::{
 };
 
 use super::{
-    LONG_LIST_OFFSET, SHORT_LIST_OFFSET, SHORT_STRING_LIMIT, decode_long_string,
-    decode_short_string, parse_payload_len, payload,
+    LONG_LIST_OFFSET, RlpScalar, RlpScalarForm, SHORT_LIST_OFFSET, SHORT_STRING_LIMIT,
+    decode_long_string, decode_short_string, parse_payload_len, payload,
 };
 
 const MAX_TRAVERSAL_STACK: usize = 128;
@@ -65,7 +65,95 @@ impl<'a> RlpList<'a> {
     pub const fn is_empty(self) -> bool {
         self.item_count == 0
     }
+
+    /// Returns an iterator over the immediate child items in this list.
+    #[must_use]
+    pub const fn items(self) -> RlpListItems<'a> {
+        RlpListItems {
+            input: self.payload,
+            cursor: 0,
+            remaining: self.item_count,
+        }
+    }
 }
+
+/// Borrowed RLP item yielded by [`RlpListItems`].
+#[derive(Clone, Copy, Debug, Eq, PartialEq)]
+pub enum RlpItem<'a> {
+    /// A scalar byte string item.
+    Scalar(RlpScalar<'a>),
+    /// A list item.
+    List(RlpList<'a>),
+}
+
+impl<'a> RlpItem<'a> {
+    /// Returns the total encoded item length in bytes.
+    #[must_use]
+    pub const fn encoded_len(self) -> usize {
+        match self {
+            Self::Scalar(scalar) => scalar.encoded_len(),
+            Self::List(list) => list.encoded_len(),
+        }
+    }
+
+    /// Returns true when this item is a scalar byte string.
+    #[must_use]
+    pub const fn is_scalar(self) -> bool {
+        matches!(self, Self::Scalar(_))
+    }
+
+    /// Returns true when this item is a list.
+    #[must_use]
+    pub const fn is_list(self) -> bool {
+        matches!(self, Self::List(_))
+    }
+}
+
+/// Iterator over immediate child items in a decoded RLP list.
+#[derive(Clone, Debug)]
+pub struct RlpListItems<'a> {
+    input: &'a [u8],
+    cursor: usize,
+    remaining: usize,
+}
+
+impl<'a> RlpListItems<'a> {
+    /// Returns the number of child items not yielded yet.
+    #[must_use]
+    pub const fn remaining(&self) -> usize {
+        self.remaining
+    }
+}
+
+impl<'a> Iterator for RlpListItems<'a> {
+    type Item = Result<RlpItem<'a>, DecodeError>;
+
+    fn next(&mut self) -> Option<Self::Item> {
+        if self.remaining == 0 {
+            return None;
+        }
+
+        match parse_item(self.input, self.cursor, self.input.len())
+            .and_then(|item| item.into_rlp_item(self.input, self.cursor))
+        {
+            Ok((item, next_cursor)) => {
+                self.cursor = next_cursor;
+                self.remaining = self.remaining.saturating_sub(1);
+                Some(Ok(item))
+            }
+            Err(error) => {
+                self.remaining = 0;
+                Some(Err(error))
+            }
+        }
+    }
+
+    fn size_hint(&self) -> (usize, Option<usize>) {
+        (self.remaining, Some(self.remaining))
+    }
+}
+
+impl ExactSizeIterator for RlpListItems<'_> {}
 
 /// Decodes exactly one canonical RLP list.
 pub fn decode_rlp_list<'a>(
@@ -173,7 +261,7 @@ fn validate_list_payload(
 
         let item = parse_item(input, cursor, frame.end)?;
         accumulator.account_items(1)?;
-        if item.is_list {
+        if matches!(item.kind, ParsedItemKind::List(_)) {
             let next_depth = checked_len_add(depth, 1)?;
             accumulator.check_nesting_depth(next_depth)?;
             if next_depth > MAX_TRAVERSAL_STACK {
@@ -198,10 +286,49 @@ fn validate_list_payload(
 }
 
 struct ParsedItem {
-    is_list: bool,
+    kind: ParsedItemKind,
+    header_len: usize,
     payload_start: usize,
     payload_end: usize,
     item_end: usize,
+}
+
+impl ParsedItem {
+    fn into_rlp_item<'a>(
+        self,
+        input: &'a [u8],
+        offset: usize,
+    ) -> Result<(RlpItem<'a>, usize), DecodeError> {
+        let payload = input
+            .get(self.payload_start..self.payload_end)
+            .ok_or(DecodeError::OffsetOutOfBounds)?;
+        let encoded_len = self
+            .item_end
+            .checked_sub(offset)
+            .ok_or(DecodeError::LengthOverflow)?;
+        let item = match self.kind {
+            ParsedItemKind::Scalar(form) => RlpItem::Scalar(RlpScalar {
+                payload,
+                encoded_len,
+                header_len: self.header_len,
+                form,
+            }),
+            ParsedItemKind::List(form) => RlpItem::List(RlpList {
+                payload,
+                encoded_len,
+                header_len: self.header_len,
+                item_count: count_immediate_items(payload)?,
+                form,
+            }),
+        };
+        Ok((item, self.item_end))
+    }
+}
+
+#[derive(Clone, Copy)]
+enum ParsedItemKind {
+    Scalar(RlpScalarForm),
+    List(RlpListForm),
 }
 
 fn parse_item(
@@ -213,23 +340,39 @@ fn parse_item(
         .get(offset..container_end)
         .ok_or(DecodeError::OffsetOutOfBounds)?;
     let prefix = *local.first().ok_or(DecodeError::Malformed)?;
-    let (is_list, header_len, payload_len) = match prefix {
-        0x00..=0x7f => (false, 0, 1),
+    let (kind, header_len, payload_len) = match prefix {
+        0x00..=0x7f => (ParsedItemKind::Scalar(RlpScalarForm::SingleByte), 0, 1),
         super::SHORT_STRING_OFFSET..=super::LONG_STRING_OFFSET => {
             let scalar = decode_short_string(local, prefix)?;
-            (false, scalar.header_len(), scalar.payload().len())
+            (
+                ParsedItemKind::Scalar(scalar.form()),
+                scalar.header_len(),
+                scalar.payload().len(),
+            )
         }
         0xb8..=0xbf => {
             let scalar = decode_long_string(local, prefix)?;
-            (false, scalar.header_len(), scalar.payload().len())
+            (
+                ParsedItemKind::Scalar(scalar.form()),
+                scalar.header_len(),
+                scalar.payload().len(),
+            )
         }
         SHORT_LIST_OFFSET..=LONG_LIST_OFFSET => {
             let list = decode_short_list(local, prefix)?;
-            (true, list.header_len(), list.payload().len())
+            (
+                ParsedItemKind::List(list.form()),
+                list.header_len(),
+                list.payload().len(),
+            )
         }
         0xf8..=0xff => {
             let list = decode_long_list(local, prefix)?;
-            (true, list.header_len(), list.payload().len())
+            (
+                ParsedItemKind::List(list.form()),
+                list.header_len(),
+                list.payload().len(),
+            )
         }
     };
     let payload_start = checked_len_add(offset, header_len)?;
@@ -241,9 +384,25 @@ fn parse_item(
     };
     require_range_in_bounds(offset, item_end.saturating_sub(offset), container_end)?;
     Ok(ParsedItem {
-        is_list,
+        kind,
+        header_len,
         payload_start,
         payload_end,
         item_end,
     })
+}
+
+fn count_immediate_items(input: &[u8]) -> Result<usize, DecodeError> {
+    let mut count = 0usize;
+    let mut cursor = 0usize;
+    while cursor < input.len() {
+        let item = parse_item(input, cursor, input.len())?;
+        count = checked_len_add(count, 1)?;
+        cursor = item.item_end;
+    }
+    if cursor == input.len() {
+        Ok(count)
+    } else {
+        Err(DecodeError::OffsetOutOfBounds)
+    }
 }

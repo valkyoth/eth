@@ -1,6 +1,8 @@
 #![no_main]
 
-use eth_valkyoth_codec::{DecodeLimits, decode_rlp_list, decode_rlp_list_partial};
+use eth_valkyoth_codec::{
+    DecodeLimits, RlpItem, RlpList, decode_rlp_list, decode_rlp_list_partial,
+};
 use libfuzzer_sys::fuzz_target;
 
 fuzz_target!(|data: &[u8]| {
@@ -20,8 +22,26 @@ fuzz_target!(|data: &[u8]| {
 });
 
 fn drive_list(data: &[u8], limits: DecodeLimits) {
-    let _ = decode_rlp_list(data, limits);
+    if let Ok(list) = decode_rlp_list(data, limits) {
+        drive_items(list);
+    }
 
     let mut accumulator = limits.accumulator();
-    let _ = decode_rlp_list_partial(data, &mut accumulator);
+    if let Ok(list) = decode_rlp_list_partial(data, &mut accumulator) {
+        drive_items(list);
+    }
+}
+
+fn drive_items(list: RlpList<'_>) {
+    for item in list.items() {
+        let Ok(item) = item else {
+            continue;
+        };
+        let _ = item.encoded_len();
+        if let RlpItem::List(child) = item {
+            for nested in child.items() {
+                let _ = nested.map(RlpItem::encoded_len);
+            }
+        }
+    }
 }
