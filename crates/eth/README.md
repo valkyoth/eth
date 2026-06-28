@@ -63,7 +63,7 @@ Not implemented yet:
 
 | Area | Status |
 | --- | --- |
-| License | `EUPL-1.2` |
+| License | `MIT OR Apache-2.0` |
 | MSRV | Rust `1.90.0` |
 | Latest verified stable | Rust `1.96.0` |
 | Default target | `no_std` |
@@ -294,4 +294,5 @@ Compatibility evidence for `0.7.0`:
 
 ## License
 
-Licensed under the European Union Public Licence 1.2.
+Licensed under either of Apache License, Version 2.0 or MIT license at your
+option.

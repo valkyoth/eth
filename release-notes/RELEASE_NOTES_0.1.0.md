@@ -10,7 +10,7 @@ Status: planned
 ## Added
 
 - Rust workspace with focused first-party crates.
-- EUPL-1.2 license.
+- MIT OR Apache-2.0 license.
 - Security, threat model, modularity, supply-chain, implementation, and release
   planning docs.
 - Local check and release-gate scripts.

@@ -2,7 +2,8 @@
 set -eu
 
 test ! -f PENTEST.md
-test -f LICENSE
+test -f LICENSE-MIT
+test -f LICENSE-APACHE
 test -f SECURITY.md
 test -f CHANGELOG.md
 test -x scripts/validate-release-readiness.sh
@@ -27,7 +28,7 @@ if grep -q 'spec_required = true' spec-lock.toml; then
     grep -Eq 'execution_tests_rev = "[0-9a-f]{40}"' spec-lock.toml
     grep -Eq 'eips_rev = "[0-9a-f]{40}"' spec-lock.toml
 fi
-grep -q 'EUPL-1.2' Cargo.toml
+grep -q 'license = "MIT OR Apache-2.0"' Cargo.toml
 grep -q 'repository = "https://github.com/valkyoth/eth"' Cargo.toml
 grep -q 'channel = "1.96.0"' rust-toolchain.toml
 grep -q 'rust-version = "1.90"' Cargo.toml

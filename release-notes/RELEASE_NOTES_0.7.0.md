@@ -20,6 +20,8 @@ payload traversal under explicit resource limits.
 - Added fuzz coverage for exact and partial RLP list decoding paths.
 - Refreshed pinned official Ethereum source revisions for v0.7.0 parser work.
 - Confirmed dependency and GitHub tooling currency for the v0.7.0 start slice.
+- Corrected the public crate license metadata and repository license files to
+  `MIT OR Apache-2.0`, matching the `sanitization` project license model.
 - Marked `eth-valkyoth-codec` and `eth` for `0.7.0` publication.
 - Left primitives, protocol, verification, derive, sanitization, RPC, signer,
   EVM, Reth, and testkit packages on their previously published versions for

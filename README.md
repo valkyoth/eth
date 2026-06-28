@@ -51,7 +51,7 @@ Implemented now:
   protocol, fork, feature, resource, and verification failures.
 - Optional sanitization and derive support crates outside the default feature
   set.
-- EUPL-1.2 license.
+- MIT OR Apache-2.0 license.
 - Security, modularity, supply-chain, implementation, and release planning docs.
 - Local check, release-gate, dependency-policy, SBOM, and pentest evidence.
 - Independent support-crate release planning for crates.io push limits.
@@ -68,7 +68,7 @@ Not implemented yet:
 
 | Area | Status |
 | --- | --- |
-| License | `EUPL-1.2` |
+| License | `MIT OR Apache-2.0` |
 | MSRV | Rust `1.90.0` |
 | Pinned toolchain | Rust `1.96.0` |
 | Default target | `no_std` |
@@ -322,4 +322,5 @@ cargo audit
 
 ## License
 
-Licensed under the European Union Public Licence 1.2.
+Licensed under either of Apache License, Version 2.0 or MIT license at your
+option.

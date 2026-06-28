@@ -16,7 +16,7 @@ class of problem.
 Before adding a third-party crate:
 
 - confirm the latest release version;
-- review license compatibility with EUPL-1.2;
+- review license compatibility with `MIT OR Apache-2.0`;
 - inspect default features and `std` requirements;
 - avoid git dependencies unless exact `rev` pinning is necessary;
 - add tests for the behavior being admitted;

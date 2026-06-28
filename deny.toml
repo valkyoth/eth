@@ -1,8 +1,8 @@
 # eth dependency policy.
 #
-# eth is an EUPL-1.2 project. Dependencies are admitted deliberately because
-# Ethereum protocol crates are security-sensitive and often sit on untrusted
-# network, RPC, or signing boundaries.
+# eth is an MIT OR Apache-2.0 project. Dependencies are admitted deliberately
+# because Ethereum protocol crates are security-sensitive and often sit on
+# untrusted network, RPC, or signing boundaries.
 
 [graph]
 all-features = true
@@ -22,7 +22,6 @@ allow = [
     "BSD-2-Clause",
     "BSD-3-Clause",
     "BSL-1.0",
-    "EUPL-1.2",
     "ISC",
     "MIT",
     "MIT-0",
