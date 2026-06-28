@@ -16,6 +16,10 @@ payload traversal under explicit resource limits.
   cumulative item-budget enforcement.
 - Added no-allocation immediate-child iteration through `RlpList::items`,
   `RlpListItems`, and `RlpItem`.
+- Split scalar and list RLP tests into separate modules to keep parser test
+  files below the 500-line limit.
+- Added official nested-list example coverage and a deeper canonical nesting
+  regression test for `NestingTooDeep`.
 - Added malformed list tests for missing payloads, missing length bytes,
   leading-zero lengths, long-form lengths for short payloads, and length
   overflow.

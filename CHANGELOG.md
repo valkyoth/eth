@@ -9,6 +9,8 @@ All notable changes to `eth` are documented here.
   depth enforcement, and adversarial malformed-list tests.
 - Added no-allocation immediate-child iteration for decoded RLP lists through
   `RlpList::items`, `RlpListItems`, and `RlpItem`.
+- Split scalar and list RLP tests into separate modules and added official
+  nested-list fixtures plus deeper canonical nesting budget regression coverage.
 - Added fuzz coverage for exact and partial RLP list decoding paths, including
   immediate child iteration on successfully decoded lists.
 - Refreshed pinned official Ethereum source revisions for v0.7.0 parser work.
