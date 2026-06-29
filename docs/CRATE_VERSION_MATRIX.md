@@ -1,6 +1,6 @@
 # Crate Version Matrix
 
-Status: `v0.8.0` implementation ready for external pentest
+Status: `v0.8.0` release candidate ready; final GitHub checks required before tag
 
 `eth` uses independent crate versions. The facade crate remains the main user
 entry point, but support crates are published only when their own package

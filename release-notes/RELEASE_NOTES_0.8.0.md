@@ -1,6 +1,6 @@
 # eth 0.8.0 Release Notes
 
-Status: implementation ready for external pentest
+Status: release candidate ready; final GitHub checks required before tag
 
 ## Summary
 
@@ -27,13 +27,15 @@ validation.
   conversion helpers.
 - Split primitive tests into a separate module to keep implementation files
   below the 500-line limit.
+- Addressed v0.8.0 pentest findings for duplicated canonical integer logic
+  documentation, maximum-width boundary coverage, `Wei` boundary coverage,
+  U256 copy invariants, constant cross-references, and Chain ID 0 domain
+  documentation.
 - Refreshed the pinned EIPs revision after checking official Ethereum sources
   on 2026-06-29.
 
 ## Still Required Before Tag
 
-- External pentest for the exact implementation commit.
-- Permanent `security/pentest/v0.8.0.md` report after findings are resolved.
 - GitHub checks must pass on the final release commit.
 
 ## Verification

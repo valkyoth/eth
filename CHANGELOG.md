@@ -14,6 +14,10 @@ All notable changes to `eth` are documented here.
   integer domain newtypes and `Wei`.
 - Added fuzz coverage for exact and partial RLP integer decoding plus bounded
   integer conversion helpers.
+- Addressed v0.8.0 pentest findings by documenting duplicated canonical
+  integer logic, adding maximum-width integer and Wei boundary tests, clarifying
+  U256 copy invariants, cross-referencing duplicated constants, and documenting
+  Chain ID 0 domain validation requirements.
 - Refreshed the pinned EIPs revision after checking official Ethereum sources
   for v0.8.0 parser work.
 - Started `0.7.0` with bounded canonical RLP list decoding, including short
