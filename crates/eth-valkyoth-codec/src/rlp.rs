@@ -1,3 +1,4 @@
+mod integer;
 mod list;
 
 #[cfg(test)]
@@ -8,6 +9,10 @@ use crate::{
     require_range_in_bounds,
 };
 
+pub use integer::{
+    MAX_RLP_U256_BYTES, RlpInteger, decode_rlp_integer, decode_rlp_integer_partial, decode_rlp_u64,
+    decode_rlp_u128, decode_rlp_u256_bytes,
+};
 pub use list::{
     MAX_RLP_LIST_TRAVERSAL_DEPTH, RlpItem, RlpList, RlpListForm, RlpListItems, decode_rlp_list,
     decode_rlp_list_partial,

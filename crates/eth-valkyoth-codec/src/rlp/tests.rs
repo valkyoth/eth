@@ -2,6 +2,7 @@ use super::*;
 extern crate std;
 use std::vec;
 
+mod integer;
 mod list;
 
 #[test]

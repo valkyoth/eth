@@ -6,6 +6,55 @@ use core::hash::{Hash, Hasher};
 pub use subtle::Choice;
 use subtle::ConstantTimeEq as _;
 
+#[cfg(test)]
+mod tests;
+
+const INTEGER_RADIX: u64 = 256;
+const MAX_U64_BYTES: usize = 8;
+const MAX_U256_BYTES: usize = 32;
+
+fn check_canonical_integer(bytes: &[u8]) -> Result<(), PrimitiveError> {
+    if bytes.first().is_some_and(|byte| *byte == 0) {
+        return Err(PrimitiveError::NonCanonicalInteger);
+    }
+    Ok(())
+}
+
+fn parse_canonical_u64(bytes: &[u8]) -> Result<u64, PrimitiveError> {
+    check_canonical_integer(bytes)?;
+    if bytes.len() > MAX_U64_BYTES {
+        return Err(PrimitiveError::IntegerTooLarge);
+    }
+
+    let mut value = 0_u64;
+    for byte in bytes {
+        value = value
+            .checked_mul(INTEGER_RADIX)
+            .ok_or(PrimitiveError::IntegerTooLarge)?;
+        value = value
+            .checked_add(u64::from(*byte))
+            .ok_or(PrimitiveError::IntegerTooLarge)?;
+    }
+    Ok(value)
+}
+
+fn canonical_u256_bytes(bytes: &[u8]) -> Result<[u8; 32], PrimitiveError> {
+    check_canonical_integer(bytes)?;
+    if bytes.len() > MAX_U256_BYTES {
+        return Err(PrimitiveError::IntegerTooLarge);
+    }
+
+    let mut output = [0_u8; 32];
+    let start = MAX_U256_BYTES
+        .checked_sub(bytes.len())
+        .ok_or(PrimitiveError::IntegerTooLarge)?;
+    let target = output
+        .get_mut(start..)
+        .ok_or(PrimitiveError::IntegerTooLarge)?;
+    target.copy_from_slice(bytes);
+    Ok(output)
+}
+
 macro_rules! id_type {
     ($name:ident, $inner:ty, $doc:literal) => {
         #[doc = $doc]
@@ -23,6 +72,14 @@ macro_rules! id_type {
             #[must_use]
             pub const fn get(self) -> $inner {
                 self.0
+            }
+
+            /// Creates a value from a canonical RLP integer payload.
+            ///
+            /// The empty payload represents zero. Non-empty payloads must be
+            /// shortest-form unsigned big-endian bytes without a leading zero.
+            pub fn try_from_canonical_be_slice(bytes: &[u8]) -> Result<Self, PrimitiveError> {
+                parse_canonical_u64(bytes).map(Self)
             }
         }
 
@@ -50,6 +107,10 @@ id_type!(UnixTimestamp, u64, "Block timestamp as Unix seconds.");
 #[non_exhaustive]
 #[derive(Clone, Copy, Debug, Eq, PartialEq)]
 pub enum PrimitiveError {
+    /// Integer bytes were not in shortest-form canonical big-endian encoding.
+    NonCanonicalInteger,
+    /// Integer bytes exceed the primitive's fixed-width range.
+    IntegerTooLarge,
     /// Transaction type exceeds the EIP-2718 single-byte typed envelope range.
     TransactionTypeTooLarge,
     /// Zero is reserved for the legacy transaction domain, not a typed envelope.
@@ -223,6 +284,14 @@ impl Wei {
         self.0
     }
 
+    /// Creates a wei amount from a canonical RLP integer payload.
+    ///
+    /// The empty payload represents zero. Non-empty payloads must be
+    /// shortest-form unsigned big-endian bytes without a leading zero.
+    pub fn try_from_canonical_be_slice(bytes: &[u8]) -> Result<Self, PrimitiveError> {
+        canonical_u256_bytes(bytes).map(Self)
+    }
+
     /// Compares two wei values in constant time.
     ///
     /// Wei is usually public, but fixed-width constant-time equality keeps
@@ -321,142 +390,5 @@ impl TryFrom<u8> for TransactionType {
 impl From<TransactionType> for u8 {
     fn from(value: TransactionType) -> Self {
         value.get()
-    }
-}
-
-#[cfg(test)]
-mod tests {
-    use super::*;
-
-    #[test]
-    fn chain_id_round_trips() {
-        assert_eq!(u64::from(ChainId::from(1)), 1);
-    }
-
-    #[test]
-    fn block_number_round_trips() {
-        assert_eq!(u64::from(BlockNumber::from(2)), 2);
-    }
-
-    #[test]
-    fn gas_round_trips() {
-        assert_eq!(u64::from(Gas::from(21_000)), 21_000);
-    }
-
-    #[test]
-    fn nonce_round_trips() {
-        assert_eq!(u64::from(Nonce::from(7)), 7);
-    }
-
-    #[test]
-    fn unix_timestamp_round_trips() {
-        assert_eq!(u64::from(UnixTimestamp::from(1_700_000_000)), 1_700_000_000);
-    }
-
-    #[test]
-    fn address_round_trips() {
-        let bytes = [7_u8; 20];
-        assert_eq!(<[u8; 20]>::from(Address::from(bytes)), bytes);
-    }
-
-    #[test]
-    fn address_constant_time_equality_result_matches_equality() {
-        let left = Address::from_bytes([1_u8; 20]);
-        let same = Address::from_bytes([1_u8; 20]);
-        let different = Address::from_bytes([2_u8; 20]);
-
-        assert!(bool::from(left.ct_eq(&same)));
-        assert!(!bool::from(left.ct_eq(&different)));
-        assert!(left == same);
-        assert!(left != different);
-    }
-
-    #[test]
-    fn b256_constant_time_equality_result_matches_equality() {
-        let left = B256::from_bytes([1_u8; 32]);
-        let same = B256::from_bytes([1_u8; 32]);
-        let different = B256::from_bytes([2_u8; 32]);
-        assert!(bool::from(left.ct_eq(&same)));
-        assert!(!bool::from(left.ct_eq(&different)));
-        assert!(left == same);
-        assert!(left != different);
-    }
-
-    #[test]
-    fn b256_constant_time_choices_compose_without_short_circuit() {
-        let left = B256::from_bytes([1_u8; 32]);
-        let same = B256::from_bytes([1_u8; 32]);
-        let different = B256::from_bytes([2_u8; 32]);
-        let composed = left.ct_eq(&same) & same.ct_eq(&different);
-
-        assert!(!bool::from(composed));
-    }
-
-    #[test]
-    fn b256_round_trips() {
-        let bytes = [3_u8; 32];
-        assert_eq!(<[u8; 32]>::from(B256::from(bytes)), bytes);
-    }
-
-    #[test]
-    fn wei_round_trips() {
-        let bytes = [9_u8; 32];
-        assert_eq!(<[u8; 32]>::from(Wei::from(bytes)), bytes);
-    }
-
-    #[test]
-    fn wei_constant_time_equality_result_matches_equality() {
-        let left = Wei::from_be_bytes([1_u8; 32]);
-        let same = Wei::from_be_bytes([1_u8; 32]);
-        let different = Wei::from_be_bytes([2_u8; 32]);
-
-        assert!(bool::from(left.ct_eq(&same)));
-        assert!(!bool::from(left.ct_eq(&different)));
-        assert!(left == same);
-        assert!(left != different);
-    }
-
-    #[test]
-    fn wei_from_u128_places_bytes_at_low_end() {
-        let wei = Wei::from_u128(1);
-        let expected = [
-            0_u8, 0_u8, 0_u8, 0_u8, 0_u8, 0_u8, 0_u8, 0_u8, 0_u8, 0_u8, 0_u8, 0_u8, 0_u8, 0_u8,
-            0_u8, 0_u8, 0_u8, 0_u8, 0_u8, 0_u8, 0_u8, 0_u8, 0_u8, 0_u8, 0_u8, 0_u8, 0_u8, 0_u8,
-            0_u8, 0_u8, 0_u8, 1_u8,
-        ];
-        assert_eq!(wei.to_be_bytes(), expected);
-    }
-
-    #[test]
-    fn transaction_type_accepts_eip_2718_range() {
-        let tx_type = TransactionType::try_new(TransactionType::MAX_TYPED);
-        assert_eq!(tx_type.map(TransactionType::get), Ok(0x7f));
-    }
-
-    #[test]
-    fn transaction_type_rejects_reserved_range() {
-        assert_eq!(
-            TransactionType::try_new(0x80),
-            Err(PrimitiveError::TransactionTypeTooLarge)
-        );
-    }
-
-    #[test]
-    fn typed_transaction_type_rejects_legacy_zero() {
-        assert_eq!(
-            TransactionType::try_new_typed(0),
-            Err(PrimitiveError::ReservedLegacyType)
-        );
-        assert_eq!(TransactionType::try_new_typed(1).map(u8::from), Ok(1));
-        assert_eq!(
-            TransactionType::try_from(0),
-            Err(PrimitiveError::ReservedLegacyType)
-        );
-    }
-
-    #[test]
-    fn transaction_type_round_trips() {
-        assert_eq!(TransactionType::try_new(2).map(u8::from), Ok(2));
-        assert_eq!(TransactionType::try_new_with_legacy(0).map(u8::from), Ok(0));
     }
 }

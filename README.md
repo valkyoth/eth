@@ -35,8 +35,7 @@ dependencies.
 
 ## Current Status
 
-Status: `v0.7.0` release candidate ready; waiting for final GitHub checks before
-tagging. `v0.6.0` is the latest published release.
+Status: `v0.8.0` implementation ready for external pentest; `v0.7.0` published.
 
 Implemented now:
 
@@ -86,14 +85,14 @@ Not implemented yet:
 
 ```toml
 [dependencies]
-eth = "0.7"
+eth = "0.8"
 ```
 
 For optional sanitization support:
 
 ```toml
 [dependencies]
-eth = { version = "0.7", features = ["sanitization"] }
+eth = { version = "0.8", features = ["sanitization"] }
 ```
 
 ## Features
@@ -204,11 +203,14 @@ assert_eq!(budget.account_items(33), Err(DecodeError::ItemCountExceeded));
 
 ## RLP Decoding
 
-The RLP decoder admits canonical byte-string scalars and lists with exact
-consumption. Every entry point requires explicit decode limits:
+The RLP decoder admits canonical byte-string scalars, lists, and Ethereum
+integers with exact consumption. Every entry point requires explicit decode
+limits:
 
 ```rust
-use eth::codec::{DecodeLimits, RlpListForm, RlpScalarForm, decode_rlp_list, decode_rlp_scalar};
+use eth::codec::{
+    DecodeLimits, RlpListForm, RlpScalarForm, decode_rlp_list, decode_rlp_scalar, decode_rlp_u64,
+};
 
 let limits = DecodeLimits {
     max_input_bytes: 32,
@@ -224,6 +226,9 @@ assert_eq!(scalar.payload(), b"dog");
 assert_eq!(scalar.encoded_len(), 4);
 assert_eq!(scalar.header_len(), 1);
 assert_eq!(scalar.form(), RlpScalarForm::ShortString);
+
+assert_eq!(decode_rlp_u64(&[0x82, 0x04, 0x00], limits)?, 1024);
+assert!(decode_rlp_u64(&[0x82, 0x00, 0x01], limits).is_err());
 
 let list = decode_rlp_list(&[0xc8, 0x83, b'c', b'a', b't', 0x83, b'd', b'o', b'g'], limits)?;
 
@@ -283,7 +288,7 @@ friendly, and independently testable.
 The minimum supported Rust version is Rust `1.90.0`. New deployments should use
 the pinned stable Rust `1.96.0` until the toolchain policy is updated.
 
-Compatibility evidence for `0.7.0`:
+Compatibility evidence for `0.8.0`:
 
 | Rust | Local Evidence |
 | --- | --- |
@@ -299,8 +304,8 @@ Compatibility evidence for `0.7.0`:
 
 ```bash
 scripts/checks.sh
-scripts/release_0_7_gate.sh
-scripts/validate-release-readiness.sh v0.7.0
+scripts/release_0_8_gate.sh
+scripts/validate-release-readiness.sh v0.8.0
 ```
 
 For dependency-policy checks, install `cargo-deny` and `cargo-audit`, then run:

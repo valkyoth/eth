@@ -4,6 +4,18 @@ All notable changes to `eth` are documented here.
 
 ## Unreleased
 
+- Started `0.8.0` with canonical RLP integer decoding layered on top of
+  scalar decoding, including exact and partial entry points.
+- Added integer-specific rejection for single-byte zero and leading-zero
+  payloads, preserving Ethereum's zero-as-empty-byte-array rule.
+- Added bounded `u64`, `u128`, and unsigned 256-bit byte conversion helpers
+  for canonical RLP integers.
+- Added primitive constructors for canonical RLP integer payloads on the
+  integer domain newtypes and `Wei`.
+- Added fuzz coverage for exact and partial RLP integer decoding plus bounded
+  integer conversion helpers.
+- Refreshed the pinned EIPs revision after checking official Ethereum sources
+  for v0.8.0 parser work.
 - Started `0.7.0` with bounded canonical RLP list decoding, including short
   and long list headers, nested traversal, list item-count enforcement, nesting
   depth enforcement, and adversarial malformed-list tests.
