@@ -9,8 +9,10 @@ use subtle::ConstantTimeEq as _;
 #[cfg(test)]
 mod tests;
 
+// Mirrors the codec crate's RLP integer radix. Keep both in sync.
 const INTEGER_RADIX: u64 = 256;
 const MAX_U64_BYTES: usize = 8;
+// Mirrors `eth_valkyoth_codec::MAX_RLP_U256_BYTES`.
 const MAX_U256_BYTES: usize = 32;
 
 fn check_canonical_integer(bytes: &[u8]) -> Result<(), PrimitiveError> {
@@ -21,6 +23,8 @@ fn check_canonical_integer(bytes: &[u8]) -> Result<(), PrimitiveError> {
 }
 
 fn parse_canonical_u64(bytes: &[u8]) -> Result<u64, PrimitiveError> {
+    // Mirrors canonical integer deserialization in eth-valkyoth-codec.
+    // Ethereum integer canonicality changes must be applied to both crates.
     check_canonical_integer(bytes)?;
     if bytes.len() > MAX_U64_BYTES {
         return Err(PrimitiveError::IntegerTooLarge);
@@ -48,6 +52,8 @@ fn canonical_u256_bytes(bytes: &[u8]) -> Result<[u8; 32], PrimitiveError> {
     let start = MAX_U256_BYTES
         .checked_sub(bytes.len())
         .ok_or(PrimitiveError::IntegerTooLarge)?;
+    // start is 32 - bytes.len(), with bytes.len() <= 32, so the range is
+    // always inside output. Keep the Result form to satisfy indexing policy.
     let target = output
         .get_mut(start..)
         .ok_or(PrimitiveError::IntegerTooLarge)?;
@@ -97,7 +103,11 @@ macro_rules! id_type {
     };
 }
 
-id_type!(ChainId, u64, "Ethereum chain identifier.");
+id_type!(
+    ChainId,
+    u64,
+    "Ethereum chain identifier.\n\nThis type enforces canonical integer encoding only. EIP-155 assigns chain ID 0 to unsigned legacy transactions; signed transaction validation must reject chain ID 0 independently."
+);
 id_type!(BlockNumber, u64, "Ethereum execution-layer block number.");
 id_type!(Gas, u64, "Gas quantity.");
 id_type!(Nonce, u64, "Account transaction nonce.");

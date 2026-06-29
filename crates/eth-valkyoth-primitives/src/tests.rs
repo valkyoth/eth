@@ -114,6 +114,16 @@ fn wei_parses_canonical_rlp_integer_payloads() {
 }
 
 #[test]
+fn wei_parses_canonical_rlp_integer_at_max_width() {
+    let max_bytes = [0xff_u8; 32];
+
+    assert_eq!(
+        Wei::try_from_canonical_be_slice(&max_bytes).map(Wei::to_be_bytes),
+        Ok(max_bytes)
+    );
+}
+
+#[test]
 fn wei_constant_time_equality_result_matches_equality() {
     let left = Wei::from_be_bytes([1_u8; 32]);
     let same = Wei::from_be_bytes([1_u8; 32]);

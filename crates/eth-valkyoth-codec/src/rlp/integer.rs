@@ -4,11 +4,15 @@ use crate::{DecodeAccumulator, DecodeError, DecodeLimits, require_exact_consumpt
 
 use super::{RlpScalar, RlpScalarForm, decode_rlp_scalar_partial};
 
-/// Maximum byte width for Ethereum unsigned 256-bit integer payloads.
+/// Ethereum U256 maximum byte width in bytes.
+///
+/// Mirrors the primitive crate's internal `MAX_U256_BYTES`; changes to
+/// Ethereum integer canonicality rules must be applied to both crates.
 pub const MAX_RLP_U256_BYTES: usize = 32;
 
 const MAX_U64_BYTES: usize = 8;
 const MAX_U128_BYTES: usize = 16;
+// Mirrors the primitive crate's internal integer radix. Keep both in sync.
 const INTEGER_RADIX_U64: u64 = 256;
 const INTEGER_RADIX_U128: u128 = 256;
 
@@ -139,6 +143,8 @@ fn validate_integer_payload(payload: &[u8]) -> Result<(), DecodeError> {
 }
 
 fn fold_u64(payload: &[u8]) -> Result<u64, DecodeError> {
+    // Pre-condition: validate_integer_payload already rejected leading zeros.
+    // Length is the only integer-canonicality guard needed here.
     if payload.len() > MAX_U64_BYTES {
         return Err(DecodeError::LengthOverflow);
     }
@@ -156,6 +162,8 @@ fn fold_u64(payload: &[u8]) -> Result<u64, DecodeError> {
 }
 
 fn fold_u128(payload: &[u8]) -> Result<u128, DecodeError> {
+    // Pre-condition: validate_integer_payload already rejected leading zeros.
+    // Length is the only integer-canonicality guard needed here.
     if payload.len() > MAX_U128_BYTES {
         return Err(DecodeError::LengthOverflow);
     }
@@ -173,6 +181,8 @@ fn fold_u128(payload: &[u8]) -> Result<u128, DecodeError> {
 }
 
 fn to_be_bytes32(payload: &[u8]) -> Result<[u8; 32], DecodeError> {
+    // Pre-condition: validate_integer_payload already rejected leading zeros.
+    // Length is the only integer-canonicality guard needed here.
     if payload.len() > MAX_RLP_U256_BYTES {
         return Err(DecodeError::LengthOverflow);
     }
@@ -181,6 +191,8 @@ fn to_be_bytes32(payload: &[u8]) -> Result<[u8; 32], DecodeError> {
     let start = MAX_RLP_U256_BYTES
         .checked_sub(payload.len())
         .ok_or(DecodeError::LengthOverflow)?;
+    // start is 32 - payload.len(), with payload.len() <= 32, so the range is
+    // always inside output. Keep the Result form to satisfy indexing policy.
     let target = output
         .get_mut(start..)
         .ok_or(DecodeError::OffsetOutOfBounds)?;

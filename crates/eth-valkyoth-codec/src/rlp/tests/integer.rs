@@ -57,6 +57,31 @@ fn converts_integer_to_larger_widths() -> Result<(), DecodeError> {
 }
 
 #[test]
+fn decodes_u64_max_exactly() {
+    let encoded = [0x88, 0xff, 0xff, 0xff, 0xff, 0xff, 0xff, 0xff, 0xff];
+
+    assert_eq!(
+        decode_rlp_u64(&encoded, DecodeLimits::TEST_FIXTURE),
+        Ok(u64::MAX)
+    );
+}
+
+#[test]
+fn decodes_u128_max_exactly() -> Result<(), DecodeError> {
+    let mut encoded = [0xff_u8; 17];
+    encoded
+        .first_mut()
+        .ok_or(DecodeError::OffsetOutOfBounds)
+        .map(|prefix| *prefix = 0x90)?;
+
+    assert_eq!(
+        decode_rlp_u128(&encoded, DecodeLimits::TEST_FIXTURE),
+        Ok(u128::MAX)
+    );
+    Ok(())
+}
+
+#[test]
 fn validates_existing_scalar_as_integer() -> Result<(), DecodeError> {
     let scalar = decode_rlp_scalar(&[0x82, 0x04, 0x00], DecodeLimits::TEST_FIXTURE)?;
     let integer = super::super::RlpInteger::try_from_scalar(scalar)?;
