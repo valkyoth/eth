@@ -1,6 +1,6 @@
 # eth 0.9.1 Release Notes
 
-Status: implementation complete; pending external pentest input
+Status: release candidate ready; final GitHub checks required before tag
 
 ## Summary
 
@@ -31,8 +31,6 @@ domain error type, but delegate canonical payload parsing to codec helpers.
 
 ## Still Required Before Tag
 
-- Maintainer pentest for the exact implementation commit.
-- Permanent report at `security/pentest/v0.9.1.md` with `Status: PASS`.
 - GitHub checks must pass on the final release commit.
 
 ## Verification
@@ -41,5 +39,10 @@ domain error type, but delegate canonical payload parsing to codec helpers.
 cargo test -p eth-valkyoth-codec -p eth-valkyoth-primitives
 cargo check --manifest-path fuzz/Cargo.toml
 scripts/checks.sh
+scripts/release_0_9_gate.sh
+scripts/check_latest_tools.sh
+cargo deny check
+cargo deny --manifest-path fuzz/Cargo.toml check
+cargo audit
 scripts/release_crates.py --dry-run --skip-checks --yes
 ```

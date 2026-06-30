@@ -35,8 +35,9 @@ dependencies.
 
 ## Current Status
 
-Status: `v0.9.1` implementation in progress. `v0.9.0` is the latest published
-release.
+Status: `v0.9.1` pentest remediations are complete and the release candidate
+is waiting for final GitHub checks before tagging. `v0.9.0` is the latest
+published release.
 
 Implemented now:
 
