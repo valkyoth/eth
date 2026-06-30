@@ -2,6 +2,10 @@
 #![forbid(unsafe_code)]
 //! Core `no_std` Ethereum primitive types used across the `eth` workspace.
 
+#[cfg(feature = "std")]
+extern crate std;
+
+use core::fmt;
 use core::hash::{Hash, Hasher};
 use eth_valkyoth_codec::{
     DecodeError, rlp_integer_payload_to_u64, rlp_integer_payload_to_u256_bytes,
@@ -111,6 +115,24 @@ pub enum PrimitiveError {
     /// Zero is reserved for the legacy transaction domain, not a typed envelope.
     ReservedLegacyType,
 }
+
+impl fmt::Display for PrimitiveError {
+    fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
+        match self {
+            Self::NonCanonicalInteger => f.write_str("integer is not canonical shortest-form"),
+            Self::IntegerTooLarge => f.write_str("integer exceeds primitive width"),
+            Self::TransactionTypeTooLarge => {
+                f.write_str("transaction type exceeds EIP-2718 typed envelope range")
+            }
+            Self::ReservedLegacyType => {
+                f.write_str("zero is reserved for the legacy transaction domain")
+            }
+        }
+    }
+}
+
+#[cfg(feature = "std")]
+impl std::error::Error for PrimitiveError {}
 
 /// Fixed-width Ethereum address bytes.
 ///

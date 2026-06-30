@@ -25,6 +25,13 @@ and hash domains enforce fixed-width scalar payloads at the primitive boundary.
   domains, and wei values.
 - Added malformed-input tests for non-canonical integers, wrong fixed-width
   scalars, and too-small caller-provided output buffers.
+- Addressed initial v0.9.2 pentest findings by expanding primitive fuzz
+  coverage to every new RLP decoder, adding `Display` and `std::error::Error`
+  support for primitive bridge errors, making internal trim helpers infallible,
+  reporting expected/found widths for fixed-width scalar failures, documenting
+  the ChainId zero reservation and variable-time encode boundary, replacing the
+  copied decode-limit test fixture with codec's `testing` fixture, and adding
+  adjacent fixed-width scalar rejection tests.
 - Updated README examples and independent crate release metadata for publishing
   only `eth-valkyoth-primitives` and the `eth` facade in this release.
 
