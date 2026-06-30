@@ -40,8 +40,10 @@ impl DecodeLimits {
     /// Starting point for externally reachable wire decoders.
     ///
     /// Using this constant unchanged in production is a security
+    /// misconfiguration. Changing only one field is likely also a
     /// misconfiguration. Copy it, review every limit against the deployment's
-    /// concurrency and memory policy, and tighten values before release.
+    /// concurrency, memory, and protocol policy, and tighten values before
+    /// release.
     #[doc(alias = "DEPLOYMENT_TEMPLATE")]
     pub const DEPLOYMENT_STARTING_POINT: Self = Self {
         max_input_bytes: 2 << 20,
