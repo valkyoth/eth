@@ -35,8 +35,8 @@ dependencies.
 
 ## Current Status
 
-Status: `v0.8.0` release candidate ready; waiting for final GitHub checks before
-tagging. `v0.7.0` is the latest published release.
+Status: `v0.9.0` implementation ready for pentest before tagging. `v0.8.0`
+is the latest published release.
 
 Implemented now:
 
@@ -48,6 +48,8 @@ Implemented now:
 - Constant-time equality composition for fixed-width hash and wei values.
 - Bounded decode limits plus stateful cumulative allocation, item, and proof-node
   accounting.
+- Canonical RLP scalar, list, and integer decoding plus no-allocation canonical
+  encoding helpers.
 - Stable error codes, messages, categories, and formatting for codec,
   protocol, fork, feature, resource, and verification failures.
 - Optional sanitization and derive support crates outside the default feature
@@ -86,14 +88,14 @@ Not implemented yet:
 
 ```toml
 [dependencies]
-eth = "0.8"
+eth = "0.9"
 ```
 
 For optional sanitization support:
 
 ```toml
 [dependencies]
-eth = { version = "0.8", features = ["sanitization"] }
+eth = { version = "0.9", features = ["sanitization"] }
 ```
 
 ## Features
@@ -202,15 +204,16 @@ assert_eq!(budget.check_allocation(1), Err(DecodeError::AllocationExceeded));
 assert_eq!(budget.account_items(33), Err(DecodeError::ItemCountExceeded));
 ```
 
-## RLP Decoding
+## RLP Codec
 
-The RLP decoder admits canonical byte-string scalars, lists, and Ethereum
-integers with exact consumption. Every entry point requires explicit decode
-limits:
+The RLP codec admits canonical byte-string scalars, lists, and Ethereum
+integers with exact consumption. Decoders require explicit limits; encoders are
+buffer-based and do not allocate:
 
 ```rust
 use eth::codec::{
     DecodeLimits, RlpListForm, RlpScalarForm, decode_rlp_list, decode_rlp_scalar, decode_rlp_u64,
+    encode_decoded_scalar, encode_rlp_list_payload, encode_rlp_scalar,
 };
 
 let limits = DecodeLimits {
@@ -228,6 +231,11 @@ assert_eq!(scalar.encoded_len(), 4);
 assert_eq!(scalar.header_len(), 1);
 assert_eq!(scalar.form(), RlpScalarForm::ShortString);
 
+let mut encoded = [0_u8; 8];
+let written = encode_decoded_scalar(scalar, &mut encoded)?;
+assert_eq!(written, 4);
+assert_eq!(encoded.get(..written), Some([0x83, b'd', b'o', b'g'].as_slice()));
+
 assert_eq!(decode_rlp_u64(&[0x82, 0x04, 0x00], limits)?, 1024);
 assert!(decode_rlp_u64(&[0x82, 0x00, 0x01], limits).is_err());
 
@@ -240,6 +248,15 @@ let first = items.next().transpose()?.and_then(|item| item.as_scalar());
 let second = items.next().transpose()?.and_then(|item| item.as_scalar());
 assert!(matches!(first, Some(item) if item.payload() == b"cat"));
 assert!(matches!(second, Some(item) if item.payload() == b"dog"));
+
+let mut scalar_output = [0_u8; 8];
+assert_eq!(encode_rlp_scalar(b"cat", &mut scalar_output)?, 4);
+assert_eq!(scalar_output.get(..4), Some([0x83, b'c', b'a', b't'].as_slice()));
+
+let list_payload = [0x83, b'c', b'a', b't', 0x83, b'd', b'o', b'g'];
+let mut list_output = [0_u8; 16];
+assert_eq!(encode_rlp_list_payload(&list_payload, &mut list_output)?, 9);
+assert_eq!(list_output.get(..9), Some([0xc8, 0x83, b'c', b'a', b't', 0x83, b'd', b'o', b'g'].as_slice()));
 # Ok::<(), eth::error::DecodeError>(())
 ```
 
@@ -273,7 +290,7 @@ friendly, and independently testable.
 | --- | --- | --- |
 | `eth` | yes | Facade crate over stable protocol-core crates. |
 | `eth-valkyoth-primitives` | yes | Chain, fork, block, gas, nonce, address, hash, wei, and bounded value types. |
-| `eth-valkyoth-codec` | yes | Bounded exact-consumption wire decoding policy. |
+| `eth-valkyoth-codec` | yes | Bounded exact-consumption wire codec policy. |
 | `eth-valkyoth-protocol` | yes | Fork-aware validation states and protocol context. |
 | `eth-valkyoth-verify` | yes | Verification boundaries for signatures, proofs, and replay domains. |
 | `eth-valkyoth-sanitization` | no | Optional bridge to the `sanitization` crate for secret-bearing Ethereum data. |
@@ -289,7 +306,7 @@ friendly, and independently testable.
 The minimum supported Rust version is Rust `1.90.0`. New deployments should use
 the pinned stable Rust `1.96.0` until the toolchain policy is updated.
 
-Compatibility evidence for `0.8.0`:
+Compatibility evidence for `0.9.0`:
 
 | Rust | Local Evidence |
 | --- | --- |
@@ -305,8 +322,8 @@ Compatibility evidence for `0.8.0`:
 
 ```bash
 scripts/checks.sh
-scripts/release_0_8_gate.sh
-scripts/validate-release-readiness.sh v0.8.0
+scripts/release_0_9_gate.sh
+scripts/validate-release-readiness.sh v0.9.0
 ```
 
 For dependency-policy checks, install `cargo-deny` and `cargo-audit`, then run:

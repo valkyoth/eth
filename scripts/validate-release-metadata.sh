@@ -19,6 +19,9 @@ test -f release-notes/RELEASE_NOTES_0.4.0.md
 test -f release-notes/RELEASE_NOTES_0.5.0.md
 test -f release-notes/RELEASE_NOTES_0.6.0.md
 test -f release-notes/RELEASE_NOTES_0.7.0.md
+test -f release-notes/RELEASE_NOTES_0.8.0.md
+test -f release-notes/RELEASE_NOTES_0.9.0.md
+test -x scripts/release_0_9_gate.sh
 test -f docs/spec-source-policy.md
 grep -q 'execution_specs_repo' spec-lock.toml
 grep -q 'local_reference_store_env' spec-lock.toml

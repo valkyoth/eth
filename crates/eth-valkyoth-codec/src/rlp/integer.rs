@@ -135,7 +135,7 @@ pub fn decode_rlp_u256_bytes(input: &[u8], limits: DecodeLimits) -> Result<[u8; 
     decode_rlp_integer(input, limits)?.to_be_bytes32()
 }
 
-fn validate_integer_payload(payload: &[u8]) -> Result<(), DecodeError> {
+pub(super) fn validate_integer_payload(payload: &[u8]) -> Result<(), DecodeError> {
     if payload.first().is_some_and(|byte| *byte == 0) {
         return Err(DecodeError::Malformed);
     }

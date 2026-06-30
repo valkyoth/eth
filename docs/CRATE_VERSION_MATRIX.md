@@ -1,6 +1,6 @@
 # Crate Version Matrix
 
-Status: `v0.8.0` release candidate ready; final GitHub checks required before tag
+Status: `v0.9.0` implementation ready for pentest before tag
 
 `eth` uses independent crate versions. The facade crate remains the main user
 entry point, but support crates are published only when their own package
@@ -26,22 +26,22 @@ but must be republished so immutable crates.io package metadata is corrected.
 workspace manifests before release. The script refuses accidental lockstep
 publication when a crate is marked `unchanged`.
 
-## v0.8.0 Tracking Table
+## v0.9.0 Tracking Table
 
 | Crate | Published | Planned | Change | Publish | Reason |
 | --- | --- | --- | --- | --- | --- |
-| `eth-valkyoth-codec` | `0.7.0` | `0.8.0` | `code` | Yes | Adds canonical RLP integer decoding, zero policy enforcement, leading-zero rejection, and bounded integer conversion helpers. |
-| `eth-valkyoth-primitives` | `0.7.0` | `0.8.0` | `code` | Yes | Adds canonical RLP integer payload constructors for primitive integer domains and Wei. |
-| `eth-valkyoth-protocol` | `0.7.0` | `0.7.0` | `unchanged` | No | No package changes for v0.8.0. |
-| `eth-valkyoth-verify` | `0.7.0` | `0.7.0` | `unchanged` | No | No package changes for v0.8.0. |
-| `eth-valkyoth-derive` | `0.7.0` | `0.7.0` | `unchanged` | No | No package changes for v0.8.0. |
-| `eth-valkyoth-sanitization` | `0.7.0` | `0.7.0` | `unchanged` | No | No package changes for v0.8.0. |
-| `eth-valkyoth-evm` | `0.7.0` | `0.7.0` | `unchanged` | No | No package changes for v0.8.0. |
-| `eth-valkyoth-rpc` | `0.7.0` | `0.7.0` | `unchanged` | No | No package changes for v0.8.0. |
-| `eth-valkyoth-signer` | `0.7.0` | `0.7.0` | `unchanged` | No | No package changes for v0.8.0. |
-| `eth-valkyoth-reth` | `0.7.0` | `0.7.0` | `unchanged` | No | No package changes for v0.8.0. |
-| `eth-valkyoth-testkit` | `0.7.0` | `0.7.0` | `unchanged` | No | No package changes for v0.8.0. |
-| `eth` | `0.7.0` | `0.8.0` | `code` | Yes | Exposes canonical RLP integer decoding and primitive constructors through the facade crate. |
+| `eth-valkyoth-codec` | `0.8.0` | `0.9.0` | `code` | Yes | Adds canonical no-alloc RLP encoding helpers and decode-then-encode round-trip coverage. |
+| `eth-valkyoth-primitives` | `0.8.0` | `0.8.0` | `unchanged` | No | No package changes for v0.9.0. |
+| `eth-valkyoth-protocol` | `0.7.0` | `0.7.0` | `unchanged` | No | No package changes for v0.9.0. |
+| `eth-valkyoth-verify` | `0.7.0` | `0.7.0` | `unchanged` | No | No package changes for v0.9.0. |
+| `eth-valkyoth-derive` | `0.7.0` | `0.7.0` | `unchanged` | No | No package changes for v0.9.0. |
+| `eth-valkyoth-sanitization` | `0.7.0` | `0.7.0` | `unchanged` | No | No package changes for v0.9.0. |
+| `eth-valkyoth-evm` | `0.7.0` | `0.7.0` | `unchanged` | No | No package changes for v0.9.0. |
+| `eth-valkyoth-rpc` | `0.7.0` | `0.7.0` | `unchanged` | No | No package changes for v0.9.0. |
+| `eth-valkyoth-signer` | `0.7.0` | `0.7.0` | `unchanged` | No | No package changes for v0.9.0. |
+| `eth-valkyoth-reth` | `0.7.0` | `0.7.0` | `unchanged` | No | No package changes for v0.9.0. |
+| `eth-valkyoth-testkit` | `0.7.0` | `0.7.0` | `unchanged` | No | No package changes for v0.9.0. |
+| `eth` | `0.8.0` | `0.9.0` | `code` | Yes | Exposes canonical RLP encoding helpers through the facade crate. |
 
 Update this table and `release-crates.toml` in the same commit whenever a crate
 changes release state.

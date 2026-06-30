@@ -4,6 +4,15 @@ All notable changes to `eth` are documented here.
 
 ## Unreleased
 
+- Started `0.9.0` with canonical no-allocation RLP encoding helpers for
+  scalar byte strings, Ethereum integer payloads, list payloads, and decoded
+  RLP items.
+- Added decode-then-encode canonicality tests plus scalar, integer, list,
+  long-payload, output-buffer, and noncanonical-input regression coverage.
+- Added fuzz coverage for RLP encoding length helpers, raw payload encoders,
+  and decoded scalar, integer, list, and item re-encoding paths.
+- Refreshed pinned execution-apis and consensus-specs revisions after checking
+  official Ethereum sources for v0.9.0 codec work.
 - Started `0.8.0` with canonical RLP integer decoding layered on top of
   scalar decoding, including exact and partial entry points.
 - Added integer-specific rejection for single-byte zero and leading-zero

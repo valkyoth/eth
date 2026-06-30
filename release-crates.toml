@@ -1,87 +1,87 @@
 [release]
-version = "0.8.0"
+version = "0.9.0"
 policy = "independent"
 
 [crates."eth-valkyoth-codec"]
-previous_version = "0.7.0"
-version = "0.8.0"
+previous_version = "0.8.0"
+version = "0.9.0"
 change = "code"
 publish = true
-reason = "Adds canonical RLP integer decoding, zero policy enforcement, leading-zero rejection, and bounded integer conversion helpers."
+reason = "Adds canonical no-alloc RLP encoding helpers and decode-then-encode round-trip coverage."
 
 [crates."eth-valkyoth-primitives"]
-previous_version = "0.7.0"
+previous_version = "0.8.0"
 version = "0.8.0"
-change = "code"
-publish = true
-reason = "Adds canonical RLP integer payload constructors for primitive integer domains and Wei."
+change = "unchanged"
+publish = false
+reason = "No package changes for v0.9.0."
 
 [crates."eth-valkyoth-protocol"]
 previous_version = "0.7.0"
 version = "0.7.0"
 change = "unchanged"
 publish = false
-reason = "No package changes for v0.8.0."
+reason = "No package changes for v0.9.0."
 
 [crates."eth-valkyoth-verify"]
 previous_version = "0.7.0"
 version = "0.7.0"
 change = "unchanged"
 publish = false
-reason = "No package changes for v0.8.0."
+reason = "No package changes for v0.9.0."
 
 [crates."eth-valkyoth-derive"]
 previous_version = "0.7.0"
 version = "0.7.0"
 change = "unchanged"
 publish = false
-reason = "No package changes for v0.8.0."
+reason = "No package changes for v0.9.0."
 
 [crates."eth-valkyoth-sanitization"]
 previous_version = "0.7.0"
 version = "0.7.0"
 change = "unchanged"
 publish = false
-reason = "No package changes for v0.8.0."
+reason = "No package changes for v0.9.0."
 
 [crates."eth-valkyoth-evm"]
 previous_version = "0.7.0"
 version = "0.7.0"
 change = "unchanged"
 publish = false
-reason = "No package changes for v0.8.0."
+reason = "No package changes for v0.9.0."
 
 [crates."eth-valkyoth-rpc"]
 previous_version = "0.7.0"
 version = "0.7.0"
 change = "unchanged"
 publish = false
-reason = "No package changes for v0.8.0."
+reason = "No package changes for v0.9.0."
 
 [crates."eth-valkyoth-signer"]
 previous_version = "0.7.0"
 version = "0.7.0"
 change = "unchanged"
 publish = false
-reason = "No package changes for v0.8.0."
+reason = "No package changes for v0.9.0."
 
 [crates."eth-valkyoth-reth"]
 previous_version = "0.7.0"
 version = "0.7.0"
 change = "unchanged"
 publish = false
-reason = "No package changes for v0.8.0."
+reason = "No package changes for v0.9.0."
 
 [crates."eth-valkyoth-testkit"]
 previous_version = "0.7.0"
 version = "0.7.0"
 change = "unchanged"
 publish = false
-reason = "No package changes for v0.8.0."
+reason = "No package changes for v0.9.0."
 
 [crates.eth]
-previous_version = "0.7.0"
-version = "0.8.0"
+previous_version = "0.8.0"
+version = "0.9.0"
 change = "code"
 publish = true
-reason = "Exposes canonical RLP integer decoding and primitive constructors through the facade crate."
+reason = "Exposes canonical RLP encoding helpers through the facade crate."

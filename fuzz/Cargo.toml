@@ -11,7 +11,7 @@ license = "MIT OR Apache-2.0"
 cargo-fuzz = true
 
 [dependencies]
-eth-valkyoth-codec = { path = "../crates/eth-valkyoth-codec", version = "0.8.0", features = ["testing"] }
+eth-valkyoth-codec = { path = "../crates/eth-valkyoth-codec", version = "0.9.0", features = ["testing"] }
 libfuzzer-sys = "0.4.13"
 
 [[bin]]
@@ -38,6 +38,13 @@ bench = false
 [[bin]]
 name = "rlp_integer"
 path = "fuzz_targets/rlp_integer.rs"
+test = false
+doc = false
+bench = false
+
+[[bin]]
+name = "rlp_encode"
+path = "fuzz_targets/rlp_encode.rs"
 test = false
 doc = false
 bench = false
