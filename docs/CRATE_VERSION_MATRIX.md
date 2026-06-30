@@ -1,6 +1,6 @@
 # Crate Version Matrix
 
-Status: `v0.9.3` implementation in progress.
+Status: `v0.9.3` implementation and clean pentest review complete.
 
 `eth` uses independent crate versions. The facade crate remains the main user
 entry point, but support crates are published only when their own package

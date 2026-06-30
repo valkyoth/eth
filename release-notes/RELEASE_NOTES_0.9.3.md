@@ -1,6 +1,7 @@
 # eth 0.9.3 Release Notes
 
-Status: implementation in progress; pentest required before tag
+Status: implementation and clean pentest review complete; permanent pentest
+report and final GitHub checks required before tag
 
 ## Summary
 
@@ -12,7 +13,7 @@ The release adds `eth-valkyoth-hash`, a small `no_std` support crate that
 defines a caller-provided Keccak-256 trait. It does not admit a concrete hashing
 implementation into the default dependency graph.
 
-## Included So Far
+## Included
 
 - Added `eth-valkyoth-hash` with the `Keccak256` trait,
   `Keccak256Digest = B256`, `hash_one`, and `hash_chunks`.
@@ -34,8 +35,6 @@ implementation into the default dependency graph.
 
 ## Still Required Before Tag
 
-- Maintainer pentest must be run for the exact implementation commit.
-- Any pentest findings must be fixed and retested.
 - A permanent report must be written at `security/pentest/v0.9.3.md`.
 - GitHub checks must pass on the final release report commit.
 
@@ -43,10 +42,12 @@ implementation into the default dependency graph.
 
 ```bash
 cargo test -p eth-valkyoth-hash -p eth
+cargo check --manifest-path fuzz/Cargo.toml
 scripts/checks.sh
 scripts/release_0_9_gate.sh
 scripts/check_latest_tools.sh
 cargo deny check
+cargo deny --manifest-path fuzz/Cargo.toml check
 cargo audit
 scripts/release_crates.py --check
 scripts/release_crates.py --dry-run --skip-checks --yes
