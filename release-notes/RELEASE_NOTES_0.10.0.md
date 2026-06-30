@@ -1,6 +1,6 @@
 # eth 0.10.0 Release Notes
 
-Status: follow-up pentest remediation complete; retest required before tag
+Status: release candidate ready; waiting for final GitHub checks before tag
 
 ## Summary
 
@@ -45,12 +45,13 @@ parser change has an explicit fuzz target to update.
 - Crash artifacts remain local until a minimized case is converted into a
   reviewed hex seed or deterministic regression test.
 
-## Still Required Before Tag
+## Release Gate
 
-- Maintainer retest must be run for the exact remediation commit.
-- Any follow-up pentest findings must be fixed and retested.
-- A permanent report must be written at `security/pentest/v0.10.0.md`.
-- GitHub checks must pass on the final release report commit.
+- Initial pentest findings were remediated and committed.
+- Follow-up pentest findings were remediated and committed.
+- Maintainer retest found no remaining findings for the release candidate.
+- Permanent report: `security/pentest/v0.10.0.md`.
+- Final GitHub checks must pass on the release report commit before tagging.
 
 ## Verification
 

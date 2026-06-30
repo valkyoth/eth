@@ -1,7 +1,7 @@
 # Crate Version Matrix
 
-Status: `v0.10.0` implementation and initial pentest remediation complete;
-retest pending.
+Status: `v0.10.0` implementation, pentest remediation, and clean retest
+complete; waiting for final GitHub checks before tag.
 
 `eth` uses independent crate versions. The facade crate remains the main user
 entry point, but support crates are published only when their own package

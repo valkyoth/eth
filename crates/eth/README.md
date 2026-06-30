@@ -35,8 +35,8 @@ integrations become real dependencies.
 
 ## Current Status
 
-The current release candidate is `0.10.0`; follow-up pentest remediation is
-complete and retest is pending.
+The current release candidate is `0.10.0`; pentest remediation and clean retest
+are complete.
 
 Implemented now:
 
