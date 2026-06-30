@@ -13,9 +13,10 @@ header hashes, receipt roots, or proof verification are implemented.
 - `Keccak256` for incremental hashing;
 - `Keccak256Digest` as the `B256` digest domain;
 - `hash_one` and `hash_chunks` helpers for caller-provided hashers;
-- `KECCAK256_EMPTY` and `verify_empty_digest` for backend conformance tests.
+- `KECCAK256_EMPTY`, `verify_empty_digest`, and
+  `verify_empty_digest_with` for backend conformance tests.
 
-No concrete Keccak implementation crate is admitted in `v0.9.3`.
+No concrete Keccak implementation crate is admitted in `v0.10.0`.
 
 ## Rationale
 
@@ -37,7 +38,7 @@ This is important for:
 
 | Option | Decision | Reason |
 | --- | --- | --- |
-| Trait boundary only | selected for `v0.9.3` | Keeps default graph dependency-free and makes the hashing contract explicit before transaction work. |
+| Trait boundary only | selected for `v0.10.0` | Keeps default graph dependency-free and makes the hashing contract explicit before transaction work. |
 | Built-in `tiny-keccak` backend | deferred | Current crates.io version checked on 2026-06-30: `2.0.2`, license `CC0-1.0`, default features empty, explicit `keccak` feature available. It is not admitted until a future release performs feature, audit, maintenance, and MSRV evidence review. |
 | Both trait and optional backend | deferred | Likely future shape if a first-party optional backend is useful, but not needed before transaction types exist. |
 
@@ -79,6 +80,9 @@ pub const KECCAK256_EMPTY: [u8; 32] = [
 SHA3-256 of the empty string produces a different digest, so this vector catches
 the most common backend confusion. Backend tests can call
 `verify_empty_digest::<Hasher>()` when the backend implements `Default`.
+Configured, hardware-backed, or platform-backed hashers that cannot implement
+`Default` can call `verify_empty_digest_with(hasher)` instead. Both helpers
+compare the finalized output to the crate-level `KECCAK256_EMPTY` value.
 Future backend tests should also prove that chunked and one-shot inputs produce
 identical digests.
 

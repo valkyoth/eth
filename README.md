@@ -35,7 +35,7 @@ dependencies.
 
 ## Current Status
 
-Status: `v0.10.0` RLP fuzz harness implementation and initial pentest
+Status: `v0.10.0` RLP fuzz harness implementation and follow-up pentest
 remediation are complete; retest is pending. `v0.9.3` is the latest published
 release.
 

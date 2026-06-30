@@ -1,6 +1,6 @@
 # eth 0.10.0 Release Notes
 
-Status: initial pentest remediation complete; retest required before tag
+Status: follow-up pentest remediation complete; retest required before tag
 
 ## Summary
 
@@ -33,6 +33,10 @@ parser change has an explicit fuzz target to update.
   transaction type constructors, removing the list iterator
   `ExactSizeIterator` contract, and adding explicit reviewed decode-policy
   construction.
+- Addressed follow-up pentest findings by giving
+  `Keccak256ConformanceError` standard formatting/error behavior and adding
+  `verify_empty_digest_with` for configured hashers that cannot implement
+  `Default`.
 
 ## Known Limitations
 

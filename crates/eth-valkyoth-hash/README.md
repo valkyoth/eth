@@ -13,5 +13,5 @@ Crates.io: <https://crates.io/crates/eth>
 
 This package is published separately so the `eth` workspace can keep small,
 auditable crate boundaries. The `0.10.0` release defines the trait boundary and
-empty-input conformance helpers; it does not provide or admit a default Keccak
-implementation crate.
+empty-input conformance helpers for both `Default` and explicitly configured
+hashers; it does not provide or admit a default Keccak implementation crate.

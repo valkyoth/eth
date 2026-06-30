@@ -12,6 +12,8 @@
 #[cfg(feature = "std")]
 extern crate std;
 
+use core::fmt;
+
 use eth_valkyoth_primitives::B256;
 
 /// Keccak-256 digest domain used by Ethereum protocol hashing.
@@ -30,6 +32,15 @@ pub const KECCAK256_EMPTY: [u8; 32] = [
 /// Keccak backend conformance failure.
 #[derive(Clone, Copy, Debug, Eq, PartialEq)]
 pub struct Keccak256ConformanceError;
+
+impl fmt::Display for Keccak256ConformanceError {
+    fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
+        f.write_str("Keccak-256 backend failed empty-input conformance check")
+    }
+}
+
+#[cfg(feature = "std")]
+impl std::error::Error for Keccak256ConformanceError {}
 
 /// Incremental Keccak-256 hasher boundary.
 ///
@@ -57,8 +68,19 @@ pub fn verify_empty_digest<H>() -> Result<(), Keccak256ConformanceError>
 where
     H: Default + Keccak256,
 {
-    let digest = hash_one(H::default(), b"");
-    if <[u8; 32]>::from(digest) == H::EMPTY_DIGEST {
+    verify_empty_digest_with(H::default())
+}
+
+/// Verifies a hasher instance against the empty-input Keccak-256 KAT.
+///
+/// Use this for hardware-backed, platform-backed, or otherwise configured
+/// hashers that cannot implement [`Default`].
+pub fn verify_empty_digest_with<H>(hasher: H) -> Result<(), Keccak256ConformanceError>
+where
+    H: Keccak256,
+{
+    let digest = hash_one(hasher, b"");
+    if <[u8; 32]>::from(digest) == KECCAK256_EMPTY {
         return Ok(());
     }
     Err(Keccak256ConformanceError)
@@ -92,11 +114,49 @@ where
 #[cfg(test)]
 mod tests {
     use super::*;
+    use core::fmt::Write;
 
     #[derive(Default)]
     struct TranscriptHasher {
         calls: u8,
         total_len: usize,
+    }
+
+    struct FixedHasher {
+        digest: B256,
+    }
+
+    struct FixedBuffer {
+        bytes: [u8; 64],
+        len: usize,
+    }
+
+    impl FixedBuffer {
+        const fn new() -> Self {
+            Self {
+                bytes: [0_u8; 64],
+                len: 0,
+            }
+        }
+
+        fn as_str(&self) -> &str {
+            self.bytes
+                .get(..self.len)
+                .and_then(|bytes| core::str::from_utf8(bytes).ok())
+                .unwrap_or("")
+        }
+    }
+
+    impl Write for FixedBuffer {
+        fn write_str(&mut self, input: &str) -> core::fmt::Result {
+            let end = self.len.saturating_add(input.len());
+            let Some(slot) = self.bytes.get_mut(self.len..end) else {
+                return Err(core::fmt::Error);
+            };
+            slot.copy_from_slice(input.as_bytes());
+            self.len = end;
+            Ok(())
+        }
     }
 
     impl Keccak256 for TranscriptHasher {
@@ -114,6 +174,14 @@ mod tests {
                 *last = u8::try_from(self.total_len).unwrap_or(u8::MAX);
             }
             B256::from_bytes(bytes)
+        }
+    }
+
+    impl Keccak256 for FixedHasher {
+        fn update(&mut self, _input: &[u8]) {}
+
+        fn finalize(self) -> Keccak256Digest {
+            self.digest
         }
     }
 
@@ -143,6 +211,39 @@ mod tests {
                 0x03, 0xc0, 0xe5, 0x00, 0xb6, 0x53, 0xca, 0x82, 0x27, 0x3b, 0x7b, 0xfa, 0xd8, 0x04,
                 0x5d, 0x85, 0xa4, 0x70,
             ]
+        );
+    }
+
+    #[test]
+    fn empty_digest_helper_accepts_non_default_hasher_instances() {
+        let hasher = FixedHasher {
+            digest: B256::from_bytes(KECCAK256_EMPTY),
+        };
+
+        assert_eq!(verify_empty_digest_with(hasher), Ok(()));
+    }
+
+    #[test]
+    fn empty_digest_helper_rejects_wrong_empty_digest() {
+        let hasher = FixedHasher {
+            digest: B256::from_bytes([0_u8; 32]),
+        };
+
+        assert_eq!(
+            verify_empty_digest_with(hasher),
+            Err(Keccak256ConformanceError)
+        );
+    }
+
+    #[test]
+    fn conformance_error_has_stable_display_text() {
+        let mut buffer = FixedBuffer::new();
+        let written = write!(&mut buffer, "{}", Keccak256ConformanceError);
+
+        assert!(written.is_ok());
+        assert_eq!(
+            buffer.as_str(),
+            "Keccak-256 backend failed empty-input conformance check"
         );
     }
 
