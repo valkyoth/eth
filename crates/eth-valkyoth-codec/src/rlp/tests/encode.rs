@@ -64,13 +64,17 @@ fn rejects_noncanonical_integer_payloads() {
 fn encodes_list_payloads() {
     let cat_dog_payload = [0x83, b'c', b'a', b't', 0x83, b'd', b'o', b'g'];
     let mut output = [0_u8; 64];
-    let written = encode_rlp_list_payload(&cat_dog_payload, &mut output);
+    let written =
+        encode_rlp_list_payload(&cat_dog_payload, DecodeLimits::TEST_FIXTURE, &mut output);
     let expected = [0xc8, 0x83, b'c', b'a', b't', 0x83, b'd', b'o', b'g'];
     assert_eq!(written, Ok(9));
     assert_eq!(output.get(..9), Some(expected.as_slice()));
 
     let mut empty_output = [0_u8; 1];
-    assert_eq!(encode_rlp_list_payload(&[], &mut empty_output), Ok(1));
+    assert_eq!(
+        encode_rlp_list_payload(&[], DecodeLimits::TEST_FIXTURE, &mut empty_output),
+        Ok(1)
+    );
     assert_eq!(empty_output, [0xc0]);
 }
 
@@ -78,13 +82,29 @@ fn encodes_list_payloads() {
 fn encodes_long_list_payloads() {
     let payload = [0x80_u8; 56];
     let mut output = [0_u8; 64];
-    let written = encode_rlp_list_payload(&payload, &mut output);
+    let written = encode_rlp_list_payload(&payload, DecodeLimits::TEST_FIXTURE, &mut output);
 
     assert_eq!(written, Ok(58));
     assert_eq!(output.first(), Some(&0xf8));
     assert_eq!(output.get(1), Some(&56));
     assert_eq!(output.get(2..58), Some(payload.as_slice()));
-    assert_eq!(encoded_rlp_list_len(&payload), Ok(58));
+    assert_eq!(
+        encoded_rlp_list_len(&payload, DecodeLimits::TEST_FIXTURE),
+        Ok(58)
+    );
+}
+
+#[test]
+fn validates_list_payloads_before_encoding() {
+    let mut output = [0_u8; 4];
+    assert_eq!(
+        encode_rlp_list_payload(&[0x81], DecodeLimits::TEST_FIXTURE, &mut output),
+        Err(DecodeError::OffsetOutOfBounds)
+    );
+    assert_eq!(
+        encoded_rlp_list_len(&[0x81], DecodeLimits::TEST_FIXTURE),
+        Err(DecodeError::OffsetOutOfBounds)
+    );
 }
 
 #[test]
@@ -153,7 +173,7 @@ fn output_buffers_must_be_large_enough() {
 
     let mut empty_output = [];
     assert_eq!(
-        encode_rlp_list_payload(&[], &mut empty_output),
+        encode_rlp_list_payload(&[], DecodeLimits::TEST_FIXTURE, &mut empty_output),
         Err(DecodeError::OffsetOutOfBounds)
     );
 }

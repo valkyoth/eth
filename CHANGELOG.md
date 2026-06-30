@@ -9,6 +9,9 @@ All notable changes to `eth` are documented here.
   RLP items.
 - Added decode-then-encode canonicality tests plus scalar, integer, list,
   long-payload, output-buffer, and noncanonical-input regression coverage.
+- Hardened raw list-payload encoding by validating concatenated child items
+  under explicit `DecodeLimits` before returning a length or emitting a list
+  header.
 - Added fuzz coverage for RLP encoding length helpers, raw payload encoders,
   and decoded scalar, integer, list, and item re-encoding paths.
 - Refreshed pinned execution-apis and consensus-specs revisions after checking

@@ -257,7 +257,7 @@ assert_eq!(scalar_output.get(..4), Some([0x83, b'c', b'a', b't'].as_slice()));
 
 let list_payload = [0x83, b'c', b'a', b't', 0x83, b'd', b'o', b'g'];
 let mut list_output = [0_u8; 16];
-assert_eq!(encode_rlp_list_payload(&list_payload, &mut list_output)?, 9);
+assert_eq!(encode_rlp_list_payload(&list_payload, limits, &mut list_output)?, 9);
 assert_eq!(list_output.get(..9), Some([0xc8, 0x83, b'c', b'a', b't', 0x83, b'd', b'o', b'g'].as_slice()));
 # Ok::<(), eth::error::DecodeError>(())
 ```

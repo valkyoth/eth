@@ -1,10 +1,11 @@
 use core::convert::TryFrom;
 
-use crate::{DecodeError, checked_len_add};
+use crate::{DecodeAccumulator, DecodeError, DecodeLimits, checked_len_add};
 
 use super::{
     LENGTH_RADIX, LONG_LIST_OFFSET, LONG_STRING_OFFSET, RlpInteger, RlpItem, RlpList, RlpScalar,
     SHORT_LIST_OFFSET, SHORT_STRING_LIMIT, SHORT_STRING_OFFSET, integer::validate_integer_payload,
+    list::validate_list_payload,
 };
 
 /// Returns the encoded RLP byte length for a scalar byte-string payload.
@@ -24,7 +25,8 @@ pub fn encoded_rlp_integer_len(payload: &[u8]) -> Result<usize, DecodeError> {
 /// Returns the encoded RLP byte length for a list payload.
 ///
 /// The payload must be the concatenated encoded child items of the list.
-pub fn encoded_rlp_list_len(payload: &[u8]) -> Result<usize, DecodeError> {
+pub fn encoded_rlp_list_len(payload: &[u8], limits: DecodeLimits) -> Result<usize, DecodeError> {
+    validate_encoded_list_payload(payload, limits)?;
     encoded_payload_len(payload, ScalarSingleByte::Disabled)
 }
 
@@ -53,7 +55,19 @@ pub fn encode_rlp_integer(payload: &[u8], output: &mut [u8]) -> Result<usize, De
 ///
 /// The payload must already contain the concatenated encoded child items.
 /// Returns the number of bytes written.
-pub fn encode_rlp_list_payload(payload: &[u8], output: &mut [u8]) -> Result<usize, DecodeError> {
+pub fn encode_rlp_list_payload(
+    payload: &[u8],
+    limits: DecodeLimits,
+    output: &mut [u8],
+) -> Result<usize, DecodeError> {
+    validate_encoded_list_payload(payload, limits)?;
+    encode_rlp_list_payload_unchecked(payload, output)
+}
+
+fn encode_rlp_list_payload_unchecked(
+    payload: &[u8],
+    output: &mut [u8],
+) -> Result<usize, DecodeError> {
     encode_payload(
         payload,
         output,
@@ -87,7 +101,7 @@ pub fn encode_decoded_integer(
 ///
 /// Returns the number of bytes written.
 pub fn encode_decoded_list(list: RlpList<'_>, output: &mut [u8]) -> Result<usize, DecodeError> {
-    encode_rlp_list_payload(list.payload(), output)
+    encode_rlp_list_payload_unchecked(list.payload(), output)
 }
 
 /// Re-encodes a decoded canonical RLP item into `output`.
@@ -215,4 +229,13 @@ fn length_of_length(payload_len: usize) -> Result<usize, DecodeError> {
             .ok_or(DecodeError::LengthOverflow)?;
     }
     Ok(len)
+}
+
+fn validate_encoded_list_payload(
+    payload: &[u8],
+    limits: DecodeLimits,
+) -> Result<usize, DecodeError> {
+    let mut accumulator: DecodeAccumulator = limits.accumulator();
+    accumulator.check_input_len(payload.len())?;
+    validate_list_payload(payload, &mut accumulator)
 }

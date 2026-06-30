@@ -20,6 +20,8 @@ buffers and return the number of bytes written.
   `encoded_rlp_integer_len` and `encode_rlp_integer`.
 - Added list payload length and encode helpers:
   `encoded_rlp_list_len` and `encode_rlp_list_payload`.
+- Raw list-payload helpers validate concatenated child items under explicit
+  `DecodeLimits` before returning a length or emitting a list header.
 - Added decoded-value re-encoding helpers:
   `encode_decoded_scalar`, `encode_decoded_integer`, `encode_decoded_list`,
   and `encode_decoded_item`.

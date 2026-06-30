@@ -14,10 +14,10 @@ fuzz_target!(|data: &[u8]| {
 
     let _ = encoded_rlp_scalar_len(data);
     let _ = encoded_rlp_integer_len(data);
-    let _ = encoded_rlp_list_len(data);
+    let _ = encoded_rlp_list_len(data, limits);
     let _ = encode_rlp_scalar(data, &mut output);
     let _ = encode_rlp_integer(data, &mut output);
-    let _ = encode_rlp_list_payload(data, &mut output);
+    let _ = encode_rlp_list_payload(data, limits, &mut output);
 
     if let Ok(scalar) = decode_rlp_scalar(data, limits) {
         let _ = encode_decoded_scalar(scalar, &mut output);

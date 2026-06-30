@@ -288,7 +288,7 @@ struct ListFrame {
     count: usize,
 }
 
-fn validate_list_payload(
+pub(super) fn validate_list_payload(
     input: &[u8],
     accumulator: &mut DecodeAccumulator,
 ) -> Result<usize, DecodeError> {
