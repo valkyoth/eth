@@ -24,6 +24,9 @@ pub enum RlpListForm {
 }
 
 /// Borrowed RLP list payload.
+///
+/// Fields are private so downstream crates cannot construct unvalidated
+/// decoded values and feed them into trusted re-encoding paths.
 #[derive(Clone, Copy, Debug)]
 pub struct RlpList<'a> {
     payload: &'a [u8],

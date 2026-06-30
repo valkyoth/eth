@@ -12,6 +12,10 @@ All notable changes to `eth` are documented here.
 - Hardened raw list-payload encoding by validating concatenated child items
   under explicit `DecodeLimits` before returning a length or emitting a list
   header.
+- Addressed v0.9.0 pentest findings by making encode errors leave output
+  buffers unchanged, expanding encode fuzz coverage to exact-size output
+  buffers, documenting sealed decoded value construction, and hardening
+  long-form length invariants.
 - Added fuzz coverage for RLP encoding length helpers, raw payload encoders,
   and decoded scalar, integer, list, and item re-encoding paths.
 - Refreshed pinned execution-apis and consensus-specs revisions after checking

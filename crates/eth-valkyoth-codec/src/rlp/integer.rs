@@ -21,6 +21,9 @@ const INTEGER_RADIX_U128: u128 = 256;
 /// Ethereum integers are encoded as shortest-form unsigned big-endian bytes.
 /// The empty payload represents zero. A non-empty payload whose first byte is
 /// zero is rejected.
+///
+/// Fields are private so downstream crates cannot construct unvalidated
+/// decoded values and feed them into trusted re-encoding paths.
 #[derive(Clone, Copy, Debug, Eq, PartialEq)]
 pub struct RlpInteger<'a> {
     scalar: RlpScalar<'a>,

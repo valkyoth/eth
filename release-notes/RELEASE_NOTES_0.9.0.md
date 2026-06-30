@@ -22,6 +22,10 @@ buffers and return the number of bytes written.
   `encoded_rlp_list_len` and `encode_rlp_list_payload`.
 - Raw list-payload helpers validate concatenated child items under explicit
   `DecodeLimits` before returning a length or emitting a list header.
+- Addressed v0.9.0 pentest findings by making encode errors leave output
+  buffers unchanged, expanding encode fuzz coverage to exact-size output
+  buffers, documenting sealed decoded value construction, and hardening
+  long-form length invariants.
 - Added decoded-value re-encoding helpers:
   `encode_decoded_scalar`, `encode_decoded_integer`, `encode_decoded_list`,
   and `encode_decoded_item`.

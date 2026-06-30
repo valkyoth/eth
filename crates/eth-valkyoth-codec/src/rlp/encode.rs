@@ -32,6 +32,7 @@ pub fn encoded_rlp_list_len(payload: &[u8], limits: DecodeLimits) -> Result<usiz
 
 /// Canonically encodes a scalar byte-string payload into `output`.
 ///
+/// `output` is not modified unless this function returns `Ok`.
 /// Returns the number of bytes written.
 pub fn encode_rlp_scalar(payload: &[u8], output: &mut [u8]) -> Result<usize, DecodeError> {
     encode_payload(
@@ -45,6 +46,7 @@ pub fn encode_rlp_scalar(payload: &[u8], output: &mut [u8]) -> Result<usize, Dec
 
 /// Canonically encodes an Ethereum integer payload into `output`.
 ///
+/// `output` is not modified unless this function returns `Ok`.
 /// Returns the number of bytes written.
 pub fn encode_rlp_integer(payload: &[u8], output: &mut [u8]) -> Result<usize, DecodeError> {
     validate_integer_payload(payload)?;
@@ -54,6 +56,7 @@ pub fn encode_rlp_integer(payload: &[u8], output: &mut [u8]) -> Result<usize, De
 /// Canonically encodes a list payload into `output`.
 ///
 /// The payload must already contain the concatenated encoded child items.
+/// `output` is not modified unless this function returns `Ok`.
 /// Returns the number of bytes written.
 pub fn encode_rlp_list_payload(
     payload: &[u8],
@@ -79,6 +82,7 @@ fn encode_rlp_list_payload_unchecked(
 
 /// Re-encodes a decoded canonical scalar into `output`.
 ///
+/// `output` is not modified unless this function returns `Ok`.
 /// Returns the number of bytes written.
 pub fn encode_decoded_scalar(
     scalar: RlpScalar<'_>,
@@ -89,6 +93,7 @@ pub fn encode_decoded_scalar(
 
 /// Re-encodes a decoded canonical integer into `output`.
 ///
+/// `output` is not modified unless this function returns `Ok`.
 /// Returns the number of bytes written.
 pub fn encode_decoded_integer(
     integer: RlpInteger<'_>,
@@ -99,6 +104,7 @@ pub fn encode_decoded_integer(
 
 /// Re-encodes a decoded canonical list into `output`.
 ///
+/// `output` is not modified unless this function returns `Ok`.
 /// Returns the number of bytes written.
 pub fn encode_decoded_list(list: RlpList<'_>, output: &mut [u8]) -> Result<usize, DecodeError> {
     encode_rlp_list_payload_unchecked(list.payload(), output)
@@ -106,6 +112,7 @@ pub fn encode_decoded_list(list: RlpList<'_>, output: &mut [u8]) -> Result<usize
 
 /// Re-encodes a decoded canonical RLP item into `output`.
 ///
+/// `output` is not modified unless this function returns `Ok`.
 /// Returns the number of bytes written.
 pub fn encode_decoded_item(item: RlpItem<'_>, output: &mut [u8]) -> Result<usize, DecodeError> {
     match item {
@@ -145,6 +152,11 @@ fn encode_payload(
     long_offset: u8,
     scalar_single_byte: ScalarSingleByte,
 ) -> Result<usize, DecodeError> {
+    let required_len = encoded_payload_len(payload, scalar_single_byte)?;
+    if output.len() < required_len {
+        return Err(DecodeError::OffsetOutOfBounds);
+    }
+
     if matches!(scalar_single_byte, ScalarSingleByte::Enabled)
         && payload.len() == 1
         && payload.first().is_some_and(|byte| *byte <= 0x7f)
@@ -220,12 +232,18 @@ fn write_payload(output: &mut [u8], header_len: usize, payload: &[u8]) -> Result
 }
 
 fn length_of_length(payload_len: usize) -> Result<usize, DecodeError> {
+    if payload_len <= SHORT_STRING_LIMIT {
+        return Err(DecodeError::Malformed);
+    }
+
     let mut value = payload_len;
     let mut len = 0usize;
     while value > 0 {
         len = checked_len_add(len, 1)?;
         value = value
             .checked_div(LENGTH_RADIX)
+            // LENGTH_RADIX is the nonzero constant 256, so this branch is
+            // unreachable unless the constant changes.
             .ok_or(DecodeError::LengthOverflow)?;
     }
     Ok(len)

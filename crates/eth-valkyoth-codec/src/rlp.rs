@@ -49,6 +49,9 @@ pub enum RlpScalarForm {
 }
 
 /// Borrowed RLP scalar byte string.
+///
+/// Fields are private so downstream crates cannot construct unvalidated
+/// decoded values and feed them into trusted re-encoding paths.
 #[derive(Clone, Copy, Debug, Eq, PartialEq)]
 pub struct RlpScalar<'a> {
     payload: &'a [u8],

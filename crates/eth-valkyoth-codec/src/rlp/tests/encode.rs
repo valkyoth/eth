@@ -170,12 +170,38 @@ fn output_buffers_must_be_large_enough() {
         encode_rlp_scalar(b"dog", &mut output),
         Err(DecodeError::OffsetOutOfBounds)
     );
+    assert_eq!(output, [0_u8; 3]);
 
     let mut empty_output = [];
     assert_eq!(
         encode_rlp_list_payload(&[], DecodeLimits::TEST_FIXTURE, &mut empty_output),
         Err(DecodeError::OffsetOutOfBounds)
     );
+}
+
+#[test]
+fn output_buffers_are_not_modified_on_encode_error() {
+    let mut short_output = [0xaa_u8; 1];
+    assert_eq!(
+        encode_rlp_scalar(b"dog", &mut short_output),
+        Err(DecodeError::OffsetOutOfBounds)
+    );
+    assert_eq!(short_output, [0xaa]);
+
+    let payload = [0x80_u8; 56];
+    let mut long_output = [0xbb_u8; 1];
+    assert_eq!(
+        encode_rlp_list_payload(&payload, DecodeLimits::TEST_FIXTURE, &mut long_output),
+        Err(DecodeError::OffsetOutOfBounds)
+    );
+    assert_eq!(long_output, [0xbb]);
+
+    let mut integer_output = [0xcc_u8; 4];
+    assert_eq!(
+        encode_rlp_integer(&[0x00], &mut integer_output),
+        Err(DecodeError::Malformed)
+    );
+    assert_eq!(integer_output, [0xcc_u8; 4]);
 }
 
 #[test]
