@@ -35,9 +35,8 @@ dependencies.
 
 ## Current Status
 
-Status: `v0.9.1` pentest remediations are complete and the release candidate
-is waiting for final GitHub checks before tagging. `v0.9.0` is the latest
-published release.
+Status: `v0.9.2` is in implementation for the primitive RLP bridge. `v0.9.1`
+is the latest published release.
 
 Implemented now:
 
@@ -51,6 +50,8 @@ Implemented now:
   accounting.
 - Canonical RLP scalar, list, and integer decoding plus no-allocation canonical
   encoding helpers.
+- No-allocation primitive RLP encode and exact-decode helpers for chain, block,
+  gas, nonce, timestamp, address, hash, and wei values.
 - Stable error codes, messages, categories, and formatting for codec,
   protocol, fork, feature, resource, and verification failures.
 - Optional sanitization and derive support crates outside the default feature
@@ -140,6 +141,41 @@ assert_eq!(<[u8; 20]>::from(address), [0x11_u8; 20]);
 assert_eq!(<[u8; 32]>::from(hash), [0x22_u8; 32]);
 assert_eq!(value.to_be_bytes()[31], 0);
 assert_eq!(tx_type.map(u8::from), Ok(2));
+```
+
+Primitive domains bridge directly to the bounded codec without allocation:
+
+```rust
+use eth::codec::DecodeLimits;
+use eth::primitives::{Address, ChainId, Wei};
+
+let limits = DecodeLimits {
+    max_input_bytes: 64,
+    max_list_items: 4,
+    max_nesting_depth: 4,
+    max_total_allocation: 64,
+    max_proof_nodes: 4,
+    max_total_items: 4,
+};
+
+let chain = ChainId::new(1);
+let mut encoded_chain = [0_u8; 8];
+let written = chain.encode_rlp(&mut encoded_chain)?;
+assert_eq!(encoded_chain.get(..written), Some([0x01].as_slice()));
+assert_eq!(ChainId::try_from_rlp(&[0x01], limits)?, chain);
+
+let value = Wei::from_u128(1024);
+let mut encoded_value = [0_u8; 8];
+let written = value.encode_rlp(&mut encoded_value)?;
+assert_eq!(encoded_value.get(..written), Some([0x82, 0x04, 0x00].as_slice()));
+assert_eq!(Wei::try_from_rlp(&[0x82, 0x04, 0x00], limits)?, value);
+
+let address = Address::from([0x11_u8; 20]);
+let mut encoded_address = [0_u8; 21];
+let written = address.encode_rlp(&mut encoded_address)?;
+assert_eq!(written, 21);
+assert_eq!(Address::try_from_rlp(&encoded_address, limits)?, address);
+# Ok::<(), eth::primitives::PrimitiveRlpError>(())
 ```
 
 ## Constant-Time Composition
@@ -307,7 +343,7 @@ friendly, and independently testable.
 The minimum supported Rust version is Rust `1.90.0`. New deployments should use
 the pinned stable Rust `1.96.0` until the toolchain policy is updated.
 
-Compatibility evidence for `0.9.1`:
+Compatibility evidence for `0.9.2`:
 
 | Rust | Local Evidence |
 | --- | --- |
@@ -324,7 +360,7 @@ Compatibility evidence for `0.9.1`:
 ```bash
 scripts/checks.sh
 scripts/release_0_9_gate.sh
-scripts/validate-release-readiness.sh v0.9.1
+scripts/validate-release-readiness.sh v0.9.2
 ```
 
 For dependency-policy checks, install `cargo-deny` and `cargo-audit`, then run:

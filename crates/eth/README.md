@@ -26,15 +26,15 @@
 `eth` is the public facade crate for a `no_std`-first Ethereum
 execution-layer protocol workspace.
 
-The crate is intentionally conservative at `0.9.1`: it provides explicit
+The crate is intentionally conservative at `0.9.2`: it provides explicit
 Ethereum primitive domains, bounded decode-budget policy, stable error
-categories, small first-party crate boundaries, optional sanitization support,
-and release evidence before RPC, signer, EVM, Reth, or P2P integrations become
-real dependencies.
+categories, primitive RLP bridge helpers, small first-party crate boundaries,
+optional sanitization support, and release evidence before RPC, signer, EVM,
+Reth, or P2P integrations become real dependencies.
 
 ## Current Status
 
-The current release candidate is `0.9.1`.
+The current release candidate is `0.9.2`.
 
 Implemented now:
 
@@ -46,6 +46,8 @@ Implemented now:
   accounting.
 - Canonical RLP scalar, list, and integer decoding plus no-allocation canonical
   encoding helpers.
+- No-allocation primitive RLP encode and exact-decode helpers for chain, block,
+  gas, nonce, timestamp, address, hash, and wei values.
 - Stable error codes, messages, categories, and formatting for codec,
   protocol, fork, feature, resource, and verification failures.
 - Optional sanitization bridge and derive macros outside the default feature
@@ -142,6 +144,41 @@ assert_eq!(tx_type.map(u8::from), Ok(2));
 Legacy transactions are not typed EIP-2718 envelopes. Use
 `TransactionType::LEGACY` for APIs that need a legacy domain value, and
 `try_new_typed` for type bytes that will be encoded as typed envelopes.
+
+Primitive domains bridge directly to the bounded codec without allocation:
+
+```rust
+use eth::codec::DecodeLimits;
+use eth::primitives::{Address, ChainId, Wei};
+
+let limits = DecodeLimits {
+    max_input_bytes: 64,
+    max_list_items: 4,
+    max_nesting_depth: 4,
+    max_total_allocation: 64,
+    max_proof_nodes: 4,
+    max_total_items: 4,
+};
+
+let chain = ChainId::new(1);
+let mut encoded_chain = [0_u8; 8];
+let written = chain.encode_rlp(&mut encoded_chain)?;
+assert_eq!(encoded_chain.get(..written), Some([0x01].as_slice()));
+assert_eq!(ChainId::try_from_rlp(&[0x01], limits)?, chain);
+
+let value = Wei::from_u128(1024);
+let mut encoded_value = [0_u8; 8];
+let written = value.encode_rlp(&mut encoded_value)?;
+assert_eq!(encoded_value.get(..written), Some([0x82, 0x04, 0x00].as_slice()));
+assert_eq!(Wei::try_from_rlp(&[0x82, 0x04, 0x00], limits)?, value);
+
+let address = Address::from([0x11_u8; 20]);
+let mut encoded_address = [0_u8; 21];
+let written = address.encode_rlp(&mut encoded_address)?;
+assert_eq!(written, 21);
+assert_eq!(Address::try_from_rlp(&encoded_address, limits)?, address);
+# Ok::<(), eth::primitives::PrimitiveRlpError>(())
+```
 
 ## Constant-Time Composition
 
@@ -306,7 +343,7 @@ the workspace can keep small, auditable boundaries:
 The minimum supported Rust version is Rust `1.90.0`. New deployments should use
 the latest stable Rust verified by the release gates.
 
-Compatibility evidence for `0.9.1`:
+Compatibility evidence for `0.9.2`:
 
 | Rust | Local Evidence |
 | --- | --- |

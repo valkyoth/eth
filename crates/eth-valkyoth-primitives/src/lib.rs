@@ -9,8 +9,11 @@ use eth_valkyoth_codec::{
 pub use subtle::Choice;
 use subtle::ConstantTimeEq as _;
 
+mod rlp;
 #[cfg(test)]
 mod tests;
+
+pub use rlp::PrimitiveRlpError;
 
 fn parse_canonical_u64(bytes: &[u8]) -> Result<u64, PrimitiveError> {
     // Do not duplicate Ethereum RLP integer canonicality in this crate.

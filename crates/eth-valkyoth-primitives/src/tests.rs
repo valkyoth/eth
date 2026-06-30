@@ -1,5 +1,16 @@
 use super::*;
-use eth_valkyoth_codec::{rlp_integer_payload_to_u64, rlp_integer_payload_to_u256_bytes};
+use eth_valkyoth_codec::{
+    DecodeError, DecodeLimits, rlp_integer_payload_to_u64, rlp_integer_payload_to_u256_bytes,
+};
+
+const TEST_LIMITS: DecodeLimits = DecodeLimits {
+    max_input_bytes: 1 << 20,
+    max_list_items: 4096,
+    max_nesting_depth: 64,
+    max_total_allocation: 1 << 20,
+    max_proof_nodes: 1024,
+    max_total_items: 8192,
+};
 
 #[test]
 fn chain_id_round_trips() {
@@ -99,6 +110,68 @@ fn id_types_map_codec_payload_errors_to_primitive_errors() {
 }
 
 #[test]
+fn id_types_rlp_round_trip_canonical_integers() -> Result<(), PrimitiveRlpError> {
+    let mut output = [0_u8; 16];
+
+    let cases: &[(ChainId, &[u8])] = &[
+        (ChainId::new(0), &[0x80]),
+        (ChainId::new(1), &[0x01]),
+        (ChainId::new(127), &[0x7f]),
+        (ChainId::new(128), &[0x81, 0x80]),
+        (ChainId::new(1024), &[0x82, 0x04, 0x00]),
+    ];
+
+    for (value, expected) in cases {
+        assert_eq!(value.encoded_rlp_len()?, expected.len());
+        let written = value.encode_rlp(&mut output)?;
+        assert_eq!(output.get(..written), Some(*expected));
+        assert_eq!(ChainId::try_from_rlp(expected, TEST_LIMITS), Ok(*value));
+    }
+
+    assert_eq!(
+        BlockNumber::try_from_rlp(&[0x82, 0x04, 0x00], TEST_LIMITS),
+        Ok(BlockNumber::new(1024))
+    );
+    assert_eq!(
+        Gas::try_from_rlp(&[0x82, 0x52, 0x08], TEST_LIMITS),
+        Ok(Gas::new(21_000))
+    );
+    assert_eq!(Nonce::try_from_rlp(&[0x07], TEST_LIMITS), Ok(Nonce::new(7)));
+    assert_eq!(
+        UnixTimestamp::try_from_rlp(&[0x84, 0x65, 0x53, 0xf1, 0x00], TEST_LIMITS),
+        Ok(UnixTimestamp::new(1_700_000_000))
+    );
+    Ok(())
+}
+
+#[test]
+fn id_types_rlp_reject_malformed_inputs() {
+    assert_eq!(
+        ChainId::try_from_rlp(&[0x00], TEST_LIMITS),
+        Err(PrimitiveRlpError::Decode(DecodeError::Malformed))
+    );
+    assert_eq!(
+        ChainId::try_from_rlp(&[0x01, 0x02], TEST_LIMITS),
+        Err(PrimitiveRlpError::Decode(DecodeError::TrailingBytes))
+    );
+    assert_eq!(
+        ChainId::try_from_rlp(&[0x89, 1, 2, 3, 4, 5, 6, 7, 8, 9], TEST_LIMITS),
+        Err(PrimitiveRlpError::Decode(DecodeError::LengthOverflow))
+    );
+}
+
+#[test]
+fn rlp_encode_rejects_short_output_without_modifying_it() {
+    let mut output = [0xaa_u8; 1];
+
+    assert_eq!(
+        ChainId::new(1024).encode_rlp(&mut output),
+        Err(PrimitiveRlpError::Decode(DecodeError::OffsetOutOfBounds))
+    );
+    assert_eq!(output, [0xaa]);
+}
+
+#[test]
 fn address_round_trips() {
     let bytes = [7_u8; 20];
     assert_eq!(<[u8; 20]>::from(Address::from(bytes)), bytes);
@@ -141,6 +214,42 @@ fn b256_constant_time_choices_compose_without_short_circuit() {
 fn b256_round_trips() {
     let bytes = [3_u8; 32];
     assert_eq!(<[u8; 32]>::from(B256::from(bytes)), bytes);
+}
+
+#[test]
+fn address_and_hash_rlp_round_trip_fixed_width_scalars() -> Result<(), PrimitiveRlpError> {
+    let address = Address::from_bytes([0x11_u8; 20]);
+    let hash = B256::from_bytes([0x22_u8; 32]);
+    let mut address_output = [0_u8; 21];
+    let mut hash_output = [0_u8; 33];
+
+    assert_eq!(address.encoded_rlp_len()?, 21);
+    let address_written = address.encode_rlp(&mut address_output)?;
+    assert_eq!(address_written, 21);
+    assert_eq!(address_output.first(), Some(&0x94));
+    assert_eq!(
+        Address::try_from_rlp(&address_output, TEST_LIMITS),
+        Ok(address)
+    );
+
+    assert_eq!(hash.encoded_rlp_len()?, 33);
+    let hash_written = hash.encode_rlp(&mut hash_output)?;
+    assert_eq!(hash_written, 33);
+    assert_eq!(hash_output.first(), Some(&0xa0));
+    assert_eq!(B256::try_from_rlp(&hash_output, TEST_LIMITS), Ok(hash));
+    Ok(())
+}
+
+#[test]
+fn fixed_width_rlp_rejects_wrong_scalar_lengths() {
+    assert_eq!(
+        Address::try_from_rlp(&[0x80], TEST_LIMITS),
+        Err(PrimitiveRlpError::FixedWidthScalar)
+    );
+    assert_eq!(
+        B256::try_from_rlp(&[0x80], TEST_LIMITS),
+        Err(PrimitiveRlpError::FixedWidthScalar)
+    );
 }
 
 #[test]
@@ -202,6 +311,34 @@ fn wei_delegates_canonical_payload_parsing_to_codec() {
         Wei::try_from_canonical_be_slice(&[1_u8; 33]),
         Err(PrimitiveError::IntegerTooLarge)
     );
+}
+
+#[test]
+fn wei_rlp_round_trips_canonical_u256() -> Result<(), PrimitiveRlpError> {
+    let cases: &[(Wei, &[u8])] = &[
+        (Wei::ZERO, &[0x80]),
+        (Wei::from_u128(1), &[0x01]),
+        (Wei::from_u128(1024), &[0x82, 0x04, 0x00]),
+    ];
+    let mut output = [0_u8; 64];
+
+    for (wei, expected) in cases {
+        assert_eq!(wei.encoded_rlp_len()?, expected.len());
+        let written = wei.encode_rlp(&mut output)?;
+        assert_eq!(output.get(..written), Some(*expected));
+        assert_eq!(Wei::try_from_rlp(expected, TEST_LIMITS), Ok(*wei));
+    }
+
+    let max = Wei::from_be_bytes([0xff_u8; 32]);
+    assert_eq!(max.encoded_rlp_len()?, 33);
+    let written = max.encode_rlp(&mut output)?;
+    assert_eq!(written, 33);
+    assert_eq!(output.first(), Some(&0xa0));
+    let encoded = output
+        .get(..written)
+        .ok_or(PrimitiveRlpError::Decode(DecodeError::OffsetOutOfBounds))?;
+    assert_eq!(Wei::try_from_rlp(encoded, TEST_LIMITS), Ok(max));
+    Ok(())
 }
 
 #[test]
