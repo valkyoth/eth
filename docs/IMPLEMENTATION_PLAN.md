@@ -48,7 +48,8 @@ The first production value is:
 - `eth-valkyoth-primitives`: no_std chain, block, gas, nonce, address, hash, fork, and
   bounded value primitives.
 - `eth-valkyoth-codec`: canonical RLP and typed-envelope decoding policy, exact
-  consumption, and decode budgets.
+  consumption, decode budgets, and the single source of truth for RLP
+  canonicality rules.
 - `eth-valkyoth-protocol`: transaction, block, receipt, withdrawal, log, and fork
   validation states.
 - `eth-valkyoth-verify`: sender recovery, replay-domain checks, EIP-712 validation,
@@ -102,6 +103,9 @@ Release gate:
 Admit current Alloy codec/primitives crates only after version, license,
 feature, and no_std review. Implement bounded canonical RLP, EIP-2718 typed
 transaction envelopes, canonical integer rejection, and trailing-data rejection.
+Before transaction envelope work grows, remove duplicated primitive/codec
+canonical integer parsing and add a primitive RLP bridge so domain types do not
+require ad hoc caller glue.
 
 Release gate:
 
@@ -109,7 +113,22 @@ Release gate:
 - cargo-fuzz infrastructure is bootstrapped before the first RLP parser lands;
 - official and adversarial RLP fixtures pass;
 - fuzz targets exist for every decoder;
-- malformed input never panics.
+- malformed input never panics;
+- primitives delegate RLP integer canonicality to codec helpers rather than
+  maintaining duplicated parsing logic;
+- primitive RLP encode/decode helpers exist before transaction structs depend
+  on those domains.
+
+## Hashing Boundary
+
+Keccak-256 is required for transaction hashes, recovered sender addresses,
+execution headers, receipts, and proof verification. The implementation must
+decide the hashing boundary before those features land.
+
+The preferred default is a small no_std trait boundary so callers can provide
+hardware, platform, WASM, or audited software hashing without forcing one hash
+crate into the core graph. Any built-in implementation remains an explicitly
+admitted dependency with license, feature, maintenance, and audit evidence.
 
 ## Phase 4: Fork-Aware Validation
 

@@ -113,7 +113,8 @@ Track every release in `release-crates.toml` and
 `docs/CRATE_VERSION_MATRIX.md`:
 
 - `code`: the crate received meaningful implementation, API, or documentation
-  changes and uses the milestone version, for example `0.4.0`;
+  changes and uses the release version, either a milestone such as `0.4.0` or
+  a deliberately scoped patch release such as `0.9.1`;
 - `dependency`: the crate only needs a manifest update because a related crate
   changed outside its current dependency range, so it receives a patch bump on
   its existing line, for example `0.3.0` to `0.3.1`;
@@ -333,6 +334,86 @@ Exit criteria:
 
 - Canonical values round-trip without accepting noncanonical forms.
 
+### v0.9.1 - Canonical Integer Source Of Truth
+
+Goal: remove duplicated Ethereum RLP integer canonicality logic between
+`eth-valkyoth-codec` and `eth-valkyoth-primitives`.
+
+Deliverables:
+
+- public codec helpers for canonical integer payload validation and conversion;
+- primitive constructors delegate canonical payload parsing to codec helpers;
+- primitive errors map codec failures without leaking codec internals into
+  primitive domain APIs;
+- cross-crate tests proving codec and primitives accept and reject identical
+  integer payloads;
+- comments that explicitly forbid reintroducing duplicate canonical integer
+  parsing in primitives.
+
+Verification:
+
+- `cargo test -p eth-valkyoth-codec -p eth-valkyoth-primitives`
+- `scripts/checks.sh`
+
+Exit criteria:
+
+- There is one implementation of canonical RLP integer payload rules.
+- A canonicality-rule change cannot silently diverge between codec and
+  primitive domain constructors.
+
+### v0.9.2 - Primitive RLP Bridge
+
+Goal: make primitive domain types directly usable with the bounded RLP codec
+without callers writing repeated field glue.
+
+Deliverables:
+
+- buffer-based RLP encode helpers for `ChainId`, `BlockNumber`, `Gas`, `Nonce`,
+  `UnixTimestamp`, `Wei`, `Address`, and `B256`;
+- exact-consumption RLP decode helpers for the same primitive domains;
+- fixed-width byte scalar policy for address and hash domains;
+- no-allocation APIs with caller-provided output buffers;
+- table-driven round-trip and malformed-input tests.
+
+Verification:
+
+- `cargo test -p eth-valkyoth-codec -p eth-valkyoth-primitives -p eth`
+- `scripts/checks.sh`
+
+Exit criteria:
+
+- Users can encode and decode common Ethereum primitive fields without
+  reimplementing codec/primitive bridging themselves.
+- Primitive RLP helpers preserve the single canonicality source established in
+  `v0.9.1`.
+
+### v0.9.3 - Keccak Boundary Decision
+
+Goal: decide and document the Keccak-256 boundary before transaction hashes,
+sender recovery, or header hashing are implemented.
+
+Deliverables:
+
+- evaluated options: trait boundary, admitted single dependency, or both behind
+  explicit feature gates;
+- no_std, no-alloc, license, maintenance, and audit review for any dependency
+  considered;
+- if using a trait boundary, define the minimal hasher trait and test doubles;
+- if admitting a dependency, add dependency-policy evidence before use;
+- release-plan updates for transaction hashing, sender recovery, header
+  hashing, and proof verification milestones.
+
+Verification:
+
+- `scripts/checks.sh`
+- `cargo deny check`
+- `cargo audit`
+
+Exit criteria:
+
+- Later transaction and proof work has an explicit hashing boundary and cannot
+  accidentally pull hashing into the default graph without review.
+
 ### v0.10.0 - RLP Fuzz Harness
 
 Goal: continuously fuzz every RLP parser.
@@ -419,7 +500,9 @@ Goal: decode EIP-1559 dynamic-fee transactions.
 
 Deliverables:
 
+- minimal `Transaction1559` field model with typed primitive domains;
 - max-fee and priority-fee fields;
+- `to`, `value`, calldata, and access-list field shape;
 - fee ordering checks deferred to validation state;
 - malformed transaction tests.
 
@@ -457,6 +540,7 @@ Goal: encode admitted transaction envelopes canonically.
 Deliverables:
 
 - canonical envelope encoding;
+- EIP-1559 transaction encoding as the first useful transaction encode path;
 - round-trip tests for each admitted type;
 - unsupported type behavior documented.
 
@@ -467,6 +551,29 @@ Verification:
 Exit criteria:
 
 - Transaction encoding cannot produce known noncanonical forms.
+
+### v0.16.1 - RLP Derive Evaluation
+
+Goal: decide and prototype derive support for RLP encoding and decoding only
+after hand-written primitive and transaction APIs have stabilized.
+
+Deliverables:
+
+- derive macro API design for `RlpEncode` and `RlpDecode`;
+- explicit field-order policy and skip/default-field rules;
+- generated code uses the same bounded codec helpers as hand-written paths;
+- negative tests for unsupported generics, enums, unions, and ambiguous fields;
+- documentation explaining when to prefer hand-written implementations.
+
+Verification:
+
+- `cargo test -p eth-valkyoth-derive -p eth-valkyoth-codec -p eth-valkyoth-protocol`
+- `scripts/checks.sh`
+
+Exit criteria:
+
+- Derive macros cannot bypass decode budgets, canonicality checks, or
+  transaction/fork validation typestates.
 
 ## Phase 4: Fork And Validation States
 
