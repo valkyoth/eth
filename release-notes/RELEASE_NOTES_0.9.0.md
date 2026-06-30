@@ -1,6 +1,6 @@
 # eth 0.9.0 Release Notes
 
-Status: implementation complete; pending external pentest input
+Status: release candidate ready; final GitHub checks required before tag
 
 ## Summary
 
@@ -43,8 +43,6 @@ buffers and return the number of bytes written.
 
 ## Still Required Before Tag
 
-- Maintainer pentest for the exact implementation commit.
-- Permanent report at `security/pentest/v0.9.0.md` with `Status: PASS`.
 - GitHub checks must pass on the final release commit.
 
 ## Verification

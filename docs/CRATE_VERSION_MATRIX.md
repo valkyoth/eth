@@ -1,6 +1,7 @@
 # Crate Version Matrix
 
-Status: `v0.9.0` implementation ready for pentest before tag
+Status: `v0.9.0` pentest passed and is waiting for final GitHub checks before
+tagging.
 
 `eth` uses independent crate versions. The facade crate remains the main user
 entry point, but support crates are published only when their own package
