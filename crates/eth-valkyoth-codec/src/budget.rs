@@ -124,8 +124,13 @@ impl DecodeLimits {
         }
     }
 
-    /// Rejects use of the unchanged deployment starting point as a final
-    /// production policy.
+    /// Rejects use of the unchanged deployment starting point as a production
+    /// policy.
+    ///
+    /// This is an identity check against the starter template. Changing only
+    /// one field is likely also a misconfiguration. Review every limit against
+    /// the deployment's concurrency, memory, and protocol constraints before
+    /// treating a policy as production-ready.
     pub fn validate_deployment_policy(self) -> Result<(), DecodeError> {
         if self == Self::DEPLOYMENT_STARTING_POINT {
             return Err(DecodeError::UnreviewedDeploymentPolicy);

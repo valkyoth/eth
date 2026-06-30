@@ -28,7 +28,18 @@ fn map_rlp_integer_error(error: DecodeError) -> PrimitiveError {
     match error {
         DecodeError::Malformed => PrimitiveError::NonCanonicalInteger,
         DecodeError::LengthOverflow => PrimitiveError::IntegerTooLarge,
-        _ => PrimitiveError::IntegerTooLarge,
+        // Payload helpers are expected to emit only Malformed for leading-zero
+        // canonicality failures or LengthOverflow for primitive width failures.
+        // OffsetOutOfBounds is structurally unreachable for the current U256
+        // right-alignment helper, and any other codec error would be a
+        // programming error rather than a wire-domain primitive failure.
+        unexpected => {
+            debug_assert!(
+                matches!(unexpected, DecodeError::OffsetOutOfBounds),
+                "unexpected codec error from RLP integer payload helper"
+            );
+            PrimitiveError::IntegerTooLarge
+        }
     }
 }
 

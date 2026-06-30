@@ -2,7 +2,8 @@
 
 use eth_valkyoth_codec::{
     DecodeLimits, decode_rlp_integer, decode_rlp_integer_partial, decode_rlp_u64, decode_rlp_u128,
-    decode_rlp_u256_bytes,
+    decode_rlp_u256_bytes, rlp_integer_payload_to_u64, rlp_integer_payload_to_u128,
+    rlp_integer_payload_to_u256_bytes, validate_rlp_integer_payload,
 };
 use libfuzzer_sys::fuzz_target;
 
@@ -26,6 +27,11 @@ fuzz_target!(|data: &[u8]| {
 });
 
 fn drive_integer(data: &[u8], limits: DecodeLimits) {
+    let _ = validate_rlp_integer_payload(data);
+    let _ = rlp_integer_payload_to_u64(data);
+    let _ = rlp_integer_payload_to_u128(data);
+    let _ = rlp_integer_payload_to_u256_bytes(data);
+
     if let Ok(integer) = decode_rlp_integer(data, limits) {
         let _ = integer.to_u64();
         let _ = integer.to_u128();

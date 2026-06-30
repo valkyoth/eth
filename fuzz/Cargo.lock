@@ -31,12 +31,21 @@ name = "eth-fuzz"
 version = "0.0.0"
 dependencies = [
  "eth-valkyoth-codec",
+ "eth-valkyoth-primitives",
  "libfuzzer-sys",
 ]
 
 [[package]]
 name = "eth-valkyoth-codec"
-version = "0.9.0"
+version = "0.9.1"
+
+[[package]]
+name = "eth-valkyoth-primitives"
+version = "0.9.1"
+dependencies = [
+ "eth-valkyoth-codec",
+ "subtle",
+]
 
 [[package]]
 name = "find-msvc-tools"
@@ -93,6 +102,12 @@ name = "shlex"
 version = "2.0.1"
 source = "registry+https://github.com/rust-lang/crates.io-index"
 checksum = "f8fadd59c855ef2080decdef8ff161eb6661b86933c9d82e5ba29dc602a55aba"
+
+[[package]]
+name = "subtle"
+version = "2.6.1"
+source = "registry+https://github.com/rust-lang/crates.io-index"
+checksum = "13c2bddecc57b384dee18652358fb23172facb8a2c51ccc10d74c157bdea3292"
 
 [[package]]
 name = "wasip2"

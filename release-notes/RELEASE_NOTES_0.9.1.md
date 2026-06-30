@@ -21,6 +21,11 @@ domain error type, but delegate canonical payload parsing to codec helpers.
   duplicated integer radix, width, leading-zero, and right-alignment logic.
 - Added primitive tests that compare constructor behavior against codec helper
   behavior for accepted and rejected integer payloads.
+- Addressed v0.9.1 pentest findings by updating fuzz dependencies to `0.9.1`,
+  fuzzing the new payload helpers directly, adding primitive delegation fuzz
+  coverage, documenting the primitive error-mapping contract, preserving
+  `ExactSizeIterator` accounting on list iterator error paths, and hardening
+  payload-helper/deployment-policy documentation.
 - Updated independent crate release metadata so only `eth-valkyoth-codec`,
   `eth-valkyoth-primitives`, and `eth` publish for this release.
 
@@ -34,6 +39,7 @@ domain error type, but delegate canonical payload parsing to codec helpers.
 
 ```bash
 cargo test -p eth-valkyoth-codec -p eth-valkyoth-primitives
+cargo check --manifest-path fuzz/Cargo.toml
 scripts/checks.sh
 scripts/release_crates.py --dry-run --skip-checks --yes
 ```

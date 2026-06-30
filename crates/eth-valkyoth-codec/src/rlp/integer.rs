@@ -69,16 +69,28 @@ impl<'a> RlpInteger<'a> {
     }
 
     /// Converts this integer to `u64` after checking the byte width.
+    ///
+    /// The payload helper re-validates canonicality as part of its public API
+    /// contract. For a correctly constructed [`RlpInteger`], this validation
+    /// was already enforced by [`Self::try_from_scalar`].
     pub fn to_u64(self) -> Result<u64, DecodeError> {
         rlp_integer_payload_to_u64(self.payload())
     }
 
     /// Converts this integer to `u128` after checking the byte width.
+    ///
+    /// The payload helper re-validates canonicality as part of its public API
+    /// contract. For a correctly constructed [`RlpInteger`], this validation
+    /// was already enforced by [`Self::try_from_scalar`].
     pub fn to_u128(self) -> Result<u128, DecodeError> {
         rlp_integer_payload_to_u128(self.payload())
     }
 
     /// Converts this integer to right-aligned unsigned 256-bit bytes.
+    ///
+    /// The payload helper re-validates canonicality as part of its public API
+    /// contract. For a correctly constructed [`RlpInteger`], this validation
+    /// was already enforced by [`Self::try_from_scalar`].
     pub fn to_be_bytes32(self) -> Result<[u8; 32], DecodeError> {
         rlp_integer_payload_to_u256_bytes(self.payload())
     }
@@ -139,6 +151,9 @@ pub fn decode_rlp_u256_bytes(input: &[u8], limits: DecodeLimits) -> Result<[u8; 
 /// This validates the decoded scalar payload only, not a complete RLP item.
 /// The empty payload represents zero. Non-empty payloads must be shortest-form
 /// unsigned big-endian bytes without a leading zero.
+///
+/// Callers operating on untrusted wire data should use [`decode_rlp_integer`],
+/// which enforces [`DecodeLimits`] before reaching this payload helper.
 pub fn validate_rlp_integer_payload(payload: &[u8]) -> Result<(), DecodeError> {
     if payload.first().is_some_and(|byte| *byte == 0) {
         return Err(DecodeError::Malformed);
@@ -150,6 +165,9 @@ pub fn validate_rlp_integer_payload(payload: &[u8]) -> Result<(), DecodeError> {
 ///
 /// This is the payload-level source of truth for primitive domains that store
 /// Ethereum integers as `u64`.
+///
+/// Callers operating on untrusted wire data should use [`decode_rlp_u64`],
+/// which enforces [`DecodeLimits`] before reaching this payload helper.
 pub fn rlp_integer_payload_to_u64(payload: &[u8]) -> Result<u64, DecodeError> {
     validate_rlp_integer_payload(payload)?;
     if payload.len() > MAX_U64_BYTES {
@@ -169,6 +187,9 @@ pub fn rlp_integer_payload_to_u64(payload: &[u8]) -> Result<u64, DecodeError> {
 }
 
 /// Converts canonical Ethereum RLP integer payload bytes to `u128`.
+///
+/// Callers operating on untrusted wire data should use [`decode_rlp_u128`],
+/// which enforces [`DecodeLimits`] before reaching this payload helper.
 pub fn rlp_integer_payload_to_u128(payload: &[u8]) -> Result<u128, DecodeError> {
     validate_rlp_integer_payload(payload)?;
     if payload.len() > MAX_U128_BYTES {
@@ -188,6 +209,10 @@ pub fn rlp_integer_payload_to_u128(payload: &[u8]) -> Result<u128, DecodeError> 
 }
 
 /// Converts canonical Ethereum RLP integer payload bytes to right-aligned U256.
+///
+/// Callers operating on untrusted wire data should use
+/// [`decode_rlp_u256_bytes`], which enforces [`DecodeLimits`] before reaching
+/// this payload helper.
 pub fn rlp_integer_payload_to_u256_bytes(payload: &[u8]) -> Result<[u8; 32], DecodeError> {
     validate_rlp_integer_payload(payload)?;
     if payload.len() > MAX_RLP_U256_BYTES {

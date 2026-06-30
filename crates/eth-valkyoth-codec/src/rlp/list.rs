@@ -172,6 +172,17 @@ impl<'a> RlpListItems<'a> {
     pub const fn remaining(&self) -> usize {
         self.remaining
     }
+
+    /// Builds a list-item iterator for tests that need malformed internals.
+    #[cfg(test)]
+    pub(super) const fn for_test(input: &'a [u8], remaining: usize, limits: DecodeLimits) -> Self {
+        Self {
+            input,
+            cursor: 0,
+            remaining,
+            limits,
+        }
+    }
 }
 
 impl<'a> Iterator for RlpListItems<'a> {
@@ -182,14 +193,16 @@ impl<'a> Iterator for RlpListItems<'a> {
             return None;
         }
 
-        match parse_item(self.input, self.cursor, self.input.len())
+        let result = parse_item(self.input, self.cursor, self.input.len())
             .and_then(|item| item.into_rlp_item(self.input, self.cursor, self.limits))
-        {
-            Ok((item, next_cursor)) => {
+            .map(|(item, next_cursor)| {
                 self.cursor = next_cursor;
-                self.remaining = self.remaining.saturating_sub(1);
-                Some(Ok(item))
-            }
+                item
+            });
+        self.remaining = self.remaining.saturating_sub(1);
+
+        match result {
+            Ok(item) => Some(Ok(item)),
             Err(error) => {
                 self.remaining = 0;
                 Some(Err(error))

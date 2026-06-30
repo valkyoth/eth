@@ -1,6 +1,7 @@
 use crate::{DecodeError, DecodeLimits};
 
 use super::{
+    super::list::RlpListItems,
     super::{RlpItem, RlpListForm, RlpScalarForm, decode_rlp_list, decode_rlp_list_partial},
     vec,
     vec::Vec,
@@ -201,6 +202,19 @@ fn list_item_iterator_is_fused() -> Result<(), DecodeError> {
     assert!(items.next().is_none());
     assert!(items.next().is_none());
     Ok(())
+}
+
+#[test]
+fn list_item_iterator_len_is_accurate_before_error_item() {
+    let mut items = RlpListItems::for_test(&[0x82], 1, DecodeLimits::TEST_FIXTURE);
+
+    assert_eq!(items.len(), 1);
+    assert!(matches!(
+        items.next(),
+        Some(Err(DecodeError::OffsetOutOfBounds))
+    ));
+    assert_eq!(items.len(), 0);
+    assert!(items.next().is_none());
 }
 
 #[test]
