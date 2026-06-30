@@ -5,14 +5,10 @@ use crate::{DecodeAccumulator, DecodeError, DecodeLimits, require_exact_consumpt
 use super::{RlpScalar, RlpScalarForm, decode_rlp_scalar_partial};
 
 /// Ethereum U256 maximum byte width in bytes.
-///
-/// Mirrors the primitive crate's internal `MAX_U256_BYTES`; changes to
-/// Ethereum integer canonicality rules must be applied to both crates.
 pub const MAX_RLP_U256_BYTES: usize = 32;
 
 const MAX_U64_BYTES: usize = 8;
 const MAX_U128_BYTES: usize = 16;
-// Mirrors the primitive crate's internal integer radix. Keep both in sync.
 const INTEGER_RADIX_U64: u64 = 256;
 const INTEGER_RADIX_U128: u128 = 256;
 
@@ -32,7 +28,7 @@ pub struct RlpInteger<'a> {
 impl<'a> RlpInteger<'a> {
     /// Validates a decoded RLP scalar as a canonical integer.
     pub fn try_from_scalar(scalar: RlpScalar<'a>) -> Result<Self, DecodeError> {
-        validate_integer_payload(scalar.payload())?;
+        validate_rlp_integer_payload(scalar.payload())?;
         Ok(Self { scalar })
     }
 
@@ -74,17 +70,17 @@ impl<'a> RlpInteger<'a> {
 
     /// Converts this integer to `u64` after checking the byte width.
     pub fn to_u64(self) -> Result<u64, DecodeError> {
-        fold_u64(self.payload())
+        rlp_integer_payload_to_u64(self.payload())
     }
 
     /// Converts this integer to `u128` after checking the byte width.
     pub fn to_u128(self) -> Result<u128, DecodeError> {
-        fold_u128(self.payload())
+        rlp_integer_payload_to_u128(self.payload())
     }
 
     /// Converts this integer to right-aligned unsigned 256-bit bytes.
     pub fn to_be_bytes32(self) -> Result<[u8; 32], DecodeError> {
-        to_be_bytes32(self.payload())
+        rlp_integer_payload_to_u256_bytes(self.payload())
     }
 }
 
@@ -138,16 +134,24 @@ pub fn decode_rlp_u256_bytes(input: &[u8], limits: DecodeLimits) -> Result<[u8; 
     decode_rlp_integer(input, limits)?.to_be_bytes32()
 }
 
-pub(super) fn validate_integer_payload(payload: &[u8]) -> Result<(), DecodeError> {
+/// Validates canonical Ethereum RLP integer payload bytes.
+///
+/// This validates the decoded scalar payload only, not a complete RLP item.
+/// The empty payload represents zero. Non-empty payloads must be shortest-form
+/// unsigned big-endian bytes without a leading zero.
+pub fn validate_rlp_integer_payload(payload: &[u8]) -> Result<(), DecodeError> {
     if payload.first().is_some_and(|byte| *byte == 0) {
         return Err(DecodeError::Malformed);
     }
     Ok(())
 }
 
-fn fold_u64(payload: &[u8]) -> Result<u64, DecodeError> {
-    // Pre-condition: validate_integer_payload already rejected leading zeros.
-    // Length is the only integer-canonicality guard needed here.
+/// Converts canonical Ethereum RLP integer payload bytes to `u64`.
+///
+/// This is the payload-level source of truth for primitive domains that store
+/// Ethereum integers as `u64`.
+pub fn rlp_integer_payload_to_u64(payload: &[u8]) -> Result<u64, DecodeError> {
+    validate_rlp_integer_payload(payload)?;
     if payload.len() > MAX_U64_BYTES {
         return Err(DecodeError::LengthOverflow);
     }
@@ -164,9 +168,9 @@ fn fold_u64(payload: &[u8]) -> Result<u64, DecodeError> {
     Ok(value)
 }
 
-fn fold_u128(payload: &[u8]) -> Result<u128, DecodeError> {
-    // Pre-condition: validate_integer_payload already rejected leading zeros.
-    // Length is the only integer-canonicality guard needed here.
+/// Converts canonical Ethereum RLP integer payload bytes to `u128`.
+pub fn rlp_integer_payload_to_u128(payload: &[u8]) -> Result<u128, DecodeError> {
+    validate_rlp_integer_payload(payload)?;
     if payload.len() > MAX_U128_BYTES {
         return Err(DecodeError::LengthOverflow);
     }
@@ -183,9 +187,9 @@ fn fold_u128(payload: &[u8]) -> Result<u128, DecodeError> {
     Ok(value)
 }
 
-fn to_be_bytes32(payload: &[u8]) -> Result<[u8; 32], DecodeError> {
-    // Pre-condition: validate_integer_payload already rejected leading zeros.
-    // Length is the only integer-canonicality guard needed here.
+/// Converts canonical Ethereum RLP integer payload bytes to right-aligned U256.
+pub fn rlp_integer_payload_to_u256_bytes(payload: &[u8]) -> Result<[u8; 32], DecodeError> {
+    validate_rlp_integer_payload(payload)?;
     if payload.len() > MAX_RLP_U256_BYTES {
         return Err(DecodeError::LengthOverflow);
     }

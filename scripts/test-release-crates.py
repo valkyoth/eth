@@ -52,6 +52,9 @@ def base_packages() -> dict[str, dict]:
     packages = {
         name: package(name, "0.3.0") for name in release_crates.PUBLISH_ORDER
     }
+    packages["eth-valkyoth-primitives"]["dependencies"] = [
+        {"name": "eth-valkyoth-codec"}
+    ]
     packages["eth-valkyoth-protocol"]["dependencies"] = [
         {"name": "eth-valkyoth-primitives"}
     ]

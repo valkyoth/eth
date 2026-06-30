@@ -1,4 +1,5 @@
 use super::*;
+use eth_valkyoth_codec::{rlp_integer_payload_to_u64, rlp_integer_payload_to_u256_bytes};
 
 #[test]
 fn chain_id_round_trips() {
@@ -41,6 +42,58 @@ fn id_types_parse_canonical_rlp_integer_payloads() {
     );
     assert_eq!(
         Nonce::try_from_canonical_be_slice(&[1_u8; 9]),
+        Err(PrimitiveError::IntegerTooLarge)
+    );
+}
+
+#[test]
+fn id_types_delegate_canonical_payload_parsing_to_codec() {
+    let cases: &[&[u8]] = &[&[], &[0x01], &[0x7f], &[0x80], &[0x04, 0x00], &[1_u8; 8]];
+
+    for bytes in cases {
+        assert_eq!(
+            ChainId::try_from_canonical_be_slice(bytes).map(ChainId::get),
+            rlp_integer_payload_to_u64(bytes).map_err(map_rlp_integer_error)
+        );
+        assert_eq!(
+            BlockNumber::try_from_canonical_be_slice(bytes).map(BlockNumber::get),
+            rlp_integer_payload_to_u64(bytes).map_err(map_rlp_integer_error)
+        );
+        assert_eq!(
+            Gas::try_from_canonical_be_slice(bytes).map(Gas::get),
+            rlp_integer_payload_to_u64(bytes).map_err(map_rlp_integer_error)
+        );
+        assert_eq!(
+            Nonce::try_from_canonical_be_slice(bytes).map(Nonce::get),
+            rlp_integer_payload_to_u64(bytes).map_err(map_rlp_integer_error)
+        );
+        assert_eq!(
+            UnixTimestamp::try_from_canonical_be_slice(bytes).map(UnixTimestamp::get),
+            rlp_integer_payload_to_u64(bytes).map_err(map_rlp_integer_error)
+        );
+    }
+}
+
+#[test]
+fn id_types_map_codec_payload_errors_to_primitive_errors() {
+    let noncanonical: &[u8] = &[0x00, 0x01];
+    let too_large: &[u8] = &[1_u8; 9];
+
+    assert_eq!(
+        rlp_integer_payload_to_u64(noncanonical),
+        Err(eth_valkyoth_codec::DecodeError::Malformed)
+    );
+    assert_eq!(
+        ChainId::try_from_canonical_be_slice(noncanonical),
+        Err(PrimitiveError::NonCanonicalInteger)
+    );
+
+    assert_eq!(
+        rlp_integer_payload_to_u64(too_large),
+        Err(eth_valkyoth_codec::DecodeError::LengthOverflow)
+    );
+    assert_eq!(
+        ChainId::try_from_canonical_be_slice(too_large),
         Err(PrimitiveError::IntegerTooLarge)
     );
 }
@@ -120,6 +173,34 @@ fn wei_parses_canonical_rlp_integer_at_max_width() {
     assert_eq!(
         Wei::try_from_canonical_be_slice(&max_bytes).map(Wei::to_be_bytes),
         Ok(max_bytes)
+    );
+}
+
+#[test]
+fn wei_delegates_canonical_payload_parsing_to_codec() {
+    let cases: &[&[u8]] = &[
+        &[],
+        &[0x01],
+        &[0x7f],
+        &[0x80],
+        &[0x04, 0x00],
+        &[0xff_u8; 32],
+    ];
+
+    for bytes in cases {
+        assert_eq!(
+            Wei::try_from_canonical_be_slice(bytes).map(Wei::to_be_bytes),
+            rlp_integer_payload_to_u256_bytes(bytes).map_err(map_rlp_integer_error)
+        );
+    }
+
+    assert_eq!(
+        Wei::try_from_canonical_be_slice(&[0x00, 0x01]),
+        Err(PrimitiveError::NonCanonicalInteger)
+    );
+    assert_eq!(
+        Wei::try_from_canonical_be_slice(&[1_u8; 33]),
+        Err(PrimitiveError::IntegerTooLarge)
     );
 }
 

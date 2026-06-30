@@ -3,62 +3,33 @@
 //! Core `no_std` Ethereum primitive types used across the `eth` workspace.
 
 use core::hash::{Hash, Hasher};
+use eth_valkyoth_codec::{
+    DecodeError, rlp_integer_payload_to_u64, rlp_integer_payload_to_u256_bytes,
+};
 pub use subtle::Choice;
 use subtle::ConstantTimeEq as _;
 
 #[cfg(test)]
 mod tests;
 
-// Mirrors the codec crate's RLP integer radix. Keep both in sync.
-const INTEGER_RADIX: u64 = 256;
-const MAX_U64_BYTES: usize = 8;
-// Mirrors `eth_valkyoth_codec::MAX_RLP_U256_BYTES`.
-const MAX_U256_BYTES: usize = 32;
-
-fn check_canonical_integer(bytes: &[u8]) -> Result<(), PrimitiveError> {
-    if bytes.first().is_some_and(|byte| *byte == 0) {
-        return Err(PrimitiveError::NonCanonicalInteger);
-    }
-    Ok(())
-}
-
 fn parse_canonical_u64(bytes: &[u8]) -> Result<u64, PrimitiveError> {
-    // Mirrors canonical integer deserialization in eth-valkyoth-codec.
-    // Ethereum integer canonicality changes must be applied to both crates.
-    check_canonical_integer(bytes)?;
-    if bytes.len() > MAX_U64_BYTES {
-        return Err(PrimitiveError::IntegerTooLarge);
-    }
-
-    let mut value = 0_u64;
-    for byte in bytes {
-        value = value
-            .checked_mul(INTEGER_RADIX)
-            .ok_or(PrimitiveError::IntegerTooLarge)?;
-        value = value
-            .checked_add(u64::from(*byte))
-            .ok_or(PrimitiveError::IntegerTooLarge)?;
-    }
-    Ok(value)
+    // Do not duplicate Ethereum RLP integer canonicality in this crate.
+    // `eth-valkyoth-codec` is the single source of truth for payload parsing.
+    rlp_integer_payload_to_u64(bytes).map_err(map_rlp_integer_error)
 }
 
 fn canonical_u256_bytes(bytes: &[u8]) -> Result<[u8; 32], PrimitiveError> {
-    check_canonical_integer(bytes)?;
-    if bytes.len() > MAX_U256_BYTES {
-        return Err(PrimitiveError::IntegerTooLarge);
-    }
+    // Do not duplicate Ethereum RLP integer canonicality in this crate.
+    // `eth-valkyoth-codec` is the single source of truth for payload parsing.
+    rlp_integer_payload_to_u256_bytes(bytes).map_err(map_rlp_integer_error)
+}
 
-    let mut output = [0_u8; 32];
-    let start = MAX_U256_BYTES
-        .checked_sub(bytes.len())
-        .ok_or(PrimitiveError::IntegerTooLarge)?;
-    // start is 32 - bytes.len(), with bytes.len() <= 32, so the range is
-    // always inside output. Keep the Result form to satisfy indexing policy.
-    let target = output
-        .get_mut(start..)
-        .ok_or(PrimitiveError::IntegerTooLarge)?;
-    target.copy_from_slice(bytes);
-    Ok(output)
+fn map_rlp_integer_error(error: DecodeError) -> PrimitiveError {
+    match error {
+        DecodeError::Malformed => PrimitiveError::NonCanonicalInteger,
+        DecodeError::LengthOverflow => PrimitiveError::IntegerTooLarge,
+        _ => PrimitiveError::IntegerTooLarge,
+    }
 }
 
 macro_rules! id_type {

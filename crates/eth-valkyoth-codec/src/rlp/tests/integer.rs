@@ -2,7 +2,8 @@ use crate::{DecodeError, DecodeLimits};
 
 use super::super::{
     RlpScalarForm, decode_rlp_integer, decode_rlp_integer_partial, decode_rlp_scalar,
-    decode_rlp_u64, decode_rlp_u128, decode_rlp_u256_bytes,
+    decode_rlp_u64, decode_rlp_u128, decode_rlp_u256_bytes, rlp_integer_payload_to_u64,
+    rlp_integer_payload_to_u128, rlp_integer_payload_to_u256_bytes, validate_rlp_integer_payload,
 };
 
 #[test]
@@ -53,6 +54,28 @@ fn converts_integer_to_larger_widths() -> Result<(), DecodeError> {
     };
 
     assert_eq!(bytes, Ok(expected));
+    Ok(())
+}
+
+#[test]
+fn payload_helpers_validate_canonical_integer_bytes() -> Result<(), DecodeError> {
+    assert_eq!(validate_rlp_integer_payload(&[]), Ok(()));
+    assert_eq!(validate_rlp_integer_payload(&[0x01]), Ok(()));
+    assert_eq!(
+        validate_rlp_integer_payload(&[0x00]),
+        Err(DecodeError::Malformed)
+    );
+    assert_eq!(
+        validate_rlp_integer_payload(&[0x00, 0x01]),
+        Err(DecodeError::Malformed)
+    );
+
+    assert_eq!(rlp_integer_payload_to_u64(&[0x04, 0x00]), Ok(1024));
+    assert_eq!(rlp_integer_payload_to_u128(&[0xff; 16]), Ok(u128::MAX));
+
+    let bytes = rlp_integer_payload_to_u256_bytes(&[0x04, 0x00])?;
+    let suffix = bytes.get(30..).ok_or(DecodeError::OffsetOutOfBounds)?;
+    assert_eq!(suffix, &[0x04, 0x00]);
     Ok(())
 }
 

@@ -22,8 +22,8 @@ DEFAULT_PLAN = ROOT / "release-crates.toml"
 CHANGE_KINDS = ("code", "dependency", "metadata", "unchanged")
 
 PUBLISH_ORDER = (
-    "eth-valkyoth-primitives",
     "eth-valkyoth-codec",
+    "eth-valkyoth-primitives",
     "eth-valkyoth-protocol",
     "eth-valkyoth-verify",
     "eth-valkyoth-derive",

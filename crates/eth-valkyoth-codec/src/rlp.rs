@@ -17,7 +17,8 @@ pub use encode::{
 };
 pub use integer::{
     MAX_RLP_U256_BYTES, RlpInteger, decode_rlp_integer, decode_rlp_integer_partial, decode_rlp_u64,
-    decode_rlp_u128, decode_rlp_u256_bytes,
+    decode_rlp_u128, decode_rlp_u256_bytes, rlp_integer_payload_to_u64,
+    rlp_integer_payload_to_u128, rlp_integer_payload_to_u256_bytes, validate_rlp_integer_payload,
 };
 pub use list::{
     MAX_RLP_LIST_TRAVERSAL_DEPTH, RlpItem, RlpList, RlpListForm, RlpListItems, decode_rlp_list,

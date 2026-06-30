@@ -26,7 +26,7 @@
 `eth` is the public facade crate for a `no_std`-first Ethereum
 execution-layer protocol workspace.
 
-The crate is intentionally conservative at `0.9.0`: it provides explicit
+The crate is intentionally conservative at `0.9.1`: it provides explicit
 Ethereum primitive domains, bounded decode-budget policy, stable error
 categories, small first-party crate boundaries, optional sanitization support,
 and release evidence before RPC, signer, EVM, Reth, or P2P integrations become
@@ -34,7 +34,7 @@ real dependencies.
 
 ## Current Status
 
-The current release candidate is `0.9.0`.
+The current release candidate is `0.9.1`.
 
 Implemented now:
 
@@ -306,7 +306,7 @@ the workspace can keep small, auditable boundaries:
 The minimum supported Rust version is Rust `1.90.0`. New deployments should use
 the latest stable Rust verified by the release gates.
 
-Compatibility evidence for `0.9.0`:
+Compatibility evidence for `0.9.1`:
 
 | Rust | Local Evidence |
 | --- | --- |

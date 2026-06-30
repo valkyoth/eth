@@ -22,5 +22,6 @@ pub use rlp::{
     decode_rlp_u64, decode_rlp_u128, decode_rlp_u256_bytes, encode_decoded_integer,
     encode_decoded_item, encode_decoded_list, encode_decoded_scalar, encode_rlp_integer,
     encode_rlp_list_payload, encode_rlp_scalar, encoded_rlp_integer_len, encoded_rlp_list_len,
-    encoded_rlp_scalar_len,
+    encoded_rlp_scalar_len, rlp_integer_payload_to_u64, rlp_integer_payload_to_u128,
+    rlp_integer_payload_to_u256_bytes, validate_rlp_integer_payload,
 };

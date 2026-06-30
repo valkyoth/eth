@@ -4,8 +4,8 @@ use crate::{DecodeAccumulator, DecodeError, DecodeLimits, checked_len_add};
 
 use super::{
     LENGTH_RADIX, LONG_LIST_OFFSET, LONG_STRING_OFFSET, RlpInteger, RlpItem, RlpList, RlpScalar,
-    SHORT_LIST_OFFSET, SHORT_STRING_LIMIT, SHORT_STRING_OFFSET, integer::validate_integer_payload,
-    list::validate_list_payload,
+    SHORT_LIST_OFFSET, SHORT_STRING_LIMIT, SHORT_STRING_OFFSET,
+    integer::validate_rlp_integer_payload, list::validate_list_payload,
 };
 
 /// Returns the encoded RLP byte length for a scalar byte-string payload.
@@ -18,7 +18,7 @@ pub fn encoded_rlp_scalar_len(payload: &[u8]) -> Result<usize, DecodeError> {
 /// The empty payload represents zero. Non-empty payloads must be shortest-form
 /// unsigned big-endian bytes and therefore cannot start with `0x00`.
 pub fn encoded_rlp_integer_len(payload: &[u8]) -> Result<usize, DecodeError> {
-    validate_integer_payload(payload)?;
+    validate_rlp_integer_payload(payload)?;
     encoded_rlp_scalar_len(payload)
 }
 
@@ -49,7 +49,7 @@ pub fn encode_rlp_scalar(payload: &[u8], output: &mut [u8]) -> Result<usize, Dec
 /// `output` is not modified unless this function returns `Ok`.
 /// Returns the number of bytes written.
 pub fn encode_rlp_integer(payload: &[u8], output: &mut [u8]) -> Result<usize, DecodeError> {
-    validate_integer_payload(payload)?;
+    validate_rlp_integer_payload(payload)?;
     encode_rlp_scalar(payload, output)
 }
 

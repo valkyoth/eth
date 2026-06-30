@@ -35,8 +35,8 @@ dependencies.
 
 ## Current Status
 
-Status: `v0.9.0` pentest passed and is waiting for final GitHub checks before
-tagging. `v0.8.0` is the latest published release.
+Status: `v0.9.1` implementation in progress. `v0.9.0` is the latest published
+release.
 
 Implemented now:
 
@@ -306,7 +306,7 @@ friendly, and independently testable.
 The minimum supported Rust version is Rust `1.90.0`. New deployments should use
 the pinned stable Rust `1.96.0` until the toolchain policy is updated.
 
-Compatibility evidence for `0.9.0`:
+Compatibility evidence for `0.9.1`:
 
 | Rust | Local Evidence |
 | --- | --- |
@@ -323,7 +323,7 @@ Compatibility evidence for `0.9.0`:
 ```bash
 scripts/checks.sh
 scripts/release_0_9_gate.sh
-scripts/validate-release-readiness.sh v0.9.0
+scripts/validate-release-readiness.sh v0.9.1
 ```
 
 For dependency-policy checks, install `cargo-deny` and `cargo-audit`, then run:
