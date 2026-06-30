@@ -1,6 +1,6 @@
 # Keccak-256 Boundary
 
-Status: v0.9.3 boundary decision
+Status: v0.10.0 boundary decision with conformance helpers
 
 Ethereum execution-layer hashing uses Keccak-256, not FIPS SHA3-256. The hash
 boundary must be explicit before transaction hashes, recovered sender addresses,
@@ -12,7 +12,8 @@ header hashes, receipt roots, or proof verification are implemented.
 
 - `Keccak256` for incremental hashing;
 - `Keccak256Digest` as the `B256` digest domain;
-- `hash_one` and `hash_chunks` helpers for caller-provided hashers.
+- `hash_one` and `hash_chunks` helpers for caller-provided hashers;
+- `KECCAK256_EMPTY` and `verify_empty_digest` for backend conformance tests.
 
 No concrete Keccak implementation crate is admitted in `v0.9.3`.
 
@@ -59,10 +60,11 @@ This is important for:
 - Test doubles are acceptable only for boundary tests; they must not be exposed
   as cryptographic implementations.
 
-## Required Conformance Vector
+## Conformance Vector
 
-The first admitted backend must include a known-answer test that distinguishes
-Ethereum Keccak-256 from FIPS SHA3-256:
+Every admitted backend must include a known-answer test that distinguishes
+Ethereum Keccak-256 from FIPS SHA3-256. The boundary crate exposes this value
+as `eth_valkyoth_hash::KECCAK256_EMPTY`:
 
 ```rust
 /// keccak256(b"")
@@ -75,8 +77,10 @@ pub const KECCAK256_EMPTY: [u8; 32] = [
 ```
 
 SHA3-256 of the empty string produces a different digest, so this vector catches
-the most common backend confusion. Future backend tests should also prove that
-chunked and one-shot inputs produce identical digests.
+the most common backend confusion. Backend tests can call
+`verify_empty_digest::<Hasher>()` when the backend implements `Default`.
+Future backend tests should also prove that chunked and one-shot inputs produce
+identical digests.
 
 ## Future Admission Checklist
 
@@ -88,7 +92,7 @@ Before admitting a concrete software backend:
 - verify `no_std` and allocation behavior;
 - run `cargo deny check`;
 - run `cargo audit`;
-- add Ethereum Keccak-256 conformance vectors, including `KECCAK256_EMPTY`;
+- add Ethereum Keccak-256 conformance tests using `KECCAK256_EMPTY`;
 - document state-clearing behavior for sender-recovery hashers;
 - keep the backend out of default features unless the release plan explicitly
   changes that policy.

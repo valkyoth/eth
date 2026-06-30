@@ -1,7 +1,8 @@
 #![no_main]
 
 use eth_valkyoth_codec::{
-    DecodeLimits, RlpItem, RlpList, decode_rlp_list, decode_rlp_list_partial,
+    DecodeLimits, MAX_RLP_LIST_TRAVERSAL_DEPTH, RlpItem, RlpList, decode_rlp_list,
+    decode_rlp_list_partial,
 };
 use libfuzzer_sys::fuzz_target;
 
@@ -26,12 +27,12 @@ fuzz_target!(|data: &[u8]| {
 
 fn drive_list(data: &[u8], limits: DecodeLimits) {
     if let Ok(list) = decode_rlp_list(data, limits) {
-        drive_items_recursive(list, 8);
+        drive_items_recursive(list, MAX_RLP_LIST_TRAVERSAL_DEPTH);
     }
 
     let mut accumulator = limits.accumulator();
     if let Ok(list) = decode_rlp_list_partial(data, &mut accumulator) {
-        drive_items_recursive(list, 8);
+        drive_items_recursive(list, MAX_RLP_LIST_TRAVERSAL_DEPTH);
     }
 }
 
@@ -45,7 +46,7 @@ fn drive_items_recursive(list: RlpList<'_>, depth: usize) {
 
     let mut items = list.items();
     let hint = items.size_hint();
-    assert_eq!(hint.0, hint.1.unwrap_or(hint.0));
+    assert!(matches!(hint.1, Some(upper) if hint.0 <= upper));
 
     for item in items.by_ref() {
         let Ok(item) = item else {

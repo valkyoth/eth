@@ -119,6 +119,23 @@ impl ChainId {
             .map(Self::new)
             .map_err(Into::into)
     }
+
+    /// Decodes a signed EIP-155 transaction chain ID.
+    ///
+    /// Rejects `0`, which is reserved for unsigned legacy transactions and
+    /// must not be accepted as a signed transaction replay domain.
+    pub fn try_from_rlp_signed(
+        input: &[u8],
+        limits: DecodeLimits,
+    ) -> Result<Self, PrimitiveRlpError> {
+        let chain_id = Self::try_from_rlp(input, limits)?;
+        if chain_id.get() == 0 {
+            return Err(PrimitiveRlpError::Primitive(
+                PrimitiveError::ReservedLegacyType,
+            ));
+        }
+        Ok(chain_id)
+    }
 }
 
 rlp_u64_bridge!(BlockNumber);

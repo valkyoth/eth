@@ -1,6 +1,7 @@
 # Crate Version Matrix
 
-Status: `v0.10.0` implementation in progress.
+Status: `v0.10.0` implementation and initial pentest remediation complete;
+retest pending.
 
 `eth` uses independent crate versions. The facade crate remains the main user
 entry point, but support crates are published only when their own package
@@ -31,8 +32,8 @@ publication when a crate is marked `unchanged`.
 | Crate | Published | Planned | Change | Publish | Reason |
 | --- | --- | --- | --- | --- | --- |
 | `eth-valkyoth-codec` | `0.9.1` | `0.10.0` | `code` | Yes | Adds v0.10.0 package documentation for the RLP fuzz harness baseline and parser seed-corpus process. |
-| `eth-valkyoth-primitives` | `0.9.2` | `0.9.3` | `dependency` | Yes | Patch-bumps the codec dependency range to eth-valkyoth-codec 0.10.0 and refreshes the facade README pointer. |
-| `eth-valkyoth-hash` | `0.9.3` | `0.9.3` | `unchanged` | No | No package changes for v0.10.0. |
+| `eth-valkyoth-primitives` | `0.9.2` | `0.10.0` | `code` | Yes | Adds signed ChainId decode helpers, release-visible unexpected codec errors, unambiguous transaction type constructors, and the codec 0.10.0 dependency range. |
+| `eth-valkyoth-hash` | `0.9.3` | `0.10.0` | `code` | Yes | Adds Keccak-256 empty-input KAT constants and backend conformance helper API. |
 | `eth-valkyoth-protocol` | `0.7.0` | `0.7.0` | `unchanged` | No | No package changes for v0.10.0. |
 | `eth-valkyoth-verify` | `0.7.0` | `0.7.0` | `unchanged` | No | No package changes for v0.10.0. |
 | `eth-valkyoth-derive` | `0.7.0` | `0.7.0` | `unchanged` | No | No package changes for v0.10.0. |

@@ -1,9 +1,9 @@
 #![no_main]
 
 use eth_valkyoth_codec::{
-    DecodeLimits, RlpItem, RlpList, decode_rlp_integer, decode_rlp_integer_partial,
-    decode_rlp_list, decode_rlp_list_partial, decode_rlp_scalar, decode_rlp_scalar_partial,
-    decode_rlp_u64, decode_rlp_u128, decode_rlp_u256_bytes,
+    DecodeLimits, MAX_RLP_LIST_TRAVERSAL_DEPTH, RlpItem, RlpList, decode_rlp_integer,
+    decode_rlp_integer_partial, decode_rlp_list, decode_rlp_list_partial, decode_rlp_scalar,
+    decode_rlp_scalar_partial, decode_rlp_u64, decode_rlp_u128, decode_rlp_u256_bytes,
 };
 use libfuzzer_sys::fuzz_target;
 
@@ -25,7 +25,7 @@ fn drive_rlp(data: &[u8], limits: DecodeLimits) {
     }
 
     if let Ok(list) = decode_rlp_list(data, limits) {
-        drive_items(list, 8);
+        drive_items(list, MAX_RLP_LIST_TRAVERSAL_DEPTH);
     }
 
     let mut accumulator = limits.accumulator();
@@ -36,7 +36,7 @@ fn drive_rlp(data: &[u8], limits: DecodeLimits) {
 
     let mut accumulator = limits.accumulator();
     if let Ok(list) = decode_rlp_list_partial(data, &mut accumulator) {
-        drive_items(list, 8);
+        drive_items(list, MAX_RLP_LIST_TRAVERSAL_DEPTH);
     }
 }
 

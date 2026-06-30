@@ -21,6 +21,10 @@ state and are ignored by git.
 Every new parser that accepts untrusted bytes must either extend one of these
 targets or add a new target in the same release.
 
+List-recursion fuzz targets drive item iteration to
+`MAX_RLP_LIST_TRAVERSAL_DEPTH`, matching the decoder hard cap. The committed
+seed corpus includes a 128-level empty-list chain for this path.
+
 ## Seed Corpus
 
 Committed seeds live in `fuzz/seed-corpus/<target>/*.hex`. They are hex text so

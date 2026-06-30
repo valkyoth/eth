@@ -35,18 +35,19 @@ fn map_rlp_integer_error(error: DecodeError) -> PrimitiveError {
     match error {
         DecodeError::Malformed => PrimitiveError::NonCanonicalInteger,
         DecodeError::LengthOverflow => PrimitiveError::IntegerTooLarge,
-        // Payload helpers are expected to emit only Malformed for leading-zero
-        // canonicality failures or LengthOverflow for primitive width failures.
-        // OffsetOutOfBounds is structurally unreachable for the current U256
-        // right-alignment helper, and any other codec error would be a
-        // programming error rather than a wire-domain primitive failure.
-        unexpected => {
-            debug_assert!(
-                matches!(unexpected, DecodeError::OffsetOutOfBounds),
-                "unexpected codec error from RLP integer payload helper"
-            );
-            PrimitiveError::IntegerTooLarge
-        }
+        DecodeError::OffsetOutOfBounds => PrimitiveError::IntegerTooLarge,
+        DecodeError::InputTooLarge
+        | DecodeError::TrailingBytes
+        | DecodeError::DecoderOverread
+        | DecodeError::UnexpectedList
+        | DecodeError::UnexpectedScalar
+        | DecodeError::ListTooLong
+        | DecodeError::NestingTooDeep
+        | DecodeError::AllocationExceeded
+        | DecodeError::ProofTooLarge
+        | DecodeError::ItemCountExceeded
+        | DecodeError::UnreviewedDeploymentPolicy => PrimitiveError::UnexpectedCodecError,
+        _ => PrimitiveError::UnexpectedCodecError,
     }
 }
 
@@ -97,6 +98,21 @@ id_type!(
     u64,
     "Ethereum chain identifier.\n\nThis type enforces canonical integer encoding only. EIP-155 assigns chain ID 0 to unsigned legacy transactions; signed transaction validation must reject chain ID 0 independently."
 );
+
+impl ChainId {
+    /// Creates a signed-transaction chain ID from a canonical RLP integer
+    /// payload.
+    ///
+    /// Rejects `0`, which EIP-155 reserves for unsigned legacy transactions.
+    pub fn try_from_signed_canonical_be_slice(bytes: &[u8]) -> Result<Self, PrimitiveError> {
+        let chain_id = Self::try_from_canonical_be_slice(bytes)?;
+        if chain_id.get() == 0 {
+            return Err(PrimitiveError::ReservedLegacyType);
+        }
+        Ok(chain_id)
+    }
+}
+
 id_type!(BlockNumber, u64, "Ethereum execution-layer block number.");
 id_type!(Gas, u64, "Gas quantity.");
 id_type!(Nonce, u64, "Account transaction nonce.");
@@ -114,6 +130,8 @@ pub enum PrimitiveError {
     TransactionTypeTooLarge,
     /// Zero is reserved for the legacy transaction domain, not a typed envelope.
     ReservedLegacyType,
+    /// A codec error unexpected for the selected primitive helper was returned.
+    UnexpectedCodecError,
 }
 
 impl fmt::Display for PrimitiveError {
@@ -126,6 +144,9 @@ impl fmt::Display for PrimitiveError {
             }
             Self::ReservedLegacyType => {
                 f.write_str("zero is reserved for the legacy transaction domain")
+            }
+            Self::UnexpectedCodecError => {
+                f.write_str("codec returned an unexpected error for this primitive")
             }
         }
     }
@@ -355,14 +376,6 @@ impl TransactionType {
     /// Largest typed transaction value admitted by EIP-2718.
     pub const MAX_TYPED: u8 = 0x7f;
 
-    /// Creates a transaction type after checking the EIP-2718 range.
-    pub const fn try_new(value: u8) -> Result<Self, PrimitiveError> {
-        if value > Self::MAX_TYPED {
-            return Err(PrimitiveError::TransactionTypeTooLarge);
-        }
-        Ok(Self(value))
-    }
-
     /// Creates a typed EIP-2718 transaction type.
     ///
     /// `0` is reserved for the legacy transaction domain. Encoders must handle
@@ -381,7 +394,10 @@ impl TransactionType {
     /// transaction domains. Use [`Self::try_new_typed`] when parsing an
     /// EIP-2718 typed-envelope byte.
     pub const fn try_new_with_legacy(value: u8) -> Result<Self, PrimitiveError> {
-        Self::try_new(value)
+        if value > Self::MAX_TYPED {
+            return Err(PrimitiveError::TransactionTypeTooLarge);
+        }
+        Ok(Self(value))
     }
 
     /// Returns the raw transaction type byte.

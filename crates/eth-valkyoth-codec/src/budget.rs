@@ -54,6 +54,31 @@ impl DecodeLimits {
         max_total_items: 65_536,
     };
 
+    /// Creates a reviewed deployment policy from explicit values.
+    ///
+    /// This helper intentionally has no defaults. Production deployments should
+    /// pass every value from their own concurrency, memory, and protocol review
+    /// instead of copying [`Self::DEPLOYMENT_STARTING_POINT`] and changing one
+    /// field.
+    #[must_use]
+    pub const fn reviewed_policy(
+        max_input_bytes: usize,
+        max_list_items: usize,
+        max_nesting_depth: usize,
+        max_total_allocation: usize,
+        max_proof_nodes: usize,
+        max_total_items: usize,
+    ) -> Self {
+        Self {
+            max_input_bytes,
+            max_list_items,
+            max_nesting_depth,
+            max_total_allocation,
+            max_proof_nodes,
+            max_total_items,
+        }
+    }
+
     /// Validates the input length before parsing starts.
     pub fn check_input_len(self, len: usize) -> Result<(), DecodeError> {
         if len > self.max_input_bytes {
@@ -388,6 +413,19 @@ mod tests {
             max_input_bytes: DecodeLimits::DEPLOYMENT_STARTING_POINT.max_input_bytes / 2,
             ..DecodeLimits::DEPLOYMENT_STARTING_POINT
         };
+        assert_eq!(reviewed.validate_deployment_policy(), Ok(()));
+    }
+
+    #[test]
+    fn reviewed_policy_requires_every_limit_explicitly() {
+        let reviewed = DecodeLimits::reviewed_policy(1024, 32, 8, 4096, 16, 128);
+
+        assert_eq!(reviewed.max_input_bytes, 1024);
+        assert_eq!(reviewed.max_list_items, 32);
+        assert_eq!(reviewed.max_nesting_depth, 8);
+        assert_eq!(reviewed.max_total_allocation, 4096);
+        assert_eq!(reviewed.max_proof_nodes, 16);
+        assert_eq!(reviewed.max_total_items, 128);
         assert_eq!(reviewed.validate_deployment_policy(), Ok(()));
     }
 }

@@ -39,6 +39,14 @@ fn id_types_parse_canonical_rlp_integer_payloads() {
         Ok(ChainId::new(1024))
     );
     assert_eq!(
+        ChainId::try_from_signed_canonical_be_slice(&[]),
+        Err(PrimitiveError::ReservedLegacyType)
+    );
+    assert_eq!(
+        ChainId::try_from_signed_canonical_be_slice(&[0x01]),
+        Ok(ChainId::new(1))
+    );
+    assert_eq!(
         Gas::try_from_canonical_be_slice(&[0x00, 0x01]),
         Err(PrimitiveError::NonCanonicalInteger)
     );
@@ -120,6 +128,16 @@ fn id_types_rlp_round_trip_canonical_integers() -> Result<(), PrimitiveRlpError>
             Ok(*value)
         );
     }
+    assert_eq!(
+        ChainId::try_from_rlp_signed(&[0x80], DecodeLimits::TEST_FIXTURE),
+        Err(PrimitiveRlpError::Primitive(
+            PrimitiveError::ReservedLegacyType
+        ))
+    );
+    assert_eq!(
+        ChainId::try_from_rlp_signed(&[0x01], DecodeLimits::TEST_FIXTURE),
+        Ok(ChainId::new(1))
+    );
 
     assert_eq!(
         BlockNumber::try_from_rlp(&[0x82, 0x04, 0x00], DecodeLimits::TEST_FIXTURE),
@@ -413,14 +431,14 @@ fn wei_from_u128_places_bytes_at_low_end() {
 
 #[test]
 fn transaction_type_accepts_eip_2718_range() {
-    let tx_type = TransactionType::try_new(TransactionType::MAX_TYPED);
+    let tx_type = TransactionType::try_new_with_legacy(TransactionType::MAX_TYPED);
     assert_eq!(tx_type.map(TransactionType::get), Ok(0x7f));
 }
 
 #[test]
 fn transaction_type_rejects_reserved_range() {
     assert_eq!(
-        TransactionType::try_new(0x80),
+        TransactionType::try_new_with_legacy(0x80),
         Err(PrimitiveError::TransactionTypeTooLarge)
     );
 }
@@ -440,6 +458,6 @@ fn typed_transaction_type_rejects_legacy_zero() {
 
 #[test]
 fn transaction_type_round_trips() {
-    assert_eq!(TransactionType::try_new(2).map(u8::from), Ok(2));
+    assert_eq!(TransactionType::try_new_with_legacy(2).map(u8::from), Ok(2));
     assert_eq!(TransactionType::try_new_with_legacy(0).map(u8::from), Ok(0));
 }

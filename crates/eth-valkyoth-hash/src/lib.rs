@@ -4,7 +4,8 @@
 //!
 //! Ethereum uses Keccak-256, not the finalized FIPS SHA3-256 variant, for
 //! transaction hashes, header hashes, recovered sender addresses, and proof
-//! roots. This crate intentionally defines only the boundary in `v0.9.3`.
+//! roots. This crate intentionally defines only the boundary and conformance
+//! helpers in `v0.10.0`.
 //! Callers provide an implementation from hardware, platform APIs, WASM, or an
 //! explicitly reviewed software crate.
 
@@ -16,6 +17,20 @@ use eth_valkyoth_primitives::B256;
 /// Keccak-256 digest domain used by Ethereum protocol hashing.
 pub type Keccak256Digest = B256;
 
+/// Ethereum Keccak-256 of the empty byte string.
+///
+/// SHA3-256 of `b""` has a different digest. Backend authors should use this
+/// known-answer value to reject FIPS SHA3-256 implementations accidentally
+/// wired into Ethereum hashing paths.
+pub const KECCAK256_EMPTY: [u8; 32] = [
+    0xc5, 0xd2, 0x46, 0x01, 0x86, 0xf7, 0x23, 0x3c, 0x92, 0x7e, 0x7d, 0xb2, 0xdc, 0xc7, 0x03, 0xc0,
+    0xe5, 0x00, 0xb6, 0x53, 0xca, 0x82, 0x27, 0x3b, 0x7b, 0xfa, 0xd8, 0x04, 0x5d, 0x85, 0xa4, 0x70,
+];
+
+/// Keccak backend conformance failure.
+#[derive(Clone, Copy, Debug, Eq, PartialEq)]
+pub struct Keccak256ConformanceError;
+
 /// Incremental Keccak-256 hasher boundary.
 ///
 /// Implementations must compute Ethereum Keccak-256, not FIPS SHA3-256. This
@@ -23,12 +38,30 @@ pub type Keccak256Digest = B256;
 /// by hardware, platform, embedded, WASM, or reviewed software backends without
 /// forcing a concrete hashing crate into the default `eth` dependency graph.
 pub trait Keccak256 {
+    /// Required empty-input digest for Ethereum Keccak-256.
+    const EMPTY_DIGEST: [u8; 32] = KECCAK256_EMPTY;
+
     /// Absorbs the next input chunk.
     fn update(&mut self, input: &[u8]);
 
     /// Finalizes the hash and returns the 32-byte digest.
     #[must_use]
     fn finalize(self) -> Keccak256Digest;
+}
+
+/// Verifies a default hasher against the empty-input Keccak-256 KAT.
+///
+/// This catches the most common backend admission error: wiring FIPS SHA3-256
+/// where Ethereum Keccak-256 is required.
+pub fn verify_empty_digest<H>() -> Result<(), Keccak256ConformanceError>
+where
+    H: Default + Keccak256,
+{
+    let digest = hash_one(H::default(), b"");
+    if <[u8; 32]>::from(digest) == H::EMPTY_DIGEST {
+        return Ok(());
+    }
+    Err(Keccak256ConformanceError)
 }
 
 /// Hashes a single byte slice with a caller-provided Keccak-256 implementation.
@@ -99,6 +132,18 @@ mod tests {
         let expected = expected_transcript_digest(2, 6);
 
         assert_eq!(digest, expected);
+    }
+
+    #[test]
+    fn empty_digest_vector_is_available_to_backend_tests() {
+        assert_eq!(
+            KECCAK256_EMPTY,
+            [
+                0xc5, 0xd2, 0x46, 0x01, 0x86, 0xf7, 0x23, 0x3c, 0x92, 0x7e, 0x7d, 0xb2, 0xdc, 0xc7,
+                0x03, 0xc0, 0xe5, 0x00, 0xb6, 0x53, 0xca, 0x82, 0x27, 0x3b, 0x7b, 0xfa, 0xd8, 0x04,
+                0x5d, 0x85, 0xa4, 0x70,
+            ]
+        );
     }
 
     fn expected_transcript_digest(calls: u8, total_len: usize) -> B256 {

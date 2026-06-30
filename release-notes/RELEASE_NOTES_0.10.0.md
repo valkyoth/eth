@@ -1,6 +1,6 @@
 # eth 0.10.0 Release Notes
 
-Status: implementation in progress; pentest required before tag
+Status: initial pentest remediation complete; retest required before tag
 
 ## Summary
 
@@ -23,8 +23,16 @@ parser change has an explicit fuzz target to update.
 - Added `docs/fuzzing.md` with target scope, seed handling, campaign commands,
   and crash reproduction.
 - Added `scripts/release_0_10_gate.sh`.
-- Updated release metadata so only `eth-valkyoth-codec`,
-  `eth-valkyoth-primitives`, and `eth` publish for this release.
+- Updated release metadata so `eth-valkyoth-codec`,
+  `eth-valkyoth-primitives`, `eth-valkyoth-hash`, and `eth` publish for this
+  release.
+- Addressed initial pentest findings by documenting and bounding list
+  iteration recursion, fuzzing list traversal to the decoder hard cap, adding
+  signed `ChainId` decode helpers, adding a Keccak empty-input KAT helper,
+  making unexpected primitive codec errors release-visible, simplifying
+  transaction type constructors, removing the list iterator
+  `ExactSizeIterator` contract, and adding explicit reviewed decode-policy
+  construction.
 
 ## Known Limitations
 
@@ -35,8 +43,8 @@ parser change has an explicit fuzz target to update.
 
 ## Still Required Before Tag
 
-- Maintainer pentest must be run for the exact implementation commit.
-- Any pentest findings must be fixed and retested.
+- Maintainer retest must be run for the exact remediation commit.
+- Any follow-up pentest findings must be fixed and retested.
 - A permanent report must be written at `security/pentest/v0.10.0.md`.
 - GitHub checks must pass on the final release report commit.
 

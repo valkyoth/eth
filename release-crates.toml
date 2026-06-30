@@ -11,17 +11,17 @@ reason = "Adds v0.10.0 package documentation for the RLP fuzz harness baseline a
 
 [crates."eth-valkyoth-primitives"]
 previous_version = "0.9.2"
-version = "0.9.3"
-change = "dependency"
+version = "0.10.0"
+change = "code"
 publish = true
-reason = "Patch-bumps the codec dependency range to eth-valkyoth-codec 0.10.0 and refreshes the facade README pointer."
+reason = "Adds signed ChainId decode helpers, release-visible unexpected codec errors, unambiguous transaction type constructors, and the codec 0.10.0 dependency range."
 
 [crates."eth-valkyoth-hash"]
 previous_version = "0.9.3"
-version = "0.9.3"
-change = "unchanged"
-publish = false
-reason = "No package changes for v0.10.0."
+version = "0.10.0"
+change = "code"
+publish = true
+reason = "Adds Keccak-256 empty-input KAT constants and backend conformance helper API."
 
 [crates."eth-valkyoth-protocol"]
 previous_version = "0.7.0"

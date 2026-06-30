@@ -205,16 +205,31 @@ fn list_item_iterator_is_fused() -> Result<(), DecodeError> {
 }
 
 #[test]
-fn list_item_iterator_len_is_accurate_before_error_item() {
+fn list_item_iterator_reports_remaining_before_error_item() {
     let mut items = RlpListItems::for_test(&[0x82], 1, DecodeLimits::TEST_FIXTURE);
 
-    assert_eq!(items.len(), 1);
+    assert_eq!(items.remaining(), 1);
+    assert_eq!(items.size_hint(), (0, Some(1)));
     assert!(matches!(
         items.next(),
         Some(Err(DecodeError::OffsetOutOfBounds))
     ));
-    assert_eq!(items.len(), 0);
+    assert_eq!(items.remaining(), 0);
     assert!(items.next().is_none());
+}
+
+#[test]
+fn list_item_iterator_can_reject_nested_lists_by_depth() -> Result<(), DecodeError> {
+    let list = decode_rlp_list(&[0xc2, 0x01, 0xc0], DecodeLimits::TEST_FIXTURE)?;
+    let mut items = list.items_with_depth_limit(0);
+
+    assert!(matches!(
+        items.next(),
+        Some(Ok(RlpItem::Scalar(scalar))) if scalar.payload() == [0x01]
+    ));
+    assert_eq!(items.next(), Some(Err(DecodeError::NestingTooDeep)));
+    assert!(items.next().is_none());
+    Ok(())
 }
 
 #[test]

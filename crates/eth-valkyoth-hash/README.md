@@ -6,11 +6,12 @@ Most users should depend on the facade crate instead:
 
 ```toml
 [dependencies]
-eth = "0.9"
+eth = "0.10"
 ```
 
 Crates.io: <https://crates.io/crates/eth>
 
 This package is published separately so the `eth` workspace can keep small,
-auditable crate boundaries. The `0.9.3` release defines the trait boundary only;
-it does not provide or admit a default Keccak implementation crate.
+auditable crate boundaries. The `0.10.0` release defines the trait boundary and
+empty-input conformance helpers; it does not provide or admit a default Keccak
+implementation crate.
