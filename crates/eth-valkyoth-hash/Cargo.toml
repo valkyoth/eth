@@ -1,0 +1,20 @@
+[package]
+name = "eth-valkyoth-hash"
+description = "no_std Ethereum Keccak-256 hashing trait boundary."
+version = "0.9.3"
+edition.workspace = true
+rust-version.workspace = true
+license.workspace = true
+homepage.workspace = true
+repository.workspace = true
+readme = "README.md"
+
+[features]
+default = []
+std = ["eth-valkyoth-primitives/std"]
+
+[dependencies]
+eth-valkyoth-primitives.workspace = true
+
+[lints]
+workspace = true

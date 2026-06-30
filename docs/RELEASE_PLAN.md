@@ -398,7 +398,9 @@ Deliverables:
   explicit feature gates;
 - no_std, no-alloc, license, maintenance, and audit review for any dependency
   considered;
-- if using a trait boundary, define the minimal hasher trait and test doubles;
+- `eth-valkyoth-hash` crate with the minimal hasher trait and test doubles;
+- `docs/keccak-boundary.md` with the dependency decision and future admission
+  checklist;
 - if admitting a dependency, add dependency-policy evidence before use;
 - release-plan updates for transaction hashing, sender recovery, header
   hashing, and proof verification milestones.
@@ -640,6 +642,7 @@ Goal: recover senders through an admitted secp256k1 dependency.
 
 Deliverables:
 
+- sender-recovery hashing uses the `eth-valkyoth-hash` trait boundary;
 - dependency admission record;
 - low-s and recovery-id policy;
 - valid and invalid signature fixtures.
@@ -682,6 +685,7 @@ Deliverables:
 
 - header field model;
 - fork-specific optional field handling;
+- header hashing uses the `eth-valkyoth-hash` trait boundary;
 - hash consistency tests.
 
 Verification:
@@ -755,6 +759,7 @@ Deliverables:
 
 - transaction proof verification;
 - receipt proof verification;
+- proof root hashing uses the `eth-valkyoth-hash` trait boundary;
 - invalid proof fixtures.
 
 Verification:
@@ -773,6 +778,8 @@ Deliverables:
 
 - account proof verification;
 - storage proof verification;
+- account and storage proof root hashing uses the `eth-valkyoth-hash` trait
+  boundary;
 - missing-node and wrong-value tests.
 
 Verification:

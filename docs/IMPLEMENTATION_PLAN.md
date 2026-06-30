@@ -47,6 +47,8 @@ The first production value is:
 
 - `eth-valkyoth-primitives`: no_std chain, block, gas, nonce, address, hash, fork, and
   bounded value primitives.
+- `eth-valkyoth-hash`: no_std Keccak-256 trait boundary for caller-provided
+  hashing implementations.
 - `eth-valkyoth-codec`: canonical RLP and typed-envelope decoding policy, exact
   consumption, decode budgets, and the single source of truth for RLP
   canonicality rules.
@@ -129,6 +131,9 @@ The preferred default is a small no_std trait boundary so callers can provide
 hardware, platform, WASM, or audited software hashing without forcing one hash
 crate into the core graph. Any built-in implementation remains an explicitly
 admitted dependency with license, feature, maintenance, and audit evidence.
+
+`v0.9.3` establishes that boundary in `eth-valkyoth-hash` and documents the
+dependency decision in [Keccak Boundary](keccak-boundary.md).
 
 ## Phase 4: Fork-Aware Validation
 

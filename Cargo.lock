@@ -4,10 +4,11 @@ version = 4
 
 [[package]]
 name = "eth"
-version = "0.9.2"
+version = "0.9.3"
 dependencies = [
  "eth-valkyoth-codec",
  "eth-valkyoth-evm",
+ "eth-valkyoth-hash",
  "eth-valkyoth-primitives",
  "eth-valkyoth-protocol",
  "eth-valkyoth-reth",
@@ -34,6 +35,13 @@ dependencies = [
 [[package]]
 name = "eth-valkyoth-evm"
 version = "0.7.0"
+
+[[package]]
+name = "eth-valkyoth-hash"
+version = "0.9.3"
+dependencies = [
+ "eth-valkyoth-primitives",
+]
 
 [[package]]
 name = "eth-valkyoth-primitives"

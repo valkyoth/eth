@@ -1,7 +1,8 @@
 # eth Specification Matrix
 
 Status: source revisions pinned for `v0.9.0`; scalar, list, and canonical
-integer RLP decoding plus canonical RLP encoding helpers implemented.
+integer RLP decoding, canonical RLP encoding helpers, primitive RLP bridging,
+and Keccak-256 trait boundary implemented.
 
 Official source and fixture revisions are governed by
 [Spec Source Policy](spec-source-policy.md). Revisions were checked against
@@ -12,6 +13,7 @@ implemented from memory.
 | Area | Status | Evidence |
 | --- | --- | --- |
 | Execution RLP | partial | `ethereum/tests` pinned in `spec-lock.toml`; scalar byte-string, list, canonical integer decoders, and canonical encoding helpers implemented |
+| Keccak-256 hashing | boundary only | `eth-valkyoth-hash` defines caller-provided Keccak-256 trait boundary; no concrete backend admitted |
 | EIP-2718 typed transactions | planned | `ethereum/EIPs` pinned in `spec-lock.toml`; parser not implemented |
 | Transaction validation | planned | `execution-specs` pinned in `spec-lock.toml`; validation not implemented |
 | Header validation | planned | `execution-specs` pinned in `spec-lock.toml`; validation not implemented |

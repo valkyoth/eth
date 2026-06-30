@@ -24,6 +24,7 @@ CHANGE_KINDS = ("code", "dependency", "metadata", "unchanged")
 PUBLISH_ORDER = (
     "eth-valkyoth-codec",
     "eth-valkyoth-primitives",
+    "eth-valkyoth-hash",
     "eth-valkyoth-protocol",
     "eth-valkyoth-verify",
     "eth-valkyoth-derive",

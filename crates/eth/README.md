@@ -26,15 +26,16 @@
 `eth` is the public facade crate for a `no_std`-first Ethereum
 execution-layer protocol workspace.
 
-The crate is intentionally conservative at `0.9.2`: it provides explicit
+The crate is intentionally conservative at `0.9.3`: it provides explicit
 Ethereum primitive domains, bounded decode-budget policy, stable error
-categories, primitive RLP bridge helpers, small first-party crate boundaries,
-optional sanitization support, and release evidence before RPC, signer, EVM,
-Reth, or P2P integrations become real dependencies.
+categories, primitive RLP bridge helpers, a caller-provided Keccak-256 boundary,
+small first-party crate boundaries, optional sanitization support, and release
+evidence before RPC, signer, EVM, Reth, or P2P integrations become real
+dependencies.
 
 ## Current Status
 
-The current release candidate is `0.9.2`.
+The current release candidate is `0.9.3`.
 
 Implemented now:
 
@@ -48,6 +49,8 @@ Implemented now:
   encoding helpers.
 - No-allocation primitive RLP encode and exact-decode helpers for chain, block,
   gas, nonce, timestamp, address, hash, and wei values.
+- Caller-provided Keccak-256 trait boundary without a default hash
+  implementation dependency.
 - Stable error codes, messages, categories, and formatting for codec,
   protocol, fork, feature, resource, and verification failures.
 - Optional sanitization bridge and derive macros outside the default feature
@@ -201,6 +204,43 @@ assert!(bool::from(valid));
 
 Convert `Choice` to `bool` only at the final trust boundary.
 
+## Keccak Boundary
+
+`eth` defines a `no_std` Keccak-256 trait boundary and intentionally does not
+ship a default hashing backend yet:
+
+```rust
+use eth::hash::{Keccak256, hash_one};
+use eth::primitives::B256;
+
+struct PlatformKeccak {
+    output: B256,
+}
+
+impl Keccak256 for PlatformKeccak {
+    fn update(&mut self, input: &[u8]) {
+        let _ = input;
+    }
+
+    fn finalize(self) -> B256 {
+        self.output
+    }
+}
+
+let digest = hash_one(
+    PlatformKeccak {
+        output: B256::from([0x44_u8; 32]),
+    },
+    b"ethereum",
+);
+
+assert_eq!(<[u8; 32]>::from(digest), [0x44_u8; 32]);
+```
+
+Implementations must compute Ethereum Keccak-256, not FIPS SHA3-256. See the
+[Keccak boundary document](https://github.com/valkyoth/eth/blob/main/docs/keccak-boundary.md)
+for the dependency decision and future backend admission checklist.
+
 ## Stable Errors
 
 Error values expose stable codes, messages, and categories. They do not carry
@@ -328,6 +368,7 @@ the workspace can keep small, auditable boundaries:
 | --- | --- | --- |
 | `eth-valkyoth-primitives` | yes | Chain, block, gas, nonce, address, hash, wei, and transaction type domains. |
 | `eth-valkyoth-codec` | yes | Bounded exact-consumption wire codec policy. |
+| `eth-valkyoth-hash` | yes | Keccak-256 trait boundary for caller-provided hash implementations. |
 | `eth-valkyoth-protocol` | yes | Fork-aware validation states and protocol context. |
 | `eth-valkyoth-verify` | yes | Verification boundaries for signatures, proofs, and replay domains. |
 | `eth-valkyoth-sanitization` | no | Optional bridge to the `sanitization` crate. |
@@ -343,7 +384,7 @@ the workspace can keep small, auditable boundaries:
 The minimum supported Rust version is Rust `1.90.0`. New deployments should use
 the latest stable Rust verified by the release gates.
 
-Compatibility evidence for `0.9.2`:
+Compatibility evidence for `0.9.3`:
 
 | Rust | Local Evidence |
 | --- | --- |

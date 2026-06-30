@@ -5,6 +5,7 @@
 pub use eth_valkyoth_codec as codec;
 #[cfg(feature = "evm")]
 pub use eth_valkyoth_evm as evm;
+pub use eth_valkyoth_hash as hash;
 pub use eth_valkyoth_primitives as primitives;
 pub use eth_valkyoth_protocol as protocol;
 #[cfg(feature = "reth")]

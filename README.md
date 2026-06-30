@@ -35,8 +35,8 @@ dependencies.
 
 ## Current Status
 
-Status: `v0.9.2` primitive RLP bridge implementation and initial pentest
-remediations are complete. `v0.9.1` is the latest published release.
+Status: `v0.9.3` is in implementation for the Keccak-256 hashing boundary.
+`v0.9.2` is the latest published release.
 
 Implemented now:
 
@@ -52,6 +52,8 @@ Implemented now:
   encoding helpers.
 - No-allocation primitive RLP encode and exact-decode helpers for chain, block,
   gas, nonce, timestamp, address, hash, and wei values.
+- Caller-provided Keccak-256 trait boundary without a default hash
+  implementation dependency.
 - Stable error codes, messages, categories, and formatting for codec,
   protocol, fork, feature, resource, and verification failures.
 - Optional sanitization and derive support crates outside the default feature
@@ -199,6 +201,43 @@ assert!(bool::from(valid));
 
 Convert `Choice` to `bool` only at the final trust boundary.
 
+## Keccak Boundary
+
+`eth` defines a `no_std` Keccak-256 trait boundary and intentionally does not
+ship a default hashing backend yet:
+
+```rust
+use eth::hash::{Keccak256, hash_one};
+use eth::primitives::B256;
+
+struct PlatformKeccak {
+    output: B256,
+}
+
+impl Keccak256 for PlatformKeccak {
+    fn update(&mut self, input: &[u8]) {
+        let _ = input;
+    }
+
+    fn finalize(self) -> B256 {
+        self.output
+    }
+}
+
+let digest = hash_one(
+    PlatformKeccak {
+        output: B256::from([0x44_u8; 32]),
+    },
+    b"ethereum",
+);
+
+assert_eq!(<[u8; 32]>::from(digest), [0x44_u8; 32]);
+```
+
+Implementations must compute Ethereum Keccak-256, not FIPS SHA3-256. See
+[`docs/keccak-boundary.md`](docs/keccak-boundary.md) for the dependency
+decision and future backend admission checklist.
+
 ## Stable Errors
 
 Error values expose stable codes, messages, and categories. They do not carry
@@ -328,6 +367,7 @@ friendly, and independently testable.
 | `eth` | yes | Facade crate over stable protocol-core crates. |
 | `eth-valkyoth-primitives` | yes | Chain, fork, block, gas, nonce, address, hash, wei, and bounded value types. |
 | `eth-valkyoth-codec` | yes | Bounded exact-consumption wire codec policy. |
+| `eth-valkyoth-hash` | yes | Keccak-256 trait boundary for caller-provided hash implementations. |
 | `eth-valkyoth-protocol` | yes | Fork-aware validation states and protocol context. |
 | `eth-valkyoth-verify` | yes | Verification boundaries for signatures, proofs, and replay domains. |
 | `eth-valkyoth-sanitization` | no | Optional bridge to the `sanitization` crate for secret-bearing Ethereum data. |
@@ -343,7 +383,7 @@ friendly, and independently testable.
 The minimum supported Rust version is Rust `1.90.0`. New deployments should use
 the pinned stable Rust `1.96.0` until the toolchain policy is updated.
 
-Compatibility evidence for `0.9.2`:
+Compatibility evidence for `0.9.3`:
 
 | Rust | Local Evidence |
 | --- | --- |
@@ -360,7 +400,7 @@ Compatibility evidence for `0.9.2`:
 ```bash
 scripts/checks.sh
 scripts/release_0_9_gate.sh
-scripts/validate-release-readiness.sh v0.9.2
+scripts/validate-release-readiness.sh v0.9.3
 ```
 
 For dependency-policy checks, install `cargo-deny` and `cargo-audit`, then run:
@@ -374,6 +414,7 @@ cargo audit
 
 - [Implementation Plan](docs/IMPLEMENTATION_PLAN.md)
 - [Release Plan](docs/RELEASE_PLAN.md)
+- [Keccak Boundary](docs/keccak-boundary.md)
 - [Scope](docs/SCOPE.md)
 - [Threat Model](docs/threat-model.md)
 - [Spec Matrix](docs/SPEC_MATRIX.md)
