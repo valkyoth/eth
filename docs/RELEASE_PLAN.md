@@ -643,6 +643,8 @@ Goal: recover senders through an admitted secp256k1 dependency.
 Deliverables:
 
 - sender-recovery hashing uses the `eth-valkyoth-hash` trait boundary;
+- sender-recovery hasher state-clearing requirements are documented or enforced
+  at the call site;
 - dependency admission record;
 - low-s and recovery-id policy;
 - valid and invalid signature fixtures.
@@ -686,6 +688,7 @@ Deliverables:
 - header field model;
 - fork-specific optional field handling;
 - header hashing uses the `eth-valkyoth-hash` trait boundary;
+- block header hashes use a domain newtype instead of raw `B256`;
 - hash consistency tests.
 
 Verification:
@@ -760,6 +763,8 @@ Deliverables:
 - transaction proof verification;
 - receipt proof verification;
 - proof root hashing uses the `eth-valkyoth-hash` trait boundary;
+- transaction hashes, receipt roots, and proof roots use distinct domain
+  newtypes instead of raw `B256`;
 - invalid proof fixtures.
 
 Verification:
@@ -780,6 +785,8 @@ Deliverables:
 - storage proof verification;
 - account and storage proof root hashing uses the `eth-valkyoth-hash` trait
   boundary;
+- account and storage proof roots use distinct domain newtypes instead of raw
+  `B256`;
 - missing-node and wrong-value tests.
 
 Verification:

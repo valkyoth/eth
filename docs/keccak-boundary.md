@@ -49,8 +49,34 @@ This is important for:
   `release-crates.toml`, `deny.toml`, release notes, and this document.
 - Transaction, header, sender-recovery, and proof milestones must depend on this
   boundary instead of importing hash crates directly.
+- Protocol-facing APIs should introduce domain newtypes such as `TxHash`,
+  `BlockHash`, or `ReceiptRoot` instead of exposing raw `B256` or
+  `Keccak256Digest` values directly.
+- Sender-recovery paths hash public-key material. The concrete hasher used for
+  that path must have an explicit state-clearing contract at the call site.
+  When the optional sanitization bridge is used, prefer hashers that implement
+  `SecureSanitize` and clear sponge state on drop.
 - Test doubles are acceptable only for boundary tests; they must not be exposed
   as cryptographic implementations.
+
+## Required Conformance Vector
+
+The first admitted backend must include a known-answer test that distinguishes
+Ethereum Keccak-256 from FIPS SHA3-256:
+
+```rust
+/// keccak256(b"")
+pub const KECCAK256_EMPTY: [u8; 32] = [
+    0xc5, 0xd2, 0x46, 0x01, 0x86, 0xf7, 0x23, 0x3c,
+    0x92, 0x7e, 0x7d, 0xb2, 0xdc, 0xc7, 0x03, 0xc0,
+    0xe5, 0x00, 0xb6, 0x53, 0xca, 0x82, 0x27, 0x3b,
+    0x7b, 0xfa, 0xd8, 0x04, 0x5d, 0x85, 0xa4, 0x70,
+];
+```
+
+SHA3-256 of the empty string produces a different digest, so this vector catches
+the most common backend confusion. Future backend tests should also prove that
+chunked and one-shot inputs produce identical digests.
 
 ## Future Admission Checklist
 
@@ -62,6 +88,7 @@ Before admitting a concrete software backend:
 - verify `no_std` and allocation behavior;
 - run `cargo deny check`;
 - run `cargo audit`;
-- add conformance vectors for Ethereum Keccak-256;
+- add Ethereum Keccak-256 conformance vectors, including `KECCAK256_EMPTY`;
+- document state-clearing behavior for sender-recovery hashers;
 - keep the backend out of default features unless the release plan explicitly
   changes that policy.

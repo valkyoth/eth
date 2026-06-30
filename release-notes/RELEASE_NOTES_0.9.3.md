@@ -27,6 +27,8 @@ implementation into the default dependency graph.
   `keccak` feature available.
 - Deferred any concrete Keccak implementation dependency until a future release
   adds feature, audit, maintenance, MSRV, and conformance-vector evidence.
+- Documented future backend requirements for the `keccak256(b"")` KAT vector,
+  sender-recovery hasher state clearing, and protocol-specific hash newtypes.
 - Updated README examples, implementation/spec planning docs, release metadata,
   and publish ordering for the new support crate.
 
