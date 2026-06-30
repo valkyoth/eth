@@ -424,12 +424,14 @@ Deliverables:
 
 - cargo-fuzz workspace before additional parser expansion;
 - RLP fuzz target;
-- seed corpus from unit fixtures;
+- committed hex seed corpus from unit fixtures and adversarial cases;
+- local seed materializer for ignored `fuzz/corpus/` directories;
 - crash reproduction docs.
 
 Verification:
 
 - fuzz target builds;
+- committed seed corpus validates;
 - `scripts/checks.sh`
 
 Exit criteria:

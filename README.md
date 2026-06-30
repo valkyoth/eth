@@ -35,8 +35,8 @@ dependencies.
 
 ## Current Status
 
-Status: `v0.9.3` Keccak-256 hashing boundary implementation and clean pentest
-review are complete. `v0.9.2` is the latest published release.
+Status: `v0.10.0` RLP fuzz harness implementation is in progress. `v0.9.3` is
+the latest published release.
 
 Implemented now:
 
@@ -54,6 +54,7 @@ Implemented now:
   gas, nonce, timestamp, address, hash, and wei values.
 - Caller-provided Keccak-256 trait boundary without a default hash
   implementation dependency.
+- RLP fuzz harness with committed hex seed corpus and crash reproduction docs.
 - Stable error codes, messages, categories, and formatting for codec,
   protocol, fork, feature, resource, and verification failures.
 - Optional sanitization and derive support crates outside the default feature
@@ -92,14 +93,14 @@ Not implemented yet:
 
 ```toml
 [dependencies]
-eth = "0.9"
+eth = "0.10"
 ```
 
 For optional sanitization support:
 
 ```toml
 [dependencies]
-eth = { version = "0.9", features = ["sanitization"] }
+eth = { version = "0.10", features = ["sanitization"] }
 ```
 
 ## Features
@@ -336,6 +337,10 @@ assert_eq!(list_output.get(..9), Some([0xc8, 0x83, b'c', b'a', b't', 0x83, b'd',
 # Ok::<(), eth::error::DecodeError>(())
 ```
 
+The RLP parser surface has cargo-fuzz targets and committed seed fixtures. See
+[`docs/fuzzing.md`](docs/fuzzing.md) for seed materialization, target scope, and
+crash reproduction.
+
 ## Optional Sanitization
 
 The main facade stays small by default. Applications that handle local secret
@@ -383,7 +388,7 @@ friendly, and independently testable.
 The minimum supported Rust version is Rust `1.90.0`. New deployments should use
 the pinned stable Rust `1.96.0` until the toolchain policy is updated.
 
-Compatibility evidence for `0.9.3`:
+Compatibility evidence for `0.10.0`:
 
 | Rust | Local Evidence |
 | --- | --- |
@@ -399,8 +404,8 @@ Compatibility evidence for `0.9.3`:
 
 ```bash
 scripts/checks.sh
-scripts/release_0_9_gate.sh
-scripts/validate-release-readiness.sh v0.9.3
+scripts/release_0_10_gate.sh
+scripts/validate-release-readiness.sh v0.10.0
 ```
 
 For dependency-policy checks, install `cargo-deny` and `cargo-audit`, then run:
@@ -415,6 +420,7 @@ cargo audit
 - [Implementation Plan](docs/IMPLEMENTATION_PLAN.md)
 - [Release Plan](docs/RELEASE_PLAN.md)
 - [Keccak Boundary](docs/keccak-boundary.md)
+- [Fuzzing](docs/fuzzing.md)
 - [Scope](docs/SCOPE.md)
 - [Threat Model](docs/threat-model.md)
 - [Spec Matrix](docs/SPEC_MATRIX.md)

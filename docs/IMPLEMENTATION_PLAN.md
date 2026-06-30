@@ -133,7 +133,10 @@ crate into the core graph. Any built-in implementation remains an explicitly
 admitted dependency with license, feature, maintenance, and audit evidence.
 
 `v0.9.3` establishes that boundary in `eth-valkyoth-hash` and documents the
-dependency decision in [Keccak Boundary](keccak-boundary.md).
+dependency decision in [Keccak Boundary](keccak-boundary.md). `v0.10.0`
+establishes the RLP fuzz harness baseline, committed hex seed corpus, and crash
+reproduction process in [Fuzzing](fuzzing.md) before transaction envelope
+parsers are admitted.
 
 ## Phase 4: Fork-Aware Validation
 

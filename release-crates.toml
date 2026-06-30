@@ -1,94 +1,94 @@
 [release]
-version = "0.9.3"
+version = "0.10.0"
 policy = "independent"
 
 [crates."eth-valkyoth-codec"]
 previous_version = "0.9.1"
-version = "0.9.1"
-change = "unchanged"
-publish = false
-reason = "No package changes for v0.9.3."
+version = "0.10.0"
+change = "code"
+publish = true
+reason = "Adds v0.10.0 package documentation for the RLP fuzz harness baseline and parser seed-corpus process."
 
 [crates."eth-valkyoth-primitives"]
 previous_version = "0.9.2"
-version = "0.9.2"
-change = "unchanged"
-publish = false
-reason = "No package changes for v0.9.3."
+version = "0.9.3"
+change = "dependency"
+publish = true
+reason = "Patch-bumps the codec dependency range to eth-valkyoth-codec 0.10.0 and refreshes the facade README pointer."
 
 [crates."eth-valkyoth-hash"]
-previous_version = "0.0.0"
+previous_version = "0.9.3"
 version = "0.9.3"
-change = "code"
-publish = true
-reason = "Adds the no_std Keccak-256 trait boundary without admitting a hash implementation dependency."
+change = "unchanged"
+publish = false
+reason = "No package changes for v0.10.0."
 
 [crates."eth-valkyoth-protocol"]
 previous_version = "0.7.0"
 version = "0.7.0"
 change = "unchanged"
 publish = false
-reason = "No package changes for v0.9.3."
+reason = "No package changes for v0.10.0."
 
 [crates."eth-valkyoth-verify"]
 previous_version = "0.7.0"
 version = "0.7.0"
 change = "unchanged"
 publish = false
-reason = "No package changes for v0.9.3."
+reason = "No package changes for v0.10.0."
 
 [crates."eth-valkyoth-derive"]
 previous_version = "0.7.0"
 version = "0.7.0"
 change = "unchanged"
 publish = false
-reason = "No package changes for v0.9.3."
+reason = "No package changes for v0.10.0."
 
 [crates."eth-valkyoth-sanitization"]
 previous_version = "0.7.0"
 version = "0.7.0"
 change = "unchanged"
 publish = false
-reason = "No package changes for v0.9.3."
+reason = "No package changes for v0.10.0."
 
 [crates."eth-valkyoth-evm"]
 previous_version = "0.7.0"
 version = "0.7.0"
 change = "unchanged"
 publish = false
-reason = "No package changes for v0.9.3."
+reason = "No package changes for v0.10.0."
 
 [crates."eth-valkyoth-rpc"]
 previous_version = "0.7.0"
 version = "0.7.0"
 change = "unchanged"
 publish = false
-reason = "No package changes for v0.9.3."
+reason = "No package changes for v0.10.0."
 
 [crates."eth-valkyoth-signer"]
 previous_version = "0.7.0"
 version = "0.7.0"
 change = "unchanged"
 publish = false
-reason = "No package changes for v0.9.3."
+reason = "No package changes for v0.10.0."
 
 [crates."eth-valkyoth-reth"]
 previous_version = "0.7.0"
 version = "0.7.0"
 change = "unchanged"
 publish = false
-reason = "No package changes for v0.9.3."
+reason = "No package changes for v0.10.0."
 
 [crates."eth-valkyoth-testkit"]
 previous_version = "0.7.0"
 version = "0.7.0"
 change = "unchanged"
 publish = false
-reason = "No package changes for v0.9.3."
+reason = "No package changes for v0.10.0."
 
 [crates.eth]
-previous_version = "0.9.2"
-version = "0.9.3"
-change = "dependency"
+previous_version = "0.9.3"
+version = "0.10.0"
+change = "code"
 publish = true
-reason = "Bumps facade dependency to the v0.9.3 Keccak trait boundary package."
+reason = "Updates facade documentation and dependency ranges for the v0.10.0 RLP fuzz harness baseline."
