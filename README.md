@@ -35,8 +35,8 @@ dependencies.
 
 ## Current Status
 
-Status: `v0.9.2` is in implementation for the primitive RLP bridge. `v0.9.1`
-is the latest published release.
+Status: `v0.9.2` primitive RLP bridge implementation and initial pentest
+remediations are complete. `v0.9.1` is the latest published release.
 
 Implemented now:
 

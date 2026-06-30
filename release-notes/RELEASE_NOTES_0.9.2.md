@@ -1,6 +1,7 @@
 # eth 0.9.2 Release Notes
 
-Status: implementation in progress; pentest required before tag
+Status: implementation and initial pentest remediations complete; clean retest,
+permanent pentest report, and final GitHub checks required before tag
 
 ## Summary
 
@@ -12,7 +13,7 @@ This release keeps the single canonicality source introduced in `0.9.1`:
 integer primitive decoders delegate through `eth-valkyoth-codec`, while address
 and hash domains enforce fixed-width scalar payloads at the primitive boundary.
 
-## Included So Far
+## Included
 
 - Added no-allocation `encoded_rlp_len`, `encode_rlp`, and `try_from_rlp`
   helpers for `ChainId`, `BlockNumber`, `Gas`, `Nonce`, and `UnixTimestamp`.
@@ -37,8 +38,7 @@ and hash domains enforce fixed-width scalar payloads at the primitive boundary.
 
 ## Still Required Before Tag
 
-- Maintainer pentest must be run for the exact implementation commit.
-- Any pentest findings must be fixed and retested.
+- Maintainer retest must confirm the remediation commit is clean.
 - A permanent report must be written at `security/pentest/v0.9.2.md`.
 - GitHub checks must pass on the final release report commit.
 
