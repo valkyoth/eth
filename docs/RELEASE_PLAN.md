@@ -770,6 +770,8 @@ Deliverables:
   low-s/y-parity policy, and sender recovery;
 - legacy `v` handling through EIP-155 chain binding;
 - typed transaction signature validation for EIP-2930, EIP-1559, and EIP-4844;
+- at least one independently derived external known-answer signing-hash vector
+  for each typed transaction family before wiring signature validation;
 - sender-recovered transaction state transition from decoded/canonical inputs;
 - wrong-chain, wrong-sender, high-s, and malformed-scalar tests.
 

@@ -36,6 +36,11 @@ helpers. The caller supplies the output buffer.
 - reject pre-EIP-155 legacy transactions with
   `TransactionSigningHashError::MissingReplayDomain`.
 
+Callers that reuse `scratch` across multiple in-flight or not-yet-broadcast
+transactions should zero it after hashing before reusing or releasing the
+buffer. Transaction preimages can contain calldata or business-sensitive
+payloads even though they are normally public after broadcast.
+
 ## Deferred Validation
 
 This is not full transaction signature validation. `v0.23.0` is still

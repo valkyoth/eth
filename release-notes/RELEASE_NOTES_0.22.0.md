@@ -27,6 +27,8 @@ for `0.23.0`.
   encode failures remain distinguishable from signature failures.
 - Added `docs/transaction-signing-hashes.md`.
 - Added `scripts/release_0_22_gate.sh`.
+- Added real `sha3::Keccak256` signing-hash tests for legacy EIP-155,
+  EIP-2930, EIP-1559, and EIP-4844, including blob hash API coverage.
 
 ## Security Notes
 
@@ -38,6 +40,9 @@ for `0.23.0`.
   crate still does not ship a default hash backend.
 - Full sender validation, wrong-sender checks, and decoded transaction
   state-promotion helpers are deferred to `0.23.0`.
+- Transaction signing-hash helpers write canonical preimages into caller-owned
+  scratch buffers. Callers that reuse scratch for in-flight transactions should
+  clear it after hashing.
 
 ## Versioning
 

@@ -357,7 +357,8 @@ The example hasher is illustrative only. Production hashers must compute
 Ethereum Keccak-256, and the signing hash is still only one input to full
 signature validation. `v0.23.0` combines signing hashes, replay-domain checks,
 low-s/y-parity policy, and sender recovery into higher-level validation
-helpers.
+helpers. Callers that reuse the scratch buffer across multiple in-flight
+transactions should zero it after hashing before reusing or releasing it.
 
 ## EIP-712 Domain Safety
 
