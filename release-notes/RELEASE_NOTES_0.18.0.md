@@ -19,6 +19,8 @@ deferred until the validators that can create those proofs exist.
 - Added `Transaction<Decoded>::try_into_canonical`.
 - Added `Transaction<Canonical>::try_into_fork_validated`.
 - Added `Transaction<ForkValidated>::try_into_sender_recovered`.
+- Added `StateTransitionError`, which carries the original transaction token
+  and validation error when promotion fails.
 - Moved transaction typestate code into a focused module with dedicated tests.
 - Added tests proving failed validation does not consume or mutate the previous
   transaction state token.
@@ -28,14 +30,17 @@ deferred until the validators that can create those proofs exist.
 
 - Removed infallible transaction state promotion methods from the public API.
   Promotion now requires a validation proof result and returns
-  `Result<Transaction<_>, ProtocolError>`.
+  `Result<Transaction<_>, StateTransitionError<_>>`.
+- Transaction state tokens and proof tokens are no longer `Copy`.
 
 ## Security Notes
 
 - The proof token fields are private. External callers cannot fabricate a
   canonical, fork-valid, or sender-recovered transition proof in this release.
-- Failed proof checks borrow the source state token and return an error without
-  consuming or mutating the previous typestate.
+- Successful promotion consumes the previous state token. Failed proof checks
+  return the original token inside `StateTransitionError` without mutating it.
+- Public proof constructors must bind proofs to the transaction identity they
+  attest to before validators can create proof tokens.
 - Replay-domain validation, sender recovery, and concrete signature checks stay
   deferred to later releases.
 

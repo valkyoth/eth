@@ -21,8 +21,9 @@ pub struct SenderRecovered;
 /// Proof that canonical transaction structure was checked.
 ///
 /// This proof is intentionally not publicly constructible yet. Public
-/// constructors will be added only with validators that can prove the state.
-#[derive(Clone, Copy, Debug, Eq, PartialEq)]
+/// constructors must bind the proof to the transaction identity they attest to
+/// before validators can create this value.
+#[derive(Debug, Eq, PartialEq)]
 pub struct CanonicalValidationProof {
     _private: (),
 }
@@ -38,8 +39,9 @@ impl CanonicalValidationProof {
 /// Proof that fork-specific transaction validity was checked.
 ///
 /// This proof is intentionally not publicly constructible yet. Public
-/// constructors will be added only with validators that can prove the state.
-#[derive(Clone, Copy, Debug, Eq, PartialEq)]
+/// constructors must bind the proof to the transaction identity they attest to
+/// before validators can create this value.
+#[derive(Debug, Eq, PartialEq)]
 pub struct ForkValidationProof {
     _private: (),
 }
@@ -55,8 +57,9 @@ impl ForkValidationProof {
 /// Proof that sender recovery succeeded.
 ///
 /// This proof is intentionally not publicly constructible yet. Public
-/// constructors will be added only with validators that can prove the state.
-#[derive(Clone, Copy, Debug, Eq, PartialEq)]
+/// constructors must bind the proof to the transaction identity they attest to
+/// before validators can create this value.
+#[derive(Debug, Eq, PartialEq)]
 pub struct SenderRecoveryProof {
     _private: (),
 }
@@ -69,8 +72,33 @@ impl SenderRecoveryProof {
     }
 }
 
+/// Failed state transition that returns the original transaction token.
+#[derive(Debug, Eq, PartialEq)]
+pub struct StateTransitionError<State> {
+    transaction: Transaction<State>,
+    error: ProtocolError,
+}
+
+impl<State> StateTransitionError<State> {
+    const fn new(transaction: Transaction<State>, error: ProtocolError) -> Self {
+        Self { transaction, error }
+    }
+
+    /// Returns the validation error that prevented promotion.
+    #[must_use]
+    pub const fn error(&self) -> ProtocolError {
+        self.error
+    }
+
+    /// Splits this error into the original transaction token and error.
+    #[must_use]
+    pub fn into_parts(self) -> (Transaction<State>, ProtocolError) {
+        (self.transaction, self.error)
+    }
+}
+
 /// A transaction token whose validation state is tracked at compile time.
-#[derive(Clone, Copy, Debug, Eq, PartialEq)]
+#[derive(Debug, Eq, PartialEq)]
 pub struct Transaction<State> {
     _state: PhantomData<State>,
 }
@@ -96,10 +124,12 @@ impl Transaction<Decoded> {
 
     /// Advances to canonical form after canonical checks pass.
     pub fn try_into_canonical(
-        &self,
+        self,
         proof: Result<CanonicalValidationProof, ProtocolError>,
-    ) -> Result<Transaction<Canonical>, ProtocolError> {
-        proof?;
+    ) -> Result<Transaction<Canonical>, StateTransitionError<Decoded>> {
+        if let Err(error) = proof {
+            return Err(StateTransitionError::new(self, error));
+        }
         Ok(Transaction::new())
     }
 }
@@ -107,10 +137,12 @@ impl Transaction<Decoded> {
 impl Transaction<Canonical> {
     /// Advances after fork-specific validation passes.
     pub fn try_into_fork_validated(
-        &self,
+        self,
         proof: Result<ForkValidationProof, ProtocolError>,
-    ) -> Result<Transaction<ForkValidated>, ProtocolError> {
-        proof?;
+    ) -> Result<Transaction<ForkValidated>, StateTransitionError<Canonical>> {
+        if let Err(error) = proof {
+            return Err(StateTransitionError::new(self, error));
+        }
         Ok(Transaction::new())
     }
 }
@@ -118,10 +150,12 @@ impl Transaction<Canonical> {
 impl Transaction<ForkValidated> {
     /// Advances after sender recovery succeeds.
     pub fn try_into_sender_recovered(
-        &self,
+        self,
         proof: Result<SenderRecoveryProof, ProtocolError>,
-    ) -> Result<Transaction<SenderRecovered>, ProtocolError> {
-        proof?;
+    ) -> Result<Transaction<SenderRecovered>, StateTransitionError<ForkValidated>> {
+        if let Err(error) = proof {
+            return Err(StateTransitionError::new(self, error));
+        }
         Ok(Transaction::new())
     }
 }

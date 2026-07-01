@@ -14,7 +14,7 @@ mod transaction;
 pub use fork::{ChainSpec, ForkActivation, ForkError, ForkSpec, Hardfork, ValidationContext};
 pub use state::{
     Canonical, CanonicalValidationProof, Decoded, ForkValidated, ForkValidationProof,
-    SenderRecovered, SenderRecoveryProof, Transaction,
+    SenderRecovered, SenderRecoveryProof, StateTransitionError, Transaction,
 };
 pub use transaction::{
     ACCESS_LIST_TRANSACTION_FIELD_COUNT, ACCESS_LIST_TRANSACTION_TYPE, AccessList,

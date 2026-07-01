@@ -19,7 +19,9 @@ auditable crate boundaries. Treat it as a lower-level building block unless the
 The `0.18.0` release adds proof-gated transaction typestate transitions for
 decoded, canonical, fork-validated, and sender-recovered state tokens. The
 proof token fields are private in this release, so external callers cannot
-fabricate validation state before the real validators land.
+fabricate validation state before the real validators land. Successful
+promotion consumes the previous state token; failed promotion returns the
+original token with the validation error.
 
 The crate also provides caller-reviewed `ChainSpec`, `ForkSpec`, `Hardfork`,
 and `ValidationContext` types for explicit fork activation context. Use
