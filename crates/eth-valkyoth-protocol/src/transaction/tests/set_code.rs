@@ -156,6 +156,24 @@ fn rejects_invalid_authorization_tuple_shape() {
 }
 
 #[test]
+fn reports_invalid_authorization_subfield() {
+    let tx = set_code_tx(
+        &[1],
+        &[0x11; 20],
+        &[authorization_tuple(&[0, 1], &[0x22; 20], 9, 1)],
+        1,
+    );
+
+    assert_eq!(
+        decode_set_code_transaction(&tx, TEST_LIMITS),
+        Err(SetCodeTransactionDecodeError::AuthorizationFieldDecode {
+            field: SetCodeAuthorizationField::ChainId,
+            source: DecodeError::Malformed,
+        })
+    );
+}
+
+#[test]
 fn rejects_invalid_authorization_address_length() {
     let tx = set_code_tx(
         &[1],

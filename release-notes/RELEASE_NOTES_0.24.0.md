@@ -19,7 +19,8 @@ execution validity remain deferred to later verification layers.
 - Added `decode_set_code_transaction`.
 - Added `UnvalidatedSetCodeTransaction`.
 - Added `SetCodeAuthorizationList`, `SetCodeAuthorizationItems`,
-  `SetCodeAuthorization`, and `SetCodeAuthorizationChainId`.
+  `SetCodeAuthorization`, `SetCodeAuthorizationChainId`, and
+  `SetCodeAuthorizationField`.
 - Added stable set-code decode errors and categories.
 - Added `encoded_set_code_transaction_len` and
   `encode_set_code_transaction`.
@@ -43,6 +44,9 @@ execution validity remain deferred to later verification layers.
   `1`.
 - Authorization chain ID is modeled separately because EIP-7702 authorization
   tuples may use chain ID zero as a universal authorization domain.
+- The EIP-7702 authorization signing magic byte is not exported in this
+  release because no reviewed authorization signing-hash helper exists until
+  `v0.24.1`.
 - Empty authorization-list rejection is intentionally deferred to later
   validation, matching the existing syntactic decode boundary for other
   transaction families. The explicit follow-up milestones are `v0.24.1` for

@@ -5,6 +5,24 @@ use eth_valkyoth_codec::{DecodeError, DecodeErrorCategory};
 use super::SetCodeTransactionField;
 use crate::transaction::{TransactionEnvelopeError, TransactionEnvelopeErrorCategory};
 
+/// EIP-7702 authorization tuple sub-field identifier.
+#[non_exhaustive]
+#[derive(Clone, Copy, Debug, Eq, PartialEq)]
+pub enum SetCodeAuthorizationField {
+    /// Authorization chain ID.
+    ChainId,
+    /// Authorized account address.
+    Address,
+    /// Authorized account nonce.
+    Nonce,
+    /// Authorization signature y parity.
+    YParity,
+    /// Authorization signature `r`.
+    R,
+    /// Authorization signature `s`.
+    S,
+}
+
 /// EIP-7702 set-code transaction decode failure.
 #[non_exhaustive]
 #[derive(Clone, Copy, Debug, Eq, PartialEq)]
@@ -27,6 +45,13 @@ pub enum SetCodeTransactionDecodeError {
     FieldDecode {
         /// Field being decoded.
         field: SetCodeTransactionField,
+        /// Underlying decode error.
+        source: DecodeError,
+    },
+    /// An authorization tuple sub-field failed RLP or primitive-domain decoding.
+    AuthorizationFieldDecode {
+        /// Authorization tuple sub-field being decoded.
+        field: SetCodeAuthorizationField,
         /// Underlying decode error.
         source: DecodeError,
     },
@@ -81,6 +106,7 @@ impl SetCodeTransactionDecodeError {
             Self::WrongTransactionType { .. } => "ETH_SET_CODE_TX_WRONG_TYPE",
             Self::WrongFieldCount { .. } => "ETH_SET_CODE_TX_WRONG_FIELD_COUNT",
             Self::FieldDecode { source, .. } => source.code(),
+            Self::AuthorizationFieldDecode { source, .. } => source.code(),
             Self::InvalidToLength { .. } => "ETH_SET_CODE_TX_INVALID_TO_LENGTH",
             Self::InvalidYParity { .. } => "ETH_SET_CODE_TX_INVALID_Y_PARITY",
             Self::InvalidAccessListEntryFieldCount { .. } => {
@@ -112,6 +138,9 @@ impl SetCodeTransactionDecodeError {
                 "set-code transaction must contain exactly thirteen RLP fields"
             }
             Self::FieldDecode { .. } => "set-code transaction field failed bounded decoding",
+            Self::AuthorizationFieldDecode { .. } => {
+                "set-code authorization tuple field failed bounded decoding"
+            }
             Self::InvalidToLength { .. } => {
                 "set-code transaction destination field must be a 20-byte address"
             }
@@ -151,12 +180,14 @@ impl SetCodeTransactionDecodeError {
                 _ => SetCodeTransactionDecodeErrorCategory::MalformedInput,
             },
             Self::WrongTransactionType { .. } => SetCodeTransactionDecodeErrorCategory::WrongType,
-            Self::FieldDecode { source, .. } => match source.category() {
-                DecodeErrorCategory::ResourceExhaustion => {
-                    SetCodeTransactionDecodeErrorCategory::ResourceExhaustion
+            Self::FieldDecode { source, .. } | Self::AuthorizationFieldDecode { source, .. } => {
+                match source.category() {
+                    DecodeErrorCategory::ResourceExhaustion => {
+                        SetCodeTransactionDecodeErrorCategory::ResourceExhaustion
+                    }
+                    _ => SetCodeTransactionDecodeErrorCategory::MalformedInput,
                 }
-                _ => SetCodeTransactionDecodeErrorCategory::MalformedInput,
-            },
+            }
             Self::WrongFieldCount { .. }
             | Self::InvalidToLength { .. }
             | Self::InvalidYParity { .. }

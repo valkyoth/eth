@@ -11,12 +11,12 @@ use crate::transaction::fields::{
 
 mod error;
 
-pub use error::{SetCodeTransactionDecodeError, SetCodeTransactionDecodeErrorCategory};
+pub use error::{
+    SetCodeAuthorizationField, SetCodeTransactionDecodeError, SetCodeTransactionDecodeErrorCategory,
+};
 
 /// EIP-7702 set-code transaction type byte.
 pub const SET_CODE_TRANSACTION_TYPE: u8 = 0x04;
-/// EIP-7702 authorization signing magic byte.
-pub const SET_CODE_AUTHORIZATION_MAGIC: u8 = 0x05;
 /// Number of fields in an EIP-7702 set-code transaction payload.
 pub const SET_CODE_TRANSACTION_FIELD_COUNT: usize = 13;
 /// Number of fields in an EIP-7702 authorization tuple.
@@ -342,9 +342,9 @@ fn decode_authorization_list(
 fn decode_authorization_item(
     item: Result<RlpItem<'_>, DecodeError>,
 ) -> Result<SetCodeAuthorization, SetCodeAuthorizationDecodeError> {
-    let item = item.map_err(SetCodeAuthorizationDecodeError::FieldDecode)?;
+    let item = item.map_err(SetCodeAuthorizationDecodeError::TupleDecode)?;
     let RlpItem::List(list) = item else {
-        return Err(SetCodeAuthorizationDecodeError::FieldDecode(
+        return Err(SetCodeAuthorizationDecodeError::TupleDecode(
             DecodeError::UnexpectedScalar,
         ));
     };
@@ -360,22 +360,22 @@ fn decode_authorization_item(
     let chain_id = decode_authorization_chain_id(next_shared_scalar(
         &mut fields,
         SetCodeTransactionField::AuthorizationList,
-        |_, source| SetCodeAuthorizationDecodeError::FieldDecode(source),
+        |_, source| auth_field_error(SetCodeAuthorizationField::ChainId, source),
     )?)?;
     let address = decode_authorization_address(next_shared_scalar(
         &mut fields,
         SetCodeTransactionField::AuthorizationList,
-        |_, source| SetCodeAuthorizationDecodeError::FieldDecode(source),
+        |_, source| auth_field_error(SetCodeAuthorizationField::Address, source),
     )?)?;
     let nonce = Nonce::new(decode_shared_u64_field(
         &mut fields,
         SetCodeTransactionField::AuthorizationList,
-        |_, source| SetCodeAuthorizationDecodeError::FieldDecode(source),
+        |_, source| auth_field_error(SetCodeAuthorizationField::Nonce, source),
     )?);
     let y_parity = SignatureYParity::try_new(decode_shared_u64_field(
         &mut fields,
         SetCodeTransactionField::AuthorizationList,
-        |_, source| SetCodeAuthorizationDecodeError::FieldDecode(source),
+        |_, source| auth_field_error(SetCodeAuthorizationField::YParity, source),
     )?)
     .map_err(
         |error| SetCodeAuthorizationDecodeError::InvalidAuthorizationYParity {
@@ -385,12 +385,12 @@ fn decode_authorization_item(
     let r = decode_shared_u256_field(
         &mut fields,
         SetCodeTransactionField::AuthorizationList,
-        |_, source| SetCodeAuthorizationDecodeError::FieldDecode(source),
+        |_, source| auth_field_error(SetCodeAuthorizationField::R, source),
     )?;
     let s = decode_shared_u256_field(
         &mut fields,
         SetCodeTransactionField::AuthorizationList,
-        |_, source| SetCodeAuthorizationDecodeError::FieldDecode(source),
+        |_, source| auth_field_error(SetCodeAuthorizationField::S, source),
     )?;
 
     Ok(SetCodeAuthorization {
@@ -408,7 +408,7 @@ fn decode_authorization_chain_id(
 ) -> Result<SetCodeAuthorizationChainId, SetCodeAuthorizationDecodeError> {
     let bytes = RlpInteger::try_from_scalar(scalar)
         .and_then(RlpInteger::to_be_bytes32)
-        .map_err(SetCodeAuthorizationDecodeError::FieldDecode)?;
+        .map_err(|source| auth_field_error(SetCodeAuthorizationField::ChainId, source))?;
     Ok(SetCodeAuthorizationChainId::from_be_bytes(bytes))
 }
 
@@ -420,6 +420,13 @@ fn decode_authorization_address(
         SetCodeAuthorizationDecodeError::InvalidAuthorizationAddressLength { found }
     })?;
     Ok(Address::from_bytes(bytes))
+}
+
+const fn auth_field_error(
+    field: SetCodeAuthorizationField,
+    source: DecodeError,
+) -> SetCodeAuthorizationDecodeError {
+    SetCodeAuthorizationDecodeError::FieldDecode { field, source }
 }
 
 const fn field_error(
@@ -448,18 +455,31 @@ const fn map_access_list_error(error: AccessListDecodeError) -> SetCodeTransacti
 
 #[derive(Clone, Copy, Debug, Eq, PartialEq)]
 enum SetCodeAuthorizationDecodeError {
-    FieldDecode(DecodeError),
-    InvalidAuthorizationFieldCount { found: usize },
-    InvalidAuthorizationAddressLength { found: usize },
-    InvalidAuthorizationYParity { value: u64 },
+    TupleDecode(DecodeError),
+    FieldDecode {
+        field: SetCodeAuthorizationField,
+        source: DecodeError,
+    },
+    InvalidAuthorizationFieldCount {
+        found: usize,
+    },
+    InvalidAuthorizationAddressLength {
+        found: usize,
+    },
+    InvalidAuthorizationYParity {
+        value: u64,
+    },
 }
 
 const fn map_authorization_error(
     error: SetCodeAuthorizationDecodeError,
 ) -> SetCodeTransactionDecodeError {
     match error {
-        SetCodeAuthorizationDecodeError::FieldDecode(source) => {
+        SetCodeAuthorizationDecodeError::TupleDecode(source) => {
             field_error(SetCodeTransactionField::AuthorizationList, source)
+        }
+        SetCodeAuthorizationDecodeError::FieldDecode { field, source } => {
+            SetCodeTransactionDecodeError::AuthorizationFieldDecode { field, source }
         }
         SetCodeAuthorizationDecodeError::InvalidAuthorizationFieldCount { found } => {
             SetCodeTransactionDecodeError::InvalidAuthorizationFieldCount { found }

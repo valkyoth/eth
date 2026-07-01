@@ -51,9 +51,9 @@ pub use legacy::{
     UnvalidatedLegacyTransaction, decode_legacy_transaction,
 };
 pub use set_code::{
-    SET_CODE_AUTHORIZATION_FIELD_COUNT, SET_CODE_AUTHORIZATION_MAGIC,
-    SET_CODE_TRANSACTION_FIELD_COUNT, SET_CODE_TRANSACTION_TYPE, SetCodeAuthorization,
-    SetCodeAuthorizationChainId, SetCodeAuthorizationItems, SetCodeAuthorizationList,
+    SET_CODE_AUTHORIZATION_FIELD_COUNT, SET_CODE_TRANSACTION_FIELD_COUNT,
+    SET_CODE_TRANSACTION_TYPE, SetCodeAuthorization, SetCodeAuthorizationChainId,
+    SetCodeAuthorizationField, SetCodeAuthorizationItems, SetCodeAuthorizationList,
     SetCodeTransactionDecodeError, SetCodeTransactionDecodeErrorCategory, SetCodeTransactionField,
     UnvalidatedSetCodeTransaction, decode_set_code_transaction,
 };

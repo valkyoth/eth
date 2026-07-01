@@ -14,6 +14,9 @@ All notable changes to `eth` are documented here.
   validation handling until the EIP-7702 signing-hash path is admitted.
 - Extended transaction-envelope fuzz coverage and seed corpus entries for
   set-code transaction decode and encode paths.
+- Addressed v0.24.0 pentest findings by keeping the EIP-7702 authorization
+  signing magic out of the public API until the reviewed v0.24.1 helper lands
+  and by adding authorization tuple sub-field decode diagnostics.
 - Started `0.23.0` with decoded transaction signature validation helpers that
   combine replay-domain checks, transaction signing hashes, low-s/y-parity
   policy, sender recovery, and optional expected-sender comparison.
