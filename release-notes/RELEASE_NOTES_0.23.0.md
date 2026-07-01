@@ -1,6 +1,6 @@
 # eth 0.23.0 Release Notes
 
-Status: pentest remediation ready for retest
+Status: pentest passed; waiting for final GitHub checks
 
 ## Summary
 
@@ -58,7 +58,7 @@ identity.
 
 ## Release Gate
 
-- External pentest must pass before a permanent report is added under
+- External pentest passed and the permanent report is available under
   `security/pentest/v0.23.0.md`.
 - Final GitHub checks must pass on the release report commit before tagging.
 

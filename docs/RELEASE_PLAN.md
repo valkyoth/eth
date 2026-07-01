@@ -762,7 +762,7 @@ Exit criteria:
 
 ### v0.23.0 - Full Transaction Signature Validation
 
-Status: pentest remediation ready for retest.
+Status: pentest passed; waiting for final GitHub checks.
 
 Goal: validate decoded transaction signatures end to end.
 

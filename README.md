@@ -35,8 +35,8 @@ dependencies.
 
 ## Current Status
 
-Status: `v0.23.0` decoded transaction signature validation pentest remediation
-is ready for retest.
+Status: `v0.23.0` decoded transaction signature validation pentest passed;
+waiting for final GitHub checks.
 `v0.22.0` is the latest tagged release.
 
 Implemented now:

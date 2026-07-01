@@ -1,7 +1,7 @@
 # Crate Version Matrix
 
-Status: `v0.23.0` decoded transaction signature validation pentest remediation
-is ready for retest.
+Status: `v0.23.0` decoded transaction signature validation pentest passed;
+waiting for final GitHub checks.
 
 `eth` uses independent crate versions. The facade crate remains the main user
 entry point, but support crates are published only when their own package

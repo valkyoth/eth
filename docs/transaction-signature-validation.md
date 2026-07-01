@@ -1,6 +1,6 @@
 # Transaction Signature Validation
 
-Status: v0.23.0 pentest remediation ready for retest.
+Status: v0.23.0 pentest passed; waiting for final GitHub checks.
 
 `eth-valkyoth-verify` now exposes decoded transaction signature validation
 helpers for the transaction families decoded by `eth-valkyoth-protocol`:

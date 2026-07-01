@@ -10,6 +10,9 @@ All notable changes to `eth` are documented here.
 - Added valid-signature coverage for legacy EIP-155, EIP-2930, EIP-1559, and
   EIP-4844 decoded transactions plus wrong-chain, wrong-sender, high-s,
   malformed-scalar, and signing-hash construction failure tests.
+- Addressed v0.23.0 pentest findings by making validated signature results
+  crate-private to construct and adding external raw mainnet transaction KATs
+  for typed sender recovery.
 - Started `0.21.0` with EIP-712 domain-safety checks for required `chainId`
   and `verifyingContract` fields.
 - Added EIP-712 signing digest framing with the EIP-191 `0x1901` prefix and a
