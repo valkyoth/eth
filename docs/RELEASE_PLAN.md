@@ -525,7 +525,7 @@ Exit criteria:
 
 ### v0.15.0 - Blob Transaction Decode
 
-Status: implementation complete; pentest pending.
+Status: release candidate ready; waiting for final GitHub checks before tag.
 
 Goal: decode EIP-4844 blob transaction structure.
 

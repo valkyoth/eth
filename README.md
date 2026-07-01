@@ -35,8 +35,8 @@ dependencies.
 
 ## Current Status
 
-Status: `v0.15.0` EIP-4844 blob transaction decode implementation is ready for
-pentest. `v0.14.0` is the latest tagged release.
+Status: `v0.15.0` release candidate is ready; waiting for final GitHub checks
+before tag. `v0.14.0` is the latest tagged release.
 
 Implemented now:
 

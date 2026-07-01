@@ -1,6 +1,6 @@
 # eth 0.15.0 Release Notes
 
-Status: implementation ready for pentest
+Status: release candidate ready; pentest passed
 
 ## Summary
 
@@ -68,8 +68,8 @@ validity.
 
 ## Release Gate
 
-- Pentest is required before the release report commit.
-- Permanent report path after pentest: `security/pentest/v0.15.0.md`.
+- Pentest passed with informational notes only.
+- Permanent report path: `security/pentest/v0.15.0.md`.
 - Final GitHub checks must pass on the release report commit before tagging.
 
 ## Verification

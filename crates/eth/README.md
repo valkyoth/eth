@@ -38,7 +38,8 @@ signer, EVM, Reth, or P2P integrations become real dependencies.
 
 ## Current Status
 
-The current release candidate is `0.15.0`; pentest is pending.
+The current release candidate is `0.15.0`; pentest has passed and final GitHub
+checks are pending before tag.
 
 Implemented now:
 
