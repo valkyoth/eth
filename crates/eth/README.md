@@ -30,14 +30,13 @@ The crate is intentionally conservative at `0.11.0`: it provides explicit
 Ethereum primitive domains, bounded decode-budget policy, stable error
 categories, primitive RLP bridge helpers, a caller-provided Keccak-256 boundary,
 RLP fuzz-harness evidence, a transaction envelope shell, small first-party crate
-boundaries, optional
-sanitization support, and release evidence before RPC, signer, EVM, Reth, or P2P
-integrations become real dependencies.
+boundaries, optional sanitization support, and release evidence before RPC,
+signer, EVM, Reth, or P2P integrations become real dependencies.
 
 ## Current Status
 
-The current release candidate is `0.11.0`; implementation is complete and
-pentest is pending.
+The current release candidate is `0.11.0`; pentest remediation and clean retest
+are complete.
 
 Implemented now:
 

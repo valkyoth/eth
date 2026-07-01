@@ -35,8 +35,9 @@ dependencies.
 
 ## Current Status
 
-Status: `v0.11.0` transaction envelope shell implementation is complete;
-pentest is pending. `v0.10.0` is the latest tagged release.
+Status: `v0.11.0` transaction envelope shell implementation, pentest
+remediation, and clean retest are complete. `v0.10.0` is the latest tagged
+release.
 
 Implemented now:
 
