@@ -660,7 +660,7 @@ Exit criteria:
 
 ### v0.20.0 - Sender Recovery
 
-Status: implementation ready; pentest pending.
+Status: pentest passed; final GitHub checks pending before tag.
 
 Goal: recover senders through an admitted secp256k1 dependency.
 

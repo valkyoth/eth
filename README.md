@@ -35,7 +35,8 @@ dependencies.
 
 ## Current Status
 
-Status: `v0.20.0` sender-recovery implementation is ready for pentest.
+Status: `v0.20.0` sender-recovery pentest passed; final GitHub checks are
+pending before tag.
 `v0.19.0` is the latest tagged release.
 
 Implemented now:

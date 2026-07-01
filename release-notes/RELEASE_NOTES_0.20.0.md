@@ -1,6 +1,6 @@
 # eth 0.20.0 Release Notes
 
-Status: implementation ready; pentest pending
+Status: pentest passed; final GitHub checks pending before tag
 
 ## Summary
 
@@ -55,8 +55,7 @@ fork/fee/account validation, and proof binding remain separate steps.
 
 ## Release Gate
 
-- Pentest must be completed before tagging.
-- Permanent pentest report will be `security/pentest/v0.20.0.md`.
+- Pentest passed and permanent report is `security/pentest/v0.20.0.md`.
 - Final GitHub checks must pass on the release report commit before tagging.
 
 ## Verification

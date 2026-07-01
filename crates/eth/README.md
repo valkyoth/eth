@@ -42,8 +42,8 @@ P2P integrations become real dependencies.
 
 ## Current Status
 
-The current release candidate is `0.20.0`; sender-recovery implementation is
-ready for pentest.
+The current release candidate is `0.20.0`; sender-recovery pentest passed and
+final GitHub checks are pending before tag.
 
 Implemented now:
 
