@@ -118,6 +118,7 @@ Not implemented yet:
 | Default features | protocol-core only |
 | Network/signing defaults | none |
 | Release evidence | local gates, cargo-deny, cargo-audit, SBOM, pentest report |
+| Formal verification | Kani harness planned for `v0.48.0` as extra assurance |
 | Crate versions | tracked in [`docs/CRATE_VERSION_MATRIX.md`](docs/CRATE_VERSION_MATRIX.md) |
 | 1.0 target | serious production-ready Ethereum execution-layer toolkit |
 

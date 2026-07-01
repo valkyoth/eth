@@ -142,6 +142,7 @@ relevant dependency point.
 | Public RLP derives had only an evaluation/prototype milestone. | Added `v0.25.0 - Public RLP Derives`. |
 | Full EIP-712 `encodeType`/`encodeData`/`hashStruct` support was missing from the roadmap. | Added `v0.26.0 - EIP-712 Typed-Data Encoder`. |
 | A first-party optional software Keccak backend was deferred without a versioned admission point. | Added `v0.27.0 - Optional Keccak Backend Admission`. |
+| Formal verification evidence was not scheduled. | Added `v0.48.0 - Kani Formal Verification Harness` as extra assurance, not a replacement for fuzzing, conformance tests, pentest, or audit. |
 | ABI encoding, Engine API, SSZ, and DevP2P/RLPx are not part of the first default execution-layer crate scope. | Keep explicit in `SPEC_MATRIX.md`; add a new post-1.0 or feature-track release plan only if they become product requirements. |
 
 ## Phase 0: Repository And Release Discipline
@@ -1285,7 +1286,34 @@ Exit criteria:
 
 - Platform support claims match tested evidence.
 
-### v0.48.0 - Public API Stability Pass
+### v0.48.0 - Kani Formal Verification Harness
+
+Goal: add bounded formal verification evidence for the highest-risk arithmetic,
+parser, and typestate invariants.
+
+Deliverables:
+
+- Kani dependency/tooling admission and install/update policy;
+- proof harnesses for decode-limit arithmetic and overflow rejection;
+- proof harnesses for output-buffer no-mutation-on-error invariants;
+- proof harnesses for canonical integer and fixed-width primitive rejection;
+- proof harnesses for transaction typestate transitions that must not skip
+  required validation proofs;
+- proof harnesses for EIP-712 missing/wrong-domain fail-closed behavior;
+- documentation that Kani is extra assurance, not a replacement for fuzzing,
+  official conformance tests, pentest, or independent audit.
+
+Verification:
+
+- Kani proof command documented and passing for admitted harnesses.
+- `scripts/checks.sh`
+
+Exit criteria:
+
+- Formal verification covers selected bounded invariants before API stability
+  and external audit remediation begin.
+
+### v0.49.0 - Public API Stability Pass
 
 Goal: stabilize the public API shape before 1.0.
 
@@ -1304,7 +1332,7 @@ Exit criteria:
 
 - The remaining 1.0 work is hardening, not API invention.
 
-### v0.49.0 - Independent Audit Remediation
+### v0.50.0 - Independent Audit Remediation
 
 Goal: fix findings from external review.
 
@@ -1324,7 +1352,7 @@ Exit criteria:
 
 - No unresolved critical or high findings remain.
 
-### v0.50.0 - Release Evidence Dry Run
+### v0.51.0 - Release Evidence Dry Run
 
 Goal: prove the release-evidence process before 1.0.
 
@@ -1338,7 +1366,7 @@ Deliverables:
 
 Verification:
 
-- release-readiness script for `v0.50.0`.
+- release-readiness script for `v0.51.0`.
 
 Exit criteria:
 

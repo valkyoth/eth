@@ -120,6 +120,7 @@ Not implemented yet:
 | Default networking/signing | none |
 | Unsafe policy | first-party crates use `#![forbid(unsafe_code)]` |
 | Release evidence | local gates, cargo-deny, cargo-audit, SBOM, pentest report |
+| Formal verification | Kani harness planned for `v0.48.0` as extra assurance |
 | Crate versions | tracked in the [version matrix](https://github.com/valkyoth/eth/blob/main/docs/CRATE_VERSION_MATRIX.md) |
 
 ## Install

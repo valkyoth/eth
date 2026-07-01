@@ -217,6 +217,12 @@ guidance.
 
 Release gate:
 
+- bounded Kani formal verification harnesses pass for selected arithmetic,
+  parser, and typestate invariants;
 - no unresolved critical or high dependency/advisory/audit findings;
 - official conformance suites pass for every claimed feature;
 - all supported Rust versions from `1.90.0` through `1.96.1` are checked.
+
+Kani is extra assurance. It does not replace fuzzing, official Ethereum
+conformance tests, pentest, cargo-audit/cargo-deny, or independent security
+review.
