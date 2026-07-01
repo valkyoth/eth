@@ -26,7 +26,7 @@
 `eth` is the public facade crate for a `no_std`-first Ethereum
 execution-layer protocol workspace.
 
-The crate is intentionally conservative at `0.18.0`: it provides explicit
+The crate is intentionally conservative at `0.19.0`: it provides explicit
 Ethereum primitive domains, bounded decode-budget policy, stable error
 categories, primitive RLP bridge helpers, a caller-provided Keccak-256 boundary,
 RLP fuzz-harness evidence, a transaction envelope shell, unvalidated legacy
@@ -34,15 +34,16 @@ transaction field decoding, unvalidated EIP-2930 access-list transaction field
 decoding, unvalidated EIP-1559 dynamic-fee transaction field decoding,
 unvalidated EIP-4844 blob transaction field decoding, no-allocation canonical
 transaction envelope encoding for admitted decoded domains, explicit chain and
-fork activation context, proof-gated transaction typestate transitions, RLP
-derive design evidence, small first-party crate boundaries, optional
+fork activation context, proof-gated transaction typestate transitions,
+replay-domain validation for transaction chain binding, RLP derive design
+evidence, small first-party crate boundaries, optional
 sanitization support, and release evidence before RPC, signer, EVM, Reth, or
 P2P integrations become real dependencies.
 
 ## Current Status
 
-The current release candidate is `0.18.0`; pentest has passed and final GitHub
-checks are pending before tag.
+The current release candidate is `0.19.0`; replay-domain validation is ready
+for pentest.
 
 Implemented now:
 
@@ -76,6 +77,8 @@ Implemented now:
   non-monotonic fork or activation ordering.
 - Proof-gated transaction typestate transitions for decoded, canonical,
   fork-validated, and sender-recovered state tokens.
+- Replay-domain validation for legacy EIP-155 and typed transaction chain IDs
+  before sender recovery results are accepted.
 - RLP derive design and private derive-crate prototype tests for future
   `RlpEncode`/`RlpDecode` support.
 - Caller-provided Keccak-256 trait boundary without a default hash
@@ -116,21 +119,21 @@ Not implemented yet:
 
 ```toml
 [dependencies]
-eth = "0.18"
+eth = "0.19"
 ```
 
 Disable defaults explicitly for embedded or freestanding builds:
 
 ```toml
 [dependencies]
-eth = { version = "0.18", default-features = false }
+eth = { version = "0.19", default-features = false }
 ```
 
 Optional sanitization support:
 
 ```toml
 [dependencies]
-eth = { version = "0.18", features = ["sanitization"] }
+eth = { version = "0.19", features = ["sanitization"] }
 ```
 
 ## Features
@@ -258,6 +261,40 @@ assert_eq!(tx.y_parity, SignatureYParity::Odd);
 let mut encoded = [0_u8; 32];
 let written = encode_dynamic_fee_transaction(&tx, &mut encoded)?;
 assert_eq!(encoded.get(..written), Some(dynamic_fee_tx.as_slice()));
+# Ok::<(), Box<dyn std::error::Error>>(())
+```
+
+## Replay Domain Checks
+
+Replay-domain helpers reject wrong-chain transactions before future sender
+recovery results are trusted:
+
+```rust
+use eth::codec::DecodeLimits;
+use eth::primitives::ChainId;
+use eth::protocol::decode_dynamic_fee_transaction;
+use eth::verify::{VerifyError, require_dynamic_fee_replay_domain};
+
+let dynamic_fee_tx = [
+    0x02, 0xce, 0x01, 0x02, 0x03, 0x04, 0x82, 0x52, 0x08, 0x80, 0x05, 0x80,
+    0xc0, 0x01, 0x01, 0x02,
+];
+
+let limits = DecodeLimits {
+    max_input_bytes: 64,
+    max_list_items: 16,
+    max_nesting_depth: 8,
+    max_total_allocation: 64,
+    max_proof_nodes: 4,
+    max_total_items: 32,
+};
+let tx = decode_dynamic_fee_transaction(&dynamic_fee_tx, limits)?;
+
+require_dynamic_fee_replay_domain(ChainId::new(1), &tx)?;
+assert_eq!(
+    require_dynamic_fee_replay_domain(ChainId::new(5), &tx),
+    Err(VerifyError::WrongChain)
+);
 # Ok::<(), Box<dyn std::error::Error>>(())
 ```
 
@@ -530,7 +567,7 @@ the workspace can keep small, auditable boundaries:
 The minimum supported Rust version is Rust `1.90.0`. New deployments should use
 the latest stable Rust verified by the release gates.
 
-Compatibility evidence for `0.18.0`:
+Compatibility evidence for `0.19.0`:
 
 | Rust | Local Evidence |
 | --- | --- |

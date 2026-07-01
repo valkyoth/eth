@@ -620,7 +620,7 @@ Exit criteria:
 
 ### v0.18.0 - Transaction Validation Typestates
 
-Status: pentest passed; final GitHub checks pending before tag.
+Status: tagged.
 
 Goal: separate decode, canonicality, fork validation, and sender recovery.
 
@@ -639,6 +639,8 @@ Exit criteria:
 - Callers cannot accidentally treat decoded bytes as fork-valid transactions.
 
 ### v0.19.0 - Replay Domain Validation
+
+Status: implementation ready for pentest.
 
 Goal: validate transaction chain binding before signatures are trusted.
 

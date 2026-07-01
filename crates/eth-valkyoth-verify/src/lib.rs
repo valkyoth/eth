@@ -8,10 +8,20 @@ extern crate std;
 use core::fmt;
 use eth_valkyoth_primitives::ChainId;
 
+mod replay;
+
+pub use replay::{
+    require_access_list_replay_domain, require_blob_replay_domain,
+    require_dynamic_fee_replay_domain, require_legacy_replay_domain,
+    require_transaction_replay_domain,
+};
+
 /// Verification failure categories.
 #[non_exhaustive]
 #[derive(Clone, Copy, Debug, Eq, PartialEq)]
 pub enum VerifyError {
+    /// The input has no chain-bound replay domain.
+    MissingReplayDomain,
     /// The input is bound to a different chain.
     WrongChain,
     /// The signature representation is not accepted.
@@ -25,6 +35,7 @@ impl VerifyError {
     #[must_use]
     pub const fn code(self) -> &'static str {
         match self {
+            Self::MissingReplayDomain => "ETH_VERIFY_MISSING_REPLAY_DOMAIN",
             Self::WrongChain => "ETH_VERIFY_WRONG_CHAIN",
             Self::InvalidSignature => "ETH_VERIFY_INVALID_SIGNATURE",
             Self::InvalidProof => "ETH_VERIFY_INVALID_PROOF",
@@ -35,6 +46,7 @@ impl VerifyError {
     #[must_use]
     pub const fn message(self) -> &'static str {
         match self {
+            Self::MissingReplayDomain => "input has no chain-bound replay domain",
             Self::WrongChain => "input is bound to a different chain",
             Self::InvalidSignature => "signature representation is not accepted",
             Self::InvalidProof => "proof is malformed or does not verify",
@@ -45,6 +57,7 @@ impl VerifyError {
     #[must_use]
     pub const fn category(self) -> VerifyErrorCategory {
         match self {
+            Self::MissingReplayDomain => VerifyErrorCategory::ReplayDomain,
             Self::WrongChain => VerifyErrorCategory::ReplayDomain,
             Self::InvalidSignature => VerifyErrorCategory::Signature,
             Self::InvalidProof => VerifyErrorCategory::Proof,
@@ -107,5 +120,11 @@ mod tests {
         assert_eq!(error.message(), "proof is malformed or does not verify");
         assert_eq!(error.category(), VerifyErrorCategory::Proof);
         assert_eq!(error.to_string(), "proof is malformed or does not verify");
+
+        let error = VerifyError::MissingReplayDomain;
+
+        assert_eq!(error.code(), "ETH_VERIFY_MISSING_REPLAY_DOMAIN");
+        assert_eq!(error.message(), "input has no chain-bound replay domain");
+        assert_eq!(error.category(), VerifyErrorCategory::ReplayDomain);
     }
 }

@@ -35,8 +35,8 @@ dependencies.
 
 ## Current Status
 
-Status: `v0.18.0` transaction validation typestate pentest passed; final
-GitHub checks are pending before tag. `v0.17.0` is the latest tagged release.
+Status: `v0.19.0` replay-domain validation implementation is ready for
+pentest. `v0.18.0` is the latest tagged release.
 
 Implemented now:
 
@@ -72,6 +72,8 @@ Implemented now:
   non-monotonic fork or activation ordering.
 - Proof-gated transaction typestate transitions for decoded, canonical,
   fork-validated, and sender-recovered state tokens.
+- Replay-domain validation for legacy EIP-155 and typed transaction chain IDs
+  before sender recovery results are accepted.
 - RLP derive design and private derive-crate prototype tests for future
   `RlpEncode`/`RlpDecode` support.
 - Caller-provided Keccak-256 trait boundary without a default hash
@@ -117,14 +119,14 @@ Not implemented yet:
 
 ```toml
 [dependencies]
-eth = "0.18"
+eth = "0.19"
 ```
 
 For optional sanitization support:
 
 ```toml
 [dependencies]
-eth = { version = "0.18", features = ["sanitization"] }
+eth = { version = "0.19", features = ["sanitization"] }
 ```
 
 ## Features
@@ -248,6 +250,40 @@ assert_eq!(tx.y_parity, SignatureYParity::Odd);
 let mut encoded = [0_u8; 32];
 let written = encode_dynamic_fee_transaction(&tx, &mut encoded)?;
 assert_eq!(encoded.get(..written), Some(dynamic_fee_tx.as_slice()));
+# Ok::<(), Box<dyn std::error::Error>>(())
+```
+
+## Replay Domain Checks
+
+Replay-domain helpers reject wrong-chain transactions before future sender
+recovery results are trusted:
+
+```rust
+use eth::codec::DecodeLimits;
+use eth::primitives::ChainId;
+use eth::protocol::decode_dynamic_fee_transaction;
+use eth::verify::{VerifyError, require_dynamic_fee_replay_domain};
+
+let dynamic_fee_tx = [
+    0x02, 0xce, 0x01, 0x02, 0x03, 0x04, 0x82, 0x52, 0x08, 0x80, 0x05, 0x80,
+    0xc0, 0x01, 0x01, 0x02,
+];
+
+let limits = DecodeLimits {
+    max_input_bytes: 64,
+    max_list_items: 16,
+    max_nesting_depth: 8,
+    max_total_allocation: 64,
+    max_proof_nodes: 4,
+    max_total_items: 32,
+};
+let tx = decode_dynamic_fee_transaction(&dynamic_fee_tx, limits)?;
+
+require_dynamic_fee_replay_domain(ChainId::new(1), &tx)?;
+assert_eq!(
+    require_dynamic_fee_replay_domain(ChainId::new(5), &tx),
+    Err(VerifyError::WrongChain)
+);
 # Ok::<(), Box<dyn std::error::Error>>(())
 ```
 
@@ -522,7 +558,7 @@ friendly, and independently testable.
 The minimum supported Rust version is Rust `1.90.0`. New deployments should use
 the pinned stable Rust `1.96.1` until the toolchain policy is updated.
 
-Compatibility evidence for `0.18.0`:
+Compatibility evidence for `0.19.0`:
 
 | Rust | Local Evidence |
 | --- | --- |
@@ -539,8 +575,8 @@ Compatibility evidence for `0.18.0`:
 
 ```bash
 scripts/checks.sh
-scripts/release_0_18_gate.sh
-scripts/validate-release-readiness.sh v0.18.0
+scripts/release_0_19_gate.sh
+scripts/validate-release-readiness.sh v0.19.0
 ```
 
 For dependency-policy checks, install `cargo-deny` and `cargo-audit`, then run:
