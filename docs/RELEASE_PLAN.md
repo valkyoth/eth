@@ -705,7 +705,7 @@ Exit criteria:
 
 ### v0.21.0 - EIP-712 Domain Safety
 
-Status: implementation ready for pentest.
+Status: pentest passed; final GitHub checks pending before tag.
 
 Goal: prevent structured-data domain confusion.
 

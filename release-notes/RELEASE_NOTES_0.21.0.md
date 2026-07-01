@@ -1,6 +1,6 @@
 # eth 0.21.0 Release Notes
 
-Status: implementation ready for pentest
+Status: pentest passed; final GitHub checks pending before tag
 
 ## Summary
 
@@ -57,8 +57,7 @@ conformant encoder before using these helpers.
 
 ## Release Gate
 
-- External pentest must pass before a permanent report is added under
-  `security/pentest/v0.21.0.md`.
+- Pentest passed and permanent report is `security/pentest/v0.21.0.md`.
 - Final GitHub checks must pass on the release report commit before tagging.
 
 ## Verification

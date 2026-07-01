@@ -1,6 +1,6 @@
 # EIP-712 Domain Safety
 
-Status: v0.21.0 implementation ready for pentest.
+Status: v0.21.0 pentest passed; final GitHub checks pending before tag.
 
 EIP-712 structured-data signing extends Ethereum signing with
 `keccak256("\x19\x01" || domainSeparator || hashStruct(message))`. The
