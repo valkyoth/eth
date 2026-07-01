@@ -26,17 +26,18 @@
 `eth` is the public facade crate for a `no_std`-first Ethereum
 execution-layer protocol workspace.
 
-The crate is intentionally conservative at `0.11.0`: it provides explicit
+The crate is intentionally conservative at `0.12.0`: it provides explicit
 Ethereum primitive domains, bounded decode-budget policy, stable error
 categories, primitive RLP bridge helpers, a caller-provided Keccak-256 boundary,
-RLP fuzz-harness evidence, a transaction envelope shell, small first-party crate
-boundaries, optional sanitization support, and release evidence before RPC,
-signer, EVM, Reth, or P2P integrations become real dependencies.
+RLP fuzz-harness evidence, a transaction envelope shell, unvalidated legacy
+transaction field decoding, small first-party crate boundaries, optional
+sanitization support, and release evidence before RPC, signer, EVM, Reth, or
+P2P integrations become real dependencies.
 
 ## Current Status
 
-The current release candidate is `0.11.0`; pentest remediation and clean retest
-are complete.
+The current release candidate is `0.12.0`; implementation is complete and
+pentest is pending.
 
 Implemented now:
 
@@ -52,6 +53,8 @@ Implemented now:
   gas, nonce, timestamp, address, hash, and wei values.
 - EIP-2718 transaction envelope shell classification for typed and legacy
   transaction bytes.
+- Unvalidated legacy transaction field decoding for nonce, gas price, gas
+  limit, to/create, value, input, and signature words.
 - Caller-provided Keccak-256 trait boundary without a default hash
   implementation dependency.
 - RLP fuzz harness with committed hex seed corpus and crash reproduction docs.
@@ -68,7 +71,8 @@ Not implemented yet:
 - No signer or local key storage.
 - No EVM execution adapter.
 - No Reth or P2P integration.
-- No full transaction field parser yet.
+- No typed transaction field parsers yet.
+- No transaction signature validation or sender recovery yet.
 - No block parser yet.
 
 ## Trust Dashboard
@@ -376,8 +380,34 @@ if let TransactionEnvelope::Typed(typed) = envelope {
 # Ok::<(), eth::error::TransactionEnvelopeError>(())
 ```
 
-This release treats typed payloads as opaque bytes. Legacy transactions must be
-exactly one RLP list, but their fields are decoded in later milestones.
+Typed payloads are still opaque bytes. Legacy transactions can also be decoded
+into an explicitly unvalidated field model:
+
+```rust
+use eth::codec::DecodeLimits;
+use eth::protocol::{LegacyTransactionTo, decode_legacy_transaction};
+
+let limits = DecodeLimits {
+    max_input_bytes: 64,
+    max_list_items: 16,
+    max_nesting_depth: 4,
+    max_total_allocation: 64,
+    max_proof_nodes: 4,
+    max_total_items: 32,
+};
+let raw = [0xcb, 0x01, 0x02, 0x82, 0x52, 0x08, 0x80, 0x80, 0x80, 0x1b, 0x01, 0x02];
+
+let tx = decode_legacy_transaction(&raw, limits)?;
+
+assert_eq!(tx.nonce.get(), 1);
+assert_eq!(tx.gas_limit.get(), 21_000);
+assert_eq!(tx.to, LegacyTransactionTo::Create);
+assert_eq!(tx.input, &[]);
+# Ok::<(), eth::error::LegacyTransactionDecodeError>(())
+```
+
+The decoded value is not chain-valid, signature-valid, sender-recovered, or
+fork-valid. It is only a bounded, canonical field parse.
 
 ## Optional Sanitization
 
@@ -424,7 +454,7 @@ the workspace can keep small, auditable boundaries:
 The minimum supported Rust version is Rust `1.90.0`. New deployments should use
 the latest stable Rust verified by the release gates.
 
-Compatibility evidence for `0.11.0`:
+Compatibility evidence for `0.12.0`:
 
 | Rust | Local Evidence |
 | --- | --- |

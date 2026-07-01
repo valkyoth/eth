@@ -1,5 +1,5 @@
 [release]
-version = "0.11.0"
+version = "0.12.0"
 policy = "independent"
 
 [crates."eth-valkyoth-codec"]
@@ -7,88 +7,88 @@ previous_version = "0.10.0"
 version = "0.10.0"
 change = "unchanged"
 publish = false
-reason = "No package changes for v0.11.0."
+reason = "No package changes for v0.12.0."
 
 [crates."eth-valkyoth-primitives"]
 previous_version = "0.10.0"
 version = "0.10.0"
 change = "unchanged"
 publish = false
-reason = "No package changes for v0.11.0."
+reason = "No package changes for v0.12.0."
 
 [crates."eth-valkyoth-hash"]
 previous_version = "0.10.0"
 version = "0.10.0"
 change = "unchanged"
 publish = false
-reason = "No package changes for v0.11.0."
+reason = "No package changes for v0.12.0."
 
 [crates."eth-valkyoth-protocol"]
-previous_version = "0.7.0"
-version = "0.11.0"
+previous_version = "0.11.0"
+version = "0.12.0"
 change = "code"
 publish = true
-reason = "Adds the v0.11.0 EIP-2718 transaction envelope shell and codec dependency for exact legacy RLP-list classification."
+reason = "Adds the v0.12.0 unvalidated legacy transaction field decoder."
 
 [crates."eth-valkyoth-verify"]
 previous_version = "0.7.0"
 version = "0.7.0"
 change = "unchanged"
 publish = false
-reason = "No package changes for v0.11.0."
+reason = "No package changes for v0.12.0."
 
 [crates."eth-valkyoth-derive"]
 previous_version = "0.7.0"
 version = "0.7.0"
 change = "unchanged"
 publish = false
-reason = "No package changes for v0.11.0."
+reason = "No package changes for v0.12.0."
 
 [crates."eth-valkyoth-sanitization"]
 previous_version = "0.7.0"
 version = "0.7.0"
 change = "unchanged"
 publish = false
-reason = "No package changes for v0.11.0."
+reason = "No package changes for v0.12.0."
 
 [crates."eth-valkyoth-evm"]
 previous_version = "0.7.0"
 version = "0.7.0"
 change = "unchanged"
 publish = false
-reason = "No package changes for v0.11.0."
+reason = "No package changes for v0.12.0."
 
 [crates."eth-valkyoth-rpc"]
 previous_version = "0.7.0"
 version = "0.7.0"
 change = "unchanged"
 publish = false
-reason = "No package changes for v0.11.0."
+reason = "No package changes for v0.12.0."
 
 [crates."eth-valkyoth-signer"]
 previous_version = "0.7.0"
 version = "0.7.0"
 change = "unchanged"
 publish = false
-reason = "No package changes for v0.11.0."
+reason = "No package changes for v0.12.0."
 
 [crates."eth-valkyoth-reth"]
 previous_version = "0.7.0"
 version = "0.7.0"
 change = "unchanged"
 publish = false
-reason = "No package changes for v0.11.0."
+reason = "No package changes for v0.12.0."
 
 [crates."eth-valkyoth-testkit"]
 previous_version = "0.7.0"
 version = "0.7.0"
 change = "unchanged"
 publish = false
-reason = "No package changes for v0.11.0."
+reason = "No package changes for v0.12.0."
 
 [crates.eth]
-previous_version = "0.10.0"
-version = "0.11.0"
+previous_version = "0.11.0"
+version = "0.12.0"
 change = "code"
 publish = true
-reason = "Updates facade documentation and dependency ranges for the v0.11.0 transaction envelope shell."
+reason = "Updates facade documentation, error re-exports, and dependency ranges for the v0.12.0 legacy transaction decoder."

@@ -4,6 +4,12 @@ All notable changes to `eth` are documented here.
 
 ## Unreleased
 
+- Started `0.12.0` with unvalidated legacy transaction field decoding for the
+  EIP-2718 legacy transaction field list.
+- Added stable legacy transaction decode error codes/categories, call/create
+  target modeling, bounded calldata exposure, and signature U256 width checks.
+- Extended transaction-envelope fuzz coverage to drive legacy transaction field
+  decoding before later typed transaction decoders land.
 - Started `0.9.0` with canonical no-allocation RLP encoding helpers for
   scalar byte strings, Ethereum integer payloads, list payloads, and decoded
   RLP items.
