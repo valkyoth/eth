@@ -13,9 +13,10 @@ structured-data sender recovery is trusted.
 
 Official source and fixture revisions are governed by
 [Spec Source Policy](spec-source-policy.md). Revisions were checked against
-upstream `HEAD` on 2026-07-01 for `v0.18.0`; execution-apis and
-consensus-specs remain deferred areas. Consensus-sensitive behavior must not be
-implemented from memory.
+upstream `HEAD` on 2026-07-01 for `v0.18.0`; later execution-apis,
+consensus-specs, ABI, contract-standard, and networking milestones must refresh
+their own pinned source evidence before implementation. Consensus-sensitive
+behavior must not be implemented from memory.
 
 | Area | Status | Evidence |
 | --- | --- | --- |
@@ -33,11 +34,13 @@ implemented from memory.
 | Header validation | planned | `execution-specs` pinned in `spec-lock.toml`; validation not implemented |
 | Receipt validation | planned | `execution-specs` pinned in `spec-lock.toml`; validation not implemented |
 | MPT proofs | planned | `ethereum/tests` pinned in `spec-lock.toml`; proof verification not implemented |
-| JSON-RPC | deferred | `execution-apis` pinned in `spec-lock.toml`; RPC not implemented |
-| ABI encoding | deferred | contract calldata/return encoding is outside the first execution-layer validation scope; add a feature-track release plan if contract-call ergonomics become a product requirement |
-| Engine API | deferred | not part of first default scope; add a post-1.0 or optional node-interface track before claiming support |
-| SSZ | deferred | consensus-layer feature only if admitted through a separate scope decision |
-| DevP2P/RLPx | deferred | separate threat-model expansion required before any networking support claim |
+| JSON-RPC | scheduled | `execution-apis` pinned in `spec-lock.toml`; RPC dependency admission starts at v0.40.0 and trust models follow at v0.41.0 |
+| ABI encoding | scheduled | ABI type modeling starts at v0.47.0, value encode/decode at v0.48.0, and contract event/error decoding at v0.49.0 |
+| Contract standards | scheduled | Common token standards, ENS, permit helpers, and interface helpers are scheduled for v0.51.0 through v0.54.0 |
+| Engine API | scheduled | Engine API types and validation helpers are scheduled for v0.59.0 and v0.60.0 |
+| SSZ and beacon consensus | scheduled | SSZ, beacon headers, light-client updates, and Beacon API boundaries are scheduled for v0.56.0 through v0.58.0 and v0.61.0 |
+| DevP2P/RLPx and discovery | scheduled | Networking threat model, dependency admission, eth wire messages, and snap messages are scheduled for v0.63.0 through v0.66.0 |
+| Txpool, sync, and node-adjacent boundaries | scheduled | Txpool policy, sync orchestration, and mining/builder/validator scope decisions are scheduled for v0.67.0 through v0.69.0 |
 
 Every release that claims support for a fork, EIP, RPC method, or wire protocol
 must update this matrix and `spec-lock.toml`.

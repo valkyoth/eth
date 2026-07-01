@@ -142,8 +142,10 @@ relevant dependency point.
 | Public RLP derives had only an evaluation/prototype milestone. | Added `v0.25.0 - Public RLP Derives`. |
 | Full EIP-712 `encodeType`/`encodeData`/`hashStruct` support was missing from the roadmap. | Added `v0.26.0 - EIP-712 Typed-Data Encoder`. |
 | A first-party optional software Keccak backend was deferred without a versioned admission point. | Added `v0.27.0 - Optional Keccak Backend Admission`. |
-| Formal verification evidence was not scheduled. | Added `v0.48.0 - Kani Formal Verification Harness` as extra assurance, not a replacement for fuzzing, conformance tests, pentest, or audit. |
-| ABI encoding, Engine API, SSZ, and DevP2P/RLPx are not part of the first default execution-layer crate scope. | Keep explicit in `SPEC_MATRIX.md`; add a new post-1.0 or feature-track release plan only if they become product requirements. |
+| Formal verification evidence was not scheduled. | Added `v0.71.0 - Kani Formal Verification Harness` as extra assurance, not a replacement for fuzzing, conformance tests, pentest, or audit. |
+| ABI encoding, Engine API, SSZ, and DevP2P/RLPx were marked deferred. | Added `v0.47.0` through `v0.69.0` feature tracks so they are versioned before 1.0. |
+| ENS and common ERC/application standards were not scheduled. | Added `v0.53.0` through `v0.55.0` for ENS and common contract standards. |
+| Node-level sync, txpool, mining/validator boundaries, and observability were not scheduled. | Added `v0.65.0` through `v0.69.0` with explicit library-boundary scope and validation gates. |
 
 ## Phase 0: Repository And Release Discipline
 
@@ -1266,9 +1268,490 @@ Exit criteria:
 
 - P2P is either explicitly deferred or split into its own future release plan.
 
-## Phase 10: Production Hardening
+## Phase 10: Contract Interaction And Application Standards
 
-### v0.47.0 - Platform Matrix
+### v0.47.0 - ABI Type System
+
+Goal: model Solidity ABI types without pulling contract interaction into the
+default core graph.
+
+Deliverables:
+
+- ABI primitive, fixed array, dynamic array, tuple, bytes, string, address, and
+  integer domain model;
+- strict type parser with recursion and size limits;
+- canonical type string rendering;
+- selector input model for functions, errors, and events;
+- malformed type grammar tests.
+
+Verification:
+
+- `cargo test -p eth-valkyoth-abi`
+- ABI fixture tests from pinned official or independently reviewed sources.
+
+Exit criteria:
+
+- ABI types can be parsed and rendered without encoding values yet.
+
+### v0.48.0 - ABI Encode And Decode
+
+Goal: encode and decode ABI values under explicit size limits.
+
+Deliverables:
+
+- ABI value model;
+- calldata and return-data encode/decode;
+- offset, dynamic-tail, and nested-array validation;
+- no unbounded allocation from hostile calldata;
+- official and adversarial ABI vectors.
+
+Verification:
+
+- `cargo test -p eth-valkyoth-abi`
+- ABI fuzz target builds.
+
+Exit criteria:
+
+- Contract call payloads can be handled without ad hoc downstream encoders.
+
+### v0.49.0 - Contract Event And Error Decoding
+
+Goal: decode logs and revert data with ABI-aware domain types.
+
+Deliverables:
+
+- event topic hashing and indexed parameter policy;
+- anonymous-event handling;
+- custom error selector decoding;
+- revert reason handling with redaction policy;
+- malformed log and revert-data tests.
+
+Verification:
+
+- `cargo test -p eth-valkyoth-abi -p eth-valkyoth-protocol`
+
+Exit criteria:
+
+- Contract events and errors can be decoded without implying RPC trust or
+  contract semantic validity.
+
+### v0.50.0 - Contract Call Builders
+
+Goal: provide safe contract call builders over ABI primitives.
+
+Deliverables:
+
+- function selector helpers;
+- calldata builder;
+- return-data decoder;
+- no automatic network call or signing behavior;
+- examples for read-only call payloads and transaction input construction.
+
+Verification:
+
+- docs examples compile.
+- `cargo test -p eth-valkyoth-abi`
+
+Exit criteria:
+
+- Users can build and decode contract calls while networking and signing remain
+  explicit separate layers.
+
+### v0.51.0 - Common Token Standards
+
+Goal: add typed helpers for the most common token standards without making
+contract wrappers part of the core protocol.
+
+Deliverables:
+
+- ERC-20 function/event selectors and ABI bindings;
+- ERC-721 function/event selectors and ABI bindings;
+- ERC-1155 function/event selectors and ABI bindings;
+- no network, signer, or balance-trust assumptions;
+- examples for calldata/log decoding only.
+
+Verification:
+
+- `cargo test -p eth-valkyoth-abi`
+
+Exit criteria:
+
+- Common token interaction helpers are typed convenience APIs over ABI, not
+  trusted contract clients.
+
+### v0.52.0 - ENS Namehash And Resolution Primitives
+
+Goal: support ENS primitives and resolver-call construction.
+
+Deliverables:
+
+- ENS name normalization policy decision;
+- namehash implementation and vectors;
+- resolver and registry ABI call builders;
+- text/address/contenthash record decode helpers;
+- phishing and Unicode caveats documented.
+
+Verification:
+
+- ENS vector tests.
+- docs examples compile.
+
+Exit criteria:
+
+- ENS support is available as explicit contract-call construction and decoding,
+  not as hidden RPC behavior.
+
+### v0.53.0 - Permit And Typed Authorization Standards
+
+Goal: support common signature-based contract authorization flows.
+
+Deliverables:
+
+- EIP-2612 permit typed-data helpers;
+- Permit2 or explicit deferral decision;
+- ERC-721 permit variants where standardized;
+- typed-data domain checks wired through the EIP-712 encoder;
+- replay-domain and chain mismatch tests.
+
+Verification:
+
+- `cargo test -p eth-valkyoth-abi -p eth-valkyoth-verify`
+
+Exit criteria:
+
+- Permit helpers use the same EIP-712 safety boundary as core signing APIs.
+
+### v0.54.0 - Contract Interface Registry
+
+Goal: expose safe helpers for interface identifiers and contract metadata.
+
+Deliverables:
+
+- ERC-165 interface ID helpers;
+- selector collision documentation;
+- optional metadata URI decode helpers;
+- no HTTP fetching or remote metadata trust by default.
+
+Verification:
+
+- selector and interface ID vector tests.
+
+Exit criteria:
+
+- Contract interface helpers are deterministic local computations only.
+
+### v0.55.0 - ABI And Contract Fuzzing
+
+Goal: fuzz ABI and contract-helper parsers before they are treated as stable.
+
+Deliverables:
+
+- ABI type parser fuzz target;
+- ABI calldata/revert/log decode fuzz targets;
+- seed corpus for nested offsets and malformed dynamic tails;
+- corpus materialization docs.
+
+Verification:
+
+- `cargo check --manifest-path fuzz/Cargo.toml`
+
+Exit criteria:
+
+- Every ABI parser that accepts untrusted bytes has fuzz coverage.
+
+## Phase 11: Consensus, Engine, And Beacon Boundaries
+
+### v0.56.0 - SSZ Codec Boundary
+
+Goal: admit or implement bounded SSZ encoding and decoding for consensus-layer
+data.
+
+Deliverables:
+
+- dependency admission or first-party SSZ design;
+- bounded container/list/vector decode policy;
+- Merkleization boundary decision;
+- official consensus-spec vectors.
+
+Verification:
+
+- `cargo test -p eth-valkyoth-consensus`
+- `cargo deny check`
+
+Exit criteria:
+
+- Consensus data can be decoded without weakening the execution-layer default
+  graph.
+
+### v0.57.0 - Beacon Block And State Headers
+
+Goal: model beacon-chain headers and execution payload references.
+
+Deliverables:
+
+- beacon block/header primitives;
+- execution payload header model;
+- fork-aware optional fields;
+- hash tree root helpers through the SSZ boundary;
+- vector tests.
+
+Verification:
+
+- `cargo test -p eth-valkyoth-consensus`
+
+Exit criteria:
+
+- Execution and consensus headers can be linked without claiming full consensus
+  validation.
+
+### v0.58.0 - Consensus Light Client Updates
+
+Goal: verify consensus light-client update structures.
+
+Deliverables:
+
+- sync committee domain types;
+- finalized header and optimistic header inputs;
+- branch verification helpers;
+- fork/version context;
+- invalid branch and wrong-period tests.
+
+Verification:
+
+- consensus light-client vector tests.
+
+Exit criteria:
+
+- Beacon evidence used by execution-layer callers has an explicit verification
+  path.
+
+### v0.59.0 - Engine API Types
+
+Goal: model Engine API request and response types without implementing a client.
+
+Deliverables:
+
+- fork-aware payload attributes;
+- execution payload and forkchoice state models;
+- payload status and validation-error model;
+- JSON serialization policy if serde is admitted;
+- execution-apis revision pinned.
+
+Verification:
+
+- `cargo test -p eth-valkyoth-engine`
+
+Exit criteria:
+
+- Engine API data can be represented without opening networking or consensus
+  validation claims.
+
+### v0.60.0 - Engine API Validation Helpers
+
+Goal: validate Engine API payload boundaries before optional transport work.
+
+Deliverables:
+
+- forkchoice state consistency checks;
+- payload timestamp/fork checks;
+- block hash and parent hash domain checks;
+- invalid status transition tests.
+
+Verification:
+
+- `cargo test -p eth-valkyoth-engine`
+
+Exit criteria:
+
+- Engine API helpers fail closed on malformed or inconsistent payload context.
+
+### v0.61.0 - Beacon API Boundary
+
+Goal: model Beacon REST API responses as optional, trust-scoped inputs.
+
+Deliverables:
+
+- endpoint trust model;
+- response size limits;
+- versioned response envelope model;
+- no default public endpoint.
+
+Verification:
+
+- `cargo test -p eth-valkyoth-consensus`
+
+Exit criteria:
+
+- Beacon API data is treated as untrusted transport data until verified.
+
+### v0.62.0 - Consensus And Engine Fuzzing
+
+Goal: fuzz consensus and Engine API parsers before claiming support.
+
+Deliverables:
+
+- SSZ fuzz targets;
+- Engine/Beacon response fuzz targets if JSON is admitted;
+- malformed fork payload seed corpus.
+
+Verification:
+
+- `cargo check --manifest-path fuzz/Cargo.toml`
+
+Exit criteria:
+
+- Consensus and Engine parser boundaries have adversarial coverage.
+
+## Phase 12: Networking, Node, And Operations Boundaries
+
+### v0.63.0 - DevP2P And Discovery Threat Model
+
+Goal: decide and document the exact networking scope before implementation.
+
+Deliverables:
+
+- Discovery v4/v5 decision;
+- RLPx handshake threat model;
+- peer identity and ENR policy;
+- resource, timeout, and process-isolation plan;
+- default-off feature policy.
+
+Verification:
+
+- security review of the networking decision document.
+
+Exit criteria:
+
+- No P2P code lands before the attack surface is scoped.
+
+### v0.64.0 - RLPx And Discovery Dependency Admission
+
+Goal: admit networking dependencies behind optional crates only.
+
+Deliverables:
+
+- latest-version, license, feature, MSRV, and maintenance review;
+- no default graph expansion;
+- test-only loopback transport;
+- timeout and message-size policy.
+
+Verification:
+
+- `cargo check --workspace --all-features`
+- `cargo deny check`
+
+Exit criteria:
+
+- Networking dependencies are isolated from protocol-core users.
+
+### v0.65.0 - Eth Wire Protocol Messages
+
+Goal: encode and decode Ethereum wire protocol messages with strict limits.
+
+Deliverables:
+
+- status, block header/body, receipt, pooled transaction, and node-data message
+  models for selected protocol versions;
+- message-size and batch limits;
+- fork/protocol-version negotiation policy;
+- malformed message tests.
+
+Verification:
+
+- `cargo test -p eth-valkyoth-p2p`
+- P2P fuzz target builds.
+
+Exit criteria:
+
+- Wire messages are parser-safe before peer management is attempted.
+
+### v0.66.0 - Snap Protocol Messages
+
+Goal: encode and decode snap-sync protocol messages.
+
+Deliverables:
+
+- account range, storage range, bytecode, and trie-node message models;
+- response size and proof-count limits;
+- malformed proof and oversized response tests.
+
+Verification:
+
+- `cargo test -p eth-valkyoth-p2p`
+
+Exit criteria:
+
+- Snap data remains untrusted until verified by trie/proof helpers.
+
+### v0.67.0 - Txpool And Mempool Policy
+
+Goal: provide transaction pool policy helpers without running an implicit node.
+
+Deliverables:
+
+- transaction admission policy model;
+- replacement and nonce-gap rules;
+- local/private transaction redaction rules;
+- no automatic rebroadcast;
+- adversarial replacement tests.
+
+Verification:
+
+- `cargo test -p eth-valkyoth-txpool`
+
+Exit criteria:
+
+- Mempool helpers are deterministic policy tools, not a hidden networking
+  service.
+
+### v0.68.0 - Sync Orchestration Boundaries
+
+Goal: model sync workflows as explicit state machines.
+
+Deliverables:
+
+- header sync state machine;
+- body/receipt retrieval state machine;
+- snap-sync state machine hooks;
+- peer trust and proof-validation boundaries;
+- structured progress/error observability hooks with redaction policy;
+- cancellation and resource-limit tests.
+
+Verification:
+
+- `cargo test -p eth-valkyoth-sync`
+
+Exit criteria:
+
+- Sync orchestration cannot imply verified state without proof or consensus
+  evidence, and operational diagnostics do not leak sensitive transaction or
+  endpoint material.
+
+### v0.69.0 - Mining, Builder, And Validator Boundary Decision
+
+Goal: decide what local block production or validator-adjacent support belongs
+in this crate family.
+
+Deliverables:
+
+- threat model for block building, MEV/builder APIs, validator duties, and key
+  custody;
+- explicit implement/defer decision;
+- if implemented, split follow-up release plan before 1.0;
+- no validator key material in default crates.
+
+Verification:
+
+- security review of the decision document.
+
+Exit criteria:
+
+- Block-production and validator-adjacent scope is either versioned or
+  explicitly excluded from 1.0 with documented rationale.
+
+## Phase 13: Production Hardening
+
+### v0.70.0 - Platform Matrix
 
 Goal: verify supported operating systems and targets.
 
@@ -1286,7 +1769,7 @@ Exit criteria:
 
 - Platform support claims match tested evidence.
 
-### v0.48.0 - Kani Formal Verification Harness
+### v0.71.0 - Kani Formal Verification Harness
 
 Goal: add bounded formal verification evidence for the highest-risk arithmetic,
 parser, and typestate invariants.
@@ -1313,7 +1796,7 @@ Exit criteria:
 - Formal verification covers selected bounded invariants before API stability
   and external audit remediation begin.
 
-### v0.49.0 - Public API Stability Pass
+### v0.72.0 - Public API Stability Pass
 
 Goal: stabilize the public API shape before 1.0.
 
@@ -1332,7 +1815,7 @@ Exit criteria:
 
 - The remaining 1.0 work is hardening, not API invention.
 
-### v0.50.0 - Independent Audit Remediation
+### v0.73.0 - Independent Audit Remediation
 
 Goal: fix findings from external review.
 
@@ -1352,7 +1835,7 @@ Exit criteria:
 
 - No unresolved critical or high findings remain.
 
-### v0.51.0 - Release Evidence Dry Run
+### v0.74.0 - Release Evidence Dry Run
 
 Goal: prove the release-evidence process before 1.0.
 
@@ -1366,7 +1849,7 @@ Deliverables:
 
 Verification:
 
-- release-readiness script for `v0.51.0`.
+- release-readiness script for `v0.74.0`.
 
 Exit criteria:
 

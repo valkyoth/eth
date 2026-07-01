@@ -4,17 +4,20 @@ Status: planning document
 
 Crate name: `eth`
 
-1.0 target: a serious production-ready Ethereum execution-layer toolkit for
-bounded decoding, fork-aware validation, cryptographic verification, explicit
-RPC trust policy, optional EVM execution, optional signer isolation, and
+1.0 target: a serious production-ready Ethereum toolkit for bounded decoding,
+fork-aware validation, cryptographic verification, contract ABI helpers,
+consensus and Engine API boundaries, explicit RPC trust policy, optional EVM
+execution, optional signer isolation, optional networking/sync boundaries, and
 optional Reth integration.
 
 ## Core Position
 
-`eth` is not a full execution client, consensus client, validator client, or
-generic re-export of upstream Ethereum crates. It is a security-oriented
-workspace that gives applications stable, testable, explicit boundaries around
-Ethereum execution-layer operations.
+`eth` is not a generic re-export of upstream Ethereum crates and must not hide
+networking, signing, consensus, or node behavior behind defaults. It is a
+security-oriented workspace that gives applications stable, testable, explicit
+boundaries around Ethereum operations. The 1.0 roadmap includes optional
+contract, consensus, Engine API, networking, sync, and node-adjacent tracks, but
+the default facade remains conservative and explicit.
 
 The first production value is:
 
@@ -23,6 +26,9 @@ The first production value is:
 - stable protocol types and validation states;
 - signer and key isolation;
 - RPC trust models that do not imply state correctness;
+- contract ABI and common standard helpers that do not imply contract trust;
+- optional consensus, Engine, networking, and sync boundaries with explicit
+  trust and resource policies;
 - conformance evidence against pinned upstream specification revisions.
 
 ## Non-Negotiable Engineering Rules
@@ -62,6 +68,14 @@ The first production value is:
 - `eth-valkyoth-evm`: optional REVM adapter boundary with explicit fork, block,
   transaction, snapshot, limit, and commit policy.
 - `eth-valkyoth-rpc`: optional RPC policy over admitted provider transports.
+- `eth-valkyoth-abi`: optional ABI, contract-call, event, error, and common
+  contract-standard helpers.
+- `eth-valkyoth-consensus`: optional SSZ, beacon, and light-client boundaries.
+- `eth-valkyoth-engine`: optional Engine API type and validation boundary.
+- `eth-valkyoth-p2p`: optional DevP2P/RLPx, discovery, eth, and snap message
+  boundary.
+- `eth-valkyoth-txpool`: optional transaction-pool policy helpers.
+- `eth-valkyoth-sync`: optional sync orchestration state machines.
 - `eth-valkyoth-sanitization`: optional bridge to the `sanitization` crate for
   secret-bearing Ethereum data.
 - `eth-valkyoth-derive`: optional derive macros for explicit sanitization users
@@ -197,17 +211,19 @@ Release gate:
   default;
 - local signer remains non-default.
 
-## Phase 8: Optional Reth And P2P Integration
+## Phase 8: Optional Reth, Contract, Consensus, Networking, And Node Tracks
 
-Add Reth and P2P only after a threat-model expansion. Keep Reth type conversion
-at the adapter boundary and avoid making node internals part of core protocol
-APIs.
+Add Reth, ABI/contract helpers, consensus/Engine boundaries, P2P, txpool, and
+sync only after threat-model expansion and dependency review. Keep every
+network, node, signer, and consensus adapter outside the default graph unless a
+future major version explicitly changes that policy.
 
 Release gate:
 
 - separate fuzz corpus and load tests;
 - reviewed dependency expansion;
-- no Reth or P2P dependency in the default graph.
+- no Reth, P2P, consensus, Engine, txpool, sync, RPC, or signer dependency in
+  the default graph.
 
 ## Phase 9: 1.0 Production Readiness
 

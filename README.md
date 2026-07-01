@@ -103,6 +103,12 @@ Not implemented yet:
   validation yet; scheduled for `v0.22.0` and `v0.23.0`.
 - No full EIP-712 typed-data encoder yet; scheduled for `v0.26.0`.
 - No block parser yet.
+- No ABI/contract helper surface yet; scheduled for `v0.47.0` through
+  `v0.55.0`.
+- No consensus/Engine API support yet; scheduled for `v0.56.0` through
+  `v0.62.0`.
+- No P2P, txpool, sync, mining, builder, or validator-adjacent boundary yet;
+  scheduled for `v0.63.0` through `v0.69.0`.
 
 ## Trust Dashboard
 
@@ -118,7 +124,7 @@ Not implemented yet:
 | Default features | protocol-core only |
 | Network/signing defaults | none |
 | Release evidence | local gates, cargo-deny, cargo-audit, SBOM, pentest report |
-| Formal verification | Kani harness planned for `v0.48.0` as extra assurance |
+| Formal verification | Kani harness planned for `v0.71.0` as extra assurance |
 | Crate versions | tracked in [`docs/CRATE_VERSION_MATRIX.md`](docs/CRATE_VERSION_MATRIX.md) |
 | 1.0 target | serious production-ready Ethereum execution-layer toolkit |
 
