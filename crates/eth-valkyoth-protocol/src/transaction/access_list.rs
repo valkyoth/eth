@@ -140,6 +140,16 @@ impl<'a> AccessList<'a> {
             items: self.list.items(),
         }
     }
+
+    /// Returns the encoded RLP list length of the borrowed access list.
+    pub(crate) const fn encoded_rlp_len(self) -> usize {
+        self.list.encoded_len()
+    }
+
+    /// Re-encodes the already validated borrowed access list.
+    pub(crate) fn encode_rlp(self, output: &mut [u8]) -> Result<usize, DecodeError> {
+        eth_valkyoth_codec::encode_decoded_list(self.list, output)
+    }
 }
 
 /// Borrowed EIP-2930 access-list entry.

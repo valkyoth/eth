@@ -79,6 +79,19 @@ fn encodes_list_payloads() {
 }
 
 #[test]
+fn encodes_list_headers_for_streaming_encoders() {
+    let mut short_header = [0_u8; 1];
+    assert_eq!(encoded_rlp_list_header_len(8), Ok(1));
+    assert_eq!(encode_rlp_list_header(8, &mut short_header), Ok(1));
+    assert_eq!(short_header, [0xc8]);
+
+    let mut long_header = [0_u8; 2];
+    assert_eq!(encoded_rlp_list_header_len(56), Ok(2));
+    assert_eq!(encode_rlp_list_header(56, &mut long_header), Ok(2));
+    assert_eq!(long_header, [0xf8, 56]);
+}
+
+#[test]
 fn encodes_long_list_payloads() {
     let payload = [0x80_u8; 56];
     let mut output = [0_u8; 64];

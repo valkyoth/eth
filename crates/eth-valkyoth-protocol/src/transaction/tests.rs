@@ -4,6 +4,7 @@ use eth_valkyoth_primitives::{Address, B256, Gas, Nonce, Wei};
 
 mod blob;
 mod dynamic_fee;
+mod encoding;
 
 extern crate std;
 use std::string::ToString;

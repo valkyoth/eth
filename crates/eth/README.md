@@ -26,20 +26,20 @@
 `eth` is the public facade crate for a `no_std`-first Ethereum
 execution-layer protocol workspace.
 
-The crate is intentionally conservative at `0.15.0`: it provides explicit
+The crate is intentionally conservative at `0.16.0`: it provides explicit
 Ethereum primitive domains, bounded decode-budget policy, stable error
 categories, primitive RLP bridge helpers, a caller-provided Keccak-256 boundary,
 RLP fuzz-harness evidence, a transaction envelope shell, unvalidated legacy
 transaction field decoding, unvalidated EIP-2930 access-list transaction field
 decoding, unvalidated EIP-1559 dynamic-fee transaction field decoding,
-unvalidated EIP-4844 blob transaction field decoding, small first-party crate
-boundaries, optional sanitization support, and release evidence before RPC,
-signer, EVM, Reth, or P2P integrations become real dependencies.
+unvalidated EIP-4844 blob transaction field decoding, no-allocation canonical
+transaction envelope encoding for admitted decoded domains, small first-party
+crate boundaries, optional sanitization support, and release evidence before
+RPC, signer, EVM, Reth, or P2P integrations become real dependencies.
 
 ## Current Status
 
-The current release candidate is `0.15.0`; pentest has passed and final GitHub
-checks are pending before tag.
+The current release candidate is `0.16.0`; pentest is pending.
 
 Implemented now:
 
@@ -65,6 +65,8 @@ Implemented now:
 - Unvalidated EIP-4844 blob transaction field decoding for blob fee, required
   call target, blob versioned hash list, calldata, access list, and signature
   words.
+- No-allocation canonical transaction envelope encoding for admitted
+  unvalidated legacy, EIP-2930, EIP-1559, and EIP-4844 transaction domains.
 - Caller-provided Keccak-256 trait boundary without a default hash
   implementation dependency.
 - RLP fuzz harness with committed hex seed corpus and crash reproduction docs.
@@ -103,21 +105,21 @@ Not implemented yet:
 
 ```toml
 [dependencies]
-eth = "0.15"
+eth = "0.16"
 ```
 
 Disable defaults explicitly for embedded or freestanding builds:
 
 ```toml
 [dependencies]
-eth = { version = "0.15", default-features = false }
+eth = { version = "0.16", default-features = false }
 ```
 
 Optional sanitization support:
 
 ```toml
 [dependencies]
-eth = { version = "0.15", features = ["sanitization"] }
+eth = { version = "0.16", features = ["sanitization"] }
 ```
 
 ## Features
@@ -213,6 +215,7 @@ use eth::codec::DecodeLimits;
 use eth::primitives::{Gas, Nonce, Wei};
 use eth::protocol::{
     DynamicFeeTransactionTo, SignatureYParity, decode_dynamic_fee_transaction,
+    encode_dynamic_fee_transaction,
 };
 
 let dynamic_fee_tx = [
@@ -240,7 +243,11 @@ assert_eq!(tx.value, Wei::from_u128(5));
 assert_eq!(tx.access_list.address_count(), 0);
 assert_eq!(tx.access_list.storage_key_count(), 0);
 assert_eq!(tx.y_parity, SignatureYParity::Odd);
-# Ok::<(), eth::error::DynamicFeeTransactionDecodeError>(())
+
+let mut encoded = [0_u8; 32];
+let written = encode_dynamic_fee_transaction(&tx, &mut encoded)?;
+assert_eq!(encoded.get(..written), Some(dynamic_fee_tx.as_slice()));
+# Ok::<(), Box<dyn std::error::Error>>(())
 ```
 
 ## Constant-Time Composition
@@ -509,7 +516,7 @@ the workspace can keep small, auditable boundaries:
 The minimum supported Rust version is Rust `1.90.0`. New deployments should use
 the latest stable Rust verified by the release gates.
 
-Compatibility evidence for `0.15.0`:
+Compatibility evidence for `0.16.0`:
 
 | Rust | Local Evidence |
 | --- | --- |

@@ -6,7 +6,7 @@ Most users should depend on the facade crate instead:
 
 ```toml
 [dependencies]
-eth = "0.10"
+eth = "0.16"
 ```
 
 Crates.io: <https://crates.io/crates/eth>
@@ -20,3 +20,7 @@ project fuzzing guide for target names, committed seed corpus handling, and
 crash reproduction:
 
 <https://github.com/valkyoth/eth/blob/main/docs/fuzzing.md>
+
+The `0.16.0` release adds a list-header encoding helper for no-allocation
+streaming encoders that compute an RLP list payload length before writing the
+payload bytes.

@@ -38,11 +38,11 @@ dependencies = [
 
 [[package]]
 name = "eth-valkyoth-codec"
-version = "0.10.0"
+version = "0.16.0"
 
 [[package]]
 name = "eth-valkyoth-primitives"
-version = "0.10.0"
+version = "0.10.1"
 dependencies = [
  "eth-valkyoth-codec",
  "subtle",
@@ -50,7 +50,7 @@ dependencies = [
 
 [[package]]
 name = "eth-valkyoth-protocol"
-version = "0.15.0"
+version = "0.16.0"
 dependencies = [
  "eth-valkyoth-codec",
  "eth-valkyoth-primitives",

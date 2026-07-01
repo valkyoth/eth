@@ -525,7 +525,7 @@ Exit criteria:
 
 ### v0.15.0 - Blob Transaction Decode
 
-Status: release candidate ready; waiting for final GitHub checks before tag.
+Status: tagged as v0.15.0.
 
 Goal: decode EIP-4844 blob transaction structure.
 
@@ -545,6 +545,8 @@ Exit criteria:
 - Blob transaction data remains bounded and fork-unvalidated.
 
 ### v0.16.0 - Transaction Encoding
+
+Status: implementation complete; pentest pending.
 
 Goal: encode admitted transaction envelopes canonically.
 

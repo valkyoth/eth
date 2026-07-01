@@ -1,94 +1,94 @@
 [release]
-version = "0.15.0"
+version = "0.16.0"
 policy = "independent"
 
 [crates."eth-valkyoth-codec"]
 previous_version = "0.10.0"
-version = "0.10.0"
-change = "unchanged"
-publish = false
-reason = "No package changes for v0.15.0."
+version = "0.16.0"
+change = "code"
+publish = true
+reason = "Adds the v0.16.0 RLP list-header helper used by no-allocation transaction encoders."
 
 [crates."eth-valkyoth-primitives"]
 previous_version = "0.10.0"
-version = "0.10.0"
-change = "unchanged"
-publish = false
-reason = "No package changes for v0.15.0."
+version = "0.10.1"
+change = "dependency"
+publish = true
+reason = "Updates the published codec dependency range for v0.16.0."
 
 [crates."eth-valkyoth-hash"]
 previous_version = "0.10.0"
 version = "0.10.0"
 change = "unchanged"
 publish = false
-reason = "No package changes for v0.15.0."
+reason = "No package changes for v0.16.0."
 
 [crates."eth-valkyoth-protocol"]
-previous_version = "0.14.0"
-version = "0.15.0"
+previous_version = "0.15.0"
+version = "0.16.0"
 change = "code"
 publish = true
-reason = "Adds the v0.15.0 unvalidated EIP-4844 blob transaction decoder."
+reason = "Adds canonical transaction envelope encoding for admitted decoded transaction domains."
 
 [crates."eth-valkyoth-verify"]
 previous_version = "0.7.0"
 version = "0.7.0"
 change = "unchanged"
 publish = false
-reason = "No package changes for v0.15.0."
+reason = "No package changes for v0.16.0."
 
 [crates."eth-valkyoth-derive"]
 previous_version = "0.7.0"
 version = "0.7.0"
 change = "unchanged"
 publish = false
-reason = "No package changes for v0.15.0."
+reason = "No package changes for v0.16.0."
 
 [crates."eth-valkyoth-sanitization"]
 previous_version = "0.7.0"
 version = "0.7.0"
 change = "unchanged"
 publish = false
-reason = "No package changes for v0.15.0."
+reason = "No package changes for v0.16.0."
 
 [crates."eth-valkyoth-evm"]
 previous_version = "0.7.0"
 version = "0.7.0"
 change = "unchanged"
 publish = false
-reason = "No package changes for v0.15.0."
+reason = "No package changes for v0.16.0."
 
 [crates."eth-valkyoth-rpc"]
 previous_version = "0.7.0"
 version = "0.7.0"
 change = "unchanged"
 publish = false
-reason = "No package changes for v0.15.0."
+reason = "No package changes for v0.16.0."
 
 [crates."eth-valkyoth-signer"]
 previous_version = "0.7.0"
 version = "0.7.0"
 change = "unchanged"
 publish = false
-reason = "No package changes for v0.15.0."
+reason = "No package changes for v0.16.0."
 
 [crates."eth-valkyoth-reth"]
 previous_version = "0.7.0"
 version = "0.7.0"
 change = "unchanged"
 publish = false
-reason = "No package changes for v0.15.0."
+reason = "No package changes for v0.16.0."
 
 [crates."eth-valkyoth-testkit"]
 previous_version = "0.7.0"
 version = "0.7.0"
 change = "unchanged"
 publish = false
-reason = "No package changes for v0.15.0."
+reason = "No package changes for v0.16.0."
 
 [crates.eth]
-previous_version = "0.14.0"
-version = "0.15.0"
+previous_version = "0.15.0"
+version = "0.16.0"
 change = "code"
 publish = true
-reason = "Updates facade documentation, error re-exports, and dependency ranges for the v0.15.0 blob transaction decoder."
+reason = "Updates facade documentation, error re-exports, and dependency ranges for the v0.16.0 transaction encoders."

@@ -12,8 +12,9 @@ use crate::{
 
 pub use encode::{
     encode_decoded_integer, encode_decoded_item, encode_decoded_list, encode_decoded_scalar,
-    encode_rlp_integer, encode_rlp_list_payload, encode_rlp_scalar, encoded_rlp_integer_len,
-    encoded_rlp_list_len, encoded_rlp_scalar_len,
+    encode_rlp_integer, encode_rlp_list_header, encode_rlp_list_payload, encode_rlp_scalar,
+    encoded_rlp_integer_len, encoded_rlp_list_header_len, encoded_rlp_list_len,
+    encoded_rlp_scalar_len,
 };
 pub use integer::{
     MAX_RLP_U256_BYTES, RlpInteger, decode_rlp_integer, decode_rlp_integer_partial, decode_rlp_u64,

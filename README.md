@@ -35,8 +35,8 @@ dependencies.
 
 ## Current Status
 
-Status: `v0.15.0` release candidate is ready; waiting for final GitHub checks
-before tag. `v0.14.0` is the latest tagged release.
+Status: `v0.16.0` transaction encoding implementation is ready for pentest.
+`v0.15.0` is the latest tagged release.
 
 Implemented now:
 
@@ -64,6 +64,8 @@ Implemented now:
 - Unvalidated EIP-4844 blob transaction field decoding for blob fee, required
   call target, blob versioned hash list, calldata, access list, and signature
   words.
+- No-allocation canonical transaction envelope encoding for admitted
+  unvalidated legacy, EIP-2930, EIP-1559, and EIP-4844 transaction domains.
 - Caller-provided Keccak-256 trait boundary without a default hash
   implementation dependency.
 - RLP fuzz harness with committed hex seed corpus and crash reproduction docs.
@@ -107,14 +109,14 @@ Not implemented yet:
 
 ```toml
 [dependencies]
-eth = "0.15"
+eth = "0.16"
 ```
 
 For optional sanitization support:
 
 ```toml
 [dependencies]
-eth = { version = "0.15", features = ["sanitization"] }
+eth = { version = "0.16", features = ["sanitization"] }
 ```
 
 ## Features
@@ -206,6 +208,7 @@ use eth::codec::DecodeLimits;
 use eth::primitives::{Gas, Nonce, Wei};
 use eth::protocol::{
     DynamicFeeTransactionTo, SignatureYParity, decode_dynamic_fee_transaction,
+    encode_dynamic_fee_transaction,
 };
 
 let dynamic_fee_tx = [
@@ -233,7 +236,11 @@ assert_eq!(tx.value, Wei::from_u128(5));
 assert_eq!(tx.access_list.address_count(), 0);
 assert_eq!(tx.access_list.storage_key_count(), 0);
 assert_eq!(tx.y_parity, SignatureYParity::Odd);
-# Ok::<(), eth::error::DynamicFeeTransactionDecodeError>(())
+
+let mut encoded = [0_u8; 32];
+let written = encode_dynamic_fee_transaction(&tx, &mut encoded)?;
+assert_eq!(encoded.get(..written), Some(dynamic_fee_tx.as_slice()));
+# Ok::<(), Box<dyn std::error::Error>>(())
 ```
 
 ## Constant-Time Composition
@@ -504,7 +511,7 @@ friendly, and independently testable.
 The minimum supported Rust version is Rust `1.90.0`. New deployments should use
 the pinned stable Rust `1.96.1` until the toolchain policy is updated.
 
-Compatibility evidence for `0.15.0`:
+Compatibility evidence for `0.16.0`:
 
 | Rust | Local Evidence |
 | --- | --- |
@@ -521,8 +528,8 @@ Compatibility evidence for `0.15.0`:
 
 ```bash
 scripts/checks.sh
-scripts/release_0_15_gate.sh
-scripts/validate-release-readiness.sh v0.15.0
+scripts/release_0_16_gate.sh
+scripts/validate-release-readiness.sh v0.16.0
 ```
 
 For dependency-policy checks, install `cargo-deny` and `cargo-audit`, then run:

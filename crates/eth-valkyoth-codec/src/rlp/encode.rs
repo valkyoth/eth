@@ -10,7 +10,10 @@ use super::{
 
 /// Returns the encoded RLP byte length for a scalar byte-string payload.
 pub fn encoded_rlp_scalar_len(payload: &[u8]) -> Result<usize, DecodeError> {
-    encoded_payload_len(payload, ScalarSingleByte::Enabled)
+    if payload.len() == 1 && payload.first().is_some_and(|byte| *byte <= 0x7f) {
+        return Ok(1);
+    }
+    encoded_payload_len(payload.len())
 }
 
 /// Returns the encoded RLP byte length for a canonical integer payload.
@@ -27,7 +30,19 @@ pub fn encoded_rlp_integer_len(payload: &[u8]) -> Result<usize, DecodeError> {
 /// The payload must be the concatenated encoded child items of the list.
 pub fn encoded_rlp_list_len(payload: &[u8], limits: DecodeLimits) -> Result<usize, DecodeError> {
     validate_encoded_list_payload(payload, limits)?;
-    encoded_payload_len(payload, ScalarSingleByte::Disabled)
+    encoded_payload_len(payload.len())
+}
+
+/// Returns the RLP list-header length for a known list payload length.
+///
+/// This helper does not inspect the payload bytes. Streaming and fixed-buffer
+/// encoders use it after independently computing a payload made only from
+/// canonical child encodings.
+pub fn encoded_rlp_list_header_len(payload_len: usize) -> Result<usize, DecodeError> {
+    let total_len = encoded_payload_len(payload_len)?;
+    total_len
+        .checked_sub(payload_len)
+        .ok_or(DecodeError::LengthOverflow)
 }
 
 /// Canonically encodes a scalar byte-string payload into `output`.
@@ -65,6 +80,23 @@ pub fn encode_rlp_list_payload(
 ) -> Result<usize, DecodeError> {
     validate_encoded_list_payload(payload, limits)?;
     encode_rlp_list_payload_unchecked(payload, output)
+}
+
+/// Encodes only the RLP list header for a known payload length.
+///
+/// The payload must later be filled with canonical encoded child items. This
+/// helper is intended for no-allocation encoders that cannot first materialize
+/// the whole list payload in a separate buffer.
+pub fn encode_rlp_list_header(payload_len: usize, output: &mut [u8]) -> Result<usize, DecodeError> {
+    let required_len = encoded_rlp_list_header_len(payload_len)?;
+    if output.len() < required_len {
+        return Err(DecodeError::OffsetOutOfBounds);
+    }
+    if payload_len <= SHORT_STRING_LIMIT {
+        write_short_header(output, SHORT_LIST_OFFSET, payload_len)
+    } else {
+        write_long_header(output, LONG_LIST_OFFSET, payload_len)
+    }
 }
 
 fn encode_rlp_list_payload_unchecked(
@@ -127,17 +159,7 @@ enum ScalarSingleByte {
     Disabled,
 }
 
-fn encoded_payload_len(
-    payload: &[u8],
-    scalar_single_byte: ScalarSingleByte,
-) -> Result<usize, DecodeError> {
-    let payload_len = payload.len();
-    if matches!(scalar_single_byte, ScalarSingleByte::Enabled)
-        && payload_len == 1
-        && payload.first().is_some_and(|byte| *byte <= 0x7f)
-    {
-        return Ok(1);
-    }
+fn encoded_payload_len(payload_len: usize) -> Result<usize, DecodeError> {
     if payload_len <= SHORT_STRING_LIMIT {
         return checked_len_add(1, payload_len);
     }
@@ -152,7 +174,14 @@ fn encode_payload(
     long_offset: u8,
     scalar_single_byte: ScalarSingleByte,
 ) -> Result<usize, DecodeError> {
-    let required_len = encoded_payload_len(payload, scalar_single_byte)?;
+    let required_len = if matches!(scalar_single_byte, ScalarSingleByte::Enabled)
+        && payload.len() == 1
+        && payload.first().is_some_and(|byte| *byte <= 0x7f)
+    {
+        1
+    } else {
+        encoded_payload_len(payload.len())?
+    };
     if output.len() < required_len {
         return Err(DecodeError::OffsetOutOfBounds);
     }

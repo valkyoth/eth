@@ -1,7 +1,6 @@
 # Crate Version Matrix
 
-Status: `v0.15.0` release candidate ready; waiting for final GitHub checks
-before tag.
+Status: `v0.16.0` implementation ready for pentest.
 
 `eth` uses independent crate versions. The facade crate remains the main user
 entry point, but support crates are published only when their own package
@@ -27,23 +26,23 @@ but must be republished so immutable crates.io package metadata is corrected.
 workspace manifests before release. The script refuses accidental lockstep
 publication when a crate is marked `unchanged`.
 
-## v0.15.0 Tracking Table
+## v0.16.0 Tracking Table
 
 | Crate | Published | Planned | Change | Publish | Reason |
 | --- | --- | --- | --- | --- | --- |
-| `eth-valkyoth-codec` | `0.10.0` | `0.10.0` | `unchanged` | No | No package changes for v0.15.0. |
-| `eth-valkyoth-primitives` | `0.10.0` | `0.10.0` | `unchanged` | No | No package changes for v0.15.0. |
-| `eth-valkyoth-hash` | `0.10.0` | `0.10.0` | `unchanged` | No | No package changes for v0.15.0. |
-| `eth-valkyoth-protocol` | `0.14.0` | `0.15.0` | `code` | Yes | Adds the unvalidated EIP-4844 blob transaction field decoder. |
-| `eth-valkyoth-verify` | `0.7.0` | `0.7.0` | `unchanged` | No | No package changes for v0.15.0. |
-| `eth-valkyoth-derive` | `0.7.0` | `0.7.0` | `unchanged` | No | No package changes for v0.15.0. |
-| `eth-valkyoth-sanitization` | `0.7.0` | `0.7.0` | `unchanged` | No | No package changes for v0.15.0. |
-| `eth-valkyoth-evm` | `0.7.0` | `0.7.0` | `unchanged` | No | No package changes for v0.15.0. |
-| `eth-valkyoth-rpc` | `0.7.0` | `0.7.0` | `unchanged` | No | No package changes for v0.15.0. |
-| `eth-valkyoth-signer` | `0.7.0` | `0.7.0` | `unchanged` | No | No package changes for v0.15.0. |
-| `eth-valkyoth-reth` | `0.7.0` | `0.7.0` | `unchanged` | No | No package changes for v0.15.0. |
-| `eth-valkyoth-testkit` | `0.7.0` | `0.7.0` | `unchanged` | No | No package changes for v0.15.0. |
-| `eth` | `0.14.0` | `0.15.0` | `code` | Yes | Updates facade documentation, error re-exports, and dependency ranges for the v0.15.0 blob transaction decoder. |
+| `eth-valkyoth-codec` | `0.10.0` | `0.16.0` | `code` | Yes | Adds the list-header helper used by no-allocation transaction encoders. |
+| `eth-valkyoth-primitives` | `0.10.0` | `0.10.1` | `dependency` | Yes | Updates the published codec dependency range for v0.16.0. |
+| `eth-valkyoth-hash` | `0.10.0` | `0.10.0` | `unchanged` | No | No package changes for v0.16.0. |
+| `eth-valkyoth-protocol` | `0.15.0` | `0.16.0` | `code` | Yes | Adds canonical transaction envelope encoding for admitted decoded transaction domains. |
+| `eth-valkyoth-verify` | `0.7.0` | `0.7.0` | `unchanged` | No | No package changes for v0.16.0. |
+| `eth-valkyoth-derive` | `0.7.0` | `0.7.0` | `unchanged` | No | No package changes for v0.16.0. |
+| `eth-valkyoth-sanitization` | `0.7.0` | `0.7.0` | `unchanged` | No | No package changes for v0.16.0. |
+| `eth-valkyoth-evm` | `0.7.0` | `0.7.0` | `unchanged` | No | No package changes for v0.16.0. |
+| `eth-valkyoth-rpc` | `0.7.0` | `0.7.0` | `unchanged` | No | No package changes for v0.16.0. |
+| `eth-valkyoth-signer` | `0.7.0` | `0.7.0` | `unchanged` | No | No package changes for v0.16.0. |
+| `eth-valkyoth-reth` | `0.7.0` | `0.7.0` | `unchanged` | No | No package changes for v0.16.0. |
+| `eth-valkyoth-testkit` | `0.7.0` | `0.7.0` | `unchanged` | No | No package changes for v0.16.0. |
+| `eth` | `0.15.0` | `0.16.0` | `code` | Yes | Updates facade documentation, error re-exports, and dependency ranges for the v0.16.0 transaction encoders. |
 
 Update this table and `release-crates.toml` in the same commit whenever a crate
 changes release state.
