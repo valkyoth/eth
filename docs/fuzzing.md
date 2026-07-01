@@ -1,10 +1,10 @@
 # Fuzzing
 
-Status: `v0.23.0` RLP, transaction envelope, legacy transaction decode,
+Status: `v0.24.0` RLP, transaction envelope, legacy transaction decode,
 EIP-2930 access-list transaction decode, EIP-1559 dynamic-fee transaction
-decode, EIP-4844 blob transaction decode, and transaction encode fuzz/test
-baseline, including signing-preimage encoding, plus Ethereum signature parsing
-fuzz coverage. Decoded transaction signature validation and EIP-712
+decode, EIP-4844 blob transaction decode, EIP-7702 set-code transaction decode,
+and transaction encode fuzz/test baseline, including signing-preimage encoding,
+plus Ethereum signature parsing fuzz coverage. Decoded transaction signature validation and EIP-712
 domain-safety coverage are currently unit-test based because they do not parse
 new untrusted byte formats.
 
@@ -22,7 +22,7 @@ state and are ignored by git.
 | `rlp_list` | List exact and partial decoders plus recursive item traversal. |
 | `rlp_encode` | Scalar, integer, list-payload, list-header, and decoded-item encode paths. |
 | `primitives` | Primitive RLP bridge decoders and canonical integer payload constructors. |
-| `transaction_envelope` | EIP-2718 typed envelope classification, legacy RLP-list shell classification, unvalidated legacy/EIP-2930/EIP-1559/EIP-4844 field decoding, and fixed-buffer canonical re-encoding for successfully decoded transaction models. |
+| `transaction_envelope` | EIP-2718 typed envelope classification, legacy RLP-list shell classification, unvalidated legacy/EIP-2930/EIP-1559/EIP-4844/EIP-7702 field decoding, and fixed-buffer canonical re-encoding for successfully decoded transaction models. |
 | `ethereum_signature` | Ethereum `r || s || y_parity` signature parsing and digest-level sender recovery with a deterministic stub hasher. |
 | `decode_limits` | Stateless and accumulator decode-budget APIs. |
 
@@ -34,9 +34,9 @@ List-recursion fuzz targets drive item iteration to
 seed corpus includes a 128-level empty-list chain for this path.
 The transaction-envelope fuzz target also drives `decode_legacy_transaction`,
 `decode_access_list_transaction`, `decode_dynamic_fee_transaction`,
-`decode_blob_transaction`, and the matching fixed-buffer encoders when decoding
-succeeds, then applies the same recursion limit when it sees a legacy RLP-list
-envelope.
+`decode_blob_transaction`, `decode_set_code_transaction`, and the matching
+fixed-buffer encoders when decoding succeeds, then applies the same recursion
+limit when it sees a legacy RLP-list envelope.
 
 ## Seed Corpus
 

@@ -7,17 +7,24 @@ use eth_valkyoth_primitives::Address;
 use super::access_list::ACCESS_LIST_TRANSACTION_TYPE;
 use super::blob::BLOB_TRANSACTION_TYPE;
 use super::dynamic_fee::DYNAMIC_FEE_TRANSACTION_TYPE;
+use super::set_code::{SET_CODE_TRANSACTION_TYPE, SetCodeAuthorizationList};
 use super::{
     AccessListTransactionTo, BlobVersionedHashes, UnvalidatedAccessListTransaction,
     UnvalidatedBlobTransaction, UnvalidatedDynamicFeeTransaction, UnvalidatedLegacyTransaction,
+    UnvalidatedSetCodeTransaction,
 };
 use crate::transaction::LegacyTransactionTo;
 
 mod error;
+mod payload_len;
 #[cfg(test)]
 mod tests;
 
 pub use error::{TransactionEncodeError, TransactionEncodeErrorCategory};
+use payload_len::{
+    access_list_payload_len, blob_payload_len, dynamic_fee_payload_len, legacy_payload_len,
+    set_code_payload_len,
+};
 
 const U64_BYTES: usize = 8;
 const U256_BYTES: usize = 32;
@@ -33,6 +40,8 @@ pub enum UnvalidatedTransaction<'a> {
     DynamicFee(UnvalidatedDynamicFeeTransaction<'a>),
     /// EIP-4844 blob transaction.
     Blob(UnvalidatedBlobTransaction<'a>),
+    /// EIP-7702 set-code transaction.
+    SetCode(UnvalidatedSetCodeTransaction<'a>),
 }
 
 /// Returns the canonical encoded transaction envelope length.
@@ -44,6 +53,7 @@ pub fn encoded_transaction_len(
         UnvalidatedTransaction::AccessList(tx) => encoded_access_list_transaction_len(&tx),
         UnvalidatedTransaction::DynamicFee(tx) => encoded_dynamic_fee_transaction_len(&tx),
         UnvalidatedTransaction::Blob(tx) => encoded_blob_transaction_len(&tx),
+        UnvalidatedTransaction::SetCode(tx) => encoded_set_code_transaction_len(&tx),
     }
 }
 
@@ -62,6 +72,7 @@ pub fn encode_transaction(
         UnvalidatedTransaction::AccessList(tx) => encode_access_list_transaction(&tx, output),
         UnvalidatedTransaction::DynamicFee(tx) => encode_dynamic_fee_transaction(&tx, output),
         UnvalidatedTransaction::Blob(tx) => encode_blob_transaction(&tx, output),
+        UnvalidatedTransaction::SetCode(tx) => encode_set_code_transaction(&tx, output),
     }
 }
 
@@ -193,74 +204,35 @@ pub fn encode_blob_transaction(
     .map_err(Into::into)
 }
 
-fn legacy_payload_len(tx: &UnvalidatedLegacyTransaction<'_>) -> Result<usize, DecodeError> {
-    sum_lengths(&[
-        encoded_u64_len(tx.nonce.get())?,
-        encoded_u256_len(tx.gas_price.to_be_bytes())?,
-        encoded_u64_len(tx.gas_limit.get())?,
-        encoded_legacy_to_len(tx.to)?,
-        encoded_u256_len(tx.value.to_be_bytes())?,
-        encoded_rlp_scalar_len(tx.input)?,
-        encoded_u256_len(tx.v)?,
-        encoded_u256_len(tx.r)?,
-        encoded_u256_len(tx.s)?,
-    ])
+/// Returns the canonical encoded EIP-7702 transaction length.
+pub fn encoded_set_code_transaction_len(
+    transaction: &UnvalidatedSetCodeTransaction<'_>,
+) -> Result<usize, TransactionEncodeError> {
+    encoded_typed_envelope_len(set_code_payload_len(transaction)?).map_err(Into::into)
 }
 
-fn access_list_payload_len(
-    tx: &UnvalidatedAccessListTransaction<'_>,
-) -> Result<usize, DecodeError> {
-    sum_lengths(&[
-        encoded_u64_len(tx.chain_id.get())?,
-        encoded_u64_len(tx.nonce.get())?,
-        encoded_u256_len(tx.gas_price.to_be_bytes())?,
-        encoded_u64_len(tx.gas_limit.get())?,
-        encoded_access_list_to_len(tx.to)?,
-        encoded_u256_len(tx.value.to_be_bytes())?,
-        encoded_rlp_scalar_len(tx.input)?,
-        tx.access_list.encoded_rlp_len(),
-        encoded_u64_len(u64::from(tx.y_parity.get()))?,
-        encoded_u256_len(tx.r)?,
-        encoded_u256_len(tx.s)?,
-    ])
-}
-
-fn dynamic_fee_payload_len(
-    tx: &UnvalidatedDynamicFeeTransaction<'_>,
-) -> Result<usize, DecodeError> {
-    sum_lengths(&[
-        encoded_u64_len(tx.chain_id.get())?,
-        encoded_u64_len(tx.nonce.get())?,
-        encoded_u256_len(tx.max_priority_fee_per_gas.to_be_bytes())?,
-        encoded_u256_len(tx.max_fee_per_gas.to_be_bytes())?,
-        encoded_u64_len(tx.gas_limit.get())?,
-        encoded_access_list_to_len(tx.to)?,
-        encoded_u256_len(tx.value.to_be_bytes())?,
-        encoded_rlp_scalar_len(tx.input)?,
-        tx.access_list.encoded_rlp_len(),
-        encoded_u64_len(u64::from(tx.y_parity.get()))?,
-        encoded_u256_len(tx.r)?,
-        encoded_u256_len(tx.s)?,
-    ])
-}
-
-fn blob_payload_len(tx: &UnvalidatedBlobTransaction<'_>) -> Result<usize, DecodeError> {
-    sum_lengths(&[
-        encoded_u64_len(tx.chain_id.get())?,
-        encoded_u64_len(tx.nonce.get())?,
-        encoded_u256_len(tx.max_priority_fee_per_gas.to_be_bytes())?,
-        encoded_u256_len(tx.max_fee_per_gas.to_be_bytes())?,
-        encoded_u64_len(tx.gas_limit.get())?,
-        encoded_rlp_scalar_len(&tx.to.to_bytes())?,
-        encoded_u256_len(tx.value.to_be_bytes())?,
-        encoded_rlp_scalar_len(tx.input)?,
-        tx.access_list.encoded_rlp_len(),
-        encoded_u256_len(tx.max_fee_per_blob_gas.to_be_bytes())?,
-        tx.blob_versioned_hashes.encoded_rlp_len(),
-        encoded_u64_len(u64::from(tx.y_parity.get()))?,
-        encoded_u256_len(tx.r)?,
-        encoded_u256_len(tx.s)?,
-    ])
+/// Canonically encodes an EIP-7702 set-code transaction.
+pub fn encode_set_code_transaction(
+    transaction: &UnvalidatedSetCodeTransaction<'_>,
+    output: &mut [u8],
+) -> Result<usize, TransactionEncodeError> {
+    let payload_len = set_code_payload_len(transaction)?;
+    encode_typed_envelope(SET_CODE_TRANSACTION_TYPE, payload_len, output, |fields| {
+        write_u64(transaction.chain_id.get(), fields)?;
+        write_u64(transaction.nonce.get(), fields)?;
+        write_wei(transaction.max_priority_fee_per_gas.to_be_bytes(), fields)?;
+        write_wei(transaction.max_fee_per_gas.to_be_bytes(), fields)?;
+        write_u64(transaction.gas_limit.get(), fields)?;
+        write_address(transaction.to, fields)?;
+        write_wei(transaction.value.to_be_bytes(), fields)?;
+        write_scalar(transaction.input, fields)?;
+        write_access_list(transaction.access_list, fields)?;
+        write_authorization_list(transaction.authorization_list, fields)?;
+        write_u64(u64::from(transaction.y_parity.get()), fields)?;
+        write_u256(transaction.r, fields)?;
+        write_u256(transaction.s, fields)
+    })
+    .map_err(Into::into)
 }
 
 pub(super) fn encoded_list_envelope_len(payload_len: usize) -> Result<usize, DecodeError> {
@@ -441,6 +413,13 @@ pub(super) fn write_blob_hashes(
     writer: &mut FieldWriter<'_>,
 ) -> Result<(), DecodeError> {
     writer.write_with(|output| hashes.encode_rlp(output))
+}
+
+pub(super) fn write_authorization_list(
+    authorization_list: SetCodeAuthorizationList<'_>,
+    writer: &mut FieldWriter<'_>,
+) -> Result<(), DecodeError> {
+    writer.write_with(|output| authorization_list.encode_rlp(output))
 }
 
 fn trim_u64_payload(bytes: &[u8; U64_BYTES]) -> &[u8] {

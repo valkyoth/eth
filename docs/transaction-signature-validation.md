@@ -1,6 +1,7 @@
 # Transaction Signature Validation
 
-Status: v0.23.0 pentest passed; waiting for final GitHub checks.
+Status: v0.24.0 set-code transaction decoding is ready for pentest; set-code
+signature validation remains fail-closed.
 
 `eth-valkyoth-verify` now exposes decoded transaction signature validation
 helpers for the transaction families decoded by `eth-valkyoth-protocol`:
@@ -9,6 +10,13 @@ helpers for the transaction families decoded by `eth-valkyoth-protocol`:
 - EIP-2930 access-list transactions;
 - EIP-1559 dynamic-fee transactions;
 - EIP-4844 blob transactions.
+
+EIP-7702 set-code transactions are decoded by `eth-valkyoth-protocol` in
+`v0.24.0`, but `validate_transaction_signature` intentionally returns
+`TransactionSignatureValidationError::UnsupportedTransactionType` for them.
+The EIP-7702 transaction signing hash and authorization-list signature
+validation paths are admitted in later releases after their domain boundaries
+and tests are complete.
 
 The helpers combine the pieces that were intentionally separate in earlier
 releases:
@@ -29,11 +37,12 @@ to enforce that for concrete hashers.
 These helpers do not prove full Ethereum execution validity. They do not check
 fork activation, intrinsic gas, fee ordering, account nonce/state, balance,
 blob count, blob-hash version bytes, KZG commitments, or protocol typestate
-promotion. They return a `ValidatedTransactionSignature`, which records only
-the recovered sender and the signing hash that was recovered against. That
-proof value is intentionally not publicly constructible; callers must obtain it
-through the validation helpers so sender-recovered state cannot be forged
-outside `eth-valkyoth-verify`.
+promotion. For EIP-7702, they also do not validate authorization-list
+signatures or account delegation state yet. They return a
+`ValidatedTransactionSignature`, which records only the recovered sender and the
+signing hash that was recovered against. That proof value is intentionally not
+publicly constructible; callers must obtain it through the validation helpers so
+sender-recovered state cannot be forged outside `eth-valkyoth-verify`.
 
 The test suite includes external raw mainnet transaction known-answer tests for
 EIP-2930, EIP-1559, and EIP-4844. Those fixtures were sourced through

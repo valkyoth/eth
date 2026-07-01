@@ -7,7 +7,7 @@ Most users should depend on the facade crate instead:
 
 ```toml
 [dependencies]
-eth = "0.18"
+eth = "0.24"
 ```
 
 Crates.io: <https://crates.io/crates/eth>
@@ -16,12 +16,18 @@ This package is published separately so the `eth` workspace can keep small,
 auditable crate boundaries. Treat it as a lower-level building block unless the
 `eth` documentation explicitly says otherwise.
 
-The `0.18.0` release adds proof-gated transaction typestate transitions for
+The `0.20.0` support-crate release, shipped with `eth` `0.24.0`, adds
+unvalidated EIP-7702 set-code transaction decoding and encoding for type byte
+`0x04`. It decodes the required destination address plus authorization tuples
+shaped as `[chain_id, address, nonce, y_parity, r, s]`, then re-encodes the
+borrowed model without allocation.
+
+Earlier releases added proof-gated transaction typestate transitions for
 decoded, canonical, fork-validated, and sender-recovered state tokens. The
-proof token fields are private in this release, so external callers cannot
-fabricate validation state before the real validators land. Successful
-promotion consumes the previous state token; failed promotion returns the
-original token with the validation error.
+proof token fields remain private, so external callers cannot fabricate
+validation state before the real validators land. Successful promotion consumes
+the previous state token; failed promotion returns the original token with the
+validation error.
 
 The crate also provides caller-reviewed `ChainSpec`, `ForkSpec`, `Hardfork`,
 and `ValidationContext` types for explicit fork activation context. Use
@@ -32,7 +38,8 @@ activation ordering before returning a fork context.
 
 This crate retains the earlier EIP-2718 typed envelope classification and
 unvalidated transaction models for legacy, EIP-2930 access-list, EIP-1559
-dynamic-fee, and EIP-4844 blob transactions. It does not validate signatures,
-recover senders, enforce transaction chain binding, account for gas or blob gas,
-verify KZG commitments/proofs, apply fee-order or duplicate access-list policy,
-or imply fork validity.
+dynamic-fee, EIP-4844 blob, and EIP-7702 set-code transactions. It does not
+validate signatures, recover senders, enforce transaction chain binding,
+account for gas or blob gas, verify KZG commitments/proofs, validate set-code
+authorization signatures, enforce non-empty authorization lists, apply fee-order
+or duplicate access-list policy, or imply fork validity.

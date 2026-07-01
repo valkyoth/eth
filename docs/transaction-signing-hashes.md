@@ -1,6 +1,8 @@
 # Transaction Signing Hashes
 
 Status: v0.22.0 tagged and released; consumed by v0.23.0 signature validation.
+EIP-7702 set-code transaction signing hashes remain deferred after v0.24.0
+field decode/encode support.
 
 This release adds canonical signing-preimage encoders for the decoded
 transaction families currently admitted by `eth-valkyoth-protocol`, plus
@@ -18,6 +20,12 @@ hasher that implements `eth_valkyoth_hash::Keccak256` and should verify it with
 | EIP-2930 | `0x01 || rlp([chainId, nonce, gasPrice, gasLimit, to, value, data, accessList])` |
 | EIP-1559 | `0x02 || rlp([chainId, nonce, maxPriorityFeePerGas, maxFeePerGas, gasLimit, to, value, data, accessList])` |
 | EIP-4844 | `0x03 || rlp([chainId, nonce, maxPriorityFeePerGas, maxFeePerGas, gasLimit, to, value, data, accessList, maxFeePerBlobGas, blobVersionedHashes])` |
+
+EIP-7702 set-code transactions use type byte `0x04`, but this crate does not
+expose their signing-hash helper yet. `v0.24.0` admits only bounded field
+decode and canonical transaction re-encoding. Until the signing-hash helper is
+added, decoded signature validation rejects set-code transactions with an
+explicit unsupported-transaction-type error.
 
 The typed transaction preimages intentionally exclude `y_parity`, `r`, and
 `s`. Legacy EIP-155 preimages replace those fields with `chainId`, `0`, and

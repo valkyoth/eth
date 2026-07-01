@@ -1,7 +1,7 @@
 use eth_valkyoth_primitives::ChainId;
 use eth_valkyoth_protocol::{
     UnvalidatedAccessListTransaction, UnvalidatedBlobTransaction, UnvalidatedDynamicFeeTransaction,
-    UnvalidatedLegacyTransaction, UnvalidatedTransaction,
+    UnvalidatedLegacyTransaction, UnvalidatedSetCodeTransaction, UnvalidatedTransaction,
 };
 
 use crate::{VerifyError, require_chain};
@@ -44,6 +44,14 @@ pub fn require_blob_replay_domain(
     require_chain(expected, transaction.chain_id)
 }
 
+/// Requires an EIP-7702 transaction to carry the expected chain domain.
+pub fn require_set_code_replay_domain(
+    expected: ChainId,
+    transaction: &UnvalidatedSetCodeTransaction<'_>,
+) -> Result<(), VerifyError> {
+    require_chain(expected, transaction.chain_id)
+}
+
 /// Requires any decoded transaction domain to match the expected chain.
 ///
 /// This is a replay-domain gate only. It does not perform signature recovery,
@@ -58,6 +66,7 @@ pub fn require_transaction_replay_domain(
         UnvalidatedTransaction::AccessList(tx) => require_access_list_replay_domain(expected, &tx),
         UnvalidatedTransaction::DynamicFee(tx) => require_dynamic_fee_replay_domain(expected, &tx),
         UnvalidatedTransaction::Blob(tx) => require_blob_replay_domain(expected, &tx),
+        UnvalidatedTransaction::SetCode(tx) => require_set_code_replay_domain(expected, &tx),
     }
 }
 
@@ -67,7 +76,7 @@ mod tests {
     use eth_valkyoth_codec::DecodeLimits;
     use eth_valkyoth_protocol::{
         decode_access_list_transaction, decode_blob_transaction, decode_dynamic_fee_transaction,
-        decode_legacy_transaction,
+        decode_legacy_transaction, decode_set_code_transaction,
     };
 
     const TEST_LIMITS: DecodeLimits = DecodeLimits {
@@ -102,6 +111,11 @@ mod tests {
         0x11, 0x05, 0x80, 0xc0, 0x06, 0xe1, 0xa0, 0x01, 0x01, 0x01, 0x01, 0x01, 0x01, 0x01, 0x01,
         0x01, 0x01, 0x01, 0x01, 0x01, 0x01, 0x01, 0x01, 0x01, 0x01, 0x01, 0x01, 0x01, 0x01, 0x01,
         0x01, 0x01, 0x01, 0x01, 0x01, 0x01, 0x01, 0x01, 0x01, 0x01, 0x01, 0x02,
+    ];
+    const SET_CODE_CHAIN_1: &[u8] = &[
+        0x04, 0xe3, 0x01, 0x02, 0x03, 0x04, 0x82, 0x52, 0x08, 0x94, 0x11, 0x11, 0x11, 0x11, 0x11,
+        0x11, 0x11, 0x11, 0x11, 0x11, 0x11, 0x11, 0x11, 0x11, 0x11, 0x11, 0x11, 0x11, 0x11, 0x11,
+        0x05, 0x80, 0xc0, 0xc0, 0x01, 0x01, 0x02,
     ];
 
     #[test]
@@ -168,6 +182,22 @@ mod tests {
                 require_transaction_replay_domain(
                     ChainId::new(5),
                     UnvalidatedTransaction::Blob(blob)
+                ),
+                Err(VerifyError::WrongChain)
+            );
+        }
+
+        let set_code = decode_set_code_transaction(SET_CODE_CHAIN_1, TEST_LIMITS);
+        assert!(set_code.is_ok());
+        if let Ok(set_code) = set_code {
+            assert_eq!(
+                require_set_code_replay_domain(ChainId::new(1), &set_code),
+                Ok(())
+            );
+            assert_eq!(
+                require_transaction_replay_domain(
+                    ChainId::new(5),
+                    UnvalidatedTransaction::SetCode(set_code),
                 ),
                 Err(VerifyError::WrongChain)
             );

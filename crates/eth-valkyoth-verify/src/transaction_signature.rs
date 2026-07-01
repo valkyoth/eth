@@ -63,6 +63,8 @@ pub enum TransactionSignatureValidationError {
     SigningHash(TransactionSigningHashError),
     /// Signature scalar, y-parity, or public-key recovery failed.
     InvalidSignature,
+    /// This transaction family has no full signature-validation helper yet.
+    UnsupportedTransactionType,
     /// The recovered sender does not match the expected sender.
     WrongSender,
 }
@@ -75,6 +77,7 @@ impl TransactionSignatureValidationError {
             Self::ReplayDomain(error) => error.code(),
             Self::SigningHash(error) => error.code(),
             Self::InvalidSignature => "ETH_TX_SIGNATURE_INVALID",
+            Self::UnsupportedTransactionType => "ETH_TX_SIGNATURE_UNSUPPORTED_TYPE",
             Self::WrongSender => "ETH_TX_SIGNATURE_WRONG_SENDER",
         }
     }
@@ -86,6 +89,9 @@ impl TransactionSignatureValidationError {
             Self::ReplayDomain(error) => error.message(),
             Self::SigningHash(_) => "transaction signing hash construction failed",
             Self::InvalidSignature => "transaction signature is not accepted",
+            Self::UnsupportedTransactionType => {
+                "transaction type has no signature validation helper yet"
+            }
             Self::WrongSender => "transaction signature recovered a different sender",
         }
     }
@@ -96,7 +102,7 @@ impl TransactionSignatureValidationError {
         match self {
             Self::ReplayDomain(_) => TransactionSignatureValidationErrorCategory::ReplayDomain,
             Self::SigningHash(_) => TransactionSignatureValidationErrorCategory::SigningHash,
-            Self::InvalidSignature | Self::WrongSender => {
+            Self::InvalidSignature | Self::WrongSender | Self::UnsupportedTransactionType => {
                 TransactionSignatureValidationErrorCategory::Signature
             }
         }
@@ -175,6 +181,9 @@ where
             signing_hasher,
             address_hasher,
         ),
+        UnvalidatedTransaction::SetCode(_) => {
+            Err(TransactionSignatureValidationError::UnsupportedTransactionType)
+        }
     }
 }
 

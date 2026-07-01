@@ -4,10 +4,11 @@ use eth_valkyoth_codec::{DecodeLimits, MAX_RLP_LIST_TRAVERSAL_DEPTH, RlpItem, Rl
 use eth_valkyoth_protocol::{
     TransactionEnvelope, decode_access_list_transaction, decode_blob_transaction,
     decode_dynamic_fee_transaction, decode_legacy_transaction, decode_transaction_envelope,
-    encode_access_list_signing_preimage, encode_access_list_transaction,
-    encode_blob_signing_preimage, encode_blob_transaction, encode_dynamic_fee_signing_preimage,
-    encode_dynamic_fee_transaction, encode_legacy_eip155_signing_preimage,
-    encode_legacy_transaction,
+    decode_set_code_transaction, encode_access_list_signing_preimage,
+    encode_access_list_transaction, encode_blob_signing_preimage, encode_blob_transaction,
+    encode_dynamic_fee_signing_preimage, encode_dynamic_fee_transaction,
+    encode_legacy_eip155_signing_preimage, encode_legacy_transaction,
+    encode_set_code_transaction,
 };
 use libfuzzer_sys::fuzz_target;
 
@@ -37,6 +38,9 @@ fn drive_transaction_envelope(data: &[u8], limits: DecodeLimits) {
     if let Ok(transaction) = decode_blob_transaction(data, limits) {
         let _ = encode_blob_transaction(&transaction, &mut output);
         let _ = encode_blob_signing_preimage(&transaction, &mut output);
+    }
+    if let Ok(transaction) = decode_set_code_transaction(data, limits) {
+        let _ = encode_set_code_transaction(&transaction, &mut output);
     }
 
     let Ok(envelope) = decode_transaction_envelope(data, limits) else {

@@ -4,6 +4,16 @@ All notable changes to `eth` are documented here.
 
 ## Unreleased
 
+- Started `0.24.0` with unvalidated EIP-7702 set-code transaction field
+  decoding and no-allocation canonical encoding for type byte `0x04`.
+- Added bounded authorization-list tuple decoding, including chain ID,
+  authorization address, nonce, y parity, `r`, and `s` domains, while
+  explicitly deferring empty-list, authorization-signature, fee, fork, and
+  account-state validation.
+- Added set-code replay-domain checks and fail-closed decoded signature
+  validation handling until the EIP-7702 signing-hash path is admitted.
+- Extended transaction-envelope fuzz coverage and seed corpus entries for
+  set-code transaction decode and encode paths.
 - Started `0.23.0` with decoded transaction signature validation helpers that
   combine replay-domain checks, transaction signing hashes, low-s/y-parity
   policy, sender recovery, and optional expected-sender comparison.

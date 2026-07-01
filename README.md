@@ -35,9 +35,8 @@ dependencies.
 
 ## Current Status
 
-Status: `v0.23.0` decoded transaction signature validation pentest passed;
-waiting for final GitHub checks.
-`v0.23.0` is the release candidate waiting for final CI before tagging.
+Status: `v0.24.0` set-code transaction decoding and encoding is ready for
+pentest.
 
 Implemented now:
 
@@ -65,8 +64,11 @@ Implemented now:
 - Unvalidated EIP-4844 blob transaction field decoding for blob fee, required
   call target, blob versioned hash list, calldata, access list, and signature
   words.
+- Unvalidated EIP-7702 set-code transaction field decoding for destination,
+  calldata, access list, authorization list, and signature words.
 - No-allocation canonical transaction envelope encoding for admitted
-  unvalidated legacy, EIP-2930, EIP-1559, and EIP-4844 transaction domains.
+  unvalidated legacy, EIP-2930, EIP-1559, EIP-4844, and EIP-7702 transaction
+  domains.
 - Explicit caller-provided `ChainSpec`, `ForkSpec`, `Hardfork`, and
   `ValidationContext` APIs for fork activation selection, including
   fail-closed checks for duplicate forks, wrong-chain entries, and
@@ -106,7 +108,6 @@ Not implemented yet:
 - No signer or local key storage.
 - No EVM execution adapter.
 - No Reth or P2P integration.
-- No set-code typed transaction field parser yet; scheduled for `v0.24.0`.
 - No full EIP-712 typed-data encoder yet; scheduled for `v0.26.0`.
 - No block parser yet.
 - No ABI/contract helper surface yet; scheduled for `v0.47.0` through
@@ -138,14 +139,14 @@ Not implemented yet:
 
 ```toml
 [dependencies]
-eth = "0.23"
+eth = "0.24"
 ```
 
 For optional sanitization support:
 
 ```toml
 [dependencies]
-eth = { version = "0.23", features = ["sanitization"] }
+eth = { version = "0.24", features = ["sanitization"] }
 ```
 
 ## Features
@@ -734,7 +735,7 @@ friendly, and independently testable.
 The minimum supported Rust version is Rust `1.90.0`. New deployments should use
 the pinned stable Rust `1.96.1` until the toolchain policy is updated.
 
-Compatibility evidence for `0.23.0`:
+Compatibility evidence for `0.24.0`:
 
 | Rust | Local Evidence |
 | --- | --- |
@@ -751,8 +752,8 @@ Compatibility evidence for `0.23.0`:
 
 ```bash
 scripts/checks.sh
-scripts/release_0_23_gate.sh
-scripts/validate-release-readiness.sh v0.23.0
+scripts/release_0_24_gate.sh
+scripts/validate-release-readiness.sh v0.24.0
 ```
 
 For dependency-policy checks, install `cargo-deny` and `cargo-audit`, then run:

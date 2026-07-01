@@ -7,6 +7,7 @@ mod encode;
 mod envelope;
 mod fields;
 mod legacy;
+mod set_code;
 mod signing;
 
 #[cfg(test)]
@@ -33,9 +34,10 @@ pub use dynamic_fee::{
 pub use encode::{
     TransactionEncodeError, TransactionEncodeErrorCategory, UnvalidatedTransaction,
     encode_access_list_transaction, encode_blob_transaction, encode_dynamic_fee_transaction,
-    encode_legacy_transaction, encode_transaction, encoded_access_list_transaction_len,
-    encoded_blob_transaction_len, encoded_dynamic_fee_transaction_len,
-    encoded_legacy_transaction_len, encoded_transaction_len,
+    encode_legacy_transaction, encode_set_code_transaction, encode_transaction,
+    encoded_access_list_transaction_len, encoded_blob_transaction_len,
+    encoded_dynamic_fee_transaction_len, encoded_legacy_transaction_len,
+    encoded_set_code_transaction_len, encoded_transaction_len,
 };
 pub use envelope::{
     EIP_2718_MAX_TYPED_PREFIX, EIP_2718_RESERVED_PREFIX, EIP_2718_SCALAR_PREFIX_START,
@@ -47,6 +49,13 @@ pub use legacy::{
     LEGACY_TRANSACTION_FIELD_COUNT, LegacyTransactionDecodeError,
     LegacyTransactionDecodeErrorCategory, LegacyTransactionField, LegacyTransactionTo,
     UnvalidatedLegacyTransaction, decode_legacy_transaction,
+};
+pub use set_code::{
+    SET_CODE_AUTHORIZATION_FIELD_COUNT, SET_CODE_AUTHORIZATION_MAGIC,
+    SET_CODE_TRANSACTION_FIELD_COUNT, SET_CODE_TRANSACTION_TYPE, SetCodeAuthorization,
+    SetCodeAuthorizationChainId, SetCodeAuthorizationItems, SetCodeAuthorizationList,
+    SetCodeTransactionDecodeError, SetCodeTransactionDecodeErrorCategory, SetCodeTransactionField,
+    UnvalidatedSetCodeTransaction, decode_set_code_transaction,
 };
 pub use signing::{
     encode_access_list_signing_preimage, encode_blob_signing_preimage,

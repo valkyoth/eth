@@ -26,26 +26,27 @@
 `eth` is the public facade crate for a `no_std`-first Ethereum
 execution-layer protocol workspace.
 
-The crate is intentionally conservative at `0.23.0`: it provides explicit
+The crate is intentionally conservative at `0.24.0`: it provides explicit
 Ethereum primitive domains, bounded decode-budget policy, stable error
 categories, primitive RLP bridge helpers, a caller-provided Keccak-256 boundary,
 RLP fuzz-harness evidence, a transaction envelope shell, unvalidated legacy
 transaction field decoding, unvalidated EIP-2930 access-list transaction field
 decoding, unvalidated EIP-1559 dynamic-fee transaction field decoding,
-unvalidated EIP-4844 blob transaction field decoding, no-allocation canonical
-transaction envelope encoding for admitted decoded domains, explicit chain and
-fork activation context, proof-gated transaction typestate transitions,
-replay-domain validation for transaction chain binding, transaction
-signing-hash helpers, decoded transaction signature validation helpers, RLP
-derive design evidence, digest-level secp256k1 sender recovery, EIP-712
-domain-safety checks, small first-party crate boundaries, optional sanitization
-support, and release evidence before RPC, signer, EVM, Reth, or P2P
-integrations become real dependencies.
+unvalidated EIP-4844 blob transaction field decoding, unvalidated EIP-7702
+set-code transaction field decoding, no-allocation canonical transaction
+envelope encoding for admitted decoded domains, explicit chain and fork
+activation context, proof-gated transaction typestate transitions, replay-domain
+validation for transaction chain binding, transaction signing-hash helpers,
+decoded transaction signature validation helpers, RLP derive design evidence,
+digest-level secp256k1 sender recovery, EIP-712 domain-safety checks, small
+first-party crate boundaries, optional sanitization support, and release
+evidence before RPC, signer, EVM, Reth, or P2P integrations become real
+dependencies.
 
 ## Current Status
 
-The current release candidate is `0.23.0`; decoded transaction signature
-validation is ready for pentest.
+The current release candidate is `0.24.0`; set-code transaction decoding and
+encoding is ready for pentest.
 
 Implemented now:
 
@@ -71,8 +72,11 @@ Implemented now:
 - Unvalidated EIP-4844 blob transaction field decoding for blob fee, required
   call target, blob versioned hash list, calldata, access list, and signature
   words.
+- Unvalidated EIP-7702 set-code transaction field decoding for destination,
+  calldata, access list, authorization list, and signature words.
 - No-allocation canonical transaction envelope encoding for admitted
-  unvalidated legacy, EIP-2930, EIP-1559, and EIP-4844 transaction domains.
+  unvalidated legacy, EIP-2930, EIP-1559, EIP-4844, and EIP-7702 transaction
+  domains.
 - Explicit caller-provided `ChainSpec`, `ForkSpec`, `Hardfork`, and
   `ValidationContext` APIs for fork activation selection, including
   fail-closed checks for duplicate forks, wrong-chain entries, and
@@ -108,7 +112,6 @@ Not implemented yet:
 - No signer or local key storage.
 - No EVM execution adapter.
 - No Reth or P2P integration.
-- No set-code typed transaction field parser yet; scheduled for `v0.24.0`.
 - No full EIP-712 typed-data encoder yet; scheduled for `v0.26.0`.
 - No block parser yet.
 - No ABI/contract helper surface yet; scheduled for `v0.47.0` through
@@ -137,21 +140,21 @@ Not implemented yet:
 
 ```toml
 [dependencies]
-eth = "0.23"
+eth = "0.24"
 ```
 
 Disable defaults explicitly for embedded or freestanding builds:
 
 ```toml
 [dependencies]
-eth = { version = "0.23", default-features = false }
+eth = { version = "0.24", default-features = false }
 ```
 
 Optional sanitization support:
 
 ```toml
 [dependencies]
-eth = { version = "0.23", features = ["sanitization"] }
+eth = { version = "0.24", features = ["sanitization"] }
 ```
 
 ## Features
@@ -742,7 +745,7 @@ the workspace can keep small, auditable boundaries:
 The minimum supported Rust version is Rust `1.90.0`. New deployments should use
 the latest stable Rust verified by the release gates.
 
-Compatibility evidence for `0.23.0`:
+Compatibility evidence for `0.24.0`:
 
 | Rust | Local Evidence |
 | --- | --- |

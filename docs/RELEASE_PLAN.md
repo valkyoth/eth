@@ -791,6 +791,8 @@ Exit criteria:
 
 ### v0.24.0 - Set-Code Transaction Decode
 
+Status: implementation ready for pentest.
+
 Goal: decode and encode the next typed transaction family currently left
 opaque by the transaction-envelope shell.
 
@@ -812,6 +814,13 @@ Exit criteria:
 
 - The README no longer has to list set-code transaction parsing as an omitted
   typed transaction family.
+
+Implementation note:
+
+- Official source check completed against final EIP-7702 on 2026-07-01:
+  transaction type `0x04`, authorization magic `0x05`, transaction payload
+  fields, required destination address, and authorization tuple shape
+  `[chain_id, address, nonce, y_parity, r, s]`.
 
 ### v0.25.0 - Public RLP Derives
 

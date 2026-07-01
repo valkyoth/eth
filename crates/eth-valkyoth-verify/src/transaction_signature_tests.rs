@@ -5,7 +5,7 @@ use eth_valkyoth_protocol::{
     SignatureYParity, UnvalidatedAccessListTransaction, UnvalidatedBlobTransaction,
     UnvalidatedDynamicFeeTransaction, UnvalidatedLegacyTransaction, UnvalidatedTransaction,
     decode_access_list_transaction, decode_blob_transaction, decode_dynamic_fee_transaction,
-    decode_legacy_transaction,
+    decode_legacy_transaction, decode_set_code_transaction,
 };
 use k256::ecdsa::SigningKey;
 use sha3::Digest;
@@ -38,6 +38,11 @@ const BLOB_TX: [u8; 72] = [
     0x80, 0xc0, 0x06, 0xe1, 0xa0, 0x01, 0x01, 0x01, 0x01, 0x01, 0x01, 0x01, 0x01, 0x01, 0x01, 0x01,
     0x01, 0x01, 0x01, 0x01, 0x01, 0x01, 0x01, 0x01, 0x01, 0x01, 0x01, 0x01, 0x01, 0x01, 0x01, 0x01,
     0x01, 0x01, 0x01, 0x01, 0x01, 0x01, 0x01, 0x02,
+];
+const SET_CODE_TX: [u8; 37] = [
+    0x04, 0xe3, 0x01, 0x02, 0x03, 0x04, 0x82, 0x52, 0x08, 0x94, 0x11, 0x11, 0x11, 0x11, 0x11, 0x11,
+    0x11, 0x11, 0x11, 0x11, 0x11, 0x11, 0x11, 0x11, 0x11, 0x11, 0x11, 0x11, 0x11, 0x11, 0x05, 0x80,
+    0xc0, 0xc0, 0x01, 0x01, 0x02,
 ];
 
 struct RealKeccak {
@@ -364,5 +369,25 @@ fn reports_signing_hash_construction_failures() {
             result,
             Err(TransactionSignatureValidationError::SigningHash(_))
         ));
+    }
+}
+
+#[test]
+fn rejects_set_code_signature_validation_until_supported() {
+    let tx = decode_set_code_transaction(&SET_CODE_TX, TEST_LIMITS);
+    assert!(tx.is_ok());
+    if let Ok(tx) = tx {
+        let mut scratch = [0_u8; 128];
+        assert_eq!(
+            validate_transaction_signature(
+                ChainId::new(1),
+                UnvalidatedTransaction::SetCode(tx),
+                None,
+                &mut scratch,
+                RealKeccak::new(),
+                RealKeccak::new(),
+            ),
+            Err(TransactionSignatureValidationError::UnsupportedTransactionType)
+        );
     }
 }
