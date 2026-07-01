@@ -1,6 +1,6 @@
 # Crate Version Matrix
 
-Status: `v0.22.0` transaction signing-hash implementation is ready for pentest.
+Status: `v0.22.0` transaction signing-hash pentest passed; final GitHub checks are pending before tag.
 
 `eth` uses independent crate versions. The facade crate remains the main user
 entry point, but support crates are published only when their own package

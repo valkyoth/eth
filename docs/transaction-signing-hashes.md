@@ -1,6 +1,6 @@
 # Transaction Signing Hashes
 
-Status: v0.22.0 implementation ready for pentest.
+Status: v0.22.0 pentest passed; final GitHub checks pending before tag.
 
 This release adds canonical signing-preimage encoders for the decoded
 transaction families currently admitted by `eth-valkyoth-protocol`, plus

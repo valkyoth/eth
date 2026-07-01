@@ -736,7 +736,7 @@ typed-data encoders for core Ethereum signing flows.
 
 ### v0.22.0 - Transaction Signing Hashes
 
-Status: implementation ready for pentest.
+Status: pentest passed; final GitHub checks pending before tag.
 
 Goal: construct Ethereum transaction signing hashes from admitted decoded
 transaction domains.
