@@ -1,0 +1,47 @@
+# Transaction Signing Hashes
+
+Status: v0.22.0 implementation ready for pentest.
+
+This release adds canonical signing-preimage encoders for the decoded
+transaction families currently admitted by `eth-valkyoth-protocol`, plus
+Keccak-256 signing-hash helpers in `eth-valkyoth-verify`.
+
+The crate still does not admit a default Keccak backend. Callers must provide a
+hasher that implements `eth_valkyoth_hash::Keccak256` and should verify it with
+`KECCAK256_EMPTY` before use.
+
+## Preimage Domains
+
+| Transaction family | Signing preimage |
+| --- | --- |
+| Legacy EIP-155 | `rlp([nonce, gasPrice, gasLimit, to, value, data, chainId, 0, 0])` |
+| EIP-2930 | `0x01 || rlp([chainId, nonce, gasPrice, gasLimit, to, value, data, accessList])` |
+| EIP-1559 | `0x02 || rlp([chainId, nonce, maxPriorityFeePerGas, maxFeePerGas, gasLimit, to, value, data, accessList])` |
+| EIP-4844 | `0x03 || rlp([chainId, nonce, maxPriorityFeePerGas, maxFeePerGas, gasLimit, to, value, data, accessList, maxFeePerBlobGas, blobVersionedHashes])` |
+
+The typed transaction preimages intentionally exclude `y_parity`, `r`, and
+`s`. Legacy EIP-155 preimages replace those fields with `chainId`, `0`, and
+`0`.
+
+## API Split
+
+`eth-valkyoth-protocol` exposes no-allocation preimage encoders and length
+helpers. The caller supplies the output buffer.
+
+`eth-valkyoth-verify` exposes signing-hash helpers that:
+
+- encode the canonical preimage into caller-provided scratch space;
+- hash only the bytes written by the encoder;
+- return `TransactionSigningHash`, a domain newtype around `B256`;
+- reject pre-EIP-155 legacy transactions with
+  `TransactionSigningHashError::MissingReplayDomain`.
+
+## Deferred Validation
+
+This is not full transaction signature validation. `v0.23.0` is still
+responsible for combining signing-hash construction, replay-domain checks,
+low-s/y-parity policy, sender recovery, and decoded transaction state
+promotion.
+
+The `v0.22.0` helpers also do not perform fee, account-state, fork-validity,
+intrinsic-gas, blob-count, blob-version, KZG, or data-availability checks.

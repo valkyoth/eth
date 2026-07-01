@@ -26,7 +26,7 @@
 `eth` is the public facade crate for a `no_std`-first Ethereum
 execution-layer protocol workspace.
 
-The crate is intentionally conservative at `0.21.0`: it provides explicit
+The crate is intentionally conservative at `0.22.0`: it provides explicit
 Ethereum primitive domains, bounded decode-budget policy, stable error
 categories, primitive RLP bridge helpers, a caller-provided Keccak-256 boundary,
 RLP fuzz-harness evidence, a transaction envelope shell, unvalidated legacy
@@ -35,16 +35,16 @@ decoding, unvalidated EIP-1559 dynamic-fee transaction field decoding,
 unvalidated EIP-4844 blob transaction field decoding, no-allocation canonical
 transaction envelope encoding for admitted decoded domains, explicit chain and
 fork activation context, proof-gated transaction typestate transitions,
-replay-domain validation for transaction chain binding, RLP derive design
-evidence, digest-level secp256k1 sender recovery, EIP-712 domain-safety checks,
-small first-party crate boundaries, optional
+replay-domain validation for transaction chain binding, transaction
+signing-hash helpers, RLP derive design evidence, digest-level secp256k1 sender
+recovery, EIP-712 domain-safety checks, small first-party crate boundaries, optional
 sanitization support, and release evidence before RPC, signer, EVM, Reth, or
 P2P integrations become real dependencies.
 
 ## Current Status
 
-The current release candidate is `0.21.0`; EIP-712 domain-safety pentest passed and
-final GitHub checks are pending before tag.
+The current release candidate is `0.22.0`; transaction signing-hash
+implementation is ready for pentest.
 
 Implemented now:
 
@@ -80,6 +80,8 @@ Implemented now:
   fork-validated, and sender-recovered state tokens.
 - Replay-domain validation for legacy EIP-155 and typed transaction chain IDs
   before sender recovery results are accepted.
+- Canonical transaction signing-preimage encoding and signing-hash helpers for
+  legacy EIP-155, EIP-2930, EIP-1559, and EIP-4844 decoded transaction domains.
 - Digest-level secp256k1 sender recovery with low-s rejection, Ethereum
   y-parity policy, and caller-provided Keccak-256 public-key hashing.
 - EIP-712 domain-safety checks for required `chainId` and
@@ -103,8 +105,7 @@ Not implemented yet:
 - No EVM execution adapter.
 - No Reth or P2P integration.
 - No set-code typed transaction field parser yet; scheduled for `v0.24.0`.
-- No transaction signing-hash construction or full transaction signature
-  validation yet; scheduled for `v0.22.0` and `v0.23.0`.
+- No full transaction signature validation yet; scheduled for `v0.23.0`.
 - No full EIP-712 typed-data encoder yet; scheduled for `v0.26.0`.
 - No block parser yet.
 - No ABI/contract helper surface yet; scheduled for `v0.47.0` through
@@ -133,21 +134,21 @@ Not implemented yet:
 
 ```toml
 [dependencies]
-eth = "0.21"
+eth = "0.22"
 ```
 
 Disable defaults explicitly for embedded or freestanding builds:
 
 ```toml
 [dependencies]
-eth = { version = "0.21", default-features = false }
+eth = { version = "0.22", default-features = false }
 ```
 
 Optional sanitization support:
 
 ```toml
 [dependencies]
-eth = { version = "0.21", features = ["sanitization"] }
+eth = { version = "0.22", features = ["sanitization"] }
 ```
 
 ## Features
@@ -312,6 +313,64 @@ assert_eq!(
 # Ok::<(), Box<dyn std::error::Error>>(())
 ```
 
+## Transaction Signing Hashes
+
+Decoded transaction domains can be converted into canonical signing hashes
+without admitting a default hash backend:
+
+```rust
+use eth::hash::Keccak256;
+use eth::primitives::B256;
+use eth::protocol::decode_dynamic_fee_transaction;
+use eth::verify::dynamic_fee_transaction_signing_hash;
+use eth::codec::DecodeLimits;
+
+struct PlatformKeccak {
+    output: B256,
+}
+
+impl Keccak256 for PlatformKeccak {
+    fn update(&mut self, input: &[u8]) {
+        let _ = input;
+    }
+
+    fn finalize(self) -> B256 {
+        self.output
+    }
+}
+
+let dynamic_fee_tx = [
+    0x02, 0xce, 0x01, 0x02, 0x03, 0x04, 0x82, 0x52, 0x08, 0x80, 0x05, 0x80,
+    0xc0, 0x01, 0x01, 0x02,
+];
+let limits = DecodeLimits {
+    max_input_bytes: 64,
+    max_list_items: 16,
+    max_nesting_depth: 8,
+    max_total_allocation: 64,
+    max_proof_nodes: 4,
+    max_total_items: 32,
+};
+let tx = decode_dynamic_fee_transaction(&dynamic_fee_tx, limits)?;
+let mut scratch = [0_u8; 64];
+let signing_hash = dynamic_fee_transaction_signing_hash(
+    &tx,
+    &mut scratch,
+    PlatformKeccak {
+        output: B256::from([0x44_u8; 32]),
+    },
+)?;
+
+assert_eq!(signing_hash.to_b256(), B256::from([0x44_u8; 32]));
+# Ok::<(), Box<dyn std::error::Error>>(())
+```
+
+The example hasher is illustrative only. Production hashers must compute
+Ethereum Keccak-256, and the signing hash is still only one input to full
+signature validation. `v0.23.0` combines signing hashes, replay-domain checks,
+low-s/y-parity policy, and sender recovery into higher-level validation
+helpers.
+
 ## EIP-712 Domain Safety
 
 EIP-712 signing paths should check the structured-data domain before any
@@ -359,9 +418,10 @@ and `hashStruct(message)` with a conformant typed-data encoder.
 
 ## Sender Recovery
 
-Sender recovery operates on an already constructed Ethereum signing digest. The
-caller is responsible for building the transaction preimage, checking the replay
-domain, and choosing an admitted Keccak-256 backend:
+Sender recovery operates on an already constructed Ethereum signing digest.
+Transaction callers should prefer the signing-hash helpers above over
+hand-built transaction digests, then recover the sender with an admitted
+Keccak-256 backend:
 
 ```rust
 use eth::hash::Keccak256;
@@ -677,7 +737,7 @@ the workspace can keep small, auditable boundaries:
 The minimum supported Rust version is Rust `1.90.0`. New deployments should use
 the latest stable Rust verified by the release gates.
 
-Compatibility evidence for `0.21.0`:
+Compatibility evidence for `0.22.0`:
 
 | Rust | Local Evidence |
 | --- | --- |

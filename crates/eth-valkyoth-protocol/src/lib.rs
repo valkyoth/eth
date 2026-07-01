@@ -34,10 +34,15 @@ pub use transaction::{
     TypedTransactionEnvelope, UnvalidatedAccessListTransaction, UnvalidatedBlobTransaction,
     UnvalidatedDynamicFeeTransaction, UnvalidatedLegacyTransaction, UnvalidatedTransaction,
     decode_access_list_transaction, decode_blob_transaction, decode_dynamic_fee_transaction,
-    decode_legacy_transaction, decode_transaction_envelope, encode_access_list_transaction,
-    encode_blob_transaction, encode_dynamic_fee_transaction, encode_legacy_transaction,
-    encode_transaction, encoded_access_list_transaction_len, encoded_blob_transaction_len,
-    encoded_dynamic_fee_transaction_len, encoded_legacy_transaction_len, encoded_transaction_len,
+    decode_legacy_transaction, decode_transaction_envelope, encode_access_list_signing_preimage,
+    encode_access_list_transaction, encode_blob_signing_preimage, encode_blob_transaction,
+    encode_dynamic_fee_signing_preimage, encode_dynamic_fee_transaction,
+    encode_legacy_eip155_signing_preimage, encode_legacy_transaction, encode_transaction,
+    encoded_access_list_signing_preimage_len, encoded_access_list_transaction_len,
+    encoded_blob_signing_preimage_len, encoded_blob_transaction_len,
+    encoded_dynamic_fee_signing_preimage_len, encoded_dynamic_fee_transaction_len,
+    encoded_legacy_eip155_signing_preimage_len, encoded_legacy_transaction_len,
+    encoded_transaction_len,
 };
 
 /// Protocol validation failure.

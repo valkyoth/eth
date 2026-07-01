@@ -11,6 +11,7 @@ use eth_valkyoth_primitives::ChainId;
 mod eip712;
 mod replay;
 mod sender;
+mod transaction_hash;
 
 pub use eip712::{
     EIP712_SIGNING_PREFIX, Eip712Domain, Eip712DomainExpectation, eip712_signing_digest,
@@ -24,6 +25,11 @@ pub use replay::{
 pub use sender::{
     COMPACT_SIGNATURE_BYTES, ETHEREUM_PUBLIC_KEY_BYTES, ETHEREUM_SIGNATURE_BYTES,
     EthereumSignature, SIGNING_DIGEST_BYTES, recover_sender_from_digest,
+};
+pub use transaction_hash::{
+    TransactionSigningHash, TransactionSigningHashError, access_list_transaction_signing_hash,
+    blob_transaction_signing_hash, dynamic_fee_transaction_signing_hash,
+    legacy_eip155_transaction_signing_hash,
 };
 
 /// Verification failure categories.

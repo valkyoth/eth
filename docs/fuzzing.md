@@ -1,10 +1,11 @@
 # Fuzzing
 
-Status: `v0.21.0` RLP, transaction envelope, legacy transaction decode,
+Status: `v0.22.0` RLP, transaction envelope, legacy transaction decode,
 EIP-2930 access-list transaction decode, EIP-1559 dynamic-fee transaction
 decode, EIP-4844 blob transaction decode, and transaction encode fuzz/test
-baseline plus Ethereum signature parsing fuzz coverage. EIP-712 domain-safety
-coverage is currently unit-test based because it does not parse untrusted bytes.
+baseline, including signing-preimage encoding, plus Ethereum signature parsing
+fuzz coverage. EIP-712 domain-safety coverage is currently unit-test based
+because it does not parse untrusted bytes.
 
 The fuzz workspace lives under `fuzz/` and is intentionally separate from the
 published crates. Live corpus growth and crash artifacts are local generated

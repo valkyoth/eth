@@ -705,7 +705,7 @@ Exit criteria:
 
 ### v0.21.0 - EIP-712 Domain Safety
 
-Status: pentest passed; final GitHub checks pending before tag.
+Status: tagged and released.
 
 Goal: prevent structured-data domain confusion.
 
@@ -735,6 +735,8 @@ previously implied work explicit. The goal is to avoid reaching signer, RPC, or
 typed-data encoders for core Ethereum signing flows.
 
 ### v0.22.0 - Transaction Signing Hashes
+
+Status: implementation ready for pentest.
 
 Goal: construct Ethereum transaction signing hashes from admitted decoded
 transaction domains.

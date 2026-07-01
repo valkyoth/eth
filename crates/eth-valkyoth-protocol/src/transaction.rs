@@ -7,6 +7,7 @@ mod encode;
 mod envelope;
 mod fields;
 mod legacy;
+mod signing;
 
 #[cfg(test)]
 mod tests;
@@ -46,4 +47,10 @@ pub use legacy::{
     LEGACY_TRANSACTION_FIELD_COUNT, LegacyTransactionDecodeError,
     LegacyTransactionDecodeErrorCategory, LegacyTransactionField, LegacyTransactionTo,
     UnvalidatedLegacyTransaction, decode_legacy_transaction,
+};
+pub use signing::{
+    encode_access_list_signing_preimage, encode_blob_signing_preimage,
+    encode_dynamic_fee_signing_preimage, encode_legacy_eip155_signing_preimage,
+    encoded_access_list_signing_preimage_len, encoded_blob_signing_preimage_len,
+    encoded_dynamic_fee_signing_preimage_len, encoded_legacy_eip155_signing_preimage_len,
 };

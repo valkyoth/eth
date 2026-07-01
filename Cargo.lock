@@ -115,7 +115,7 @@ dependencies = [
 
 [[package]]
 name = "eth"
-version = "0.21.0"
+version = "0.22.0"
 dependencies = [
  "eth-valkyoth-codec",
  "eth-valkyoth-evm",
@@ -164,7 +164,7 @@ dependencies = [
 
 [[package]]
 name = "eth-valkyoth-protocol"
-version = "0.18.0"
+version = "0.19.0"
 dependencies = [
  "eth-valkyoth-codec",
  "eth-valkyoth-primitives",
@@ -199,7 +199,7 @@ version = "0.7.0"
 
 [[package]]
 name = "eth-valkyoth-verify"
-version = "0.10.0"
+version = "0.11.0"
 dependencies = [
  "eth-valkyoth-codec",
  "eth-valkyoth-hash",

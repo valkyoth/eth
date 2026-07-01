@@ -263,15 +263,15 @@ fn blob_payload_len(tx: &UnvalidatedBlobTransaction<'_>) -> Result<usize, Decode
     ])
 }
 
-fn encoded_list_envelope_len(payload_len: usize) -> Result<usize, DecodeError> {
+pub(super) fn encoded_list_envelope_len(payload_len: usize) -> Result<usize, DecodeError> {
     checked_len_add(encoded_rlp_list_header_len(payload_len)?, payload_len)
 }
 
-fn encoded_typed_envelope_len(payload_len: usize) -> Result<usize, DecodeError> {
+pub(super) fn encoded_typed_envelope_len(payload_len: usize) -> Result<usize, DecodeError> {
     checked_len_add(1, encoded_list_envelope_len(payload_len)?)
 }
 
-fn encode_list_envelope(
+pub(super) fn encode_list_envelope(
     payload_len: usize,
     output: &mut [u8],
     write_fields: impl FnOnce(&mut FieldWriter<'_>) -> Result<(), DecodeError>,
@@ -291,7 +291,7 @@ fn encode_list_envelope(
     Ok(total_len)
 }
 
-fn encode_typed_envelope(
+pub(super) fn encode_typed_envelope(
     transaction_type: u8,
     payload_len: usize,
     output: &mut [u8],
@@ -311,30 +311,32 @@ fn encode_typed_envelope(
     Ok(total_len)
 }
 
-fn encoded_u64_len(value: u64) -> Result<usize, DecodeError> {
+pub(super) fn encoded_u64_len(value: u64) -> Result<usize, DecodeError> {
     let bytes = value.to_be_bytes();
     encoded_rlp_integer_len(trim_u64_payload(&bytes))
 }
 
-fn encoded_u256_len(bytes: [u8; U256_BYTES]) -> Result<usize, DecodeError> {
+pub(super) fn encoded_u256_len(bytes: [u8; U256_BYTES]) -> Result<usize, DecodeError> {
     encoded_rlp_integer_len(trim_u256_payload(&bytes))
 }
 
-fn encoded_legacy_to_len(to: LegacyTransactionTo) -> Result<usize, DecodeError> {
+pub(super) fn encoded_legacy_to_len(to: LegacyTransactionTo) -> Result<usize, DecodeError> {
     match to {
         LegacyTransactionTo::Create => encoded_rlp_scalar_len(&[]),
         LegacyTransactionTo::Call(address) => encoded_rlp_scalar_len(&address.to_bytes()),
     }
 }
 
-fn encoded_access_list_to_len(to: AccessListTransactionTo) -> Result<usize, DecodeError> {
+pub(super) fn encoded_access_list_to_len(
+    to: AccessListTransactionTo,
+) -> Result<usize, DecodeError> {
     match to {
         AccessListTransactionTo::Create => encoded_rlp_scalar_len(&[]),
         AccessListTransactionTo::Call(address) => encoded_rlp_scalar_len(&address.to_bytes()),
     }
 }
 
-fn sum_lengths(lengths: &[usize]) -> Result<usize, DecodeError> {
+pub(super) fn sum_lengths(lengths: &[usize]) -> Result<usize, DecodeError> {
     let mut total = 0usize;
     for length in lengths {
         total = checked_len_add(total, *length)?;
@@ -342,7 +344,7 @@ fn sum_lengths(lengths: &[usize]) -> Result<usize, DecodeError> {
     Ok(total)
 }
 
-struct FieldWriter<'a> {
+pub(super) struct FieldWriter<'a> {
     output: &'a mut [u8],
     cursor: usize,
 }
@@ -352,7 +354,7 @@ impl<'a> FieldWriter<'a> {
         Self { output, cursor: 0 }
     }
 
-    fn write_with(
+    pub(super) fn write_with(
         &mut self,
         write: impl FnOnce(&mut [u8]) -> Result<usize, DecodeError>,
     ) -> Result<(), DecodeError> {
@@ -374,28 +376,40 @@ impl<'a> FieldWriter<'a> {
     }
 }
 
-fn write_u64(value: u64, writer: &mut FieldWriter<'_>) -> Result<(), DecodeError> {
+pub(super) fn write_u64(value: u64, writer: &mut FieldWriter<'_>) -> Result<(), DecodeError> {
     let bytes = value.to_be_bytes();
     writer.write_with(|output| encode_rlp_integer(trim_u64_payload(&bytes), output))
 }
 
-fn write_u256(bytes: [u8; U256_BYTES], writer: &mut FieldWriter<'_>) -> Result<(), DecodeError> {
+pub(super) fn write_u256(
+    bytes: [u8; U256_BYTES],
+    writer: &mut FieldWriter<'_>,
+) -> Result<(), DecodeError> {
     writer.write_with(|output| encode_rlp_integer(trim_u256_payload(&bytes), output))
 }
 
-fn write_wei(bytes: [u8; U256_BYTES], writer: &mut FieldWriter<'_>) -> Result<(), DecodeError> {
+pub(super) fn write_wei(
+    bytes: [u8; U256_BYTES],
+    writer: &mut FieldWriter<'_>,
+) -> Result<(), DecodeError> {
     write_u256(bytes, writer)
 }
 
-fn write_scalar(payload: &[u8], writer: &mut FieldWriter<'_>) -> Result<(), DecodeError> {
+pub(super) fn write_scalar(
+    payload: &[u8],
+    writer: &mut FieldWriter<'_>,
+) -> Result<(), DecodeError> {
     writer.write_with(|output| encode_rlp_scalar(payload, output))
 }
 
-fn write_address(address: Address, writer: &mut FieldWriter<'_>) -> Result<(), DecodeError> {
+pub(super) fn write_address(
+    address: Address,
+    writer: &mut FieldWriter<'_>,
+) -> Result<(), DecodeError> {
     write_scalar(&address.to_bytes(), writer)
 }
 
-fn write_legacy_to(
+pub(super) fn write_legacy_to(
     to: LegacyTransactionTo,
     writer: &mut FieldWriter<'_>,
 ) -> Result<(), DecodeError> {
@@ -405,7 +419,7 @@ fn write_legacy_to(
     }
 }
 
-fn write_transaction_to(
+pub(super) fn write_transaction_to(
     to: AccessListTransactionTo,
     writer: &mut FieldWriter<'_>,
 ) -> Result<(), DecodeError> {
@@ -415,14 +429,14 @@ fn write_transaction_to(
     }
 }
 
-fn write_access_list(
+pub(super) fn write_access_list(
     access_list: super::AccessList<'_>,
     writer: &mut FieldWriter<'_>,
 ) -> Result<(), DecodeError> {
     writer.write_with(|output| access_list.encode_rlp(output))
 }
 
-fn write_blob_hashes(
+pub(super) fn write_blob_hashes(
     hashes: BlobVersionedHashes<'_>,
     writer: &mut FieldWriter<'_>,
 ) -> Result<(), DecodeError> {
