@@ -1,6 +1,6 @@
 # eth 0.14.0 Release Notes
 
-Status: implementation ready for pentest
+Status: release candidate ready; waiting for final GitHub checks before tag
 
 ## Summary
 
@@ -74,8 +74,11 @@ duplicate access-list policy, or prove fork validity.
     internal access-list decode error;
   - y-parity parsing uses a dedicated narrow error type so both transaction
     decoders avoid catch-all error mapping.
-- Pentest is required before the release report commit.
-- Permanent report path after pentest: `security/pentest/v0.14.0.md`.
+- Initial retest reported one minor leftover: y-parity mapping still used a
+  wildcard fallback. This was remediated by introducing
+  `InvalidSignatureYParity` and removing the fallback.
+- Maintainer retest found no remaining findings for the release candidate.
+- Permanent report: `security/pentest/v0.14.0.md`.
 - Final GitHub checks must pass on the release report commit before tagging.
 
 ## Verification

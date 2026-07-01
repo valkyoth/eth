@@ -35,8 +35,9 @@ dependencies.
 
 ## Current Status
 
-Status: `v0.14.0` EIP-1559 dynamic-fee transaction decode implementation is
-ready for pentest. `v0.13.0` is the latest tagged release.
+Status: `v0.14.0` EIP-1559 dynamic-fee transaction decode release candidate is
+pentest-clean and waiting for final GitHub checks before tag. `v0.13.0` is the
+latest tagged release.
 
 Implemented now:
 

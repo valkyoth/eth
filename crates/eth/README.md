@@ -38,7 +38,8 @@ dependencies.
 
 ## Current Status
 
-The current release candidate is `0.14.0`; pentest is pending.
+The current release candidate is `0.14.0`; pentest is clean and final GitHub
+checks must pass before tag.
 
 Implemented now:
 
