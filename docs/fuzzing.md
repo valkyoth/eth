@@ -1,9 +1,9 @@
 # Fuzzing
 
-Status: `v0.16.0` RLP, transaction envelope, legacy transaction decode,
+Status: `v0.20.0` RLP, transaction envelope, legacy transaction decode,
 EIP-2930 access-list transaction decode, EIP-1559 dynamic-fee transaction
 decode, EIP-4844 blob transaction decode, and transaction encode fuzz/test
-baseline.
+baseline plus Ethereum signature parsing fuzz coverage.
 
 The fuzz workspace lives under `fuzz/` and is intentionally separate from the
 published crates. Live corpus growth and crash artifacts are local generated
@@ -20,6 +20,7 @@ state and are ignored by git.
 | `rlp_encode` | Scalar, integer, list-payload, list-header, and decoded-item encode paths. |
 | `primitives` | Primitive RLP bridge decoders and canonical integer payload constructors. |
 | `transaction_envelope` | EIP-2718 typed envelope classification, legacy RLP-list shell classification, unvalidated legacy/EIP-2930/EIP-1559/EIP-4844 field decoding, and fixed-buffer canonical re-encoding for successfully decoded transaction models. |
+| `ethereum_signature` | Ethereum `r || s || y_parity` signature parsing and digest-level sender recovery with a deterministic stub hasher. |
 | `decode_limits` | Stateless and accumulator decode-budget APIs. |
 
 Every new parser that accepts untrusted bytes must either extend one of these

@@ -156,6 +156,7 @@ where
 mod tests {
     use super::*;
     use k256::ecdsa::SigningKey;
+    use sha3::Digest;
 
     struct AddressFromPublicKeyHasher {
         digest: [u8; 32],
@@ -180,6 +181,31 @@ mod tests {
 
         fn finalize(self) -> B256 {
             B256::from_bytes(self.digest)
+        }
+    }
+
+    struct RealKeccak {
+        inner: sha3::Keccak256,
+    }
+
+    impl RealKeccak {
+        fn new() -> Self {
+            Self {
+                inner: sha3::Keccak256::new(),
+            }
+        }
+    }
+
+    impl Keccak256 for RealKeccak {
+        fn update(&mut self, input: &[u8]) {
+            self.inner.update(input);
+        }
+
+        fn finalize(self) -> B256 {
+            let digest = self.inner.finalize();
+            let mut bytes = [0_u8; SIGNING_DIGEST_BYTES];
+            bytes.copy_from_slice(&digest);
+            B256::from_bytes(bytes)
         }
     }
 
@@ -230,6 +256,38 @@ mod tests {
             .and_then(|bytes| <[u8; 20]>::try_from(bytes).ok())
             .ok_or(VerifyError::InvalidSignature)?;
         Ok(Address::from_bytes(source))
+    }
+
+    #[test]
+    fn recovers_known_ethereum_vector() {
+        let message = [
+            0xe9, 0x80, 0x85, 0x04, 0xe3, 0xb2, 0x92, 0x00, 0x83, 0x1e, 0x84, 0x80, 0x94, 0xf0,
+            0x10, 0x9f, 0xc8, 0xdf, 0x28, 0x30, 0x27, 0xb6, 0x28, 0x5c, 0xc8, 0x89, 0xf5, 0xaa,
+            0x62, 0x4e, 0xac, 0x1f, 0x55, 0x84, 0x3b, 0x9a, 0xca, 0x00, 0x80, 0x01, 0x80, 0x80,
+        ];
+        let signing_digest = eth_valkyoth_hash::hash_one(RealKeccak::new(), &message);
+        let signature = EthereumSignature::from_parts(
+            [
+                0xc9, 0xcf, 0x86, 0x33, 0x3b, 0xcb, 0x06, 0x5d, 0x14, 0x00, 0x32, 0xec, 0xaa, 0xb5,
+                0xd9, 0x28, 0x1b, 0xde, 0x80, 0xf2, 0x1b, 0x96, 0x87, 0xb3, 0xe9, 0x41, 0x61, 0xde,
+                0x42, 0xd5, 0x18, 0x95,
+            ],
+            [
+                0x72, 0x7a, 0x10, 0x8a, 0x0b, 0x8d, 0x10, 0x14, 0x65, 0x41, 0x40, 0x33, 0xc3, 0xf7,
+                0x05, 0xa9, 0xc7, 0xb8, 0x26, 0xe5, 0x96, 0x76, 0x60, 0x46, 0xee, 0x11, 0x83, 0xdb,
+                0xc8, 0xae, 0xaa, 0x68,
+            ],
+            SignatureYParity::Even,
+        );
+        let expected = Address::from_bytes([
+            0x2c, 0x75, 0x36, 0xe3, 0x60, 0x5d, 0x9c, 0x16, 0xa7, 0xa3, 0xd7, 0xb1, 0x89, 0x8e,
+            0x52, 0x93, 0x96, 0xa6, 0x5c, 0x23,
+        ]);
+
+        assert_eq!(
+            recover_sender_from_digest(signing_digest, signature, RealKeccak::new()),
+            Ok(expected)
+        );
     }
 
     #[test]

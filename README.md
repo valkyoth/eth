@@ -333,8 +333,13 @@ let _result = recover_sender_from_digest(
 ```
 
 The recovery layer rejects malformed scalar values, high-s signatures, and
-non-Ethereum recovery IDs. A successful recovered address is still not a full
-transaction-validity proof.
+non-Ethereum recovery IDs. The example hasher above is illustrative only and
+does not compute a real digest. Production hashers must implement Ethereum
+Keccak-256, not FIPS SHA3-256, and should be checked with
+`eth::hash::verify_empty_digest_with` before being wired into
+`recover_sender_from_digest`. A wrong backend produces a wrong sender address
+silently; there is no runtime cross-check. A successful recovered address is
+still not a full transaction-validity proof.
 
 ## Constant-Time Composition
 

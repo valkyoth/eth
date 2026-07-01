@@ -34,5 +34,6 @@ dependencies.
 | `libfuzzer-sys` | `0.4.13` | `(MIT OR Apache-2.0) AND NCSA` | fuzz-only | LLVM libFuzzer runtime for `fuzz/` targets. |
 | `k256` | `0.13.4` | `MIT OR Apache-2.0` | disabled, `ecdsa` enabled | secp256k1 ECDSA recovery for digest-level sender recovery. |
 | `sanitization` | `1.2.2` | `MIT OR Apache-2.0` | disabled | Optional best-effort secret memory clearing bridge. |
+| `sha3` | `0.10.9` | `MIT OR Apache-2.0` | disabled | Test-only Ethereum Keccak-256 backend for independent sender-recovery vectors; kept on the RustCrypto `digest 0.10` line to avoid duplicate-version policy violations. |
 | `subtle` | `2.6.1` | `BSD-3-Clause` | disabled, `core_hint_black_box` enabled | Constant-time equality for security-boundary byte comparisons. |
 | `syn` | `2.0.118` | `MIT OR Apache-2.0` | enabled, `full` enabled | Syntax parsing for optional derive macros. |

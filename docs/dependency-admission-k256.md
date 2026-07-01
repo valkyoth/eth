@@ -16,6 +16,10 @@ protocol-core graph, so it is scoped to digest-level sender recovery only.
 
 The selected version was checked with `cargo info k256@0.13.4` on 2026-07-01.
 It declares `rust-version = 1.65`, below this workspace's Rust `1.90.0` MSRV.
+The independent recovery test uses `sha3` `0.10.9` as a dev-only Keccak
+backend because it stays on the same RustCrypto `digest 0.10` dependency line
+as `k256` `0.13.4`. `sha3` `0.12.0` is newer, but admitting it here would add a
+second `digest` major line and violate `cargo-deny` duplicate-version policy.
 
 ## Feature Decision
 
@@ -44,6 +48,9 @@ features are not admitted by accident. The `ecdsa` feature is required for
 - Concrete sender-recovery hashers should have an explicit state-clearing
   policy. Prefer the optional sanitization bridge when a stateful software
   hasher buffers sensitive deployment context.
+- Sender recovery must keep at least one independent Keccak-backed Ethereum
+  vector test. Self-referential signing/recovery round trips are not enough for
+  consensus-sensitive address attribution.
 
 ## Verification
 

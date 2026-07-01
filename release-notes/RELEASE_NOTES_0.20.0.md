@@ -20,6 +20,10 @@ fork/fee/account validation, and proof binding remain separate steps.
 - Added low-s rejection for EIP-2 signature malleability policy.
 - Added explicit y-parity recovery policy: only `0` and `1` are accepted.
 - Added digest-level valid and invalid sender-recovery tests.
+- Added an independent Keccak-backed Ethereum sender-recovery vector adapted
+  from the k256/ethers-rs recovery fixture.
+- Added `ethereum_signature` fuzz coverage for signature parsing and
+  digest-level recovery.
 - Added `docs/dependency-admission-k256.md`.
 - Added `scripts/release_0_20_gate.sh`.
 
@@ -30,6 +34,8 @@ fork/fee/account validation, and proof binding remain separate steps.
 - The facade crate publishes as `eth` `0.20.0` and re-exports the sender
   recovery APIs through `eth::verify`.
 - `eth-valkyoth-verify` now depends on `eth-valkyoth-hash` and `k256`.
+- `eth-valkyoth-verify` uses `sha3` `0.10.9` only as a dev-dependency for the
+  independent Keccak-backed recovery vector.
 
 ## Security Notes
 
@@ -40,6 +46,9 @@ fork/fee/account validation, and proof binding remain separate steps.
 - Address derivation hashes the recovered uncompressed public key payload
   through the caller-provided `Keccak256` trait boundary. No concrete Keccak
   backend is admitted in this release.
+- The README sender-recovery example is illustrative only. Production hashers
+  must be checked as Ethereum Keccak-256 backends before use because a wrong
+  backend produces a wrong sender address silently.
 - The hasher used for sender recovery should have an explicit state-clearing
   policy. The optional sanitization bridge remains the preferred place to
   enforce `SecureSanitize` for concrete stateful hashers.
