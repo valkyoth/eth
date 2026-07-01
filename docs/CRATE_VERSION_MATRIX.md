@@ -1,6 +1,6 @@
 # Crate Version Matrix
 
-Status: `v0.16.1` RLP derive evaluation implementation ready for pentest.
+Status: `v0.17.0` chain and fork spec implementation ready for pentest.
 
 `eth` uses independent crate versions. The facade crate remains the main user
 entry point, but support crates are published only when their own package
@@ -26,23 +26,23 @@ but must be republished so immutable crates.io package metadata is corrected.
 workspace manifests before release. The script refuses accidental lockstep
 publication when a crate is marked `unchanged`.
 
-## v0.16.1 Tracking Table
+## v0.17.0 Tracking Table
 
 | Crate | Published | Planned | Change | Publish | Reason |
 | --- | --- | --- | --- | --- | --- |
-| `eth-valkyoth-codec` | `0.16.0` | `0.16.0` | `unchanged` | No | No package changes for v0.16.1. |
-| `eth-valkyoth-primitives` | `0.10.1` | `0.10.1` | `unchanged` | No | No package changes for v0.16.1. |
-| `eth-valkyoth-hash` | `0.10.0` | `0.10.0` | `unchanged` | No | No package changes for v0.16.1. |
-| `eth-valkyoth-protocol` | `0.16.0` | `0.16.0` | `unchanged` | No | No package changes for v0.16.1. |
-| `eth-valkyoth-verify` | `0.7.0` | `0.7.0` | `unchanged` | No | No package changes for v0.16.1. |
-| `eth-valkyoth-derive` | `0.7.0` | `0.16.1` | `code` | Yes | Adds the private RLP derive evaluation prototype and tests. |
-| `eth-valkyoth-sanitization` | `0.7.0` | `0.7.1` | `dependency` | Yes | Updates the optional derive dependency range to `eth-valkyoth-derive 0.16.1`. |
-| `eth-valkyoth-evm` | `0.7.0` | `0.7.0` | `unchanged` | No | No package changes for v0.16.1. |
-| `eth-valkyoth-rpc` | `0.7.0` | `0.7.0` | `unchanged` | No | No package changes for v0.16.1. |
-| `eth-valkyoth-signer` | `0.7.0` | `0.7.0` | `unchanged` | No | No package changes for v0.16.1. |
-| `eth-valkyoth-reth` | `0.7.0` | `0.7.0` | `unchanged` | No | No package changes for v0.16.1. |
-| `eth-valkyoth-testkit` | `0.7.0` | `0.7.0` | `unchanged` | No | No package changes for v0.16.1. |
-| `eth` | `0.16.0` | `0.16.1` | `metadata` | Yes | Updates facade documentation and packaged metadata for the v0.16.1 RLP derive evaluation. |
+| `eth-valkyoth-codec` | `0.16.0` | `0.16.0` | `unchanged` | No | No package changes for v0.17.0. |
+| `eth-valkyoth-primitives` | `0.10.1` | `0.10.1` | `unchanged` | No | No package changes for v0.17.0. |
+| `eth-valkyoth-hash` | `0.10.0` | `0.10.0` | `unchanged` | No | No package changes for v0.17.0. |
+| `eth-valkyoth-protocol` | `0.16.0` | `0.17.0` | `code` | Yes | Adds explicit chain/fork spec APIs, activation context selection, unsupported-fork errors, and chain mismatch checks. |
+| `eth-valkyoth-verify` | `0.7.0` | `0.7.0` | `unchanged` | No | No package changes for v0.17.0. |
+| `eth-valkyoth-derive` | `0.16.1` | `0.16.1` | `unchanged` | No | No package changes for v0.17.0. |
+| `eth-valkyoth-sanitization` | `0.7.1` | `0.7.1` | `unchanged` | No | No package changes for v0.17.0. |
+| `eth-valkyoth-evm` | `0.7.0` | `0.7.0` | `unchanged` | No | No package changes for v0.17.0. |
+| `eth-valkyoth-rpc` | `0.7.0` | `0.7.0` | `unchanged` | No | No package changes for v0.17.0. |
+| `eth-valkyoth-signer` | `0.7.0` | `0.7.0` | `unchanged` | No | No package changes for v0.17.0. |
+| `eth-valkyoth-reth` | `0.7.0` | `0.7.0` | `unchanged` | No | No package changes for v0.17.0. |
+| `eth-valkyoth-testkit` | `0.7.0` | `0.7.0` | `unchanged` | No | No package changes for v0.17.0. |
+| `eth` | `0.16.1` | `0.17.0` | `code` | Yes | Re-exports protocol chain/fork APIs and updates packaged documentation for v0.17.0. |
 
 Update this table and `release-crates.toml` in the same commit whenever a crate
 changes release state.

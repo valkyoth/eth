@@ -26,22 +26,21 @@
 `eth` is the public facade crate for a `no_std`-first Ethereum
 execution-layer protocol workspace.
 
-The crate is intentionally conservative at `0.16.1`: it provides explicit
+The crate is intentionally conservative at `0.17.0`: it provides explicit
 Ethereum primitive domains, bounded decode-budget policy, stable error
 categories, primitive RLP bridge helpers, a caller-provided Keccak-256 boundary,
 RLP fuzz-harness evidence, a transaction envelope shell, unvalidated legacy
 transaction field decoding, unvalidated EIP-2930 access-list transaction field
 decoding, unvalidated EIP-1559 dynamic-fee transaction field decoding,
 unvalidated EIP-4844 blob transaction field decoding, no-allocation canonical
-transaction envelope encoding for admitted decoded domains, RLP derive design
-evidence, small first-party crate boundaries, optional sanitization support, and
-release evidence before RPC, signer, EVM, Reth, or P2P integrations become real
-dependencies.
+transaction envelope encoding for admitted decoded domains, explicit chain and
+fork activation context, RLP derive design evidence, small first-party crate
+boundaries, optional sanitization support, and release evidence before RPC,
+signer, EVM, Reth, or P2P integrations become real dependencies.
 
 ## Current Status
 
-The current release candidate is `0.16.1`; pentest has passed and final GitHub
-checks are pending before tag.
+The current release candidate is `0.17.0`; pentest is pending.
 
 Implemented now:
 
@@ -69,6 +68,8 @@ Implemented now:
   words.
 - No-allocation canonical transaction envelope encoding for admitted
   unvalidated legacy, EIP-2930, EIP-1559, and EIP-4844 transaction domains.
+- Explicit caller-provided `ChainSpec`, `ForkSpec`, `Hardfork`, and
+  `ValidationContext` APIs for fork activation selection.
 - RLP derive design and private derive-crate prototype tests for future
   `RlpEncode`/`RlpDecode` support.
 - Caller-provided Keccak-256 trait boundary without a default hash
@@ -109,21 +110,21 @@ Not implemented yet:
 
 ```toml
 [dependencies]
-eth = "0.16"
+eth = "0.17"
 ```
 
 Disable defaults explicitly for embedded or freestanding builds:
 
 ```toml
 [dependencies]
-eth = { version = "0.16", default-features = false }
+eth = { version = "0.17", default-features = false }
 ```
 
 Optional sanitization support:
 
 ```toml
 [dependencies]
-eth = { version = "0.16", features = ["sanitization"] }
+eth = { version = "0.17", features = ["sanitization"] }
 ```
 
 ## Features
@@ -523,7 +524,7 @@ the workspace can keep small, auditable boundaries:
 The minimum supported Rust version is Rust `1.90.0`. New deployments should use
 the latest stable Rust verified by the release gates.
 
-Compatibility evidence for `0.16.1`:
+Compatibility evidence for `0.17.0`:
 
 | Rust | Local Evidence |
 | --- | --- |

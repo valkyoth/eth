@@ -7,10 +7,10 @@ extern crate std;
 
 use core::{fmt, marker::PhantomData};
 
-use eth_valkyoth_primitives::{BlockNumber, ChainId, UnixTimestamp};
-
+mod fork;
 mod transaction;
 
+pub use fork::{ChainSpec, ForkActivation, ForkError, ForkSpec, Hardfork, ValidationContext};
 pub use transaction::{
     ACCESS_LIST_TRANSACTION_FIELD_COUNT, ACCESS_LIST_TRANSACTION_TYPE, AccessList,
     AccessListEntries, AccessListEntry, AccessListStorageKeyItems, AccessListStorageKeys,
@@ -142,99 +142,6 @@ impl fmt::Display for FeatureError {
 impl std::error::Error for FeatureError {}
 
 /// Fork selection or activation failure.
-#[non_exhaustive]
-#[derive(Clone, Copy, Debug, Eq, PartialEq)]
-pub enum ForkError {
-    /// The selected fork is not supported by this crate version.
-    Unsupported,
-    /// The selected fork is not active for the supplied validation context.
-    Inactive,
-    /// Fork activation data is incomplete.
-    MissingActivation,
-}
-
-impl ForkError {
-    /// Stable machine-readable error code.
-    #[must_use]
-    pub const fn code(self) -> &'static str {
-        match self {
-            Self::Unsupported => "ETH_FORK_UNSUPPORTED",
-            Self::Inactive => "ETH_FORK_INACTIVE",
-            Self::MissingActivation => "ETH_FORK_MISSING_ACTIVATION",
-        }
-    }
-
-    /// Stable human-readable error message.
-    #[must_use]
-    pub const fn message(self) -> &'static str {
-        match self {
-            Self::Unsupported => "fork is not supported by this crate version",
-            Self::Inactive => "fork is not active for the validation context",
-            Self::MissingActivation => "fork activation data is incomplete",
-        }
-    }
-}
-
-impl fmt::Display for ForkError {
-    fn fmt(&self, formatter: &mut fmt::Formatter<'_>) -> fmt::Result {
-        formatter.write_str(self.message())
-    }
-}
-
-#[cfg(feature = "std")]
-impl std::error::Error for ForkError {}
-
-/// Unambiguous fork activation rule.
-#[derive(Clone, Copy, Debug, Eq, PartialEq)]
-pub enum ForkActivation {
-    /// Block number alone determines activation.
-    BlockOnly {
-        /// Activation block for this fork view.
-        activation_block: BlockNumber,
-    },
-    /// Both block number and timestamp must be satisfied.
-    BlockAndTimestamp {
-        /// Activation block for this fork view.
-        activation_block: BlockNumber,
-        /// Activation timestamp for timestamp-based forks.
-        activation_timestamp: UnixTimestamp,
-    },
-}
-
-/// Ethereum fork rules selected for a validation operation.
-#[derive(Clone, Copy, Debug, Eq, PartialEq)]
-pub struct ForkSpec {
-    /// Chain being validated.
-    pub chain_id: ChainId,
-    /// Activation rule for this fork view.
-    pub activation: ForkActivation,
-}
-
-/// Validation context that must be explicit for consensus-sensitive operations.
-#[derive(Clone, Copy, Debug, Eq, PartialEq)]
-pub struct ValidationContext {
-    /// Fork rules.
-    pub fork: ForkSpec,
-    /// Current block number.
-    pub block_number: BlockNumber,
-    /// Current block timestamp.
-    pub timestamp: UnixTimestamp,
-}
-
-impl ValidationContext {
-    /// Returns whether the configured fork is active for this context.
-    #[must_use]
-    pub fn fork_is_active(self) -> bool {
-        match self.fork.activation {
-            ForkActivation::BlockOnly { activation_block } => self.block_number >= activation_block,
-            ForkActivation::BlockAndTimestamp {
-                activation_block,
-                activation_timestamp,
-            } => self.block_number >= activation_block && self.timestamp >= activation_timestamp,
-        }
-    }
-}
-
 /// Raw wire input was accepted by the codec.
 #[derive(Clone, Copy, Debug, Eq, PartialEq)]
 pub struct Decoded;
@@ -304,37 +211,6 @@ mod tests {
     use super::*;
     extern crate std;
     use std::string::ToString;
-
-    #[test]
-    fn activation_requires_block_and_time() {
-        let context = ValidationContext {
-            fork: ForkSpec {
-                chain_id: ChainId::new(1),
-                activation: ForkActivation::BlockAndTimestamp {
-                    activation_block: BlockNumber::new(10),
-                    activation_timestamp: UnixTimestamp::new(20),
-                },
-            },
-            block_number: BlockNumber::new(10),
-            timestamp: UnixTimestamp::new(19),
-        };
-        assert!(!context.fork_is_active());
-    }
-
-    #[test]
-    fn block_only_activation_ignores_timestamp() {
-        let context = ValidationContext {
-            fork: ForkSpec {
-                chain_id: ChainId::new(1),
-                activation: ForkActivation::BlockOnly {
-                    activation_block: BlockNumber::new(10),
-                },
-            },
-            block_number: BlockNumber::new(10),
-            timestamp: UnixTimestamp::new(0),
-        };
-        assert!(context.fork_is_active());
-    }
 
     #[test]
     fn transaction_typestate_advances_in_order() {

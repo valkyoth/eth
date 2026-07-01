@@ -35,9 +35,8 @@ dependencies.
 
 ## Current Status
 
-Status: `v0.16.1` RLP derive evaluation pentest passed; final GitHub checks are
-pending before tag.
-`v0.16.0` is the latest tagged release.
+Status: `v0.17.0` chain and fork spec implementation is ready for pentest.
+`v0.16.1` is the latest tagged release.
 
 Implemented now:
 
@@ -67,6 +66,8 @@ Implemented now:
   words.
 - No-allocation canonical transaction envelope encoding for admitted
   unvalidated legacy, EIP-2930, EIP-1559, and EIP-4844 transaction domains.
+- Explicit caller-provided `ChainSpec`, `ForkSpec`, `Hardfork`, and
+  `ValidationContext` APIs for fork activation selection.
 - RLP derive design and private derive-crate prototype tests for future
   `RlpEncode`/`RlpDecode` support.
 - Caller-provided Keccak-256 trait boundary without a default hash
@@ -112,14 +113,14 @@ Not implemented yet:
 
 ```toml
 [dependencies]
-eth = "0.16"
+eth = "0.17"
 ```
 
 For optional sanitization support:
 
 ```toml
 [dependencies]
-eth = { version = "0.16", features = ["sanitization"] }
+eth = { version = "0.17", features = ["sanitization"] }
 ```
 
 ## Features
@@ -517,7 +518,7 @@ friendly, and independently testable.
 The minimum supported Rust version is Rust `1.90.0`. New deployments should use
 the pinned stable Rust `1.96.1` until the toolchain policy is updated.
 
-Compatibility evidence for `0.16.1`:
+Compatibility evidence for `0.17.0`:
 
 | Rust | Local Evidence |
 | --- | --- |
@@ -534,8 +535,8 @@ Compatibility evidence for `0.16.1`:
 
 ```bash
 scripts/checks.sh
-scripts/release_0_16_gate.sh
-scripts/validate-release-readiness.sh v0.16.1
+scripts/release_0_17_gate.sh
+scripts/validate-release-readiness.sh v0.17.0
 ```
 
 For dependency-policy checks, install `cargo-deny` and `cargo-audit`, then run:

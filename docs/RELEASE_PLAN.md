@@ -597,6 +597,8 @@ Exit criteria:
 
 ### v0.17.0 - Chain And Fork Specs
 
+Status: implementation complete; pentest pending.
+
 Goal: make chain and fork activation rules explicit.
 
 Deliverables:
