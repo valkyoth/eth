@@ -18,6 +18,9 @@ are stable.
 - Added private `eth-valkyoth-derive` tests for the RLP derive plan:
   declaration-order field handling, explicit skip/default reason handling, and
   rejection of generics, enums, unions, and ambiguous field attributes.
+- Added pentest remediation coverage ensuring skip/default reasons are retained
+  in the private field plan and duplicate `#[eth_rlp(...)]` attributes are
+  rejected.
 
 ## Changed
 
@@ -32,6 +35,9 @@ are stable.
 - No public RLP derive macro is exposed in this release.
 - The design requires future decode derives to take explicit `DecodeLimits` and
   use the same bounded codec and primitive helpers as hand-written paths.
+- The private prototype now carries skip/default reasons forward in its plan so
+  future code generation cannot silently drop the audit trail.
+- Duplicate `eth_rlp` field attributes are rejected instead of merged.
 - Transaction derives remain deferred so generated code cannot bypass fork
   validation or sender-recovery typestates.
 

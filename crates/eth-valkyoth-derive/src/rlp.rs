@@ -16,6 +16,13 @@ enum RlpFieldMode {
 struct RlpFieldPlan {
     index: usize,
     mode: RlpFieldMode,
+    skip_reason: Option<String>,
+}
+
+#[derive(Debug, Eq, PartialEq)]
+struct RlpFieldAttrs {
+    mode: RlpFieldMode,
+    skip_reason: Option<String>,
 }
 
 #[derive(Debug, Eq, PartialEq)]
@@ -61,9 +68,11 @@ fn ordered_fields(fields: &Fields) -> Result<Vec<RlpFieldPlan>, Error> {
             .iter()
             .enumerate()
             .map(|(index, field)| {
+                let attrs = rlp_field_attrs(field)?;
                 Ok(RlpFieldPlan {
                     index,
-                    mode: rlp_field_mode(field)?,
+                    mode: attrs.mode,
+                    skip_reason: attrs.skip_reason,
                 })
             })
             .collect(),
@@ -72,9 +81,11 @@ fn ordered_fields(fields: &Fields) -> Result<Vec<RlpFieldPlan>, Error> {
             .iter()
             .enumerate()
             .map(|(index, field)| {
+                let attrs = rlp_field_attrs(field)?;
                 Ok(RlpFieldPlan {
                     index,
-                    mode: rlp_field_mode(field)?,
+                    mode: attrs.mode,
+                    skip_reason: attrs.skip_reason,
                 })
             })
             .collect(),
@@ -82,15 +93,23 @@ fn ordered_fields(fields: &Fields) -> Result<Vec<RlpFieldPlan>, Error> {
     }
 }
 
-fn rlp_field_mode(field: &syn::Field) -> Result<RlpFieldMode, Error> {
+fn rlp_field_attrs(field: &syn::Field) -> Result<RlpFieldAttrs, Error> {
     let mut skip = false;
     let mut default = false;
     let mut reason = None::<LitStr>;
+    let mut seen_attr = false;
     for attr in field
         .attrs
         .iter()
         .filter(|attr| attr.path().is_ident("eth_rlp"))
     {
+        if seen_attr {
+            return Err(Error::new_spanned(
+                attr,
+                "duplicate #[eth_rlp(...)] attribute on field",
+            ));
+        }
+        seen_attr = true;
         attr.parse_nested_meta(|meta| {
             if meta.path.is_ident("skip") {
                 skip = true;
@@ -113,8 +132,14 @@ fn rlp_field_mode(field: &syn::Field) -> Result<RlpFieldMode, Error> {
         })?;
     }
     match (skip, default, reason.is_some()) {
-        (false, false, false) => Ok(RlpFieldMode::Required),
-        (true, true, true) => Ok(RlpFieldMode::SkipWithDefault),
+        (false, false, false) => Ok(RlpFieldAttrs {
+            mode: RlpFieldMode::Required,
+            skip_reason: None,
+        }),
+        (true, true, true) => Ok(RlpFieldAttrs {
+            mode: RlpFieldMode::SkipWithDefault,
+            skip_reason: reason.map(|reason| reason.value()),
+        }),
         (true, false, _) => Err(Error::new_spanned(
             field,
             "eth_rlp skip requires default and reason = \"...\"",
@@ -159,15 +184,18 @@ mod tests {
             }) if fields == &vec![
                     RlpFieldPlan {
                         index: 0,
-                        mode: RlpFieldMode::Required
+                        mode: RlpFieldMode::Required,
+                        skip_reason: None,
                     },
                     RlpFieldPlan {
                         index: 1,
-                        mode: RlpFieldMode::Required
+                        mode: RlpFieldMode::Required,
+                        skip_reason: None,
                     },
                     RlpFieldPlan {
                         index: 2,
-                        mode: RlpFieldMode::Required
+                        mode: RlpFieldMode::Required,
+                        skip_reason: None,
                     },
                 ]
         ));
@@ -193,11 +221,13 @@ mod tests {
             }) if fields == &vec![
                     RlpFieldPlan {
                         index: 0,
-                        mode: RlpFieldMode::Required
+                        mode: RlpFieldMode::Required,
+                        skip_reason: None,
                     },
                     RlpFieldPlan {
                         index: 1,
-                        mode: RlpFieldMode::SkipWithDefault
+                        mode: RlpFieldMode::SkipWithDefault,
+                        skip_reason: Some(String::from("derived cache")),
                     },
                 ]
         ));
@@ -260,13 +290,26 @@ mod tests {
         };
 
         assert!(
-            matches!(rlp_field_mode(&skip_only), Err(error) if error.to_string().contains("skip requires default"))
+            matches!(rlp_field_attrs(&skip_only), Err(error) if error.to_string().contains("skip requires default"))
         );
         assert!(
-            matches!(rlp_field_mode(&default_only), Err(error) if error.to_string().contains("default is only supported"))
+            matches!(rlp_field_attrs(&default_only), Err(error) if error.to_string().contains("default is only supported"))
         );
         assert!(
-            matches!(rlp_field_mode(&reason_only), Err(error) if error.to_string().contains("reason is only supported"))
+            matches!(rlp_field_attrs(&reason_only), Err(error) if error.to_string().contains("reason is only supported"))
         );
+    }
+
+    #[test]
+    fn rlp_field_attrs_reject_duplicate_attributes() {
+        let field: syn::Field = parse_quote! {
+            #[eth_rlp(skip, default, reason = "derived cache")]
+            #[eth_rlp(reason = "conflicting reason")]
+            cached_hash: [u8; 32]
+        };
+
+        let result = rlp_field_attrs(&field);
+
+        assert!(matches!(result, Err(error) if error.to_string().contains("duplicate")));
     }
 }

@@ -46,6 +46,15 @@ cached_hash: B256,
 non-empty `reason` are rejected in the prototype. This keeps cached or derived
 fields visible in review and prevents accidental consensus-field omission.
 
+The private prototype carries the validated reason into its field plan instead
+of discarding it after parsing. When public code generation lands, the reason
+must remain visible in generated output or diagnostics so review evidence is not
+lost during macro expansion.
+
+Repeated `#[eth_rlp(...)]` attributes on the same field are rejected. Attribute
+merging or last-write-wins behavior is not allowed for consensus-relevant field
+metadata.
+
 ## Deferred Public Surface
 
 The following remain intentionally deferred:
@@ -70,5 +79,6 @@ Public derives must preserve these invariants:
 - generated transaction code cannot bypass fork or sender validation.
 
 The v0.16.1 prototype lives in derive-crate tests and enforces the first API
-rules: declaration order, explicit skip/default reason, and rejection of
-generics, enums, unions, and ambiguous field attributes.
+rules: declaration order, retained explicit skip/default reasons, and rejection
+of generics, enums, unions, duplicate attributes, and ambiguous field
+attributes.
