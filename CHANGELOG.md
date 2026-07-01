@@ -4,6 +4,12 @@ All notable changes to `eth` are documented here.
 
 ## Unreleased
 
+- Started `0.13.0` with unvalidated EIP-2930 access-list transaction field
+  decoding for typed transaction byte `0x01`.
+- Added bounded borrowed access-list entry and storage-key iteration plus stable
+  access-list transaction decode error codes/categories.
+- Extended transaction-envelope fuzz coverage to drive EIP-2930 access-list
+  transaction decoding.
 - Started `0.12.0` with unvalidated legacy transaction field decoding for the
   EIP-2718 legacy transaction field list.
 - Added stable legacy transaction decode error codes/categories, call/create

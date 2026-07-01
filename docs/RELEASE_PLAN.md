@@ -481,6 +481,8 @@ Exit criteria:
 
 ### v0.13.0 - Access List Transaction Decode
 
+Status: implementation complete; pentest pending.
+
 Goal: decode EIP-2930 access-list transactions.
 
 Deliverables:

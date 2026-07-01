@@ -24,9 +24,10 @@ pub use eth_valkyoth_verify as verify;
 pub mod error {
     pub use eth_valkyoth_codec::{DecodeError, DecodeErrorCategory, ResourceError};
     pub use eth_valkyoth_protocol::{
-        FeatureError, ForkError, LegacyTransactionDecodeError,
-        LegacyTransactionDecodeErrorCategory, ProtocolError, ProtocolErrorCategory,
-        TransactionEnvelopeError, TransactionEnvelopeErrorCategory,
+        AccessListTransactionDecodeError, AccessListTransactionDecodeErrorCategory, FeatureError,
+        ForkError, LegacyTransactionDecodeError, LegacyTransactionDecodeErrorCategory,
+        ProtocolError, ProtocolErrorCategory, TransactionEnvelopeError,
+        TransactionEnvelopeErrorCategory,
     };
     pub use eth_valkyoth_verify::{VerifyError, VerifyErrorCategory};
 }

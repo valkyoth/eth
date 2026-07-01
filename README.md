@@ -35,9 +35,8 @@ dependencies.
 
 ## Current Status
 
-Status: `v0.12.0` legacy transaction decode implementation, pentest
-remediation, and clean retest are complete. `v0.11.0` is the latest tagged
-release.
+Status: `v0.13.0` EIP-2930 access-list transaction decode implementation is
+ready for pentest. `v0.12.0` is the latest tagged release.
 
 Implemented now:
 
@@ -57,6 +56,8 @@ Implemented now:
   transaction bytes.
 - Unvalidated legacy transaction field decoding for nonce, gas price, gas
   limit, to/create, value, input, and signature words.
+- Unvalidated EIP-2930 access-list transaction field decoding, including
+  bounded borrowed access-list entry and storage-key iteration.
 - Caller-provided Keccak-256 trait boundary without a default hash
   implementation dependency.
 - RLP fuzz harness with committed hex seed corpus and crash reproduction docs.
@@ -75,7 +76,7 @@ Not implemented yet:
 - No signer or local key storage.
 - No EVM execution adapter.
 - No Reth or P2P integration.
-- No typed transaction field parsers yet.
+- No dynamic-fee, blob, or set-code typed transaction field parsers yet.
 - No transaction signature validation or sender recovery yet.
 - No block parser yet.
 
@@ -100,14 +101,14 @@ Not implemented yet:
 
 ```toml
 [dependencies]
-eth = "0.11"
+eth = "0.13"
 ```
 
 For optional sanitization support:
 
 ```toml
 [dependencies]
-eth = { version = "0.11", features = ["sanitization"] }
+eth = { version = "0.13", features = ["sanitization"] }
 ```
 
 ## Features
@@ -186,6 +187,45 @@ let written = address.encode_rlp(&mut encoded_address)?;
 assert_eq!(written, 21);
 assert_eq!(Address::try_from_rlp(&encoded_address, limits)?, address);
 # Ok::<(), eth::primitives::PrimitiveRlpError>(())
+```
+
+## Transaction Decode
+
+Transaction decoders return explicitly unvalidated borrowed field models. They
+classify and bound wire data, but do not validate signatures, recover senders,
+check account state, or prove fork validity:
+
+```rust
+use eth::codec::DecodeLimits;
+use eth::primitives::{Gas, Nonce, Wei};
+use eth::protocol::{
+    AccessListTransactionTo, SignatureYParity, decode_access_list_transaction,
+};
+
+let access_list_tx = [
+    0x01, 0xcd, 0x01, 0x02, 0x03, 0x82, 0x52, 0x08, 0x80, 0x80, 0x80, 0xc0,
+    0x01, 0x01, 0x02,
+];
+
+let limits = DecodeLimits {
+    max_input_bytes: 64,
+    max_list_items: 16,
+    max_nesting_depth: 8,
+    max_total_allocation: 64,
+    max_proof_nodes: 4,
+    max_total_items: 32,
+};
+let tx = decode_access_list_transaction(&access_list_tx, limits)?;
+
+assert_eq!(tx.chain_id.get(), 1);
+assert_eq!(tx.nonce, Nonce::new(2));
+assert_eq!(tx.gas_price, Wei::from_u128(3));
+assert_eq!(tx.gas_limit, Gas::new(21_000));
+assert_eq!(tx.to, AccessListTransactionTo::Create);
+assert_eq!(tx.access_list.address_count(), 0);
+assert_eq!(tx.access_list.storage_key_count(), 0);
+assert_eq!(tx.y_parity, SignatureYParity::Odd);
+# Ok::<(), eth::error::AccessListTransactionDecodeError>(())
 ```
 
 ## Constant-Time Composition
@@ -455,7 +495,7 @@ friendly, and independently testable.
 The minimum supported Rust version is Rust `1.90.0`. New deployments should use
 the pinned stable Rust `1.96.1` until the toolchain policy is updated.
 
-Compatibility evidence for `0.12.0`:
+Compatibility evidence for `0.13.0`:
 
 | Rust | Local Evidence |
 | --- | --- |
@@ -472,8 +512,8 @@ Compatibility evidence for `0.12.0`:
 
 ```bash
 scripts/checks.sh
-scripts/release_0_12_gate.sh
-scripts/validate-release-readiness.sh v0.12.0
+scripts/release_0_13_gate.sh
+scripts/validate-release-readiness.sh v0.13.0
 ```
 
 For dependency-policy checks, install `cargo-deny` and `cargo-audit`, then run:

@@ -12,12 +12,16 @@ use eth_valkyoth_primitives::{BlockNumber, ChainId, UnixTimestamp};
 mod transaction;
 
 pub use transaction::{
-    EIP_2718_MAX_TYPED_PREFIX, EIP_2718_RESERVED_PREFIX, EIP_2718_SCALAR_PREFIX_START,
-    EIP_2718_TYPED_ZERO_PREFIX, LEGACY_TRANSACTION_FIELD_COUNT, LEGACY_TRANSACTION_PREFIX_START,
-    LegacyTransactionDecodeError, LegacyTransactionDecodeErrorCategory, LegacyTransactionField,
-    LegacyTransactionTo, TransactionEnvelope, TransactionEnvelopeError,
-    TransactionEnvelopeErrorCategory, TypedTransactionEnvelope, UnvalidatedLegacyTransaction,
-    decode_legacy_transaction, decode_transaction_envelope,
+    ACCESS_LIST_TRANSACTION_FIELD_COUNT, AccessList, AccessListEntry, AccessListStorageKeys,
+    AccessListTransactionDecodeError, AccessListTransactionDecodeErrorCategory,
+    AccessListTransactionField, AccessListTransactionTo, EIP_2718_MAX_TYPED_PREFIX,
+    EIP_2718_RESERVED_PREFIX, EIP_2718_SCALAR_PREFIX_START, EIP_2718_TYPED_ZERO_PREFIX,
+    LEGACY_TRANSACTION_FIELD_COUNT, LEGACY_TRANSACTION_PREFIX_START, LegacyTransactionDecodeError,
+    LegacyTransactionDecodeErrorCategory, LegacyTransactionField, LegacyTransactionTo,
+    SignatureYParity, TransactionEnvelope, TransactionEnvelopeError,
+    TransactionEnvelopeErrorCategory, TypedTransactionEnvelope, UnvalidatedAccessListTransaction,
+    UnvalidatedLegacyTransaction, decode_access_list_transaction, decode_legacy_transaction,
+    decode_transaction_envelope,
 };
 
 /// Protocol validation failure.

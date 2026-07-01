@@ -1,7 +1,7 @@
 # Fuzzing
 
-Status: `v0.12.0` RLP, transaction envelope, and legacy transaction decode
-fuzz harness baseline.
+Status: `v0.13.0` RLP, transaction envelope, legacy transaction decode, and
+EIP-2930 access-list transaction decode fuzz harness baseline.
 
 The fuzz workspace lives under `fuzz/` and is intentionally separate from the
 published crates. Live corpus growth and crash artifacts are local generated
@@ -17,7 +17,7 @@ state and are ignored by git.
 | `rlp_list` | List exact and partial decoders plus recursive item traversal. |
 | `rlp_encode` | Scalar, integer, list-payload, and decoded-item encode paths. |
 | `primitives` | Primitive RLP bridge decoders and canonical integer payload constructors. |
-| `transaction_envelope` | EIP-2718 typed envelope classification, legacy RLP-list shell classification, and unvalidated legacy transaction field decoding. |
+| `transaction_envelope` | EIP-2718 typed envelope classification, legacy RLP-list shell classification, unvalidated legacy transaction field decoding, and unvalidated EIP-2930 access-list transaction field decoding. |
 | `decode_limits` | Stateless and accumulator decode-budget APIs. |
 
 Every new parser that accepts untrusted bytes must either extend one of these
@@ -27,7 +27,8 @@ List-recursion fuzz targets drive item iteration to
 `MAX_RLP_LIST_TRAVERSAL_DEPTH`, matching the decoder hard cap. The committed
 seed corpus includes a 128-level empty-list chain for this path.
 The transaction-envelope fuzz target also drives `decode_legacy_transaction`
-and applies the same recursion limit when it sees a legacy RLP-list envelope.
+and `decode_access_list_transaction`, then applies the same recursion limit when
+it sees a legacy RLP-list envelope.
 
 ## Seed Corpus
 
