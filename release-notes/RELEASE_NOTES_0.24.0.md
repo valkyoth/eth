@@ -45,7 +45,9 @@ execution validity remain deferred to later verification layers.
   tuples may use chain ID zero as a universal authorization domain.
 - Empty authorization-list rejection is intentionally deferred to later
   validation, matching the existing syntactic decode boundary for other
-  transaction families.
+  transaction families. The explicit follow-up milestones are `v0.24.1` for
+  set-code signing and authorization validation, and `v0.24.2` for the
+  transaction-validity gate.
 - Set-code transaction signing-hash construction and authorization-signature
   validation are not part of this release. The decoded signature validation
   helper rejects set-code transactions with an explicit unsupported-type error.

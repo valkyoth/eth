@@ -139,6 +139,7 @@ relevant dependency point.
 | Standard transaction signing digests were implied by sender recovery but not scheduled. | Added `v0.22.0 - Transaction Signing Hashes`. |
 | End-to-end decoded transaction signature validation was implied by typestates but not scheduled. | Added `v0.23.0 - Full Transaction Signature Validation`. |
 | Set-code typed transactions were listed as missing without a version. | Added `v0.24.0 - Set-Code Transaction Decode`. |
+| EIP-7702 set-code signing, authorization signatures, empty-list rejection, and fork/account-state validation were deferred by the syntactic decoder. | Added `v0.24.1 - Set-Code Signing And Authorization Validation` and `v0.24.2 - Set-Code Transaction Validity Gate`. |
 | Public RLP derives had only an evaluation/prototype milestone. | Added `v0.25.0 - Public RLP Derives`. |
 | Full EIP-712 `encodeType`/`encodeData`/`hashStruct` support was missing from the roadmap. | Added `v0.26.0 - EIP-712 Typed-Data Encoder`. |
 | A first-party optional software Keccak backend was deferred without a versioned admission point. | Added `v0.27.0 - Optional Keccak Backend Admission`. |
@@ -803,7 +804,7 @@ Deliverables:
 - field model with explicit authorization-list domain types;
 - bounded decode and no-allocation encode helpers;
 - fuzz seed coverage for malformed and maximal authorization lists;
-- scope note for validation deferred to later fork/account-state passes.
+- scope note for validation deferred to `v0.24.1` and `v0.24.2`.
 
 Verification:
 
@@ -821,6 +822,76 @@ Implementation note:
   transaction type `0x04`, authorization magic `0x05`, transaction payload
   fields, required destination address, and authorization tuple shape
   `[chain_id, address, nonce, y_parity, r, s]`.
+
+### v0.24.1 - Set-Code Signing And Authorization Validation
+
+Goal: add the cryptographic EIP-7702 validation pieces that were intentionally
+left out of the syntactic set-code decoder.
+
+Deliverables:
+
+- refresh the official EIP-7702 source check before implementation;
+- set-code transaction signing preimage and signing-hash helpers for type
+  `0x04`;
+- set-code authorization tuple signing hash using the EIP-7702 authorization
+  magic/domain;
+- authorization signer recovery with low-s, scalar, and y-parity policy;
+- decoded set-code transaction signature validation no longer returns
+  `UnsupportedTransactionType`;
+- explicit tests for transaction signature validation versus authorization
+  tuple signature validation so the domains cannot be substituted;
+- KATs or independently generated vectors for set-code transaction hashes and
+  authorization signer recovery;
+- fuzz coverage for malformed authorization signatures and hash-construction
+  scratch-buffer limits.
+
+Verification:
+
+- `cargo test -p eth-valkyoth-protocol -p eth-valkyoth-verify`
+- `cargo check --manifest-path fuzz/Cargo.toml`
+
+Exit criteria:
+
+- A syntactically decoded EIP-7702 transaction can have its transaction
+  signature and each authorization tuple signature validated through explicit
+  verify-layer APIs.
+- The transaction-signature domain and authorization-signature domain are
+  represented by distinct APIs or newtypes.
+
+### v0.24.2 - Set-Code Transaction Validity Gate
+
+Goal: add the non-cryptographic EIP-7702 validity checks that decide whether a
+decoded set-code transaction can advance beyond the unvalidated state.
+
+Deliverables:
+
+- refresh the official EIP-7702 source check before implementation;
+- validation API that rejects empty authorization lists before a set-code
+  transaction is considered transaction-valid;
+- authorization chain-ID policy for universal chain ID `0` versus the expected
+  chain;
+- authorization nonce and integer-bound policy from the official EIP;
+- fork activation check for set-code transaction admission;
+- caller-provided account-state/delegation view for the EIP-7702 account and
+  delegation-indicator rules;
+- fee, gas, and account-state integration points that do not require a bundled
+  node or trusted RPC dependency;
+- typestate or proof token that distinguishes merely decoded set-code
+  transactions from set-code transactions that passed the validity gate;
+- regression tests for empty authorization lists, wrong authorization chain,
+  stale authorization nonce, inactive fork, and malformed delegation state.
+
+Verification:
+
+- `cargo test -p eth-valkyoth-protocol -p eth-valkyoth-verify`
+- fork/account-state validation fixtures documented in the release notes.
+
+Exit criteria:
+
+- Empty authorization lists remain accepted by the syntactic decoder but are
+  rejected by the set-code validity gate.
+- Downstream callers have a single documented API boundary for promoting an
+  EIP-7702 transaction from decoded/unvalidated to valid-for-context.
 
 ### v0.25.0 - Public RLP Derives
 
