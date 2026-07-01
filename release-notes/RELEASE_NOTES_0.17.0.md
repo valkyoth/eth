@@ -1,6 +1,6 @@
 # eth 0.17.0 Release Notes
 
-Status: implementation ready for pentest
+Status: pentest passed; final GitHub checks pending before tag
 
 ## Summary
 
@@ -42,11 +42,14 @@ own chain spec entries from reviewed upstream data.
   tables; use `ChainSpec::try_new` for generated config, external chain-spec
   data, or merged fork lists.
 - Timestamp-based forks require both block and timestamp thresholds.
+- Chain specs are intentionally chain-agnostic: a timestamp-based fork may be
+  followed by a block-only fork on non-mainnet chains when block thresholds
+  remain monotonic.
 
 ## Release Gate
 
-- Pentest is required before the release report commit.
-- Permanent report path after pentest: `security/pentest/v0.17.0.md`.
+- Pentest passed and permanent report is
+  `security/pentest/v0.17.0.md`.
 - Final GitHub checks must pass on the release report commit before tagging.
 
 ## Verification

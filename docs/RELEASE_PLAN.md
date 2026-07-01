@@ -597,7 +597,7 @@ Exit criteria:
 
 ### v0.17.0 - Chain And Fork Specs
 
-Status: implementation complete; pentest pending.
+Status: pentest passed; final GitHub checks pending before tag.
 
 Goal: make chain and fork activation rules explicit.
 

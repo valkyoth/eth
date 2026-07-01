@@ -35,7 +35,8 @@ dependencies.
 
 ## Current Status
 
-Status: `v0.17.0` chain and fork spec implementation is ready for pentest.
+Status: `v0.17.0` chain and fork spec pentest passed; final GitHub checks are
+pending before tag.
 `v0.16.1` is the latest tagged release.
 
 Implemented now:
