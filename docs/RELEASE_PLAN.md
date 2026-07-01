@@ -546,7 +546,8 @@ Exit criteria:
 
 ### v0.16.0 - Transaction Encoding
 
-Status: implementation complete; pentest remediation ready for retest.
+Status: implementation, pentest remediation, and clean retest complete; waiting
+for final GitHub checks before tag.
 
 Goal: encode admitted transaction envelopes canonically.
 

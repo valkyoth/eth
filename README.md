@@ -35,7 +35,8 @@ dependencies.
 
 ## Current Status
 
-Status: `v0.16.0` transaction encoding pentest remediation is ready for retest.
+Status: `v0.16.0` transaction encoding pentest passed; final GitHub checks are
+pending before tag.
 `v0.15.0` is the latest tagged release.
 
 Implemented now:

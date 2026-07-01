@@ -1,6 +1,6 @@
 # eth 0.16.0 Release Notes
 
-Status: pentest remediation ready for retest
+Status: pentest passed; final GitHub checks pending before tag
 
 ## Summary
 
@@ -52,8 +52,8 @@ prove fork validity.
 
 ## Release Gate
 
-- Pentest is required before the release report commit.
-- Permanent report path after pentest: `security/pentest/v0.16.0.md`.
+- Pentest completed with remediation and clean retest.
+- Permanent report path: `security/pentest/v0.16.0.md`.
 - Final GitHub checks must pass on the release report commit before tagging.
 
 ## Verification
