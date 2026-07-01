@@ -26,7 +26,7 @@
 `eth` is the public facade crate for a `no_std`-first Ethereum
 execution-layer protocol workspace.
 
-The crate is intentionally conservative at `0.20.0`: it provides explicit
+The crate is intentionally conservative at `0.21.0`: it provides explicit
 Ethereum primitive domains, bounded decode-budget policy, stable error
 categories, primitive RLP bridge helpers, a caller-provided Keccak-256 boundary,
 RLP fuzz-harness evidence, a transaction envelope shell, unvalidated legacy
@@ -36,14 +36,15 @@ unvalidated EIP-4844 blob transaction field decoding, no-allocation canonical
 transaction envelope encoding for admitted decoded domains, explicit chain and
 fork activation context, proof-gated transaction typestate transitions,
 replay-domain validation for transaction chain binding, RLP derive design
-evidence, digest-level secp256k1 sender recovery, small first-party crate boundaries, optional
+evidence, digest-level secp256k1 sender recovery, EIP-712 domain-safety checks,
+small first-party crate boundaries, optional
 sanitization support, and release evidence before RPC, signer, EVM, Reth, or
 P2P integrations become real dependencies.
 
 ## Current Status
 
-The current release candidate is `0.20.0`; sender-recovery pentest passed and
-final GitHub checks are pending before tag.
+The current release candidate is `0.21.0`; EIP-712 domain-safety implementation
+is ready for pentest.
 
 Implemented now:
 
@@ -81,6 +82,8 @@ Implemented now:
   before sender recovery results are accepted.
 - Digest-level secp256k1 sender recovery with low-s rejection, Ethereum
   y-parity policy, and caller-provided Keccak-256 public-key hashing.
+- EIP-712 domain-safety checks for required `chainId` and
+  `verifyingContract` fields, plus a domain-gated sender recovery helper.
 - RLP derive design and private derive-crate prototype tests for future
   `RlpEncode`/`RlpDecode` support.
 - Caller-provided Keccak-256 trait boundary without a default hash
@@ -102,6 +105,7 @@ Not implemented yet:
 - No set-code typed transaction field parser yet.
 - No transaction signing-hash construction or full transaction signature
   validation yet.
+- No full EIP-712 typed-data encoder yet.
 - No block parser yet.
 
 ## Trust Dashboard
@@ -122,21 +126,21 @@ Not implemented yet:
 
 ```toml
 [dependencies]
-eth = "0.20"
+eth = "0.21"
 ```
 
 Disable defaults explicitly for embedded or freestanding builds:
 
 ```toml
 [dependencies]
-eth = { version = "0.20", default-features = false }
+eth = { version = "0.21", default-features = false }
 ```
 
 Optional sanitization support:
 
 ```toml
 [dependencies]
-eth = { version = "0.20", features = ["sanitization"] }
+eth = { version = "0.21", features = ["sanitization"] }
 ```
 
 ## Features
@@ -300,6 +304,51 @@ assert_eq!(
 );
 # Ok::<(), Box<dyn std::error::Error>>(())
 ```
+
+## EIP-712 Domain Safety
+
+EIP-712 signing paths should check the structured-data domain before any
+signature result is trusted:
+
+```rust
+use eth::primitives::{Address, B256, ChainId};
+use eth::verify::{
+    Eip712Domain, VerifyError, eip712_signing_digest, require_eip712_domain,
+};
+
+let expected_chain = ChainId::new(1);
+let expected_contract = Address::from([0xcc_u8; 20]);
+let domain = Eip712Domain::complete(expected_chain, expected_contract);
+
+require_eip712_domain(expected_chain, expected_contract, domain)?;
+assert_eq!(
+    require_eip712_domain(
+        ChainId::new(5),
+        expected_contract,
+        domain,
+    ),
+    Err(VerifyError::WrongChain)
+);
+
+let domain_separator = B256::from([0x11_u8; 32]);
+let message_hash = B256::from([0x22_u8; 32]);
+let _digest = eip712_signing_digest(
+    domain_separator,
+    message_hash,
+    ExampleKeccak {
+        output: B256::from([0x33_u8; 32]),
+    },
+);
+# struct ExampleKeccak { output: B256 }
+# impl eth::hash::Keccak256 for ExampleKeccak {
+#     fn update(&mut self, input: &[u8]) { let _ = input; }
+#     fn finalize(self) -> B256 { self.output }
+# }
+# Ok::<(), Box<dyn std::error::Error>>(())
+```
+
+This is not a full EIP-712 encoder. Callers still compute the domain separator
+and `hashStruct(message)` with a conformant typed-data encoder.
 
 ## Sender Recovery
 
@@ -607,7 +656,7 @@ the workspace can keep small, auditable boundaries:
 | `eth-valkyoth-codec` | yes | Bounded exact-consumption wire codec policy. |
 | `eth-valkyoth-hash` | yes | Keccak-256 trait boundary for caller-provided hash implementations. |
 | `eth-valkyoth-protocol` | yes | Fork-aware validation states and protocol context. |
-| `eth-valkyoth-verify` | yes | Verification boundaries for signatures, proofs, and replay domains. |
+| `eth-valkyoth-verify` | yes | Verification boundaries for signatures, proofs, replay domains, and EIP-712 domain checks. |
 | `eth-valkyoth-sanitization` | no | Optional bridge to the `sanitization` crate. |
 | `eth-valkyoth-derive` | no | Optional sanitization derive macros. |
 | `eth-valkyoth-evm` | no | Future EVM adapter boundary. |
@@ -621,7 +670,7 @@ the workspace can keep small, auditable boundaries:
 The minimum supported Rust version is Rust `1.90.0`. New deployments should use
 the latest stable Rust verified by the release gates.
 
-Compatibility evidence for `0.20.0`:
+Compatibility evidence for `0.21.0`:
 
 | Rust | Local Evidence |
 | --- | --- |

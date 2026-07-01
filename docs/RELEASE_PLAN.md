@@ -660,7 +660,7 @@ Exit criteria:
 
 ### v0.20.0 - Sender Recovery
 
-Status: pentest passed; final GitHub checks pending before tag.
+Status: tagged.
 
 Goal: recover senders through an admitted secp256k1 dependency.
 
@@ -685,6 +685,8 @@ Exit criteria:
 
 ### v0.21.0 - EIP-712 Domain Safety
 
+Status: implementation ready for pentest.
+
 Goal: prevent structured-data domain confusion.
 
 Deliverables:
@@ -692,6 +694,10 @@ Deliverables:
 - complete-domain helpers;
 - expected chain and verifying-contract checks;
 - tests for missing or wrong domain fields.
+- EIP-712 signing digest helper using the EIP-191 `0x1901` prefix and
+  caller-provided Keccak-256 boundary;
+- domain-gated sender recovery helper so raw digest recovery is not the primary
+  safe structured-data signing interface.
 
 Verification:
 

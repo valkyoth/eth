@@ -1,6 +1,6 @@
 # eth Specification Matrix
 
-Status: source revisions pinned for `v0.20.0`; scalar, list, and canonical
+Status: source revisions pinned for `v0.21.0`; scalar, list, and canonical
 integer RLP decoding, canonical RLP encoding helpers, primitive RLP bridging,
 Keccak-256 trait boundary, RLP fuzz harness baseline, and transaction envelope
 shell plus unvalidated legacy, EIP-2930 access-list, EIP-1559 dynamic-fee, and
@@ -8,6 +8,8 @@ EIP-4844 blob transaction decoding and canonical encoding implemented. Explicit
 chain and fork activation context is available for caller-reviewed specs.
 Transaction typestate promotion is proof-gated. Digest-level sender recovery is
 available after caller-side signing-hash construction and replay-domain checks.
+EIP-712 domain-safety helpers require `chainId` and `verifyingContract` before
+structured-data sender recovery is trusted.
 
 Official source and fixture revisions are governed by
 [Spec Source Policy](spec-source-policy.md). Revisions were checked against
@@ -20,6 +22,7 @@ implemented from memory.
 | Execution RLP | partial | `ethereum/tests` pinned in `spec-lock.toml`; scalar byte-string, list, canonical integer decoders, and canonical encoding helpers implemented |
 | RLP fuzz harness | baseline | `fuzz/` workspace builds; committed hex seeds live under `fuzz/seed-corpus/`; crash reproduction is documented |
 | Keccak-256 hashing | boundary only | `eth-valkyoth-hash` defines caller-provided Keccak-256 trait boundary; no concrete backend admitted |
+| EIP-712 structured data | domain gate | EIP-712 defines the `0x1901` signing digest and optional domain fields; v0.21.0 checks required caller-provided `chainId` and `verifyingContract` fields and builds the signing digest from supplied domain/message hashes; full typed-data encoding remains planned |
 | EIP-2718 typed transactions | partial | `ethereum/EIPs` pinned in `spec-lock.toml`; envelope classification implemented; EIP-2930 type `0x01`, EIP-1559 type `0x02`, and EIP-4844 type `0x03` field decode and canonical encode implemented; later typed transaction payloads remain opaque |
 | Legacy transactions | field decode/encode | EIP-2718 defines the legacy transaction field list; v0.12.0 decodes fields into an unvalidated model and v0.16.0 encodes that admitted model without signature, sender, chain, or fork validation |
 | EIP-2930 access-list transactions | field decode/encode | EIP-2930 defines type `0x01`, eleven payload fields, and access-list shape; v0.13.0 decodes fields and v0.16.0 encodes the admitted model without signature, sender, gas, duplicate, chain, account-state, or fork validation |

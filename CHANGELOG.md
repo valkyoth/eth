@@ -4,6 +4,10 @@ All notable changes to `eth` are documented here.
 
 ## Unreleased
 
+- Started `0.21.0` with EIP-712 domain-safety checks for required `chainId`
+  and `verifyingContract` fields.
+- Added EIP-712 signing digest framing with the EIP-191 `0x1901` prefix and a
+  domain-gated sender recovery helper.
 - Started `0.14.0` with unvalidated EIP-1559 dynamic-fee transaction field
   decoding for typed transaction byte `0x02`.
 - Added max-priority-fee and max-fee field domains while explicitly deferring

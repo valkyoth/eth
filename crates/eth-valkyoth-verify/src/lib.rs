@@ -8,9 +8,14 @@ extern crate std;
 use core::fmt;
 use eth_valkyoth_primitives::ChainId;
 
+mod eip712;
 mod replay;
 mod sender;
 
+pub use eip712::{
+    EIP712_SIGNING_PREFIX, Eip712Domain, Eip712DomainExpectation, eip712_signing_digest,
+    recover_eip712_sender, require_eip712_domain,
+};
 pub use replay::{
     require_access_list_replay_domain, require_blob_replay_domain,
     require_dynamic_fee_replay_domain, require_legacy_replay_domain,
@@ -29,6 +34,12 @@ pub enum VerifyError {
     MissingReplayDomain,
     /// The input is bound to a different chain.
     WrongChain,
+    /// The EIP-712 domain has no `chainId` field.
+    MissingEip712ChainId,
+    /// The EIP-712 domain has no `verifyingContract` field.
+    MissingEip712VerifyingContract,
+    /// The EIP-712 domain is bound to a different verifying contract.
+    WrongVerifyingContract,
     /// The signature representation is not accepted.
     InvalidSignature,
     /// The proof is malformed or does not verify against its root.
@@ -42,6 +53,9 @@ impl VerifyError {
         match self {
             Self::MissingReplayDomain => "ETH_VERIFY_MISSING_REPLAY_DOMAIN",
             Self::WrongChain => "ETH_VERIFY_WRONG_CHAIN",
+            Self::MissingEip712ChainId => "ETH_VERIFY_MISSING_EIP712_CHAIN_ID",
+            Self::MissingEip712VerifyingContract => "ETH_VERIFY_MISSING_EIP712_VERIFYING_CONTRACT",
+            Self::WrongVerifyingContract => "ETH_VERIFY_WRONG_VERIFYING_CONTRACT",
             Self::InvalidSignature => "ETH_VERIFY_INVALID_SIGNATURE",
             Self::InvalidProof => "ETH_VERIFY_INVALID_PROOF",
         }
@@ -53,6 +67,11 @@ impl VerifyError {
         match self {
             Self::MissingReplayDomain => "input has no chain-bound replay domain",
             Self::WrongChain => "input is bound to a different chain",
+            Self::MissingEip712ChainId => "EIP-712 domain is missing chainId",
+            Self::MissingEip712VerifyingContract => "EIP-712 domain is missing verifyingContract",
+            Self::WrongVerifyingContract => {
+                "EIP-712 domain is bound to a different verifying contract"
+            }
             Self::InvalidSignature => "signature representation is not accepted",
             Self::InvalidProof => "proof is malformed or does not verify",
         }
@@ -64,6 +83,9 @@ impl VerifyError {
         match self {
             Self::MissingReplayDomain => VerifyErrorCategory::ReplayDomain,
             Self::WrongChain => VerifyErrorCategory::ReplayDomain,
+            Self::MissingEip712ChainId
+            | Self::MissingEip712VerifyingContract
+            | Self::WrongVerifyingContract => VerifyErrorCategory::StructuredDataDomain,
             Self::InvalidSignature => VerifyErrorCategory::Signature,
             Self::InvalidProof => VerifyErrorCategory::Proof,
         }
@@ -85,6 +107,8 @@ impl std::error::Error for VerifyError {}
 pub enum VerifyErrorCategory {
     /// Replay-domain or chain binding failure.
     ReplayDomain,
+    /// EIP-712 structured-data domain failure.
+    StructuredDataDomain,
     /// Signature representation or verification failure.
     Signature,
     /// Proof structure or root verification failure.
@@ -131,5 +155,14 @@ mod tests {
         assert_eq!(error.code(), "ETH_VERIFY_MISSING_REPLAY_DOMAIN");
         assert_eq!(error.message(), "input has no chain-bound replay domain");
         assert_eq!(error.category(), VerifyErrorCategory::ReplayDomain);
+
+        let error = VerifyError::WrongVerifyingContract;
+
+        assert_eq!(error.code(), "ETH_VERIFY_WRONG_VERIFYING_CONTRACT");
+        assert_eq!(
+            error.message(),
+            "EIP-712 domain is bound to a different verifying contract"
+        );
+        assert_eq!(error.category(), VerifyErrorCategory::StructuredDataDomain);
     }
 }

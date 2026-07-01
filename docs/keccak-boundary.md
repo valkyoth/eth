@@ -1,6 +1,6 @@
 # Keccak-256 Boundary
 
-Status: v0.20.0 boundary consumed by digest-level sender recovery
+Status: v0.21.0 boundary consumed by sender recovery and EIP-712 digest framing
 
 Ethereum execution-layer hashing uses Keccak-256, not FIPS SHA3-256. The hash
 boundary must be explicit before transaction hashes, recovered sender addresses,
@@ -18,7 +18,9 @@ header hashes, receipt roots, or proof verification are implemented.
 
 No concrete Keccak implementation crate is admitted in `v0.10.0`.
 `v0.20.0` sender recovery consumes this boundary for public-key-to-address
-hashing and still does not admit a default Keccak backend.
+hashing. `v0.21.0` EIP-712 helpers also consume it for
+`keccak256("\x19\x01" || domainSeparator || hashStruct(message))`. The crate
+still does not admit a default Keccak backend.
 
 ## Rationale
 
