@@ -25,6 +25,8 @@ targets or add a new target in the same release.
 List-recursion fuzz targets drive item iteration to
 `MAX_RLP_LIST_TRAVERSAL_DEPTH`, matching the decoder hard cap. The committed
 seed corpus includes a 128-level empty-list chain for this path.
+The transaction-envelope fuzz target applies the same recursion limit when it
+sees a legacy RLP-list envelope.
 
 ## Seed Corpus
 

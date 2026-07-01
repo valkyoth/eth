@@ -28,6 +28,10 @@ validity.
 - Added a dedicated `transaction_envelope` fuzz target and committed seed
   corpus cases for typed, legacy, scalar-prefix, typed-zero, reserved-prefix,
   and trailing-legacy inputs.
+- Addressed pentest findings by tying the protocol typed-prefix maximum to
+  `TransactionType::MAX_TYPED`, documenting that unknown nonzero typed prefixes
+  are accepted only as opaque envelopes, and recursing through nested legacy
+  list payloads in the transaction-envelope fuzz target.
 - Refreshed `spec-lock.toml` and `docs/SPEC_MATRIX.md` with official EIP and
   execution-spec revisions checked on 2026-07-01.
 - Updated release metadata so `eth-valkyoth-protocol` and `eth` publish for

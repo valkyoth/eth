@@ -10,7 +10,7 @@ use eth_valkyoth_primitives::TransactionType;
 pub const EIP_2718_TYPED_ZERO_PREFIX: u8 = 0x00;
 
 /// Largest single-byte EIP-2718 typed transaction prefix.
-pub const EIP_2718_MAX_TYPED_PREFIX: u8 = 0x7f;
+pub const EIP_2718_MAX_TYPED_PREFIX: u8 = TransactionType::MAX_TYPED;
 
 /// First RLP scalar prefix that cannot be a typed transaction envelope or a
 /// legacy transaction list.
@@ -51,6 +51,11 @@ pub enum TransactionEnvelopeError {
     /// No bytes were supplied.
     EmptyInput,
     /// The first byte is a typed-prefix value this release does not admit.
+    ///
+    /// The envelope shell intentionally accepts every nonzero typed prefix in
+    /// `0x01..=0x7f` as opaque data. This error is reserved for prefix values
+    /// outside that admitted shell domain, such as legacy zero if it reaches
+    /// typed-prefix handling.
     UnsupportedTransactionType {
         /// Unsupported typed transaction prefix byte.
         type_byte: u8,
