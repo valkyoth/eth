@@ -35,8 +35,9 @@ dependencies.
 
 ## Current Status
 
-Status: `v0.13.0` EIP-2930 access-list transaction decode implementation is
-ready for pentest. `v0.12.0` is the latest tagged release.
+Status: `v0.13.0` EIP-2930 access-list transaction decode implementation,
+pentest remediation, and clean retest are complete. `v0.12.0` is the latest
+tagged release.
 
 Implemented now:
 

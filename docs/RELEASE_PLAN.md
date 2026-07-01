@@ -481,7 +481,8 @@ Exit criteria:
 
 ### v0.13.0 - Access List Transaction Decode
 
-Status: implementation complete; pentest pending.
+Status: implementation, pentest remediation, and clean retest complete; waiting
+for final GitHub checks before tag.
 
 Goal: decode EIP-2930 access-list transactions.
 

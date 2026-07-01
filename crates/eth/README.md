@@ -37,7 +37,8 @@ dependencies.
 
 ## Current Status
 
-The current release candidate is `0.13.0`; pentest is pending.
+The current release candidate is `0.13.0`; pentest remediation and clean retest
+are complete.
 
 Implemented now:
 

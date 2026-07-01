@@ -1,6 +1,6 @@
 # eth 0.13.0 Release Notes
 
-Status: implementation ready for pentest
+Status: release candidate ready; waiting for final GitHub checks before tag
 
 ## Summary
 
@@ -60,8 +60,9 @@ duplicate access-list policy, or prove fork validity.
 
 ## Release Gate
 
-- Pentest is required before the release report commit.
-- Permanent report path after pentest: `security/pentest/v0.13.0.md`.
+- Initial pentest findings were remediated and committed.
+- Maintainer retest found no remaining findings for the release candidate.
+- Permanent report: `security/pentest/v0.13.0.md`.
 - Final GitHub checks must pass on the release report commit before tagging.
 
 ## Verification
