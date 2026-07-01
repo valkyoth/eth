@@ -1,7 +1,12 @@
-use eth_valkyoth_codec::{DecodeError, DecodeLimits, RlpInteger, RlpItem, RlpList, RlpScalar};
+use eth_valkyoth_codec::{DecodeError, DecodeLimits, RlpItem, RlpList, RlpScalar};
 use eth_valkyoth_primitives::{Address, B256, ChainId, Gas, Nonce, Wei};
 
 use super::{TransactionEnvelope, decode_transaction_envelope};
+use crate::transaction::fields::{
+    ADDRESS_BYTES, decode_chain_id as decode_shared_chain_id, decode_to as decode_shared_to,
+    decode_u64_field as decode_shared_u64_field, decode_u256_field as decode_shared_u256_field,
+    next_list as next_shared_list, next_scalar as next_shared_scalar,
+};
 
 mod error;
 
@@ -13,7 +18,6 @@ pub const ACCESS_LIST_TRANSACTION_TYPE: u8 = 0x01;
 pub const ACCESS_LIST_TRANSACTION_FIELD_COUNT: usize = 11;
 
 const ACCESS_LIST_ENTRY_FIELD_COUNT: usize = 2;
-const ADDRESS_BYTES: usize = 20;
 const B256_BYTES: usize = 32;
 
 /// Borrowed EIP-2930 transaction decoded only into field domains.
@@ -175,7 +179,9 @@ impl<'a> Iterator for AccessListEntries<'a> {
     type Item = Result<AccessListEntry<'a>, AccessListTransactionDecodeError>;
 
     fn next(&mut self) -> Option<Self::Item> {
-        self.items.next().map(decode_access_list_entry_item)
+        self.items
+            .next()
+            .map(|item| decode_access_list_entry_item(item).map_err(map_access_list_decode_error))
     }
 }
 
@@ -191,7 +197,9 @@ impl Iterator for AccessListStorageKeyItems<'_> {
     type Item = Result<B256, AccessListTransactionDecodeError>;
 
     fn next(&mut self) -> Option<Self::Item> {
-        self.items.next().map(decode_storage_key_item)
+        self.items
+            .next()
+            .map(|item| decode_storage_key_item(item).map_err(map_access_list_decode_error))
     }
 }
 
@@ -201,6 +209,8 @@ impl core::iter::FusedIterator for AccessListStorageKeyItems<'_> {}
 #[non_exhaustive]
 #[derive(Clone, Copy, Debug, Eq, PartialEq)]
 pub enum AccessListTransactionField {
+    /// Whole typed-transaction payload.
+    Payload,
     /// `chainId`.
     ChainId,
     /// `nonce`.
@@ -254,7 +264,7 @@ fn decode_access_list_payload<'a>(
     limits: DecodeLimits,
 ) -> Result<UnvalidatedAccessListTransaction<'a>, AccessListTransactionDecodeError> {
     let list = eth_valkyoth_codec::decode_rlp_list(payload, limits)
-        .map_err(|source| field_error(AccessListTransactionField::AccessList, source))?;
+        .map_err(|source| field_error(AccessListTransactionField::Payload, source))?;
     if list.item_count() != ACCESS_LIST_TRANSACTION_FIELD_COUNT {
         return Err(AccessListTransactionDecodeError::WrongFieldCount {
             expected: ACCESS_LIST_TRANSACTION_FIELD_COUNT,
@@ -263,38 +273,61 @@ fn decode_access_list_payload<'a>(
     }
 
     let mut fields = list.items();
-    let chain_id = decode_chain_id(&mut fields)?;
-    let nonce = Nonce::new(decode_u64_field(
+    let chain_id = decode_shared_chain_id(
+        &mut fields,
+        AccessListTransactionField::ChainId,
+        field_error,
+    )?;
+    let nonce = Nonce::new(decode_shared_u64_field(
         &mut fields,
         AccessListTransactionField::Nonce,
+        field_error,
     )?);
-    let gas_price = Wei::from_be_bytes(decode_u256_field(
+    let gas_price = Wei::from_be_bytes(decode_shared_u256_field(
         &mut fields,
         AccessListTransactionField::GasPrice,
+        field_error,
     )?);
-    let gas_limit = Gas::new(decode_u64_field(
+    let gas_limit = Gas::new(decode_shared_u64_field(
         &mut fields,
         AccessListTransactionField::GasLimit,
+        field_error,
     )?);
-    let to = decode_to(next_scalar(&mut fields, AccessListTransactionField::To)?)?;
-    let value = Wei::from_be_bytes(decode_u256_field(
+    let to = decode_shared_to(
+        next_shared_scalar(&mut fields, AccessListTransactionField::To, field_error)?,
+        |found| AccessListTransactionDecodeError::InvalidToLength { found },
+    )?;
+    let value = Wei::from_be_bytes(decode_shared_u256_field(
         &mut fields,
         AccessListTransactionField::Value,
+        field_error,
     )?);
-    let input = next_scalar(&mut fields, AccessListTransactionField::Data)?.payload();
+    let input =
+        next_shared_scalar(&mut fields, AccessListTransactionField::Data, field_error)?.payload();
     limits
         .check_single_allocation_limit(input.len())
         .map_err(|source| field_error(AccessListTransactionField::Data, source))?;
-    let access_list = decode_access_list(next_list(
+    let access_list = decode_access_list(next_shared_list(
         &mut fields,
         AccessListTransactionField::AccessList,
-    )?)?;
-    let y_parity = SignatureYParity::try_new(decode_u64_field(
+        field_error,
+    )?)
+    .map_err(map_access_list_decode_error)?;
+    let y_parity = SignatureYParity::try_new(decode_shared_u64_field(
         &mut fields,
         AccessListTransactionField::SignatureYParity,
+        field_error,
     )?)?;
-    let r = decode_u256_field(&mut fields, AccessListTransactionField::SignatureR)?;
-    let s = decode_u256_field(&mut fields, AccessListTransactionField::SignatureS)?;
+    let r = decode_shared_u256_field(
+        &mut fields,
+        AccessListTransactionField::SignatureR,
+        field_error,
+    )?;
+    let s = decode_shared_u256_field(
+        &mut fields,
+        AccessListTransactionField::SignatureS,
+        field_error,
+    )?;
 
     Ok(UnvalidatedAccessListTransaction {
         chain_id,
@@ -311,19 +344,9 @@ fn decode_access_list_payload<'a>(
     })
 }
 
-fn decode_chain_id<'a>(
-    fields: &mut impl Iterator<Item = Result<RlpItem<'a>, DecodeError>>,
-) -> Result<ChainId, AccessListTransactionDecodeError> {
-    let integer =
-        RlpInteger::try_from_scalar(next_scalar(fields, AccessListTransactionField::ChainId)?)
-            .map_err(|source| field_error(AccessListTransactionField::ChainId, source))?;
-    ChainId::try_from_signed_canonical_be_slice(integer.payload())
-        .map_err(|_| field_error(AccessListTransactionField::ChainId, DecodeError::Malformed))
-}
-
 pub(crate) fn decode_access_list(
     list: RlpList<'_>,
-) -> Result<AccessList<'_>, AccessListTransactionDecodeError> {
+) -> Result<AccessList<'_>, AccessListDecodeError> {
     // Eager validation proves the borrowed model is well-formed. Later
     // iteration intentionally re-parses these bounded bytes instead of storing
     // decoded entries in an allocation-backed structure.
@@ -332,7 +355,7 @@ pub(crate) fn decode_access_list(
         let entry = decode_access_list_entry_item(item)?;
         storage_key_count =
             eth_valkyoth_codec::checked_len_add(storage_key_count, entry.storage_keys.len())
-                .map_err(|source| field_error(AccessListTransactionField::AccessList, source))?;
+                .map_err(AccessListDecodeError::FieldDecode)?;
     }
     Ok(AccessList {
         list,
@@ -342,34 +365,35 @@ pub(crate) fn decode_access_list(
 
 fn decode_access_list_entry_item(
     item: Result<RlpItem<'_>, DecodeError>,
-) -> Result<AccessListEntry<'_>, AccessListTransactionDecodeError> {
-    let item =
-        item.map_err(|source| field_error(AccessListTransactionField::AccessList, source))?;
+) -> Result<AccessListEntry<'_>, AccessListDecodeError> {
+    let item = item.map_err(AccessListDecodeError::FieldDecode)?;
     let RlpItem::List(list) = item else {
-        return Err(field_error(
-            AccessListTransactionField::AccessList,
+        return Err(AccessListDecodeError::FieldDecode(
             DecodeError::UnexpectedScalar,
         ));
     };
     if list.item_count() != ACCESS_LIST_ENTRY_FIELD_COUNT {
-        return Err(
-            AccessListTransactionDecodeError::InvalidAccessListEntryFieldCount {
-                found: list.item_count(),
-            },
-        );
+        return Err(AccessListDecodeError::InvalidAccessListEntryFieldCount {
+            found: list.item_count(),
+        });
     }
 
     let mut fields = list.items();
-    let address = decode_access_list_address(next_scalar(
+    let address = decode_access_list_address(next_shared_scalar(
         &mut fields,
         AccessListTransactionField::AccessList,
+        |_, source| AccessListDecodeError::FieldDecode(source),
     )?)?;
     let storage_keys = AccessListStorageKeys {
-        list: next_list(&mut fields, AccessListTransactionField::AccessList)?,
+        list: next_shared_list(
+            &mut fields,
+            AccessListTransactionField::AccessList,
+            |_, source| AccessListDecodeError::FieldDecode(source),
+        )?,
     };
 
-    for key in storage_keys.keys() {
-        let _ = key?;
+    for key in storage_keys.list.items() {
+        let _ = decode_storage_key_item(key)?;
     }
     Ok(AccessListEntry {
         address,
@@ -379,12 +403,10 @@ fn decode_access_list_entry_item(
 
 fn decode_storage_key_item(
     item: Result<RlpItem<'_>, DecodeError>,
-) -> Result<B256, AccessListTransactionDecodeError> {
-    let item =
-        item.map_err(|source| field_error(AccessListTransactionField::AccessList, source))?;
+) -> Result<B256, AccessListDecodeError> {
+    let item = item.map_err(AccessListDecodeError::FieldDecode)?;
     let RlpItem::Scalar(scalar) = item else {
-        return Err(field_error(
-            AccessListTransactionField::AccessList,
+        return Err(AccessListDecodeError::FieldDecode(
             DecodeError::UnexpectedList,
         ));
     };
@@ -392,79 +414,17 @@ fn decode_storage_key_item(
     let bytes: [u8; B256_BYTES] = scalar
         .payload()
         .try_into()
-        .map_err(|_| AccessListTransactionDecodeError::InvalidStorageKeyLength { found })?;
+        .map_err(|_| AccessListDecodeError::InvalidStorageKeyLength { found })?;
     Ok(B256::from_bytes(bytes))
 }
 
-fn decode_to(
-    scalar: RlpScalar<'_>,
-) -> Result<AccessListTransactionTo, AccessListTransactionDecodeError> {
-    let payload = scalar.payload();
-    if payload.is_empty() {
-        return Ok(AccessListTransactionTo::Create);
-    }
-    let found = payload.len();
-    let bytes: [u8; ADDRESS_BYTES] = payload
-        .try_into()
-        .map_err(|_| AccessListTransactionDecodeError::InvalidToLength { found })?;
-    Ok(AccessListTransactionTo::Call(Address::from_bytes(bytes)))
-}
-
-fn decode_access_list_address(
-    scalar: RlpScalar<'_>,
-) -> Result<Address, AccessListTransactionDecodeError> {
+fn decode_access_list_address(scalar: RlpScalar<'_>) -> Result<Address, AccessListDecodeError> {
     let found = scalar.payload().len();
     let bytes: [u8; ADDRESS_BYTES] = scalar
         .payload()
         .try_into()
-        .map_err(|_| AccessListTransactionDecodeError::InvalidAccessListAddressLength { found })?;
+        .map_err(|_| AccessListDecodeError::InvalidAccessListAddressLength { found })?;
     Ok(Address::from_bytes(bytes))
-}
-
-fn next_scalar<'a>(
-    fields: &mut impl Iterator<Item = Result<RlpItem<'a>, DecodeError>>,
-    field: AccessListTransactionField,
-) -> Result<RlpScalar<'a>, AccessListTransactionDecodeError> {
-    let item = fields
-        .next()
-        .ok_or(field_error(field, DecodeError::Malformed))?
-        .map_err(|source| field_error(field, source))?;
-    match item {
-        RlpItem::Scalar(scalar) => Ok(scalar),
-        RlpItem::List(_) => Err(field_error(field, DecodeError::UnexpectedList)),
-    }
-}
-
-fn next_list<'a>(
-    fields: &mut impl Iterator<Item = Result<RlpItem<'a>, DecodeError>>,
-    field: AccessListTransactionField,
-) -> Result<RlpList<'a>, AccessListTransactionDecodeError> {
-    let item = fields
-        .next()
-        .ok_or(field_error(field, DecodeError::Malformed))?
-        .map_err(|source| field_error(field, source))?;
-    match item {
-        RlpItem::List(list) => Ok(list),
-        RlpItem::Scalar(_) => Err(field_error(field, DecodeError::UnexpectedScalar)),
-    }
-}
-
-fn decode_u64_field<'a>(
-    fields: &mut impl Iterator<Item = Result<RlpItem<'a>, DecodeError>>,
-    field: AccessListTransactionField,
-) -> Result<u64, AccessListTransactionDecodeError> {
-    RlpInteger::try_from_scalar(next_scalar(fields, field)?)
-        .and_then(RlpInteger::to_u64)
-        .map_err(|source| field_error(field, source))
-}
-
-fn decode_u256_field<'a>(
-    fields: &mut impl Iterator<Item = Result<RlpItem<'a>, DecodeError>>,
-    field: AccessListTransactionField,
-) -> Result<[u8; 32], AccessListTransactionDecodeError> {
-    RlpInteger::try_from_scalar(next_scalar(fields, field)?)
-        .and_then(RlpInteger::to_be_bytes32)
-        .map_err(|source| field_error(field, source))
 }
 
 const fn field_error(
@@ -472,4 +432,32 @@ const fn field_error(
     source: DecodeError,
 ) -> AccessListTransactionDecodeError {
     AccessListTransactionDecodeError::FieldDecode { field, source }
+}
+
+/// Internal access-list structure decode failure.
+#[derive(Clone, Copy, Debug, Eq, PartialEq)]
+pub(crate) enum AccessListDecodeError {
+    FieldDecode(DecodeError),
+    InvalidAccessListEntryFieldCount { found: usize },
+    InvalidAccessListAddressLength { found: usize },
+    InvalidStorageKeyLength { found: usize },
+}
+
+pub(crate) const fn map_access_list_decode_error(
+    error: AccessListDecodeError,
+) -> AccessListTransactionDecodeError {
+    match error {
+        AccessListDecodeError::FieldDecode(source) => {
+            field_error(AccessListTransactionField::AccessList, source)
+        }
+        AccessListDecodeError::InvalidAccessListEntryFieldCount { found } => {
+            AccessListTransactionDecodeError::InvalidAccessListEntryFieldCount { found }
+        }
+        AccessListDecodeError::InvalidAccessListAddressLength { found } => {
+            AccessListTransactionDecodeError::InvalidAccessListAddressLength { found }
+        }
+        AccessListDecodeError::InvalidStorageKeyLength { found } => {
+            AccessListTransactionDecodeError::InvalidStorageKeyLength { found }
+        }
+    }
 }

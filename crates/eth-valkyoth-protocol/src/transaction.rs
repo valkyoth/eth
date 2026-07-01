@@ -3,6 +3,7 @@
 mod access_list;
 mod dynamic_fee;
 mod envelope;
+mod fields;
 mod legacy;
 
 #[cfg(test)]

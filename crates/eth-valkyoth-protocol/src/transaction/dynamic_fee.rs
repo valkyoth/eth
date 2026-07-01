@@ -1,10 +1,15 @@
-use eth_valkyoth_codec::{DecodeError, DecodeLimits, RlpInteger, RlpItem, RlpScalar};
-use eth_valkyoth_primitives::{Address, ChainId, Gas, Nonce, Wei};
+use eth_valkyoth_codec::{DecodeError, DecodeLimits};
+use eth_valkyoth_primitives::{ChainId, Gas, Nonce, Wei};
 
-use super::access_list::decode_access_list;
+use super::access_list::{AccessListDecodeError, decode_access_list};
 use super::{
     AccessList, AccessListTransactionDecodeError, AccessListTransactionTo, SignatureYParity,
     TransactionEnvelope, decode_transaction_envelope,
+};
+use crate::transaction::fields::{
+    decode_chain_id as decode_shared_chain_id, decode_to as decode_shared_to,
+    decode_u64_field as decode_shared_u64_field, decode_u256_field as decode_shared_u256_field,
+    next_list as next_shared_list, next_scalar as next_shared_scalar,
 };
 
 mod error;
@@ -15,8 +20,6 @@ pub use error::{DynamicFeeTransactionDecodeError, DynamicFeeTransactionDecodeErr
 pub const DYNAMIC_FEE_TRANSACTION_TYPE: u8 = 0x02;
 /// Number of fields in an EIP-1559 dynamic-fee transaction payload.
 pub const DYNAMIC_FEE_TRANSACTION_FIELD_COUNT: usize = 12;
-
-const ADDRESS_BYTES: usize = 20;
 
 /// EIP-1559 transaction call/create target.
 pub type DynamicFeeTransactionTo = AccessListTransactionTo;
@@ -63,6 +66,8 @@ pub struct UnvalidatedDynamicFeeTransaction<'a> {
 #[non_exhaustive]
 #[derive(Clone, Copy, Debug, Eq, PartialEq)]
 pub enum DynamicFeeTransactionField {
+    /// Whole typed-transaction payload.
+    Payload,
     /// `chain_id`.
     ChainId,
     /// `nonce`.
@@ -118,7 +123,7 @@ fn decode_dynamic_fee_payload<'a>(
     limits: DecodeLimits,
 ) -> Result<UnvalidatedDynamicFeeTransaction<'a>, DynamicFeeTransactionDecodeError> {
     let list = eth_valkyoth_codec::decode_rlp_list(payload, limits)
-        .map_err(|source| field_error(DynamicFeeTransactionField::AccessList, source))?;
+        .map_err(|source| field_error(DynamicFeeTransactionField::Payload, source))?;
     if list.item_count() != DYNAMIC_FEE_TRANSACTION_FIELD_COUNT {
         return Err(DynamicFeeTransactionDecodeError::WrongFieldCount {
             expected: DYNAMIC_FEE_TRANSACTION_FIELD_COUNT,
@@ -127,40 +132,55 @@ fn decode_dynamic_fee_payload<'a>(
     }
 
     let mut fields = list.items();
-    let chain_id = decode_chain_id(&mut fields)?;
-    let nonce = Nonce::new(decode_u64_field(
+    let chain_id = decode_shared_chain_id(
+        &mut fields,
+        DynamicFeeTransactionField::ChainId,
+        field_error,
+    )?;
+    let nonce = Nonce::new(decode_shared_u64_field(
         &mut fields,
         DynamicFeeTransactionField::Nonce,
+        field_error,
     )?);
-    let max_priority_fee_per_gas = Wei::from_be_bytes(decode_u256_field(
+    let max_priority_fee_per_gas = Wei::from_be_bytes(decode_shared_u256_field(
         &mut fields,
         DynamicFeeTransactionField::MaxPriorityFeePerGas,
+        field_error,
     )?);
-    let max_fee_per_gas = Wei::from_be_bytes(decode_u256_field(
+    let max_fee_per_gas = Wei::from_be_bytes(decode_shared_u256_field(
         &mut fields,
         DynamicFeeTransactionField::MaxFeePerGas,
+        field_error,
     )?);
-    let gas_limit = Gas::new(decode_u64_field(
+    let gas_limit = Gas::new(decode_shared_u64_field(
         &mut fields,
         DynamicFeeTransactionField::GasLimit,
+        field_error,
     )?);
-    let to = decode_to(next_scalar(&mut fields, DynamicFeeTransactionField::To)?)?;
-    let value = Wei::from_be_bytes(decode_u256_field(
+    let to = decode_shared_to(
+        next_shared_scalar(&mut fields, DynamicFeeTransactionField::To, field_error)?,
+        |found| DynamicFeeTransactionDecodeError::InvalidToLength { found },
+    )?;
+    let value = Wei::from_be_bytes(decode_shared_u256_field(
         &mut fields,
         DynamicFeeTransactionField::Value,
+        field_error,
     )?);
-    let input = next_scalar(&mut fields, DynamicFeeTransactionField::Data)?.payload();
+    let input =
+        next_shared_scalar(&mut fields, DynamicFeeTransactionField::Data, field_error)?.payload();
     limits
         .check_single_allocation_limit(input.len())
         .map_err(|source| field_error(DynamicFeeTransactionField::Data, source))?;
-    let access_list = decode_access_list(next_list(
+    let access_list = decode_access_list(next_shared_list(
         &mut fields,
         DynamicFeeTransactionField::AccessList,
+        field_error,
     )?)
     .map_err(map_access_list_error)?;
-    let y_parity = SignatureYParity::try_new(decode_u64_field(
+    let y_parity = SignatureYParity::try_new(decode_shared_u64_field(
         &mut fields,
         DynamicFeeTransactionField::SignatureYParity,
+        field_error,
     )?)
     .map_err(|error| match error {
         AccessListTransactionDecodeError::InvalidYParity { value } => {
@@ -171,8 +191,16 @@ fn decode_dynamic_fee_payload<'a>(
             DecodeError::Malformed,
         ),
     })?;
-    let r = decode_u256_field(&mut fields, DynamicFeeTransactionField::SignatureR)?;
-    let s = decode_u256_field(&mut fields, DynamicFeeTransactionField::SignatureS)?;
+    let r = decode_shared_u256_field(
+        &mut fields,
+        DynamicFeeTransactionField::SignatureR,
+        field_error,
+    )?;
+    let s = decode_shared_u256_field(
+        &mut fields,
+        DynamicFeeTransactionField::SignatureS,
+        field_error,
+    )?;
 
     Ok(UnvalidatedDynamicFeeTransaction {
         chain_id,
@@ -190,76 +218,6 @@ fn decode_dynamic_fee_payload<'a>(
     })
 }
 
-fn decode_chain_id<'a>(
-    fields: &mut impl Iterator<Item = Result<RlpItem<'a>, DecodeError>>,
-) -> Result<ChainId, DynamicFeeTransactionDecodeError> {
-    let integer =
-        RlpInteger::try_from_scalar(next_scalar(fields, DynamicFeeTransactionField::ChainId)?)
-            .map_err(|source| field_error(DynamicFeeTransactionField::ChainId, source))?;
-    ChainId::try_from_signed_canonical_be_slice(integer.payload())
-        .map_err(|_| field_error(DynamicFeeTransactionField::ChainId, DecodeError::Malformed))
-}
-
-fn decode_to(
-    scalar: RlpScalar<'_>,
-) -> Result<DynamicFeeTransactionTo, DynamicFeeTransactionDecodeError> {
-    let payload = scalar.payload();
-    if payload.is_empty() {
-        return Ok(DynamicFeeTransactionTo::Create);
-    }
-    let found = payload.len();
-    let bytes: [u8; ADDRESS_BYTES] = payload
-        .try_into()
-        .map_err(|_| DynamicFeeTransactionDecodeError::InvalidToLength { found })?;
-    Ok(DynamicFeeTransactionTo::Call(Address::from_bytes(bytes)))
-}
-
-fn next_scalar<'a>(
-    fields: &mut impl Iterator<Item = Result<RlpItem<'a>, DecodeError>>,
-    field: DynamicFeeTransactionField,
-) -> Result<RlpScalar<'a>, DynamicFeeTransactionDecodeError> {
-    let item = fields
-        .next()
-        .ok_or(field_error(field, DecodeError::Malformed))?
-        .map_err(|source| field_error(field, source))?;
-    match item {
-        RlpItem::Scalar(scalar) => Ok(scalar),
-        RlpItem::List(_) => Err(field_error(field, DecodeError::UnexpectedList)),
-    }
-}
-
-fn next_list<'a>(
-    fields: &mut impl Iterator<Item = Result<RlpItem<'a>, DecodeError>>,
-    field: DynamicFeeTransactionField,
-) -> Result<eth_valkyoth_codec::RlpList<'a>, DynamicFeeTransactionDecodeError> {
-    let item = fields
-        .next()
-        .ok_or(field_error(field, DecodeError::Malformed))?
-        .map_err(|source| field_error(field, source))?;
-    match item {
-        RlpItem::List(list) => Ok(list),
-        RlpItem::Scalar(_) => Err(field_error(field, DecodeError::UnexpectedScalar)),
-    }
-}
-
-fn decode_u64_field<'a>(
-    fields: &mut impl Iterator<Item = Result<RlpItem<'a>, DecodeError>>,
-    field: DynamicFeeTransactionField,
-) -> Result<u64, DynamicFeeTransactionDecodeError> {
-    RlpInteger::try_from_scalar(next_scalar(fields, field)?)
-        .and_then(RlpInteger::to_u64)
-        .map_err(|source| field_error(field, source))
-}
-
-fn decode_u256_field<'a>(
-    fields: &mut impl Iterator<Item = Result<RlpItem<'a>, DecodeError>>,
-    field: DynamicFeeTransactionField,
-) -> Result<[u8; 32], DynamicFeeTransactionDecodeError> {
-    RlpInteger::try_from_scalar(next_scalar(fields, field)?)
-        .and_then(RlpInteger::to_be_bytes32)
-        .map_err(|source| field_error(field, source))
-}
-
 const fn field_error(
     field: DynamicFeeTransactionField,
     source: DecodeError,
@@ -267,25 +225,19 @@ const fn field_error(
     DynamicFeeTransactionDecodeError::FieldDecode { field, source }
 }
 
-const fn map_access_list_error(
-    error: AccessListTransactionDecodeError,
-) -> DynamicFeeTransactionDecodeError {
+const fn map_access_list_error(error: AccessListDecodeError) -> DynamicFeeTransactionDecodeError {
     match error {
-        AccessListTransactionDecodeError::FieldDecode { source, .. } => {
+        AccessListDecodeError::FieldDecode(source) => {
             field_error(DynamicFeeTransactionField::AccessList, source)
         }
-        AccessListTransactionDecodeError::InvalidAccessListEntryFieldCount { found } => {
+        AccessListDecodeError::InvalidAccessListEntryFieldCount { found } => {
             DynamicFeeTransactionDecodeError::InvalidAccessListEntryFieldCount { found }
         }
-        AccessListTransactionDecodeError::InvalidAccessListAddressLength { found } => {
+        AccessListDecodeError::InvalidAccessListAddressLength { found } => {
             DynamicFeeTransactionDecodeError::InvalidAccessListAddressLength { found }
         }
-        AccessListTransactionDecodeError::InvalidStorageKeyLength { found } => {
+        AccessListDecodeError::InvalidStorageKeyLength { found } => {
             DynamicFeeTransactionDecodeError::InvalidStorageKeyLength { found }
         }
-        _ => field_error(
-            DynamicFeeTransactionField::AccessList,
-            DecodeError::Malformed,
-        ),
     }
 }

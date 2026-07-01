@@ -35,6 +35,14 @@ duplicate access-list policy, or prove fork validity.
 - Dynamic-fee transaction field decoding is syntactic and bounded only.
 - Access lists use the same borrowed EIP-2930 access-list model and eager
   validation behavior introduced in v0.13.0.
+- EIP-2930 and EIP-1559 transaction decoders share the same internal scalar,
+  list, address-target, chain-id, and U256 field helpers to avoid validation
+  drift as later typed transaction formats are added.
+- Whole-payload RLP failures are attributed to the `Payload` field variant for
+  both access-list and dynamic-fee transactions instead of being bucketed under
+  `AccessList`.
+- Dynamic-fee access-list error mapping uses a narrower internal error type so
+  future access-list decode changes must be mapped deliberately.
 - The decoder intentionally does not reject `max_fee_per_gas` values below
   `max_priority_fee_per_gas`; fee-order validation belongs in a later validation
   state with fork and block context.
@@ -53,6 +61,14 @@ duplicate access-list policy, or prove fork validity.
 
 ## Release Gate
 
+- Initial pentest findings were remediated before retest:
+  - shared transaction field helpers replaced duplicated validation code;
+  - malformed whole-payload tests were added for EIP-2930 and EIP-1559;
+  - dynamic-fee negative-path tests now cover invalid `to`, malformed
+    access-list entry shape, invalid storage-key length, and invalid address
+    length;
+  - dynamic-fee access-list error mapping is exhaustive over the narrower
+    internal access-list decode error.
 - Pentest is required before the release report commit.
 - Permanent report path after pentest: `security/pentest/v0.14.0.md`.
 - Final GitHub checks must pass on the release report commit before tagging.
