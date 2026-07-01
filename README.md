@@ -35,7 +35,8 @@ dependencies.
 
 ## Current Status
 
-Status: `v0.16.1` RLP derive evaluation implementation is ready for pentest.
+Status: `v0.16.1` RLP derive evaluation pentest passed; final GitHub checks are
+pending before tag.
 `v0.16.0` is the latest tagged release.
 
 Implemented now:

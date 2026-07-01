@@ -568,7 +568,8 @@ Exit criteria:
 
 ### v0.16.1 - RLP Derive Evaluation
 
-Status: implementation complete; pentest pending.
+Status: implementation, pentest remediation, and clean retest complete; waiting
+for final GitHub checks before tag.
 
 Goal: decide and prototype derive support for RLP encoding and decoding only
 after hand-written primitive and transaction APIs have stabilized.

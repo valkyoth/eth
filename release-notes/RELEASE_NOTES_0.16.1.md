@@ -1,6 +1,6 @@
 # eth 0.16.1 Release Notes
 
-Status: implementation ready for pentest
+Status: pentest passed; final GitHub checks pending before tag
 
 ## Summary
 
@@ -43,8 +43,8 @@ are stable.
 
 ## Release Gate
 
-- Pentest is required before the release report commit.
-- Permanent report path after pentest: `security/pentest/v0.16.1.md`.
+- Pentest completed with remediation and clean retest.
+- Permanent report path: `security/pentest/v0.16.1.md`.
 - Final GitHub checks must pass on the release report commit before tagging.
 
 ## Verification
