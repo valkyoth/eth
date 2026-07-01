@@ -503,6 +503,8 @@ Exit criteria:
 
 ### v0.14.0 - Dynamic Fee Transaction Decode
 
+Status: implementation complete; pentest pending.
+
 Goal: decode EIP-1559 dynamic-fee transactions.
 
 Deliverables:

@@ -4,6 +4,12 @@ All notable changes to `eth` are documented here.
 
 ## Unreleased
 
+- Started `0.14.0` with unvalidated EIP-1559 dynamic-fee transaction field
+  decoding for typed transaction byte `0x02`.
+- Added max-priority-fee and max-fee field domains while explicitly deferring
+  fee-order validation to later validation state.
+- Extended transaction-envelope fuzz coverage to drive EIP-1559 dynamic-fee
+  transaction decoding.
 - Started `0.13.0` with unvalidated EIP-2930 access-list transaction field
   decoding for typed transaction byte `0x01`.
 - Added bounded borrowed access-list entry and storage-key iteration plus stable

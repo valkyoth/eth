@@ -3,7 +3,7 @@
 use eth_valkyoth_codec::{DecodeLimits, MAX_RLP_LIST_TRAVERSAL_DEPTH, RlpItem, RlpList};
 use eth_valkyoth_protocol::{
     TransactionEnvelope, decode_access_list_transaction, decode_legacy_transaction,
-    decode_transaction_envelope,
+    decode_dynamic_fee_transaction, decode_transaction_envelope,
 };
 use libfuzzer_sys::fuzz_target;
 
@@ -15,6 +15,7 @@ fuzz_target!(|data: &[u8]| {
 fn drive_transaction_envelope(data: &[u8], limits: DecodeLimits) {
     let _ = decode_legacy_transaction(data, limits);
     let _ = decode_access_list_transaction(data, limits);
+    let _ = decode_dynamic_fee_transaction(data, limits);
 
     let Ok(envelope) = decode_transaction_envelope(data, limits) else {
         return;

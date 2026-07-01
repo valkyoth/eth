@@ -35,9 +35,8 @@ dependencies.
 
 ## Current Status
 
-Status: `v0.13.0` EIP-2930 access-list transaction decode implementation,
-pentest remediation, and clean retest are complete. `v0.12.0` is the latest
-tagged release.
+Status: `v0.14.0` EIP-1559 dynamic-fee transaction decode implementation is
+ready for pentest. `v0.13.0` is the latest tagged release.
 
 Implemented now:
 
@@ -59,6 +58,9 @@ Implemented now:
   limit, to/create, value, input, and signature words.
 - Unvalidated EIP-2930 access-list transaction field decoding, including
   bounded borrowed access-list entry and storage-key iteration.
+- Unvalidated EIP-1559 dynamic-fee transaction field decoding for max priority
+  fee, max fee, gas limit, destination/create, value, calldata, access list, and
+  signature words.
 - Caller-provided Keccak-256 trait boundary without a default hash
   implementation dependency.
 - RLP fuzz harness with committed hex seed corpus and crash reproduction docs.
@@ -77,7 +79,7 @@ Not implemented yet:
 - No signer or local key storage.
 - No EVM execution adapter.
 - No Reth or P2P integration.
-- No dynamic-fee, blob, or set-code typed transaction field parsers yet.
+- No blob or set-code typed transaction field parsers yet.
 - No transaction signature validation or sender recovery yet.
 - No block parser yet.
 
@@ -102,14 +104,14 @@ Not implemented yet:
 
 ```toml
 [dependencies]
-eth = "0.13"
+eth = "0.14"
 ```
 
 For optional sanitization support:
 
 ```toml
 [dependencies]
-eth = { version = "0.13", features = ["sanitization"] }
+eth = { version = "0.14", features = ["sanitization"] }
 ```
 
 ## Features
@@ -200,12 +202,12 @@ check account state, or prove fork validity:
 use eth::codec::DecodeLimits;
 use eth::primitives::{Gas, Nonce, Wei};
 use eth::protocol::{
-    AccessListTransactionTo, SignatureYParity, decode_access_list_transaction,
+    DynamicFeeTransactionTo, SignatureYParity, decode_dynamic_fee_transaction,
 };
 
-let access_list_tx = [
-    0x01, 0xcd, 0x01, 0x02, 0x03, 0x82, 0x52, 0x08, 0x80, 0x80, 0x80, 0xc0,
-    0x01, 0x01, 0x02,
+let dynamic_fee_tx = [
+    0x02, 0xce, 0x01, 0x02, 0x03, 0x04, 0x82, 0x52, 0x08, 0x80, 0x05, 0x80,
+    0xc0, 0x01, 0x01, 0x02,
 ];
 
 let limits = DecodeLimits {
@@ -216,17 +218,19 @@ let limits = DecodeLimits {
     max_proof_nodes: 4,
     max_total_items: 32,
 };
-let tx = decode_access_list_transaction(&access_list_tx, limits)?;
+let tx = decode_dynamic_fee_transaction(&dynamic_fee_tx, limits)?;
 
 assert_eq!(tx.chain_id.get(), 1);
 assert_eq!(tx.nonce, Nonce::new(2));
-assert_eq!(tx.gas_price, Wei::from_u128(3));
+assert_eq!(tx.max_priority_fee_per_gas, Wei::from_u128(3));
+assert_eq!(tx.max_fee_per_gas, Wei::from_u128(4));
 assert_eq!(tx.gas_limit, Gas::new(21_000));
-assert_eq!(tx.to, AccessListTransactionTo::Create);
+assert_eq!(tx.to, DynamicFeeTransactionTo::Create);
+assert_eq!(tx.value, Wei::from_u128(5));
 assert_eq!(tx.access_list.address_count(), 0);
 assert_eq!(tx.access_list.storage_key_count(), 0);
 assert_eq!(tx.y_parity, SignatureYParity::Odd);
-# Ok::<(), eth::error::AccessListTransactionDecodeError>(())
+# Ok::<(), eth::error::DynamicFeeTransactionDecodeError>(())
 ```
 
 ## Constant-Time Composition
@@ -496,7 +500,7 @@ friendly, and independently testable.
 The minimum supported Rust version is Rust `1.90.0`. New deployments should use
 the pinned stable Rust `1.96.1` until the toolchain policy is updated.
 
-Compatibility evidence for `0.13.0`:
+Compatibility evidence for `0.14.0`:
 
 | Rust | Local Evidence |
 | --- | --- |
@@ -513,8 +517,8 @@ Compatibility evidence for `0.13.0`:
 
 ```bash
 scripts/checks.sh
-scripts/release_0_13_gate.sh
-scripts/validate-release-readiness.sh v0.13.0
+scripts/release_0_14_gate.sh
+scripts/validate-release-readiness.sh v0.14.0
 ```
 
 For dependency-policy checks, install `cargo-deny` and `cargo-audit`, then run:

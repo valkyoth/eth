@@ -1,14 +1,14 @@
 # eth Specification Matrix
 
-Status: source revisions pinned for `v0.13.0`; scalar, list, and canonical
+Status: source revisions pinned for `v0.14.0`; scalar, list, and canonical
 integer RLP decoding, canonical RLP encoding helpers, primitive RLP bridging,
 Keccak-256 trait boundary, RLP fuzz harness baseline, and transaction envelope
-shell plus unvalidated legacy and EIP-2930 access-list transaction decoding
-implemented.
+shell plus unvalidated legacy, EIP-2930 access-list, and EIP-1559 dynamic-fee
+transaction decoding implemented.
 
 Official source and fixture revisions are governed by
 [Spec Source Policy](spec-source-policy.md). Revisions were checked against
-upstream `HEAD` on 2026-07-01 for `v0.13.0`; execution-apis and
+upstream `HEAD` on 2026-07-01 for `v0.14.0`; execution-apis and
 consensus-specs remain deferred areas. Consensus-sensitive behavior must not be
 implemented from memory.
 
@@ -17,9 +17,10 @@ implemented from memory.
 | Execution RLP | partial | `ethereum/tests` pinned in `spec-lock.toml`; scalar byte-string, list, canonical integer decoders, and canonical encoding helpers implemented |
 | RLP fuzz harness | baseline | `fuzz/` workspace builds; committed hex seeds live under `fuzz/seed-corpus/`; crash reproduction is documented |
 | Keccak-256 hashing | boundary only | `eth-valkyoth-hash` defines caller-provided Keccak-256 trait boundary; no concrete backend admitted |
-| EIP-2718 typed transactions | partial | `ethereum/EIPs` pinned in `spec-lock.toml`; envelope classification implemented; EIP-2930 type `0x01` field decode implemented; later typed transaction payloads remain opaque |
+| EIP-2718 typed transactions | partial | `ethereum/EIPs` pinned in `spec-lock.toml`; envelope classification implemented; EIP-2930 type `0x01` and EIP-1559 type `0x02` field decode implemented; later typed transaction payloads remain opaque |
 | Legacy transactions | field decode | EIP-2718 defines the legacy transaction field list; v0.12.0 decodes fields into an unvalidated model without signature, sender, chain, or fork validation |
 | EIP-2930 access-list transactions | field decode | EIP-2930 defines type `0x01`, eleven payload fields, and access-list shape; v0.13.0 decodes fields into an unvalidated model without signature, sender, gas, duplicate, chain, account-state, or fork validation |
+| EIP-1559 dynamic-fee transactions | field decode | EIP-1559 defines type `0x02`, twelve payload fields, and access-list inheritance from EIP-2930; v0.14.0 decodes fields into an unvalidated model without signature, sender, fee-order, gas, duplicate, chain, account-state, or fork validation |
 | Transaction validation | planned | `execution-specs` pinned in `spec-lock.toml`; validation not implemented |
 | Header validation | planned | `execution-specs` pinned in `spec-lock.toml`; validation not implemented |
 | Receipt validation | planned | `execution-specs` pinned in `spec-lock.toml`; validation not implemented |

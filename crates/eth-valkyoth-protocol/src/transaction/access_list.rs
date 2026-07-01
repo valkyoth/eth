@@ -321,7 +321,7 @@ fn decode_chain_id<'a>(
         .map_err(|_| field_error(AccessListTransactionField::ChainId, DecodeError::Malformed))
 }
 
-fn decode_access_list(
+pub(crate) fn decode_access_list(
     list: RlpList<'_>,
 ) -> Result<AccessList<'_>, AccessListTransactionDecodeError> {
     // Eager validation proves the borrowed model is well-formed. Later

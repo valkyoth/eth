@@ -1,6 +1,7 @@
 //! Transaction envelope and field decoding.
 
 mod access_list;
+mod dynamic_fee;
 mod envelope;
 mod legacy;
 
@@ -12,6 +13,11 @@ pub use access_list::{
     AccessListStorageKeyItems, AccessListStorageKeys, AccessListTransactionDecodeError,
     AccessListTransactionDecodeErrorCategory, AccessListTransactionField, AccessListTransactionTo,
     SignatureYParity, UnvalidatedAccessListTransaction, decode_access_list_transaction,
+};
+pub use dynamic_fee::{
+    DYNAMIC_FEE_TRANSACTION_FIELD_COUNT, DynamicFeeTransactionDecodeError,
+    DynamicFeeTransactionDecodeErrorCategory, DynamicFeeTransactionField, DynamicFeeTransactionTo,
+    UnvalidatedDynamicFeeTransaction, decode_dynamic_fee_transaction,
 };
 pub use envelope::{
     EIP_2718_MAX_TYPED_PREFIX, EIP_2718_RESERVED_PREFIX, EIP_2718_SCALAR_PREFIX_START,
