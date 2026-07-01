@@ -35,8 +35,9 @@ dependencies.
 
 ## Current Status
 
-Status: `v0.12.0` legacy transaction decode implementation is complete; pentest
-is pending. `v0.11.0` is the latest tagged release.
+Status: `v0.12.0` legacy transaction decode implementation, pentest
+remediation, and clean retest are complete. `v0.11.0` is the latest tagged
+release.
 
 Implemented now:
 

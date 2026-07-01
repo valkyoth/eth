@@ -36,8 +36,8 @@ P2P integrations become real dependencies.
 
 ## Current Status
 
-The current release candidate is `0.12.0`; implementation is complete and
-pentest is pending.
+The current release candidate is `0.12.0`; pentest remediation and clean retest
+are complete.
 
 Implemented now:
 

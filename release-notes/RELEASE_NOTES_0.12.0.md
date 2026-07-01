@@ -1,6 +1,6 @@
 # eth 0.12.0 Release Notes
 
-Status: implementation complete; pentest required before tag
+Status: release candidate ready; waiting for final GitHub checks before tag
 
 ## Summary
 
@@ -49,12 +49,12 @@ validity.
   validation milestones.
 - Official EIP sources were checked on 2026-07-01 while preparing this release.
 
-## Still Required Before Tag
+## Release Gate
 
-- Maintainer pentest must be run for the exact implementation commit.
-- Any pentest findings must be fixed and retested.
-- A permanent report must be written at `security/pentest/v0.12.0.md`.
-- GitHub checks must pass on the final release report commit.
+- Initial pentest and retest findings were remediated and committed.
+- Maintainer retest found no remaining findings for the release candidate.
+- Permanent report: `security/pentest/v0.12.0.md`.
+- Final GitHub checks must pass on the release report commit before tagging.
 
 ## Verification
 
