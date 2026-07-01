@@ -136,6 +136,11 @@ where
 /// `digest_hasher` hashes the EIP-712 signing preimage. `address_hasher` hashes
 /// the recovered public key payload into an Ethereum address. Both hashers must
 /// compute Ethereum Keccak-256, not FIPS SHA3-256.
+///
+/// This function does not prove `domain_separator` was derived from `domain`.
+/// Callers must compute `domain_separator` from the same `chainId` and
+/// `verifyingContract` values passed here, using a conformant EIP-712 encoder;
+/// otherwise the checked domain and signed digest can silently diverge.
 pub fn recover_eip712_sender<DH, AH>(
     expected_domain: Eip712DomainExpectation,
     domain: Eip712Domain,
@@ -161,6 +166,19 @@ where
 #[cfg(test)]
 mod tests {
     use super::*;
+    use k256::ecdsa::SigningKey;
+    use sha3::Digest;
+
+    const TEST_PRIVATE_KEY: [u8; 32] = [
+        0x4c, 0x08, 0x83, 0xa6, 0x91, 0x02, 0x93, 0x7d, 0x62, 0x31, 0x47, 0x1b, 0x5d, 0xbb, 0x62,
+        0x04, 0xfe, 0x51, 0x29, 0x61, 0x70, 0x82, 0x79, 0x2a, 0xe4, 0x68, 0xd0, 0x1a, 0x3f, 0x36,
+        0x23, 0x18,
+    ];
+    const TEST_PRIVATE_KEY_ADDRESS: Address = Address::from_bytes([
+        0x2c, 0x75, 0x36, 0xe3, 0x60, 0x5d, 0x9c, 0x16, 0xa7, 0xa3, 0xd7, 0xb1, 0x89, 0x8e, 0x52,
+        0x93, 0x96, 0xa6, 0x5c, 0x23,
+    ]);
+
     use eth_valkyoth_protocol::SignatureYParity;
 
     struct Eip712TranscriptHasher {
@@ -170,6 +188,18 @@ mod tests {
 
     struct FixedHasher {
         digest: B256,
+    }
+
+    struct RealKeccak {
+        inner: sha3::Keccak256,
+    }
+
+    impl RealKeccak {
+        fn new() -> Self {
+            Self {
+                inner: sha3::Keccak256::new(),
+            }
+        }
     }
 
     impl Eip712TranscriptHasher {
@@ -213,6 +243,19 @@ mod tests {
         }
     }
 
+    impl Keccak256 for RealKeccak {
+        fn update(&mut self, input: &[u8]) {
+            self.inner.update(input);
+        }
+
+        fn finalize(self) -> B256 {
+            let digest = self.inner.finalize();
+            let mut bytes = [0_u8; 32];
+            bytes.copy_from_slice(&digest);
+            B256::from_bytes(bytes)
+        }
+    }
+
     fn expected_chain() -> ChainId {
         ChainId::new(1)
     }
@@ -231,6 +274,28 @@ mod tests {
 
     fn invalid_signature() -> EthereumSignature {
         EthereumSignature::from_parts([0_u8; 32], [0_u8; 32], SignatureYParity::Even)
+    }
+
+    fn signing_key() -> Result<SigningKey, VerifyError> {
+        SigningKey::from_bytes((&TEST_PRIVATE_KEY).into())
+            .map_err(|_| VerifyError::InvalidSignature)
+    }
+
+    fn sign_digest(digest: B256) -> Result<EthereumSignature, VerifyError> {
+        let key = signing_key()?;
+        let (signature, recovery_id) = key
+            .sign_prehash_recoverable(&<[u8; 32]>::from(digest))
+            .map_err(|_| VerifyError::InvalidSignature)?;
+        let bytes = signature.to_bytes();
+        let r = bytes
+            .get(..32)
+            .and_then(|value| <[u8; 32]>::try_from(value).ok())
+            .ok_or(VerifyError::InvalidSignature)?;
+        let s = bytes
+            .get(32..)
+            .and_then(|value| <[u8; 32]>::try_from(value).ok())
+            .ok_or(VerifyError::InvalidSignature)?;
+        EthereumSignature::try_from_parts_with_y_parity(r, s, recovery_id.to_byte())
     }
 
     #[test]
@@ -298,6 +363,28 @@ mod tests {
         }
 
         assert_eq!(digest, B256::from_bytes(expected));
+    }
+
+    #[test]
+    fn recovers_known_eip712_vector() -> Result<(), VerifyError> {
+        let domain_separator = B256::from_bytes([0x11_u8; 32]);
+        let message_hash = B256::from_bytes([0x22_u8; 32]);
+        let digest = eip712_signing_digest(domain_separator, message_hash, RealKeccak::new());
+        let signature = sign_digest(digest)?;
+
+        assert_eq!(
+            recover_eip712_sender(
+                expected_domain(),
+                complete_domain(),
+                domain_separator,
+                message_hash,
+                signature,
+                RealKeccak::new(),
+                RealKeccak::new(),
+            ),
+            Ok(TEST_PRIVATE_KEY_ADDRESS)
+        );
+        Ok(())
     }
 
     #[test]

@@ -27,6 +27,8 @@ conformant encoder before using these helpers.
   `verifyingContract`, and wrong verifying contract.
 - Added unit tests for missing fields, wrong fields, digest preimage
   composition, and domain-before-signature ordering.
+- Added an independent Keccak/k256 EIP-712 sender-recovery vector for the full
+  domain-check, digest-construction, and sender-recovery pipeline.
 - Added `scripts/release_0_21_gate.sh`.
 
 ## Changed
@@ -47,6 +49,9 @@ conformant encoder before using these helpers.
 - The digest helper uses the EIP-191 `0x1901` prefix required by EIP-712, but
   it does not validate that the supplied domain separator or message hash came
   from a conformant typed-data encoder.
+- `recover_eip712_sender` documents locally that `domain_separator` is not
+  proven to be derived from the checked domain; callers must compute both from
+  the same EIP-712 domain model until the full typed-data encoder lands.
 - Concrete Keccak-256 backend admission rules from `docs/keccak-boundary.md`
   still apply.
 
