@@ -1,6 +1,7 @@
 # Crate Version Matrix
 
-Status: `v0.19.0` replay-domain validation implementation ready for pentest.
+Status: `v0.19.0` replay-domain validation pentest passed; final GitHub checks
+are pending before tag.
 
 `eth` uses independent crate versions. The facade crate remains the main user
 entry point, but support crates are published only when their own package

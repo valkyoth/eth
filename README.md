@@ -35,8 +35,8 @@ dependencies.
 
 ## Current Status
 
-Status: `v0.19.0` replay-domain validation implementation is ready for
-pentest. `v0.18.0` is the latest tagged release.
+Status: `v0.19.0` replay-domain validation pentest passed; final GitHub checks
+are pending before tag. `v0.18.0` is the latest tagged release.
 
 Implemented now:
 

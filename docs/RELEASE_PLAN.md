@@ -640,7 +640,7 @@ Exit criteria:
 
 ### v0.19.0 - Replay Domain Validation
 
-Status: implementation ready for pentest.
+Status: pentest passed; final GitHub checks pending before tag.
 
 Goal: validate transaction chain binding before signatures are trusted.
 
