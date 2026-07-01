@@ -1,6 +1,6 @@
 # Transaction Signature Validation
 
-Status: v0.23.0 implementation ready for pentest.
+Status: v0.23.0 pentest remediation ready for retest.
 
 `eth-valkyoth-verify` now exposes decoded transaction signature validation
 helpers for the transaction families decoded by `eth-valkyoth-protocol`:
@@ -30,7 +30,16 @@ These helpers do not prove full Ethereum execution validity. They do not check
 fork activation, intrinsic gas, fee ordering, account nonce/state, balance,
 blob count, blob-hash version bytes, KZG commitments, or protocol typestate
 promotion. They return a `ValidatedTransactionSignature`, which records only
-the recovered sender and the signing hash that was recovered against.
+the recovered sender and the signing hash that was recovered against. That
+proof value is intentionally not publicly constructible; callers must obtain it
+through the validation helpers so sender-recovered state cannot be forged
+outside `eth-valkyoth-verify`.
+
+The test suite includes external raw mainnet transaction known-answer tests for
+EIP-2930, EIP-1559, and EIP-4844. Those fixtures were sourced through
+`eth_getRawTransactionByHash` from `ethereum.publicnode.com` and assert the RPC
+`from` sender against the crate's independent decode, signing-hash, and
+recovery path.
 
 Protocol typestate promotion remains intentionally gated until public proof
 constructors can bind proofs to transaction identity instead of allowing

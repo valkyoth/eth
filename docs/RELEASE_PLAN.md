@@ -762,7 +762,7 @@ Exit criteria:
 
 ### v0.23.0 - Full Transaction Signature Validation
 
-Status: implementation ready for pentest.
+Status: pentest remediation ready for retest.
 
 Goal: validate decoded transaction signatures end to end.
 
@@ -772,8 +772,9 @@ Deliverables:
   low-s/y-parity policy, and sender recovery;
 - legacy `v` handling through EIP-155 chain binding;
 - typed transaction signature validation for EIP-2930, EIP-1559, and EIP-4844;
-- at least one independently derived external known-answer signing-hash vector
-  for each typed transaction family before wiring signature validation;
+- at least one external raw mainnet transaction KAT for each typed transaction
+  family, sourced independently through public Ethereum RPC and checked against
+  the RPC `from` sender;
 - validated-signature result carrying the recovered sender and signing hash;
 - protocol typestate sender-recovered promotion remains deferred until public
   proof constructors can be bound to transaction identity;

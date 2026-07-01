@@ -16,6 +16,9 @@ use crate::{
 };
 
 #[cfg(test)]
+#[path = "transaction_signature_external_tests.rs"]
+mod external_tests;
+#[cfg(test)]
 #[path = "transaction_signature_tests.rs"]
 mod tests;
 
@@ -30,7 +33,7 @@ pub struct ValidatedTransactionSignature {
 impl ValidatedTransactionSignature {
     /// Creates a validated signature result from its checked components.
     #[must_use]
-    pub const fn new(sender: Address, signing_hash: TransactionSigningHash) -> Self {
+    pub(crate) const fn new(sender: Address, signing_hash: TransactionSigningHash) -> Self {
         Self {
             sender,
             signing_hash,

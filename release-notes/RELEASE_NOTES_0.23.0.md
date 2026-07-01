@@ -1,6 +1,6 @@
 # eth 0.23.0 Release Notes
 
-Status: implementation ready for pentest
+Status: pentest remediation ready for retest
 
 ## Summary
 
@@ -26,6 +26,9 @@ identity.
   - EIP-4844 blob transactions.
 - Added real-Keccak tests that sign and recover all supported transaction
   families through the public validation helpers.
+- Added external mainnet raw-transaction KATs sourced from
+  `ethereum.publicnode.com` for EIP-2930, EIP-1559, and EIP-4844 sender
+  recovery.
 - Added wrong-chain, wrong-sender, high-s, malformed-scalar, and signing-hash
   construction failure tests.
 - Added `docs/transaction-signature-validation.md`.
@@ -39,6 +42,9 @@ identity.
   transactions remain rejected as missing a replay domain.
 - The helpers reject high-s signatures and malformed secp256k1 scalars through
   the existing sender recovery path.
+- `ValidatedTransactionSignature` can only be constructed inside
+  `eth-valkyoth-verify`; downstream callers must pass through validation
+  helpers to obtain one.
 - The caller may pass an expected sender; mismatches return
   `TransactionSignatureValidationError::WrongSender`.
 - The helpers still do not validate fork activation, fees, account state,

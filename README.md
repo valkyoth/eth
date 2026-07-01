@@ -35,7 +35,8 @@ dependencies.
 
 ## Current Status
 
-Status: `v0.23.0` decoded transaction signature validation is ready for pentest.
+Status: `v0.23.0` decoded transaction signature validation pentest remediation
+is ready for retest.
 `v0.22.0` is the latest tagged release.
 
 Implemented now:
@@ -81,6 +82,8 @@ Implemented now:
 - Decoded transaction signature validation helpers that combine replay-domain
   checks, signing hashes, low-s/y-parity policy, sender recovery, and optional
   expected-sender comparison.
+- External raw mainnet transaction KATs for EIP-2930, EIP-1559, and EIP-4844
+  sender recovery.
 - EIP-712 domain-safety checks for required `chainId` and
   `verifyingContract` fields, plus a domain-gated sender recovery helper.
 - RLP derive design and private derive-crate prototype tests for future
