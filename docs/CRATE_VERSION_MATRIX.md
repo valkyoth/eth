@@ -1,7 +1,6 @@
 # Crate Version Matrix
 
-Status: `v0.10.0` implementation, pentest remediation, and clean retest
-complete; waiting for final GitHub checks before tag.
+Status: `v0.11.0` implementation complete; pentest pending.
 
 `eth` uses independent crate versions. The facade crate remains the main user
 entry point, but support crates are published only when their own package
@@ -27,23 +26,23 @@ but must be republished so immutable crates.io package metadata is corrected.
 workspace manifests before release. The script refuses accidental lockstep
 publication when a crate is marked `unchanged`.
 
-## v0.10.0 Tracking Table
+## v0.11.0 Tracking Table
 
 | Crate | Published | Planned | Change | Publish | Reason |
 | --- | --- | --- | --- | --- | --- |
-| `eth-valkyoth-codec` | `0.9.1` | `0.10.0` | `code` | Yes | Adds v0.10.0 package documentation for the RLP fuzz harness baseline and parser seed-corpus process. |
-| `eth-valkyoth-primitives` | `0.9.2` | `0.10.0` | `code` | Yes | Adds signed ChainId decode helpers, release-visible unexpected codec errors, unambiguous transaction type constructors, and the codec 0.10.0 dependency range. |
-| `eth-valkyoth-hash` | `0.9.3` | `0.10.0` | `code` | Yes | Adds Keccak-256 empty-input KAT constants and backend conformance helper API. |
-| `eth-valkyoth-protocol` | `0.7.0` | `0.7.0` | `unchanged` | No | No package changes for v0.10.0. |
-| `eth-valkyoth-verify` | `0.7.0` | `0.7.0` | `unchanged` | No | No package changes for v0.10.0. |
-| `eth-valkyoth-derive` | `0.7.0` | `0.7.0` | `unchanged` | No | No package changes for v0.10.0. |
-| `eth-valkyoth-sanitization` | `0.7.0` | `0.7.0` | `unchanged` | No | No package changes for v0.10.0. |
-| `eth-valkyoth-evm` | `0.7.0` | `0.7.0` | `unchanged` | No | No package changes for v0.10.0. |
-| `eth-valkyoth-rpc` | `0.7.0` | `0.7.0` | `unchanged` | No | No package changes for v0.10.0. |
-| `eth-valkyoth-signer` | `0.7.0` | `0.7.0` | `unchanged` | No | No package changes for v0.10.0. |
-| `eth-valkyoth-reth` | `0.7.0` | `0.7.0` | `unchanged` | No | No package changes for v0.10.0. |
-| `eth-valkyoth-testkit` | `0.7.0` | `0.7.0` | `unchanged` | No | No package changes for v0.10.0. |
-| `eth` | `0.9.3` | `0.10.0` | `code` | Yes | Updates facade documentation and dependency ranges for the v0.10.0 RLP fuzz harness baseline. |
+| `eth-valkyoth-codec` | `0.10.0` | `0.10.0` | `unchanged` | No | No package changes for v0.11.0. |
+| `eth-valkyoth-primitives` | `0.10.0` | `0.10.0` | `unchanged` | No | No package changes for v0.11.0. |
+| `eth-valkyoth-hash` | `0.10.0` | `0.10.0` | `unchanged` | No | No package changes for v0.11.0. |
+| `eth-valkyoth-protocol` | `0.7.0` | `0.11.0` | `code` | Yes | Adds the EIP-2718 transaction envelope shell and codec dependency for exact legacy RLP-list classification. |
+| `eth-valkyoth-verify` | `0.7.0` | `0.7.0` | `unchanged` | No | No package changes for v0.11.0. |
+| `eth-valkyoth-derive` | `0.7.0` | `0.7.0` | `unchanged` | No | No package changes for v0.11.0. |
+| `eth-valkyoth-sanitization` | `0.7.0` | `0.7.0` | `unchanged` | No | No package changes for v0.11.0. |
+| `eth-valkyoth-evm` | `0.7.0` | `0.7.0` | `unchanged` | No | No package changes for v0.11.0. |
+| `eth-valkyoth-rpc` | `0.7.0` | `0.7.0` | `unchanged` | No | No package changes for v0.11.0. |
+| `eth-valkyoth-signer` | `0.7.0` | `0.7.0` | `unchanged` | No | No package changes for v0.11.0. |
+| `eth-valkyoth-reth` | `0.7.0` | `0.7.0` | `unchanged` | No | No package changes for v0.11.0. |
+| `eth-valkyoth-testkit` | `0.7.0` | `0.7.0` | `unchanged` | No | No package changes for v0.11.0. |
+| `eth` | `0.10.0` | `0.11.0` | `code` | Yes | Updates facade documentation and dependency ranges for the v0.11.0 transaction envelope shell. |
 
 Update this table and `release-crates.toml` in the same commit whenever a crate
 changes release state.

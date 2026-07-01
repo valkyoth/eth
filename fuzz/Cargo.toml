@@ -13,6 +13,7 @@ cargo-fuzz = true
 [dependencies]
 eth-valkyoth-codec = { path = "../crates/eth-valkyoth-codec", version = "0.10.0", features = ["testing"] }
 eth-valkyoth-primitives = { path = "../crates/eth-valkyoth-primitives", version = "0.10.0" }
+eth-valkyoth-protocol = { path = "../crates/eth-valkyoth-protocol", version = "0.11.0" }
 libfuzzer-sys = "0.4.13"
 
 [[bin]]
@@ -60,6 +61,13 @@ bench = false
 [[bin]]
 name = "primitives"
 path = "fuzz_targets/primitives.rs"
+test = false
+doc = false
+bench = false
+
+[[bin]]
+name = "transaction_envelope"
+path = "fuzz_targets/transaction_envelope.rs"
 test = false
 doc = false
 bench = false

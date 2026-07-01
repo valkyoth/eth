@@ -32,6 +32,7 @@ version = "0.0.0"
 dependencies = [
  "eth-valkyoth-codec",
  "eth-valkyoth-primitives",
+ "eth-valkyoth-protocol",
  "libfuzzer-sys",
 ]
 
@@ -45,6 +46,14 @@ version = "0.10.0"
 dependencies = [
  "eth-valkyoth-codec",
  "subtle",
+]
+
+[[package]]
+name = "eth-valkyoth-protocol"
+version = "0.11.0"
+dependencies = [
+ "eth-valkyoth-codec",
+ "eth-valkyoth-primitives",
 ]
 
 [[package]]

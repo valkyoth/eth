@@ -35,9 +35,8 @@ dependencies.
 
 ## Current Status
 
-Status: `v0.10.0` RLP fuzz harness implementation, pentest remediation, and
-clean retest are complete. `v0.9.3` is the latest published
-release.
+Status: `v0.11.0` transaction envelope shell implementation is complete;
+pentest is pending. `v0.10.0` is the latest tagged release.
 
 Implemented now:
 
@@ -53,6 +52,8 @@ Implemented now:
   encoding helpers.
 - No-allocation primitive RLP encode and exact-decode helpers for chain, block,
   gas, nonce, timestamp, address, hash, and wei values.
+- EIP-2718 transaction envelope shell classification for typed and legacy
+  transaction bytes.
 - Caller-provided Keccak-256 trait boundary without a default hash
   implementation dependency.
 - RLP fuzz harness with committed hex seed corpus and crash reproduction docs.
@@ -71,7 +72,8 @@ Not implemented yet:
 - No signer or local key storage.
 - No EVM execution adapter.
 - No Reth or P2P integration.
-- No transaction or block parser yet.
+- No full transaction field parser yet.
+- No block parser yet.
 
 ## Trust Dashboard
 
@@ -94,14 +96,14 @@ Not implemented yet:
 
 ```toml
 [dependencies]
-eth = "0.10"
+eth = "0.11"
 ```
 
 For optional sanitization support:
 
 ```toml
 [dependencies]
-eth = { version = "0.10", features = ["sanitization"] }
+eth = { version = "0.11", features = ["sanitization"] }
 ```
 
 ## Features
@@ -342,6 +344,37 @@ The RLP parser surface has cargo-fuzz targets and committed seed fixtures. See
 [`docs/fuzzing.md`](docs/fuzzing.md) for seed materialization, target scope, and
 crash reproduction.
 
+## Transaction Envelopes
+
+The protocol crate can classify the outer transaction envelope without decoding
+or validating transaction fields:
+
+```rust
+use eth::codec::DecodeLimits;
+use eth::protocol::{TransactionEnvelope, decode_transaction_envelope};
+
+let limits = DecodeLimits {
+    max_input_bytes: 32,
+    max_list_items: 4,
+    max_nesting_depth: 4,
+    max_total_allocation: 32,
+    max_proof_nodes: 4,
+    max_total_items: 4,
+};
+
+let envelope = decode_transaction_envelope(&[0x02, 0xc0], limits)?;
+
+assert!(matches!(envelope, TransactionEnvelope::Typed(_)));
+if let TransactionEnvelope::Typed(typed) = envelope {
+    assert_eq!(u8::from(typed.transaction_type), 2);
+    assert_eq!(typed.payload, &[0xc0]);
+}
+# Ok::<(), eth::error::TransactionEnvelopeError>(())
+```
+
+This release treats typed payloads as opaque bytes. Legacy transactions must be
+exactly one RLP list, but their fields are decoded in later milestones.
+
 ## Optional Sanitization
 
 The main facade stays small by default. Applications that handle local secret
@@ -389,7 +422,7 @@ friendly, and independently testable.
 The minimum supported Rust version is Rust `1.90.0`. New deployments should use
 the pinned stable Rust `1.96.0` until the toolchain policy is updated.
 
-Compatibility evidence for `0.10.0`:
+Compatibility evidence for `0.11.0`:
 
 | Rust | Local Evidence |
 | --- | --- |
@@ -405,8 +438,8 @@ Compatibility evidence for `0.10.0`:
 
 ```bash
 scripts/checks.sh
-scripts/release_0_10_gate.sh
-scripts/validate-release-readiness.sh v0.10.0
+scripts/release_0_11_gate.sh
+scripts/validate-release-readiness.sh v0.11.0
 ```
 
 For dependency-policy checks, install `cargo-deny` and `cargo-audit`, then run:

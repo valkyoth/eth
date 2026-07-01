@@ -9,6 +9,15 @@ use core::{fmt, marker::PhantomData};
 
 use eth_valkyoth_primitives::{BlockNumber, ChainId, UnixTimestamp};
 
+mod transaction;
+
+pub use transaction::{
+    EIP_2718_MAX_TYPED_PREFIX, EIP_2718_RESERVED_PREFIX, EIP_2718_SCALAR_PREFIX_START,
+    EIP_2718_TYPED_ZERO_PREFIX, LEGACY_TRANSACTION_PREFIX_START, TransactionEnvelope,
+    TransactionEnvelopeError, TransactionEnvelopeErrorCategory, TypedTransactionEnvelope,
+    decode_transaction_envelope,
+};
+
 /// Protocol validation failure.
 #[non_exhaustive]
 #[derive(Clone, Copy, Debug, Eq, PartialEq)]
