@@ -37,7 +37,7 @@ dependencies.
 
 Status: `v0.23.0` decoded transaction signature validation pentest passed;
 waiting for final GitHub checks.
-`v0.22.0` is the latest tagged release.
+`v0.23.0` is the release candidate waiting for final CI before tagging.
 
 Implemented now:
 
@@ -138,14 +138,14 @@ Not implemented yet:
 
 ```toml
 [dependencies]
-eth = "0.22"
+eth = "0.23"
 ```
 
 For optional sanitization support:
 
 ```toml
 [dependencies]
-eth = { version = "0.22", features = ["sanitization"] }
+eth = { version = "0.23", features = ["sanitization"] }
 ```
 
 ## Features

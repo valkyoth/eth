@@ -137,21 +137,21 @@ Not implemented yet:
 
 ```toml
 [dependencies]
-eth = "0.22"
+eth = "0.23"
 ```
 
 Disable defaults explicitly for embedded or freestanding builds:
 
 ```toml
 [dependencies]
-eth = { version = "0.22", default-features = false }
+eth = { version = "0.23", default-features = false }
 ```
 
 Optional sanitization support:
 
 ```toml
 [dependencies]
-eth = { version = "0.22", features = ["sanitization"] }
+eth = { version = "0.23", features = ["sanitization"] }
 ```
 
 ## Features
