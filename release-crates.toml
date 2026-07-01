@@ -1,5 +1,5 @@
 [release]
-version = "0.19.0"
+version = "0.20.0"
 policy = "independent"
 
 [crates."eth-valkyoth-codec"]
@@ -7,88 +7,88 @@ previous_version = "0.16.0"
 version = "0.16.0"
 change = "unchanged"
 publish = false
-reason = "No package changes for v0.19.0."
+reason = "No package changes for v0.20.0."
 
 [crates."eth-valkyoth-primitives"]
 previous_version = "0.10.1"
 version = "0.10.1"
 change = "unchanged"
 publish = false
-reason = "No package changes for v0.19.0."
+reason = "No package changes for v0.20.0."
 
 [crates."eth-valkyoth-hash"]
 previous_version = "0.10.0"
 version = "0.10.0"
 change = "unchanged"
 publish = false
-reason = "No package changes for v0.19.0."
+reason = "No package changes for v0.20.0."
 
 [crates."eth-valkyoth-protocol"]
 previous_version = "0.18.0"
 version = "0.18.0"
 change = "unchanged"
 publish = false
-reason = "No package changes for v0.19.0."
+reason = "No package changes for v0.20.0."
 
 [crates."eth-valkyoth-verify"]
-previous_version = "0.7.0"
-version = "0.8.0"
+previous_version = "0.8.0"
+version = "0.9.0"
 change = "code"
 publish = true
-reason = "Adds transaction replay-domain validation for legacy EIP-155 and typed transaction chain IDs."
+reason = "Adds digest-level Ethereum sender recovery with k256 secp256k1, low-s rejection, y-parity policy, and caller-provided Keccak hashing."
 
 [crates."eth-valkyoth-derive"]
 previous_version = "0.16.1"
 version = "0.16.1"
 change = "unchanged"
 publish = false
-reason = "No package changes for v0.19.0."
+reason = "No package changes for v0.20.0."
 
 [crates."eth-valkyoth-sanitization"]
 previous_version = "0.7.1"
 version = "0.7.1"
 change = "unchanged"
 publish = false
-reason = "No package changes for v0.19.0."
+reason = "No package changes for v0.20.0."
 
 [crates."eth-valkyoth-evm"]
 previous_version = "0.7.0"
 version = "0.7.0"
 change = "unchanged"
 publish = false
-reason = "No package changes for v0.19.0."
+reason = "No package changes for v0.20.0."
 
 [crates."eth-valkyoth-rpc"]
 previous_version = "0.7.0"
 version = "0.7.0"
 change = "unchanged"
 publish = false
-reason = "No package changes for v0.19.0."
+reason = "No package changes for v0.20.0."
 
 [crates."eth-valkyoth-signer"]
 previous_version = "0.7.0"
 version = "0.7.0"
 change = "unchanged"
 publish = false
-reason = "No package changes for v0.19.0."
+reason = "No package changes for v0.20.0."
 
 [crates."eth-valkyoth-reth"]
 previous_version = "0.7.0"
 version = "0.7.0"
 change = "unchanged"
 publish = false
-reason = "No package changes for v0.19.0."
+reason = "No package changes for v0.20.0."
 
 [crates."eth-valkyoth-testkit"]
 previous_version = "0.7.0"
 version = "0.7.0"
 change = "unchanged"
 publish = false
-reason = "No package changes for v0.19.0."
+reason = "No package changes for v0.20.0."
 
 [crates.eth]
-previous_version = "0.18.0"
-version = "0.19.0"
+previous_version = "0.19.0"
+version = "0.20.0"
 change = "code"
 publish = true
-reason = "Re-exports the v0.19.0 replay-domain verification APIs and updates packaged documentation."
+reason = "Re-exports the v0.20.0 sender recovery APIs and updates packaged documentation."

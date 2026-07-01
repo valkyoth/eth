@@ -35,8 +35,8 @@ dependencies.
 
 ## Current Status
 
-Status: `v0.19.0` replay-domain validation pentest passed; final GitHub checks
-are pending before tag. `v0.18.0` is the latest tagged release.
+Status: `v0.20.0` sender-recovery implementation is ready for pentest.
+`v0.19.0` is the latest tagged release.
 
 Implemented now:
 
@@ -74,6 +74,8 @@ Implemented now:
   fork-validated, and sender-recovered state tokens.
 - Replay-domain validation for legacy EIP-155 and typed transaction chain IDs
   before sender recovery results are accepted.
+- Digest-level secp256k1 sender recovery with low-s rejection, Ethereum
+  y-parity policy, and caller-provided Keccak-256 public-key hashing.
 - RLP derive design and private derive-crate prototype tests for future
   `RlpEncode`/`RlpDecode` support.
 - Caller-provided Keccak-256 trait boundary without a default hash
@@ -95,7 +97,8 @@ Not implemented yet:
 - No EVM execution adapter.
 - No Reth or P2P integration.
 - No set-code typed transaction field parser yet.
-- No transaction signature validation or sender recovery yet.
+- No transaction signing-hash construction or full transaction signature
+  validation yet.
 - No block parser yet.
 
 ## Trust Dashboard
@@ -119,14 +122,14 @@ Not implemented yet:
 
 ```toml
 [dependencies]
-eth = "0.19"
+eth = "0.20"
 ```
 
 For optional sanitization support:
 
 ```toml
 [dependencies]
-eth = { version = "0.19", features = ["sanitization"] }
+eth = { version = "0.20", features = ["sanitization"] }
 ```
 
 ## Features
@@ -210,8 +213,8 @@ assert_eq!(Address::try_from_rlp(&encoded_address, limits)?, address);
 ## Transaction Decode
 
 Transaction decoders return explicitly unvalidated borrowed field models. They
-classify and bound wire data, but do not validate signatures, recover senders,
-check account state, or prove fork validity:
+classify and bound wire data, but do not validate signatures from the full
+transaction, check account state, or prove fork validity:
 
 ```rust
 use eth::codec::DecodeLimits;
@@ -255,8 +258,8 @@ assert_eq!(encoded.get(..written), Some(dynamic_fee_tx.as_slice()));
 
 ## Replay Domain Checks
 
-Replay-domain helpers reject wrong-chain transactions before future sender
-recovery results are trusted:
+Replay-domain helpers reject wrong-chain transactions before sender recovery
+results are trusted:
 
 ```rust
 use eth::codec::DecodeLimits;
@@ -286,6 +289,52 @@ assert_eq!(
 );
 # Ok::<(), Box<dyn std::error::Error>>(())
 ```
+
+## Sender Recovery
+
+Sender recovery operates on an already constructed Ethereum signing digest. The
+caller is responsible for building the transaction preimage, checking the replay
+domain, and choosing an admitted Keccak-256 backend:
+
+```rust
+use eth::hash::Keccak256;
+use eth::primitives::B256;
+use eth::protocol::SignatureYParity;
+use eth::verify::{EthereumSignature, recover_sender_from_digest};
+
+struct PlatformKeccak {
+    output: B256,
+}
+
+impl Keccak256 for PlatformKeccak {
+    fn update(&mut self, input: &[u8]) {
+        let _ = input;
+    }
+
+    fn finalize(self) -> B256 {
+        self.output
+    }
+}
+
+let digest = B256::from([0x44_u8; 32]);
+let signature = EthereumSignature::from_parts(
+    [0x11_u8; 32],
+    [0x22_u8; 32],
+    SignatureYParity::Even,
+);
+
+let _result = recover_sender_from_digest(
+    digest,
+    signature,
+    PlatformKeccak {
+        output: B256::from([0x33_u8; 32]),
+    },
+);
+```
+
+The recovery layer rejects malformed scalar values, high-s signatures, and
+non-Ethereum recovery IDs. A successful recovered address is still not a full
+transaction-validity proof.
 
 ## Constant-Time Composition
 
@@ -558,7 +607,7 @@ friendly, and independently testable.
 The minimum supported Rust version is Rust `1.90.0`. New deployments should use
 the pinned stable Rust `1.96.1` until the toolchain policy is updated.
 
-Compatibility evidence for `0.19.0`:
+Compatibility evidence for `0.20.0`:
 
 | Rust | Local Evidence |
 | --- | --- |
@@ -575,8 +624,8 @@ Compatibility evidence for `0.19.0`:
 
 ```bash
 scripts/checks.sh
-scripts/release_0_19_gate.sh
-scripts/validate-release-readiness.sh v0.19.0
+scripts/release_0_20_gate.sh
+scripts/validate-release-readiness.sh v0.20.0
 ```
 
 For dependency-policy checks, install `cargo-deny` and `cargo-audit`, then run:
@@ -591,6 +640,7 @@ cargo audit
 - [Implementation Plan](docs/IMPLEMENTATION_PLAN.md)
 - [Release Plan](docs/RELEASE_PLAN.md)
 - [Keccak Boundary](docs/keccak-boundary.md)
+- [k256 Dependency Admission](docs/dependency-admission-k256.md)
 - [Fuzzing](docs/fuzzing.md)
 - [Scope](docs/SCOPE.md)
 - [Threat Model](docs/threat-model.md)

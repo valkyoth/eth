@@ -1,12 +1,13 @@
 # eth Specification Matrix
 
-Status: source revisions pinned for `v0.18.0`; scalar, list, and canonical
+Status: source revisions pinned for `v0.20.0`; scalar, list, and canonical
 integer RLP decoding, canonical RLP encoding helpers, primitive RLP bridging,
 Keccak-256 trait boundary, RLP fuzz harness baseline, and transaction envelope
 shell plus unvalidated legacy, EIP-2930 access-list, EIP-1559 dynamic-fee, and
 EIP-4844 blob transaction decoding and canonical encoding implemented. Explicit
 chain and fork activation context is available for caller-reviewed specs.
-Transaction typestate promotion is proof-gated.
+Transaction typestate promotion is proof-gated. Digest-level sender recovery is
+available after caller-side signing-hash construction and replay-domain checks.
 
 Official source and fixture revisions are governed by
 [Spec Source Policy](spec-source-policy.md). Revisions were checked against
@@ -25,7 +26,7 @@ implemented from memory.
 | EIP-1559 dynamic-fee transactions | field decode/encode | EIP-1559 defines type `0x02`, twelve payload fields, and access-list inheritance from EIP-2930; v0.14.0 decodes fields and v0.16.0 encodes the admitted model without signature, sender, fee-order, gas, duplicate, chain, account-state, or fork validation |
 | EIP-4844 blob transactions | field decode/encode | EIP-4844 defines type `0x03`, fourteen payload fields, required 20-byte `to`, max blob fee, and blob versioned hash list; v0.15.0 decodes fields and v0.16.0 encodes the admitted model without signature, sender, blob fee, KZG, data availability, blob-hash version, blob count, chain, account-state, block blob-gas, or fork validation |
 | Chain and fork specs | explicit context | `execution-specs` and EIPs are pinned in `spec-lock.toml`; v0.17.0 adds caller-provided `ChainSpec`, `ForkSpec`, hardfork identity, block/timestamp activation checks, unsupported-fork errors, chain-mismatch errors, duplicate-fork errors, and non-monotonic fork/activation ordering errors without hardcoding mainnet validation rules |
-| Transaction validation | typestate shell | `execution-specs` pinned in `spec-lock.toml`; v0.18.0 adds proof-gated decoded/canonical/fork-valid/sender-recovered transaction state transitions, consumes tokens on successful promotion, returns the original token on failed promotion, and keeps public proof constructors deferred until proofs can be transaction-bound; replay-domain checks, signature recovery, and concrete validity rules remain planned |
+| Transaction validation | partial | `execution-specs` pinned in `spec-lock.toml`; v0.18.0 adds proof-gated decoded/canonical/fork-valid/sender-recovered transaction state transitions, v0.19.0 adds replay-domain checks, and v0.20.0 adds digest-level sender recovery with low-s and y-parity policy. Transaction signing-hash construction, full signature validation from decoded transactions, fee/account/fork validity, and concrete proof constructors remain planned |
 | Header validation | planned | `execution-specs` pinned in `spec-lock.toml`; validation not implemented |
 | Receipt validation | planned | `execution-specs` pinned in `spec-lock.toml`; validation not implemented |
 | MPT proofs | planned | `ethereum/tests` pinned in `spec-lock.toml`; proof verification not implemented |

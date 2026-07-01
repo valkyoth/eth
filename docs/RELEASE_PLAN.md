@@ -640,7 +640,7 @@ Exit criteria:
 
 ### v0.19.0 - Replay Domain Validation
 
-Status: pentest passed; final GitHub checks pending before tag.
+Status: tagged.
 
 Goal: validate transaction chain binding before signatures are trusted.
 
@@ -659,6 +659,8 @@ Exit criteria:
 - Wrong-chain transactions fail before sender recovery results are accepted.
 
 ### v0.20.0 - Sender Recovery
+
+Status: implementation ready; pentest pending.
 
 Goal: recover senders through an admitted secp256k1 dependency.
 

@@ -9,11 +9,16 @@ use core::fmt;
 use eth_valkyoth_primitives::ChainId;
 
 mod replay;
+mod sender;
 
 pub use replay::{
     require_access_list_replay_domain, require_blob_replay_domain,
     require_dynamic_fee_replay_domain, require_legacy_replay_domain,
     require_transaction_replay_domain,
+};
+pub use sender::{
+    COMPACT_SIGNATURE_BYTES, ETHEREUM_PUBLIC_KEY_BYTES, ETHEREUM_SIGNATURE_BYTES,
+    EthereumSignature, SIGNING_DIGEST_BYTES, recover_sender_from_digest,
 };
 
 /// Verification failure categories.
