@@ -315,6 +315,16 @@ fn rejects_invalid_access_list_y_parity() {
 }
 
 #[test]
+fn signature_y_parity_reports_narrow_error() {
+    assert_eq!(SignatureYParity::try_new(0), Ok(SignatureYParity::Even));
+    assert_eq!(SignatureYParity::try_new(1), Ok(SignatureYParity::Odd));
+    assert_eq!(
+        SignatureYParity::try_new(2).map_err(|error| error.value()),
+        Err(2)
+    );
+}
+
+#[test]
 fn rejects_invalid_access_list_address_length() {
     let tx = [
         0x01, 0xd0, 0x01, 0x02, 0x03, 0x82, 0x52, 0x08, 0x80, 0x80, 0x80, 0xc3, 0xc2, 0x01, 0xc0,

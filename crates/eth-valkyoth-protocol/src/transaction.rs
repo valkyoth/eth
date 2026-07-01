@@ -13,7 +13,8 @@ pub use access_list::{
     ACCESS_LIST_TRANSACTION_FIELD_COUNT, AccessList, AccessListEntries, AccessListEntry,
     AccessListStorageKeyItems, AccessListStorageKeys, AccessListTransactionDecodeError,
     AccessListTransactionDecodeErrorCategory, AccessListTransactionField, AccessListTransactionTo,
-    SignatureYParity, UnvalidatedAccessListTransaction, decode_access_list_transaction,
+    InvalidSignatureYParity, SignatureYParity, UnvalidatedAccessListTransaction,
+    decode_access_list_transaction,
 };
 pub use dynamic_fee::{
     DYNAMIC_FEE_TRANSACTION_FIELD_COUNT, DynamicFeeTransactionDecodeError,

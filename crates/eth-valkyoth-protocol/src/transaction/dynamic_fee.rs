@@ -3,8 +3,8 @@ use eth_valkyoth_primitives::{ChainId, Gas, Nonce, Wei};
 
 use super::access_list::{AccessListDecodeError, decode_access_list};
 use super::{
-    AccessList, AccessListTransactionDecodeError, AccessListTransactionTo, SignatureYParity,
-    TransactionEnvelope, decode_transaction_envelope,
+    AccessList, AccessListTransactionTo, SignatureYParity, TransactionEnvelope,
+    decode_transaction_envelope,
 };
 use crate::transaction::fields::{
     decode_chain_id as decode_shared_chain_id, decode_to as decode_shared_to,
@@ -182,14 +182,8 @@ fn decode_dynamic_fee_payload<'a>(
         DynamicFeeTransactionField::SignatureYParity,
         field_error,
     )?)
-    .map_err(|error| match error {
-        AccessListTransactionDecodeError::InvalidYParity { value } => {
-            DynamicFeeTransactionDecodeError::InvalidYParity { value }
-        }
-        _ => field_error(
-            DynamicFeeTransactionField::SignatureYParity,
-            DecodeError::Malformed,
-        ),
+    .map_err(|error| DynamicFeeTransactionDecodeError::InvalidYParity {
+        value: error.value(),
     })?;
     let r = decode_shared_u256_field(
         &mut fields,

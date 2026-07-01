@@ -43,6 +43,9 @@ duplicate access-list policy, or prove fork validity.
   `AccessList`.
 - Dynamic-fee access-list error mapping uses a narrower internal error type so
   future access-list decode changes must be mapped deliberately.
+- `SignatureYParity::try_new` returns a dedicated `InvalidSignatureYParity`
+  error, allowing EIP-2930 and EIP-1559 decoders to map y-parity failures
+  without wildcard fallback arms.
 - The decoder intentionally does not reject `max_fee_per_gas` values below
   `max_priority_fee_per_gas`; fee-order validation belongs in a later validation
   state with fork and block context.
@@ -68,7 +71,9 @@ duplicate access-list policy, or prove fork validity.
     access-list entry shape, invalid storage-key length, and invalid address
     length;
   - dynamic-fee access-list error mapping is exhaustive over the narrower
-    internal access-list decode error.
+    internal access-list decode error;
+  - y-parity parsing uses a dedicated narrow error type so both transaction
+    decoders avoid catch-all error mapping.
 - Pentest is required before the release report commit.
 - Permanent report path after pentest: `security/pentest/v0.14.0.md`.
 - Final GitHub checks must pass on the release report commit before tagging.

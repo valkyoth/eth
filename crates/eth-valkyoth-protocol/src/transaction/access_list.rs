@@ -74,13 +74,27 @@ pub enum SignatureYParity {
     Odd,
 }
 
+/// Invalid EIP-2930/EIP-1559 signature y-parity bit.
+#[derive(Clone, Copy, Debug, Eq, PartialEq)]
+pub struct InvalidSignatureYParity {
+    value: u64,
+}
+
+impl InvalidSignatureYParity {
+    /// Returns the rejected y-parity integer.
+    #[must_use]
+    pub const fn value(self) -> u64 {
+        self.value
+    }
+}
+
 impl SignatureYParity {
     /// Creates y parity from its wire integer.
-    pub const fn try_new(value: u64) -> Result<Self, AccessListTransactionDecodeError> {
+    pub const fn try_new(value: u64) -> Result<Self, InvalidSignatureYParity> {
         match value {
             0 => Ok(Self::Even),
             1 => Ok(Self::Odd),
-            _ => Err(AccessListTransactionDecodeError::InvalidYParity { value }),
+            _ => Err(InvalidSignatureYParity { value }),
         }
     }
 
@@ -317,7 +331,10 @@ fn decode_access_list_payload<'a>(
         &mut fields,
         AccessListTransactionField::SignatureYParity,
         field_error,
-    )?)?;
+    )?)
+    .map_err(|error| AccessListTransactionDecodeError::InvalidYParity {
+        value: error.value(),
+    })?;
     let r = decode_shared_u256_field(
         &mut fields,
         AccessListTransactionField::SignatureR,
