@@ -1,6 +1,7 @@
 //! Transaction envelope and field decoding.
 
 mod access_list;
+mod blob;
 mod dynamic_fee;
 mod envelope;
 mod fields;
@@ -15,6 +16,11 @@ pub use access_list::{
     AccessListTransactionDecodeErrorCategory, AccessListTransactionField, AccessListTransactionTo,
     InvalidSignatureYParity, SignatureYParity, UnvalidatedAccessListTransaction,
     decode_access_list_transaction,
+};
+pub use blob::{
+    BLOB_TRANSACTION_FIELD_COUNT, BlobTransactionDecodeError, BlobTransactionDecodeErrorCategory,
+    BlobTransactionField, BlobVersionedHashItems, BlobVersionedHashes, UnvalidatedBlobTransaction,
+    decode_blob_transaction,
 };
 pub use dynamic_fee::{
     DYNAMIC_FEE_TRANSACTION_FIELD_COUNT, DynamicFeeTransactionDecodeError,

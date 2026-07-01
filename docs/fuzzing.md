@@ -1,8 +1,8 @@
 # Fuzzing
 
-Status: `v0.14.0` RLP, transaction envelope, legacy transaction decode,
-EIP-2930 access-list transaction decode, and EIP-1559 dynamic-fee transaction
-decode fuzz harness baseline.
+Status: `v0.15.0` RLP, transaction envelope, legacy transaction decode,
+EIP-2930 access-list transaction decode, EIP-1559 dynamic-fee transaction
+decode, and EIP-4844 blob transaction decode fuzz harness baseline.
 
 The fuzz workspace lives under `fuzz/` and is intentionally separate from the
 published crates. Live corpus growth and crash artifacts are local generated
@@ -18,7 +18,7 @@ state and are ignored by git.
 | `rlp_list` | List exact and partial decoders plus recursive item traversal. |
 | `rlp_encode` | Scalar, integer, list-payload, and decoded-item encode paths. |
 | `primitives` | Primitive RLP bridge decoders and canonical integer payload constructors. |
-| `transaction_envelope` | EIP-2718 typed envelope classification, legacy RLP-list shell classification, unvalidated legacy transaction field decoding, unvalidated EIP-2930 access-list transaction field decoding, and unvalidated EIP-1559 dynamic-fee transaction field decoding. |
+| `transaction_envelope` | EIP-2718 typed envelope classification, legacy RLP-list shell classification, unvalidated legacy transaction field decoding, unvalidated EIP-2930 access-list transaction field decoding, unvalidated EIP-1559 dynamic-fee transaction field decoding, and unvalidated EIP-4844 blob transaction field decoding. |
 | `decode_limits` | Stateless and accumulator decode-budget APIs. |
 
 Every new parser that accepts untrusted bytes must either extend one of these
@@ -28,8 +28,9 @@ List-recursion fuzz targets drive item iteration to
 `MAX_RLP_LIST_TRAVERSAL_DEPTH`, matching the decoder hard cap. The committed
 seed corpus includes a 128-level empty-list chain for this path.
 The transaction-envelope fuzz target also drives `decode_legacy_transaction`,
-`decode_access_list_transaction`, and `decode_dynamic_fee_transaction`, then
-applies the same recursion limit when it sees a legacy RLP-list envelope.
+`decode_access_list_transaction`, `decode_dynamic_fee_transaction`, and
+`decode_blob_transaction`, then applies the same recursion limit when it sees a
+legacy RLP-list envelope.
 
 ## Seed Corpus
 

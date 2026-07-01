@@ -26,20 +26,19 @@
 `eth` is the public facade crate for a `no_std`-first Ethereum
 execution-layer protocol workspace.
 
-The crate is intentionally conservative at `0.14.0`: it provides explicit
+The crate is intentionally conservative at `0.15.0`: it provides explicit
 Ethereum primitive domains, bounded decode-budget policy, stable error
 categories, primitive RLP bridge helpers, a caller-provided Keccak-256 boundary,
 RLP fuzz-harness evidence, a transaction envelope shell, unvalidated legacy
 transaction field decoding, unvalidated EIP-2930 access-list transaction field
-decoding, unvalidated EIP-1559 dynamic-fee transaction field decoding, small
-first-party crate boundaries, optional sanitization support, and release
-evidence before RPC, signer, EVM, Reth, or P2P integrations become real
-dependencies.
+decoding, unvalidated EIP-1559 dynamic-fee transaction field decoding,
+unvalidated EIP-4844 blob transaction field decoding, small first-party crate
+boundaries, optional sanitization support, and release evidence before RPC,
+signer, EVM, Reth, or P2P integrations become real dependencies.
 
 ## Current Status
 
-The current release candidate is `0.14.0`; pentest is clean and final GitHub
-checks must pass before tag.
+The current release candidate is `0.15.0`; pentest is pending.
 
 Implemented now:
 
@@ -62,6 +61,9 @@ Implemented now:
 - Unvalidated EIP-1559 dynamic-fee transaction field decoding for max priority
   fee, max fee, gas limit, destination/create, value, calldata, access list, and
   signature words.
+- Unvalidated EIP-4844 blob transaction field decoding for blob fee, required
+  call target, blob versioned hash list, calldata, access list, and signature
+  words.
 - Caller-provided Keccak-256 trait boundary without a default hash
   implementation dependency.
 - RLP fuzz harness with committed hex seed corpus and crash reproduction docs.
@@ -78,7 +80,7 @@ Not implemented yet:
 - No signer or local key storage.
 - No EVM execution adapter.
 - No Reth or P2P integration.
-- No blob or set-code typed transaction field parsers yet.
+- No set-code typed transaction field parser yet.
 - No transaction signature validation or sender recovery yet.
 - No block parser yet.
 
@@ -100,21 +102,21 @@ Not implemented yet:
 
 ```toml
 [dependencies]
-eth = "0.14"
+eth = "0.15"
 ```
 
 Disable defaults explicitly for embedded or freestanding builds:
 
 ```toml
 [dependencies]
-eth = { version = "0.14", default-features = false }
+eth = { version = "0.15", default-features = false }
 ```
 
 Optional sanitization support:
 
 ```toml
 [dependencies]
-eth = { version = "0.14", features = ["sanitization"] }
+eth = { version = "0.15", features = ["sanitization"] }
 ```
 
 ## Features
@@ -428,8 +430,9 @@ if let TransactionEnvelope::Typed(typed) = envelope {
 # Ok::<(), eth::error::TransactionEnvelopeError>(())
 ```
 
-Typed payloads are still opaque bytes. Legacy transactions can also be decoded
-into an explicitly unvalidated field model:
+Typed payloads can be classified first, then decoded with the matching
+transaction decoder. Legacy transactions can also be decoded into an explicitly
+unvalidated field model:
 
 ```rust
 use eth::codec::DecodeLimits;
@@ -505,7 +508,7 @@ the workspace can keep small, auditable boundaries:
 The minimum supported Rust version is Rust `1.90.0`. New deployments should use
 the latest stable Rust verified by the release gates.
 
-Compatibility evidence for `0.14.0`:
+Compatibility evidence for `0.15.0`:
 
 | Rust | Local Evidence |
 | --- | --- |

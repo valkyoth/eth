@@ -35,9 +35,8 @@ dependencies.
 
 ## Current Status
 
-Status: `v0.14.0` EIP-1559 dynamic-fee transaction decode release candidate is
-pentest-clean and waiting for final GitHub checks before tag. `v0.13.0` is the
-latest tagged release.
+Status: `v0.15.0` EIP-4844 blob transaction decode implementation is ready for
+pentest. `v0.14.0` is the latest tagged release.
 
 Implemented now:
 
@@ -62,6 +61,9 @@ Implemented now:
 - Unvalidated EIP-1559 dynamic-fee transaction field decoding for max priority
   fee, max fee, gas limit, destination/create, value, calldata, access list, and
   signature words.
+- Unvalidated EIP-4844 blob transaction field decoding for blob fee, required
+  call target, blob versioned hash list, calldata, access list, and signature
+  words.
 - Caller-provided Keccak-256 trait boundary without a default hash
   implementation dependency.
 - RLP fuzz harness with committed hex seed corpus and crash reproduction docs.
@@ -80,7 +82,7 @@ Not implemented yet:
 - No signer or local key storage.
 - No EVM execution adapter.
 - No Reth or P2P integration.
-- No blob or set-code typed transaction field parsers yet.
+- No set-code typed transaction field parser yet.
 - No transaction signature validation or sender recovery yet.
 - No block parser yet.
 
@@ -105,14 +107,14 @@ Not implemented yet:
 
 ```toml
 [dependencies]
-eth = "0.14"
+eth = "0.15"
 ```
 
 For optional sanitization support:
 
 ```toml
 [dependencies]
-eth = { version = "0.14", features = ["sanitization"] }
+eth = { version = "0.15", features = ["sanitization"] }
 ```
 
 ## Features
@@ -422,8 +424,9 @@ if let TransactionEnvelope::Typed(typed) = envelope {
 # Ok::<(), eth::error::TransactionEnvelopeError>(())
 ```
 
-Typed payloads are still opaque bytes. Legacy transactions can also be decoded
-into an explicitly unvalidated field model:
+Typed payloads can be classified first, then decoded with the matching
+transaction decoder. Legacy transactions can also be decoded into an explicitly
+unvalidated field model:
 
 ```rust
 use eth::codec::DecodeLimits;
@@ -501,7 +504,7 @@ friendly, and independently testable.
 The minimum supported Rust version is Rust `1.90.0`. New deployments should use
 the pinned stable Rust `1.96.1` until the toolchain policy is updated.
 
-Compatibility evidence for `0.14.0`:
+Compatibility evidence for `0.15.0`:
 
 | Rust | Local Evidence |
 | --- | --- |
@@ -518,8 +521,8 @@ Compatibility evidence for `0.14.0`:
 
 ```bash
 scripts/checks.sh
-scripts/release_0_14_gate.sh
-scripts/validate-release-readiness.sh v0.14.0
+scripts/release_0_15_gate.sh
+scripts/validate-release-readiness.sh v0.15.0
 ```
 
 For dependency-policy checks, install `cargo-deny` and `cargo-audit`, then run:

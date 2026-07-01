@@ -15,6 +15,8 @@ pub use transaction::{
     ACCESS_LIST_TRANSACTION_FIELD_COUNT, AccessList, AccessListEntries, AccessListEntry,
     AccessListStorageKeyItems, AccessListStorageKeys, AccessListTransactionDecodeError,
     AccessListTransactionDecodeErrorCategory, AccessListTransactionField, AccessListTransactionTo,
+    BLOB_TRANSACTION_FIELD_COUNT, BlobTransactionDecodeError, BlobTransactionDecodeErrorCategory,
+    BlobTransactionField, BlobVersionedHashItems, BlobVersionedHashes,
     DYNAMIC_FEE_TRANSACTION_FIELD_COUNT, DynamicFeeTransactionDecodeError,
     DynamicFeeTransactionDecodeErrorCategory, DynamicFeeTransactionField, DynamicFeeTransactionTo,
     EIP_2718_MAX_TYPED_PREFIX, EIP_2718_RESERVED_PREFIX, EIP_2718_SCALAR_PREFIX_START,
@@ -23,8 +25,9 @@ pub use transaction::{
     LegacyTransactionDecodeErrorCategory, LegacyTransactionField, LegacyTransactionTo,
     SignatureYParity, TransactionEnvelope, TransactionEnvelopeError,
     TransactionEnvelopeErrorCategory, TypedTransactionEnvelope, UnvalidatedAccessListTransaction,
-    UnvalidatedDynamicFeeTransaction, UnvalidatedLegacyTransaction, decode_access_list_transaction,
-    decode_dynamic_fee_transaction, decode_legacy_transaction, decode_transaction_envelope,
+    UnvalidatedBlobTransaction, UnvalidatedDynamicFeeTransaction, UnvalidatedLegacyTransaction,
+    decode_access_list_transaction, decode_blob_transaction, decode_dynamic_fee_transaction,
+    decode_legacy_transaction, decode_transaction_envelope,
 };
 
 /// Protocol validation failure.

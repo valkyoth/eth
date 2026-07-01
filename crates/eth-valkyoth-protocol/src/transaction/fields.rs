@@ -32,6 +32,18 @@ pub(crate) fn decode_to<E>(
     Ok(AccessListTransactionTo::Call(Address::from_bytes(bytes)))
 }
 
+pub(crate) fn decode_required_address<E>(
+    scalar: RlpScalar<'_>,
+    invalid_len: impl Fn(usize) -> E,
+) -> Result<Address, E> {
+    let found = scalar.payload().len();
+    let bytes: [u8; ADDRESS_BYTES] = scalar
+        .payload()
+        .try_into()
+        .map_err(|_| invalid_len(found))?;
+    Ok(Address::from_bytes(bytes))
+}
+
 pub(crate) fn next_scalar<'a, F, E>(
     fields: &mut impl Iterator<Item = Result<RlpItem<'a>, DecodeError>>,
     field: F,

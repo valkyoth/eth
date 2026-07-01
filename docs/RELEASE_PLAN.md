@@ -503,7 +503,7 @@ Exit criteria:
 
 ### v0.14.0 - Dynamic Fee Transaction Decode
 
-Status: implementation complete; pentest pending.
+Status: tagged as v0.14.0.
 
 Goal: decode EIP-1559 dynamic-fee transactions.
 
@@ -524,6 +524,8 @@ Exit criteria:
 - Dynamic-fee transactions parse without implying they are valid for a fork.
 
 ### v0.15.0 - Blob Transaction Decode
+
+Status: implementation complete; pentest pending.
 
 Goal: decode EIP-4844 blob transaction structure.
 

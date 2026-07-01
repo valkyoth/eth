@@ -2,6 +2,7 @@ use super::*;
 use eth_valkyoth_codec::{DecodeError, DecodeLimits};
 use eth_valkyoth_primitives::{Address, B256, Gas, Nonce, Wei};
 
+mod blob;
 mod dynamic_fee;
 
 extern crate std;

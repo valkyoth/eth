@@ -25,6 +25,7 @@ pub mod error {
     pub use eth_valkyoth_codec::{DecodeError, DecodeErrorCategory, ResourceError};
     pub use eth_valkyoth_protocol::{
         AccessListTransactionDecodeError, AccessListTransactionDecodeErrorCategory,
+        BlobTransactionDecodeError, BlobTransactionDecodeErrorCategory,
         DynamicFeeTransactionDecodeError, DynamicFeeTransactionDecodeErrorCategory, FeatureError,
         ForkError, LegacyTransactionDecodeError, LegacyTransactionDecodeErrorCategory,
         ProtocolError, ProtocolErrorCategory, TransactionEnvelopeError,
