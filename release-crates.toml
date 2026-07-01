@@ -32,7 +32,7 @@ reason = "No package changes for v0.19.0."
 
 [crates."eth-valkyoth-verify"]
 previous_version = "0.7.0"
-version = "0.19.0"
+version = "0.8.0"
 change = "code"
 publish = true
 reason = "Adds transaction replay-domain validation for legacy EIP-155 and typed transaction chain IDs."

@@ -134,9 +134,19 @@ def validate_plan_entry(package_name: str, entry: dict, release: str) -> None:
     release_parts = parse_version(release)
 
     if change == "code":
-        if planned_version != release_parts:
+        if package_name == "eth":
+            code_version_is_valid = planned_version == release_parts
+            code_error = f"{package_name} has code changes, so version must be {release}"
+        else:
+            expected = (previous_version[0], previous_version[1] + 1, 0)
+            code_version_is_valid = planned_version == expected
+            code_error = (
+                f"{package_name} has code changes, so independent support-crate "
+                f"version must be {expected[0]}.{expected[1]}.{expected[2]}"
+            )
+        if not code_version_is_valid:
             raise RuntimeError(
-                f"{package_name} has code changes, so version must be {release}"
+                code_error
             )
         if not publish:
             raise RuntimeError(f"{package_name} has code changes but publish is false")

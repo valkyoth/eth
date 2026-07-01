@@ -10,7 +10,7 @@ contents need a new crates.io version.
 
 | Change kind | Version rule | Publish? |
 | --- | --- | --- |
-| `code` | Use the milestone version, for example `0.5.0`. | Yes |
+| `code` | `eth` uses the milestone version, for example `0.19.0`; support crates use their next independent minor, for example `0.7.0` to `0.8.0`. | Yes |
 | `dependency` | Patch-bump the existing line, for example `0.3.1` to `0.3.2`. | Yes |
 | `metadata` | Use the milestone version when republishing corrected package metadata. | Yes |
 | `unchanged` | Keep the previous published version. | No |
@@ -34,7 +34,7 @@ publication when a crate is marked `unchanged`.
 | `eth-valkyoth-primitives` | `0.10.1` | `0.10.1` | `unchanged` | No | No package changes for v0.19.0. |
 | `eth-valkyoth-hash` | `0.10.0` | `0.10.0` | `unchanged` | No | No package changes for v0.19.0. |
 | `eth-valkyoth-protocol` | `0.18.0` | `0.18.0` | `unchanged` | No | No package changes for v0.19.0. |
-| `eth-valkyoth-verify` | `0.7.0` | `0.19.0` | `code` | Yes | Adds replay-domain checks for legacy EIP-155 and typed transaction chain IDs. |
+| `eth-valkyoth-verify` | `0.7.0` | `0.8.0` | `code` | Yes | Adds replay-domain checks for legacy EIP-155 and typed transaction chain IDs. |
 | `eth-valkyoth-derive` | `0.16.1` | `0.16.1` | `unchanged` | No | No package changes for v0.19.0. |
 | `eth-valkyoth-sanitization` | `0.7.1` | `0.7.1` | `unchanged` | No | No package changes for v0.19.0. |
 | `eth-valkyoth-evm` | `0.7.0` | `0.7.0` | `unchanged` | No | No package changes for v0.19.0. |

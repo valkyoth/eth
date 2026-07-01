@@ -76,7 +76,7 @@ def test_current_plan_accepts_unchanged_crates() -> None:
     release_crates.verify_publish_order(base_packages(), base_plan())
 
 
-def test_code_changes_must_use_milestone_version() -> None:
+def test_facade_code_changes_must_use_milestone_version() -> None:
     plan = base_plan()
     plan["crates"]["eth"]["change"] = "code"
     plan["crates"]["eth"]["publish"] = True
@@ -86,6 +86,34 @@ def test_code_changes_must_use_milestone_version() -> None:
         "eth",
         plan["crates"]["eth"],
         "0.4.0",
+    )
+
+
+def test_support_crate_code_changes_use_next_independent_minor() -> None:
+    entry = {
+        "previous_version": "0.7.0",
+        "version": "0.8.0",
+        "change": "code",
+        "publish": True,
+        "reason": "test",
+    }
+    release_crates.validate_plan_entry("eth-valkyoth-verify", entry, "0.19.0")
+
+
+def test_support_crate_code_changes_reject_release_counter_jump() -> None:
+    entry = {
+        "previous_version": "0.7.0",
+        "version": "0.19.0",
+        "change": "code",
+        "publish": True,
+        "reason": "test",
+    }
+    assert_fails(
+        "independent support-crate version must be 0.8.0",
+        release_crates.validate_plan_entry,
+        "eth-valkyoth-verify",
+        entry,
+        "0.19.0",
     )
 
 
@@ -166,7 +194,9 @@ def test_publish_plan_skips_unchanged_crates() -> None:
 def run_tests() -> None:
     tests = (
         test_current_plan_accepts_unchanged_crates,
-        test_code_changes_must_use_milestone_version,
+        test_facade_code_changes_must_use_milestone_version,
+        test_support_crate_code_changes_use_next_independent_minor,
+        test_support_crate_code_changes_reject_release_counter_jump,
         test_dependency_only_changes_must_patch_bump,
         test_unchanged_crates_are_not_published,
         test_metadata_changes_use_milestone_version,

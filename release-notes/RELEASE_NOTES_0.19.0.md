@@ -31,6 +31,8 @@ validation, or full transaction validity.
 
 - `eth-valkyoth-verify` now depends on `eth-valkyoth-protocol` so replay-domain
   checks can accept decoded transaction field models directly.
+- `eth-valkyoth-verify` publishes as `0.8.0` under the independent support-crate
+  versioning policy while the facade publishes as `eth` `0.19.0`.
 - The facade crate re-exports the new verification APIs through `eth::verify`
   and the new stable error through `eth::error`.
 
