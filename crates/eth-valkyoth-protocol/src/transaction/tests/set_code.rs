@@ -5,12 +5,10 @@ use std::vec::Vec;
 
 #[test]
 fn decodes_set_code_transaction_as_unvalidated() {
-    let tx = set_code_tx(
-        &[1],
-        &[0x11; 20],
-        &[authorization_tuple(&[], &[0x22; 20], 9, 1)],
-        1,
-    );
+    let to = test_address(0x11);
+    let auth_address = test_address(0x22);
+    let auth = authorization_tuple(&[], &auth_address, 9, 1);
+    let tx = set_code_tx(&[1], &to, &[auth.as_slice()], 1);
     let result = decode_set_code_transaction(&tx, TEST_LIMITS);
     assert!(result.is_ok());
 
@@ -20,7 +18,7 @@ fn decodes_set_code_transaction_as_unvalidated() {
         assert_eq!(tx.max_priority_fee_per_gas, Wei::from_u128(3));
         assert_eq!(tx.max_fee_per_gas, Wei::from_u128(4));
         assert_eq!(tx.gas_limit, Gas::new(21_000));
-        assert_eq!(tx.to, Address::from_bytes([0x11; 20]));
+        assert_eq!(tx.to, Address::from_bytes(to));
         assert_eq!(tx.value, Wei::from_u128(5));
         assert_eq!(tx.input, &[]);
         assert_eq!(tx.access_list.address_count(), 0);
@@ -34,7 +32,7 @@ fn decodes_set_code_transaction_as_unvalidated() {
         assert!(matches!(first, Some(Ok(_))));
         if let Some(Ok(auth)) = first {
             assert!(auth.chain_id.is_universal());
-            assert_eq!(auth.address, Address::from_bytes([0x22; 20]));
+            assert_eq!(auth.address, Address::from_bytes(auth_address));
             assert_eq!(auth.nonce, Nonce::new(9));
             assert_eq!(auth.y_parity, SignatureYParity::Odd);
             assert_eq!(last_byte(auth.r), Some(1));
@@ -46,8 +44,9 @@ fn decodes_set_code_transaction_as_unvalidated() {
 
 #[test]
 fn set_code_decoder_defers_empty_authorization_list_validation() {
+    let to = test_address(0x11);
     let authorizations: [&[u8]; 0] = [];
-    let tx = set_code_tx(&[1], &[0x11; 20], &authorizations, 1);
+    let tx = set_code_tx(&[1], &to, &authorizations, 1);
     let result = decode_set_code_transaction(&tx, TEST_LIMITS);
     assert!(result.is_ok());
 
@@ -58,12 +57,10 @@ fn set_code_decoder_defers_empty_authorization_list_validation() {
 
 #[test]
 fn round_trips_set_code_transaction_encoding() {
-    let tx = set_code_tx(
-        &[1],
-        &[0x11; 20],
-        &[authorization_tuple(&[1], &[0x22; 20], 9, 1)],
-        1,
-    );
+    let to = test_address(0x11);
+    let auth_address = test_address(0x22);
+    let auth = authorization_tuple(&[1], &auth_address, 9, 1);
+    let tx = set_code_tx(&[1], &to, &[auth.as_slice()], 1);
     let decoded = decode_set_code_transaction(&tx, TEST_LIMITS);
     assert!(decoded.is_ok(), "{decoded:?}");
 
@@ -118,12 +115,10 @@ fn rejects_malformed_set_code_payload_as_payload_field() {
 
 #[test]
 fn rejects_reserved_set_code_chain_id_zero() {
-    let tx = set_code_tx(
-        &[],
-        &[0x11; 20],
-        &[authorization_tuple(&[], &[0x22; 20], 9, 1)],
-        1,
-    );
+    let to = test_address(0x11);
+    let auth_address = test_address(0x22);
+    let auth = authorization_tuple(&[], &auth_address, 9, 1);
+    let tx = set_code_tx(&[], &to, &[auth.as_slice()], 1);
 
     assert_eq!(
         decode_set_code_transaction(&tx, TEST_LIMITS),
@@ -136,7 +131,9 @@ fn rejects_reserved_set_code_chain_id_zero() {
 
 #[test]
 fn rejects_set_code_create_target() {
-    let tx = set_code_tx(&[1], &[], &[authorization_tuple(&[], &[0x22; 20], 9, 1)], 1);
+    let auth_address = test_address(0x22);
+    let auth = authorization_tuple(&[], &auth_address, 9, 1);
+    let tx = set_code_tx(&[1], &[], &[auth.as_slice()], 1);
 
     assert_eq!(
         decode_set_code_transaction(&tx, TEST_LIMITS),
@@ -146,8 +143,9 @@ fn rejects_set_code_create_target() {
 
 #[test]
 fn rejects_invalid_authorization_tuple_shape() {
+    let to = test_address(0x11);
     let malformed_auth = [0xc0];
-    let tx = set_code_tx(&[1], &[0x11; 20], &[malformed_auth.as_slice()], 1);
+    let tx = set_code_tx(&[1], &to, &[malformed_auth.as_slice()], 1);
 
     assert_eq!(
         decode_set_code_transaction(&tx, TEST_LIMITS),
@@ -157,12 +155,10 @@ fn rejects_invalid_authorization_tuple_shape() {
 
 #[test]
 fn reports_invalid_authorization_subfield() {
-    let tx = set_code_tx(
-        &[1],
-        &[0x11; 20],
-        &[authorization_tuple(&[0, 1], &[0x22; 20], 9, 1)],
-        1,
-    );
+    let to = test_address(0x11);
+    let auth_address = test_address(0x22);
+    let auth = authorization_tuple(&[0, 1], &auth_address, 9, 1);
+    let tx = set_code_tx(&[1], &to, &[auth.as_slice()], 1);
 
     assert_eq!(
         decode_set_code_transaction(&tx, TEST_LIMITS),
@@ -175,12 +171,10 @@ fn reports_invalid_authorization_subfield() {
 
 #[test]
 fn rejects_invalid_authorization_address_length() {
-    let tx = set_code_tx(
-        &[1],
-        &[0x11; 20],
-        &[authorization_tuple(&[], &[1], 9, 1)],
-        1,
-    );
+    let to = test_address(0x11);
+    let short_address = short_test_address();
+    let auth = authorization_tuple(&[], &short_address, 9, 1);
+    let tx = set_code_tx(&[1], &to, &[auth.as_slice()], 1);
 
     assert_eq!(
         decode_set_code_transaction(&tx, TEST_LIMITS),
@@ -190,12 +184,10 @@ fn rejects_invalid_authorization_address_length() {
 
 #[test]
 fn rejects_invalid_authorization_y_parity() {
-    let tx = set_code_tx(
-        &[1],
-        &[0x11; 20],
-        &[authorization_tuple(&[], &[0x22; 20], 9, 2)],
-        1,
-    );
+    let to = test_address(0x11);
+    let auth_address = test_address(0x22);
+    let auth = authorization_tuple(&[], &auth_address, 9, 2);
+    let tx = set_code_tx(&[1], &to, &[auth.as_slice()], 1);
 
     assert_eq!(
         decode_set_code_transaction(&tx, TEST_LIMITS),
@@ -205,9 +197,11 @@ fn rejects_invalid_authorization_y_parity() {
 
 #[test]
 fn rejects_oversized_authorization_list() {
-    let auth = authorization_tuple(&[], &[0x22; 20], 9, 1);
+    let to = test_address(0x11);
+    let auth_address = test_address(0x22);
+    let auth = authorization_tuple(&[], &auth_address, 9, 1);
     let authorizations = [auth.as_slice(); 17];
-    let tx = set_code_tx(&[1], &[0x11; 20], &authorizations, 1);
+    let tx = set_code_tx(&[1], &to, &authorizations, 1);
     let limits = DecodeLimits {
         max_input_bytes: 1024,
         max_list_items: 13,
@@ -265,6 +259,24 @@ fn authorization_tuple(chain_id: &[u8], address: &[u8], nonce: u8, y_parity: u8)
     let mut tuple = Vec::new();
     push_list(&mut tuple, &fields);
     tuple
+}
+
+fn test_address(seed: u8) -> [u8; 20] {
+    let mut bytes = [0_u8; 20];
+    fill_test_bytes(&mut bytes, seed);
+    bytes
+}
+
+fn short_test_address() -> Vec<u8> {
+    let mut bytes = [0_u8; 1];
+    fill_test_bytes(&mut bytes, 0x33);
+    Vec::from(bytes)
+}
+
+fn fill_test_bytes(bytes: &mut [u8], seed: u8) {
+    for (index, byte) in bytes.iter_mut().enumerate() {
+        *byte = seed.wrapping_add(u8::try_from(index).unwrap_or_default());
+    }
 }
 
 fn push_scalar(out: &mut Vec<u8>, payload: &[u8]) {
