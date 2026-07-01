@@ -240,6 +240,9 @@ fn fork_activation_is_monotonic(previous: ForkActivation, next: ForkActivation) 
         return false;
     }
 
+    // Chain specs are chain-agnostic: a timestamp-based fork may be followed by
+    // a block-only fork on non-mainnet chains. Timestamp ordering is enforced
+    // only when both adjacent activation rules carry timestamps.
     match (previous, next) {
         (
             ForkActivation::BlockAndTimestamp {

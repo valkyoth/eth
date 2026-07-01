@@ -209,6 +209,29 @@ fn try_new_rejects_non_monotonic_activation_thresholds() {
 }
 
 #[test]
+fn timestamp_based_fork_can_be_followed_by_block_only_fork() {
+    let forks = [
+        ForkSpec {
+            chain_id: TEST_CHAIN_ID,
+            hardfork: Hardfork::Shanghai,
+            activation: ForkActivation::BlockAndTimestamp {
+                activation_block: BlockNumber::new(10),
+                activation_timestamp: UnixTimestamp::new(20),
+            },
+        },
+        ForkSpec {
+            chain_id: TEST_CHAIN_ID,
+            hardfork: Hardfork::Cancun,
+            activation: ForkActivation::BlockOnly {
+                activation_block: BlockNumber::new(30),
+            },
+        },
+    ];
+
+    assert!(ChainSpec::try_new(TEST_CHAIN_ID, &forks).is_ok());
+}
+
+#[test]
 fn unsupported_fork_is_explicit() {
     assert_eq!(
         TEST_CHAIN.fork_spec(Hardfork::Amsterdam),
