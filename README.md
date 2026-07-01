@@ -35,8 +35,8 @@ dependencies.
 
 ## Current Status
 
-Status: `v0.18.0` transaction validation typestate implementation is ready for
-pentest. `v0.17.0` is the latest tagged release.
+Status: `v0.18.0` transaction validation typestate pentest passed; final
+GitHub checks are pending before tag. `v0.17.0` is the latest tagged release.
 
 Implemented now:
 

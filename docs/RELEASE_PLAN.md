@@ -620,7 +620,7 @@ Exit criteria:
 
 ### v0.18.0 - Transaction Validation Typestates
 
-Status: implementation complete; pentest pending.
+Status: pentest passed; final GitHub checks pending before tag.
 
 Goal: separate decode, canonicality, fork validation, and sender recovery.
 

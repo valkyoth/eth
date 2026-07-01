@@ -1,7 +1,7 @@
 # Crate Version Matrix
 
-Status: `v0.18.0` transaction validation typestate implementation ready for
-pentest.
+Status: `v0.18.0` transaction validation typestate pentest passed; final GitHub
+checks are pending before tag.
 
 `eth` uses independent crate versions. The facade crate remains the main user
 entry point, but support crates are published only when their own package
@@ -34,7 +34,7 @@ publication when a crate is marked `unchanged`.
 | `eth-valkyoth-codec` | `0.16.0` | `0.16.0` | `unchanged` | No | No package changes for v0.18.0. |
 | `eth-valkyoth-primitives` | `0.10.1` | `0.10.1` | `unchanged` | No | No package changes for v0.18.0. |
 | `eth-valkyoth-hash` | `0.10.0` | `0.10.0` | `unchanged` | No | No package changes for v0.18.0. |
-| `eth-valkyoth-protocol` | `0.17.0` | `0.18.0` | `code` | Yes | Adds proof-gated transaction typestate transitions and no-mutation failure tests. |
+| `eth-valkyoth-protocol` | `0.17.0` | `0.18.0` | `code` | Yes | Adds proof-gated transaction typestate transitions, state-transition errors, and no-mutation failure tests. |
 | `eth-valkyoth-verify` | `0.7.0` | `0.7.0` | `unchanged` | No | No package changes for v0.18.0. |
 | `eth-valkyoth-derive` | `0.16.1` | `0.16.1` | `unchanged` | No | No package changes for v0.18.0. |
 | `eth-valkyoth-sanitization` | `0.7.1` | `0.7.1` | `unchanged` | No | No package changes for v0.18.0. |
@@ -43,7 +43,7 @@ publication when a crate is marked `unchanged`.
 | `eth-valkyoth-signer` | `0.7.0` | `0.7.0` | `unchanged` | No | No package changes for v0.18.0. |
 | `eth-valkyoth-reth` | `0.7.0` | `0.7.0` | `unchanged` | No | No package changes for v0.18.0. |
 | `eth-valkyoth-testkit` | `0.7.0` | `0.7.0` | `unchanged` | No | No package changes for v0.18.0. |
-| `eth` | `0.17.0` | `0.18.0` | `code` | Yes | Re-exports protocol proof-gated typestate APIs and updates packaged documentation for v0.18.0. |
+| `eth` | `0.17.0` | `0.18.0` | `code` | Yes | Re-exports protocol proof-gated typestate APIs, curated state-transition errors, and packaged documentation for v0.18.0. |
 
 Update this table and `release-crates.toml` in the same commit whenever a crate
 changes release state.

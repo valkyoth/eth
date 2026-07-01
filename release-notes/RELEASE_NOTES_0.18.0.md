@@ -1,6 +1,6 @@
 # eth 0.18.0 Release Notes
 
-Status: implementation ready for pentest
+Status: pentest passed; final GitHub checks pending before tag
 
 ## Summary
 
@@ -21,6 +21,7 @@ deferred until the validators that can create those proofs exist.
 - Added `Transaction<ForkValidated>::try_into_sender_recovered`.
 - Added `StateTransitionError`, which carries the original transaction token
   and validation error when promotion fails.
+- Added the facade `eth::error::StateTransitionError` re-export.
 - Moved transaction typestate code into a focused module with dedicated tests.
 - Added tests proving failed validation does not consume or mutate the previous
   transaction state token.
@@ -46,8 +47,8 @@ deferred until the validators that can create those proofs exist.
 
 ## Release Gate
 
-- Pentest is required before the release report commit.
-- Permanent report path after pentest: `security/pentest/v0.18.0.md`.
+- Pentest passed and permanent report is
+  `security/pentest/v0.18.0.md`.
 - Final GitHub checks must pass on the release report commit before tagging.
 
 ## Verification
