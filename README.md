@@ -405,7 +405,7 @@ assert_eq!(tx.eip155_chain_id(), None);
 The decoded value is not chain-valid, signature-valid, sender-recovered, or
 fork-valid. It is only a bounded, canonical field parse. Use
 `eip155_chain_id` instead of subtracting directly from the raw `v` signature
-word.
+word; reserved `ChainId(0)` maps to `None`.
 
 ## Optional Sanitization
 

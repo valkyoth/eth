@@ -33,7 +33,8 @@ validity.
 - Signature fields are decoded as canonical unsigned U256 words but are not
   checked for secp256k1 validity, low-s, sender recovery, or chain binding.
 - Callers should use `eip155_chain_id` instead of unchecked arithmetic on the
-  raw `v` word; pre-EIP-155 `v` values and oversized values return `None`.
+  raw `v` word; pre-EIP-155 `v` values, reserved `ChainId(0)`, and oversized
+  values return `None`.
 - The `to` field is either empty contract creation or exactly 20 address bytes.
 - The borrowed input field is checked against the active allocation limit even
   though the decoder does not allocate, so callers have one policy knob for

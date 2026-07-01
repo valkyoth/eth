@@ -46,12 +46,14 @@ pub struct UnvalidatedLegacyTransaction<'a> {
 }
 
 impl UnvalidatedLegacyTransaction<'_> {
-    /// Returns the EIP-155 chain ID encoded by `v`, if it fits this crate's
-    /// chain-domain width.
+    /// Returns the nonzero EIP-155 chain ID encoded by `v`, if it fits this
+    /// crate's signed chain-domain width.
     ///
     /// Returns `None` for pre-EIP-155 `v` values such as `27` and `28`, and
-    /// for oversized `v` values that cannot fit in `u64`. This helper is
-    /// intentionally syntactic: it does not prove that the chain ID is nonzero,
+    /// for oversized `v` values that cannot fit in `u64`. It also returns
+    /// `None` when `v` maps to reserved `ChainId(0)`, matching
+    /// [`ChainId::try_from_signed_canonical_be_slice`]. This helper is
+    /// intentionally syntactic: it does not prove that the chain ID is
     /// configured, active, or valid for any fork.
     #[must_use]
     pub fn eip155_chain_id(&self) -> Option<ChainId> {
@@ -64,7 +66,11 @@ impl UnvalidatedLegacyTransaction<'_> {
 
         let low_bytes = self.v.get(U64_TAIL_START..)?.try_into().ok()?;
         let v = u64::from_be_bytes(low_bytes);
-        v.checked_sub(35).map(|delta| ChainId::new(delta / 2))
+        let chain_id = v.checked_sub(35)? / 2;
+        if chain_id == 0 {
+            return None;
+        }
+        Some(ChainId::new(chain_id))
     }
 }
 

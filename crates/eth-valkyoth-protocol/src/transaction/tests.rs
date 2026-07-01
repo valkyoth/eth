@@ -55,6 +55,21 @@ fn eip155_chain_id_recovers_without_subtraction_panic() {
 }
 
 #[test]
+fn eip155_chain_id_rejects_reserved_zero_chain_id() {
+    for v in [35_u8, 36_u8] {
+        let tx = [
+            0xcb, 0x01, 0x02, 0x82, 0x52, 0x08, 0x80, 0x80, 0x80, v, 0x01, 0x02,
+        ];
+        let result = decode_legacy_transaction(&tx, TEST_LIMITS);
+        assert!(result.is_ok());
+
+        if let Ok(tx) = result {
+            assert_eq!(tx.eip155_chain_id(), None);
+        }
+    }
+}
+
+#[test]
 fn eip155_chain_id_ignores_oversized_v() {
     let tx = [
         0xd4, 0x01, 0x02, 0x82, 0x52, 0x08, 0x80, 0x80, 0x80, 0x89, 0x01, 0x00, 0x00, 0x00, 0x00,
