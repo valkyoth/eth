@@ -4,6 +4,12 @@ All notable changes to `eth` are documented here.
 
 ## Unreleased
 
+- Started `0.23.0` with decoded transaction signature validation helpers that
+  combine replay-domain checks, transaction signing hashes, low-s/y-parity
+  policy, sender recovery, and optional expected-sender comparison.
+- Added valid-signature coverage for legacy EIP-155, EIP-2930, EIP-1559, and
+  EIP-4844 decoded transactions plus wrong-chain, wrong-sender, high-s,
+  malformed-scalar, and signing-hash construction failure tests.
 - Started `0.21.0` with EIP-712 domain-safety checks for required `chainId`
   and `verifyingContract` fields.
 - Added EIP-712 signing digest framing with the EIP-191 `0x1901` prefix and a

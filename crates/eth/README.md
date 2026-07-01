@@ -26,7 +26,7 @@
 `eth` is the public facade crate for a `no_std`-first Ethereum
 execution-layer protocol workspace.
 
-The crate is intentionally conservative at `0.22.0`: it provides explicit
+The crate is intentionally conservative at `0.23.0`: it provides explicit
 Ethereum primitive domains, bounded decode-budget policy, stable error
 categories, primitive RLP bridge helpers, a caller-provided Keccak-256 boundary,
 RLP fuzz-harness evidence, a transaction envelope shell, unvalidated legacy
@@ -36,15 +36,16 @@ unvalidated EIP-4844 blob transaction field decoding, no-allocation canonical
 transaction envelope encoding for admitted decoded domains, explicit chain and
 fork activation context, proof-gated transaction typestate transitions,
 replay-domain validation for transaction chain binding, transaction
-signing-hash helpers, RLP derive design evidence, digest-level secp256k1 sender
-recovery, EIP-712 domain-safety checks, small first-party crate boundaries, optional
-sanitization support, and release evidence before RPC, signer, EVM, Reth, or
-P2P integrations become real dependencies.
+signing-hash helpers, decoded transaction signature validation helpers, RLP
+derive design evidence, digest-level secp256k1 sender recovery, EIP-712
+domain-safety checks, small first-party crate boundaries, optional sanitization
+support, and release evidence before RPC, signer, EVM, Reth, or P2P
+integrations become real dependencies.
 
 ## Current Status
 
-The current release candidate is `0.22.0`; transaction signing-hash pentest passed and
-final GitHub checks are pending before tag.
+The current release candidate is `0.23.0`; decoded transaction signature
+validation is ready for pentest.
 
 Implemented now:
 
@@ -84,6 +85,9 @@ Implemented now:
   legacy EIP-155, EIP-2930, EIP-1559, and EIP-4844 decoded transaction domains.
 - Digest-level secp256k1 sender recovery with low-s rejection, Ethereum
   y-parity policy, and caller-provided Keccak-256 public-key hashing.
+- Decoded transaction signature validation helpers that combine replay-domain
+  checks, signing hashes, low-s/y-parity policy, sender recovery, and optional
+  expected-sender comparison.
 - EIP-712 domain-safety checks for required `chainId` and
   `verifyingContract` fields, plus a domain-gated sender recovery helper.
 - RLP derive design and private derive-crate prototype tests for future
@@ -105,7 +109,6 @@ Not implemented yet:
 - No EVM execution adapter.
 - No Reth or P2P integration.
 - No set-code typed transaction field parser yet; scheduled for `v0.24.0`.
-- No full transaction signature validation yet; scheduled for `v0.23.0`.
 - No full EIP-712 typed-data encoder yet; scheduled for `v0.26.0`.
 - No block parser yet.
 - No ABI/contract helper surface yet; scheduled for `v0.47.0` through
@@ -366,11 +369,12 @@ assert_eq!(signing_hash.to_b256(), B256::from([0x44_u8; 32]));
 ```
 
 The example hasher is illustrative only. Production hashers must compute
-Ethereum Keccak-256, and the signing hash is still only one input to full
-signature validation. `v0.23.0` combines signing hashes, replay-domain checks,
-low-s/y-parity policy, and sender recovery into higher-level validation
-helpers. Callers that reuse the scratch buffer across multiple in-flight
-transactions should zero it after hashing before reusing or releasing it.
+Ethereum Keccak-256. For full decoded transaction signature validation, use
+`validate_transaction_signature` or the type-specific validation helpers so
+replay-domain checks, signing-hash construction, low-s/y-parity policy, sender
+recovery, and optional expected-sender comparison are applied together. Callers
+that reuse the scratch buffer across multiple in-flight transactions should
+zero it after hashing before reusing or releasing it.
 
 ## EIP-712 Domain Safety
 
@@ -738,7 +742,7 @@ the workspace can keep small, auditable boundaries:
 The minimum supported Rust version is Rust `1.90.0`. New deployments should use
 the latest stable Rust verified by the release gates.
 
-Compatibility evidence for `0.22.0`:
+Compatibility evidence for `0.23.0`:
 
 | Rust | Local Evidence |
 | --- | --- |

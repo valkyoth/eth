@@ -1,5 +1,5 @@
 [release]
-version = "0.22.0"
+version = "0.23.0"
 policy = "independent"
 
 [crates."eth-valkyoth-codec"]
@@ -7,88 +7,88 @@ previous_version = "0.16.0"
 version = "0.16.0"
 change = "unchanged"
 publish = false
-reason = "No package changes for v0.22.0."
+reason = "No package changes for v0.23.0."
 
 [crates."eth-valkyoth-primitives"]
 previous_version = "0.10.1"
 version = "0.10.1"
 change = "unchanged"
 publish = false
-reason = "No package changes for v0.22.0."
+reason = "No package changes for v0.23.0."
 
 [crates."eth-valkyoth-hash"]
 previous_version = "0.10.0"
 version = "0.10.0"
 change = "unchanged"
 publish = false
-reason = "No package changes for v0.22.0."
+reason = "No package changes for v0.23.0."
 
 [crates."eth-valkyoth-protocol"]
-previous_version = "0.18.0"
+previous_version = "0.19.0"
 version = "0.19.0"
-change = "code"
-publish = true
-reason = "Adds canonical transaction signing-preimage encoders for legacy EIP-155, EIP-2930, EIP-1559, and EIP-4844."
+change = "unchanged"
+publish = false
+reason = "No package changes for v0.23.0."
 
 [crates."eth-valkyoth-verify"]
-previous_version = "0.10.0"
-version = "0.11.0"
+previous_version = "0.11.0"
+version = "0.12.0"
 change = "code"
 publish = true
-reason = "Adds typed transaction signing-hash helpers behind the caller-provided Keccak-256 boundary."
+reason = "Adds decoded transaction signature validation helpers for legacy EIP-155, EIP-2930, EIP-1559, and EIP-4844."
 
 [crates."eth-valkyoth-derive"]
 previous_version = "0.16.1"
 version = "0.16.1"
 change = "unchanged"
 publish = false
-reason = "No package changes for v0.22.0."
+reason = "No package changes for v0.23.0."
 
 [crates."eth-valkyoth-sanitization"]
 previous_version = "0.7.1"
 version = "0.7.1"
 change = "unchanged"
 publish = false
-reason = "No package changes for v0.22.0."
+reason = "No package changes for v0.23.0."
 
 [crates."eth-valkyoth-evm"]
 previous_version = "0.7.0"
 version = "0.7.0"
 change = "unchanged"
 publish = false
-reason = "No package changes for v0.22.0."
+reason = "No package changes for v0.23.0."
 
 [crates."eth-valkyoth-rpc"]
 previous_version = "0.7.0"
 version = "0.7.0"
 change = "unchanged"
 publish = false
-reason = "No package changes for v0.22.0."
+reason = "No package changes for v0.23.0."
 
 [crates."eth-valkyoth-signer"]
 previous_version = "0.7.0"
 version = "0.7.0"
 change = "unchanged"
 publish = false
-reason = "No package changes for v0.22.0."
+reason = "No package changes for v0.23.0."
 
 [crates."eth-valkyoth-reth"]
 previous_version = "0.7.0"
 version = "0.7.0"
 change = "unchanged"
 publish = false
-reason = "No package changes for v0.22.0."
+reason = "No package changes for v0.23.0."
 
 [crates."eth-valkyoth-testkit"]
 previous_version = "0.7.0"
 version = "0.7.0"
 change = "unchanged"
 publish = false
-reason = "No package changes for v0.22.0."
+reason = "No package changes for v0.23.0."
 
 [crates.eth]
-previous_version = "0.21.0"
-version = "0.22.0"
+previous_version = "0.22.0"
+version = "0.23.0"
 change = "code"
 publish = true
-reason = "Re-exports the v0.22.0 transaction signing-hash APIs and updates packaged documentation."
+reason = "Re-exports the v0.23.0 decoded transaction signature validation APIs and updates packaged documentation."

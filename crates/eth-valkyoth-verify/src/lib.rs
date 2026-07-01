@@ -12,6 +12,7 @@ mod eip712;
 mod replay;
 mod sender;
 mod transaction_hash;
+mod transaction_signature;
 
 pub use eip712::{
     EIP712_SIGNING_PREFIX, Eip712Domain, Eip712DomainExpectation, eip712_signing_digest,
@@ -30,6 +31,12 @@ pub use transaction_hash::{
     TransactionSigningHash, TransactionSigningHashError, access_list_transaction_signing_hash,
     blob_transaction_signing_hash, dynamic_fee_transaction_signing_hash,
     legacy_eip155_transaction_signing_hash,
+};
+pub use transaction_signature::{
+    TransactionSignatureValidationError, TransactionSignatureValidationErrorCategory,
+    ValidatedTransactionSignature, validate_access_list_transaction_signature,
+    validate_blob_transaction_signature, validate_dynamic_fee_transaction_signature,
+    validate_legacy_transaction_signature, validate_transaction_signature,
 };
 
 /// Verification failure categories.

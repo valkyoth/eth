@@ -6,7 +6,7 @@ Most users should depend on the facade crate instead:
 
 ```toml
 [dependencies]
-eth = "0.21"
+eth = "0.23"
 ```
 
 Crates.io: <https://crates.io/crates/eth>
@@ -15,14 +15,15 @@ This package is published separately so the `eth` workspace can keep small,
 auditable crate boundaries. Treat it as a lower-level building block unless the
 `eth` documentation explicitly says otherwise.
 
-The `0.10.0` support-crate release, shipped with `eth` `0.21.0`, adds
-EIP-712 domain-safety checks on top of digest-level sender recovery. Use raw
-digest recovery only after constructing the correct Ethereum signing digest and
-checking the transaction or structured-data domain.
+The `0.12.0` support-crate release, shipped with `eth` `0.23.0`, adds decoded
+transaction signature validation helpers for legacy EIP-155, EIP-2930,
+EIP-1559, and EIP-4844 transaction domains. Use raw digest recovery only after
+constructing the correct Ethereum signing digest and checking the transaction
+or structured-data domain.
 
-Sender recovery is not full transaction validation. It does not build signing
-hashes from decoded transactions, prove fork validity, enforce fee rules,
-validate account state, or validate blob/KZG commitments.
+Decoded transaction signature validation is still not full execution
+validation. It does not prove fork validity, enforce fee rules, validate account
+state, or validate blob/KZG commitments.
 
 EIP-712 helpers require the caller to provide both `chainId` and
 `verifyingContract`, then check them against the expected execution context

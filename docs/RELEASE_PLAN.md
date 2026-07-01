@@ -736,7 +736,7 @@ typed-data encoders for core Ethereum signing flows.
 
 ### v0.22.0 - Transaction Signing Hashes
 
-Status: pentest passed; final GitHub checks pending before tag.
+Status: tagged and released.
 
 Goal: construct Ethereum transaction signing hashes from admitted decoded
 transaction domains.
@@ -762,6 +762,8 @@ Exit criteria:
 
 ### v0.23.0 - Full Transaction Signature Validation
 
+Status: implementation ready for pentest.
+
 Goal: validate decoded transaction signatures end to end.
 
 Deliverables:
@@ -772,7 +774,9 @@ Deliverables:
 - typed transaction signature validation for EIP-2930, EIP-1559, and EIP-4844;
 - at least one independently derived external known-answer signing-hash vector
   for each typed transaction family before wiring signature validation;
-- sender-recovered transaction state transition from decoded/canonical inputs;
+- validated-signature result carrying the recovered sender and signing hash;
+- protocol typestate sender-recovered promotion remains deferred until public
+  proof constructors can be bound to transaction identity;
 - wrong-chain, wrong-sender, high-s, and malformed-scalar tests.
 
 Verification:
@@ -781,8 +785,8 @@ Verification:
 
 Exit criteria:
 
-- A caller can validate transaction signatures without using raw digest recovery
-  as the primary API.
+- A caller can validate decoded transaction signatures without using raw digest
+  recovery as the primary API.
 
 ### v0.24.0 - Set-Code Transaction Decode
 

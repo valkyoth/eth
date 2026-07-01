@@ -1,7 +1,7 @@
 # Keccak-256 Boundary
 
-Status: v0.22.0 boundary consumed by transaction signing hashes, sender
-recovery, and EIP-712 digest framing
+Status: v0.23.0 boundary consumed by transaction signing hashes, decoded
+transaction signature validation, sender recovery, and EIP-712 digest framing
 
 Ethereum execution-layer hashing uses Keccak-256, not FIPS SHA3-256. The hash
 boundary must be explicit before transaction hashes, recovered sender addresses,
@@ -22,7 +22,10 @@ No concrete Keccak implementation crate is admitted in `v0.10.0`.
 hashing. `v0.21.0` EIP-712 helpers consume it for
 `keccak256("\x19\x01" || domainSeparator || hashStruct(message))`. `v0.22.0`
 transaction signing-hash helpers consume it for canonical decoded transaction
-signing preimages. The crate still does not admit a default Keccak backend.
+signing preimages. `v0.23.0` decoded transaction signature validation composes
+the signing-hash and public-key-to-address hashing paths through caller-provided
+Keccak implementations. The crate still does not admit a default Keccak
+backend.
 
 ## Rationale
 

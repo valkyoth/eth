@@ -1,6 +1,6 @@
 # Transaction Signing Hashes
 
-Status: v0.22.0 pentest passed; final GitHub checks pending before tag.
+Status: v0.22.0 tagged and released; consumed by v0.23.0 signature validation.
 
 This release adds canonical signing-preimage encoders for the decoded
 transaction families currently admitted by `eth-valkyoth-protocol`, plus
@@ -43,10 +43,10 @@ payloads even though they are normally public after broadcast.
 
 ## Deferred Validation
 
-This is not full transaction signature validation. `v0.23.0` is still
-responsible for combining signing-hash construction, replay-domain checks,
-low-s/y-parity policy, sender recovery, and decoded transaction state
-promotion.
+For full decoded transaction signature validation, use the v0.23.0
+`validate_transaction_signature` helpers so replay-domain checks, low-s/y-parity
+policy, sender recovery, and optional expected-sender comparison are applied
+together.
 
 The `v0.22.0` helpers also do not perform fee, account-state, fork-validity,
 intrinsic-gas, blob-count, blob-version, KZG, or data-availability checks.

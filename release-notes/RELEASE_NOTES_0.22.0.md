@@ -1,6 +1,6 @@
 # eth 0.22.0 Release Notes
 
-Status: pentest passed; final GitHub checks pending before tag
+Status: tagged
 
 ## Summary
 

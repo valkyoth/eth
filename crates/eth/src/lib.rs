@@ -31,5 +31,8 @@ pub mod error {
         ProtocolError, ProtocolErrorCategory, StateTransitionError, TransactionEncodeError,
         TransactionEnvelopeError, TransactionEnvelopeErrorCategory,
     };
-    pub use eth_valkyoth_verify::{TransactionSigningHashError, VerifyError, VerifyErrorCategory};
+    pub use eth_valkyoth_verify::{
+        TransactionSignatureValidationError, TransactionSignatureValidationErrorCategory,
+        TransactionSigningHashError, VerifyError, VerifyErrorCategory,
+    };
 }

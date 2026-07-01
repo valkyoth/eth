@@ -35,8 +35,8 @@ dependencies.
 
 ## Current Status
 
-Status: `v0.22.0` transaction signing-hash pentest passed; final GitHub checks are pending before tag.
-`v0.21.0` is the latest tagged release.
+Status: `v0.23.0` decoded transaction signature validation is ready for pentest.
+`v0.22.0` is the latest tagged release.
 
 Implemented now:
 
@@ -78,6 +78,9 @@ Implemented now:
   legacy EIP-155, EIP-2930, EIP-1559, and EIP-4844 decoded transaction domains.
 - Digest-level secp256k1 sender recovery with low-s rejection, Ethereum
   y-parity policy, and caller-provided Keccak-256 public-key hashing.
+- Decoded transaction signature validation helpers that combine replay-domain
+  checks, signing hashes, low-s/y-parity policy, sender recovery, and optional
+  expected-sender comparison.
 - EIP-712 domain-safety checks for required `chainId` and
   `verifyingContract` fields, plus a domain-gated sender recovery helper.
 - RLP derive design and private derive-crate prototype tests for future
@@ -101,7 +104,6 @@ Not implemented yet:
 - No EVM execution adapter.
 - No Reth or P2P integration.
 - No set-code typed transaction field parser yet; scheduled for `v0.24.0`.
-- No full transaction signature validation yet; scheduled for `v0.23.0`.
 - No full EIP-712 typed-data encoder yet; scheduled for `v0.26.0`.
 - No block parser yet.
 - No ABI/contract helper surface yet; scheduled for `v0.47.0` through
@@ -354,11 +356,12 @@ assert_eq!(signing_hash.to_b256(), B256::from([0x44_u8; 32]));
 ```
 
 The example hasher is illustrative only. Production hashers must compute
-Ethereum Keccak-256, and the signing hash is still only one input to full
-signature validation. `v0.23.0` combines signing hashes, replay-domain checks,
-low-s/y-parity policy, and sender recovery into higher-level validation
-helpers. Callers that reuse the scratch buffer across multiple in-flight
-transactions should zero it after hashing before reusing or releasing it.
+Ethereum Keccak-256. For full decoded transaction signature validation, use
+`validate_transaction_signature` or the type-specific validation helpers so
+replay-domain checks, signing-hash construction, low-s/y-parity policy, sender
+recovery, and optional expected-sender comparison are applied together. Callers
+that reuse the scratch buffer across multiple in-flight transactions should
+zero it after hashing before reusing or releasing it.
 
 ## EIP-712 Domain Safety
 
@@ -728,7 +731,7 @@ friendly, and independently testable.
 The minimum supported Rust version is Rust `1.90.0`. New deployments should use
 the pinned stable Rust `1.96.1` until the toolchain policy is updated.
 
-Compatibility evidence for `0.22.0`:
+Compatibility evidence for `0.23.0`:
 
 | Rust | Local Evidence |
 | --- | --- |
@@ -745,8 +748,8 @@ Compatibility evidence for `0.22.0`:
 
 ```bash
 scripts/checks.sh
-scripts/release_0_22_gate.sh
-scripts/validate-release-readiness.sh v0.22.0
+scripts/release_0_23_gate.sh
+scripts/validate-release-readiness.sh v0.23.0
 ```
 
 For dependency-policy checks, install `cargo-deny` and `cargo-audit`, then run:
@@ -762,6 +765,7 @@ cargo audit
 - [Release Plan](docs/RELEASE_PLAN.md)
 - [Keccak Boundary](docs/keccak-boundary.md)
 - [Transaction Signing Hashes](docs/transaction-signing-hashes.md)
+- [Transaction Signature Validation](docs/transaction-signature-validation.md)
 - [k256 Dependency Admission](docs/dependency-admission-k256.md)
 - [Fuzzing](docs/fuzzing.md)
 - [Scope](docs/SCOPE.md)
