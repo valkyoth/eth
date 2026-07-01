@@ -57,7 +57,9 @@ metadata.
 
 ## Deferred Public Surface
 
-The following remain intentionally deferred:
+The public RLP derive surface is scheduled for
+`v0.25.0 - Public RLP Derives`. The following remain intentionally deferred
+until that milestone defines and tests the generated API contract:
 
 - generic structs, until generated trait bounds and borrowed lifetimes are
   specified;

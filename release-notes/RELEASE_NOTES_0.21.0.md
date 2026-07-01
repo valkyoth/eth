@@ -9,9 +9,10 @@ now require `chainId` and `verifyingContract`, check both against the expected
 execution context, build the EIP-191/EIP-712 signing digest, and recover a
 sender only after the domain gate passes.
 
-This release does not implement a full EIP-712 typed-data encoder. Callers must
-still compute `domainSeparator` and `hashStruct(message)` with a conformant
-encoder before using these helpers.
+This release does not implement a full EIP-712 typed-data encoder. That work is
+now scheduled for `v0.26.0 - EIP-712 Typed-Data Encoder`. Until then, callers
+must still compute `domainSeparator` and `hashStruct(message)` with a
+conformant encoder before using these helpers.
 
 ## Added
 

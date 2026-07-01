@@ -102,10 +102,10 @@ Not implemented yet:
 - No signer or local key storage.
 - No EVM execution adapter.
 - No Reth or P2P integration.
-- No set-code typed transaction field parser yet.
+- No set-code typed transaction field parser yet; scheduled for `v0.24.0`.
 - No transaction signing-hash construction or full transaction signature
-  validation yet.
-- No full EIP-712 typed-data encoder yet.
+  validation yet; scheduled for `v0.22.0` and `v0.23.0`.
+- No full EIP-712 typed-data encoder yet; scheduled for `v0.26.0`.
 - No block parser yet.
 
 ## Trust Dashboard

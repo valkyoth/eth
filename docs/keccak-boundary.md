@@ -43,8 +43,8 @@ This is important for:
 | Option | Decision | Reason |
 | --- | --- | --- |
 | Trait boundary only | selected for `v0.10.0` | Keeps default graph dependency-free and makes the hashing contract explicit before transaction work. |
-| Built-in `tiny-keccak` backend | deferred | Current crates.io version checked on 2026-06-30: `2.0.2`, license `CC0-1.0`, default features empty, explicit `keccak` feature available. It is not admitted until a future release performs feature, audit, maintenance, and MSRV evidence review. |
-| Both trait and optional backend | deferred | Likely future shape if a first-party optional backend is useful, but not needed before transaction types exist. |
+| Built-in `tiny-keccak` backend | scheduled for review | Current crates.io version checked on 2026-06-30: `2.0.2`, license `CC0-1.0`, default features empty, explicit `keccak` feature available. `v0.27.0 - Optional Keccak Backend Admission` must repeat the latest-version, feature, audit, maintenance, and MSRV evidence review before admitting any backend. |
+| Both trait and optional backend | planned shape | The trait boundary remains the default; `v0.27.0` decides whether a first-party optional backend is admitted outside the default graph. |
 
 ## Security Rules
 

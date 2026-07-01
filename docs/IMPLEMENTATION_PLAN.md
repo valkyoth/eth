@@ -48,20 +48,25 @@ The first production value is:
 - `eth-valkyoth-primitives`: no_std chain, block, gas, nonce, address, hash, fork, and
   bounded value primitives.
 - `eth-valkyoth-hash`: no_std Keccak-256 trait boundary for caller-provided
-  hashing implementations.
+  hashing implementations plus optional reviewed backend admission outside the
+  default graph.
 - `eth-valkyoth-codec`: canonical RLP and typed-envelope decoding policy, exact
   consumption, decode budgets, and the single source of truth for RLP
   canonicality rules.
-- `eth-valkyoth-protocol`: transaction, block, receipt, withdrawal, log, and fork
-  validation states.
-- `eth-valkyoth-verify`: sender recovery, replay-domain checks, EIP-712 validation,
-  header/hash checks, and MPT proof verification.
+- `eth-valkyoth-protocol`: transaction, set-code transaction, block, receipt,
+  withdrawal, log, and fork validation states.
+- `eth-valkyoth-verify`: transaction signing hashes, full transaction
+  signature validation, sender recovery, replay-domain checks, EIP-712
+  validation and typed-data hashing, header/hash checks, and MPT proof
+  verification.
 - `eth-valkyoth-evm`: optional REVM adapter boundary with explicit fork, block,
   transaction, snapshot, limit, and commit policy.
 - `eth-valkyoth-rpc`: optional RPC policy over admitted provider transports.
 - `eth-valkyoth-sanitization`: optional bridge to the `sanitization` crate for
   secret-bearing Ethereum data.
-- `eth-valkyoth-derive`: optional derive macros for explicit sanitization users.
+- `eth-valkyoth-derive`: optional derive macros for explicit sanitization users
+  and, after review, public RLP derives that preserve bounded decode and
+  primitive-domain invariants.
 - `eth-valkyoth-signer`: optional signer isolation and domain-specific signing APIs.
 - `eth-valkyoth-reth`: optional Reth adapter boundary.
 - `eth-valkyoth-testkit`: fixtures, adversarial inputs, conformance helpers, and
@@ -153,9 +158,10 @@ Release gate:
 
 ## Phase 5: Verification And Proofs
 
-Implement replay-domain checks, sender recovery, EIP-712 safety rules, header
-hash consistency, transaction and receipt inclusion proofs, and MPT proof
-verification.
+Implement replay-domain checks, transaction signing hashes, full transaction
+signature validation, sender recovery, EIP-712 safety rules, EIP-712 typed-data
+hashing, header hash consistency, transaction and receipt inclusion proofs, and
+MPT proof verification.
 
 Release gate:
 
@@ -163,6 +169,8 @@ Release gate:
   `spec-lock.toml`;
 - official and independent proof fixtures pass;
 - invalid proofs fail closed;
+- raw digest signing is not the primary API for standard transaction or EIP-712
+  flows;
 - signature and domain errors never expose secret material.
 
 ## Phase 6: Optional REVM Adapter

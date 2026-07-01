@@ -22,5 +22,7 @@ parse JSON-RPC typed-data payloads, validate field order, validate type graphs,
 or prove that the supplied domain separator was derived from the checked
 `Eip712Domain` view.
 
-Future EIP-712 work should add a typed-data encoder only behind the same
-bounded, no-allocation, fuzzed approach used for RLP and transaction decoding.
+`v0.26.0 - EIP-712 Typed-Data Encoder` is the planned milestone for full
+`encodeType`, `encodeData`, `hashStruct`, domain separator construction, and
+typed-data vector coverage. That work must follow the same bounded, fuzzed
+approach used for RLP and transaction decoding.

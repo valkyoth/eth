@@ -127,6 +127,23 @@ Track every release in `release-crates.toml` and
 and refuses accidental lockstep publication. The script still publishes in
 dependency order, but only for crates marked `publish = true`.
 
+## Completeness Review Register
+
+Every planning or pentest pass must check this register for implied work that
+has not been assigned to a release. If a row affects the 1.0 execution-layer
+scope, it must have a versioned milestone before work continues past the
+relevant dependency point.
+
+| Gap | Resolution |
+| --- | --- |
+| Standard transaction signing digests were implied by sender recovery but not scheduled. | Added `v0.22.0 - Transaction Signing Hashes`. |
+| End-to-end decoded transaction signature validation was implied by typestates but not scheduled. | Added `v0.23.0 - Full Transaction Signature Validation`. |
+| Set-code typed transactions were listed as missing without a version. | Added `v0.24.0 - Set-Code Transaction Decode`. |
+| Public RLP derives had only an evaluation/prototype milestone. | Added `v0.25.0 - Public RLP Derives`. |
+| Full EIP-712 `encodeType`/`encodeData`/`hashStruct` support was missing from the roadmap. | Added `v0.26.0 - EIP-712 Typed-Data Encoder`. |
+| A first-party optional software Keccak backend was deferred without a versioned admission point. | Added `v0.27.0 - Optional Keccak Backend Admission`. |
+| ABI encoding, Engine API, SSZ, and DevP2P/RLPx are not part of the first default execution-layer crate scope. | Keep explicit in `SPEC_MATRIX.md`; add a new post-1.0 or feature-track release plan only if they become product requirements. |
+
 ## Phase 0: Repository And Release Discipline
 
 ### v0.1.0 - Repository Foundation
@@ -693,7 +710,7 @@ Deliverables:
 
 - complete-domain helpers;
 - expected chain and verifying-contract checks;
-- tests for missing or wrong domain fields.
+- tests for missing or wrong domain fields;
 - EIP-712 signing digest helper using the EIP-191 `0x1901` prefix and
   caller-provided Keccak-256 boundary;
 - domain-gated sender recovery helper so raw digest recovery is not the primary
@@ -707,9 +724,164 @@ Exit criteria:
 
 - Raw digest signing is not the primary safe signing interface.
 
+## Phase 4A: Signing And Encoding Completeness
+
+These milestones were added after the `v0.21.0` planning review to make
+previously implied work explicit. The goal is to avoid reaching signer, RPC, or
+1.0 hardening work while still depending on caller-built hashes or external
+typed-data encoders for core Ethereum signing flows.
+
+### v0.22.0 - Transaction Signing Hashes
+
+Goal: construct Ethereum transaction signing hashes from admitted decoded
+transaction domains.
+
+Deliverables:
+
+- legacy EIP-155 signing preimage construction;
+- EIP-2930 signing preimage construction;
+- EIP-1559 signing preimage construction;
+- EIP-4844 signing preimage construction;
+- transaction hash domain newtype instead of raw `B256`;
+- caller-provided Keccak-256 boundary for all signing hashes;
+- tests against official or independently generated transaction vectors.
+
+Verification:
+
+- `cargo test -p eth-valkyoth-protocol -p eth-valkyoth-verify`
+
+Exit criteria:
+
+- Sender recovery no longer requires downstream callers to hand-build standard
+  transaction signing digests.
+
+### v0.23.0 - Full Transaction Signature Validation
+
+Goal: validate decoded transaction signatures end to end.
+
+Deliverables:
+
+- typed helpers that combine replay-domain checks, signing-hash construction,
+  low-s/y-parity policy, and sender recovery;
+- legacy `v` handling through EIP-155 chain binding;
+- typed transaction signature validation for EIP-2930, EIP-1559, and EIP-4844;
+- sender-recovered transaction state transition from decoded/canonical inputs;
+- wrong-chain, wrong-sender, high-s, and malformed-scalar tests.
+
+Verification:
+
+- `cargo test -p eth-valkyoth-verify -p eth-valkyoth-protocol`
+
+Exit criteria:
+
+- A caller can validate transaction signatures without using raw digest recovery
+  as the primary API.
+
+### v0.24.0 - Set-Code Transaction Decode
+
+Goal: decode and encode the next typed transaction family currently left
+opaque by the transaction-envelope shell.
+
+Deliverables:
+
+- current official EIP/source check for set-code transactions before coding;
+- typed transaction prefix admission;
+- field model with explicit authorization-list domain types;
+- bounded decode and no-allocation encode helpers;
+- fuzz seed coverage for malformed and maximal authorization lists;
+- scope note for validation deferred to later fork/account-state passes.
+
+Verification:
+
+- `cargo test -p eth-valkyoth-protocol`
+- `cargo check --manifest-path fuzz/Cargo.toml`
+
+Exit criteria:
+
+- The README no longer has to list set-code transaction parsing as an omitted
+  typed transaction family.
+
+### v0.25.0 - Public RLP Derives
+
+Goal: turn the private RLP derive prototype into a reviewed public derive
+surface.
+
+Deliverables:
+
+- public `RlpEncode` and `RlpDecode` derives for supported structs;
+- generated decode paths require `DecodeLimits`;
+- generated integer and fixed-width field code delegates to codec and primitive
+  helpers;
+- explicit diagnostics for unsupported generics, enums, unions, and unsafe
+  transaction-state shortcuts;
+- trybuild-style compile-fail coverage.
+
+Verification:
+
+- `cargo test -p eth-valkyoth-derive`
+- docs examples compile.
+
+Exit criteria:
+
+- Users can derive RLP for simple reviewed structs without bypassing the
+  bounded codec contract.
+
+### v0.26.0 - EIP-712 Typed-Data Encoder
+
+Goal: implement the full EIP-712 typed-data hashing pipeline instead of relying
+on caller-provided `domainSeparator` and `hashStruct(message)` values.
+
+Deliverables:
+
+- `encodeType` implementation with dependency collection and canonical type
+  ordering;
+- `encodeData` implementation for admitted atomic, dynamic, array, and struct
+  fields;
+- `hashStruct` helper;
+- EIP-712 domain separator construction;
+- JSON-RPC typed-data model or an explicit no-JSON decision with a separate
+  follow-up milestone;
+- official EIP-712 test vectors and adversarial type-graph tests;
+- clear recursion, allocation, and input-size limits.
+
+Verification:
+
+- `cargo test -p eth-valkyoth-verify -p eth-valkyoth-protocol`
+- EIP-712 vector test command documented in release notes.
+
+Exit criteria:
+
+- EIP-712 signing APIs no longer need callers to supply externally constructed
+  domain and message hashes for standard typed data.
+
+### v0.27.0 - Optional Keccak Backend Admission
+
+Goal: optionally provide a reviewed software Keccak-256 backend without adding
+it to the default core graph.
+
+Deliverables:
+
+- latest-version, license, feature, no_std, and maintenance review for the
+  selected Keccak crate;
+- feature-gated backend crate or feature outside default `eth`;
+- `KECCAK256_EMPTY` and additional chunking KATs;
+- duplicate-dependency and MSRV review;
+- state-clearing contract documented for sender-recovery paths.
+
+Verification:
+
+- `cargo test -p eth-valkyoth-hash --all-features`
+- `cargo deny check`
+- `cargo audit`
+
+Exit criteria:
+
+- Applications that want a first-party software backend can opt in without
+  changing the dependency-free default boundary.
+
 ## Phase 5: Blocks, Receipts, And Proofs
 
-### v0.22.0 - Header Decode And Hashing
+### v0.28.0 - Header Decode And Hashing
 
 Goal: parse and hash execution-layer block headers.
 
@@ -729,7 +901,7 @@ Exit criteria:
 
 - Headers can be decoded without implying full block validity.
 
-### v0.23.0 - Receipt Decode
+### v0.29.0 - Receipt Decode
 
 Goal: parse legacy and typed receipts.
 
@@ -748,7 +920,7 @@ Exit criteria:
 
 - Receipt data is bounded before trie or block validation.
 
-### v0.24.0 - Withdrawal And Post-Merge Fields
+### v0.30.0 - Withdrawal And Post-Merge Fields
 
 Goal: model post-merge execution fields explicitly.
 
@@ -766,7 +938,7 @@ Exit criteria:
 
 - Post-merge fields are not bolted onto pre-merge validation paths.
 
-### v0.25.0 - MPT Node Decoder
+### v0.31.0 - MPT Node Decoder
 
 Goal: decode trie nodes with strict limits.
 
@@ -784,7 +956,7 @@ Exit criteria:
 
 - Trie proof input cannot allocate or recurse without limits.
 
-### v0.26.0 - Inclusion Proof Verification
+### v0.32.0 - Inclusion Proof Verification
 
 Goal: verify transaction and receipt inclusion proofs.
 
@@ -805,7 +977,7 @@ Exit criteria:
 
 - Inclusion proof APIs distinguish malformed, absent, and wrong-root proofs.
 
-### v0.27.0 - Account And Storage Proofs
+### v0.33.0 - Account And Storage Proofs
 
 Goal: verify account and storage proofs against trusted roots.
 
@@ -829,7 +1001,7 @@ Exit criteria:
 
 ## Phase 6: Conformance And Test Infrastructure
 
-### v0.28.0 - Spec Lock And Fixture Import
+### v0.34.0 - Spec Lock And Fixture Import
 
 Goal: pin official Ethereum specification and fixture revisions.
 
@@ -849,7 +1021,7 @@ Exit criteria:
 
 - Every conformance claim names exact upstream revisions.
 
-### v0.29.0 - Execution Test Harness
+### v0.35.0 - Execution Test Harness
 
 Goal: run applicable Ethereum execution tests through protocol validation.
 
@@ -867,7 +1039,7 @@ Exit criteria:
 
 - Validation behavior is tested against external Ethereum material.
 
-### v0.30.0 - Differential Test Harness
+### v0.36.0 - Differential Test Harness
 
 Goal: compare selected behavior against independent implementations.
 
@@ -887,7 +1059,7 @@ Exit criteria:
 
 ## Phase 7: Optional Execution
 
-### v0.31.0 - REVM Dependency Admission
+### v0.37.0 - REVM Dependency Admission
 
 Goal: admit REVM behind `eth-valkyoth-evm` with reviewed features.
 
@@ -906,7 +1078,7 @@ Exit criteria:
 
 - REVM is optional and cannot enter the default core graph.
 
-### v0.32.0 - Explicit Execution Environment
+### v0.38.0 - Explicit Execution Environment
 
 Goal: execute with explicit fork, block, transaction, and snapshot inputs.
 
@@ -924,7 +1096,7 @@ Exit criteria:
 
 - Simulation reports the exact state and fork configuration used.
 
-### v0.33.0 - Bounded Gas Estimation
+### v0.39.0 - Bounded Gas Estimation
 
 Goal: make gas estimation bounded and auditable.
 
@@ -945,7 +1117,7 @@ Exit criteria:
 
 ## Phase 8: Optional RPC And Signer Boundaries
 
-### v0.34.0 - RPC Dependency Admission
+### v0.40.0 - RPC Dependency Admission
 
 Goal: admit provider/transport crates behind `eth-valkyoth-rpc` and add the
 local node harness used by later live integration tests.
@@ -974,7 +1146,7 @@ Exit criteria:
 - The project can spin up and destroy a local Ethereum node for integration
   tests without depending on a developer's existing node.
 
-### v0.35.0 - RPC Trust Models
+### v0.41.0 - RPC Trust Models
 
 Goal: implement trusted, quorum, and verified response models.
 
@@ -992,7 +1164,7 @@ Exit criteria:
 
 - TLS endpoint trust is documented as separate from Ethereum state trust.
 
-### v0.36.0 - RPC Retry And Redaction
+### v0.42.0 - RPC Retry And Redaction
 
 Goal: make network behavior and logs safe by default.
 
@@ -1011,7 +1183,7 @@ Exit criteria:
 
 - RPC errors and logs do not leak sensitive payloads by default.
 
-### v0.37.0 - Signer Interface
+### v0.43.0 - Signer Interface
 
 Goal: add domain-specific signer APIs without local keys by default.
 
@@ -1031,7 +1203,7 @@ Exit criteria:
 
 - Signing APIs make domain separation explicit.
 
-### v0.38.0 - Local Signer Fallback
+### v0.44.0 - Local Signer Fallback
 
 Goal: add optional local signing only after secret-handling review.
 
@@ -1054,7 +1226,7 @@ Exit criteria:
 
 ## Phase 9: Optional Reth And P2P Decisions
 
-### v0.39.0 - Reth Dependency Admission
+### v0.45.0 - Reth Dependency Admission
 
 Goal: integrate selected Reth concepts without leaking node internals.
 
@@ -1074,7 +1246,7 @@ Exit criteria:
 
 - Reth remains an adapter, not a protocol-core foundation.
 
-### v0.40.0 - P2P Threat Model Decision
+### v0.46.0 - P2P Threat Model Decision
 
 Goal: decide whether P2P belongs in this crate family.
 
@@ -1095,7 +1267,7 @@ Exit criteria:
 
 ## Phase 10: Production Hardening
 
-### v0.41.0 - Platform Matrix
+### v0.47.0 - Platform Matrix
 
 Goal: verify supported operating systems and targets.
 
@@ -1113,7 +1285,7 @@ Exit criteria:
 
 - Platform support claims match tested evidence.
 
-### v0.42.0 - Public API Stability Pass
+### v0.48.0 - Public API Stability Pass
 
 Goal: stabilize the public API shape before 1.0.
 
@@ -1132,7 +1304,7 @@ Exit criteria:
 
 - The remaining 1.0 work is hardening, not API invention.
 
-### v0.43.0 - Independent Audit Remediation
+### v0.49.0 - Independent Audit Remediation
 
 Goal: fix findings from external review.
 
@@ -1152,7 +1324,7 @@ Exit criteria:
 
 - No unresolved critical or high findings remain.
 
-### v0.44.0 - Release Evidence Dry Run
+### v0.50.0 - Release Evidence Dry Run
 
 Goal: prove the release-evidence process before 1.0.
 
@@ -1166,7 +1338,7 @@ Deliverables:
 
 Verification:
 
-- release-readiness script for `v0.44.0`.
+- release-readiness script for `v0.50.0`.
 
 Exit criteria:
 

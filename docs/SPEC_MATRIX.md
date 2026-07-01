@@ -22,21 +22,22 @@ implemented from memory.
 | Execution RLP | partial | `ethereum/tests` pinned in `spec-lock.toml`; scalar byte-string, list, canonical integer decoders, and canonical encoding helpers implemented |
 | RLP fuzz harness | baseline | `fuzz/` workspace builds; committed hex seeds live under `fuzz/seed-corpus/`; crash reproduction is documented |
 | Keccak-256 hashing | boundary only | `eth-valkyoth-hash` defines caller-provided Keccak-256 trait boundary; no concrete backend admitted |
-| EIP-712 structured data | domain gate | EIP-712 defines the `0x1901` signing digest and optional domain fields; v0.21.0 checks required caller-provided `chainId` and `verifyingContract` fields and builds the signing digest from supplied domain/message hashes; full typed-data encoding remains planned |
-| EIP-2718 typed transactions | partial | `ethereum/EIPs` pinned in `spec-lock.toml`; envelope classification implemented; EIP-2930 type `0x01`, EIP-1559 type `0x02`, and EIP-4844 type `0x03` field decode and canonical encode implemented; later typed transaction payloads remain opaque |
+| EIP-712 structured data | domain gate | EIP-712 defines the `0x1901` signing digest and optional domain fields; v0.21.0 checks required caller-provided `chainId` and `verifyingContract` fields and builds the signing digest from supplied domain/message hashes; full typed-data encoding is scheduled for v0.26.0 |
+| EIP-2718 typed transactions | partial | `ethereum/EIPs` pinned in `spec-lock.toml`; envelope classification implemented; EIP-2930 type `0x01`, EIP-1559 type `0x02`, and EIP-4844 type `0x03` field decode and canonical encode implemented; set-code transaction decode is scheduled for v0.24.0 and later typed transaction payloads remain opaque until explicitly admitted |
 | Legacy transactions | field decode/encode | EIP-2718 defines the legacy transaction field list; v0.12.0 decodes fields into an unvalidated model and v0.16.0 encodes that admitted model without signature, sender, chain, or fork validation |
 | EIP-2930 access-list transactions | field decode/encode | EIP-2930 defines type `0x01`, eleven payload fields, and access-list shape; v0.13.0 decodes fields and v0.16.0 encodes the admitted model without signature, sender, gas, duplicate, chain, account-state, or fork validation |
 | EIP-1559 dynamic-fee transactions | field decode/encode | EIP-1559 defines type `0x02`, twelve payload fields, and access-list inheritance from EIP-2930; v0.14.0 decodes fields and v0.16.0 encodes the admitted model without signature, sender, fee-order, gas, duplicate, chain, account-state, or fork validation |
 | EIP-4844 blob transactions | field decode/encode | EIP-4844 defines type `0x03`, fourteen payload fields, required 20-byte `to`, max blob fee, and blob versioned hash list; v0.15.0 decodes fields and v0.16.0 encodes the admitted model without signature, sender, blob fee, KZG, data availability, blob-hash version, blob count, chain, account-state, block blob-gas, or fork validation |
 | Chain and fork specs | explicit context | `execution-specs` and EIPs are pinned in `spec-lock.toml`; v0.17.0 adds caller-provided `ChainSpec`, `ForkSpec`, hardfork identity, block/timestamp activation checks, unsupported-fork errors, chain-mismatch errors, duplicate-fork errors, and non-monotonic fork/activation ordering errors without hardcoding mainnet validation rules |
-| Transaction validation | partial | `execution-specs` pinned in `spec-lock.toml`; v0.18.0 adds proof-gated decoded/canonical/fork-valid/sender-recovered transaction state transitions, v0.19.0 adds replay-domain checks, and v0.20.0 adds digest-level sender recovery with low-s and y-parity policy. Transaction signing-hash construction, full signature validation from decoded transactions, fee/account/fork validity, and concrete proof constructors remain planned |
+| Transaction validation | partial | `execution-specs` pinned in `spec-lock.toml`; v0.18.0 adds proof-gated decoded/canonical/fork-valid/sender-recovered transaction state transitions, v0.19.0 adds replay-domain checks, and v0.20.0 adds digest-level sender recovery with low-s and y-parity policy. Transaction signing-hash construction is scheduled for v0.22.0, full decoded-transaction signature validation for v0.23.0, and fee/account/fork validity plus concrete proof constructors remain planned |
 | Header validation | planned | `execution-specs` pinned in `spec-lock.toml`; validation not implemented |
 | Receipt validation | planned | `execution-specs` pinned in `spec-lock.toml`; validation not implemented |
 | MPT proofs | planned | `ethereum/tests` pinned in `spec-lock.toml`; proof verification not implemented |
 | JSON-RPC | deferred | `execution-apis` pinned in `spec-lock.toml`; RPC not implemented |
-| Engine API | deferred | not part of first default scope |
-| SSZ | deferred | consensus-layer feature only if admitted |
-| DevP2P/RLPx | deferred | separate threat-model expansion required |
+| ABI encoding | deferred | contract calldata/return encoding is outside the first execution-layer validation scope; add a feature-track release plan if contract-call ergonomics become a product requirement |
+| Engine API | deferred | not part of first default scope; add a post-1.0 or optional node-interface track before claiming support |
+| SSZ | deferred | consensus-layer feature only if admitted through a separate scope decision |
+| DevP2P/RLPx | deferred | separate threat-model expansion required before any networking support claim |
 
 Every release that claims support for a fork, EIP, RPC method, or wire protocol
 must update this matrix and `spec-lock.toml`.
