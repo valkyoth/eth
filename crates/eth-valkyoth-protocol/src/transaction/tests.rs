@@ -237,14 +237,14 @@ fn decodes_access_list_transaction_as_unvalidated() {
         assert_eq!(last_byte(tx.r), Some(1));
         assert_eq!(last_byte(tx.s), Some(2));
 
-        let mut entries = tx.access_list.entries();
+        let mut entries = named_access_list_entries(tx.access_list.entries());
         let first = entries.next();
         assert!(matches!(first, Some(Ok(_))));
         if let Some(Ok(entry)) = first {
             assert_eq!(entry.address, Address::from_bytes([0x11; 20]));
             assert_eq!(entry.storage_keys.len(), 1);
 
-            let mut keys = entry.storage_keys.keys();
+            let mut keys = named_storage_key_items(entry.storage_keys.keys());
             assert_eq!(keys.next(), Some(Ok(B256::from_bytes([0x22; 32]))));
             assert_eq!(keys.next(), None);
         }
@@ -331,4 +331,16 @@ fn rejects_invalid_access_list_storage_key_length() {
 
 fn last_byte(bytes: [u8; 32]) -> Option<u8> {
     bytes.last().copied()
+}
+
+fn named_access_list_entries<'a>(
+    entries: crate::AccessListEntries<'a>,
+) -> crate::AccessListEntries<'a> {
+    entries
+}
+
+fn named_storage_key_items<'a>(
+    keys: crate::AccessListStorageKeyItems<'a>,
+) -> crate::AccessListStorageKeyItems<'a> {
+    keys
 }

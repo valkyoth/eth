@@ -34,8 +34,13 @@ duplicate access-list policy, or prove fork validity.
 
 - Access lists are decoded through the bounded RLP list machinery before the
   unvalidated transaction model is returned.
+- Access-list entry and storage-key iterator types are exported so downstream
+  callers can name the vetted borrowed walkers in their own APIs.
 - Access-list addresses must be exactly 20 scalar bytes.
 - Access-list storage keys must be exactly 32 scalar bytes.
+- The borrowed access-list model is eager-validated at decode time. Iterating
+  entries or storage keys later intentionally re-parses the same bounded bytes
+  instead of allocating decoded storage.
 - Duplicate access-list entries and duplicate storage keys are accepted by this
   syntactic decoder. EIP-2930 allows duplicates and charges them multiple times;
   any deployment-specific duplicate policy belongs in a later validation layer.

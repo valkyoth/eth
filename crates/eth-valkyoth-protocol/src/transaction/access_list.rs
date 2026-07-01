@@ -111,6 +111,11 @@ impl<'a> AccessList<'a> {
     }
 
     /// Returns an iterator over access-list entries.
+    ///
+    /// The transaction decoder validates every access-list entry before
+    /// returning this borrowed model. Iterating re-parses the same bounded RLP
+    /// bytes so callers can use zero-copy access without storing decoded
+    /// entries.
     #[must_use]
     pub const fn entries(self) -> AccessListEntries<'a> {
         AccessListEntries {
@@ -148,6 +153,10 @@ impl<'a> AccessListStorageKeys<'a> {
     }
 
     /// Returns an iterator over storage keys.
+    ///
+    /// The parent access-list decoder validates every storage key before
+    /// returning this borrowed model. Iterating re-parses the same bounded RLP
+    /// bytes so callers can use zero-copy access without storing decoded keys.
     #[must_use]
     pub const fn keys(self) -> AccessListStorageKeyItems<'a> {
         AccessListStorageKeyItems {
@@ -315,6 +324,9 @@ fn decode_chain_id<'a>(
 fn decode_access_list(
     list: RlpList<'_>,
 ) -> Result<AccessList<'_>, AccessListTransactionDecodeError> {
+    // Eager validation proves the borrowed model is well-formed. Later
+    // iteration intentionally re-parses these bounded bytes instead of storing
+    // decoded entries in an allocation-backed structure.
     let mut storage_key_count = 0usize;
     for item in list.items() {
         let entry = decode_access_list_entry_item(item)?;
