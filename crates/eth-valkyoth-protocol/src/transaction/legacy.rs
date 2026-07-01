@@ -1,7 +1,7 @@
 use core::fmt;
 
 use eth_valkyoth_codec::{DecodeError, DecodeLimits, RlpInteger, RlpItem, RlpList, RlpScalar};
-use eth_valkyoth_primitives::{Address, Gas, Nonce, Wei};
+use eth_valkyoth_primitives::{Address, ChainId, Gas, Nonce, Wei};
 
 use super::{TransactionEnvelope, TransactionEnvelopeError, decode_transaction_envelope};
 
@@ -29,11 +29,43 @@ pub struct UnvalidatedLegacyTransaction<'a> {
     /// Borrowed transaction input data.
     pub input: &'a [u8],
     /// Raw canonical U256 signature recovery value.
+    ///
+    /// This is not checked for EIP-155, chain, or fork validity. Use
+    /// [`Self::eip155_chain_id`] instead of subtracting from this value
+    /// directly.
     pub v: [u8; 32],
     /// Raw canonical U256 signature `r` value.
+    ///
+    /// This is not checked for secp256k1 scalar validity.
     pub r: [u8; 32],
     /// Raw canonical U256 signature `s` value.
+    ///
+    /// This is not checked against the EIP-2 low-s bound or secp256k1 scalar
+    /// validity.
     pub s: [u8; 32],
+}
+
+impl UnvalidatedLegacyTransaction<'_> {
+    /// Returns the EIP-155 chain ID encoded by `v`, if it fits this crate's
+    /// chain-domain width.
+    ///
+    /// Returns `None` for pre-EIP-155 `v` values such as `27` and `28`, and
+    /// for oversized `v` values that cannot fit in `u64`. This helper is
+    /// intentionally syntactic: it does not prove that the chain ID is nonzero,
+    /// configured, active, or valid for any fork.
+    #[must_use]
+    pub fn eip155_chain_id(&self) -> Option<ChainId> {
+        const U64_TAIL_START: usize = 24;
+
+        let high_bytes = self.v.get(..U64_TAIL_START)?;
+        if high_bytes.iter().any(|byte| *byte != 0) {
+            return None;
+        }
+
+        let low_bytes = self.v.get(U64_TAIL_START..)?.try_into().ok()?;
+        let v = u64::from_be_bytes(low_bytes);
+        v.checked_sub(35).map(|delta| ChainId::new(delta / 2))
+    }
 }
 
 /// Legacy transaction call/create target.

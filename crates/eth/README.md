@@ -403,11 +403,14 @@ assert_eq!(tx.nonce.get(), 1);
 assert_eq!(tx.gas_limit.get(), 21_000);
 assert_eq!(tx.to, LegacyTransactionTo::Create);
 assert_eq!(tx.input, &[]);
+assert_eq!(tx.eip155_chain_id(), None);
 # Ok::<(), eth::error::LegacyTransactionDecodeError>(())
 ```
 
 The decoded value is not chain-valid, signature-valid, sender-recovered, or
-fork-valid. It is only a bounded, canonical field parse.
+fork-valid. It is only a bounded, canonical field parse. Use
+`eip155_chain_id` instead of subtracting directly from the raw `v` signature
+word.
 
 ## Optional Sanitization
 

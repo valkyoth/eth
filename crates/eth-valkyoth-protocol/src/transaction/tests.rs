@@ -37,6 +37,34 @@ fn decodes_create_legacy_transaction_as_unvalidated() {
         assert_eq!(last_byte(tx.v), Some(27));
         assert_eq!(last_byte(tx.r), Some(1));
         assert_eq!(last_byte(tx.s), Some(2));
+        assert_eq!(tx.eip155_chain_id(), None);
+    }
+}
+
+#[test]
+fn eip155_chain_id_recovers_without_subtraction_panic() {
+    let tx = [
+        0xcb, 0x01, 0x02, 0x82, 0x52, 0x08, 0x80, 0x80, 0x80, 0x25, 0x01, 0x02,
+    ];
+    let result = decode_legacy_transaction(&tx, TEST_LIMITS);
+    assert!(result.is_ok());
+
+    if let Ok(tx) = result {
+        assert_eq!(tx.eip155_chain_id().map(|chain_id| chain_id.get()), Some(1));
+    }
+}
+
+#[test]
+fn eip155_chain_id_ignores_oversized_v() {
+    let tx = [
+        0xd4, 0x01, 0x02, 0x82, 0x52, 0x08, 0x80, 0x80, 0x80, 0x89, 0x01, 0x00, 0x00, 0x00, 0x00,
+        0x00, 0x00, 0x00, 0x23, 0x01, 0x02,
+    ];
+    let result = decode_legacy_transaction(&tx, TEST_LIMITS);
+    assert!(result.is_ok());
+
+    if let Ok(tx) = result {
+        assert_eq!(tx.eip155_chain_id(), None);
     }
 }
 

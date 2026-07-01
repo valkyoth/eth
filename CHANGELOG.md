@@ -8,6 +8,8 @@ All notable changes to `eth` are documented here.
   EIP-2718 legacy transaction field list.
 - Added stable legacy transaction decode error codes/categories, call/create
   target modeling, bounded calldata exposure, and signature U256 width checks.
+- Added a panic-free `eip155_chain_id` helper and direct signature-field caveats
+  after v0.12.0 pentest feedback.
 - Extended transaction-envelope fuzz coverage to drive legacy transaction field
   decoding before later typed transaction decoders land.
 - Updated the pinned stable Rust toolchain and compatibility evidence through
