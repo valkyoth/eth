@@ -36,6 +36,10 @@ pub enum ForkError {
     MissingActivation,
     /// A fork spec was supplied for a different chain.
     ChainMismatch,
+    /// The chain spec contains the same hardfork more than once.
+    DuplicateFork,
+    /// The chain spec hardfork entries are not in chronological order.
+    NonMonotonicForkOrder,
 }
 
 impl ForkError {
@@ -47,6 +51,8 @@ impl ForkError {
             Self::Inactive => "ETH_FORK_INACTIVE",
             Self::MissingActivation => "ETH_FORK_MISSING_ACTIVATION",
             Self::ChainMismatch => "ETH_FORK_CHAIN_MISMATCH",
+            Self::DuplicateFork => "ETH_FORK_DUPLICATE",
+            Self::NonMonotonicForkOrder => "ETH_FORK_NON_MONOTONIC_ORDER",
         }
     }
 
@@ -58,6 +64,8 @@ impl ForkError {
             Self::Inactive => "fork is not active for the validation context",
             Self::MissingActivation => "fork activation data is incomplete",
             Self::ChainMismatch => "fork chain id does not match the selected chain spec",
+            Self::DuplicateFork => "chain spec contains a duplicate hardfork entry",
+            Self::NonMonotonicForkOrder => "chain spec fork entries are not monotonic",
         }
     }
 }
@@ -72,6 +80,7 @@ impl fmt::Display for ForkError {
 impl std::error::Error for ForkError {}
 
 /// Unambiguous fork activation rule.
+#[non_exhaustive]
 #[derive(Clone, Copy, Debug, Eq, PartialEq)]
 pub enum ForkActivation {
     /// Block number alone determines activation.
@@ -121,10 +130,23 @@ pub struct ChainSpec<'a> {
 }
 
 impl<'a> ChainSpec<'a> {
-    /// Creates a chain spec from caller-reviewed fork entries.
+    /// Creates a chain spec from caller-reviewed static fork entries.
+    ///
+    /// This constructor is intentionally `const` for hand-audited static
+    /// tables. Use [`Self::try_new`] when entries come from dynamic config,
+    /// generated data, or any source that is not reviewed in code. Selection
+    /// methods still reject duplicate, unordered, or wrong-chain entries before
+    /// returning fork context.
     #[must_use]
     pub const fn new(chain_id: ChainId, forks: &'a [ForkSpec]) -> Self {
         Self { chain_id, forks }
+    }
+
+    /// Creates a chain spec after validating ordering, uniqueness, and chain ID.
+    pub fn try_new(chain_id: ChainId, forks: &'a [ForkSpec]) -> Result<Self, ForkError> {
+        let spec = Self { chain_id, forks };
+        spec.validate()?;
+        Ok(spec)
     }
 
     /// Chain ID this spec validates.
@@ -141,11 +163,9 @@ impl<'a> ChainSpec<'a> {
 
     /// Returns the spec for a hardfork admitted by this chain spec.
     pub fn fork_spec(self, hardfork: Hardfork) -> Result<ForkSpec, ForkError> {
+        self.validate()?;
         for fork in self.forks {
             if fork.hardfork == hardfork {
-                if fork.chain_id != self.chain_id {
-                    return Err(ForkError::ChainMismatch);
-                }
                 return Ok(*fork);
             }
         }
@@ -172,22 +192,75 @@ impl<'a> ChainSpec<'a> {
         }
     }
 
-    /// Returns the last active fork in the supplied fork order.
+    /// Returns the highest active hardfork in this chain spec.
     pub fn active_fork(
         self,
         block_number: BlockNumber,
         timestamp: UnixTimestamp,
     ) -> Result<ForkSpec, ForkError> {
-        let mut active = None;
+        let mut active: Option<ForkSpec> = None;
+        self.validate()?;
+        for fork in self.forks {
+            if fork.is_active_at(block_number, timestamp) {
+                active = match active {
+                    Some(previous) if previous.hardfork > fork.hardfork => Some(previous),
+                    _ => Some(*fork),
+                };
+            }
+        }
+        active.ok_or(ForkError::Inactive)
+    }
+
+    fn validate(self) -> Result<(), ForkError> {
+        let mut previous: Option<ForkSpec> = None;
         for fork in self.forks {
             if fork.chain_id != self.chain_id {
                 return Err(ForkError::ChainMismatch);
             }
-            if fork.is_active_at(block_number, timestamp) {
-                active = Some(*fork);
+            if let Some(previous_fork) = previous {
+                if fork.hardfork == previous_fork.hardfork {
+                    return Err(ForkError::DuplicateFork);
+                }
+                if fork.hardfork < previous_fork.hardfork
+                    || !fork_activation_is_monotonic(previous_fork.activation, fork.activation)
+                {
+                    return Err(ForkError::NonMonotonicForkOrder);
+                }
             }
+            previous = Some(*fork);
         }
-        active.ok_or(ForkError::Inactive)
+        Ok(())
+    }
+}
+
+fn fork_activation_is_monotonic(previous: ForkActivation, next: ForkActivation) -> bool {
+    let previous_block = fork_activation_block(previous);
+    let next_block = fork_activation_block(next);
+    if next_block < previous_block {
+        return false;
+    }
+
+    match (previous, next) {
+        (
+            ForkActivation::BlockAndTimestamp {
+                activation_timestamp: previous_timestamp,
+                ..
+            },
+            ForkActivation::BlockAndTimestamp {
+                activation_timestamp: next_timestamp,
+                ..
+            },
+        ) => next_timestamp >= previous_timestamp,
+        _ => true,
+    }
+}
+
+fn fork_activation_block(activation: ForkActivation) -> BlockNumber {
+    match activation {
+        ForkActivation::BlockOnly { activation_block }
+        | ForkActivation::BlockAndTimestamp {
+            activation_block, ..
+        } => activation_block,
     }
 }
 
@@ -211,117 +284,5 @@ impl ValidationContext {
 }
 
 #[cfg(test)]
-mod tests {
-    use super::*;
-
-    const TEST_CHAIN_ID: ChainId = ChainId::new(1);
-    const TEST_FORKS: &[ForkSpec] = &[
-        ForkSpec {
-            chain_id: TEST_CHAIN_ID,
-            hardfork: Hardfork::Frontier,
-            activation: ForkActivation::BlockOnly {
-                activation_block: BlockNumber::new(0),
-            },
-        },
-        ForkSpec {
-            chain_id: TEST_CHAIN_ID,
-            hardfork: Hardfork::Shanghai,
-            activation: ForkActivation::BlockAndTimestamp {
-                activation_block: BlockNumber::new(10),
-                activation_timestamp: UnixTimestamp::new(20),
-            },
-        },
-        ForkSpec {
-            chain_id: TEST_CHAIN_ID,
-            hardfork: Hardfork::Cancun,
-            activation: ForkActivation::BlockAndTimestamp {
-                activation_block: BlockNumber::new(20),
-                activation_timestamp: UnixTimestamp::new(30),
-            },
-        },
-    ];
-    const TEST_CHAIN: ChainSpec<'static> = ChainSpec::new(TEST_CHAIN_ID, TEST_FORKS);
-
-    #[test]
-    fn activation_requires_block_and_time() {
-        let context = ValidationContext {
-            fork: ForkSpec {
-                chain_id: ChainId::new(1),
-                hardfork: Hardfork::Shanghai,
-                activation: ForkActivation::BlockAndTimestamp {
-                    activation_block: BlockNumber::new(10),
-                    activation_timestamp: UnixTimestamp::new(20),
-                },
-            },
-            block_number: BlockNumber::new(10),
-            timestamp: UnixTimestamp::new(19),
-        };
-        assert!(!context.fork_is_active());
-    }
-
-    #[test]
-    fn block_only_activation_ignores_timestamp() {
-        let context = ValidationContext {
-            fork: ForkSpec {
-                chain_id: ChainId::new(1),
-                hardfork: Hardfork::Frontier,
-                activation: ForkActivation::BlockOnly {
-                    activation_block: BlockNumber::new(10),
-                },
-            },
-            block_number: BlockNumber::new(10),
-            timestamp: UnixTimestamp::new(0),
-        };
-        assert!(context.fork_is_active());
-    }
-
-    #[test]
-    fn chain_spec_builds_context_only_for_active_fork() {
-        assert_eq!(
-            TEST_CHAIN.validation_context(
-                Hardfork::Cancun,
-                BlockNumber::new(20),
-                UnixTimestamp::new(29)
-            ),
-            Err(ForkError::Inactive)
-        );
-
-        let context = TEST_CHAIN.validation_context(
-            Hardfork::Cancun,
-            BlockNumber::new(20),
-            UnixTimestamp::new(30),
-        );
-        assert!(matches!(context, Ok(context) if context.fork.hardfork == Hardfork::Cancun));
-    }
-
-    #[test]
-    fn active_fork_returns_last_active_entry() {
-        let fork = TEST_CHAIN.active_fork(BlockNumber::new(20), UnixTimestamp::new(30));
-        assert!(matches!(fork, Ok(fork) if fork.hardfork == Hardfork::Cancun));
-    }
-
-    #[test]
-    fn unsupported_fork_is_explicit() {
-        assert_eq!(
-            TEST_CHAIN.fork_spec(Hardfork::Amsterdam),
-            Err(ForkError::Unsupported)
-        );
-    }
-
-    #[test]
-    fn chain_mismatch_is_rejected() {
-        let forks = [ForkSpec {
-            chain_id: ChainId::new(5),
-            hardfork: Hardfork::Frontier,
-            activation: ForkActivation::BlockOnly {
-                activation_block: BlockNumber::new(0),
-            },
-        }];
-        let spec = ChainSpec::new(TEST_CHAIN_ID, &forks);
-
-        assert_eq!(
-            spec.fork_spec(Hardfork::Frontier),
-            Err(ForkError::ChainMismatch)
-        );
-    }
-}
+#[path = "fork_tests.rs"]
+mod tests;

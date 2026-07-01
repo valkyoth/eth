@@ -33,7 +33,7 @@ publication when a crate is marked `unchanged`.
 | `eth-valkyoth-codec` | `0.16.0` | `0.16.0` | `unchanged` | No | No package changes for v0.17.0. |
 | `eth-valkyoth-primitives` | `0.10.1` | `0.10.1` | `unchanged` | No | No package changes for v0.17.0. |
 | `eth-valkyoth-hash` | `0.10.0` | `0.10.0` | `unchanged` | No | No package changes for v0.17.0. |
-| `eth-valkyoth-protocol` | `0.16.0` | `0.17.0` | `code` | Yes | Adds explicit chain/fork spec APIs, activation context selection, unsupported-fork errors, and chain mismatch checks. |
+| `eth-valkyoth-protocol` | `0.16.0` | `0.17.0` | `code` | Yes | Adds explicit chain/fork spec APIs, activation context selection, and fail-closed malformed-spec checks. |
 | `eth-valkyoth-verify` | `0.7.0` | `0.7.0` | `unchanged` | No | No package changes for v0.17.0. |
 | `eth-valkyoth-derive` | `0.16.1` | `0.16.1` | `unchanged` | No | No package changes for v0.17.0. |
 | `eth-valkyoth-sanitization` | `0.7.1` | `0.7.1` | `unchanged` | No | No package changes for v0.17.0. |

@@ -67,7 +67,9 @@ Implemented now:
 - No-allocation canonical transaction envelope encoding for admitted
   unvalidated legacy, EIP-2930, EIP-1559, and EIP-4844 transaction domains.
 - Explicit caller-provided `ChainSpec`, `ForkSpec`, `Hardfork`, and
-  `ValidationContext` APIs for fork activation selection.
+  `ValidationContext` APIs for fork activation selection, including
+  fail-closed checks for duplicate forks, wrong-chain entries, and
+  non-monotonic fork or activation ordering.
 - RLP derive design and private derive-crate prototype tests for future
   `RlpEncode`/`RlpDecode` support.
 - Caller-provided Keccak-256 trait boundary without a default hash

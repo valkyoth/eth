@@ -16,13 +16,17 @@ own chain spec entries from reviewed upstream data.
 
 - Added `Hardfork` identities for execution-layer fork selection.
 - Added `ChainSpec` as a caller-reviewed list of admitted fork specs.
+- Added `ChainSpec::try_new` for dynamic or generated chain spec entries that
+  need eager runtime validation.
 - Extended `ForkSpec` with an explicit hardfork identity.
 - Added `ForkSpec::is_active_at`.
 - Added `ChainSpec::fork_spec`, `ChainSpec::validation_context`, and
   `ChainSpec::active_fork`.
-- Added `ForkError::ChainMismatch`.
+- Added `ForkError::ChainMismatch`, `ForkError::DuplicateFork`, and
+  `ForkError::NonMonotonicForkOrder`.
 - Added tests for block-only activation, block/timestamp activation,
-  unsupported forks, chain mismatch, and active-fork boundary selection.
+  unsupported forks, chain mismatch, duplicate forks, non-monotonic fork order,
+  non-monotonic activation thresholds, and active-fork boundary selection.
 - Added `scripts/release_0_17_gate.sh`.
 
 ## Security Notes
@@ -31,6 +35,12 @@ own chain spec entries from reviewed upstream data.
   transaction, header, receipt, account-state, gas, fee, or sender validity.
 - Missing fork entries produce `ForkError::Unsupported`.
 - Fork entries with the wrong chain ID produce `ForkError::ChainMismatch`.
+- Duplicate fork entries produce `ForkError::DuplicateFork`.
+- Non-monotonic hardfork or activation ordering produces
+  `ForkError::NonMonotonicForkOrder`.
+- `ChainSpec::new` remains the `const` constructor for hand-audited static
+  tables; use `ChainSpec::try_new` for generated config, external chain-spec
+  data, or merged fork lists.
 - Timestamp-based forks require both block and timestamp thresholds.
 
 ## Release Gate
