@@ -5,12 +5,17 @@
 #[cfg(feature = "std")]
 extern crate std;
 
-use core::{fmt, marker::PhantomData};
+use core::fmt;
 
 mod fork;
+mod state;
 mod transaction;
 
 pub use fork::{ChainSpec, ForkActivation, ForkError, ForkSpec, Hardfork, ValidationContext};
+pub use state::{
+    Canonical, CanonicalValidationProof, Decoded, ForkValidated, ForkValidationProof,
+    SenderRecovered, SenderRecoveryProof, Transaction,
+};
 pub use transaction::{
     ACCESS_LIST_TRANSACTION_FIELD_COUNT, ACCESS_LIST_TRANSACTION_TYPE, AccessList,
     AccessListEntries, AccessListEntry, AccessListStorageKeyItems, AccessListStorageKeys,
@@ -141,90 +146,11 @@ impl fmt::Display for FeatureError {
 #[cfg(feature = "std")]
 impl std::error::Error for FeatureError {}
 
-/// Fork selection or activation failure.
-/// Raw wire input was accepted by the codec.
-#[derive(Clone, Copy, Debug, Eq, PartialEq)]
-pub struct Decoded;
-
-/// Canonical wire form and type-specific structure were checked.
-#[derive(Clone, Copy, Debug, Eq, PartialEq)]
-pub struct Canonical;
-
-/// Fork-specific validity was checked.
-#[derive(Clone, Copy, Debug, Eq, PartialEq)]
-pub struct ForkValidated;
-
-/// Sender recovery succeeded.
-#[derive(Clone, Copy, Debug, Eq, PartialEq)]
-pub struct SenderRecovered;
-
-/// A transaction token whose validation state is tracked at compile time.
-#[derive(Clone, Copy, Debug, Eq, PartialEq)]
-pub struct Transaction<State> {
-    _state: PhantomData<State>,
-}
-
-impl Transaction<Decoded> {
-    /// Creates a token for a decoded transaction in internal tests.
-    ///
-    /// A public decoded-transaction entry point will be added only together
-    /// with the real codec output that proves the decoded state.
-    #[must_use]
-    #[cfg(test)]
-    pub(crate) const fn decoded() -> Self {
-        Self {
-            _state: PhantomData,
-        }
-    }
-
-    /// Advances to canonical form after canonical checks pass.
-    #[must_use]
-    pub const fn into_canonical(self) -> Transaction<Canonical> {
-        Transaction {
-            _state: PhantomData,
-        }
-    }
-}
-
-impl Transaction<Canonical> {
-    /// Advances after fork-specific validation passes.
-    #[must_use]
-    pub const fn into_fork_validated(self) -> Transaction<ForkValidated> {
-        Transaction {
-            _state: PhantomData,
-        }
-    }
-}
-
-impl Transaction<ForkValidated> {
-    /// Advances after sender recovery succeeds.
-    #[must_use]
-    pub const fn into_sender_recovered(self) -> Transaction<SenderRecovered> {
-        Transaction {
-            _state: PhantomData,
-        }
-    }
-}
-
 #[cfg(test)]
 mod tests {
     use super::*;
     extern crate std;
     use std::string::ToString;
-
-    #[test]
-    fn transaction_typestate_advances_in_order() {
-        let transaction = Transaction::decoded()
-            .into_canonical()
-            .into_fork_validated()
-            .into_sender_recovered();
-        assert_eq!(
-            transaction,
-            Transaction::<SenderRecovered> {
-                _state: PhantomData
-            }
-        );
-    }
 
     #[test]
     fn protocol_errors_have_stable_codes_and_categories() {

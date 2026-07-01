@@ -597,7 +597,7 @@ Exit criteria:
 
 ### v0.17.0 - Chain And Fork Specs
 
-Status: pentest passed; final GitHub checks pending before tag.
+Status: tagged.
 
 Goal: make chain and fork activation rules explicit.
 
@@ -619,6 +619,8 @@ Exit criteria:
 - Consensus-sensitive operations require explicit chain and fork context.
 
 ### v0.18.0 - Transaction Validation Typestates
+
+Status: implementation complete; pentest pending.
 
 Goal: separate decode, canonicality, fork validation, and sender recovery.
 
