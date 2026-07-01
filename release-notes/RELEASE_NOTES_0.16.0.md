@@ -1,6 +1,6 @@
 # eth 0.16.0 Release Notes
 
-Status: implementation ready for pentest
+Status: pentest remediation ready for retest
 
 ## Summary
 
@@ -30,6 +30,8 @@ prove fork validity.
 - Added `eth-valkyoth-codec::encoded_rlp_list_header_len` and
   `eth-valkyoth-codec::encode_rlp_list_header` for no-allocation streaming
   encoders.
+- Added failure-path tests that verify transaction envelope type/header bytes
+  are not committed when payload writer completion fails.
 
 ## Security Notes
 
@@ -45,6 +47,8 @@ prove fork validity.
   recovery remain outside this release.
 - EIP-1559 fee ordering and EIP-4844 blob fee/hash/KZG/data-availability checks
   remain validation-layer responsibilities.
+- First pentest pass fixed transaction encoder envelope writes so list headers
+  and typed transaction bytes are committed only after payload writer completion.
 
 ## Release Gate
 

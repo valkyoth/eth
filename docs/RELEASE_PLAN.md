@@ -546,7 +546,7 @@ Exit criteria:
 
 ### v0.16.0 - Transaction Encoding
 
-Status: implementation complete; pentest pending.
+Status: implementation complete; pentest remediation ready for retest.
 
 Goal: encode admitted transaction envelopes canonically.
 

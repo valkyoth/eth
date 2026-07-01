@@ -35,7 +35,7 @@ dependencies.
 
 ## Current Status
 
-Status: `v0.16.0` transaction encoding implementation is ready for pentest.
+Status: `v0.16.0` transaction encoding pentest remediation is ready for retest.
 `v0.15.0` is the latest tagged release.
 
 Implemented now:

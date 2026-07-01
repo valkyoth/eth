@@ -8,13 +8,14 @@ use super::access_list::ACCESS_LIST_TRANSACTION_TYPE;
 use super::blob::BLOB_TRANSACTION_TYPE;
 use super::dynamic_fee::DYNAMIC_FEE_TRANSACTION_TYPE;
 use super::{
-    AccessListTransactionTo, BlobVersionedHashes, DynamicFeeTransactionTo,
-    UnvalidatedAccessListTransaction, UnvalidatedBlobTransaction, UnvalidatedDynamicFeeTransaction,
-    UnvalidatedLegacyTransaction,
+    AccessListTransactionTo, BlobVersionedHashes, UnvalidatedAccessListTransaction,
+    UnvalidatedBlobTransaction, UnvalidatedDynamicFeeTransaction, UnvalidatedLegacyTransaction,
 };
 use crate::transaction::LegacyTransactionTo;
 
 mod error;
+#[cfg(test)]
+mod tests;
 
 pub use error::{TransactionEncodeError, TransactionEncodeErrorCategory};
 
@@ -113,7 +114,7 @@ pub fn encode_access_list_transaction(
             write_u64(transaction.nonce.get(), fields)?;
             write_wei(transaction.gas_price.to_be_bytes(), fields)?;
             write_u64(transaction.gas_limit.get(), fields)?;
-            write_access_list_to(transaction.to, fields)?;
+            write_transaction_to(transaction.to, fields)?;
             write_wei(transaction.value.to_be_bytes(), fields)?;
             write_scalar(transaction.input, fields)?;
             write_access_list(transaction.access_list, fields)?;
@@ -148,7 +149,7 @@ pub fn encode_dynamic_fee_transaction(
             write_wei(transaction.max_priority_fee_per_gas.to_be_bytes(), fields)?;
             write_wei(transaction.max_fee_per_gas.to_be_bytes(), fields)?;
             write_u64(transaction.gas_limit.get(), fields)?;
-            write_access_list_to(transaction.to, fields)?;
+            write_transaction_to(transaction.to, fields)?;
             write_wei(transaction.value.to_be_bytes(), fields)?;
             write_scalar(transaction.input, fields)?;
             write_access_list(transaction.access_list, fields)?;
@@ -279,13 +280,14 @@ fn encode_list_envelope(
     if output.len() < total_len {
         return Err(DecodeError::OffsetOutOfBounds);
     }
-    let header_len = encode_rlp_list_header(payload_len, output)?;
+    let header_len = encoded_rlp_list_header_len(payload_len)?;
     let fields = output
         .get_mut(header_len..total_len)
         .ok_or(DecodeError::OffsetOutOfBounds)?;
     let mut writer = FieldWriter::new(fields);
     write_fields(&mut writer)?;
     writer.finish(payload_len)?;
+    encode_rlp_list_header(payload_len, output)?;
     Ok(total_len)
 }
 
@@ -300,12 +302,12 @@ fn encode_typed_envelope(
     if output.len() < total_len {
         return Err(DecodeError::OffsetOutOfBounds);
     }
-    let type_byte = output.first_mut().ok_or(DecodeError::OffsetOutOfBounds)?;
-    *type_byte = transaction_type;
     let payload_output = output
         .get_mut(1..total_len)
         .ok_or(DecodeError::OffsetOutOfBounds)?;
     encode_list_envelope(payload_len, payload_output, write_fields)?;
+    let type_byte = output.first_mut().ok_or(DecodeError::OffsetOutOfBounds)?;
+    *type_byte = transaction_type;
     Ok(total_len)
 }
 
@@ -403,8 +405,8 @@ fn write_legacy_to(
     }
 }
 
-fn write_access_list_to(
-    to: DynamicFeeTransactionTo,
+fn write_transaction_to(
+    to: AccessListTransactionTo,
     writer: &mut FieldWriter<'_>,
 ) -> Result<(), DecodeError> {
     match to {
