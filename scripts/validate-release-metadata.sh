@@ -26,12 +26,17 @@ test -f release-notes/RELEASE_NOTES_0.11.0.md
 test -f release-notes/RELEASE_NOTES_0.12.0.md
 test -f release-notes/RELEASE_NOTES_0.13.0.md
 test -f release-notes/RELEASE_NOTES_0.14.0.md
+test -f release-notes/RELEASE_NOTES_0.15.0.md
+test -f release-notes/RELEASE_NOTES_0.16.0.md
+test -f release-notes/RELEASE_NOTES_0.16.1.md
 test -x scripts/release_0_9_gate.sh
 test -x scripts/release_0_10_gate.sh
 test -x scripts/release_0_11_gate.sh
 test -x scripts/release_0_12_gate.sh
 test -x scripts/release_0_13_gate.sh
 test -x scripts/release_0_14_gate.sh
+test -x scripts/release_0_15_gate.sh
+test -x scripts/release_0_16_gate.sh
 test -f docs/spec-source-policy.md
 grep -q 'execution_specs_repo' spec-lock.toml
 grep -q 'local_reference_store_env' spec-lock.toml

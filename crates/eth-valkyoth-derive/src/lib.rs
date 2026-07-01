@@ -1,6 +1,9 @@
 #![forbid(unsafe_code)]
 //! Optional derive macros for `eth-valkyoth-sanitization`.
 
+#[cfg(test)]
+mod rlp;
+
 use proc_macro::TokenStream;
 use proc_macro2::TokenStream as TokenStream2;
 use quote::quote;

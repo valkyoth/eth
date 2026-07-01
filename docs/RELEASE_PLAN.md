@@ -568,6 +568,8 @@ Exit criteria:
 
 ### v0.16.1 - RLP Derive Evaluation
 
+Status: implementation complete; pentest pending.
+
 Goal: decide and prototype derive support for RLP encoding and decoding only
 after hand-written primitive and transaction APIs have stabilized.
 
@@ -575,7 +577,8 @@ Deliverables:
 
 - derive macro API design for `RlpEncode` and `RlpDecode`;
 - explicit field-order policy and skip/default-field rules;
-- generated code uses the same bounded codec helpers as hand-written paths;
+- documentation requiring generated code to use the same bounded codec helpers
+  as hand-written paths;
 - negative tests for unsupported generics, enums, unions, and ambiguous fields;
 - documentation explaining when to prefer hand-written implementations.
 

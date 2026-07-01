@@ -6,7 +6,7 @@ Most users should depend on the facade crate instead:
 
 ```toml
 [dependencies]
-eth = "0.8"
+eth = "0.16"
 ```
 
 Crates.io: <https://crates.io/crates/eth>
@@ -19,6 +19,11 @@ and does not add runtime clearing by itself.
 [dependencies]
 eth-valkyoth-sanitization = { version = "0.7", features = ["derive"] }
 ```
+
+RLP encode/decode derives are under evaluation and are not exported by this
+crate yet. The v0.16.1 prototype is private to tests and rejects generics,
+enums, unions, and ambiguous `eth_rlp` field attributes until the codec trait
+surface is stable.
 
 Supported field attribute:
 
