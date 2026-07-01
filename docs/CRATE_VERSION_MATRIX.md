@@ -1,7 +1,7 @@
 # Crate Version Matrix
 
-Status: `v0.24.0` set-code transaction decoding and encoding is ready for
-pentest.
+Status: `v0.24.0` set-code transaction decoding and encoding pentest passed;
+waiting for final GitHub checks.
 
 `eth` uses independent crate versions. The facade crate remains the main user
 entry point, but support crates are published only when their own package

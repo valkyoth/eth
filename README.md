@@ -35,8 +35,8 @@ dependencies.
 
 ## Current Status
 
-Status: `v0.24.0` set-code transaction decoding and encoding is ready for
-pentest.
+Status: `v0.24.0` set-code transaction decoding and encoding pentest passed;
+waiting for final GitHub checks.
 
 Implemented now:
 

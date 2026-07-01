@@ -1,6 +1,6 @@
 # Transaction Signature Validation
 
-Status: v0.24.0 set-code transaction decoding is ready for pentest; set-code
+Status: v0.24.0 set-code transaction decoding pentest passed; set-code
 signature validation remains fail-closed.
 
 `eth-valkyoth-verify` now exposes decoded transaction signature validation

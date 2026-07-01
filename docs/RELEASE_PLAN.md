@@ -792,7 +792,7 @@ Exit criteria:
 
 ### v0.24.0 - Set-Code Transaction Decode
 
-Status: implementation ready for pentest.
+Status: pentest passed; waiting for final GitHub checks.
 
 Goal: decode and encode the next typed transaction family currently left
 opaque by the transaction-envelope shell.

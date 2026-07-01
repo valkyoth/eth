@@ -46,7 +46,7 @@ dependencies.
 ## Current Status
 
 The current release candidate is `0.24.0`; set-code transaction decoding and
-encoding is ready for pentest.
+encoding pentest passed and final GitHub checks are pending.
 
 Implemented now:
 
