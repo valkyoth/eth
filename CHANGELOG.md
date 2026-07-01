@@ -10,6 +10,8 @@ All notable changes to `eth` are documented here.
   target modeling, bounded calldata exposure, and signature U256 width checks.
 - Extended transaction-envelope fuzz coverage to drive legacy transaction field
   decoding before later typed transaction decoders land.
+- Updated the pinned stable Rust toolchain and compatibility evidence through
+  Rust `1.96.1`.
 - Started `0.9.0` with canonical no-allocation RLP encoding helpers for
   scalar byte strings, Ethereum integer payloads, list payloads, and decoded
   RLP items.

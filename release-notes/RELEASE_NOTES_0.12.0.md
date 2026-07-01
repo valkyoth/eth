@@ -22,6 +22,8 @@ validity.
 - Re-exported the legacy decode errors from `eth::error`.
 - Extended the transaction-envelope fuzz target to also drive legacy transaction
   field decoding.
+- Updated the pinned stable Rust toolchain and release-gate compatibility
+  matrix through Rust `1.96.1`.
 
 ## Security Notes
 

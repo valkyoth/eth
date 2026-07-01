@@ -7,6 +7,6 @@ scripts/materialize_fuzz_seeds.py --check
 cargo check --manifest-path fuzz/Cargo.toml
 cargo test -p eth-valkyoth-protocol -p eth --all-features
 cargo clippy -p eth-valkyoth-protocol -p eth --all-targets --all-features -- -D warnings
-for toolchain in 1.90.0 1.91.0 1.92.0 1.93.0 1.94.0 1.95.0 1.96.0; do
+for toolchain in 1.90.0 1.91.0 1.92.0 1.93.0 1.94.0 1.95.0 1.96.0 1.96.1; do
     cargo "+$toolchain" check --workspace --all-features
 done

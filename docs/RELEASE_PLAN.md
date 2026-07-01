@@ -135,8 +135,8 @@ Goal: initialize the serious Rust workspace and policy baseline.
 
 Deliverables:
 
-- Rust stable `1.96.0` pinned.
-- Rust `1.90.0` through `1.96.0` compatibility policy.
+- Rust stable `1.96.1` pinned.
+- Rust `1.90.0` through `1.96.1` compatibility policy.
 - Focused no_std workspace crates.
 - CI, dependency policy, security policy, release notes.
 - Implementation, release, scope, threat-model, modularity, toolchain,

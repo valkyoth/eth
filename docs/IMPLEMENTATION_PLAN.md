@@ -27,8 +27,8 @@ The first production value is:
 
 ## Non-Negotiable Engineering Rules
 
-- Rust stable `1.96.0`, edition 2024, workspace resolver `3`.
-- MSRV is Rust `1.90.0`; compatibility must be checked through `1.96.0`.
+- Rust stable `1.96.1`, edition 2024, workspace resolver `3`.
+- MSRV is Rust `1.90.0`; compatibility must be checked through `1.96.1`.
 - Latest crate and tool versions are checked before dependency or tooling edits.
 - Official Ethereum sources are checked before consensus-sensitive
   implementation work; exact revisions are pinned in `spec-lock.toml`.
@@ -211,4 +211,4 @@ Release gate:
 
 - no unresolved critical or high dependency/advisory/audit findings;
 - official conformance suites pass for every claimed feature;
-- all supported Rust versions from `1.90.0` through `1.96.0` are checked.
+- all supported Rust versions from `1.90.0` through `1.96.1` are checked.

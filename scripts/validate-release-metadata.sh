@@ -39,5 +39,5 @@ if grep -q 'spec_required = true' spec-lock.toml; then
 fi
 grep -q 'license = "MIT OR Apache-2.0"' Cargo.toml
 grep -q 'repository = "https://github.com/valkyoth/eth"' Cargo.toml
-grep -q 'channel = "1.96.0"' rust-toolchain.toml
+grep -q 'channel = "1.96.1"' rust-toolchain.toml
 grep -q 'rust-version = "1.90"' Cargo.toml

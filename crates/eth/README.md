@@ -81,7 +81,7 @@ Not implemented yet:
 | --- | --- |
 | License | `MIT OR Apache-2.0` |
 | MSRV | Rust `1.90.0` |
-| Latest verified stable | Rust `1.96.0` |
+| Latest verified stable | Rust `1.96.1` |
 | Default target | `no_std` |
 | Default features | protocol-core only |
 | Default networking/signing | none |
@@ -464,7 +464,8 @@ Compatibility evidence for `0.12.0`:
 | `1.93.0` | `cargo check --workspace --all-features` |
 | `1.94.0` | `cargo check --workspace --all-features` |
 | `1.95.0` | `cargo check --workspace --all-features` |
-| `1.96.0` | full release gate |
+| `1.96.0` | `cargo check --workspace --all-features` |
+| `1.96.1` | full release gate |
 
 ## License
 
