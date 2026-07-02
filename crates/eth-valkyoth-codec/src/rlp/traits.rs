@@ -10,7 +10,12 @@ use super::{
 /// RLP encoding contract for derive-generated and hand-written domains.
 ///
 /// Implementations must return the exact encoded length and must not modify the
-/// output buffer when returning an error.
+/// output buffer when they reject before writing.
+///
+/// Aggregate encoders, including derive-generated struct encoders, may already
+/// have written a valid prefix when a later field encoder returns an error or
+/// reports an inconsistent byte count. Callers must treat the returned length as
+/// authoritative and must discard the output buffer on any error.
 pub trait RlpEncode {
     /// Error returned by this encoder.
     type Error;

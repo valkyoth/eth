@@ -22,5 +22,6 @@ crash reproduction:
 <https://github.com/valkyoth/eth/blob/main/docs/fuzzing.md>
 
 The `0.17.0` release adds public `RlpEncode` and `RlpDecode` traits plus
-`RlpDeriveError` for derive-generated struct encoders and decoders. The traits
-preserve caller-provided output buffers and explicit `DecodeLimits`.
+`RlpDeriveError` for derive-generated struct encoders and decoders. Decoders
+require explicit `DecodeLimits`; callers must discard encode output buffers
+after any returned error.

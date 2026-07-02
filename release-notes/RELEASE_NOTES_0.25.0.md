@@ -36,6 +36,8 @@ and implicit skipped fields remain rejected.
   not bypass the bounded codec contract.
 - The generated RLP encoder now treats inconsistent field encoder length
   reporting as a runtime error instead of relying on a debug-only assertion.
+- Encode callers must discard output buffers after any returned error; aggregate
+  derived encoders can leave a partial prefix when a later field fails.
 - Skipped fields must be explicit:
   `#[eth_rlp(skip, default, reason = "...")]`.
 - Transaction structs still use hand-written encoders and decoders. Public RLP

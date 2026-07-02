@@ -76,7 +76,10 @@ Public derives must preserve these invariants:
 - decode paths require `DecodeLimits` and cumulative budget accounting;
 - integer fields delegate to canonical codec and primitive helpers;
 - fixed-width fields reject adjacent scalar lengths;
-- output buffers are not mutated on encode errors;
+- direct field encoders must not mutate buffers when they reject before
+  writing;
+- aggregate derived encoders may leave a partial prefix on later field failure,
+  so callers must discard output buffers after any encode error;
 - generated transaction code cannot bypass fork or sender validation.
 
 The v0.25.0 implementation includes trybuild compile-fail coverage for
