@@ -49,8 +49,8 @@ P2P integrations become real dependencies.
 
 ## Current Status
 
-The current release candidate is `0.29.0`; receipt decoding is implemented and
-ready for external pentest.
+The current release candidate is `0.29.0`; receipt decoding has passed pentest
+and is waiting for final GitHub checks before tagging.
 
 Implemented now:
 

@@ -1,6 +1,6 @@
 # eth 0.29.0 Release Notes
 
-Status: implementation complete; pending external pentest
+Status: pentest passed; waiting for final GitHub checks before tagging
 
 ## Summary
 
@@ -53,7 +53,8 @@ keeps log data borrowed.
 
 ## Release Gate
 
-- External pentest must pass before tagging.
+- External pentest passed after remediation of the shared EIP-2718 prefix
+  classifier finding.
 - Final GitHub checks must pass on the pentest report commit before tagging.
 
 ## Verification

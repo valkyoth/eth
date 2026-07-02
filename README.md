@@ -35,8 +35,8 @@ dependencies.
 
 ## Current Status
 
-Status: `v0.29.0` receipt decoding is implemented and ready for external
-pentest.
+Status: `v0.29.0` receipt decoding has passed pentest and is waiting for final
+GitHub checks before tagging.
 
 Implemented now:
 

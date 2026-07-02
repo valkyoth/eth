@@ -1077,7 +1077,8 @@ Exit criteria:
 
 ### v0.29.0 - Receipt Decode
 
-Status: implemented; ready for external pentest.
+Status: implementation, pentest remediation, and clean retest complete; waiting
+for final GitHub checks before tagging.
 
 Goal: parse legacy and typed receipts.
 
