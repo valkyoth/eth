@@ -48,7 +48,7 @@ real dependencies.
 ## Current Status
 
 The current release candidate is `0.26.0`; EIP-712 typed-data encoding is
-implemented and ready for external pentest.
+implemented, pentested, and ready for the final GitHub/tag gate.
 
 Implemented now:
 

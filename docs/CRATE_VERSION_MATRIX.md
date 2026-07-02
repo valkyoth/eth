@@ -1,7 +1,7 @@
 # Crate Version Matrix
 
-Status: `v0.26.0` EIP-712 typed-data encoding is implemented and ready for
-external pentest.
+Status: `v0.26.0` EIP-712 typed-data encoding is implemented, pentested, and
+ready for the final GitHub/tag gate.
 
 `eth` uses independent crate versions. The facade crate remains the main user
 entry point, but support crates are published only when their own package

@@ -868,7 +868,8 @@ Implementation note:
 
 ### v0.24.2 - Set-Code Transaction Validity Gate
 
-Status: implemented; ready for external pentest.
+Status: implementation, pentest remediation, and clean retest complete; waiting
+for final GitHub checks before tagging.
 
 Goal: add the non-cryptographic EIP-7702 validity checks that decide whether a
 decoded set-code transaction can advance beyond the unvalidated state.

@@ -1,7 +1,7 @@
 # eth 0.26.0 Release Notes
 
-Status: implementation complete; initial external pentest findings remediated;
-pending retest
+Status: implementation complete; external pentest findings remediated; clean
+retest complete; waiting for final GitHub checks before tagging
 
 ## Summary
 

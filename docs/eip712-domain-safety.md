@@ -1,6 +1,7 @@
 # EIP-712 Domain Safety
 
-Status: v0.26.0 typed-data encoder implemented and ready for external pentest.
+Status: v0.26.0 typed-data encoder implemented, pentested, and ready for the
+final GitHub/tag gate.
 
 EIP-712 structured-data signing extends Ethereum signing with
 `keccak256("\x19\x01" || domainSeparator || hashStruct(message))`. The
