@@ -1,6 +1,6 @@
 # eth 0.28.0 Release Notes
 
-Status: implementation complete; pending external pentest
+Status: pentest passed; waiting for final GitHub checks before tagging
 
 ## Summary
 
@@ -62,7 +62,8 @@ exact canonical RLP bytes for hashing.
 
 ## Release Gate
 
-- External pentest must pass before tagging.
+- External pentest passed for
+  `c2989eab13fad32ac1cc2133452e8eaf1ee3d695`.
 - Final GitHub checks must pass on the pentest report commit before tagging.
 
 ## Verification

@@ -49,8 +49,8 @@ dependencies.
 
 ## Current Status
 
-The current release candidate is `0.28.0`; block header decoding and hashing is
-implemented and ready for external pentest.
+The current release candidate is `0.28.0`; block header decoding and hashing
+has passed pentest and is waiting for final GitHub checks before tagging.
 
 Implemented now:
 

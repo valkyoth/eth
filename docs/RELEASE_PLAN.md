@@ -1054,7 +1054,8 @@ Exit criteria:
 
 ### v0.28.0 - Header Decode And Hashing
 
-Status: implemented; ready for external pentest.
+Status: implementation, pentest remediation, and clean retest complete; waiting
+for final GitHub checks before tagging.
 
 Goal: parse and hash execution-layer block headers.
 
