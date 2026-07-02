@@ -138,6 +138,17 @@ pub enum TransactionSignatureValidationErrorCategory {
 /// low-s/y-parity policy, and sender recovery. It intentionally does not prove
 /// fork validity, fee validity, account-state validity, blob/KZG validity, or
 /// protocol typestate promotion.
+///
+/// # EIP-7702 set-code transactions
+///
+/// For [`UnvalidatedTransaction::SetCode`], `Ok` proves only that the outer
+/// transaction sender signature in the `0x04` domain is valid. It does not
+/// validate any authorization-tuple signature inside `authorization_list`.
+/// Callers must additionally call
+/// [`crate::validate_set_code_authorization_signature`] for every tuple before
+/// treating the authorization list as authenticated. Applying a delegation from
+/// an unchecked authorization tuple is equivalent to skipping signature
+/// verification for that authorizing account.
 pub fn validate_transaction_signature<H1, H2>(
     expected_chain: ChainId,
     transaction: UnvalidatedTransaction<'_>,

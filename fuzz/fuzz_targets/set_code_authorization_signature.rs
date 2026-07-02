@@ -10,24 +10,16 @@ use libfuzzer_sys::fuzz_target;
 
 fuzz_target!(|data: &[u8]| {
     let authorization = authorization_from_data(data);
-    let mut full_scratch = [0_u8; 128];
-    let _ =
-        set_code_authorization_signing_hash(authorization, &mut full_scratch, FuzzKeccak::new());
+    let mut scratch = [0_u8; 160];
+    let scratch_len = usize::from(data.first().copied().unwrap_or_default()).min(scratch.len());
+    let Some(scratch) = scratch.get_mut(..scratch_len) else {
+        return;
+    };
+    let _ = set_code_authorization_signing_hash(authorization, scratch, FuzzKeccak::new());
     let _ = validate_set_code_authorization_signature(
         authorization,
         None,
-        &mut full_scratch,
-        FuzzKeccak::new(),
-        FuzzKeccak::new(),
-    );
-
-    let mut short_scratch = [0_u8; 8];
-    let _ =
-        set_code_authorization_signing_hash(authorization, &mut short_scratch, FuzzKeccak::new());
-    let _ = validate_set_code_authorization_signature(
-        authorization,
-        None,
-        &mut short_scratch,
+        scratch,
         FuzzKeccak::new(),
         FuzzKeccak::new(),
     );

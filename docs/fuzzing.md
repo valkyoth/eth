@@ -25,7 +25,7 @@ state and are ignored by git.
 | `primitives` | Primitive RLP bridge decoders and canonical integer payload constructors. |
 | `transaction_envelope` | EIP-2718 typed envelope classification, legacy RLP-list shell classification, unvalidated legacy/EIP-2930/EIP-1559/EIP-4844/EIP-7702 field decoding, and fixed-buffer canonical re-encoding for successfully decoded transaction models. |
 | `ethereum_signature` | Ethereum `r || s || y_parity` signature parsing and digest-level sender recovery with a deterministic stub hasher. |
-| `set_code_authorization_signature` | EIP-7702 authorization signing-hash construction and tuple signature validation with full and intentionally short scratch buffers. |
+| `set_code_authorization_signature` | EIP-7702 authorization signing-hash construction and tuple signature validation with input-selected scratch-buffer lengths. |
 | `decode_limits` | Stateless and accumulator decode-budget APIs. |
 
 Every new parser that accepts untrusted bytes must either extend one of these

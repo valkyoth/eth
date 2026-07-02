@@ -37,7 +37,7 @@ indicator checks, fee checks, and fork activation remain scheduled for
   `UnvalidatedTransaction::SetCode` uses the EIP-7702 transaction signing
   domain instead of returning `UnsupportedTransactionType`.
 - Added fuzz coverage for set-code authorization signing-hash construction and
-  tuple signature validation with full and intentionally short scratch buffers.
+  tuple signature validation with input-selected scratch-buffer lengths.
 
 ## Security Notes
 
