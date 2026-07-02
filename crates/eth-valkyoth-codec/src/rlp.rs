@@ -1,6 +1,7 @@
 mod encode;
 mod integer;
 mod list;
+mod traits;
 
 #[cfg(test)]
 mod tests;
@@ -25,6 +26,7 @@ pub use list::{
     MAX_RLP_LIST_TRAVERSAL_DEPTH, RlpItem, RlpList, RlpListForm, RlpListItems, decode_rlp_list,
     decode_rlp_list_partial,
 };
+pub use traits::{RlpDecode, RlpDeriveError, RlpEncode, checked_encoded_len_add};
 
 pub(super) const SHORT_STRING_OFFSET: u8 = 0x80;
 /// Base for computing `len_of_len` in long-string encoding.

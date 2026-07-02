@@ -6,7 +6,7 @@ Most users should depend on the facade crate instead:
 
 ```toml
 [dependencies]
-eth = "0.16"
+eth = "0.25"
 ```
 
 Crates.io: <https://crates.io/crates/eth>
@@ -18,7 +18,7 @@ the default `eth` dependency graph.
 
 ```toml
 [dependencies]
-eth-valkyoth-sanitization = "0.6"
+eth-valkyoth-sanitization = "0.7"
 ```
 
 For derive macros:
@@ -28,9 +28,10 @@ For derive macros:
 eth-valkyoth-sanitization = { version = "0.7", features = ["derive"] }
 ```
 
-The derive macros generate calls to `eth_valkyoth_sanitization::SecureSanitize`.
-They do not replace review of secret ownership, copies, logging, paging, swap,
-crash dumps, or compiler/runtime behavior.
+The sanitization derive macros generate calls to
+`eth_valkyoth_sanitization::SecureSanitize`. They do not replace review of
+secret ownership, copies, logging, paging, swap, crash dumps, or
+compiler/runtime behavior.
 
 Enum derives are rejected because Rust does not guarantee inactive variant
 backing bytes are cleared when the active variant changes. Use a struct wrapper

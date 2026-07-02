@@ -1,6 +1,6 @@
 # eth Specification Matrix
 
-Status: source revisions pinned for `v0.24.2`; scalar, list, and canonical
+Status: source revisions pinned for `v0.25.0`; scalar, list, and canonical
 integer RLP decoding, canonical RLP encoding helpers, primitive RLP bridging,
 Keccak-256 trait boundary, RLP fuzz harness baseline, and transaction envelope
 shell plus unvalidated legacy, EIP-2930 access-list, EIP-1559 dynamic-fee,
@@ -25,7 +25,8 @@ behavior must not be implemented from memory.
 
 | Area | Status | Evidence |
 | --- | --- | --- |
-| Execution RLP | partial | `ethereum/tests` pinned in `spec-lock.toml`; scalar byte-string, list, canonical integer decoders, and canonical encoding helpers implemented |
+| Execution RLP | partial | `ethereum/tests` pinned in `spec-lock.toml`; scalar byte-string, list, canonical integer decoders, canonical encoding helpers, and public conservative RLP derives implemented |
+| RLP derives | public conservative surface | v0.25.0 adds public `RlpEncode`/`RlpDecode` traits and derive macros for reviewed structs; generated decoders require `DecodeLimits`; generics, enums, unions, and transaction derives remain rejected |
 | RLP fuzz harness | baseline | `fuzz/` workspace builds; committed hex seeds live under `fuzz/seed-corpus/`; crash reproduction is documented |
 | Keccak-256 hashing | boundary only | `eth-valkyoth-hash` defines caller-provided Keccak-256 trait boundary; no concrete backend admitted |
 | EIP-712 structured data | domain gate | EIP-712 defines the `0x1901` signing digest and optional domain fields; v0.21.0 checks required caller-provided `chainId` and `verifyingContract` fields and builds the signing digest from supplied domain/message hashes; full typed-data encoding is scheduled for v0.26.0 |

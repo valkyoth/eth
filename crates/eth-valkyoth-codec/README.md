@@ -6,7 +6,7 @@ Most users should depend on the facade crate instead:
 
 ```toml
 [dependencies]
-eth = "0.16"
+eth = "0.25"
 ```
 
 Crates.io: <https://crates.io/crates/eth>
@@ -21,6 +21,6 @@ crash reproduction:
 
 <https://github.com/valkyoth/eth/blob/main/docs/fuzzing.md>
 
-The `0.16.0` release adds a list-header encoding helper for no-allocation
-streaming encoders that compute an RLP list payload length before writing the
-payload bytes.
+The `0.17.0` release adds public `RlpEncode` and `RlpDecode` traits plus
+`RlpDeriveError` for derive-generated struct encoders and decoders. The traits
+preserve caller-provided output buffers and explicit `DecodeLimits`.

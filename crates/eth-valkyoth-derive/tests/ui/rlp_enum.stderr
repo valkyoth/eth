@@ -1,0 +1,5 @@
+error: RLP derives are not available for enums; use an explicit hand-written domain decoder
+ --> tests/ui/rlp_enum.rs:4:1
+  |
+4 | enum Invalid {
+  | ^^^^

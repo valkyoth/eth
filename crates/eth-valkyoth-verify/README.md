@@ -6,7 +6,7 @@ Most users should depend on the facade crate instead:
 
 ```toml
 [dependencies]
-eth = "0.24"
+eth = "0.25"
 ```
 
 Crates.io: <https://crates.io/crates/eth>
@@ -15,8 +15,12 @@ This package is published separately so the `eth` workspace can keep small,
 auditable crate boundaries. Treat it as a lower-level building block unless the
 `eth` documentation explicitly says otherwise.
 
-The `0.14.1` support-crate release, shipped with `eth` `0.24.2`, aligns the
-protocol dependency with the EIP-7702 set-code transaction validity gate.
+The `0.14.2` support-crate release, shipped with `eth` `0.25.0`, aligns the
+published codec, primitive, hash, and protocol dependency ranges for the public
+RLP derive surface.
+
+The previous `0.14.1` support-crate release aligned the protocol dependency
+with the EIP-7702 set-code transaction validity gate.
 
 The previous `0.14.0` release added EIP-7702 set-code transaction signing
 hashes, decoded set-code transaction signature validation, and authorization

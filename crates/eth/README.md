@@ -26,7 +26,7 @@
 `eth` is the public facade crate for a `no_std`-first Ethereum
 execution-layer protocol workspace.
 
-The crate is intentionally conservative at `0.24.2`: it provides explicit
+The crate is intentionally conservative at `0.25.0`: it provides explicit
 Ethereum primitive domains, bounded decode-budget policy, stable error
 categories, primitive RLP bridge helpers, a caller-provided Keccak-256 boundary,
 RLP fuzz-harness evidence, a transaction envelope shell, unvalidated legacy
@@ -39,7 +39,7 @@ activation context, proof-gated transaction typestate transitions, replay-domain
 validation for transaction chain binding, transaction signing-hash helpers,
 EIP-7702 authorization signing and signer recovery helpers, an EIP-7702
 set-code transaction validity gate, decoded transaction signature validation
-helpers, RLP derive design evidence,
+helpers, public RLP derive support,
 digest-level secp256k1 sender recovery, EIP-712 domain-safety checks, small
 first-party crate boundaries, optional sanitization support, and release
 evidence before RPC, signer, EVM, Reth, or P2P integrations become real
@@ -47,8 +47,8 @@ dependencies.
 
 ## Current Status
 
-The current release candidate is `0.24.2`; the set-code transaction validity
-gate is implemented and ready for external pentest.
+The current release candidate is `0.25.0`; public RLP derives are implemented
+and ready for external pentest.
 
 Implemented now:
 
@@ -103,8 +103,8 @@ Implemented now:
   expected-sender comparison.
 - EIP-712 domain-safety checks for required `chainId` and
   `verifyingContract` fields, plus a domain-gated sender recovery helper.
-- RLP derive design and private derive-crate prototype tests for future
-  `RlpEncode`/`RlpDecode` support.
+- Public `RlpEncode`/`RlpDecode` traits and derive macros for reviewed simple
+  structs, with bounded decode and trybuild compile-fail coverage.
 - Caller-provided Keccak-256 trait boundary without a default hash
   implementation dependency.
 - RLP fuzz harness with committed hex seed corpus and crash reproduction docs.
@@ -149,21 +149,21 @@ Not implemented yet:
 
 ```toml
 [dependencies]
-eth = "0.24"
+eth = "0.25"
 ```
 
 Disable defaults explicitly for embedded or freestanding builds:
 
 ```toml
 [dependencies]
-eth = { version = "0.24", default-features = false }
+eth = { version = "0.25", default-features = false }
 ```
 
 Optional sanitization support:
 
 ```toml
 [dependencies]
-eth = { version = "0.24", features = ["sanitization"] }
+eth = { version = "0.25", features = ["sanitization"] }
 ```
 
 ## Features
@@ -773,8 +773,17 @@ For derive macros, depend on the support crate directly:
 eth-valkyoth-sanitization = { version = "0.7", features = ["derive"] }
 ```
 
-RLP encode/decode derives are not public yet. The current design is documented
-in the workspace `docs/rlp-derive-design.md`.
+Public RLP encode/decode derives live in `eth-valkyoth-derive`:
+
+```toml
+[dependencies]
+eth-valkyoth-derive = "0.17"
+eth-valkyoth-codec = "0.17"
+```
+
+The derive surface is intentionally conservative. It supports reviewed structs
+only, rejects generics/enums/unions, requires `DecodeLimits` for decode, and
+keeps skipped fields explicit with `#[eth_rlp(skip, default, reason = "...")]`.
 
 ## Support Crates
 
@@ -789,7 +798,7 @@ the workspace can keep small, auditable boundaries:
 | `eth-valkyoth-protocol` | yes | Fork-aware validation states and protocol context. |
 | `eth-valkyoth-verify` | yes | Verification boundaries for signatures, proofs, replay domains, and EIP-712 domain checks. |
 | `eth-valkyoth-sanitization` | no | Optional bridge to the `sanitization` crate. |
-| `eth-valkyoth-derive` | no | Optional sanitization derive macros. |
+| `eth-valkyoth-derive` | no | Optional sanitization and RLP derive macros. |
 | `eth-valkyoth-evm` | no | Future EVM adapter boundary. |
 | `eth-valkyoth-rpc` | no | Future RPC trust-policy boundary. |
 | `eth-valkyoth-signer` | no | Future signer isolation boundary. |
@@ -801,7 +810,7 @@ the workspace can keep small, auditable boundaries:
 The minimum supported Rust version is Rust `1.90.0`. New deployments should use
 the latest stable Rust verified by the release gates.
 
-Compatibility evidence for `0.24.2`:
+Compatibility evidence for `0.25.0`:
 
 | Rust | Local Evidence |
 | --- | --- |

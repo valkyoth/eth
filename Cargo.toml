@@ -18,7 +18,7 @@ default-members = ["crates/eth"]
 resolver = "3"
 
 [workspace.package]
-version = "0.24.2"
+version = "0.25.0"
 edition = "2024"
 rust-version = "1.90"
 license = "MIT OR Apache-2.0"
@@ -43,18 +43,18 @@ cast_possible_truncation = "deny"
 cast_sign_loss = "deny"
 
 [workspace.dependencies]
-eth-valkyoth-codec = { path = "crates/eth-valkyoth-codec", version = "0.16.0" }
-eth-valkyoth-derive = { path = "crates/eth-valkyoth-derive", version = "0.16.1" }
+eth-valkyoth-codec = { path = "crates/eth-valkyoth-codec", version = "0.17.0" }
+eth-valkyoth-derive = { path = "crates/eth-valkyoth-derive", version = "0.17.0" }
 eth-valkyoth-evm = { path = "crates/eth-valkyoth-evm", version = "0.7.0" }
-eth-valkyoth-hash = { path = "crates/eth-valkyoth-hash", version = "0.10.0" }
-eth-valkyoth-primitives = { path = "crates/eth-valkyoth-primitives", version = "0.10.1" }
-eth-valkyoth-protocol = { path = "crates/eth-valkyoth-protocol", version = "0.22.0" }
+eth-valkyoth-hash = { path = "crates/eth-valkyoth-hash", version = "0.10.1" }
+eth-valkyoth-primitives = { path = "crates/eth-valkyoth-primitives", version = "0.11.0" }
+eth-valkyoth-protocol = { path = "crates/eth-valkyoth-protocol", version = "0.22.1" }
 eth-valkyoth-reth = { path = "crates/eth-valkyoth-reth", version = "0.7.0" }
 eth-valkyoth-rpc = { path = "crates/eth-valkyoth-rpc", version = "0.7.0" }
-eth-valkyoth-sanitization = { path = "crates/eth-valkyoth-sanitization", version = "0.7.1" }
-eth-valkyoth-signer = { path = "crates/eth-valkyoth-signer", version = "0.7.0" }
+eth-valkyoth-sanitization = { path = "crates/eth-valkyoth-sanitization", version = "0.7.2" }
+eth-valkyoth-signer = { path = "crates/eth-valkyoth-signer", version = "0.7.1" }
 eth-valkyoth-testkit = { path = "crates/eth-valkyoth-testkit", version = "0.7.0" }
-eth-valkyoth-verify = { path = "crates/eth-valkyoth-verify", version = "0.14.1" }
+eth-valkyoth-verify = { path = "crates/eth-valkyoth-verify", version = "0.14.2" }
 k256 = { version = "0.13.4", default-features = false, features = ["ecdsa"] }
 proc-macro2 = "1.0.106"
 quote = "1.0.46"
@@ -62,6 +62,7 @@ sanitization = { version = "1.2.2", default-features = false }
 sha3 = { version = "0.10.9", default-features = false }
 subtle = { version = "2.6.1", default-features = false, features = ["core_hint_black_box"] }
 syn = { version = "2.0.118", features = ["full"] }
+trybuild = "1.0.117"
 
 [profile.release]
 overflow-checks = true

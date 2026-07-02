@@ -14,6 +14,7 @@ pub use subtle::Choice;
 use subtle::ConstantTimeEq as _;
 
 mod rlp;
+mod rlp_traits;
 #[cfg(test)]
 mod tests;
 

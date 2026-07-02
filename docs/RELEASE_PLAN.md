@@ -920,6 +920,8 @@ Implementation note:
 
 ### v0.25.0 - Public RLP Derives
 
+Status: implemented; ready for external pentest.
+
 Goal: turn the private RLP derive prototype into a reviewed public derive
 surface.
 

@@ -1,0 +1,5 @@
+error: RLP derive prototype does not support generics until bounds and lifetimes are specified
+ --> tests/ui/rlp_generic.rs:4:15
+  |
+4 | struct Invalid<T> {
+  |               ^^^

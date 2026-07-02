@@ -1,7 +1,6 @@
 #![forbid(unsafe_code)]
 //! Optional derive macros for `eth-valkyoth-sanitization`.
 
-#[cfg(test)]
 mod rlp;
 
 use proc_macro::TokenStream;
@@ -36,6 +35,30 @@ pub fn derive_secure_sanitize(input: TokenStream) -> TokenStream {
 pub fn derive_secure_sanitize_on_drop(input: TokenStream) -> TokenStream {
     let input = parse_macro_input!(input as DeriveInput);
     expand_secure_sanitize_on_drop(&input)
+        .unwrap_or_else(Error::into_compile_error)
+        .into()
+}
+
+/// Derives `eth_valkyoth_codec::RlpEncode` for reviewed structs.
+///
+/// The generated encoding is an RLP list containing non-skipped fields in Rust
+/// declaration order. Enums, unions, and generics are rejected.
+#[proc_macro_derive(RlpEncode, attributes(eth_rlp))]
+pub fn derive_rlp_encode(input: TokenStream) -> TokenStream {
+    let input = parse_macro_input!(input as DeriveInput);
+    rlp::expand_rlp_encode(&input)
+        .unwrap_or_else(Error::into_compile_error)
+        .into()
+}
+
+/// Derives `eth_valkyoth_codec::RlpDecode` for reviewed structs.
+///
+/// The generated decoder requires explicit `DecodeLimits`, expects an RLP list,
+/// and decodes non-skipped fields in Rust declaration order.
+#[proc_macro_derive(RlpDecode, attributes(eth_rlp))]
+pub fn derive_rlp_decode(input: TokenStream) -> TokenStream {
+    let input = parse_macro_input!(input as DeriveInput);
+    rlp::expand_rlp_decode(&input)
         .unwrap_or_else(Error::into_compile_error)
         .into()
 }

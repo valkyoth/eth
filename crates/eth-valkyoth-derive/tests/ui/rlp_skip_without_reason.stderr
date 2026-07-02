@@ -1,0 +1,6 @@
+error: eth_rlp skip requires default and reason = "..."
+ --> tests/ui/rlp_skip_without_reason.rs:5:5
+  |
+5 | /     #[eth_rlp(skip)]
+6 | |     value: u64,
+  | |______________^

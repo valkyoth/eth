@@ -1,11 +1,11 @@
 # RLP Derive Evaluation
 
-Status: v0.16.1 design and non-exported prototype.
+Status: v0.25.0 public conservative derive surface.
 
-`eth-valkyoth-derive` does not expose public `RlpEncode` or `RlpDecode` macros
-yet. The v0.16.1 release records the API decision and keeps the prototype
-private to tests until the codec traits and transaction validation typestates
-are stable enough for a public derive contract.
+`eth-valkyoth-derive` exposes public `RlpEncode` and `RlpDecode` macros for
+reviewed simple structs. The public surface remains intentionally conservative:
+generics, enums, unions, transaction derives, and implicit skipped fields are
+still rejected.
 
 ## Decision
 
@@ -57,9 +57,8 @@ metadata.
 
 ## Deferred Public Surface
 
-The public RLP derive surface is scheduled for
-`v0.25.0 - Public RLP Derives`. The following remain intentionally deferred
-until that milestone defines and tests the generated API contract:
+The first public RLP derive surface shipped in `v0.25.0`. The following remain
+intentionally deferred:
 
 - generic structs, until generated trait bounds and borrowed lifetimes are
   specified;
@@ -80,7 +79,6 @@ Public derives must preserve these invariants:
 - output buffers are not mutated on encode errors;
 - generated transaction code cannot bypass fork or sender validation.
 
-The v0.16.1 prototype lives in derive-crate tests and enforces the first API
-rules: declaration order, retained explicit skip/default reasons, and rejection
-of generics, enums, unions, duplicate attributes, and ambiguous field
-attributes.
+The v0.25.0 implementation includes trybuild compile-fail coverage for
+unsupported generics, enums, and ambiguous skipped fields, plus round-trip tests
+for named, tuple, and unit structs.

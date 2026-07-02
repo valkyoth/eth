@@ -35,8 +35,8 @@ dependencies.
 
 ## Current Status
 
-Status: `v0.24.2` set-code transaction validity gate is implemented and ready
-for external pentest.
+Status: `v0.25.0` public RLP derives are implemented and ready for external
+pentest.
 
 Implemented now:
 
@@ -95,8 +95,8 @@ Implemented now:
   EIP-7702 sender recovery.
 - EIP-712 domain-safety checks for required `chainId` and
   `verifyingContract` fields, plus a domain-gated sender recovery helper.
-- RLP derive design and private derive-crate prototype tests for future
-  `RlpEncode`/`RlpDecode` support.
+- Public `RlpEncode`/`RlpDecode` traits and derive macros for reviewed simple
+  structs, with bounded decode and trybuild compile-fail coverage.
 - Caller-provided Keccak-256 trait boundary without a default hash
   implementation dependency.
 - RLP fuzz harness with committed hex seed corpus and crash reproduction docs.
@@ -146,14 +146,14 @@ Not implemented yet:
 
 ```toml
 [dependencies]
-eth = "0.24"
+eth = "0.25"
 ```
 
 For optional sanitization support:
 
 ```toml
 [dependencies]
-eth = { version = "0.24", features = ["sanitization"] }
+eth = { version = "0.25", features = ["sanitization"] }
 ```
 
 ## Features
@@ -759,8 +759,17 @@ For derive macros, depend on the support crate directly:
 eth-valkyoth-sanitization = { version = "0.7", features = ["derive"] }
 ```
 
-RLP encode/decode derives are not public yet. The current design is documented
-in [`docs/rlp-derive-design.md`](docs/rlp-derive-design.md).
+Public RLP encode/decode derives live in `eth-valkyoth-derive`:
+
+```toml
+[dependencies]
+eth-valkyoth-derive = "0.17"
+eth-valkyoth-codec = "0.17"
+```
+
+The derive surface is intentionally conservative. It supports reviewed structs
+only, rejects generics/enums/unions, requires `DecodeLimits` for decode, and
+keeps skipped fields explicit with `#[eth_rlp(skip, default, reason = "...")]`.
 
 ## Workspace Shape
 
@@ -777,7 +786,7 @@ friendly, and independently testable.
 | `eth-valkyoth-protocol` | yes | Fork-aware validation states and protocol context. |
 | `eth-valkyoth-verify` | yes | Verification boundaries for signatures, proofs, replay domains, and EIP-712 domain checks. |
 | `eth-valkyoth-sanitization` | no | Optional bridge to the `sanitization` crate for secret-bearing Ethereum data. |
-| `eth-valkyoth-derive` | no | Optional sanitization derive macros. |
+| `eth-valkyoth-derive` | no | Optional sanitization and RLP derive macros. |
 | `eth-valkyoth-evm` | no | Future REVM adapter boundary. |
 | `eth-valkyoth-rpc` | no | Future explicit RPC trust-policy boundary. |
 | `eth-valkyoth-signer` | no | Future signer isolation boundary. |
@@ -789,7 +798,7 @@ friendly, and independently testable.
 The minimum supported Rust version is Rust `1.90.0`. New deployments should use
 the pinned stable Rust `1.96.1` until the toolchain policy is updated.
 
-Compatibility evidence for `0.24.2`:
+Compatibility evidence for `0.25.0`:
 
 | Rust | Local Evidence |
 | --- | --- |
@@ -806,8 +815,8 @@ Compatibility evidence for `0.24.2`:
 
 ```bash
 scripts/checks.sh
-scripts/release_0_24_gate.sh
-scripts/validate-release-readiness.sh v0.24.2
+scripts/release_0_25_gate.sh
+scripts/validate-release-readiness.sh v0.25.0
 ```
 
 For dependency-policy checks, install `cargo-deny` and `cargo-audit`, then run:

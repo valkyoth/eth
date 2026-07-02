@@ -37,3 +37,4 @@ dependencies.
 | `sha3` | `0.10.9` | `MIT OR Apache-2.0` | disabled | Test-only Ethereum Keccak-256 backend for independent sender-recovery vectors; kept on the RustCrypto `digest 0.10` line to avoid duplicate-version policy violations. |
 | `subtle` | `2.6.1` | `BSD-3-Clause` | disabled, `core_hint_black_box` enabled | Constant-time equality for security-boundary byte comparisons. |
 | `syn` | `2.0.118` | `MIT OR Apache-2.0` | enabled, `full` enabled | Syntax parsing for optional derive macros. |
+| `trybuild` | `1.0.117` | `MIT OR Apache-2.0` | enabled | Dev-only compile-fail diagnostics for public derive macros. |
