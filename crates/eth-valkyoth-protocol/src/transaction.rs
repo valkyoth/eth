@@ -51,11 +51,15 @@ pub use legacy::{
     UnvalidatedLegacyTransaction, decode_legacy_transaction,
 };
 pub use set_code::{
-    SET_CODE_AUTHORIZATION_FIELD_COUNT, SET_CODE_TRANSACTION_FIELD_COUNT,
-    SET_CODE_TRANSACTION_TYPE, SetCodeAuthorization, SetCodeAuthorizationChainId,
+    EIP_7702_DELEGATION_INDICATOR_PREFIX, SET_CODE_AUTHORIZATION_FIELD_COUNT,
+    SET_CODE_TRANSACTION_FIELD_COUNT, SET_CODE_TRANSACTION_TYPE, SetCodeAuthorityAccount,
+    SetCodeAuthorityCode, SetCodeAuthorityStateView, SetCodeAuthorization,
+    SetCodeAuthorizationAuthority, SetCodeAuthorizationAuthorityView, SetCodeAuthorizationChainId,
     SetCodeAuthorizationField, SetCodeAuthorizationItems, SetCodeAuthorizationList,
     SetCodeTransactionDecodeError, SetCodeTransactionDecodeErrorCategory, SetCodeTransactionField,
-    UnvalidatedSetCodeTransaction, decode_set_code_transaction,
+    SetCodeTransactionValidationContext, SetCodeTransactionValidityError,
+    SetCodeTransactionValidityErrorCategory, UnvalidatedSetCodeTransaction,
+    ValidSetCodeTransaction, decode_set_code_transaction, validate_set_code_transaction_context,
 };
 pub use signing::{
     SET_CODE_AUTHORIZATION_MAGIC, encode_access_list_signing_preimage,

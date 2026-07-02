@@ -35,8 +35,8 @@ dependencies.
 
 ## Current Status
 
-Status: `v0.24.1` set-code signing and authorization validation passed
-external pentest and is ready for release.
+Status: `v0.24.2` set-code transaction validity gate is implemented and ready
+for external pentest.
 
 Implemented now:
 
@@ -82,6 +82,10 @@ Implemented now:
   transaction domains.
 - EIP-7702 authorization tuple signing-hash and signer recovery helpers, kept
   separate from transaction signing hashes with explicit domain newtypes.
+- EIP-7702 set-code transaction validity gate for Prague/Pectra fork context,
+  non-empty authorization lists, authorization chain/nonce policy, fee order,
+  caller-computed gas policy, and caller-provided authority account-state
+  checks.
 - Digest-level secp256k1 sender recovery with low-s rejection, Ethereum
   y-parity policy, and caller-provided Keccak-256 public-key hashing.
 - Decoded transaction signature validation helpers that combine replay-domain
@@ -112,7 +116,6 @@ Not implemented yet:
 - No EVM execution adapter.
 - No Reth or P2P integration.
 - No full EIP-712 typed-data encoder yet; scheduled for `v0.26.0`.
-- No full EIP-7702 transaction-validity gate yet; scheduled for `v0.24.2`.
 - No block parser yet.
 - No ABI/contract helper surface yet; scheduled for `v0.47.0` through
   `v0.55.0`.
@@ -786,7 +789,7 @@ friendly, and independently testable.
 The minimum supported Rust version is Rust `1.90.0`. New deployments should use
 the pinned stable Rust `1.96.1` until the toolchain policy is updated.
 
-Compatibility evidence for `0.24.1`:
+Compatibility evidence for `0.24.2`:
 
 | Rust | Local Evidence |
 | --- | --- |
@@ -804,7 +807,7 @@ Compatibility evidence for `0.24.1`:
 ```bash
 scripts/checks.sh
 scripts/release_0_24_gate.sh
-scripts/validate-release-readiness.sh v0.24.1
+scripts/validate-release-readiness.sh v0.24.2
 ```
 
 For dependency-policy checks, install `cargo-deny` and `cargo-audit`, then run:

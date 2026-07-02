@@ -1,7 +1,7 @@
 # Transaction Signing Hashes
 
-Status: v0.24.1 adds EIP-7702 set-code transaction and authorization signing
-hashes.
+Status: v0.24.2 keeps signing hashes separate from EIP-7702 set-code
+transaction context validity.
 
 This release adds canonical signing-preimage encoders for the decoded
 transaction families currently admitted by `eth-valkyoth-protocol`, plus
@@ -51,11 +51,12 @@ payloads even though they are normally public after broadcast.
 
 ## Deferred Validation
 
-For full decoded transaction signature validation, use the v0.24.1
+For full decoded transaction signature validation, use the v0.24.2
 `validate_transaction_signature` helpers so replay-domain checks, low-s/y-parity
 policy, sender recovery, and optional expected-sender comparison are applied
 together.
 
-The helpers also do not perform fee, account-state, fork-validity,
-intrinsic-gas, blob-count, blob-version, KZG, data-availability, or EIP-7702
-authorization chain/nonce/account-state checks.
+The signature helpers do not perform fee, account-state, fork-validity,
+intrinsic-gas, blob-count, blob-version, KZG, or data-availability checks. Use
+`validate_set_code_transaction_context` for the non-cryptographic EIP-7702
+authorization chain, nonce, fork, gas, and authority account-state gate.

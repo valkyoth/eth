@@ -868,6 +868,8 @@ Implementation note:
 
 ### v0.24.2 - Set-Code Transaction Validity Gate
 
+Status: implemented; ready for external pentest.
+
 Goal: add the non-cryptographic EIP-7702 validity checks that decide whether a
 decoded set-code transaction can advance beyond the unvalidated state.
 
@@ -900,6 +902,14 @@ Exit criteria:
   rejected by the set-code validity gate.
 - Downstream callers have a single documented API boundary for promoting an
   EIP-7702 transaction from decoded/unvalidated to valid-for-context.
+
+Implementation note:
+
+- Official source check refreshed against final EIP-7702 on 2026-07-02:
+  set-code transactions require non-empty authorization lists; authorization
+  chain IDs must be universal chain ID `0` or the current chain; authorization
+  nonces must be less than `2**64 - 1`; and authority code must be empty or an
+  EIP-7702 delegation indicator before a tuple can be applied.
 
 ### v0.25.0 - Public RLP Derives
 

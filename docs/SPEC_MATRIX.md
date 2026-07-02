@@ -1,6 +1,6 @@
 # eth Specification Matrix
 
-Status: source revisions pinned for `v0.24.1`; scalar, list, and canonical
+Status: source revisions pinned for `v0.24.2`; scalar, list, and canonical
 integer RLP decoding, canonical RLP encoding helpers, primitive RLP bridging,
 Keccak-256 trait boundary, RLP fuzz harness baseline, and transaction envelope
 shell plus unvalidated legacy, EIP-2930 access-list, EIP-1559 dynamic-fee,
@@ -11,6 +11,8 @@ Transaction typestate promotion is proof-gated. Transaction signing-hash
 construction, digest-level sender recovery, and decoded transaction signature
 validation are available behind the caller-provided Keccak-256 boundary,
 including EIP-7702 transaction and authorization signature validation.
+EIP-7702 set-code transaction context validity is available through a
+caller-provided authority and account-state boundary.
 EIP-712 domain-safety helpers require `chainId` and `verifyingContract` before
 structured-data sender recovery is trusted.
 
@@ -32,9 +34,9 @@ behavior must not be implemented from memory.
 | EIP-2930 access-list transactions | field decode/encode | EIP-2930 defines type `0x01`, eleven payload fields, and access-list shape; v0.13.0 decodes fields and v0.16.0 encodes the admitted model without signature, sender, gas, duplicate, chain, account-state, or fork validation |
 | EIP-1559 dynamic-fee transactions | field decode/encode | EIP-1559 defines type `0x02`, twelve payload fields, and access-list inheritance from EIP-2930; v0.14.0 decodes fields and v0.16.0 encodes the admitted model without signature, sender, fee-order, gas, duplicate, chain, account-state, or fork validation |
 | EIP-4844 blob transactions | field decode/encode | EIP-4844 defines type `0x03`, fourteen payload fields, required 20-byte `to`, max blob fee, and blob versioned hash list; v0.15.0 decodes fields and v0.16.0 encodes the admitted model without signature, sender, blob fee, KZG, data availability, blob-hash version, blob count, chain, account-state, block blob-gas, or fork validation |
-| EIP-7702 set-code transactions | signing validation | EIP-7702 defines type `0x04`, thirteen payload fields, required 20-byte destination, authorization tuples shaped `[chain_id, address, nonce, y_parity, r, s]`, transaction signing over `0x04 || payload`, and authorization signing over `0x05 || rlp([chain_id, address, nonce])`; v0.24.0 decodes and encodes the admitted model, and v0.24.1 adds transaction signing-hash plus authorization signer recovery. Empty-authorization-list, account-state, delegation-indicator, fee, and fork validation are scheduled for v0.24.2 |
+| EIP-7702 set-code transactions | validity gate | EIP-7702 defines type `0x04`, thirteen payload fields, required 20-byte destination, authorization tuples shaped `[chain_id, address, nonce, y_parity, r, s]`, transaction signing over `0x04 || payload`, authorization signing over `0x05 || rlp([chain_id, address, nonce])`, non-empty authorization lists, authorization chain binding, nonce policy, and empty-or-delegated authority code. v0.24.0 decodes and encodes the admitted model, v0.24.1 adds transaction signing-hash plus authorization signer recovery, and v0.24.2 adds the non-cryptographic context validity gate. |
 | Chain and fork specs | explicit context | `execution-specs` and EIPs are pinned in `spec-lock.toml`; v0.17.0 adds caller-provided `ChainSpec`, `ForkSpec`, hardfork identity, block/timestamp activation checks, unsupported-fork errors, chain-mismatch errors, duplicate-fork errors, and non-monotonic fork/activation ordering errors without hardcoding mainnet validation rules |
-| Transaction validation | partial | `execution-specs` pinned in `spec-lock.toml`; v0.18.0 adds proof-gated decoded/canonical/fork-valid/sender-recovered transaction state transitions, v0.19.0 adds replay-domain checks, v0.20.0 adds digest-level sender recovery with low-s and y-parity policy, v0.22.0 adds transaction signing-hash construction for legacy EIP-155, EIP-2930, EIP-1559, and EIP-4844, v0.23.0 adds decoded transaction signature validation helpers, and v0.24.1 adds EIP-7702 set-code transaction and authorization signature validation. Remaining fee/account/fork validity plus concrete proof constructors remain planned |
+| Transaction validation | partial | `execution-specs` pinned in `spec-lock.toml`; v0.18.0 adds proof-gated decoded/canonical/fork-valid/sender-recovered transaction state transitions, v0.19.0 adds replay-domain checks, v0.20.0 adds digest-level sender recovery with low-s and y-parity policy, v0.22.0 adds transaction signing-hash construction for legacy EIP-155, EIP-2930, EIP-1559, and EIP-4844, v0.23.0 adds decoded transaction signature validation helpers, v0.24.1 adds EIP-7702 set-code transaction and authorization signature validation, and v0.24.2 adds the EIP-7702 set-code context validity gate. Remaining concrete proof constructors remain planned. |
 | Header validation | planned | `execution-specs` pinned in `spec-lock.toml`; validation not implemented |
 | Receipt validation | planned | `execution-specs` pinned in `spec-lock.toml`; validation not implemented |
 | MPT proofs | planned | `ethereum/tests` pinned in `spec-lock.toml`; proof verification not implemented |

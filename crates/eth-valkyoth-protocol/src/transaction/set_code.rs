@@ -10,10 +10,12 @@ use crate::transaction::fields::{
 };
 
 mod error;
+mod validity;
 
 pub use error::{
     SetCodeAuthorizationField, SetCodeTransactionDecodeError, SetCodeTransactionDecodeErrorCategory,
 };
+pub use validity::*;
 
 /// EIP-7702 set-code transaction type byte.
 pub const SET_CODE_TRANSACTION_TYPE: u8 = 0x04;

@@ -29,7 +29,8 @@ pub mod error {
         DynamicFeeTransactionDecodeError, DynamicFeeTransactionDecodeErrorCategory, FeatureError,
         ForkError, LegacyTransactionDecodeError, LegacyTransactionDecodeErrorCategory,
         ProtocolError, ProtocolErrorCategory, SetCodeTransactionDecodeError,
-        SetCodeTransactionDecodeErrorCategory, StateTransitionError, TransactionEncodeError,
+        SetCodeTransactionDecodeErrorCategory, SetCodeTransactionValidityError,
+        SetCodeTransactionValidityErrorCategory, StateTransitionError, TransactionEncodeError,
         TransactionEnvelopeError, TransactionEnvelopeErrorCategory,
     };
     pub use eth_valkyoth_verify::{

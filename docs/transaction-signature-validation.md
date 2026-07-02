@@ -1,7 +1,8 @@
 # Transaction Signature Validation
 
-Status: v0.24.1 adds set-code transaction signature validation and
-authorization tuple signature validation.
+Status: v0.24.2 keeps set-code transaction signature validation and
+authorization tuple signature validation separate from the protocol validity
+gate.
 
 `eth-valkyoth-verify` now exposes decoded transaction signature validation
 helpers for the transaction families decoded by `eth-valkyoth-protocol`:

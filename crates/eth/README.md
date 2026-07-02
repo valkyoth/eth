@@ -26,7 +26,7 @@
 `eth` is the public facade crate for a `no_std`-first Ethereum
 execution-layer protocol workspace.
 
-The crate is intentionally conservative at `0.24.1`: it provides explicit
+The crate is intentionally conservative at `0.24.2`: it provides explicit
 Ethereum primitive domains, bounded decode-budget policy, stable error
 categories, primitive RLP bridge helpers, a caller-provided Keccak-256 boundary,
 RLP fuzz-harness evidence, a transaction envelope shell, unvalidated legacy
@@ -37,8 +37,9 @@ set-code transaction field decoding, no-allocation canonical transaction
 envelope encoding for admitted decoded domains, explicit chain and fork
 activation context, proof-gated transaction typestate transitions, replay-domain
 validation for transaction chain binding, transaction signing-hash helpers,
-EIP-7702 authorization signing and signer recovery helpers, decoded
-transaction signature validation helpers, RLP derive design evidence,
+EIP-7702 authorization signing and signer recovery helpers, an EIP-7702
+set-code transaction validity gate, decoded transaction signature validation
+helpers, RLP derive design evidence,
 digest-level secp256k1 sender recovery, EIP-712 domain-safety checks, small
 first-party crate boundaries, optional sanitization support, and release
 evidence before RPC, signer, EVM, Reth, or P2P integrations become real
@@ -46,8 +47,8 @@ dependencies.
 
 ## Current Status
 
-The current release candidate is `0.24.1`; set-code signing and authorization
-validation passed external pentest and is ready for release.
+The current release candidate is `0.24.2`; the set-code transaction validity
+gate is implemented and ready for external pentest.
 
 Implemented now:
 
@@ -91,6 +92,10 @@ Implemented now:
   transaction domains.
 - EIP-7702 authorization tuple signing-hash and signer recovery helpers, kept
   separate from transaction signing hashes with explicit domain newtypes.
+- EIP-7702 set-code transaction validity gate for Prague/Pectra fork context,
+  non-empty authorization lists, authorization chain/nonce policy, fee order,
+  caller-computed gas policy, and caller-provided authority account-state
+  checks.
 - Digest-level secp256k1 sender recovery with low-s rejection, Ethereum
   y-parity policy, and caller-provided Keccak-256 public-key hashing.
 - Decoded transaction signature validation helpers that combine replay-domain
@@ -796,7 +801,7 @@ the workspace can keep small, auditable boundaries:
 The minimum supported Rust version is Rust `1.90.0`. New deployments should use
 the latest stable Rust verified by the release gates.
 
-Compatibility evidence for `0.24.1`:
+Compatibility evidence for `0.24.2`:
 
 | Rust | Local Evidence |
 | --- | --- |
