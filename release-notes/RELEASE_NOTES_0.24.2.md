@@ -8,12 +8,13 @@ Status: implementation complete; pending external pentest input
 scheduled after the syntactic decoder and signing validation releases.
 
 The protocol crate now exposes a non-cryptographic context validator that keeps
-decode permissive but rejects set-code transactions that are not valid for a
-caller-supplied execution context. The gate checks Prague/Pectra fork
+decode permissive but rejects set-code transactions that fail outer
+caller-supplied execution-context checks. The gate checks Prague/Pectra fork
 activation, outer transaction chain binding, fee order, optional caller-computed
-minimum gas, non-empty authorization lists, authorization chain and nonce
-policy, recovered authority availability, authority nonce equality, and
-authority code classification.
+minimum gas, and non-empty authorization lists. Per-authorization tuple checks
+for chain binding, nonce bounds, recovered authority availability, authority
+nonce equality, and authority code classification are applied as EIP-7702 skip
+rules and reported through applied/skipped counters.
 
 The gate intentionally does not recover signatures itself. Callers should obtain
 authorization authorities through the `eth-valkyoth-verify` authorization
@@ -32,19 +33,29 @@ Official EIP-7702 source was refreshed on 2026-07-02 before implementation.
 - Added `SetCodeTransactionValidityError` and stable validity error categories.
 - Added `EIP_7702_DELEGATION_INDICATOR_PREFIX`.
 - Added regression tests for empty authorization lists, wrong authorization
-  chain, max authorization nonce, inactive fork, pre-Prague fork context, fee
-  order, gas policy integration, nonce mismatch, and invalid authority code.
+  chain skips, max authorization nonce skips, inactive fork, pre-Prague fork
+  context, fee order, gas policy integration, nonce mismatch skips, invalid
+  authority code skips, and synthesized nonce-0 empty account state.
 
 ## Security Notes
 
 - The syntactic decoder still accepts empty authorization lists so callers can
   inspect malformed or invalid transactions. The validity gate rejects them.
 - Authorization chain ID `0` remains universal. Nonzero authorization chain IDs
-  must match the outer transaction chain ID.
-- Authorization nonce `u64::MAX` is rejected before authority-state checks
-  because EIP-7702 increments authority nonces after a valid tuple is applied.
+  must match the outer transaction chain ID or the tuple is skipped.
+- Authorization nonce `u64::MAX` causes that tuple to be skipped before
+  authority-state checks because EIP-7702 increments authority nonces after a
+  valid tuple is applied.
+- Authority accounts absent from the state trie must be supplied as nonce-0
+  empty accounts. `None` means state is unavailable, not that the account does
+  not exist.
 - Authority account code must be empty or already classified by the caller as
-  an EIP-7702 delegation indicator. Non-delegation code is rejected.
+  an EIP-7702 delegation indicator. Non-delegation code skips that tuple. The
+  crate does not inspect account bytecode or verify the delegation prefix; that
+  classification is caller-trusted account-state input.
+- The built-in slice views are intended for tests and small fixtures. Production
+  integrations with large authorization lists should use indexed authority and
+  account-state views.
 - The optional `minimum_gas_limit` field lets callers bind their own intrinsic
   gas calculation to this validation boundary without introducing a node or RPC
   dependency.

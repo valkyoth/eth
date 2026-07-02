@@ -879,8 +879,9 @@ Deliverables:
 - validation API that rejects empty authorization lists before a set-code
   transaction is considered transaction-valid;
 - authorization chain-ID policy for universal chain ID `0` versus the expected
-  chain;
-- authorization nonce and integer-bound policy from the official EIP;
+  chain, reported as per-tuple skip accounting;
+- authorization nonce and integer-bound policy from the official EIP, reported
+  as per-tuple skip accounting;
 - fork activation check for set-code transaction admission;
 - caller-provided account-state/delegation view for the EIP-7702 account and
   delegation-indicator rules;
@@ -888,8 +889,9 @@ Deliverables:
   node or trusted RPC dependency;
 - typestate or proof token that distinguishes merely decoded set-code
   transactions from set-code transactions that passed the validity gate;
-- regression tests for empty authorization lists, wrong authorization chain,
-  stale authorization nonce, inactive fork, and malformed delegation state.
+- regression tests for empty authorization lists, wrong authorization chain
+  skips, stale authorization nonce skips, inactive fork, synthesized nonce-0
+  empty account state, and malformed delegation-state skips.
 
 Verification:
 
@@ -902,14 +904,19 @@ Exit criteria:
   rejected by the set-code validity gate.
 - Downstream callers have a single documented API boundary for promoting an
   EIP-7702 transaction from decoded/unvalidated to valid-for-context.
+- Downstream callers can inspect applied and skipped authorization tuple counts
+  without accidentally treating every skipped tuple as transaction-fatal.
 
 Implementation note:
 
 - Official source check refreshed against final EIP-7702 on 2026-07-02:
   set-code transactions require non-empty authorization lists; authorization
   chain IDs must be universal chain ID `0` or the current chain; authorization
-  nonces must be less than `2**64 - 1`; and authority code must be empty or an
-  EIP-7702 delegation indicator before a tuple can be applied.
+  nonces must be less than `2**64 - 1`; missing authority accounts are treated
+  as nonce-0 empty accounts by caller-supplied state views; and authority code
+  must be empty or an EIP-7702 delegation indicator before a tuple can be
+  applied. Failed tuple checks skip that tuple rather than rejecting the whole
+  transaction.
 
 ### v0.25.0 - Public RLP Derives
 

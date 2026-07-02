@@ -34,6 +34,10 @@ pub struct SetCodeAuthorizationAuthority {
 }
 
 /// Caller-provided source of recovered authorization authorities.
+///
+/// The slice implementation is intended for tests and small fixtures. Production
+/// callers with large authorization lists should use an indexed implementation
+/// to avoid repeated linear scans.
 pub trait SetCodeAuthorizationAuthorityView {
     /// Returns the recovered authority for `authorization` at
     /// `authorization_index`.
@@ -62,6 +66,10 @@ pub enum SetCodeAuthorityCode {
     /// The authority account has no code.
     Empty,
     /// The authority account already contains an EIP-7702 delegation indicator.
+    ///
+    /// This crate does not inspect account bytecode or verify the
+    /// [`EIP_7702_DELEGATION_INDICATOR_PREFIX`] itself. The `Delegation`
+    /// classification is caller-trusted account-state input.
     Delegation {
         /// Delegation target encoded after `0xef0100`.
         target: Address,
@@ -82,6 +90,15 @@ pub struct SetCodeAuthorityAccount {
 }
 
 /// Caller-provided authority account-state view.
+///
+/// EIP-7702 treats an authority account that is absent from the state trie as an
+/// empty account with nonce `0`. Implementations must synthesize
+/// `SetCodeAuthorityAccount { nonce: Nonce::new(0), code: Empty, .. }` for that
+/// case. Return `None` only when state is genuinely unavailable.
+///
+/// The slice implementation is intended for tests and small fixtures. Production
+/// callers with large authorization lists should use an indexed implementation
+/// to avoid repeated linear scans.
 pub trait SetCodeAuthorityStateView {
     /// Returns account state for `authority`.
     fn authority_account(&self, authority: Address) -> Option<SetCodeAuthorityAccount>;
@@ -100,16 +117,22 @@ impl SetCodeAuthorityStateView for [SetCodeAuthorityAccount] {
 pub struct ValidSetCodeTransaction<'a> {
     transaction: UnvalidatedSetCodeTransaction<'a>,
     authorization_count: usize,
+    applied_authorization_count: usize,
+    skipped_authorization_count: usize,
 }
 
 impl<'a> ValidSetCodeTransaction<'a> {
     const fn new(
         transaction: UnvalidatedSetCodeTransaction<'a>,
         authorization_count: usize,
+        applied_authorization_count: usize,
+        skipped_authorization_count: usize,
     ) -> Self {
         Self {
             transaction,
             authorization_count,
+            applied_authorization_count,
+            skipped_authorization_count,
         }
     }
 
@@ -124,9 +147,25 @@ impl<'a> ValidSetCodeTransaction<'a> {
     pub const fn authorization_count(self) -> usize {
         self.authorization_count
     }
+
+    /// Returns the number of authorization tuples that passed per-tuple checks.
+    #[must_use]
+    pub const fn applied_authorization_count(self) -> usize {
+        self.applied_authorization_count
+    }
+
+    /// Returns the number of authorization tuples skipped by EIP-7702 rules.
+    #[must_use]
+    pub const fn skipped_authorization_count(self) -> usize {
+        self.skipped_authorization_count
+    }
 }
 
 /// EIP-7702 set-code transaction validity failure.
+///
+/// Per-authorization-tuple failures are exposed for diagnostics, but the
+/// transaction validity gate does not return them as fatal errors. EIP-7702
+/// skips invalid authorization tuples and continues processing later tuples.
 #[non_exhaustive]
 #[derive(Clone, Copy, Debug, Eq, PartialEq)]
 pub enum SetCodeTransactionValidityError {
@@ -286,7 +325,8 @@ pub enum SetCodeTransactionValidityErrorCategory {
 /// This is the non-cryptographic validity gate. It expects `authorities` to be
 /// produced by validating every authorization tuple signature through the
 /// verify crate. It does not recover signatures itself and does not execute the
-/// transaction.
+/// transaction. Invalid authorization tuples are counted as skipped instead of
+/// rejecting the whole transaction, matching EIP-7702 tuple processing.
 pub fn validate_set_code_transaction_context<'a, A, S>(
     transaction: UnvalidatedSetCodeTransaction<'a>,
     context: SetCodeTransactionValidationContext,
@@ -298,10 +338,12 @@ where
     S: SetCodeAuthorityStateView + ?Sized,
 {
     validate_outer_context(&transaction, context)?;
-    validate_authorizations(transaction, authorities, accounts)?;
+    let summary = validate_authorizations(transaction, authorities, accounts);
     Ok(ValidSetCodeTransaction::new(
         transaction,
         transaction.authorization_list.len(),
+        summary.applied,
+        summary.skipped,
     ))
 }
 
@@ -343,25 +385,40 @@ fn validate_authorizations<A, S>(
     transaction: UnvalidatedSetCodeTransaction<'_>,
     authorities: &A,
     accounts: &S,
-) -> Result<(), SetCodeTransactionValidityError>
+) -> AuthorizationValidationSummary
 where
     A: SetCodeAuthorizationAuthorityView + ?Sized,
     S: SetCodeAuthorityStateView + ?Sized,
 {
+    let mut summary = AuthorizationValidationSummary::default();
     for (authorization_index, authorization) in
         transaction.authorization_list.authorizations().enumerate()
     {
-        let authorization =
-            authorization.map_err(SetCodeTransactionValidityError::AuthorizationDecode)?;
-        validate_authorization(
+        let Ok(authorization) = authorization else {
+            summary.skipped = summary.skipped.saturating_add(1);
+            continue;
+        };
+        if validate_authorization(
             transaction,
             authorization_index,
             authorization,
             authorities,
             accounts,
-        )?;
+        )
+        .is_ok()
+        {
+            summary.applied = summary.applied.saturating_add(1);
+        } else {
+            summary.skipped = summary.skipped.saturating_add(1);
+        }
     }
-    Ok(())
+    summary
+}
+
+#[derive(Clone, Copy, Debug, Default, Eq, PartialEq)]
+struct AuthorizationValidationSummary {
+    applied: usize,
+    skipped: usize,
 }
 
 fn validate_authorization<A, S>(

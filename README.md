@@ -83,9 +83,9 @@ Implemented now:
 - EIP-7702 authorization tuple signing-hash and signer recovery helpers, kept
   separate from transaction signing hashes with explicit domain newtypes.
 - EIP-7702 set-code transaction validity gate for Prague/Pectra fork context,
-  non-empty authorization lists, authorization chain/nonce policy, fee order,
-  caller-computed gas policy, and caller-provided authority account-state
-  checks.
+  non-empty authorization lists, fee order, caller-computed gas policy, and
+  caller-provided authority account-state checks. Per-authorization failures
+  are counted as skipped tuples instead of rejecting the whole transaction.
 - Digest-level secp256k1 sender recovery with low-s rejection, Ethereum
   y-parity policy, and caller-provided Keccak-256 public-key hashing.
 - Decoded transaction signature validation helpers that combine replay-domain

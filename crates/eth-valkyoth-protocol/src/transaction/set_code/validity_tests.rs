@@ -35,6 +35,8 @@ fn set_code_validity_accepts_reviewed_context() {
     assert!(result.is_ok(), "{result:?}");
     if let Ok(valid) = result {
         assert_eq!(valid.authorization_count(), 1);
+        assert_eq!(valid.applied_authorization_count(), 1);
+        assert_eq!(valid.skipped_authorization_count(), 0);
         assert_eq!(valid.transaction().chain_id, ChainId::new(1));
     }
 }
@@ -48,23 +50,33 @@ fn set_code_validity_rejects_empty_authorization_list() {
 }
 
 #[test]
-fn set_code_validity_rejects_wrong_authorization_chain() {
-    assert_eq!(
-        validate_single(&[authorization_tuple(&[2], &[4])]),
-        Err(SetCodeTransactionValidityError::WrongAuthorizationChain {
-            authorization_index: 0,
-        })
-    );
+fn set_code_validity_skips_wrong_authorization_chain() {
+    let result = validate_single(&[
+        authorization_tuple(&[2], &[4]),
+        authorization_tuple(&[1], &[4]),
+    ]);
+
+    assert!(result.is_ok(), "{result:?}");
+    if let Ok(valid) = result {
+        assert_eq!(valid.authorization_count(), 2);
+        assert_eq!(valid.applied_authorization_count(), 1);
+        assert_eq!(valid.skipped_authorization_count(), 1);
+    }
 }
 
 #[test]
-fn set_code_validity_rejects_max_authorization_nonce() {
-    assert_eq!(
-        validate_single(&[authorization_tuple(&[1], &[0xff; 8])]),
-        Err(SetCodeTransactionValidityError::AuthorizationNonceTooHigh {
-            authorization_index: 0,
-        })
-    );
+fn set_code_validity_skips_max_authorization_nonce() {
+    let result = validate_single(&[
+        authorization_tuple(&[1], &[0xff; 8]),
+        authorization_tuple(&[1], &[4]),
+    ]);
+
+    assert!(result.is_ok(), "{result:?}");
+    if let Ok(valid) = result {
+        assert_eq!(valid.authorization_count(), 2);
+        assert_eq!(valid.applied_authorization_count(), 1);
+        assert_eq!(valid.skipped_authorization_count(), 1);
+    }
 }
 
 #[test]
@@ -99,7 +111,7 @@ fn set_code_validity_rejects_inactive_or_pre_prague_fork() {
 }
 
 #[test]
-fn set_code_validity_rejects_bad_fee_gas_and_account_state() {
+fn set_code_validity_rejects_bad_fee_and_gas() {
     assert_eq!(
         validate_transaction(
             decoded_transaction_with_fee_and_gas(&[3], &[2], &[0x52, 0x08]),
@@ -118,28 +130,66 @@ fn set_code_validity_rejects_bad_fee_gas_and_account_state() {
         ),
         Err(SetCodeTransactionValidityError::GasLimitTooLow)
     );
-    assert_eq!(
-        validate_transaction(
-            decoded_transaction(&[authorization_tuple(&[1], &[4])]),
-            validity_context(None),
-            Nonce::new(5),
-            SetCodeAuthorityCode::Empty,
-        ),
-        Err(SetCodeTransactionValidityError::AuthorityNonceMismatch {
-            authorization_index: 0,
-        })
+}
+
+#[test]
+fn set_code_validity_skips_bad_account_state() {
+    let stale_nonce = validate_transaction(
+        decoded_transaction(&[
+            authorization_tuple(&[1], &[4]),
+            authorization_tuple(&[1], &[5]),
+        ]),
+        validity_context(None),
+        Nonce::new(5),
+        SetCodeAuthorityCode::Empty,
     );
-    assert_eq!(
-        validate_transaction(
-            decoded_transaction(&[authorization_tuple(&[1], &[4])]),
-            validity_context(None),
-            Nonce::new(4),
-            SetCodeAuthorityCode::Other,
-        ),
-        Err(SetCodeTransactionValidityError::InvalidAuthorityCode {
-            authorization_index: 0,
-        })
+    assert!(stale_nonce.is_ok(), "{stale_nonce:?}");
+    if let Ok(valid) = stale_nonce {
+        assert_eq!(valid.authorization_count(), 2);
+        assert_eq!(valid.applied_authorization_count(), 1);
+        assert_eq!(valid.skipped_authorization_count(), 1);
+    }
+
+    let invalid_code = validate_transaction(
+        decoded_transaction(&[
+            authorization_tuple(&[1], &[4]),
+            authorization_tuple(&[1], &[5]),
+        ]),
+        validity_context(None),
+        Nonce::new(5),
+        SetCodeAuthorityCode::Other,
     );
+    assert!(invalid_code.is_ok(), "{invalid_code:?}");
+    if let Ok(valid) = invalid_code {
+        assert_eq!(valid.authorization_count(), 2);
+        assert_eq!(valid.applied_authorization_count(), 0);
+        assert_eq!(valid.skipped_authorization_count(), 2);
+    }
+}
+
+#[test]
+fn set_code_validity_accepts_synthesized_absent_account_state() {
+    let authorizations = [authorization_tuple(&[1], &[])];
+    let transaction = decoded_transaction(&authorizations);
+    assert!(transaction.is_ok(), "{transaction:?}");
+    let Ok(transaction) = transaction else {
+        return;
+    };
+    let authorities = [authority(0)];
+    let accounts = [account(Nonce::new(0), SetCodeAuthorityCode::Empty)];
+
+    let result = validate_set_code_transaction_context(
+        transaction,
+        validity_context(None),
+        &authorities[..],
+        &accounts[..],
+    );
+
+    assert!(result.is_ok(), "{result:?}");
+    if let Ok(valid) = result {
+        assert_eq!(valid.applied_authorization_count(), 1);
+        assert_eq!(valid.skipped_authorization_count(), 0);
+    }
 }
 
 #[test]
@@ -172,9 +222,17 @@ fn validate_transaction(
     let Ok(transaction) = transaction else {
         return Err(SetCodeTransactionValidityError::EmptyAuthorizationList);
     };
-    let authorities = [authority(0)];
+    let authorities = authorities_for(transaction);
     let accounts = [account(nonce, code)];
     validate_set_code_transaction_context(transaction, context, &authorities[..], &accounts[..])
+}
+
+fn authorities_for(
+    transaction: UnvalidatedSetCodeTransaction<'_>,
+) -> Vec<SetCodeAuthorizationAuthority> {
+    (0..transaction.authorization_list.len())
+        .map(authority)
+        .collect()
 }
 
 fn decoded_transaction(
