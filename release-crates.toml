@@ -1,5 +1,5 @@
 [release]
-version = "0.27.0"
+version = "0.28.0"
 policy = "independent"
 
 [crates."eth-valkyoth-codec"]
@@ -7,88 +7,88 @@ previous_version = "0.17.0"
 version = "0.17.0"
 change = "unchanged"
 publish = false
-reason = "No package changes for v0.27.0."
+reason = "No package changes for v0.28.0."
 
 [crates."eth-valkyoth-primitives"]
 previous_version = "0.11.0"
 version = "0.11.0"
 change = "unchanged"
 publish = false
-reason = "No package changes for v0.27.0."
+reason = "No package changes for v0.28.0."
 
 [crates."eth-valkyoth-hash"]
-previous_version = "0.10.1"
+previous_version = "0.11.0"
 version = "0.11.0"
-change = "code"
-publish = true
-reason = "Adds the optional tiny-keccak software backend behind a non-default feature."
+change = "unchanged"
+publish = false
+reason = "No package changes for v0.28.0."
 
 [crates."eth-valkyoth-protocol"]
 previous_version = "0.22.1"
-version = "0.22.1"
-change = "unchanged"
-publish = false
-reason = "No package changes for v0.27.0."
-
-[crates."eth-valkyoth-verify"]
-previous_version = "0.16.0"
-version = "0.17.0"
+version = "0.23.0"
 change = "code"
 publish = true
-reason = "Adds EIP-712 JSON parser fuzz coverage and a raw JSON recursion-limit regression."
+reason = "Adds syntactic block header decoding, fork-specific header field sets, and block header hashing."
+
+[crates."eth-valkyoth-verify"]
+previous_version = "0.17.0"
+version = "0.17.1"
+change = "dependency"
+publish = true
+reason = "Bumps the published protocol dependency range to eth-valkyoth-protocol 0.23.0."
 
 [crates."eth-valkyoth-derive"]
 previous_version = "0.17.0"
 version = "0.17.0"
 change = "unchanged"
 publish = false
-reason = "No package changes for v0.27.0."
+reason = "No package changes for v0.28.0."
 
 [crates."eth-valkyoth-sanitization"]
 previous_version = "0.7.2"
 version = "0.7.2"
 change = "unchanged"
 publish = false
-reason = "No package changes for v0.27.0."
+reason = "No package changes for v0.28.0."
 
 [crates."eth-valkyoth-evm"]
 previous_version = "0.7.0"
 version = "0.7.0"
 change = "unchanged"
 publish = false
-reason = "No package changes for v0.27.0."
+reason = "No package changes for v0.28.0."
 
 [crates."eth-valkyoth-rpc"]
 previous_version = "0.7.0"
 version = "0.7.0"
 change = "unchanged"
 publish = false
-reason = "No package changes for v0.27.0."
+reason = "No package changes for v0.28.0."
 
 [crates."eth-valkyoth-signer"]
 previous_version = "0.7.1"
 version = "0.7.1"
 change = "unchanged"
 publish = false
-reason = "No package changes for v0.27.0."
+reason = "No package changes for v0.28.0."
 
 [crates."eth-valkyoth-reth"]
 previous_version = "0.7.0"
 version = "0.7.0"
 change = "unchanged"
 publish = false
-reason = "No package changes for v0.27.0."
+reason = "No package changes for v0.28.0."
 
 [crates."eth-valkyoth-testkit"]
 previous_version = "0.7.0"
 version = "0.7.0"
 change = "unchanged"
 publish = false
-reason = "No package changes for v0.27.0."
+reason = "No package changes for v0.28.0."
 
 [crates.eth]
-previous_version = "0.26.1"
-version = "0.27.0"
+previous_version = "0.27.0"
+version = "0.28.0"
 change = "code"
 publish = true
-reason = "Adds the opt-in keccak-tiny facade feature and updates packaged documentation."
+reason = "Re-exports the new block header decode and hash APIs and updates packaged documentation."

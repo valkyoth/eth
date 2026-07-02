@@ -1054,6 +1054,8 @@ Exit criteria:
 
 ### v0.28.0 - Header Decode And Hashing
 
+Status: implemented; ready for external pentest.
+
 Goal: parse and hash execution-layer block headers.
 
 Deliverables:

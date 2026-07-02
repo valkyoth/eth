@@ -26,7 +26,7 @@
 `eth` is the public facade crate for a `no_std`-first Ethereum
 execution-layer protocol workspace.
 
-The crate is intentionally conservative at `0.27.0`: it provides explicit
+The crate is intentionally conservative at `0.28.0`: it provides explicit
 Ethereum primitive domains, bounded decode-budget policy, stable error
 categories, primitive RLP bridge helpers, a caller-provided Keccak-256 boundary,
 RLP fuzz-harness evidence, a transaction envelope shell, unvalidated legacy
@@ -41,16 +41,16 @@ EIP-7702 authorization signing and signer recovery helpers, an EIP-7702
 set-code transaction validity gate, decoded transaction signature validation
 helpers, public RLP derive support, digest-level secp256k1 sender recovery,
 EIP-712 domain-safety checks, EIP-712 typed-data hashing over borrowed
-descriptors, an opt-in bounded JSON typed-data parser, an opt-in reviewed
-`tiny-keccak` software backend, small first-party crate boundaries, optional
-sanitization support, and release evidence before RPC, signer, EVM, Reth, or
-P2P integrations become real dependencies.
+descriptors, an opt-in bounded JSON typed-data parser, syntactic block header
+decoding and hashing, an opt-in reviewed `tiny-keccak` software backend, small
+first-party crate boundaries, optional sanitization support, and release
+evidence before RPC, signer, EVM, Reth, or P2P integrations become real
+dependencies.
 
 ## Current Status
 
-The current release candidate is `0.27.0`; optional `tiny-keccak` backend
-admission has passed external pentest retest and is waiting for final GitHub
-checks before tagging.
+The current release candidate is `0.28.0`; block header decoding and hashing is
+implemented and ready for external pentest.
 
 Implemented now:
 
@@ -85,6 +85,9 @@ Implemented now:
   `ValidationContext` APIs for fork activation selection, including
   fail-closed checks for duplicate forks, wrong-chain entries, and
   non-monotonic fork or activation ordering.
+- Unvalidated execution block header decoding for legacy, London, Shanghai,
+  Cancun, and Prague field sets, plus block header hashing through the Keccak
+  trait boundary and a distinct `BlockHash` domain newtype.
 - Proof-gated transaction typestate transitions for decoded, canonical,
   fork-validated, and sender-recovered state tokens.
 - Replay-domain validation for legacy EIP-155 and typed transaction chain IDs
@@ -158,21 +161,21 @@ Not implemented yet:
 
 ```toml
 [dependencies]
-eth = "0.27"
+eth = "0.28"
 ```
 
 Disable defaults explicitly for embedded or freestanding builds:
 
 ```toml
 [dependencies]
-eth = { version = "0.27", default-features = false }
+eth = { version = "0.28", default-features = false }
 ```
 
 Optional sanitization support:
 
 ```toml
 [dependencies]
-eth = { version = "0.27", features = ["sanitization"] }
+eth = { version = "0.28", features = ["sanitization"] }
 ```
 
 ## Features
@@ -196,7 +199,7 @@ Optional reviewed software Keccak backend:
 
 ```toml
 [dependencies]
-eth = { version = "0.27", features = ["keccak-tiny"] }
+eth = { version = "0.28", features = ["keccak-tiny"] }
 ```
 
 ```rust
@@ -872,7 +875,7 @@ the workspace can keep small, auditable boundaries:
 The minimum supported Rust version is Rust `1.90.0`. New deployments should use
 the latest stable Rust verified by the release gates.
 
-Compatibility evidence for `0.27.0`:
+Compatibility evidence for `0.28.0`:
 
 | Rust | Local Evidence |
 | --- | --- |

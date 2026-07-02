@@ -6,7 +6,7 @@ Most users should depend on the facade crate instead:
 
 ```toml
 [dependencies]
-eth = "0.27"
+eth = "0.28"
 ```
 
 Crates.io: <https://crates.io/crates/eth>
@@ -15,7 +15,11 @@ This package is published separately so the `eth` workspace can keep small,
 auditable crate boundaries. Treat it as a lower-level building block unless the
 `eth` documentation explicitly says otherwise.
 
-The `0.17.0` support-crate release, shipped with `eth` `0.27.0`, adds EIP-712
+The `0.17.1` support-crate release, shipped with `eth` `0.28.0`, updates the
+published dependency range for `eth-valkyoth-protocol 0.23.0`. No verification
+API changes are introduced by this patch release.
+
+The previous `0.17.0` support-crate release, shipped with `eth` `0.27.0`, adds EIP-712
 JSON parser fuzz coverage and a raw JSON structural-depth regression test. The
 `json` feature continues to rely on `serde_json`'s default recursion guard and
 must not be built with `serde_json/unbounded_depth`.

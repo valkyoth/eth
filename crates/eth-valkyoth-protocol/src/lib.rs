@@ -8,10 +8,17 @@ extern crate std;
 use core::fmt;
 
 mod fork;
+mod header;
 mod state;
 mod transaction;
 
 pub use fork::{ChainSpec, ForkActivation, ForkError, ForkSpec, Hardfork, ValidationContext};
+pub use header::{
+    BlockHash, BlockHeaderDecodeError, BlockHeaderDecodeErrorCategory, BlockHeaderField,
+    CANCUN_HEADER_FIELD_COUNT, HeaderFieldSet, LEGACY_HEADER_FIELD_COUNT,
+    LONDON_HEADER_FIELD_COUNT, LogsBloom, PRAGUE_HEADER_FIELD_COUNT, SHANGHAI_HEADER_FIELD_COUNT,
+    UnvalidatedBlockHeader, decode_block_header,
+};
 pub use state::{
     Canonical, CanonicalValidationProof, Decoded, ForkValidated, ForkValidationProof,
     SenderRecovered, SenderRecoveryProof, StateTransitionError, Transaction,

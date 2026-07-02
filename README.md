@@ -35,8 +35,8 @@ dependencies.
 
 ## Current Status
 
-Status: `v0.27.0` optional `tiny-keccak` backend admission has passed external
-pentest retest and is waiting for final GitHub checks before tagging.
+Status: `v0.28.0` block header decoding and hashing is implemented and ready
+for external pentest.
 
 Implemented now:
 
@@ -73,6 +73,9 @@ Implemented now:
   `ValidationContext` APIs for fork activation selection, including
   fail-closed checks for duplicate forks, wrong-chain entries, and
   non-monotonic fork or activation ordering.
+- Unvalidated execution block header decoding for legacy, London, Shanghai,
+  Cancun, and Prague field sets, plus block header hashing through the Keccak
+  trait boundary and a distinct `BlockHash` domain newtype.
 - Proof-gated transaction typestate transitions for decoded, canonical,
   fork-validated, and sender-recovered state tokens.
 - Replay-domain validation for legacy EIP-155 and typed transaction chain IDs
@@ -153,14 +156,14 @@ Not implemented yet:
 
 ```toml
 [dependencies]
-eth = "0.27"
+eth = "0.28"
 ```
 
 For optional sanitization support:
 
 ```toml
 [dependencies]
-eth = { version = "0.27", features = ["sanitization"] }
+eth = { version = "0.28", features = ["sanitization"] }
 ```
 
 ## Features
@@ -184,7 +187,7 @@ Optional reviewed software Keccak backend:
 
 ```toml
 [dependencies]
-eth = { version = "0.27", features = ["keccak-tiny"] }
+eth = { version = "0.28", features = ["keccak-tiny"] }
 ```
 
 ```rust
@@ -858,7 +861,7 @@ friendly, and independently testable.
 The minimum supported Rust version is Rust `1.90.0`. New deployments should use
 the pinned stable Rust `1.96.1` until the toolchain policy is updated.
 
-Compatibility evidence for `0.27.0`:
+Compatibility evidence for `0.28.0`:
 
 | Rust | Local Evidence |
 | --- | --- |
@@ -875,7 +878,7 @@ Compatibility evidence for `0.27.0`:
 
 ```bash
 scripts/checks.sh
-scripts/release_0_27_gate.sh
+scripts/release_0_28_gate.sh
 ```
 
 For dependency-policy checks, install `cargo-deny` and `cargo-audit`, then run:
@@ -889,6 +892,7 @@ cargo audit
 
 - [Implementation Plan](docs/IMPLEMENTATION_PLAN.md)
 - [Release Plan](docs/RELEASE_PLAN.md)
+- [Block Headers](docs/block-headers.md)
 - [Keccak Boundary](docs/keccak-boundary.md)
 - [Transaction Signing Hashes](docs/transaction-signing-hashes.md)
 - [Transaction Signature Validation](docs/transaction-signature-validation.md)
