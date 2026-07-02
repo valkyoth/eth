@@ -25,6 +25,8 @@ pub use eip712_typed::{
     Eip712ValueKind, eip712_domain_separator, eip712_hash_struct, eip712_type_hash,
     eip712_typed_data_signing_digest, encode_eip712_data, encode_eip712_type,
 };
+#[cfg(feature = "json")]
+pub use eip712_typed::{Eip712JsonError, Eip712JsonLimits, eip712_json_typed_data_signing_digest};
 pub use replay::{
     require_access_list_replay_domain, require_blob_replay_domain,
     require_dynamic_fee_replay_domain, require_legacy_replay_domain,

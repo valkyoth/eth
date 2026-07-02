@@ -1,7 +1,7 @@
 # EIP-712 Domain Safety
 
-Status: v0.26.0 typed-data encoder implemented, pentested, and ready for the
-final GitHub/tag gate.
+Status: v0.26.1 optional JSON typed-data parser boundary implemented and ready
+for external pentest.
 
 EIP-712 structured-data signing extends Ethereum signing with
 `keccak256("\x19\x01" || domainSeparator || hashStruct(message))`. The
@@ -29,6 +29,16 @@ over caller-provided borrowed descriptors:
 - `eip712_typed_data_signing_digest` computes the final `0x1901` digest from
   domain data, type descriptors, and message values.
 
-The encoder intentionally does not parse JSON-RPC typed-data payloads. Callers
-must parse JSON at their boundary, review the resulting type graph and values,
-then pass bounded borrowed descriptors into this crate.
+In `v0.26.1`, `eth-valkyoth-verify` adds an optional `json` feature for
+JSON-RPC typed-data payloads. The feature is disabled by default, requires
+`std`, and keeps concrete Keccak backends caller-provided.
+
+The JSON boundary:
+
+- rejects duplicate JSON object keys before any type map is accepted;
+- enforces explicit limits for input bytes, type count, field count, array
+  length, dynamic bytes, string length, and recursion depth;
+- rejects `ChainId(0)` in parsed EIP-712 domains;
+- maps parsed type strings to the same typed-data encoder model used by the
+  borrowed API;
+- includes Ether Mail and adversarial missing/duplicate field fixtures.

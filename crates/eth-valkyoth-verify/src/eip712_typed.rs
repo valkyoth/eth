@@ -5,8 +5,13 @@ use eth_valkyoth_primitives::{Address, B256, ChainId};
 
 use crate::eip712_signing_digest;
 
+#[cfg(feature = "json")]
+#[path = "eip712_json.rs"]
+mod eip712_json;
 #[path = "eip712_typed_helpers.rs"]
 mod typed_helpers;
+#[cfg(feature = "json")]
+pub use eip712_json::{Eip712JsonError, Eip712JsonLimits, eip712_json_typed_data_signing_digest};
 
 use typed_helpers::{
     SliceWriter, encode_domain_type, encode_value_word, find_struct, find_value, next_dependency,

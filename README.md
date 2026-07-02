@@ -35,8 +35,8 @@ dependencies.
 
 ## Current Status
 
-Status: `v0.26.0` EIP-712 typed-data encoding is implemented, pentested, and
-ready for the final GitHub/tag gate.
+Status: `v0.26.1` optional EIP-712 JSON typed-data parsing is implemented and
+ready for external pentest.
 
 Implemented now:
 
@@ -98,6 +98,9 @@ Implemented now:
 - No-allocation EIP-712 typed-data encoder for caller-provided schemas and
   borrowed values, including `encodeType`, `encodeData`, `hashStruct`, domain
   separator construction, and typed-data signing digest construction.
+- Optional `eip712-json` parser boundary for JSON-RPC typed-data payloads with
+  duplicate-key rejection, explicit parser limits, and no default dependency
+  impact.
 - Public `RlpEncode`/`RlpDecode` traits and derive macros for reviewed simple
   structs, with bounded decode and trybuild compile-fail coverage.
 - Caller-provided Keccak-256 trait boundary without a default hash
@@ -118,8 +121,6 @@ Not implemented yet:
 - No signer or local key storage.
 - No EVM execution adapter.
 - No Reth or P2P integration.
-- No JSON-RPC typed-data parser yet; callers provide reviewed borrowed EIP-712
-  descriptors and values to the encoder.
 - No block parser yet.
 - No ABI/contract helper surface yet; scheduled for `v0.47.0` through
   `v0.55.0`.
@@ -167,6 +168,7 @@ eth = { version = "0.26", features = ["sanitization"] }
 | `std` | no | Enables `std` support in admitted core crates. |
 | `evm` | no | Future explicit EVM adapter boundary. |
 | `rpc` | no | Future explicit RPC trust-policy boundary. |
+| `eip712-json` | no | Enables the optional `std` JSON-RPC EIP-712 typed-data parser boundary. |
 | `sanitization` | no | Re-exports optional secret sanitization bridge APIs. |
 | `signer` | no | Future signer isolation boundary. |
 | `reth` | no | Future Reth integration boundary. |
@@ -428,8 +430,8 @@ assert_eq!(authorization_hash.to_b256(), B256::from([0x55_u8; 32]));
 ## EIP-712 Typed Data
 
 EIP-712 signing paths can build the structured-data digest from reviewed
-borrowed type descriptors and values without adding a JSON parser or concrete
-Keccak backend to the default graph:
+borrowed type descriptors and values without adding a concrete Keccak backend
+to the default graph:
 
 ```rust
 use eth::hash::Keccak256;
@@ -485,9 +487,27 @@ let _digest = eip712_typed_data_signing_digest::<ExampleKeccak>(
 # Ok::<(), Box<dyn std::error::Error>>(())
 ```
 
-The crate intentionally does not parse JSON typed-data documents in this
-release. Applications should parse and review JSON at their boundary, then pass
-bounded descriptors and values into this encoder.
+JSON-RPC typed-data parsing is available only through the opt-in
+`eip712-json` feature. It uses explicit parser limits, rejects duplicate JSON
+object keys, and still relies on a caller-provided Keccak backend.
+
+```rust,ignore
+use eth::verify::{Eip712JsonLimits, eip712_json_typed_data_signing_digest};
+
+let json = r#"{
+  "types": {"Permit": [{"name": "owner", "type": "address"}]},
+  "primaryType": "Permit",
+  "domain": {"chainId": 1},
+  "message": {"owner": "0x1111111111111111111111111111111111111111"}
+}"#;
+let mut scratch = [0_u8; 512];
+let _digest = eip712_json_typed_data_signing_digest::<ExampleKeccak>(
+    json,
+    Eip712JsonLimits::DEFAULT,
+    &mut scratch,
+)?;
+# Ok::<(), Box<dyn std::error::Error>>(())
+```
 
 ## Sender Recovery
 
@@ -752,7 +772,7 @@ let tx = decode_legacy_transaction(&raw, limits)?;
 assert_eq!(tx.nonce.get(), 1);
 assert_eq!(tx.gas_limit.get(), 21_000);
 assert_eq!(tx.to, LegacyTransactionTo::Create);
-assert_eq!(tx.input, &[]);
+assert_eq!(tx.input, &[] as &[u8]);
 assert_eq!(tx.eip155_chain_id(), None);
 # Ok::<(), eth::error::LegacyTransactionDecodeError>(())
 ```
@@ -821,7 +841,7 @@ friendly, and independently testable.
 The minimum supported Rust version is Rust `1.90.0`. New deployments should use
 the pinned stable Rust `1.96.1` until the toolchain policy is updated.
 
-Compatibility evidence for `0.26.0`:
+Compatibility evidence for `0.26.1`:
 
 | Rust | Local Evidence |
 | --- | --- |
@@ -838,8 +858,7 @@ Compatibility evidence for `0.26.0`:
 
 ```bash
 scripts/checks.sh
-scripts/release_0_26_gate.sh
-scripts/validate-release-readiness.sh v0.26.0
+scripts/release_0_26_1_gate.sh
 ```
 
 For dependency-policy checks, install `cargo-deny` and `cargo-audit`, then run:

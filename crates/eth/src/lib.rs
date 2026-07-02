@@ -33,6 +33,8 @@ pub mod error {
         SetCodeTransactionValidityErrorCategory, StateTransitionError, TransactionEncodeError,
         TransactionEnvelopeError, TransactionEnvelopeErrorCategory,
     };
+    #[cfg(feature = "eip712-json")]
+    pub use eth_valkyoth_verify::Eip712JsonError;
     pub use eth_valkyoth_verify::{
         Eip712EncodeError, SetCodeAuthorizationValidationError,
         SetCodeAuthorizationValidationErrorCategory, TransactionSignatureValidationError,

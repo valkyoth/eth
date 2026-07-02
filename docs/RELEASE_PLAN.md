@@ -948,7 +948,7 @@ Exit criteria:
 
 ### v0.26.0 - EIP-712 Typed-Data Encoder
 
-Status: implemented; ready for external pentest.
+Status: tagged and released.
 
 Goal: implement the full EIP-712 typed-data hashing pipeline instead of relying
 on caller-provided `domainSeparator` and `hashStruct(message)` values.
@@ -984,23 +984,26 @@ Implementation note:
 
 ### v0.26.1 - EIP-712 JSON Typed-Data Parser Boundary
 
+Status: implemented; ready for external pentest.
+
 Goal: admit a reviewed way to parse JSON-RPC typed-data payloads into the
 borrowed EIP-712 encoder boundary without weakening the default `no_std` graph.
 
 Deliverables:
 
-- decision on optional support crate, feature, or explicit application-owned
-  parser boundary;
-- dependency and license review if a JSON parser is admitted;
+- optional `json` feature in `eth-valkyoth-verify` and `eip712-json` facade
+  feature in `eth`;
+- dependency and license review for current `serde` and `serde_json`;
 - size limits for type maps, field counts, array lengths, strings, and dynamic
   bytes;
 - validation that parsed type strings map exactly to the `v0.26.0` descriptor
   model;
-- JSON fixtures for Ether Mail and adversarial duplicate/missing type fields.
+- JSON fixtures for Ether Mail and adversarial duplicate/missing type fields;
+- duplicate JSON object-key rejection before type maps are admitted.
 
 Verification:
 
-- parser-specific tests or documented no-parser decision;
+- parser-specific tests;
 - `cargo deny check`;
 - release notes documenting whether JSON support is first-party or
   application-owned.

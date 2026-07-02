@@ -1,7 +1,7 @@
 [package]
 name = "eth"
 description = "no_std-first Ethereum execution-layer protocol toolkit facade."
-version = "0.26.0"
+version = "0.26.1"
 edition.workspace = true
 rust-version.workspace = true
 license.workspace = true
@@ -24,6 +24,7 @@ sanitization = ["dep:eth-valkyoth-sanitization"]
 signer = ["dep:eth-valkyoth-signer"]
 reth = ["dep:eth-valkyoth-reth"]
 testkit = ["dep:eth-valkyoth-testkit"]
+eip712-json = ["eth-valkyoth-verify/json"]
 
 [dependencies]
 eth-valkyoth-codec.workspace = true

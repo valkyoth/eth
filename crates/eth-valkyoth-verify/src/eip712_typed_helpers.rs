@@ -209,9 +209,9 @@ pub(super) fn find_value<'a>(
 }
 
 #[derive(Clone, Copy)]
-struct ArrayType<'a> {
-    base: &'a str,
-    len: Option<usize>,
+pub(super) struct ArrayType<'a> {
+    pub(super) base: &'a str,
+    pub(super) len: Option<usize>,
 }
 
 pub(super) struct SliceWriter<'a> {
@@ -299,7 +299,7 @@ fn is_reserved_atomic_type(name: &str) -> bool {
         || matches!(fixed_bytes_width(name), Ok(Some(_)))
 }
 
-fn encode_numeric_or_fixed_bytes(
+pub(super) fn encode_numeric_or_fixed_bytes(
     type_name: &str,
     value: Eip712ValueKind<'_>,
     out: &mut [u8; WORD_BYTES],
@@ -398,7 +398,9 @@ fn reject_non_sign_extended(width: usize, bytes: [u8; 32]) -> Result<(), Eip712E
     Ok(())
 }
 
-fn parse_array_type(type_name: &str) -> Result<Option<ArrayType<'_>>, Eip712EncodeError> {
+pub(super) fn parse_array_type(
+    type_name: &str,
+) -> Result<Option<ArrayType<'_>>, Eip712EncodeError> {
     let Some((base, suffix)) = type_name.rsplit_once('[') else {
         return Ok(None);
     };

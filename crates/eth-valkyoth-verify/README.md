@@ -15,7 +15,13 @@ This package is published separately so the `eth` workspace can keep small,
 auditable crate boundaries. Treat it as a lower-level building block unless the
 `eth` documentation explicitly says otherwise.
 
-The `0.15.0` support-crate release, shipped with `eth` `0.26.0`, adds a
+The `0.16.0` support-crate release, shipped with `eth` `0.26.1`, adds an
+optional `json` feature for bounded EIP-712 JSON-RPC typed-data parsing. The
+feature depends on current `serde`/`serde_json`, requires `std`, rejects
+duplicate JSON object keys, enforces explicit parser limits, and remains
+disabled by default.
+
+The previous `0.15.0` support-crate release, shipped with `eth` `0.26.0`, adds a
 no-allocation EIP-712 typed-data encoder over caller-provided borrowed
 descriptors. It supports canonical `encodeType`, bounded `encodeData`,
 `hashStruct`, domain separator construction, and final `0x1901` signing digest
@@ -48,5 +54,6 @@ non-cryptographic set-code transaction checks.
 EIP-712 helpers require the caller to provide both `chainId` and
 `verifyingContract`, then check them against the expected execution context
 before sender recovery. The typed-data encoder now computes domain separators
-and message hashes from borrowed descriptors, but JSON-RPC typed-data parsing
-remains an application-boundary responsibility.
+and message hashes from borrowed descriptors. JSON-RPC typed-data parsing is
+available only through the opt-in `json` feature and does not affect default
+`no_std` builds.
