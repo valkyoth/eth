@@ -47,7 +47,7 @@ dependencies.
 ## Current Status
 
 The current release candidate is `0.24.1`; set-code signing and authorization
-validation is ready for external pentest.
+validation passed external pentest and is ready for release.
 
 Implemented now:
 

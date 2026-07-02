@@ -65,8 +65,7 @@ fn drive_legacy_items(list: RlpList<'_>, depth: usize) {
         return;
     }
 
-    let mut items = list.items();
-    while let Some(item) = items.next() {
+    for item in list.items() {
         let Ok(item) = item else {
             return;
         };

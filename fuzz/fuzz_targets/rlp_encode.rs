@@ -36,11 +36,9 @@ fuzz_target!(|data: &[u8]| {
     if let Ok(list) = decode_rlp_list(data, limits) {
         let mut output = vec![0_u8; list.encoded_len()];
         let _ = encode_decoded_list(list, &mut output);
-        for item in list.items() {
-            if let Ok(item) = item {
-                let mut output = vec![0_u8; item.encoded_len()];
-                let _ = encode_decoded_item(item, &mut output);
-            }
+        for item in list.items().flatten() {
+            let mut output = vec![0_u8; item.encoded_len()];
+            let _ = encode_decoded_item(item, &mut output);
         }
     }
 });

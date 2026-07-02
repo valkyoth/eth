@@ -1,6 +1,6 @@
 # eth 0.24.1 Release Notes
 
-Status: ready for external pentest
+Status: pentest passed; ready for release
 
 ## Summary
 
@@ -38,6 +38,8 @@ indicator checks, fee checks, and fork activation remain scheduled for
   domain instead of returning `UnsupportedTransactionType`.
 - Added fuzz coverage for set-code authorization signing-hash construction and
   tuple signature validation with input-selected scratch-buffer lengths.
+- Added an external raw mainnet EIP-7702 set-code transaction KAT and validated
+  its embedded authorization tuple against the `0x05` authorization domain.
 
 ## Security Notes
 
@@ -63,7 +65,7 @@ indicator checks, fee checks, and fork activation remain scheduled for
 
 ## Release Gate
 
-- External pentest must pass before tagging.
+- External pentest passed before tagging.
 - Final GitHub checks must pass on the pentest report commit before tagging.
 
 ## Verification
@@ -71,5 +73,6 @@ indicator checks, fee checks, and fork activation remain scheduled for
 ```bash
 cargo test -p eth-valkyoth-protocol -p eth-valkyoth-verify -p eth --all-features
 cargo clippy -p eth-valkyoth-protocol -p eth-valkyoth-verify -p eth --all-targets --all-features -- -D warnings
+cargo clippy --manifest-path fuzz/Cargo.toml --all-targets -- -D warnings
 scripts/release_0_24_gate.sh
 ```

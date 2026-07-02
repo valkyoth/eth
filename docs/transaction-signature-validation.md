@@ -45,10 +45,12 @@ publicly constructible; callers must obtain it through the validation helpers so
 sender-recovered state cannot be forged outside `eth-valkyoth-verify`.
 
 The test suite includes external raw mainnet transaction known-answer tests for
-EIP-2930, EIP-1559, and EIP-4844. Those fixtures were sourced through
-`eth_getRawTransactionByHash` from `ethereum.publicnode.com` and assert the RPC
-`from` sender against the crate's independent decode, signing-hash, and
-recovery path.
+EIP-2930, EIP-1559, EIP-4844, and EIP-7702. Those fixtures were sourced through
+`eth_getRawTransactionByHash` from `ethereum.publicnode.com` or
+`ethereum-rpc.publicnode.com` and assert the RPC `from` sender against the
+crate's independent decode, signing-hash, and recovery path. The EIP-7702
+fixture also validates its embedded authorization tuple through the separate
+`0x05` authorization domain.
 
 Protocol typestate promotion remains intentionally gated until public proof
 constructors can bind proofs to transaction identity instead of allowing

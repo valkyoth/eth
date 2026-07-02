@@ -825,7 +825,7 @@ Implementation note:
 
 ### v0.24.1 - Set-Code Signing And Authorization Validation
 
-Status: implemented; ready for external pentest.
+Status: implemented; pentest passed; ready for release.
 
 Goal: add the cryptographic EIP-7702 validation pieces that were intentionally
 left out of the syntactic set-code decoder.

@@ -1,7 +1,7 @@
 # Crate Version Matrix
 
-Status: `v0.24.1` set-code signing and authorization validation is ready for
-external pentest.
+Status: `v0.24.1` set-code signing and authorization validation passed
+external pentest and is ready for release.
 
 `eth` uses independent crate versions. The facade crate remains the main user
 entry point, but support crates are published only when their own package

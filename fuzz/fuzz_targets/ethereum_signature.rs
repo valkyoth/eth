@@ -8,10 +8,10 @@ use libfuzzer_sys::fuzz_target;
 fuzz_target!(|data: &[u8]| {
     let mut signature_bytes = [0_u8; ETHEREUM_SIGNATURE_BYTES];
     let signature_len = data.len().min(ETHEREUM_SIGNATURE_BYTES);
-    if let Some(source) = data.get(..signature_len) {
-        if let Some(target) = signature_bytes.get_mut(..signature_len) {
-            target.copy_from_slice(source);
-        }
+    if let Some(source) = data.get(..signature_len)
+        && let Some(target) = signature_bytes.get_mut(..signature_len)
+    {
+        target.copy_from_slice(source);
     }
 
     let parsed = EthereumSignature::try_from_bytes(signature_bytes);
@@ -73,10 +73,10 @@ fn digest_from_data(data: &[u8]) -> B256 {
         return B256::from_bytes(digest);
     };
     let len = source.len().min(digest.len());
-    if let Some(source) = source.get(..len) {
-        if let Some(target) = digest.get_mut(..len) {
-            target.copy_from_slice(source);
-        }
+    if let Some(source) = source.get(..len)
+        && let Some(target) = digest.get_mut(..len)
+    {
+        target.copy_from_slice(source);
     }
     B256::from_bytes(digest)
 }

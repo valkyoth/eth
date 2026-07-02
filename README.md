@@ -35,8 +35,8 @@ dependencies.
 
 ## Current Status
 
-Status: `v0.24.1` set-code signing and authorization validation is ready for
-external pentest.
+Status: `v0.24.1` set-code signing and authorization validation passed
+external pentest and is ready for release.
 
 Implemented now:
 
@@ -87,8 +87,8 @@ Implemented now:
 - Decoded transaction signature validation helpers that combine replay-domain
   checks, signing hashes, low-s/y-parity policy, sender recovery, and optional
   expected-sender comparison.
-- External raw mainnet transaction KATs for EIP-2930, EIP-1559, and EIP-4844
-  sender recovery.
+- External raw mainnet transaction KATs for EIP-2930, EIP-1559, EIP-4844, and
+  EIP-7702 sender recovery.
 - EIP-712 domain-safety checks for required `chainId` and
   `verifyingContract` fields, plus a domain-gated sender recovery helper.
 - RLP derive design and private derive-crate prototype tests for future
