@@ -54,7 +54,7 @@ eth-valkyoth-rpc = { path = "crates/eth-valkyoth-rpc", version = "0.7.0" }
 eth-valkyoth-sanitization = { path = "crates/eth-valkyoth-sanitization", version = "0.7.2" }
 eth-valkyoth-signer = { path = "crates/eth-valkyoth-signer", version = "0.7.1" }
 eth-valkyoth-testkit = { path = "crates/eth-valkyoth-testkit", version = "0.7.0" }
-eth-valkyoth-verify = { path = "crates/eth-valkyoth-verify", version = "0.16.0" }
+eth-valkyoth-verify = { path = "crates/eth-valkyoth-verify", version = "0.17.0" }
 k256 = { version = "0.13.4", default-features = false, features = ["ecdsa"] }
 proc-macro2 = "1.0.106"
 quote = "1.0.46"

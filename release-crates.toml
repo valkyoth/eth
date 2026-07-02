@@ -32,10 +32,10 @@ reason = "No package changes for v0.27.0."
 
 [crates."eth-valkyoth-verify"]
 previous_version = "0.16.0"
-version = "0.16.0"
-change = "unchanged"
-publish = false
-reason = "No package changes for v0.27.0."
+version = "0.17.0"
+change = "code"
+publish = true
+reason = "Adds EIP-712 JSON parser fuzz coverage and a raw JSON recursion-limit regression."
 
 [crates."eth-valkyoth-derive"]
 previous_version = "0.17.0"

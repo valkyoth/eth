@@ -15,7 +15,7 @@ eth-valkyoth-codec = { path = "../crates/eth-valkyoth-codec", version = "0.17.0"
 eth-valkyoth-hash = { path = "../crates/eth-valkyoth-hash", version = "0.11.0" }
 eth-valkyoth-primitives = { path = "../crates/eth-valkyoth-primitives", version = "0.11.0" }
 eth-valkyoth-protocol = { path = "../crates/eth-valkyoth-protocol", version = "0.22.1" }
-eth-valkyoth-verify = { path = "../crates/eth-valkyoth-verify", version = "0.16.0" }
+eth-valkyoth-verify = { path = "../crates/eth-valkyoth-verify", version = "0.17.0", features = ["json"] }
 libfuzzer-sys = "0.4.13"
 
 [[bin]]
@@ -91,6 +91,13 @@ bench = false
 [[bin]]
 name = "eip712_typed"
 path = "fuzz_targets/eip712_typed.rs"
+test = false
+doc = false
+bench = false
+
+[[bin]]
+name = "eip712_json"
+path = "fuzz_targets/eip712_json.rs"
 test = false
 doc = false
 bench = false

@@ -39,4 +39,8 @@ dependencies.
 | `subtle` | `2.6.1` | `BSD-3-Clause` | disabled, `core_hint_black_box` enabled | Constant-time equality for security-boundary byte comparisons. |
 | `syn` | `2.0.118` | `MIT OR Apache-2.0` | enabled, `full` enabled | Syntax parsing for optional derive macros. |
 | `tiny-keccak` | `2.0.2` | `CC0-1.0` | disabled, `keccak` enabled | Optional non-default software Keccak-256 backend admitted in v0.27.0. |
+
+`CC0-1.0` is not a globally allowed license in `deny.toml`. The release policy
+uses a scoped cargo-deny license exception for `tiny-keccak 2.0.2` only, so any
+future CC0 dependency must receive a separate review and exception.
 | `trybuild` | `1.0.117` | `MIT OR Apache-2.0` | enabled | Dev-only compile-fail diagnostics for public derive macros. |

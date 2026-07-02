@@ -305,6 +305,29 @@ fn rejects_excessively_wide_json_objects() {
     assert_json_error(&json, Eip712JsonLimits::DEFAULT, Eip712JsonError::Json);
 }
 
+#[test]
+fn rejects_raw_json_structural_depth_before_parser_walk() {
+    let mut json =
+        String::from(r#"{"types":{"Value":[]},"primaryType":"Value","domain":{},"message":"#);
+    for _ in 0..2048 {
+        json.push('[');
+    }
+    json.push('0');
+    for _ in 0..2048 {
+        json.push(']');
+    }
+    json.push('}');
+
+    assert_json_error(
+        &json,
+        Eip712JsonLimits {
+            max_input_bytes: json.len().saturating_add(1),
+            ..Eip712JsonLimits::DEFAULT
+        },
+        Eip712JsonError::Json,
+    );
+}
+
 fn assert_json_error(json: &str, limits: Eip712JsonLimits, expected: Eip712JsonError) {
     let mut scratch = [0_u8; 512];
     assert_eq!(

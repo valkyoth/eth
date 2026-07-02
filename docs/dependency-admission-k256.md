@@ -12,7 +12,7 @@ protocol-core graph, so it is scoped to digest-level sender recovery only.
 | --- | --- | --- |
 | `k256` | `0.13.4` | Selected stable release. |
 | `k256` | `0.14.0-rc.15` | Not selected because it is a release candidate. |
-| `secp256k1` | `0.32.0-beta.2` | Not selected because it is beta and uses `CC0-1.0`, which is not admitted by the current license policy. |
+| `secp256k1` | `0.32.0-beta.2` | Not selected because it is beta and uses `CC0-1.0`; only reviewed dependencies with scoped cargo-deny exceptions may use that license. |
 
 The selected version was checked with `cargo info k256@0.13.4` on 2026-07-01.
 It declares `rust-version = 1.65`, below this workspace's Rust `1.90.0` MSRV.

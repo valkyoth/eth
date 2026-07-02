@@ -1,7 +1,7 @@
 # EIP-712 Domain Safety
 
-Status: v0.26.1 optional JSON typed-data parser boundary implemented; pentest
-retest passed and final GitHub checks are pending before tagging.
+Status: v0.27.0 optional JSON typed-data parser boundary has fuzz build
+coverage, committed JSON seeds, and a raw JSON structural-depth regression.
 
 EIP-712 structured-data signing extends Ethereum signing with
 `keccak256("\x19\x01" || domainSeparator || hashStruct(message))`. The
@@ -37,6 +37,9 @@ The JSON boundary:
 
 - rejects duplicate JSON object keys before any type map is accepted, using an
   independent object-width guard in addition to the input-byte limit;
+- relies on `serde_json`'s default recursion guard while constructing the first
+  JSON DOM; this is a security control and the crate must not enable
+  `serde_json/unbounded_depth`;
 - enforces explicit limits for input bytes, type count, field count, array
   length, dynamic bytes, string length, and recursion depth;
 - rejects `ChainId(0)` in parsed EIP-712 domains;
@@ -47,4 +50,5 @@ The JSON boundary:
 - maps parsed type strings to the same typed-data encoder model used by the
   borrowed API;
 - includes Ether Mail and adversarial parser-limit, malformed-hex,
-  duplicate-field, fixed-array mismatch, and domain-validation fixtures.
+  duplicate-field, fixed-array mismatch, domain-validation, and raw JSON
+  structural-depth fixtures.

@@ -1020,7 +1020,8 @@ Exit criteria:
 
 ### v0.27.0 - Optional Keccak Backend Admission
 
-Status: implemented; ready for external pentest.
+Status: implemented; external pentest findings remediated and ready for
+retest.
 
 Goal: optionally provide a reviewed software Keccak-256 backend without adding
 it to the default core graph.
@@ -1032,12 +1033,15 @@ Deliverables:
 - `eth-valkyoth-hash` feature `tiny-keccak` and facade feature `keccak-tiny`,
   both outside default `eth`;
 - `KECCAK256_EMPTY`, `KECCAK256_ABC`, and chunk-boundary KATs;
+- EIP-712 JSON parser fuzz target, committed JSON seeds, and raw JSON
+  structural-depth regression added during pentest remediation;
 - duplicate-dependency and MSRV review;
 - state-clearing contract documented for sender-recovery paths.
 
 Verification:
 
 - `cargo test -p eth-valkyoth-hash --all-features`
+- `cargo test -p eth-valkyoth-verify --features json`
 - `cargo deny check`
 - `cargo audit`
 

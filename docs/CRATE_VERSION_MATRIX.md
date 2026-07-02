@@ -35,7 +35,7 @@ publication when a crate is marked `unchanged`.
 | `eth-valkyoth-primitives` | `0.11.0` | `0.11.0` | `unchanged` | No | No package changes for v0.27.0. |
 | `eth-valkyoth-hash` | `0.10.1` | `0.11.0` | `code` | Yes | Adds the optional `tiny-keccak` software backend behind a non-default feature. |
 | `eth-valkyoth-protocol` | `0.22.1` | `0.22.1` | `unchanged` | No | No package changes for v0.27.0. |
-| `eth-valkyoth-verify` | `0.16.0` | `0.16.0` | `unchanged` | No | No package changes for v0.27.0. |
+| `eth-valkyoth-verify` | `0.16.0` | `0.17.0` | `code` | Yes | Adds EIP-712 JSON parser fuzz coverage and a raw JSON recursion-limit regression. |
 | `eth-valkyoth-derive` | `0.17.0` | `0.17.0` | `unchanged` | No | No package changes for v0.27.0. |
 | `eth-valkyoth-sanitization` | `0.7.2` | `0.7.2` | `unchanged` | No | No package changes for v0.27.0. |
 | `eth-valkyoth-evm` | `0.7.0` | `0.7.0` | `unchanged` | No | No package changes for v0.27.0. |

@@ -6,7 +6,7 @@ Most users should depend on the facade crate instead:
 
 ```toml
 [dependencies]
-eth = "0.26"
+eth = "0.27"
 ```
 
 Crates.io: <https://crates.io/crates/eth>
@@ -15,7 +15,12 @@ This package is published separately so the `eth` workspace can keep small,
 auditable crate boundaries. Treat it as a lower-level building block unless the
 `eth` documentation explicitly says otherwise.
 
-The `0.16.0` support-crate release, shipped with `eth` `0.26.1`, adds an
+The `0.17.0` support-crate release, shipped with `eth` `0.27.0`, adds EIP-712
+JSON parser fuzz coverage and a raw JSON structural-depth regression test. The
+`json` feature continues to rely on `serde_json`'s default recursion guard and
+must not be built with `serde_json/unbounded_depth`.
+
+The previous `0.16.0` support-crate release, shipped with `eth` `0.26.1`, adds an
 optional `json` feature for bounded EIP-712 JSON-RPC typed-data parsing. The
 feature depends on current `serde`/`serde_json`, requires `std`, rejects
 duplicate JSON object keys, enforces explicit parser limits, and remains

@@ -22,7 +22,6 @@ allow = [
     "BSD-2-Clause",
     "BSD-3-Clause",
     "BSL-1.0",
-    "CC0-1.0",
     "ISC",
     "MIT",
     "MIT-0",
@@ -33,6 +32,11 @@ allow = [
 
 [licenses.private]
 ignore = true
+
+[[licenses.exceptions]]
+allow = ["CC0-1.0"]
+name = "tiny-keccak"
+version = "2.0.2"
 
 [bans]
 multiple-versions = "deny"
