@@ -13,6 +13,7 @@ mod header;
 mod receipt;
 mod state;
 mod transaction;
+mod withdrawal;
 
 pub use fork::{ChainSpec, ForkActivation, ForkError, ForkSpec, Hardfork, ValidationContext};
 pub use header::{
@@ -74,6 +75,11 @@ pub use transaction::{
     encoded_set_code_authorization_signing_preimage_len, encoded_set_code_signing_preimage_len,
     encoded_set_code_transaction_len, encoded_transaction_len,
     validate_set_code_transaction_context,
+};
+pub use withdrawal::{
+    UnvalidatedWithdrawal, UnvalidatedWithdrawals, WITHDRAWAL_FIELD_COUNT, WithdrawalAmountGwei,
+    WithdrawalDecodeError, WithdrawalDecodeErrorCategory, WithdrawalField, WithdrawalIndex,
+    WithdrawalItems, WithdrawalValidatorIndex, decode_withdrawals,
 };
 
 /// Protocol validation failure.

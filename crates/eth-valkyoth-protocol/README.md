@@ -7,7 +7,7 @@ Most users should depend on the facade crate instead:
 
 ```toml
 [dependencies]
-eth = "0.29"
+eth = "0.30"
 ```
 
 Crates.io: <https://crates.io/crates/eth>
@@ -16,7 +16,14 @@ This package is published separately so the `eth` workspace can keep small,
 auditable crate boundaries. Treat it as a lower-level building block unless the
 `eth` documentation explicitly says otherwise.
 
-The `0.24.0` support-crate release, shipped with `eth` `0.29.0`, adds
+The `0.25.0` support-crate release, shipped with `eth` `0.30.0`, adds
+syntactic EIP-4895 withdrawal-list decoding. It returns
+`UnvalidatedWithdrawals`, models global withdrawal indexes, validator indexes,
+recipient addresses, and nonzero Gwei amounts explicitly, and keeps entries
+borrowed without claiming consensus-layer dequeue correctness, header
+`withdrawals_root` matching, or state-balance application.
+
+The previous `0.24.0` support-crate release, shipped with `eth` `0.29.0`, adds
 syntactic legacy and EIP-2718 typed receipt decoding. It returns
 `UnvalidatedReceipt`, models status-or-state-root explicitly, validates the
 256-byte logs bloom and log/topic shape, and keeps logs borrowed without

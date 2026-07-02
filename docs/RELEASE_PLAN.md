@@ -869,8 +869,7 @@ Implementation note:
 
 ### v0.24.2 - Set-Code Transaction Validity Gate
 
-Status: implementation, pentest remediation, and clean retest complete; waiting
-for final GitHub checks before tagging.
+Status: tagged as `v0.28.0`.
 
 Goal: add the non-cryptographic EIP-7702 validity checks that decide whether a
 decoded set-code transaction can advance beyond the unvalidated state.
@@ -985,8 +984,7 @@ Implementation note:
 
 ### v0.26.1 - EIP-712 JSON Typed-Data Parser Boundary
 
-Status: implementation, pentest remediation, and clean retest complete; waiting
-for final GitHub checks before tagging.
+Status: tagged as `v0.29.0`.
 
 Goal: admit a reviewed way to parse JSON-RPC typed-data payloads into the
 borrowed EIP-712 encoder boundary without weakening the default `no_std` graph.
@@ -1099,6 +1097,8 @@ Exit criteria:
 
 ### v0.30.0 - Withdrawal And Post-Merge Fields
 
+Status: implementation ready for external pentest.
+
 Goal: model post-merge execution fields explicitly.
 
 Deliverables:
@@ -1106,6 +1106,7 @@ Deliverables:
 - withdrawal structures;
 - withdrawals-root input model;
 - timestamp/fork interaction tests.
+- withdrawal-list fuzz target.
 
 Verification:
 

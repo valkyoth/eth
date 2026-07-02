@@ -26,7 +26,7 @@
 `eth` is the public facade crate for a `no_std`-first Ethereum
 execution-layer protocol workspace.
 
-The crate is intentionally conservative at `0.29.0`: it provides explicit
+The crate is intentionally conservative at `0.30.0`: it provides explicit
 Ethereum primitive domains, bounded decode-budget policy, stable error
 categories, primitive RLP bridge helpers, a caller-provided Keccak-256 boundary,
 RLP fuzz-harness evidence, a transaction envelope shell, unvalidated legacy
@@ -42,15 +42,16 @@ set-code transaction validity gate, decoded transaction signature validation
 helpers, public RLP derive support, digest-level secp256k1 sender recovery,
 EIP-712 domain-safety checks, EIP-712 typed-data hashing over borrowed
 descriptors, an opt-in bounded JSON typed-data parser, syntactic block header
-decoding and hashing, syntactic receipt decoding, an opt-in reviewed
+decoding and hashing, syntactic receipt and withdrawal-list decoding, an
+opt-in reviewed
 `tiny-keccak` software backend, small first-party crate boundaries, optional
 sanitization support, and release evidence before RPC, signer, EVM, Reth, or
 P2P integrations become real dependencies.
 
 ## Current Status
 
-The current release candidate is `0.29.0`; receipt decoding has passed pentest
-and is waiting for final GitHub checks before tagging.
+The current release candidate is `0.30.0`; withdrawal-list decoding is
+implemented and ready for pentest.
 
 Implemented now:
 
@@ -91,6 +92,8 @@ Implemented now:
 - Unvalidated legacy and EIP-2718 typed receipt decoding, including
   status/root policy, 256-byte logs bloom, borrowed log entries, topics, and
   data.
+- Unvalidated EIP-4895 withdrawal-list decoding, including global withdrawal
+  indexes, validator indexes, recipient addresses, and nonzero Gwei amounts.
 - Proof-gated transaction typestate transitions for decoded, canonical,
   fork-validated, and sender-recovered state tokens.
 - Replay-domain validation for legacy EIP-155 and typed transaction chain IDs
@@ -164,21 +167,21 @@ Not implemented yet:
 
 ```toml
 [dependencies]
-eth = "0.29"
+eth = "0.30"
 ```
 
 Disable defaults explicitly for embedded or freestanding builds:
 
 ```toml
 [dependencies]
-eth = { version = "0.29", default-features = false }
+eth = { version = "0.30", default-features = false }
 ```
 
 Optional sanitization support:
 
 ```toml
 [dependencies]
-eth = { version = "0.29", features = ["sanitization"] }
+eth = { version = "0.30", features = ["sanitization"] }
 ```
 
 ## Features
@@ -202,7 +205,7 @@ Optional reviewed software Keccak backend:
 
 ```toml
 [dependencies]
-eth = { version = "0.29", features = ["keccak-tiny"] }
+eth = { version = "0.30", features = ["keccak-tiny"] }
 ```
 
 ```rust
@@ -760,6 +763,43 @@ The RLP parser surface has cargo-fuzz targets and committed seed fixtures. See
 the [fuzzing guide](https://github.com/valkyoth/eth/blob/main/docs/fuzzing.md)
 for seed materialization, target scope, and crash reproduction.
 
+## Withdrawals
+
+EIP-4895 withdrawal lists decode into an explicitly unvalidated borrowed model.
+The decoder checks canonical RLP shape, `uint64` indexes, 20-byte recipient
+addresses, and nonzero Gwei amounts, but it does not prove header
+`withdrawals_root` membership or state-balance application:
+
+```rust
+use eth::codec::DecodeLimits;
+use eth::protocol::decode_withdrawals;
+
+let limits = DecodeLimits {
+    max_input_bytes: 64,
+    max_list_items: 8,
+    max_nesting_depth: 4,
+    max_total_allocation: 64,
+    max_proof_nodes: 4,
+    max_total_items: 16,
+};
+let raw = [
+    0xd9, 0xd8, 0x01, 0x02, 0x94, 0x30, 0x31, 0x32, 0x33, 0x34, 0x35, 0x36,
+    0x37, 0x38, 0x39, 0x3a, 0x3b, 0x3c, 0x3d, 0x3e, 0x3f, 0x40, 0x41, 0x42,
+    0x43, 0x03,
+];
+
+let withdrawals = decode_withdrawals(&raw, limits)?;
+let mut entries = withdrawals.entries();
+let first = entries.next().transpose()?.ok_or("missing withdrawal")?;
+
+assert_eq!(withdrawals.len(), 1);
+assert_eq!(first.index.get(), 1);
+assert_eq!(first.validator_index.get(), 2);
+assert_eq!(first.amount.get(), 3);
+assert!(entries.next().is_none());
+# Ok::<(), Box<dyn std::error::Error>>(())
+```
+
 ## Transaction Envelopes
 
 The protocol crate can classify the outer transaction envelope without decoding
@@ -878,7 +918,7 @@ the workspace can keep small, auditable boundaries:
 The minimum supported Rust version is Rust `1.90.0`. New deployments should use
 the latest stable Rust verified by the release gates.
 
-Compatibility evidence for `0.29.0`:
+Compatibility evidence for `0.30.0`:
 
 | Rust | Local Evidence |
 | --- | --- |

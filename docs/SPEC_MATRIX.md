@@ -1,6 +1,6 @@
 # eth Specification Matrix
 
-Status: source revisions pinned for `v0.29.0`; scalar, list, and canonical
+Status: source revisions pinned for `v0.30.0`; scalar, list, and canonical
 integer RLP decoding, canonical RLP encoding helpers, primitive RLP bridging,
 Keccak-256 trait boundary, RLP fuzz harness baseline, and transaction envelope
 shell plus unvalidated legacy, EIP-2930 access-list, EIP-1559 dynamic-fee,
@@ -21,14 +21,16 @@ typed-data payloads into the same hashing path when explicitly enabled.
 `v0.27.0` admits an optional non-default `tiny-keccak` backend with
 Keccak-256 KAT coverage. `v0.28.0` adds syntactic execution block header
 decoding and hashing. `v0.29.0` adds syntactic legacy and typed receipt
-decoding with borrowed logs and explicit status/root handling.
+decoding with borrowed logs and explicit status/root handling. `v0.30.0` adds
+syntactic EIP-4895 withdrawal-list decoding with borrowed entries.
 
 Official source and fixture revisions are governed by
 [Spec Source Policy](spec-source-policy.md). Revisions were checked against
 upstream `HEAD` on 2026-07-01 for `v0.18.0`; later execution-apis,
 consensus-specs, ABI, contract-standard, and networking milestones must refresh
 their own pinned source evidence before implementation. Consensus-sensitive
-behavior must not be implemented from memory.
+behavior must not be implemented from memory. EIP-4895 was checked at the
+pinned EIPs revision in `spec-lock.toml` on 2026-07-02 for `v0.30.0`.
 
 | Area | Status | Evidence |
 | --- | --- | --- |
@@ -47,8 +49,9 @@ behavior must not be implemented from memory.
 | Transaction validation | partial | `execution-specs` pinned in `spec-lock.toml`; v0.18.0 adds proof-gated decoded/canonical/fork-valid/sender-recovered transaction state transitions, v0.19.0 adds replay-domain checks, v0.20.0 adds digest-level sender recovery with low-s and y-parity policy, v0.22.0 adds transaction signing-hash construction for legacy EIP-155, EIP-2930, EIP-1559, and EIP-4844, v0.23.0 adds decoded transaction signature validation helpers, v0.24.1 adds EIP-7702 set-code transaction and authorization signature validation, and v0.24.2 adds the EIP-7702 set-code context validity gate. Remaining concrete proof constructors remain planned. |
 | Header decoding and hashing | syntactic decode/hash | `execution-specs` pinned in `spec-lock.toml`; v0.28.0 decodes legacy, London, Shanghai, Cancun, and Prague header field sets and hashes canonical header RLP through the Keccak trait boundary without claiming full header validity |
 | Receipt decoding | syntactic decode | EIP-658 and EIP-2718 checked for status/root and typed receipt envelopes; v0.29.0 decodes legacy and typed receipts, validates bloom/log/topic shape, and does not claim receipt-trie or block-root validity |
+| Withdrawal decoding | syntactic decode | EIP-4895 checked for withdrawal list and entry shape; v0.30.0 decodes canonical withdrawal lists with `uint64` indexes, 20-byte recipient addresses, and nonzero Gwei amounts, and does not claim consensus-layer dequeue correctness, header `withdrawals_root` matching, or state-balance application |
 | Header validation | planned | `execution-specs` pinned in `spec-lock.toml`; ancestry, root, gas, base-fee, fork-activation, and consensus-layer commitment validation not implemented |
-| Receipt validation | planned | `execution-specs` pinned in `spec-lock.toml`; receipt-trie membership, block `receipts_root` matching, transaction/receipt type matching, and cumulative gas monotonicity are not implemented |
+| Receipt and withdrawal validation | planned | `execution-specs` pinned in `spec-lock.toml`; receipt-trie membership, block `receipts_root` matching, transaction/receipt type matching, cumulative gas monotonicity, withdrawal trie-root matching, and withdrawal state application are not implemented |
 | MPT proofs | planned | `ethereum/tests` pinned in `spec-lock.toml`; proof verification not implemented |
 | JSON-RPC | scheduled | `execution-apis` pinned in `spec-lock.toml`; RPC dependency admission starts at v0.40.0 and trust models follow at v0.41.0 |
 | ABI encoding | scheduled | ABI type modeling starts at v0.47.0, value encode/decode at v0.48.0, and contract event/error decoding at v0.49.0 |

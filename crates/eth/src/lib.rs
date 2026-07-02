@@ -33,7 +33,7 @@ pub mod error {
         SetCodeTransactionDecodeError, SetCodeTransactionDecodeErrorCategory,
         SetCodeTransactionValidityError, SetCodeTransactionValidityErrorCategory,
         StateTransitionError, TransactionEncodeError, TransactionEnvelopeError,
-        TransactionEnvelopeErrorCategory,
+        TransactionEnvelopeErrorCategory, WithdrawalDecodeError, WithdrawalDecodeErrorCategory,
     };
     #[cfg(feature = "eip712-json")]
     pub use eth_valkyoth_verify::Eip712JsonError;
