@@ -1,6 +1,7 @@
 # eth 0.27.0 Release Notes
 
-Status: implementation complete; pending external pentest retest
+Status: implementation, remediation, and external pentest retest complete;
+pending final GitHub checks before tagging
 
 ## Summary
 

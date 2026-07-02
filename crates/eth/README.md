@@ -49,7 +49,8 @@ P2P integrations become real dependencies.
 ## Current Status
 
 The current release candidate is `0.27.0`; optional `tiny-keccak` backend
-admission is implemented and ready for external pentest.
+admission has passed external pentest retest and is waiting for final GitHub
+checks before tagging.
 
 Implemented now:
 

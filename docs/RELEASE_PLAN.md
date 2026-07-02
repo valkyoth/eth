@@ -1020,8 +1020,8 @@ Exit criteria:
 
 ### v0.27.0 - Optional Keccak Backend Admission
 
-Status: implemented; external pentest findings remediated and ready for
-retest.
+Status: implementation, pentest remediation, and clean retest complete; waiting
+for final GitHub checks before tagging.
 
 Goal: optionally provide a reviewed software Keccak-256 backend without adding
 it to the default core graph.

@@ -35,8 +35,8 @@ dependencies.
 
 ## Current Status
 
-Status: `v0.27.0` optional `tiny-keccak` backend admission is implemented and
-ready for external pentest.
+Status: `v0.27.0` optional `tiny-keccak` backend admission has passed external
+pentest retest and is waiting for final GitHub checks before tagging.
 
 Implemented now:
 
