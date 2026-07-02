@@ -22,6 +22,8 @@ checks the 20-byte recipient address, and rejects zero Gwei amounts.
   noncanonical integer fields, zero amounts, and decode-limit resource
   exhaustion.
 - Added `fuzz/fuzz_targets/withdrawal.rs`.
+- Added curated withdrawal fuzz seeds for empty, valid, malformed field-count,
+  noncanonical integer, oversized-address, and zero-amount cases.
 - Added `docs/withdrawals.md`.
 
 ## Security Notes
@@ -29,6 +31,9 @@ checks the 20-byte recipient address, and rejects zero Gwei amounts.
 - Withdrawal decoding remains syntactic. It does not prove consensus-layer
   dequeue correctness, global index monotonicity, header `withdrawals_root`
   matching, trie-root membership, or state-balance application.
+- Zero amounts are rejected as an intentional field-domain admission rule
+  because EIP-4895 defines withdrawal amounts as nonzero. This is not a claim
+  that the parser performs all execution-layer block validity checks.
 - Empty withdrawal lists are accepted syntactically. Fork and payload validity
   rules remain outside this parser.
 - Withdrawal entries are eagerly shape-checked before the borrowed model is

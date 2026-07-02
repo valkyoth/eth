@@ -12,12 +12,20 @@ The decoder supports withdrawals encoded as:
 rlp([[index, validator_index, address, amount], ...])
 ```
 
-Each withdrawal entry has:
+Each admitted withdrawal entry has:
 
 - `index`: canonical `uint64` global withdrawal index;
 - `validator_index`: canonical `uint64` consensus-layer validator index;
 - `address`: 20-byte execution-layer recipient address;
 - `amount`: nonzero canonical `uint64` amount in Gwei.
+
+This decoder rejects zero amounts at decode time. That is a deliberate
+field-domain admission rule: `WithdrawalAmountGwei` represents an EIP-4895
+withdrawal amount, and EIP-4895 defines the amount as nonzero. This is still
+not a full execution-layer block-validity claim. A future fork, test network,
+or diagnostic tool that needs to inspect zero-amount artifacts should keep the
+raw RLP bytes or use a fork-specific decoder instead of treating
+`UnvalidatedWithdrawals` as a universal payload container.
 
 The returned `UnvalidatedWithdrawals` value is intentionally not a validity
 proof. It does not prove consensus-layer dequeue correctness, global index
