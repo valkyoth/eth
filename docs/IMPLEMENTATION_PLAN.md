@@ -174,8 +174,9 @@ Release gate:
 
 Implement replay-domain checks, transaction signing hashes, full transaction
 signature validation, sender recovery, EIP-712 safety rules, EIP-712 typed-data
-hashing, header hash consistency, transaction and receipt inclusion proofs, and
-MPT proof verification.
+hashing, the optional EIP-712 JSON typed-data parser boundary, header hash
+consistency, transaction and receipt inclusion proofs, and MPT proof
+verification.
 
 Release gate:
 
