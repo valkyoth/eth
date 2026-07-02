@@ -6,7 +6,7 @@ Most users should depend on the facade crate instead:
 
 ```toml
 [dependencies]
-eth = "0.28"
+eth = "0.29"
 ```
 
 Crates.io: <https://crates.io/crates/eth>
@@ -15,7 +15,11 @@ This package is published separately so the `eth` workspace can keep small,
 auditable crate boundaries. Treat it as a lower-level building block unless the
 `eth` documentation explicitly says otherwise.
 
-The `0.17.1` support-crate release, shipped with `eth` `0.28.0`, updates the
+The `0.17.2` support-crate release, shipped with `eth` `0.29.0`, updates the
+published dependency range for `eth-valkyoth-protocol 0.24.0`. No verification
+API changes are introduced by this patch release.
+
+The previous `0.17.1` support-crate release, shipped with `eth` `0.28.0`, updates the
 published dependency range for `eth-valkyoth-protocol 0.23.0`. No verification
 API changes are introduced by this patch release.
 

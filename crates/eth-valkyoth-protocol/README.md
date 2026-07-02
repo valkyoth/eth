@@ -7,7 +7,7 @@ Most users should depend on the facade crate instead:
 
 ```toml
 [dependencies]
-eth = "0.28"
+eth = "0.29"
 ```
 
 Crates.io: <https://crates.io/crates/eth>
@@ -16,7 +16,13 @@ This package is published separately so the `eth` workspace can keep small,
 auditable crate boundaries. Treat it as a lower-level building block unless the
 `eth` documentation explicitly says otherwise.
 
-The `0.23.0` support-crate release, shipped with `eth` `0.28.0`, adds
+The `0.24.0` support-crate release, shipped with `eth` `0.29.0`, adds
+syntactic legacy and EIP-2718 typed receipt decoding. It returns
+`UnvalidatedReceipt`, models status-or-state-root explicitly, validates the
+256-byte logs bloom and log/topic shape, and keeps logs borrowed without
+claiming receipt-trie or block-root validity.
+
+The previous `0.23.0` support-crate release, shipped with `eth` `0.28.0`, adds
 syntactic execution block header decoding for legacy, London, Shanghai,
 Cancun, and Prague field sets. It returns `UnvalidatedBlockHeader`, hashes the
 exact canonical header RLP through the caller-provided Keccak boundary, and

@@ -29,10 +29,11 @@ pub mod error {
         BlockHeaderDecodeErrorCategory, DynamicFeeTransactionDecodeError,
         DynamicFeeTransactionDecodeErrorCategory, FeatureError, ForkError,
         LegacyTransactionDecodeError, LegacyTransactionDecodeErrorCategory, ProtocolError,
-        ProtocolErrorCategory, SetCodeTransactionDecodeError,
-        SetCodeTransactionDecodeErrorCategory, SetCodeTransactionValidityError,
-        SetCodeTransactionValidityErrorCategory, StateTransitionError, TransactionEncodeError,
-        TransactionEnvelopeError, TransactionEnvelopeErrorCategory,
+        ProtocolErrorCategory, ReceiptDecodeError, ReceiptDecodeErrorCategory,
+        SetCodeTransactionDecodeError, SetCodeTransactionDecodeErrorCategory,
+        SetCodeTransactionValidityError, SetCodeTransactionValidityErrorCategory,
+        StateTransitionError, TransactionEncodeError, TransactionEnvelopeError,
+        TransactionEnvelopeErrorCategory,
     };
     #[cfg(feature = "eip712-json")]
     pub use eth_valkyoth_verify::Eip712JsonError;

@@ -1,7 +1,7 @@
 # Crate Version Matrix
 
-Status: `v0.28.0` block header decoding and hashing has passed pentest and is
-waiting for final GitHub checks before tagging.
+Status: `v0.29.0` receipt decoding is implemented and ready for external
+pentest.
 
 `eth` uses independent crate versions. The facade crate remains the main user
 entry point, but support crates are published only when their own package
@@ -27,23 +27,23 @@ but must be republished so immutable crates.io package metadata is corrected.
 workspace manifests before release. The script refuses accidental lockstep
 publication when a crate is marked `unchanged`.
 
-## v0.28.0 Tracking Table
+## v0.29.0 Tracking Table
 
 | Crate | Published | Planned | Change | Publish | Reason |
 | --- | --- | --- | --- | --- | --- |
-| `eth-valkyoth-codec` | `0.17.0` | `0.17.0` | `unchanged` | No | No package changes for v0.28.0. |
-| `eth-valkyoth-primitives` | `0.11.0` | `0.11.0` | `unchanged` | No | No package changes for v0.28.0. |
-| `eth-valkyoth-hash` | `0.11.0` | `0.11.0` | `unchanged` | No | No package changes for v0.28.0. |
-| `eth-valkyoth-protocol` | `0.22.1` | `0.23.0` | `code` | Yes | Adds syntactic block header decoding, fork-specific header field sets, and block header hashing. |
-| `eth-valkyoth-verify` | `0.17.0` | `0.17.1` | `dependency` | Yes | Bumps the published protocol dependency range to `eth-valkyoth-protocol 0.23.0`. |
-| `eth-valkyoth-derive` | `0.17.0` | `0.17.0` | `unchanged` | No | No package changes for v0.28.0. |
-| `eth-valkyoth-sanitization` | `0.7.2` | `0.7.2` | `unchanged` | No | No package changes for v0.28.0. |
-| `eth-valkyoth-evm` | `0.7.0` | `0.7.0` | `unchanged` | No | No package changes for v0.28.0. |
-| `eth-valkyoth-rpc` | `0.7.0` | `0.7.0` | `unchanged` | No | No package changes for v0.28.0. |
-| `eth-valkyoth-signer` | `0.7.1` | `0.7.1` | `unchanged` | No | No package changes for v0.28.0. |
-| `eth-valkyoth-reth` | `0.7.0` | `0.7.0` | `unchanged` | No | No package changes for v0.28.0. |
-| `eth-valkyoth-testkit` | `0.7.0` | `0.7.0` | `unchanged` | No | No package changes for v0.28.0. |
-| `eth` | `0.27.0` | `0.28.0` | `code` | Yes | Re-exports the new block header decode and hash APIs and updates packaged documentation. |
+| `eth-valkyoth-codec` | `0.17.0` | `0.17.0` | `unchanged` | No | No package changes for v0.29.0. |
+| `eth-valkyoth-primitives` | `0.11.0` | `0.11.0` | `unchanged` | No | No package changes for v0.29.0. |
+| `eth-valkyoth-hash` | `0.11.0` | `0.11.0` | `unchanged` | No | No package changes for v0.29.0. |
+| `eth-valkyoth-protocol` | `0.23.0` | `0.24.0` | `code` | Yes | Adds syntactic legacy and typed receipt decoding with borrowed logs and fuzz coverage. |
+| `eth-valkyoth-verify` | `0.17.1` | `0.17.2` | `dependency` | Yes | Bumps the published protocol dependency range to `eth-valkyoth-protocol 0.24.0`. |
+| `eth-valkyoth-derive` | `0.17.0` | `0.17.0` | `unchanged` | No | No package changes for v0.29.0. |
+| `eth-valkyoth-sanitization` | `0.7.2` | `0.7.2` | `unchanged` | No | No package changes for v0.29.0. |
+| `eth-valkyoth-evm` | `0.7.0` | `0.7.0` | `unchanged` | No | No package changes for v0.29.0. |
+| `eth-valkyoth-rpc` | `0.7.0` | `0.7.0` | `unchanged` | No | No package changes for v0.29.0. |
+| `eth-valkyoth-signer` | `0.7.1` | `0.7.1` | `unchanged` | No | No package changes for v0.29.0. |
+| `eth-valkyoth-reth` | `0.7.0` | `0.7.0` | `unchanged` | No | No package changes for v0.29.0. |
+| `eth-valkyoth-testkit` | `0.7.0` | `0.7.0` | `unchanged` | No | No package changes for v0.29.0. |
+| `eth` | `0.28.0` | `0.29.0` | `code` | Yes | Re-exports the new receipt decode APIs and updates packaged documentation. |
 
 Update this table and `release-crates.toml` in the same commit whenever a crate
 changes release state.

@@ -1077,6 +1077,8 @@ Exit criteria:
 
 ### v0.29.0 - Receipt Decode
 
+Status: implemented; ready for external pentest.
+
 Goal: parse legacy and typed receipts.
 
 Deliverables:

@@ -14,8 +14,8 @@ cargo-fuzz = true
 eth-valkyoth-codec = { path = "../crates/eth-valkyoth-codec", version = "0.17.0", features = ["testing"] }
 eth-valkyoth-hash = { path = "../crates/eth-valkyoth-hash", version = "0.11.0" }
 eth-valkyoth-primitives = { path = "../crates/eth-valkyoth-primitives", version = "0.11.0" }
-eth-valkyoth-protocol = { path = "../crates/eth-valkyoth-protocol", version = "0.23.0" }
-eth-valkyoth-verify = { path = "../crates/eth-valkyoth-verify", version = "0.17.1", features = ["json"] }
+eth-valkyoth-protocol = { path = "../crates/eth-valkyoth-protocol", version = "0.24.0" }
+eth-valkyoth-verify = { path = "../crates/eth-valkyoth-verify", version = "0.17.2", features = ["json"] }
 libfuzzer-sys = "0.4.13"
 
 [[bin]]
@@ -77,6 +77,13 @@ bench = false
 [[bin]]
 name = "header"
 path = "fuzz_targets/header.rs"
+test = false
+doc = false
+bench = false
+
+[[bin]]
+name = "receipt"
+path = "fuzz_targets/receipt.rs"
 test = false
 doc = false
 bench = false

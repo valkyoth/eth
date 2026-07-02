@@ -9,6 +9,7 @@ use core::fmt;
 
 mod fork;
 mod header;
+mod receipt;
 mod state;
 mod transaction;
 
@@ -18,6 +19,15 @@ pub use header::{
     CANCUN_HEADER_FIELD_COUNT, HeaderFieldSet, LEGACY_HEADER_FIELD_COUNT,
     LONDON_HEADER_FIELD_COUNT, LogsBloom, PRAGUE_HEADER_FIELD_COUNT, SHANGHAI_HEADER_FIELD_COUNT,
     UnvalidatedBlockHeader, decode_block_header,
+};
+pub use receipt::{
+    EIP_2718_MAX_TYPED_RECEIPT_PREFIX, EIP_2718_RECEIPT_SCALAR_PREFIX_START,
+    EIP_2718_RESERVED_RECEIPT_PREFIX, EIP_2718_TYPED_ZERO_RECEIPT_PREFIX,
+    LEGACY_RECEIPT_PREFIX_START, RECEIPT_FIELD_COUNT, ReceiptDecodeError,
+    ReceiptDecodeErrorCategory, ReceiptEnvelope, ReceiptField, ReceiptKind, ReceiptLog,
+    ReceiptLogEntries, ReceiptLogTopicItems, ReceiptLogTopics, ReceiptLogs, ReceiptLogsBloom,
+    ReceiptStatusOrStateRoot, TypedReceiptEnvelope, UnvalidatedReceipt, decode_receipt,
+    decode_receipt_envelope,
 };
 pub use state::{
     Canonical, CanonicalValidationProof, Decoded, ForkValidated, ForkValidationProof,
