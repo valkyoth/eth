@@ -5,22 +5,30 @@ use eth_valkyoth_codec::{
 };
 use eth_valkyoth_primitives::TransactionType;
 
+use crate::eip2718::{
+    EIP_2718_MAX_TYPED_PREFIX as SHARED_EIP_2718_MAX_TYPED_PREFIX,
+    EIP_2718_RESERVED_PREFIX as SHARED_EIP_2718_RESERVED_PREFIX,
+    EIP_2718_SCALAR_PREFIX_START as SHARED_EIP_2718_SCALAR_PREFIX_START,
+    EIP_2718_TYPED_ZERO_PREFIX as SHARED_EIP_2718_TYPED_ZERO_PREFIX, Eip2718Prefix,
+    LEGACY_PREFIX_START as SHARED_LEGACY_PREFIX_START, classify_eip2718_prefix,
+};
+
 /// EIP-2718 byte value reserved by this crate for the legacy transaction
 /// domain.
-pub const EIP_2718_TYPED_ZERO_PREFIX: u8 = 0x00;
+pub const EIP_2718_TYPED_ZERO_PREFIX: u8 = SHARED_EIP_2718_TYPED_ZERO_PREFIX;
 
 /// Largest single-byte EIP-2718 typed transaction prefix.
-pub const EIP_2718_MAX_TYPED_PREFIX: u8 = TransactionType::MAX_TYPED;
+pub const EIP_2718_MAX_TYPED_PREFIX: u8 = SHARED_EIP_2718_MAX_TYPED_PREFIX;
 
 /// First RLP scalar prefix that cannot be a typed transaction envelope or a
 /// legacy transaction list.
-pub const EIP_2718_SCALAR_PREFIX_START: u8 = 0x80;
+pub const EIP_2718_SCALAR_PREFIX_START: u8 = SHARED_EIP_2718_SCALAR_PREFIX_START;
 
 /// First byte used by canonical RLP short-list legacy transactions.
-pub const LEGACY_TRANSACTION_PREFIX_START: u8 = 0xc0;
+pub const LEGACY_TRANSACTION_PREFIX_START: u8 = SHARED_LEGACY_PREFIX_START;
 
 /// Prefix reserved by EIP-2718 as a future extension sentinel.
-pub const EIP_2718_RESERVED_PREFIX: u8 = 0xff;
+pub const EIP_2718_RESERVED_PREFIX: u8 = SHARED_EIP_2718_RESERVED_PREFIX;
 
 /// Borrowed transaction envelope shell.
 ///
@@ -165,31 +173,30 @@ pub fn decode_transaction_envelope<'a>(
         .check_input_len(input.len())
         .map_err(TransactionEnvelopeError::Decode)?;
 
-    let Some((&prefix, payload)) = input.split_first() else {
+    let Some(prefix) = classify_eip2718_prefix(input) else {
         return Err(TransactionEnvelopeError::EmptyInput);
     };
 
     match prefix {
-        EIP_2718_TYPED_ZERO_PREFIX => {
-            Err(TransactionEnvelopeError::UnsupportedTransactionType { type_byte: prefix })
-        }
-        0x01..=EIP_2718_MAX_TYPED_PREFIX => {
-            let transaction_type = TransactionType::try_new_typed(prefix).map_err(|_| {
-                TransactionEnvelopeError::UnsupportedTransactionType { type_byte: prefix }
-            })?;
+        Eip2718Prefix::TypedZero => Err(TransactionEnvelopeError::UnsupportedTransactionType {
+            type_byte: EIP_2718_TYPED_ZERO_PREFIX,
+        }),
+        Eip2718Prefix::Typed { type_byte, payload } => {
+            let transaction_type = TransactionType::try_new_typed(type_byte)
+                .map_err(|_| TransactionEnvelopeError::UnsupportedTransactionType { type_byte })?;
             Ok(TransactionEnvelope::Typed(TypedTransactionEnvelope {
                 transaction_type,
                 payload,
             }))
         }
-        EIP_2718_SCALAR_PREFIX_START..=0xbf => {
+        Eip2718Prefix::ScalarPrefix { prefix } => {
             Err(TransactionEnvelopeError::ScalarPrefix { prefix })
         }
-        LEGACY_TRANSACTION_PREFIX_START..=0xfe => {
+        Eip2718Prefix::Legacy => {
             let list = decode_rlp_list(input, limits).map_err(TransactionEnvelopeError::Decode)?;
             Ok(TransactionEnvelope::Legacy(list))
         }
-        EIP_2718_RESERVED_PREFIX => Err(TransactionEnvelopeError::ReservedPrefix),
+        Eip2718Prefix::Reserved => Err(TransactionEnvelopeError::ReservedPrefix),
     }
 }
 

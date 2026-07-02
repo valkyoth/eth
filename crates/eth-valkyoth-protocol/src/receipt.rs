@@ -1,6 +1,14 @@
 use eth_valkyoth_codec::{DecodeError, DecodeLimits, RlpInteger, RlpItem, RlpList, RlpScalar};
 use eth_valkyoth_primitives::{Address, B256, Gas, TransactionType};
 
+use crate::eip2718::{
+    EIP_2718_MAX_TYPED_PREFIX as SHARED_EIP_2718_MAX_TYPED_PREFIX,
+    EIP_2718_RESERVED_PREFIX as SHARED_EIP_2718_RESERVED_PREFIX,
+    EIP_2718_SCALAR_PREFIX_START as SHARED_EIP_2718_SCALAR_PREFIX_START,
+    EIP_2718_TYPED_ZERO_PREFIX as SHARED_EIP_2718_TYPED_ZERO_PREFIX, Eip2718Prefix,
+    LEGACY_PREFIX_START as SHARED_LEGACY_PREFIX_START, classify_eip2718_prefix,
+};
+
 mod error;
 pub use error::{ReceiptDecodeError, ReceiptDecodeErrorCategory, ReceiptField};
 
@@ -12,15 +20,15 @@ const LOG_FIELD_COUNT: usize = 3;
 /// Number of fields in a legacy or typed receipt payload.
 pub const RECEIPT_FIELD_COUNT: usize = 4;
 /// EIP-2718 byte value reserved by this crate for the legacy receipt domain.
-pub const EIP_2718_TYPED_ZERO_RECEIPT_PREFIX: u8 = 0x00;
+pub const EIP_2718_TYPED_ZERO_RECEIPT_PREFIX: u8 = SHARED_EIP_2718_TYPED_ZERO_PREFIX;
 /// Largest single-byte EIP-2718 typed receipt prefix.
-pub const EIP_2718_MAX_TYPED_RECEIPT_PREFIX: u8 = TransactionType::MAX_TYPED;
+pub const EIP_2718_MAX_TYPED_RECEIPT_PREFIX: u8 = SHARED_EIP_2718_MAX_TYPED_PREFIX;
 /// First RLP scalar prefix that cannot be a typed receipt or legacy list.
-pub const EIP_2718_RECEIPT_SCALAR_PREFIX_START: u8 = 0x80;
+pub const EIP_2718_RECEIPT_SCALAR_PREFIX_START: u8 = SHARED_EIP_2718_SCALAR_PREFIX_START;
 /// First byte used by canonical RLP short-list legacy receipts.
-pub const LEGACY_RECEIPT_PREFIX_START: u8 = 0xc0;
+pub const LEGACY_RECEIPT_PREFIX_START: u8 = SHARED_LEGACY_PREFIX_START;
 /// Prefix reserved by EIP-2718 as a future extension sentinel.
-pub const EIP_2718_RESERVED_RECEIPT_PREFIX: u8 = 0xff;
+pub const EIP_2718_RESERVED_RECEIPT_PREFIX: u8 = SHARED_EIP_2718_RESERVED_PREFIX;
 
 /// Borrowed receipt envelope shell.
 #[derive(Clone, Copy, Debug, Eq, PartialEq)]
@@ -218,31 +226,29 @@ pub fn decode_receipt_envelope<'a>(
         .check_input_len(input.len())
         .map_err(|source| field_error(ReceiptField::Payload, source))?;
 
-    let Some((&prefix, payload)) = input.split_first() else {
+    let Some(prefix) = classify_eip2718_prefix(input) else {
         return Err(ReceiptDecodeError::EmptyInput);
     };
 
     match prefix {
-        EIP_2718_TYPED_ZERO_RECEIPT_PREFIX => {
-            Err(ReceiptDecodeError::UnsupportedReceiptType { type_byte: prefix })
-        }
-        0x01..=EIP_2718_MAX_TYPED_RECEIPT_PREFIX => {
-            let receipt_type = TransactionType::try_new_typed(prefix)
-                .map_err(|_| ReceiptDecodeError::UnsupportedReceiptType { type_byte: prefix })?;
+        Eip2718Prefix::TypedZero => Err(ReceiptDecodeError::UnsupportedReceiptType {
+            type_byte: EIP_2718_TYPED_ZERO_RECEIPT_PREFIX,
+        }),
+        Eip2718Prefix::Typed { type_byte, payload } => {
+            let receipt_type = TransactionType::try_new_typed(type_byte)
+                .map_err(|_| ReceiptDecodeError::UnsupportedReceiptType { type_byte })?;
             Ok(ReceiptEnvelope::Typed(TypedReceiptEnvelope {
                 receipt_type,
                 payload,
             }))
         }
-        EIP_2718_RECEIPT_SCALAR_PREFIX_START..=0xbf => {
-            Err(ReceiptDecodeError::ScalarPrefix { prefix })
-        }
-        LEGACY_RECEIPT_PREFIX_START..=0xfe => {
+        Eip2718Prefix::ScalarPrefix { prefix } => Err(ReceiptDecodeError::ScalarPrefix { prefix }),
+        Eip2718Prefix::Legacy => {
             let list = eth_valkyoth_codec::decode_rlp_list(input, limits)
                 .map_err(|source| field_error(ReceiptField::Payload, source))?;
             Ok(ReceiptEnvelope::Legacy(list))
         }
-        EIP_2718_RESERVED_RECEIPT_PREFIX => Err(ReceiptDecodeError::ReservedPrefix),
+        Eip2718Prefix::Reserved => Err(ReceiptDecodeError::ReservedPrefix),
     }
 }
 

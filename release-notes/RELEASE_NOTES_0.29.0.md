@@ -25,6 +25,8 @@ keeps log data borrowed.
   topic width, and decode-limit resource exhaustion.
 - Added `fuzz/fuzz_targets/receipt.rs`.
 - Added `docs/receipts.md`.
+- Added a shared internal EIP-2718 prefix classifier used by both transaction
+  and receipt envelope decoders to prevent range-classification drift.
 
 ## Security Notes
 

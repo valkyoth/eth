@@ -7,6 +7,7 @@ extern crate std;
 
 use core::fmt;
 
+mod eip2718;
 mod fork;
 mod header;
 mod receipt;
