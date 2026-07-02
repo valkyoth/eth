@@ -16,6 +16,9 @@ use core::fmt;
 
 use eth_valkyoth_primitives::B256;
 
+#[cfg(feature = "tiny-keccak")]
+use tiny_keccak::{Hasher as TinyKeccakHasher, Keccak};
+
 /// Keccak-256 digest domain used by Ethereum protocol hashing.
 pub type Keccak256Digest = B256;
 
@@ -28,6 +31,36 @@ pub const KECCAK256_EMPTY: [u8; 32] = [
     0xc5, 0xd2, 0x46, 0x01, 0x86, 0xf7, 0x23, 0x3c, 0x92, 0x7e, 0x7d, 0xb2, 0xdc, 0xc7, 0x03, 0xc0,
     0xe5, 0x00, 0xb6, 0x53, 0xca, 0x82, 0x27, 0x3b, 0x7b, 0xfa, 0xd8, 0x04, 0x5d, 0x85, 0xa4, 0x70,
 ];
+
+/// Ethereum Keccak-256 of `b"abc"`.
+///
+/// Backend tests use this in addition to [`KECCAK256_EMPTY`] so empty-input
+/// conformance does not become the only admitted known-answer test.
+pub const KECCAK256_ABC: [u8; 32] = [
+    0x4e, 0x03, 0x65, 0x7a, 0xea, 0x45, 0xa9, 0x4f, 0xc7, 0xd4, 0x7b, 0xa8, 0x26, 0xc8, 0xd6, 0x67,
+    0xc0, 0xd1, 0xe6, 0xe3, 0x3a, 0x64, 0xa0, 0x36, 0xec, 0x44, 0xf5, 0x8f, 0xa1, 0x2d, 0x6c, 0x45,
+];
+
+/// Optional reviewed software Keccak-256 backend based on `tiny-keccak`.
+///
+/// This type is available only with the `tiny-keccak` feature. The default
+/// crate graph keeps only the trait boundary. `tiny-keccak` does not expose a
+/// documented sponge-state zeroization contract, so callers with deployment
+/// rules that require hasher state clearing should continue to provide a
+/// backend with an explicit sanitization contract for those paths.
+#[cfg(feature = "tiny-keccak")]
+pub struct TinyKeccak256 {
+    inner: Keccak,
+}
+
+#[cfg(feature = "tiny-keccak")]
+impl Default for TinyKeccak256 {
+    fn default() -> Self {
+        Self {
+            inner: Keccak::v256(),
+        }
+    }
+}
 
 /// Keccak backend conformance failure.
 #[derive(Clone, Copy, Debug, Eq, PartialEq)]
@@ -58,6 +91,19 @@ pub trait Keccak256 {
     /// Finalizes the hash and returns the 32-byte digest.
     #[must_use]
     fn finalize(self) -> Keccak256Digest;
+}
+
+#[cfg(feature = "tiny-keccak")]
+impl Keccak256 for TinyKeccak256 {
+    fn update(&mut self, input: &[u8]) {
+        TinyKeccakHasher::update(&mut self.inner, input);
+    }
+
+    fn finalize(self) -> Keccak256Digest {
+        let mut output = [0_u8; 32];
+        TinyKeccakHasher::finalize(self.inner, &mut output);
+        B256::from_bytes(output)
+    }
 }
 
 /// Verifies a default hasher against the empty-input Keccak-256 KAT.
@@ -212,6 +258,42 @@ mod tests {
                 0x5d, 0x85, 0xa4, 0x70,
             ]
         );
+    }
+
+    #[test]
+    fn abc_digest_vector_is_available_to_backend_tests() {
+        assert_eq!(
+            KECCAK256_ABC,
+            [
+                0x4e, 0x03, 0x65, 0x7a, 0xea, 0x45, 0xa9, 0x4f, 0xc7, 0xd4, 0x7b, 0xa8, 0x26, 0xc8,
+                0xd6, 0x67, 0xc0, 0xd1, 0xe6, 0xe3, 0x3a, 0x64, 0xa0, 0x36, 0xec, 0x44, 0xf5, 0x8f,
+                0xa1, 0x2d, 0x6c, 0x45,
+            ]
+        );
+    }
+
+    #[cfg(feature = "tiny-keccak")]
+    #[test]
+    fn tiny_keccak_backend_matches_empty_input_kat() {
+        assert_eq!(verify_empty_digest::<TinyKeccak256>(), Ok(()));
+    }
+
+    #[cfg(feature = "tiny-keccak")]
+    #[test]
+    fn tiny_keccak_backend_matches_abc_kat() {
+        let digest = hash_one(TinyKeccak256::default(), b"abc");
+
+        assert_eq!(<[u8; 32]>::from(digest), KECCAK256_ABC);
+    }
+
+    #[cfg(feature = "tiny-keccak")]
+    #[test]
+    fn tiny_keccak_backend_is_chunk_boundary_independent() {
+        let one_shot = hash_one(TinyKeccak256::default(), b"abc");
+        let chunks: [&[u8]; 3] = [b"a", b"b", b"c"];
+        let chunked = hash_chunks(TinyKeccak256::default(), chunks);
+
+        assert_eq!(one_shot, chunked);
     }
 
     #[test]

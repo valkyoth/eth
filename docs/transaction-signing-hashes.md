@@ -1,7 +1,8 @@
 # Transaction Signing Hashes
 
-Status: v0.24.2 keeps signing hashes separate from EIP-7702 set-code
-transaction context validity.
+Status: v0.27.0 keeps signing hashes separate from EIP-7702 set-code
+transaction context validity and keeps concrete Keccak backends out of the
+default graph.
 
 This release adds canonical signing-preimage encoders for the decoded
 transaction families currently admitted by `eth-valkyoth-protocol`, plus
@@ -9,7 +10,9 @@ Keccak-256 signing-hash helpers in `eth-valkyoth-verify`.
 
 The crate still does not admit a default Keccak backend. Callers must provide a
 hasher that implements `eth_valkyoth_hash::Keccak256` and should verify it with
-`KECCAK256_EMPTY` before use.
+`KECCAK256_EMPTY` before use. In `v0.27.0`, callers that want a reviewed
+software backend can opt into `eth-valkyoth-hash` feature `tiny-keccak` or the
+facade feature `keccak-tiny`.
 
 ## Preimage Domains
 

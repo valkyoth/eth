@@ -26,7 +26,7 @@
 `eth` is the public facade crate for a `no_std`-first Ethereum
 execution-layer protocol workspace.
 
-The crate is intentionally conservative at `0.26.1`: it provides explicit
+The crate is intentionally conservative at `0.27.0`: it provides explicit
 Ethereum primitive domains, bounded decode-budget policy, stable error
 categories, primitive RLP bridge helpers, a caller-provided Keccak-256 boundary,
 RLP fuzz-harness evidence, a transaction envelope shell, unvalidated legacy
@@ -41,15 +41,15 @@ EIP-7702 authorization signing and signer recovery helpers, an EIP-7702
 set-code transaction validity gate, decoded transaction signature validation
 helpers, public RLP derive support, digest-level secp256k1 sender recovery,
 EIP-712 domain-safety checks, EIP-712 typed-data hashing over borrowed
-descriptors, an opt-in bounded JSON typed-data parser, small first-party crate
-boundaries, optional sanitization support, and release evidence before RPC,
-signer, EVM, Reth, or P2P integrations become real dependencies.
+descriptors, an opt-in bounded JSON typed-data parser, an opt-in reviewed
+`tiny-keccak` software backend, small first-party crate boundaries, optional
+sanitization support, and release evidence before RPC, signer, EVM, Reth, or
+P2P integrations become real dependencies.
 
 ## Current Status
 
-The current release candidate is `0.26.1`; optional EIP-712 JSON typed-data
-parsing passed pentest retest and is waiting for final GitHub checks before
-tagging.
+The current release candidate is `0.27.0`; optional `tiny-keccak` backend
+admission is implemented and ready for external pentest.
 
 Implemented now:
 
@@ -110,9 +110,11 @@ Implemented now:
 - Optional `eip712-json` parser boundary for JSON-RPC typed-data payloads with
   duplicate-key rejection, explicit parser limits, and no default dependency
   impact.
+- Optional `keccak-tiny` software backend using reviewed `tiny-keccak`,
+  disabled by default and covered by Keccak-256 KATs.
 - Public `RlpEncode`/`RlpDecode` traits and derive macros for reviewed simple
   structs, with bounded decode and trybuild compile-fail coverage.
-- Caller-provided Keccak-256 trait boundary without a default hash
+- Caller-provided Keccak-256 trait boundary with no default hash
   implementation dependency.
 - RLP fuzz harness with committed hex seed corpus and crash reproduction docs.
 - Stable error codes, messages, categories, and formatting for codec,
@@ -155,21 +157,21 @@ Not implemented yet:
 
 ```toml
 [dependencies]
-eth = "0.26"
+eth = "0.27"
 ```
 
 Disable defaults explicitly for embedded or freestanding builds:
 
 ```toml
 [dependencies]
-eth = { version = "0.26", default-features = false }
+eth = { version = "0.27", default-features = false }
 ```
 
 Optional sanitization support:
 
 ```toml
 [dependencies]
-eth = { version = "0.26", features = ["sanitization"] }
+eth = { version = "0.27", features = ["sanitization"] }
 ```
 
 ## Features
@@ -180,6 +182,7 @@ eth = { version = "0.26", features = ["sanitization"] }
 | `evm` | no | Future explicit EVM adapter boundary. |
 | `rpc` | no | Future explicit RPC trust-policy boundary. |
 | `eip712-json` | no | Enables the optional `std` JSON-RPC EIP-712 typed-data parser boundary. |
+| `keccak-tiny` | no | Enables the optional reviewed `tiny-keccak` software backend. |
 | `sanitization` | no | Re-exports optional secret sanitization bridge APIs. |
 | `signer` | no | Future signer isolation boundary. |
 | `reth` | no | Future Reth integration boundary. |
@@ -187,6 +190,20 @@ eth = { version = "0.26", features = ["sanitization"] }
 
 Default builds do not enable networking, signing, local key storage, Reth, P2P,
 or EVM execution.
+
+Optional reviewed software Keccak backend:
+
+```toml
+[dependencies]
+eth = { version = "0.27", features = ["keccak-tiny"] }
+```
+
+```rust
+use eth::hash::{KECCAK256_ABC, TinyKeccak256, hash_one};
+
+let digest = hash_one(TinyKeccak256::default(), b"abc");
+assert_eq!(<[u8; 32]>::from(digest), KECCAK256_ABC);
+```
 
 ## Primitive Domains
 
@@ -854,7 +871,7 @@ the workspace can keep small, auditable boundaries:
 The minimum supported Rust version is Rust `1.90.0`. New deployments should use
 the latest stable Rust verified by the release gates.
 
-Compatibility evidence for `0.26.1`:
+Compatibility evidence for `0.27.0`:
 
 | Rust | Local Evidence |
 | --- | --- |

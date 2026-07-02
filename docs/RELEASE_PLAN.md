@@ -1020,15 +1020,18 @@ Exit criteria:
 
 ### v0.27.0 - Optional Keccak Backend Admission
 
+Status: implemented; ready for external pentest.
+
 Goal: optionally provide a reviewed software Keccak-256 backend without adding
 it to the default core graph.
 
 Deliverables:
 
-- latest-version, license, feature, no_std, and maintenance review for the
-  selected Keccak crate;
-- feature-gated backend crate or feature outside default `eth`;
-- `KECCAK256_EMPTY` and additional chunking KATs;
+- latest-version, license, feature, no_std, and maintenance review for
+  `tiny-keccak 2.0.2`;
+- `eth-valkyoth-hash` feature `tiny-keccak` and facade feature `keccak-tiny`,
+  both outside default `eth`;
+- `KECCAK256_EMPTY`, `KECCAK256_ABC`, and chunk-boundary KATs;
 - duplicate-dependency and MSRV review;
 - state-clearing contract documented for sender-recovery paths.
 

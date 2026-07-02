@@ -1,7 +1,7 @@
 [package]
 name = "eth-valkyoth-hash"
 description = "no_std Ethereum Keccak-256 hashing trait boundary."
-version = "0.10.1"
+version = "0.11.0"
 edition.workspace = true
 rust-version.workspace = true
 license.workspace = true
@@ -12,9 +12,11 @@ readme = "README.md"
 [features]
 default = []
 std = ["eth-valkyoth-primitives/std"]
+tiny-keccak = ["dep:tiny-keccak"]
 
 [dependencies]
 eth-valkyoth-primitives.workspace = true
+tiny-keccak = { workspace = true, optional = true }
 
 [lints]
 workspace = true

@@ -29,6 +29,7 @@ dependencies.
 
 | Crate | Version | License | Default Features | Reason |
 | --- | --- | --- | --- | --- |
+| `crunchy` | `0.2.4` | `MIT` | enabled | Tiny macro helper pulled by `tiny-keccak`; no direct public API dependency. |
 | `proc-macro2` | `1.0.106` | `MIT OR Apache-2.0` | enabled | Token handling for optional derive macros. |
 | `quote` | `1.0.46` | `MIT OR Apache-2.0` | enabled | Code generation for optional derive macros. |
 | `libfuzzer-sys` | `0.4.13` | `(MIT OR Apache-2.0) AND NCSA` | fuzz-only | LLVM libFuzzer runtime for `fuzz/` targets. |
@@ -37,4 +38,5 @@ dependencies.
 | `sha3` | `0.10.9` | `MIT OR Apache-2.0` | disabled | Test-only Ethereum Keccak-256 backend for independent sender-recovery vectors; kept on the RustCrypto `digest 0.10` line to avoid duplicate-version policy violations. |
 | `subtle` | `2.6.1` | `BSD-3-Clause` | disabled, `core_hint_black_box` enabled | Constant-time equality for security-boundary byte comparisons. |
 | `syn` | `2.0.118` | `MIT OR Apache-2.0` | enabled, `full` enabled | Syntax parsing for optional derive macros. |
+| `tiny-keccak` | `2.0.2` | `CC0-1.0` | disabled, `keccak` enabled | Optional non-default software Keccak-256 backend admitted in v0.27.0. |
 | `trybuild` | `1.0.117` | `MIT OR Apache-2.0` | enabled | Dev-only compile-fail diagnostics for public derive macros. |

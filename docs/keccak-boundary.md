@@ -1,7 +1,8 @@
 # Keccak-256 Boundary
 
-Status: v0.23.0 boundary consumed by transaction signing hashes, decoded
-transaction signature validation, sender recovery, and EIP-712 digest framing
+Status: v0.27.0 boundary consumed by transaction signing hashes, decoded
+transaction signature validation, sender recovery, and EIP-712 digest framing;
+optional `tiny-keccak` backend admitted behind a non-default feature
 
 Ethereum execution-layer hashing uses Keccak-256, not FIPS SHA3-256. The hash
 boundary must be explicit before transaction hashes, recovered sender addresses,
@@ -17,15 +18,17 @@ header hashes, receipt roots, or proof verification are implemented.
 - `KECCAK256_EMPTY`, `verify_empty_digest`, and
   `verify_empty_digest_with` for backend conformance tests.
 
-No concrete Keccak implementation crate is admitted in `v0.10.0`.
+No concrete Keccak implementation crate was admitted in `v0.10.0`.
 `v0.20.0` sender recovery consumes this boundary for public-key-to-address
 hashing. `v0.21.0` EIP-712 helpers consume it for
 `keccak256("\x19\x01" || domainSeparator || hashStruct(message))`. `v0.22.0`
 transaction signing-hash helpers consume it for canonical decoded transaction
 signing preimages. `v0.23.0` decoded transaction signature validation composes
 the signing-hash and public-key-to-address hashing paths through caller-provided
-Keccak implementations. The crate still does not admit a default Keccak
-backend.
+Keccak implementations. `v0.27.0` admits an optional `tiny-keccak` software
+backend behind the `tiny-keccak` support-crate feature and the `keccak-tiny`
+facade feature. The default crate graph still does not include a concrete
+Keccak backend.
 
 ## Rationale
 
@@ -48,31 +51,32 @@ This is important for:
 | Option | Decision | Reason |
 | --- | --- | --- |
 | Trait boundary only | selected for `v0.10.0` | Keeps default graph dependency-free and makes the hashing contract explicit before transaction work. |
-| Built-in `tiny-keccak` backend | scheduled for review | Current crates.io version checked on 2026-06-30: `2.0.2`, license `CC0-1.0`, default features empty, explicit `keccak` feature available. `v0.27.0 - Optional Keccak Backend Admission` must repeat the latest-version, feature, audit, maintenance, and MSRV evidence review before admitting any backend. |
-| Both trait and optional backend | planned shape | The trait boundary remains the default; `v0.27.0` decides whether a first-party optional backend is admitted outside the default graph. |
+| Built-in `tiny-keccak` backend | admitted for `v0.27.0` | Current crates.io version checked on 2026-07-02: `2.0.2`, license `CC0-1.0`, default features empty, explicit `keccak` feature available. The backend is non-default and covered by empty-input, `abc`, and chunking KATs. |
+| Both trait and optional backend | selected | The trait boundary remains the default; applications can opt into the first-party software backend outside the default graph. |
 
 ## Security Rules
 
 - Implementations must compute Ethereum Keccak-256, not SHA3-256.
-- Hashing remains caller-provided unless a future release explicitly admits an
-  implementation crate.
-- Any admitted implementation must be feature-gated and documented in
+- Hashing remains caller-provided by default.
+- The admitted `tiny-keccak` implementation is feature-gated and documented in
   `release-crates.toml`, `deny.toml`, release notes, and this document.
 - Transaction, header, sender-recovery, and proof milestones must depend on this
   boundary instead of importing hash crates directly.
 - Protocol-facing APIs should introduce domain newtypes such as `TxHash`,
   `BlockHash`, or `ReceiptRoot` instead of exposing raw `B256` or
   `Keccak256Digest` values directly.
-- Sender-recovery paths hash public-key material. The concrete hasher used for
-  that path must have an explicit state-clearing contract at the call site.
-  When the optional sanitization bridge is used, prefer hashers that implement
-  `SecureSanitize` and clear sponge state on drop.
+- Sender-recovery paths hash public-key material. `TinyKeccak256` does not
+  expose or claim a documented sponge-state zeroization contract. Deployments
+  that require hasher state clearing must provide a custom backend with an
+  explicit sanitization contract at the call site. When the optional
+  sanitization bridge is used, prefer hashers that implement `SecureSanitize`
+  and clear sponge state on drop.
 - Test doubles are acceptable only for boundary tests; they must not be exposed
   as cryptographic implementations.
 
 ## Conformance Vector
 
-Every admitted backend must include a known-answer test that distinguishes
+Every admitted backend includes a known-answer test that distinguishes
 Ethereum Keccak-256 from FIPS SHA3-256. The boundary crate exposes this value
 as `eth_valkyoth_hash::KECCAK256_EMPTY`:
 
@@ -92,8 +96,9 @@ the most common backend confusion. Backend tests can call
 Configured, hardware-backed, or platform-backed hashers that cannot implement
 `Default` can call `verify_empty_digest_with(hasher)` instead. Both helpers
 compare the finalized output to the crate-level `KECCAK256_EMPTY` value.
-Future backend tests should also prove that chunked and one-shot inputs produce
-identical digests.
+`v0.27.0` also exposes `KECCAK256_ABC` and tests `TinyKeccak256` against both
+the empty-input KAT and `keccak256(b"abc")`. The backend test suite also proves
+that chunked and one-shot inputs produce identical digests.
 
 ## Future Admission Checklist
 

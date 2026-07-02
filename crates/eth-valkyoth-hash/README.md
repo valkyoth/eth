@@ -6,14 +6,24 @@ Most users should depend on the facade crate instead:
 
 ```toml
 [dependencies]
-eth = "0.26"
+eth = "0.27"
 ```
 
 Crates.io: <https://crates.io/crates/eth>
 
 This package is published separately so the `eth` workspace can keep small,
-auditable crate boundaries. The `0.10.1` release aligns the primitive
-dependency range for `eth` `0.26.0`. The `0.10.0` release defines the trait
-boundary and empty-input conformance helpers for both `Default` and explicitly
-configured hashers; it does not provide or admit a default Keccak
-implementation crate.
+auditable crate boundaries. The `0.11.0` release adds the optional
+`tiny-keccak` feature and `TinyKeccak256` backend for applications that want a
+reviewed software Keccak-256 implementation without changing the default
+dependency graph. The backend is covered by empty-input, `abc`, and chunking
+known-answer tests.
+
+```toml
+[dependencies]
+eth = { version = "0.27", features = ["keccak-tiny"] }
+```
+
+The default build still defines only the trait boundary and conformance
+helpers. `tiny-keccak` does not expose a documented sponge-state zeroization
+contract, so deployments that require state clearing should provide a custom
+hasher with an explicit sanitization contract.

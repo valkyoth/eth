@@ -35,8 +35,8 @@ dependencies.
 
 ## Current Status
 
-Status: `v0.26.1` optional EIP-712 JSON typed-data parsing passed pentest
-retest and is waiting for final GitHub checks before tagging.
+Status: `v0.27.0` optional `tiny-keccak` backend admission is implemented and
+ready for external pentest.
 
 Implemented now:
 
@@ -101,9 +101,11 @@ Implemented now:
 - Optional `eip712-json` parser boundary for JSON-RPC typed-data payloads with
   duplicate-key rejection, explicit parser limits, and no default dependency
   impact.
+- Optional `keccak-tiny` software backend using reviewed `tiny-keccak`,
+  disabled by default and covered by Keccak-256 KATs.
 - Public `RlpEncode`/`RlpDecode` traits and derive macros for reviewed simple
   structs, with bounded decode and trybuild compile-fail coverage.
-- Caller-provided Keccak-256 trait boundary without a default hash
+- Caller-provided Keccak-256 trait boundary with no default hash
   implementation dependency.
 - RLP fuzz harness with committed hex seed corpus and crash reproduction docs.
 - Stable error codes, messages, categories, and formatting for codec,
@@ -151,14 +153,14 @@ Not implemented yet:
 
 ```toml
 [dependencies]
-eth = "0.26"
+eth = "0.27"
 ```
 
 For optional sanitization support:
 
 ```toml
 [dependencies]
-eth = { version = "0.26", features = ["sanitization"] }
+eth = { version = "0.27", features = ["sanitization"] }
 ```
 
 ## Features
@@ -169,6 +171,7 @@ eth = { version = "0.26", features = ["sanitization"] }
 | `evm` | no | Future explicit EVM adapter boundary. |
 | `rpc` | no | Future explicit RPC trust-policy boundary. |
 | `eip712-json` | no | Enables the optional `std` JSON-RPC EIP-712 typed-data parser boundary. |
+| `keccak-tiny` | no | Enables the optional reviewed `tiny-keccak` software backend. |
 | `sanitization` | no | Re-exports optional secret sanitization bridge APIs. |
 | `signer` | no | Future signer isolation boundary. |
 | `reth` | no | Future Reth integration boundary. |
@@ -176,6 +179,20 @@ eth = { version = "0.26", features = ["sanitization"] }
 
 Default builds do not enable networking, signing, local key storage, Reth, P2P,
 or EVM execution.
+
+Optional reviewed software Keccak backend:
+
+```toml
+[dependencies]
+eth = { version = "0.27", features = ["keccak-tiny"] }
+```
+
+```rust
+use eth::hash::{KECCAK256_ABC, TinyKeccak256, hash_one};
+
+let digest = hash_one(TinyKeccak256::default(), b"abc");
+assert_eq!(<[u8; 32]>::from(digest), KECCAK256_ABC);
+```
 
 ## Primitive Domains
 
@@ -841,7 +858,7 @@ friendly, and independently testable.
 The minimum supported Rust version is Rust `1.90.0`. New deployments should use
 the pinned stable Rust `1.96.1` until the toolchain policy is updated.
 
-Compatibility evidence for `0.26.1`:
+Compatibility evidence for `0.27.0`:
 
 | Rust | Local Evidence |
 | --- | --- |
@@ -858,7 +875,7 @@ Compatibility evidence for `0.26.1`:
 
 ```bash
 scripts/checks.sh
-scripts/release_0_26_1_gate.sh
+scripts/release_0_27_gate.sh
 ```
 
 For dependency-policy checks, install `cargo-deny` and `cargo-audit`, then run:
