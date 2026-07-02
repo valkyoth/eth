@@ -58,8 +58,11 @@ pub use set_code::{
     UnvalidatedSetCodeTransaction, decode_set_code_transaction,
 };
 pub use signing::{
-    encode_access_list_signing_preimage, encode_blob_signing_preimage,
-    encode_dynamic_fee_signing_preimage, encode_legacy_eip155_signing_preimage,
-    encoded_access_list_signing_preimage_len, encoded_blob_signing_preimage_len,
-    encoded_dynamic_fee_signing_preimage_len, encoded_legacy_eip155_signing_preimage_len,
+    SET_CODE_AUTHORIZATION_MAGIC, encode_access_list_signing_preimage,
+    encode_blob_signing_preimage, encode_dynamic_fee_signing_preimage,
+    encode_legacy_eip155_signing_preimage, encode_set_code_authorization_signing_preimage,
+    encode_set_code_signing_preimage, encoded_access_list_signing_preimage_len,
+    encoded_blob_signing_preimage_len, encoded_dynamic_fee_signing_preimage_len,
+    encoded_legacy_eip155_signing_preimage_len,
+    encoded_set_code_authorization_signing_preimage_len, encoded_set_code_signing_preimage_len,
 };

@@ -3,9 +3,9 @@ use eth_valkyoth_hash::Keccak256Digest;
 use eth_valkyoth_primitives::{Address, B256, ChainId};
 use eth_valkyoth_protocol::{
     SignatureYParity, UnvalidatedAccessListTransaction, UnvalidatedBlobTransaction,
-    UnvalidatedDynamicFeeTransaction, UnvalidatedLegacyTransaction, UnvalidatedTransaction,
-    decode_access_list_transaction, decode_blob_transaction, decode_dynamic_fee_transaction,
-    decode_legacy_transaction, decode_set_code_transaction,
+    UnvalidatedDynamicFeeTransaction, UnvalidatedLegacyTransaction, UnvalidatedSetCodeTransaction,
+    UnvalidatedTransaction, decode_access_list_transaction, decode_blob_transaction,
+    decode_dynamic_fee_transaction, decode_legacy_transaction, decode_set_code_transaction,
 };
 use k256::ecdsa::SigningKey;
 use sha3::Digest;
@@ -140,6 +140,12 @@ fn blob_fixture() -> Result<UnvalidatedBlobTransaction<'static>, TransactionSign
         .map_err(|_| TransactionSignatureValidationError::InvalidSignature)
 }
 
+fn set_code_fixture()
+-> Result<UnvalidatedSetCodeTransaction<'static>, TransactionSignatureValidationError> {
+    decode_set_code_transaction(&SET_CODE_TX, TEST_LIMITS)
+        .map_err(|_| TransactionSignatureValidationError::InvalidSignature)
+}
+
 fn signed_legacy()
 -> Result<UnvalidatedLegacyTransaction<'static>, TransactionSignatureValidationError> {
     let tx = legacy_fixture()?;
@@ -205,6 +211,21 @@ fn signed_blob() -> Result<UnvalidatedBlobTransaction<'static>, TransactionSigna
     })
 }
 
+fn signed_set_code()
+-> Result<UnvalidatedSetCodeTransaction<'static>, TransactionSignatureValidationError> {
+    let tx = set_code_fixture()?;
+    let mut scratch = [0_u8; 128];
+    let signing_hash = set_code_transaction_signing_hash(&tx, &mut scratch, RealKeccak::new())
+        .map_err(TransactionSignatureValidationError::SigningHash)?;
+    let (r, s, y_parity) = sign_hash(signing_hash)?;
+    Ok(UnvalidatedSetCodeTransaction {
+        y_parity,
+        r,
+        s,
+        ..tx
+    })
+}
+
 #[test]
 fn validates_supported_transaction_signatures() {
     let expected = expected_sender();
@@ -212,14 +233,16 @@ fn validates_supported_transaction_signatures() {
     let access_list = signed_access_list();
     let dynamic_fee = signed_dynamic_fee();
     let blob = signed_blob();
+    let set_code = signed_set_code();
     assert!(expected.is_ok());
     assert!(legacy.is_ok());
     assert!(access_list.is_ok());
     assert!(dynamic_fee.is_ok());
     assert!(blob.is_ok());
+    assert!(set_code.is_ok());
 
-    if let (Ok(expected), Ok(legacy), Ok(access_list), Ok(dynamic_fee), Ok(blob)) =
-        (expected, legacy, access_list, dynamic_fee, blob)
+    if let (Ok(expected), Ok(legacy), Ok(access_list), Ok(dynamic_fee), Ok(blob), Ok(set_code)) =
+        (expected, legacy, access_list, dynamic_fee, blob, set_code)
     {
         let mut scratch = [0_u8; 128];
 
@@ -263,6 +286,30 @@ fn validates_supported_transaction_signatures() {
             validate_blob_transaction_signature(
                 ChainId::new(1),
                 &blob,
+                Some(expected),
+                &mut scratch,
+                RealKeccak::new(),
+                RealKeccak::new(),
+            )
+            .map(ValidatedTransactionSignature::sender),
+            Ok(expected)
+        );
+        assert_eq!(
+            validate_set_code_transaction_signature(
+                ChainId::new(1),
+                &set_code,
+                Some(expected),
+                &mut scratch,
+                RealKeccak::new(),
+                RealKeccak::new(),
+            )
+            .map(ValidatedTransactionSignature::sender),
+            Ok(expected)
+        );
+        assert_eq!(
+            validate_transaction_signature(
+                ChainId::new(1),
+                UnvalidatedTransaction::SetCode(set_code),
                 Some(expected),
                 &mut scratch,
                 RealKeccak::new(),
@@ -373,21 +420,24 @@ fn reports_signing_hash_construction_failures() {
 }
 
 #[test]
-fn rejects_set_code_signature_validation_until_supported() {
-    let tx = decode_set_code_transaction(&SET_CODE_TX, TEST_LIMITS);
+fn set_code_transaction_signature_uses_transaction_domain() {
+    let tx = signed_set_code();
     assert!(tx.is_ok());
     if let Ok(tx) = tx {
         let mut scratch = [0_u8; 128];
+        let result = validate_set_code_transaction_signature(
+            ChainId::new(5),
+            &tx,
+            None,
+            &mut scratch,
+            RealKeccak::new(),
+            RealKeccak::new(),
+        );
         assert_eq!(
-            validate_transaction_signature(
-                ChainId::new(1),
-                UnvalidatedTransaction::SetCode(tx),
-                None,
-                &mut scratch,
-                RealKeccak::new(),
-                RealKeccak::new(),
-            ),
-            Err(TransactionSignatureValidationError::UnsupportedTransactionType)
+            result,
+            Err(TransactionSignatureValidationError::ReplayDomain(
+                VerifyError::WrongChain
+            ))
         );
     }
 }

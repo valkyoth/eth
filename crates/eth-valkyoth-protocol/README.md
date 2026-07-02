@@ -16,11 +16,17 @@ This package is published separately so the `eth` workspace can keep small,
 auditable crate boundaries. Treat it as a lower-level building block unless the
 `eth` documentation explicitly says otherwise.
 
-The `0.20.0` support-crate release, shipped with `eth` `0.24.0`, adds
-unvalidated EIP-7702 set-code transaction decoding and encoding for type byte
-`0x04`. It decodes the required destination address plus authorization tuples
-shaped as `[chain_id, address, nonce, y_parity, r, s]`, then re-encodes the
-borrowed model without allocation.
+The `0.21.0` support-crate release, shipped with `eth` `0.24.1`, adds
+no-allocation EIP-7702 set-code transaction and authorization signing-preimage
+helpers. The transaction preimage uses type byte `0x04`; authorization tuple
+preimages use the EIP-7702 authorization magic byte `0x05` over
+`rlp([chain_id, address, nonce])`.
+
+The previous `0.20.0` release added unvalidated EIP-7702 set-code transaction
+decoding and encoding for type byte `0x04`. It decodes the required
+destination address plus authorization tuples shaped as
+`[chain_id, address, nonce, y_parity, r, s]`, then re-encodes the borrowed
+model without allocation.
 
 Earlier releases added proof-gated transaction typestate transitions for
 decoded, canonical, fork-validated, and sender-recovered state tokens. The
@@ -41,5 +47,5 @@ unvalidated transaction models for legacy, EIP-2930 access-list, EIP-1559
 dynamic-fee, EIP-4844 blob, and EIP-7702 set-code transactions. It does not
 validate signatures, recover senders, enforce transaction chain binding,
 account for gas or blob gas, verify KZG commitments/proofs, validate set-code
-authorization signatures, enforce non-empty authorization lists, apply fee-order
-or duplicate access-list policy, or imply fork validity.
+authorization signatures itself, enforce non-empty authorization lists, apply
+fee-order or duplicate access-list policy, or imply fork validity.

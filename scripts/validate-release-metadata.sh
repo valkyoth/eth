@@ -37,6 +37,7 @@ test -f release-notes/RELEASE_NOTES_0.21.0.md
 test -f release-notes/RELEASE_NOTES_0.22.0.md
 test -f release-notes/RELEASE_NOTES_0.23.0.md
 test -f release-notes/RELEASE_NOTES_0.24.0.md
+test -f release-notes/RELEASE_NOTES_0.24.1.md
 test -x scripts/release_0_9_gate.sh
 test -x scripts/release_0_10_gate.sh
 test -x scripts/release_0_11_gate.sh

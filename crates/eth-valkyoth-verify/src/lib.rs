@@ -11,6 +11,7 @@ use eth_valkyoth_primitives::ChainId;
 mod eip712;
 mod replay;
 mod sender;
+mod set_code_authorization;
 mod transaction_hash;
 mod transaction_signature;
 
@@ -27,16 +28,22 @@ pub use sender::{
     COMPACT_SIGNATURE_BYTES, ETHEREUM_PUBLIC_KEY_BYTES, ETHEREUM_SIGNATURE_BYTES,
     EthereumSignature, SIGNING_DIGEST_BYTES, recover_sender_from_digest,
 };
+pub use set_code_authorization::{
+    SetCodeAuthorizationValidationError, SetCodeAuthorizationValidationErrorCategory,
+    ValidatedSetCodeAuthorization, validate_set_code_authorization_signature,
+};
 pub use transaction_hash::{
-    TransactionSigningHash, TransactionSigningHashError, access_list_transaction_signing_hash,
-    blob_transaction_signing_hash, dynamic_fee_transaction_signing_hash,
-    legacy_eip155_transaction_signing_hash,
+    SetCodeAuthorizationSigningHash, TransactionSigningHash, TransactionSigningHashError,
+    access_list_transaction_signing_hash, blob_transaction_signing_hash,
+    dynamic_fee_transaction_signing_hash, legacy_eip155_transaction_signing_hash,
+    set_code_authorization_signing_hash, set_code_transaction_signing_hash,
 };
 pub use transaction_signature::{
     TransactionSignatureValidationError, TransactionSignatureValidationErrorCategory,
     ValidatedTransactionSignature, validate_access_list_transaction_signature,
     validate_blob_transaction_signature, validate_dynamic_fee_transaction_signature,
-    validate_legacy_transaction_signature, validate_transaction_signature,
+    validate_legacy_transaction_signature, validate_set_code_transaction_signature,
+    validate_transaction_signature,
 };
 
 /// Verification failure categories.

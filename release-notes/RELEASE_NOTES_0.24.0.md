@@ -1,6 +1,6 @@
 # eth 0.24.0 Release Notes
 
-Status: pentest passed; waiting for final GitHub checks
+Status: tagged and released
 
 ## Summary
 
@@ -67,7 +67,7 @@ execution validity remain deferred to later verification layers.
 
 - External pentest passed and the permanent report is available under
   `security/pentest/v0.24.0.md`.
-- Final GitHub checks must pass on the release report commit before tagging.
+- Final GitHub checks passed before tagging.
 
 ## Verification
 

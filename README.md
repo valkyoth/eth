@@ -35,8 +35,8 @@ dependencies.
 
 ## Current Status
 
-Status: `v0.24.0` set-code transaction decoding and encoding pentest passed;
-waiting for final GitHub checks.
+Status: `v0.24.1` set-code signing and authorization validation is ready for
+external pentest.
 
 Implemented now:
 
@@ -78,7 +78,10 @@ Implemented now:
 - Replay-domain validation for legacy EIP-155 and typed transaction chain IDs
   before sender recovery results are accepted.
 - Canonical transaction signing-preimage encoding and signing-hash helpers for
-  legacy EIP-155, EIP-2930, EIP-1559, and EIP-4844 decoded transaction domains.
+  legacy EIP-155, EIP-2930, EIP-1559, EIP-4844, and EIP-7702 decoded
+  transaction domains.
+- EIP-7702 authorization tuple signing-hash and signer recovery helpers, kept
+  separate from transaction signing hashes with explicit domain newtypes.
 - Digest-level secp256k1 sender recovery with low-s rejection, Ethereum
   y-parity policy, and caller-provided Keccak-256 public-key hashing.
 - Decoded transaction signature validation helpers that combine replay-domain
@@ -109,6 +112,7 @@ Not implemented yet:
 - No EVM execution adapter.
 - No Reth or P2P integration.
 - No full EIP-712 typed-data encoder yet; scheduled for `v0.26.0`.
+- No full EIP-7702 transaction-validity gate yet; scheduled for `v0.24.2`.
 - No block parser yet.
 - No ABI/contract helper surface yet; scheduled for `v0.47.0` through
   `v0.55.0`.
@@ -366,6 +370,53 @@ replay-domain checks, signing-hash construction, low-s/y-parity policy, sender
 recovery, and optional expected-sender comparison are applied together. Callers
 that reuse the scratch buffer across multiple in-flight transactions should
 zero it after hashing before reusing or releasing it.
+
+EIP-7702 authorization tuples use a separate signing-hash domain:
+
+```rust
+use eth::hash::Keccak256;
+use eth::primitives::{Address, B256, Nonce};
+use eth::protocol::{SetCodeAuthorization, SetCodeAuthorizationChainId, SignatureYParity};
+use eth::verify::set_code_authorization_signing_hash;
+
+struct PlatformKeccak {
+    output: B256,
+}
+
+impl Keccak256 for PlatformKeccak {
+    fn update(&mut self, input: &[u8]) {
+        let _ = input;
+    }
+
+    fn finalize(self) -> B256 {
+        self.output
+    }
+}
+
+let mut chain_id = [0_u8; 32];
+if let Some(last) = chain_id.last_mut() {
+    *last = 1;
+}
+let authorization = SetCodeAuthorization {
+    chain_id: SetCodeAuthorizationChainId::from_be_bytes(chain_id),
+    address: Address::from([0x11_u8; 20]),
+    nonce: Nonce::new(7),
+    y_parity: SignatureYParity::Even,
+    r: [0_u8; 32],
+    s: [0_u8; 32],
+};
+let mut scratch = [0_u8; 128];
+let authorization_hash = set_code_authorization_signing_hash(
+    authorization,
+    &mut scratch,
+    PlatformKeccak {
+        output: B256::from([0x55_u8; 32]),
+    },
+)?;
+
+assert_eq!(authorization_hash.to_b256(), B256::from([0x55_u8; 32]));
+# Ok::<(), Box<dyn std::error::Error>>(())
+```
 
 ## EIP-712 Domain Safety
 
@@ -735,7 +786,7 @@ friendly, and independently testable.
 The minimum supported Rust version is Rust `1.90.0`. New deployments should use
 the pinned stable Rust `1.96.1` until the toolchain policy is updated.
 
-Compatibility evidence for `0.24.0`:
+Compatibility evidence for `0.24.1`:
 
 | Rust | Local Evidence |
 | --- | --- |
@@ -753,7 +804,7 @@ Compatibility evidence for `0.24.0`:
 ```bash
 scripts/checks.sh
 scripts/release_0_24_gate.sh
-scripts/validate-release-readiness.sh v0.24.0
+scripts/validate-release-readiness.sh v0.24.1
 ```
 
 For dependency-policy checks, install `cargo-deny` and `cargo-audit`, then run:

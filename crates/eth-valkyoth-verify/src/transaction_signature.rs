@@ -4,7 +4,8 @@ use eth_valkyoth_hash::Keccak256;
 use eth_valkyoth_primitives::{Address, ChainId};
 use eth_valkyoth_protocol::{
     SignatureYParity, UnvalidatedAccessListTransaction, UnvalidatedBlobTransaction,
-    UnvalidatedDynamicFeeTransaction, UnvalidatedLegacyTransaction, UnvalidatedTransaction,
+    UnvalidatedDynamicFeeTransaction, UnvalidatedLegacyTransaction, UnvalidatedSetCodeTransaction,
+    UnvalidatedTransaction,
 };
 
 use crate::{
@@ -13,6 +14,7 @@ use crate::{
     dynamic_fee_transaction_signing_hash, legacy_eip155_transaction_signing_hash,
     recover_sender_from_digest, require_access_list_replay_domain, require_blob_replay_domain,
     require_dynamic_fee_replay_domain, require_legacy_replay_domain,
+    require_set_code_replay_domain, set_code_transaction_signing_hash,
 };
 
 #[cfg(test)]
@@ -181,9 +183,14 @@ where
             signing_hasher,
             address_hasher,
         ),
-        UnvalidatedTransaction::SetCode(_) => {
-            Err(TransactionSignatureValidationError::UnsupportedTransactionType)
-        }
+        UnvalidatedTransaction::SetCode(tx) => validate_set_code_transaction_signature(
+            expected_chain,
+            &tx,
+            expected_sender,
+            scratch,
+            signing_hasher,
+            address_hasher,
+        ),
     }
 }
 
@@ -268,6 +275,32 @@ where
     require_blob_replay_domain(expected_chain, transaction)
         .map_err(TransactionSignatureValidationError::ReplayDomain)?;
     let signing_hash = blob_transaction_signing_hash(transaction, scratch, signing_hasher)
+        .map_err(TransactionSignatureValidationError::SigningHash)?;
+    let signature =
+        EthereumSignature::from_parts(transaction.r, transaction.s, transaction.y_parity);
+    recover_and_check(signing_hash, signature, expected_sender, address_hasher)
+}
+
+/// Validates a decoded EIP-7702 set-code transaction sender signature.
+///
+/// This validates only the outer transaction signature. Authorization-list
+/// tuple signatures use [`crate::validate_set_code_authorization_signature`]
+/// because EIP-7702 defines a distinct authorization signing domain.
+pub fn validate_set_code_transaction_signature<H1, H2>(
+    expected_chain: ChainId,
+    transaction: &UnvalidatedSetCodeTransaction<'_>,
+    expected_sender: Option<Address>,
+    scratch: &mut [u8],
+    signing_hasher: H1,
+    address_hasher: H2,
+) -> Result<ValidatedTransactionSignature, TransactionSignatureValidationError>
+where
+    H1: Keccak256,
+    H2: Keccak256,
+{
+    require_set_code_replay_domain(expected_chain, transaction)
+        .map_err(TransactionSignatureValidationError::ReplayDomain)?;
+    let signing_hash = set_code_transaction_signing_hash(transaction, scratch, signing_hasher)
         .map_err(TransactionSignatureValidationError::SigningHash)?;
     let signature =
         EthereumSignature::from_parts(transaction.r, transaction.s, transaction.y_parity);

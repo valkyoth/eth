@@ -26,7 +26,7 @@
 `eth` is the public facade crate for a `no_std`-first Ethereum
 execution-layer protocol workspace.
 
-The crate is intentionally conservative at `0.24.0`: it provides explicit
+The crate is intentionally conservative at `0.24.1`: it provides explicit
 Ethereum primitive domains, bounded decode-budget policy, stable error
 categories, primitive RLP bridge helpers, a caller-provided Keccak-256 boundary,
 RLP fuzz-harness evidence, a transaction envelope shell, unvalidated legacy
@@ -37,7 +37,8 @@ set-code transaction field decoding, no-allocation canonical transaction
 envelope encoding for admitted decoded domains, explicit chain and fork
 activation context, proof-gated transaction typestate transitions, replay-domain
 validation for transaction chain binding, transaction signing-hash helpers,
-decoded transaction signature validation helpers, RLP derive design evidence,
+EIP-7702 authorization signing and signer recovery helpers, decoded
+transaction signature validation helpers, RLP derive design evidence,
 digest-level secp256k1 sender recovery, EIP-712 domain-safety checks, small
 first-party crate boundaries, optional sanitization support, and release
 evidence before RPC, signer, EVM, Reth, or P2P integrations become real
@@ -45,8 +46,8 @@ dependencies.
 
 ## Current Status
 
-The current release candidate is `0.24.0`; set-code transaction decoding and
-encoding pentest passed and final GitHub checks are pending.
+The current release candidate is `0.24.1`; set-code signing and authorization
+validation is ready for external pentest.
 
 Implemented now:
 
@@ -86,7 +87,10 @@ Implemented now:
 - Replay-domain validation for legacy EIP-155 and typed transaction chain IDs
   before sender recovery results are accepted.
 - Canonical transaction signing-preimage encoding and signing-hash helpers for
-  legacy EIP-155, EIP-2930, EIP-1559, and EIP-4844 decoded transaction domains.
+  legacy EIP-155, EIP-2930, EIP-1559, EIP-4844, and EIP-7702 decoded
+  transaction domains.
+- EIP-7702 authorization tuple signing-hash and signer recovery helpers, kept
+  separate from transaction signing hashes with explicit domain newtypes.
 - Digest-level secp256k1 sender recovery with low-s rejection, Ethereum
   y-parity policy, and caller-provided Keccak-256 public-key hashing.
 - Decoded transaction signature validation helpers that combine replay-domain
@@ -378,6 +382,53 @@ replay-domain checks, signing-hash construction, low-s/y-parity policy, sender
 recovery, and optional expected-sender comparison are applied together. Callers
 that reuse the scratch buffer across multiple in-flight transactions should
 zero it after hashing before reusing or releasing it.
+
+EIP-7702 authorization tuples use a separate signing-hash domain:
+
+```rust
+use eth::hash::Keccak256;
+use eth::primitives::{Address, B256, Nonce};
+use eth::protocol::{SetCodeAuthorization, SetCodeAuthorizationChainId, SignatureYParity};
+use eth::verify::set_code_authorization_signing_hash;
+
+struct PlatformKeccak {
+    output: B256,
+}
+
+impl Keccak256 for PlatformKeccak {
+    fn update(&mut self, input: &[u8]) {
+        let _ = input;
+    }
+
+    fn finalize(self) -> B256 {
+        self.output
+    }
+}
+
+let mut chain_id = [0_u8; 32];
+if let Some(last) = chain_id.last_mut() {
+    *last = 1;
+}
+let authorization = SetCodeAuthorization {
+    chain_id: SetCodeAuthorizationChainId::from_be_bytes(chain_id),
+    address: Address::from([0x11_u8; 20]),
+    nonce: Nonce::new(7),
+    y_parity: SignatureYParity::Even,
+    r: [0_u8; 32],
+    s: [0_u8; 32],
+};
+let mut scratch = [0_u8; 128];
+let authorization_hash = set_code_authorization_signing_hash(
+    authorization,
+    &mut scratch,
+    PlatformKeccak {
+        output: B256::from([0x55_u8; 32]),
+    },
+)?;
+
+assert_eq!(authorization_hash.to_b256(), B256::from([0x55_u8; 32]));
+# Ok::<(), Box<dyn std::error::Error>>(())
+```
 
 ## EIP-712 Domain Safety
 
@@ -745,7 +796,7 @@ the workspace can keep small, auditable boundaries:
 The minimum supported Rust version is Rust `1.90.0`. New deployments should use
 the latest stable Rust verified by the release gates.
 
-Compatibility evidence for `0.24.0`:
+Compatibility evidence for `0.24.1`:
 
 | Rust | Local Evidence |
 | --- | --- |

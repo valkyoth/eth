@@ -1,8 +1,7 @@
 # Transaction Signing Hashes
 
-Status: v0.22.0 tagged and released; consumed by v0.23.0 signature validation.
-EIP-7702 set-code transaction signing hashes remain deferred after v0.24.0
-field decode/encode support.
+Status: v0.24.1 adds EIP-7702 set-code transaction and authorization signing
+hashes.
 
 This release adds canonical signing-preimage encoders for the decoded
 transaction families currently admitted by `eth-valkyoth-protocol`, plus
@@ -20,12 +19,12 @@ hasher that implements `eth_valkyoth_hash::Keccak256` and should verify it with
 | EIP-2930 | `0x01 || rlp([chainId, nonce, gasPrice, gasLimit, to, value, data, accessList])` |
 | EIP-1559 | `0x02 || rlp([chainId, nonce, maxPriorityFeePerGas, maxFeePerGas, gasLimit, to, value, data, accessList])` |
 | EIP-4844 | `0x03 || rlp([chainId, nonce, maxPriorityFeePerGas, maxFeePerGas, gasLimit, to, value, data, accessList, maxFeePerBlobGas, blobVersionedHashes])` |
+| EIP-7702 transaction | `0x04 || rlp([chainId, nonce, maxPriorityFeePerGas, maxFeePerGas, gasLimit, destination, value, data, accessList, authorizationList])` |
+| EIP-7702 authorization | `0x05 || rlp([chain_id, address, nonce])` |
 
-EIP-7702 set-code transactions use type byte `0x04`, but this crate does not
-expose their signing-hash helper yet. `v0.24.0` admits only bounded field
-decode and canonical transaction re-encoding. Until the signing-hash helper is
-added, decoded signature validation rejects set-code transactions with an
-explicit unsupported-transaction-type error.
+The EIP-7702 authorization domain is not a transaction signing hash. It uses
+`SetCodeAuthorizationSigningHash` so callers cannot pass it where a
+`TransactionSigningHash` is required.
 
 The typed transaction preimages intentionally exclude `y_parity`, `r`, and
 `s`. Legacy EIP-155 preimages replace those fields with `chainId`, `0`, and
@@ -41,6 +40,7 @@ helpers. The caller supplies the output buffer.
 - encode the canonical preimage into caller-provided scratch space;
 - hash only the bytes written by the encoder;
 - return `TransactionSigningHash`, a domain newtype around `B256`;
+- return `SetCodeAuthorizationSigningHash` for authorization tuples;
 - reject pre-EIP-155 legacy transactions with
   `TransactionSigningHashError::MissingReplayDomain`.
 
@@ -51,10 +51,11 @@ payloads even though they are normally public after broadcast.
 
 ## Deferred Validation
 
-For full decoded transaction signature validation, use the v0.23.0
+For full decoded transaction signature validation, use the v0.24.1
 `validate_transaction_signature` helpers so replay-domain checks, low-s/y-parity
 policy, sender recovery, and optional expected-sender comparison are applied
 together.
 
-The `v0.22.0` helpers also do not perform fee, account-state, fork-validity,
-intrinsic-gas, blob-count, blob-version, KZG, or data-availability checks.
+The helpers also do not perform fee, account-state, fork-validity,
+intrinsic-gas, blob-count, blob-version, KZG, data-availability, or EIP-7702
+authorization chain/nonce/account-state checks.

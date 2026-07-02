@@ -763,7 +763,7 @@ Exit criteria:
 
 ### v0.23.0 - Full Transaction Signature Validation
 
-Status: pentest passed; waiting for final GitHub checks.
+Status: tagged and released.
 
 Goal: validate decoded transaction signatures end to end.
 
@@ -792,7 +792,7 @@ Exit criteria:
 
 ### v0.24.0 - Set-Code Transaction Decode
 
-Status: pentest passed; waiting for final GitHub checks.
+Status: tagged and released.
 
 Goal: decode and encode the next typed transaction family currently left
 opaque by the transaction-envelope shell.
@@ -824,6 +824,8 @@ Implementation note:
   `[chain_id, address, nonce, y_parity, r, s]`.
 
 ### v0.24.1 - Set-Code Signing And Authorization Validation
+
+Status: implemented; ready for external pentest.
 
 Goal: add the cryptographic EIP-7702 validation pieces that were intentionally
 left out of the syntactic set-code decoder.
@@ -857,6 +859,12 @@ Exit criteria:
   verify-layer APIs.
 - The transaction-signature domain and authorization-signature domain are
   represented by distinct APIs or newtypes.
+
+Implementation note:
+
+- Official source check refreshed against final EIP-7702 on 2026-07-02:
+  set-code transactions sign `keccak256(0x04 || TransactionPayload)`, and
+  authorization tuples sign `keccak256(0x05 || rlp([chain_id, address, nonce]))`.
 
 ### v0.24.2 - Set-Code Transaction Validity Gate
 

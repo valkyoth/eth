@@ -3,10 +3,12 @@ use core::fmt;
 use eth_valkyoth_hash::{Keccak256, hash_one};
 use eth_valkyoth_primitives::B256;
 use eth_valkyoth_protocol::{
-    TransactionEncodeError, UnvalidatedAccessListTransaction, UnvalidatedBlobTransaction,
-    UnvalidatedDynamicFeeTransaction, UnvalidatedLegacyTransaction,
-    encode_access_list_signing_preimage, encode_blob_signing_preimage,
-    encode_dynamic_fee_signing_preimage, encode_legacy_eip155_signing_preimage,
+    SetCodeAuthorization, TransactionEncodeError, UnvalidatedAccessListTransaction,
+    UnvalidatedBlobTransaction, UnvalidatedDynamicFeeTransaction, UnvalidatedLegacyTransaction,
+    UnvalidatedSetCodeTransaction, encode_access_list_signing_preimage,
+    encode_blob_signing_preimage, encode_dynamic_fee_signing_preimage,
+    encode_legacy_eip155_signing_preimage, encode_set_code_authorization_signing_preimage,
+    encode_set_code_signing_preimage,
 };
 
 /// Ethereum transaction signing hash domain.
@@ -29,6 +31,30 @@ impl TransactionSigningHash {
 
 impl From<TransactionSigningHash> for B256 {
     fn from(value: TransactionSigningHash) -> Self {
+        value.to_b256()
+    }
+}
+
+/// EIP-7702 authorization signing hash domain.
+#[derive(Clone, Copy, Debug, Eq, PartialEq)]
+pub struct SetCodeAuthorizationSigningHash(B256);
+
+impl SetCodeAuthorizationSigningHash {
+    /// Creates an authorization signing hash from a raw Keccak-256 digest.
+    #[must_use]
+    pub const fn from_b256(value: B256) -> Self {
+        Self(value)
+    }
+
+    /// Returns the raw digest.
+    #[must_use]
+    pub const fn to_b256(self) -> B256 {
+        self.0
+    }
+}
+
+impl From<SetCodeAuthorizationSigningHash> for B256 {
+    fn from(value: SetCodeAuthorizationSigningHash) -> Self {
         value.to_b256()
     }
 }
@@ -158,6 +184,47 @@ where
 {
     let written = encode_blob_signing_preimage(transaction, scratch)?;
     hash_written_preimage(scratch, written, hasher)
+}
+
+/// Builds the EIP-7702 set-code transaction signing hash.
+///
+/// This is the transaction-sender signature domain:
+/// `keccak256(0x04 || rlp(unsigned_set_code_transaction_payload))`. It is
+/// intentionally distinct from [`set_code_authorization_signing_hash`], which
+/// validates authorization-list tuple signatures.
+pub fn set_code_transaction_signing_hash<H>(
+    transaction: &UnvalidatedSetCodeTransaction<'_>,
+    scratch: &mut [u8],
+    hasher: H,
+) -> Result<TransactionSigningHash, TransactionSigningHashError>
+where
+    H: Keccak256,
+{
+    let written = encode_set_code_signing_preimage(transaction, scratch)?;
+    hash_written_preimage(scratch, written, hasher)
+}
+
+/// Builds the EIP-7702 authorization-list tuple signing hash.
+///
+/// This is the authorization signature domain:
+/// `keccak256(0x05 || rlp([chain_id, address, nonce]))`. It is intentionally
+/// distinct from transaction signing hashes so the two EIP-7702 domains cannot
+/// be substituted silently.
+pub fn set_code_authorization_signing_hash<H>(
+    authorization: SetCodeAuthorization,
+    scratch: &mut [u8],
+    hasher: H,
+) -> Result<SetCodeAuthorizationSigningHash, TransactionSigningHashError>
+where
+    H: Keccak256,
+{
+    let written = encode_set_code_authorization_signing_preimage(authorization, scratch)?;
+    let preimage = scratch.get(..written).ok_or(TransactionEncodeError::Codec(
+        eth_valkyoth_codec::DecodeError::OffsetOutOfBounds,
+    ))?;
+    Ok(SetCodeAuthorizationSigningHash::from_b256(hash_one(
+        hasher, preimage,
+    )))
 }
 
 fn hash_written_preimage<H>(

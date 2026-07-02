@@ -4,6 +4,15 @@ All notable changes to `eth` are documented here.
 
 ## Unreleased
 
+- Started `0.24.1` with EIP-7702 set-code transaction signing-preimage and
+  signing-hash helpers for the type `0x04` transaction domain.
+- Added EIP-7702 authorization tuple signing-preimage and signing-hash helpers
+  for the `0x05 || rlp([chain_id, address, nonce])` authorization domain.
+- Added decoded set-code transaction signature validation and separate
+  authorization tuple signer recovery APIs with low-s, scalar, and y-parity
+  policy.
+- Added set-code authorization signature fuzz coverage with full and short
+  scratch buffers.
 - Started `0.24.0` with unvalidated EIP-7702 set-code transaction field
   decoding and no-allocation canonical encoding for type byte `0x04`.
 - Added bounded authorization-list tuple decoding, including chain ID,

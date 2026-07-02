@@ -1,7 +1,7 @@
 # Transaction Signature Validation
 
-Status: v0.24.0 set-code transaction decoding pentest passed; set-code
-signature validation remains fail-closed.
+Status: v0.24.1 adds set-code transaction signature validation and
+authorization tuple signature validation.
 
 `eth-valkyoth-verify` now exposes decoded transaction signature validation
 helpers for the transaction families decoded by `eth-valkyoth-protocol`:
@@ -9,14 +9,14 @@ helpers for the transaction families decoded by `eth-valkyoth-protocol`:
 - legacy EIP-155 transactions;
 - EIP-2930 access-list transactions;
 - EIP-1559 dynamic-fee transactions;
-- EIP-4844 blob transactions.
+- EIP-4844 blob transactions;
+- EIP-7702 set-code transactions.
 
-EIP-7702 set-code transactions are decoded by `eth-valkyoth-protocol` in
-`v0.24.0`, but `validate_transaction_signature` intentionally returns
-`TransactionSignatureValidationError::UnsupportedTransactionType` for them.
-The EIP-7702 transaction signing hash and authorization-list signature
-validation paths are admitted in later releases after their domain boundaries
-and tests are complete.
+EIP-7702 authorization tuple signatures are validated through
+`validate_set_code_authorization_signature`, not through the transaction
+signature helper. The authorization signing hash uses
+`SetCodeAuthorizationSigningHash` to keep the `0x05` authorization domain
+separate from the `0x04` transaction sender domain.
 
 The helpers combine the pieces that were intentionally separate in earlier
 releases:
@@ -36,9 +36,9 @@ to enforce that for concrete hashers.
 
 These helpers do not prove full Ethereum execution validity. They do not check
 fork activation, intrinsic gas, fee ordering, account nonce/state, balance,
-blob count, blob-hash version bytes, KZG commitments, or protocol typestate
-promotion. For EIP-7702, they also do not validate authorization-list
-signatures or account delegation state yet. They return a
+blob count, blob-hash version bytes, KZG commitments, EIP-7702 authorization
+chain policy, authorization nonce/account-state policy, delegation indicator
+state, or protocol typestate promotion. They return a
 `ValidatedTransactionSignature`, which records only the recovered sender and the
 signing hash that was recovered against. That proof value is intentionally not
 publicly constructible; callers must obtain it through the validation helpers so
