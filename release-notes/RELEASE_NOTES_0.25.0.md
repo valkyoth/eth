@@ -34,11 +34,16 @@ and implicit skipped fields remain rejected.
 
 - Decode derives require caller-provided `DecodeLimits`; generated code does
   not bypass the bounded codec contract.
+- The generated RLP encoder now treats inconsistent field encoder length
+  reporting as a runtime error instead of relying on a debug-only assertion.
 - Skipped fields must be explicit:
   `#[eth_rlp(skip, default, reason = "...")]`.
 - Transaction structs still use hand-written encoders and decoders. Public RLP
   derives do not imply fork validity, signature validity, sender recovery, or
   Ethereum transaction-state promotion.
+- The EIP-7702 set-code validity gate counts repeated recovered authorities as
+  sequential nonce applications. Duplicate-authority tuples with a reused nonce
+  are skipped instead of over-counted.
 - Generic structs, enums, and unions are rejected until their generated trait
   bounds, layout behavior, and domain semantics are explicitly designed.
 - `trybuild` is admitted as a dev-only dependency for compiler diagnostic

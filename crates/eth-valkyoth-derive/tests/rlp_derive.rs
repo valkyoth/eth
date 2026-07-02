@@ -28,6 +28,31 @@ struct Pair(u64, [u8; 2]);
 #[derive(Debug, Eq, PartialEq, RlpDecode, RlpEncode)]
 struct Empty;
 
+#[derive(RlpEncode)]
+struct Wrapper {
+    broken: ShortWriter,
+}
+
+struct ShortWriter;
+
+impl eth_valkyoth_codec::RlpEncode for ShortWriter {
+    type Error = eth_valkyoth_codec::RlpDeriveError;
+
+    fn encoded_rlp_len(&self) -> Result<usize, Self::Error> {
+        Ok(2)
+    }
+
+    fn encode_rlp(&self, output: &mut [u8]) -> Result<usize, Self::Error> {
+        let Some(first) = output.first_mut() else {
+            return Err(eth_valkyoth_codec::RlpDeriveError::Decode(
+                eth_valkyoth_codec::DecodeError::OffsetOutOfBounds,
+            ));
+        };
+        *first = 0x80;
+        Ok(1)
+    }
+}
+
 #[test]
 fn rlp_derives_round_trip_named_struct_with_skipped_default()
 -> Result<(), eth_valkyoth_codec::RlpDeriveError> {
@@ -82,6 +107,18 @@ fn rlp_derives_round_trip_tuple_and_unit_structs() -> Result<(), eth_valkyoth_co
     assert_eq!(empty_output, [0xc0]);
     assert_eq!(Empty::decode_rlp(&empty_output, TEST_LIMITS)?, empty);
     Ok(())
+}
+
+#[test]
+fn rlp_encode_derive_rejects_inconsistent_field_writer() {
+    let wrapper = Wrapper {
+        broken: ShortWriter,
+    };
+    let mut output = [0x55u8; 3];
+    assert_eq!(
+        wrapper.encode_rlp(&mut output),
+        Err(eth_valkyoth_codec::RlpDeriveError::Field)
+    );
 }
 
 #[test]

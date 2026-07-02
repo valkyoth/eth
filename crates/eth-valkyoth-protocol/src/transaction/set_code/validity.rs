@@ -1,9 +1,14 @@
 use core::fmt;
 
-use eth_valkyoth_primitives::{Address, ChainId, Gas, Nonce};
+use eth_valkyoth_primitives::{Address, Gas, Nonce};
 
 use super::{SetCodeAuthorization, SetCodeTransactionDecodeError, UnvalidatedSetCodeTransaction};
 use crate::{Hardfork, ValidationContext};
+
+#[path = "validity_authorization.rs"]
+mod authorization_validity;
+
+use authorization_validity::validate_authorizations;
 
 /// EIP-7702 delegation indicator prefix bytes.
 pub const EIP_7702_DELEGATION_INDICATOR_PREFIX: [u8; 3] = [0xef, 0x01, 0x00];
@@ -381,104 +386,10 @@ fn wei_exceeds(left: eth_valkyoth_primitives::Wei, right: eth_valkyoth_primitive
     left.to_be_bytes() > right.to_be_bytes()
 }
 
-fn validate_authorizations<A, S>(
-    transaction: UnvalidatedSetCodeTransaction<'_>,
-    authorities: &A,
-    accounts: &S,
-) -> AuthorizationValidationSummary
-where
-    A: SetCodeAuthorizationAuthorityView + ?Sized,
-    S: SetCodeAuthorityStateView + ?Sized,
-{
-    let mut summary = AuthorizationValidationSummary::default();
-    for (authorization_index, authorization) in
-        transaction.authorization_list.authorizations().enumerate()
-    {
-        let Ok(authorization) = authorization else {
-            summary.skipped = summary.skipped.saturating_add(1);
-            continue;
-        };
-        if validate_authorization(
-            transaction,
-            authorization_index,
-            authorization,
-            authorities,
-            accounts,
-        )
-        .is_ok()
-        {
-            summary.applied = summary.applied.saturating_add(1);
-        } else {
-            summary.skipped = summary.skipped.saturating_add(1);
-        }
-    }
-    summary
-}
-
 #[derive(Clone, Copy, Debug, Default, Eq, PartialEq)]
-struct AuthorizationValidationSummary {
-    applied: usize,
-    skipped: usize,
-}
-
-fn validate_authorization<A, S>(
-    transaction: UnvalidatedSetCodeTransaction<'_>,
-    authorization_index: usize,
-    authorization: SetCodeAuthorization,
-    authorities: &A,
-    accounts: &S,
-) -> Result<(), SetCodeTransactionValidityError>
-where
-    A: SetCodeAuthorizationAuthorityView + ?Sized,
-    S: SetCodeAuthorityStateView + ?Sized,
-{
-    if !authorization_chain_permits(authorization, transaction.chain_id) {
-        return Err(SetCodeTransactionValidityError::WrongAuthorizationChain {
-            authorization_index,
-        });
-    }
-    if authorization.nonce.get() == u64::MAX {
-        return Err(SetCodeTransactionValidityError::AuthorizationNonceTooHigh {
-            authorization_index,
-        });
-    }
-    let authority = authorities
-        .authority_for(authorization_index, authorization)
-        .ok_or(
-            SetCodeTransactionValidityError::MissingAuthorizationAuthority {
-                authorization_index,
-            },
-        )?;
-    let account = accounts.authority_account(authority).ok_or(
-        SetCodeTransactionValidityError::MissingAuthorityState {
-            authorization_index,
-        },
-    )?;
-    if account.nonce != authorization.nonce {
-        return Err(SetCodeTransactionValidityError::AuthorityNonceMismatch {
-            authorization_index,
-        });
-    }
-    match account.code {
-        SetCodeAuthorityCode::Empty | SetCodeAuthorityCode::Delegation { .. } => Ok(()),
-        SetCodeAuthorityCode::Other => Err(SetCodeTransactionValidityError::InvalidAuthorityCode {
-            authorization_index,
-        }),
-    }
-}
-
-fn authorization_chain_permits(authorization: SetCodeAuthorization, chain_id: ChainId) -> bool {
-    if authorization.chain_id.is_universal() {
-        return true;
-    }
-    let bytes = authorization.chain_id.to_be_bytes();
-    let Some(prefix) = bytes.get(..24) else {
-        return false;
-    };
-    let Some(suffix) = bytes.get(24..) else {
-        return false;
-    };
-    prefix.iter().all(|byte| *byte == 0) && suffix == chain_id.get().to_be_bytes()
+pub(super) struct AuthorizationValidationSummary {
+    pub(super) applied: usize,
+    pub(super) skipped: usize,
 }
 
 #[cfg(test)]

@@ -78,7 +78,9 @@ pub(crate) fn expand_rlp_encode(input: &DeriveInput) -> Result<TokenStream2, Err
                 let mut cursor = #crate_path::encode_rlp_list_header(payload_len, output)
                     .map_err(#crate_path::RlpDeriveError::from)?;
                 #(#write_steps)*
-                debug_assert_eq!(cursor, total_len);
+                if cursor != total_len {
+                    return Err(#crate_path::RlpDeriveError::Field);
+                }
                 let _eth_rlp_required_field_count: usize = #required_count;
                 Ok(total_len)
             }

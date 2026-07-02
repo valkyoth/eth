@@ -168,6 +168,41 @@ fn set_code_validity_skips_bad_account_state() {
 }
 
 #[test]
+fn set_code_validity_tracks_repeated_authority_nonce_in_order() {
+    let duplicate_nonce = validate_transaction(
+        decoded_transaction(&[
+            authorization_tuple(&[1], &[4]),
+            authorization_tuple(&[1], &[4]),
+        ]),
+        validity_context(None),
+        Nonce::new(4),
+        SetCodeAuthorityCode::Empty,
+    );
+    assert!(duplicate_nonce.is_ok(), "{duplicate_nonce:?}");
+    if let Ok(valid) = duplicate_nonce {
+        assert_eq!(valid.authorization_count(), 2);
+        assert_eq!(valid.applied_authorization_count(), 1);
+        assert_eq!(valid.skipped_authorization_count(), 1);
+    }
+
+    let sequential_nonce = validate_transaction(
+        decoded_transaction(&[
+            authorization_tuple(&[1], &[4]),
+            authorization_tuple(&[1], &[5]),
+        ]),
+        validity_context(None),
+        Nonce::new(4),
+        SetCodeAuthorityCode::Empty,
+    );
+    assert!(sequential_nonce.is_ok(), "{sequential_nonce:?}");
+    if let Ok(valid) = sequential_nonce {
+        assert_eq!(valid.authorization_count(), 2);
+        assert_eq!(valid.applied_authorization_count(), 2);
+        assert_eq!(valid.skipped_authorization_count(), 0);
+    }
+}
+
+#[test]
 fn set_code_validity_accepts_synthesized_absent_account_state() {
     let authorizations = [authorization_tuple(&[1], &[])];
     let transaction = decoded_transaction(&authorizations);
