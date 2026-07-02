@@ -101,6 +101,22 @@ fn rejects_fixed_width_field_with_wrong_length() -> Result<(), &'static str> {
 }
 
 #[test]
+fn rejects_oversized_header_input_as_resource_exhaustion() -> Result<(), &'static str> {
+    let input = header_rlp(HeaderFieldSet::Legacy);
+    let tiny_limits = DecodeLimits {
+        max_input_bytes: 4,
+        ..TEST_LIMITS
+    };
+    let error = decode_err_with_limits(&input, HeaderFieldSet::Legacy, tiny_limits)?;
+
+    assert_eq!(
+        error.category(),
+        BlockHeaderDecodeErrorCategory::ResourceExhaustion
+    );
+    Ok(())
+}
+
+#[test]
 fn header_hash_uses_exact_canonical_rlp_bytes() -> Result<(), &'static str> {
     let input = header_rlp(HeaderFieldSet::Shanghai);
     let header = decode_ok(&input, HeaderFieldSet::Shanghai)?;
@@ -267,7 +283,15 @@ fn decode_err(
     input: &[u8],
     field_set: HeaderFieldSet,
 ) -> Result<BlockHeaderDecodeError, &'static str> {
-    match decode_block_header(input, field_set, TEST_LIMITS) {
+    decode_err_with_limits(input, field_set, TEST_LIMITS)
+}
+
+fn decode_err_with_limits(
+    input: &[u8],
+    field_set: HeaderFieldSet,
+    limits: DecodeLimits,
+) -> Result<BlockHeaderDecodeError, &'static str> {
+    match decode_block_header(input, field_set, limits) {
         Ok(_) => Err("header fixture should fail"),
         Err(error) => Ok(error),
     }

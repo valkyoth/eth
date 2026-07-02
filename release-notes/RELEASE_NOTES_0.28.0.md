@@ -23,8 +23,11 @@ exact canonical RLP bytes for hashing.
 - Added `UnvalidatedBlockHeader::hash_with` using the caller-provided
   `Keccak256` trait boundary.
 - Added malformed header tests for field-count and fixed-width failures.
+- Added a resource-exhaustion regression for oversized header input.
 - Added hash consistency tests that verify hashing uses the exact canonical RLP
   header bytes that were decoded.
+- Added `fuzz/fuzz_targets/header.rs` to drive `decode_block_header` across all
+  current `HeaderFieldSet` variants under fixture and deployment limits.
 - Added `docs/block-headers.md`.
 
 ## Security Notes
@@ -39,6 +42,8 @@ exact canonical RLP bytes for hashing.
   trie roots.
 - The crate does not infer fork layout from block number or timestamp. Callers
   must pass the reviewed `HeaderFieldSet` for the context they are decoding.
+- `extra_data` is decoded as borrowed bytes and is not checked against a
+  network's consensus-specific length limit, such as the 32-byte mainnet cap.
 
 ## Specification Notes
 

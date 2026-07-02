@@ -25,6 +25,7 @@ pub const CANCUN_HEADER_FIELD_COUNT: usize = 20;
 pub const PRAGUE_HEADER_FIELD_COUNT: usize = 21;
 
 /// Fork-specific execution header field set.
+#[non_exhaustive]
 #[derive(Clone, Copy, Debug, Eq, PartialEq)]
 pub enum HeaderFieldSet {
     /// Header layout before EIP-1559.
@@ -99,6 +100,8 @@ impl From<BlockHash> for B256 {
 /// hash, state root, transaction root, receipt root, bloom correctness, gas
 /// accounting, base-fee calculation, withdrawals root, blob-gas accounting,
 /// parent beacon root, requests hash, proof roots, or fork activation.
+/// The `extra_data` field is also not checked against any network's
+/// consensus-specific byte limit.
 #[derive(Clone, Copy, Debug, Eq, PartialEq)]
 pub struct UnvalidatedBlockHeader<'a> {
     encoded_rlp: &'a [u8],
@@ -129,6 +132,9 @@ pub struct UnvalidatedBlockHeader<'a> {
     /// Header timestamp.
     pub timestamp: UnixTimestamp,
     /// Borrowed extra data.
+    ///
+    /// This is not checked against the network's consensus limit, such as the
+    /// 32-byte mainnet cap. Callers must validate that limit for their chain.
     pub extra_data: &'a [u8],
     /// Mix hash or post-merge prev_randao.
     pub mix_hash: B256,

@@ -75,6 +75,13 @@ doc = false
 bench = false
 
 [[bin]]
+name = "header"
+path = "fuzz_targets/header.rs"
+test = false
+doc = false
+bench = false
+
+[[bin]]
 name = "ethereum_signature"
 path = "fuzz_targets/ethereum_signature.rs"
 test = false

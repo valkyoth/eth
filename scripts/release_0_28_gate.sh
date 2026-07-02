@@ -6,7 +6,6 @@ scripts/check_latest_tools.sh
 scripts/release_crates.py --check
 scripts/materialize_fuzz_seeds.py --check
 cargo check --manifest-path fuzz/Cargo.toml
-cargo test -p eth-valkyoth-protocol -p eth-valkyoth-verify --all-features
 cargo test -p eth-valkyoth-protocol -p eth-valkyoth-verify -p eth --all-features
 cargo clippy -p eth-valkyoth-protocol -p eth-valkyoth-verify -p eth --all-targets --all-features -- -D warnings
 cargo deny check

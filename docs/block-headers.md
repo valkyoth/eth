@@ -23,6 +23,10 @@ state root, transaction root, receipt root, logs-bloom correctness,
 withdrawals root, blob gas accounting, parent beacon root, requests hash, or
 consensus-layer commitments.
 
+- `extra_data` length is not checked against the network's consensus limit
+  (for example, 32 bytes on mainnet). Callers must validate this for their
+  selected chain before treating the header as consensus-valid.
+
 Header hashing uses the `eth-valkyoth-hash::Keccak256` trait boundary and
 hashes the exact canonical RLP header bytes that were decoded. The result is a
 `BlockHash` newtype instead of a raw `B256`, preserving domain separation for
