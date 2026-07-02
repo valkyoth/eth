@@ -1,7 +1,7 @@
 # Crate Version Matrix
 
-Status: `v0.26.1` optional EIP-712 JSON typed-data parsing is implemented and
-ready for external pentest.
+Status: `v0.26.1` optional EIP-712 JSON typed-data parsing passed pentest
+retest and is waiting for final GitHub checks before tagging.
 
 `eth` uses independent crate versions. The facade crate remains the main user
 entry point, but support crates are published only when their own package

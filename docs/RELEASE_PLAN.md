@@ -985,7 +985,8 @@ Implementation note:
 
 ### v0.26.1 - EIP-712 JSON Typed-Data Parser Boundary
 
-Status: implemented; ready for external pentest.
+Status: implementation, pentest remediation, and clean retest complete; waiting
+for final GitHub checks before tagging.
 
 Goal: admit a reviewed way to parse JSON-RPC typed-data payloads into the
 borrowed EIP-712 encoder boundary without weakening the default `no_std` graph.

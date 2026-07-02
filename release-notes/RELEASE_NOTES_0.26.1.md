@@ -1,6 +1,7 @@
 # eth 0.26.1 Release Notes
 
-Status: implementation complete; pending external pentest input
+Status: implementation, pentest remediation, and clean retest complete; waiting
+for final GitHub checks before tagging.
 
 ## Summary
 
@@ -59,7 +60,7 @@ that want first-party JSON typed-data handling can opt into
 
 ## Release Gate
 
-- External pentest must pass before tagging.
+- External pentest and retest passed before tagging.
 - Final GitHub checks must pass on the pentest report commit before tagging.
 
 ## Verification

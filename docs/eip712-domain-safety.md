@@ -1,7 +1,7 @@
 # EIP-712 Domain Safety
 
-Status: v0.26.1 optional JSON typed-data parser boundary implemented and ready
-for external pentest.
+Status: v0.26.1 optional JSON typed-data parser boundary implemented; pentest
+retest passed and final GitHub checks are pending before tagging.
 
 EIP-712 structured-data signing extends Ethereum signing with
 `keccak256("\x19\x01" || domainSeparator || hashStruct(message))`. The

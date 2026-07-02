@@ -48,7 +48,8 @@ signer, EVM, Reth, or P2P integrations become real dependencies.
 ## Current Status
 
 The current release candidate is `0.26.1`; optional EIP-712 JSON typed-data
-parsing is implemented and ready for external pentest.
+parsing passed pentest retest and is waiting for final GitHub checks before
+tagging.
 
 Implemented now:
 
