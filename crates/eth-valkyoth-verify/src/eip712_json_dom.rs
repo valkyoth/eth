@@ -2,10 +2,13 @@ use core::fmt;
 
 use serde::de::{Error as _, MapAccess, SeqAccess, Visitor};
 use serde::{Deserialize, Deserializer};
+use std::collections::BTreeSet;
 use std::string::{String, ToString};
 use std::vec::Vec;
 
 use super::Eip712JsonError;
+
+const MAX_JSON_OBJECT_KEYS: usize = 512;
 
 pub(super) enum Json {
     Null,
@@ -32,10 +35,6 @@ impl Object {
 
     pub(super) fn entries(&self) -> impl Iterator<Item = (&str, &Json)> {
         self.0.iter().map(|(name, value)| (name.as_str(), value))
-    }
-
-    pub(super) fn len(&self) -> usize {
-        self.0.len()
     }
 }
 
@@ -141,8 +140,12 @@ impl<'de> Visitor<'de> for JsonVisitor {
         A: MapAccess<'de>,
     {
         let mut entries = Vec::<(String, Json)>::new();
+        let mut seen = BTreeSet::<String>::new();
         while let Some((key, value)) = map.next_entry::<String, Json>()? {
-            if entries.iter().any(|(existing, _)| existing == &key) {
+            if entries.len() >= MAX_JSON_OBJECT_KEYS {
+                return Err(A::Error::custom("object has too many keys"));
+            }
+            if !seen.insert(key.clone()) {
                 return Err(A::Error::custom("duplicate object key"));
             }
             entries.push((key, value));

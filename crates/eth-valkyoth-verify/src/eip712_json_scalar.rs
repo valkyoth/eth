@@ -12,7 +12,7 @@ pub(super) fn encode_json_numeric_or_bytes(
     type_name: &str,
     value: &Json,
     out: &mut [u8; WORD_BYTES],
-    limits: Eip712JsonLimits,
+    _limits: Eip712JsonLimits,
 ) -> Result<(), Eip712JsonError> {
     if type_name.starts_with("uint") {
         encode_numeric_or_fixed_bytes(
@@ -24,7 +24,6 @@ pub(super) fn encode_json_numeric_or_bytes(
         encode_numeric_or_fixed_bytes(type_name, Eip712ValueKind::Int256(parse_i256(value)?), out)?;
     } else if type_name.starts_with("bytes") {
         let bytes = parse_hex(value.as_str()?, WORD_BYTES)?;
-        check_len(bytes.len(), limits.max_bytes_value)?;
         encode_numeric_or_fixed_bytes(type_name, Eip712ValueKind::FixedBytes(&bytes), out)?;
     } else {
         return Err(Eip712JsonError::Encode(Eip712EncodeError::InvalidType));
@@ -74,16 +73,23 @@ fn parse_u256(value: &Json) -> Result<[u8; WORD_BYTES], Eip712JsonError> {
 fn parse_i256(value: &Json) -> Result<[u8; WORD_BYTES], Eip712JsonError> {
     match value {
         Json::Number(number) => {
-            let signed = number.as_i64().ok_or(Eip712JsonError::Integer)?;
-            Ok(i64_to_word(signed))
+            if let Some(signed) = number.as_i64() {
+                Ok(i64_to_word(signed))
+            } else {
+                number
+                    .as_u64()
+                    .map(u64_to_word)
+                    .ok_or(Eip712JsonError::Integer)
+            }
         }
         Json::String(text) if text.starts_with("0x") => parse_hex_word(text),
-        Json::String(text) => parse_decimal_i64(text).map(i64_to_word),
+        Json::String(text) => parse_decimal_i256(text),
         _ => Err(Eip712JsonError::Shape),
     }
 }
 
 fn parse_decimal_u64(input: &str) -> Result<u64, Eip712JsonError> {
+    reject_empty_decimal(input)?;
     let mut value = 0_u64;
     for byte in input.bytes() {
         let digit = decimal_digit(byte)?;
@@ -95,19 +101,53 @@ fn parse_decimal_u64(input: &str) -> Result<u64, Eip712JsonError> {
     Ok(value)
 }
 
-fn parse_decimal_i64(input: &str) -> Result<i64, Eip712JsonError> {
+fn parse_decimal_i256(input: &str) -> Result<[u8; WORD_BYTES], Eip712JsonError> {
     let negative = input.starts_with('-');
     let digits = input.strip_prefix('-').unwrap_or(input);
-    let value = parse_decimal_u64(digits)?;
-    let signed = i64::try_from(value).map_err(|_| Eip712JsonError::Integer)?;
-    if negative {
-        signed.checked_neg().ok_or(Eip712JsonError::Integer)
+    let magnitude = parse_decimal_u256(digits)?;
+    if !negative {
+        if magnitude.first().copied().ok_or(Eip712JsonError::Integer)? & 0x80 == 0 {
+            return Ok(magnitude);
+        }
+        return Err(Eip712JsonError::Integer);
+    }
+    if magnitude > i256_min_magnitude() {
+        return Err(Eip712JsonError::Integer);
+    }
+    negate_twos_complement(magnitude)
+}
+
+fn negate_twos_complement(word: [u8; WORD_BYTES]) -> Result<[u8; WORD_BYTES], Eip712JsonError> {
+    let mut out = [0_u8; WORD_BYTES];
+    let mut carry = 1_u16;
+    for (target, byte) in out.iter_mut().rev().zip(word.iter().rev()) {
+        let sum = u16::from(!byte)
+            .checked_add(carry)
+            .ok_or(Eip712JsonError::Integer)?;
+        *target = u8::try_from(sum & 0xff).map_err(|_| Eip712JsonError::Integer)?;
+        carry = sum >> 8;
+    }
+    Ok(out)
+}
+
+fn i256_min_magnitude() -> [u8; WORD_BYTES] {
+    let mut word = [0_u8; WORD_BYTES];
+    if let Some(first) = word.first_mut() {
+        *first = 0x80;
+    }
+    word
+}
+
+fn reject_empty_decimal(input: &str) -> Result<(), Eip712JsonError> {
+    if input.is_empty() {
+        Err(Eip712JsonError::Integer)
     } else {
-        Ok(signed)
+        Ok(())
     }
 }
 
 fn parse_decimal_u256(input: &str) -> Result<[u8; WORD_BYTES], Eip712JsonError> {
+    reject_empty_decimal(input)?;
     let mut word = [0_u8; WORD_BYTES];
     for byte in input.bytes() {
         let digit = decimal_digit(byte)?;

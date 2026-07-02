@@ -26,6 +26,9 @@ use crate::eip712_signing_digest;
 #[derive(Clone, Copy, Debug, Eq, PartialEq)]
 pub struct Eip712JsonLimits {
     /// Maximum JSON input length in bytes.
+    ///
+    /// JSON object width is also independently capped during duplicate-key
+    /// detection so raising this limit does not admit unbounded object maps.
     pub max_input_bytes: usize,
     /// Maximum non-domain type definitions.
     pub max_types: usize,
@@ -35,7 +38,10 @@ pub struct Eip712JsonLimits {
     pub max_array_items: usize,
     /// Maximum UTF-8 string length in bytes.
     pub max_string_bytes: usize,
-    /// Maximum decoded dynamic bytes length.
+    /// Maximum decoded dynamic `bytes` length.
+    ///
+    /// Fixed `bytesN` values remain bounded by the EIP-712 `bytes1` through
+    /// `bytes32` type width and are not restricted by this dynamic-byte limit.
     pub max_bytes_value: usize,
     /// Maximum JSON/type recursion depth.
     pub max_depth: usize,
@@ -234,12 +240,13 @@ struct OwnedField {
 
 fn parse_types(types: &Json, limits: Eip712JsonLimits) -> Result<Vec<OwnedType>, Eip712JsonError> {
     let object = types.as_object()?;
-    check_len(object.len(), limits.max_types.saturating_add(1))?;
     let mut owned = Vec::new();
     for (name, fields) in object.entries() {
         if name == "EIP712Domain" {
+            check_len(fields.as_array()?.len(), limits.max_fields_per_type)?;
             continue;
         }
+        check_len(owned.len().saturating_add(1), limits.max_types)?;
         check_len(name.len(), limits.max_string_bytes)?;
         let field_values = fields.as_array()?;
         check_len(field_values.len(), limits.max_fields_per_type)?;

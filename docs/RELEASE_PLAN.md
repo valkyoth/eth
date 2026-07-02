@@ -999,8 +999,11 @@ Deliverables:
   bytes;
 - validation that parsed type strings map exactly to the `v0.26.0` descriptor
   model;
-- JSON fixtures for Ether Mail and adversarial duplicate/missing type fields;
-- duplicate JSON object-key rejection before type maps are admitted.
+- JSON fixtures for Ether Mail and adversarial duplicate/missing type fields,
+  parser limits, malformed hex, fixed-array mismatch, signed integer
+  boundaries, and domain validation;
+- duplicate JSON object-key rejection before type maps are admitted, with a
+  bounded object-width guard.
 
 Verification:
 

@@ -35,10 +35,16 @@ JSON-RPC typed-data payloads. The feature is disabled by default, requires
 
 The JSON boundary:
 
-- rejects duplicate JSON object keys before any type map is accepted;
+- rejects duplicate JSON object keys before any type map is accepted, using an
+  independent object-width guard in addition to the input-byte limit;
 - enforces explicit limits for input bytes, type count, field count, array
   length, dynamic bytes, string length, and recursion depth;
 - rejects `ChainId(0)` in parsed EIP-712 domains;
+- validates the shape of `types.EIP712Domain` even though the actual domain
+  separator is built from the parsed `domain` object;
+- parses signed decimal `intN` strings through the full 256-bit integer path
+  before the typed encoder enforces the requested signed width;
 - maps parsed type strings to the same typed-data encoder model used by the
   borrowed API;
-- includes Ether Mail and adversarial missing/duplicate field fixtures.
+- includes Ether Mail and adversarial parser-limit, malformed-hex,
+  duplicate-field, fixed-array mismatch, and domain-validation fixtures.
