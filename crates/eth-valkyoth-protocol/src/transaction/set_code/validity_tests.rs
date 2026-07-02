@@ -1,29 +1,36 @@
 use eth_valkyoth_codec::DecodeLimits;
-use eth_valkyoth_primitives::{Address, BlockNumber, ChainId, Gas, Nonce, UnixTimestamp};
+use eth_valkyoth_primitives::{BlockNumber, Gas, Nonce, UnixTimestamp};
 use std::vec::Vec;
 
 use super::*;
 use crate::{ForkActivation, ForkSpec};
+
+#[path = "validity_test_fixtures.rs"]
+mod fixtures;
+use fixtures::*;
 
 const TEST_LIMITS: DecodeLimits = DecodeLimits {
     max_input_bytes: 1024,
     max_list_items: 32,
     max_nesting_depth: 8,
     max_total_allocation: 1024,
-    max_proof_nodes: 4,
+    max_proof_nodes: b"node".len(),
     max_total_items: 128,
 };
 
 #[test]
 fn set_code_validity_accepts_reviewed_context() {
-    let authorizations = [authorization_tuple(&[1], &[4])];
+    let authorizations = [authorization_tuple(
+        &expected_chain_id_payload(),
+        &starting_nonce_payload(),
+    )];
     let transaction = decoded_transaction(&authorizations);
     assert!(transaction.is_ok(), "{transaction:?}");
     let Ok(transaction) = transaction else {
         return;
     };
     let authorities = [authority(0)];
-    let accounts = [account(Nonce::new(4), SetCodeAuthorityCode::Empty)];
+    let accounts = [account(starting_nonce(), SetCodeAuthorityCode::Empty)];
 
     let result = validate_set_code_transaction_context(
         transaction,
@@ -37,7 +44,7 @@ fn set_code_validity_accepts_reviewed_context() {
         assert_eq!(valid.authorization_count(), 1);
         assert_eq!(valid.applied_authorization_count(), 1);
         assert_eq!(valid.skipped_authorization_count(), 0);
-        assert_eq!(valid.transaction().chain_id, ChainId::new(1));
+        assert_eq!(valid.transaction().chain_id, expected_chain_id());
     }
 }
 
@@ -52,8 +59,8 @@ fn set_code_validity_rejects_empty_authorization_list() {
 #[test]
 fn set_code_validity_skips_wrong_authorization_chain() {
     let result = validate_single(&[
-        authorization_tuple(&[2], &[4]),
-        authorization_tuple(&[1], &[4]),
+        authorization_tuple(&unexpected_chain_id_payload(), &starting_nonce_payload()),
+        authorization_tuple(&expected_chain_id_payload(), &starting_nonce_payload()),
     ]);
 
     assert!(result.is_ok(), "{result:?}");
@@ -67,8 +74,8 @@ fn set_code_validity_skips_wrong_authorization_chain() {
 #[test]
 fn set_code_validity_skips_max_authorization_nonce() {
     let result = validate_single(&[
-        authorization_tuple(&[1], &[0xff; 8]),
-        authorization_tuple(&[1], &[4]),
+        authorization_tuple(&expected_chain_id_payload(), &max_nonce_payload()),
+        authorization_tuple(&expected_chain_id_payload(), &starting_nonce_payload()),
     ]);
 
     assert!(result.is_ok(), "{result:?}");
@@ -81,14 +88,17 @@ fn set_code_validity_skips_max_authorization_nonce() {
 
 #[test]
 fn set_code_validity_rejects_inactive_or_pre_prague_fork() {
-    let authorizations = [authorization_tuple(&[1], &[4])];
+    let authorizations = [authorization_tuple(
+        &expected_chain_id_payload(),
+        &starting_nonce_payload(),
+    )];
     let transaction = decoded_transaction(&authorizations);
     assert!(transaction.is_ok(), "{transaction:?}");
     let Ok(transaction) = transaction else {
         return;
     };
     let authorities = [authority(0)];
-    let accounts = [account(Nonce::new(4), SetCodeAuthorityCode::Empty)];
+    let accounts = [account(starting_nonce(), SetCodeAuthorityCode::Empty)];
 
     assert_eq!(
         validate_set_code_transaction_context(
@@ -114,18 +124,26 @@ fn set_code_validity_rejects_inactive_or_pre_prague_fork() {
 fn set_code_validity_rejects_bad_fee_and_gas() {
     assert_eq!(
         validate_transaction(
-            decoded_transaction_with_fee_and_gas(&[3], &[2], &[0x52, 0x08]),
+            decoded_transaction_with_fee_and_gas(
+                &priority_fee_too_high_payload(),
+                &max_fee_payload(),
+                &gas_limit_payload(),
+            ),
             validity_context(None),
-            Nonce::new(4),
+            starting_nonce(),
             SetCodeAuthorityCode::Empty,
         ),
         Err(SetCodeTransactionValidityError::PriorityFeeExceedsMaxFee)
     );
     assert_eq!(
         validate_transaction(
-            decoded_transaction_with_fee_and_gas(&[1], &[2], &[0x52, 0x08]),
+            decoded_transaction_with_fee_and_gas(
+                &low_priority_fee_payload(),
+                &max_fee_payload(),
+                &gas_limit_payload(),
+            ),
             validity_context(Some(Gas::new(21_001))),
-            Nonce::new(4),
+            starting_nonce(),
             SetCodeAuthorityCode::Empty,
         ),
         Err(SetCodeTransactionValidityError::GasLimitTooLow)
@@ -136,11 +154,11 @@ fn set_code_validity_rejects_bad_fee_and_gas() {
 fn set_code_validity_skips_bad_account_state() {
     let stale_nonce = validate_transaction(
         decoded_transaction(&[
-            authorization_tuple(&[1], &[4]),
-            authorization_tuple(&[1], &[5]),
+            authorization_tuple(&expected_chain_id_payload(), &starting_nonce_payload()),
+            authorization_tuple(&expected_chain_id_payload(), &next_nonce_payload()),
         ]),
         validity_context(None),
-        Nonce::new(5),
+        next_nonce(),
         SetCodeAuthorityCode::Empty,
     );
     assert!(stale_nonce.is_ok(), "{stale_nonce:?}");
@@ -152,11 +170,11 @@ fn set_code_validity_skips_bad_account_state() {
 
     let invalid_code = validate_transaction(
         decoded_transaction(&[
-            authorization_tuple(&[1], &[4]),
-            authorization_tuple(&[1], &[5]),
+            authorization_tuple(&expected_chain_id_payload(), &starting_nonce_payload()),
+            authorization_tuple(&expected_chain_id_payload(), &next_nonce_payload()),
         ]),
         validity_context(None),
-        Nonce::new(5),
+        next_nonce(),
         SetCodeAuthorityCode::Other,
     );
     assert!(invalid_code.is_ok(), "{invalid_code:?}");
@@ -171,11 +189,11 @@ fn set_code_validity_skips_bad_account_state() {
 fn set_code_validity_tracks_repeated_authority_nonce_in_order() {
     let duplicate_nonce = validate_transaction(
         decoded_transaction(&[
-            authorization_tuple(&[1], &[4]),
-            authorization_tuple(&[1], &[4]),
+            authorization_tuple(&expected_chain_id_payload(), &starting_nonce_payload()),
+            authorization_tuple(&expected_chain_id_payload(), &starting_nonce_payload()),
         ]),
         validity_context(None),
-        Nonce::new(4),
+        starting_nonce(),
         SetCodeAuthorityCode::Empty,
     );
     assert!(duplicate_nonce.is_ok(), "{duplicate_nonce:?}");
@@ -187,11 +205,11 @@ fn set_code_validity_tracks_repeated_authority_nonce_in_order() {
 
     let sequential_nonce = validate_transaction(
         decoded_transaction(&[
-            authorization_tuple(&[1], &[4]),
-            authorization_tuple(&[1], &[5]),
+            authorization_tuple(&expected_chain_id_payload(), &starting_nonce_payload()),
+            authorization_tuple(&expected_chain_id_payload(), &next_nonce_payload()),
         ]),
         validity_context(None),
-        Nonce::new(4),
+        starting_nonce(),
         SetCodeAuthorityCode::Empty,
     );
     assert!(sequential_nonce.is_ok(), "{sequential_nonce:?}");
@@ -204,14 +222,17 @@ fn set_code_validity_tracks_repeated_authority_nonce_in_order() {
 
 #[test]
 fn set_code_validity_accepts_synthesized_absent_account_state() {
-    let authorizations = [authorization_tuple(&[1], &[])];
+    let authorizations = [authorization_tuple(
+        &expected_chain_id_payload(),
+        &uninitialized_nonce_payload(),
+    )];
     let transaction = decoded_transaction(&authorizations);
     assert!(transaction.is_ok(), "{transaction:?}");
     let Ok(transaction) = transaction else {
         return;
     };
     let authorities = [authority(0)];
-    let accounts = [account(Nonce::new(0), SetCodeAuthorityCode::Empty)];
+    let accounts = [account(uninitialized_nonce(), SetCodeAuthorityCode::Empty)];
 
     let result = validate_set_code_transaction_context(
         transaction,
@@ -229,8 +250,8 @@ fn set_code_validity_accepts_synthesized_absent_account_state() {
 
 #[test]
 fn authorization_chain_id_matches_universal_or_expected_chain() {
-    let universal = authorization_tuple(&[], &[4]);
-    let expected = authorization_tuple(&[1], &[4]);
+    let universal = authorization_tuple(&universal_chain_id_payload(), &starting_nonce_payload());
+    let expected = authorization_tuple(&expected_chain_id_payload(), &starting_nonce_payload());
 
     assert!(validate_single(&[universal]).is_ok());
     assert!(validate_single(&[expected]).is_ok());
@@ -242,7 +263,7 @@ fn validate_single(
     validate_transaction(
         decoded_transaction(authorizations),
         validity_context(None),
-        Nonce::new(4),
+        starting_nonce(),
         SetCodeAuthorityCode::Empty,
     )
 }
@@ -273,7 +294,13 @@ fn authorities_for(
 fn decoded_transaction(
     authorizations: &[Vec<u8>],
 ) -> Result<UnvalidatedSetCodeTransaction<'static>, SetCodeTransactionDecodeError> {
-    let tx = set_code_tx(&[1], &[3], &[4], &[0x52, 0x08], authorizations);
+    let tx = set_code_tx(
+        &expected_chain_id_payload(),
+        &default_priority_fee_payload(),
+        &default_max_fee_payload(),
+        &gas_limit_payload(),
+        authorizations,
+    );
     let leaked = Vec::leak(tx);
     crate::decode_set_code_transaction(leaked, TEST_LIMITS)
 }
@@ -283,8 +310,14 @@ fn decoded_transaction_with_fee_and_gas(
     max_fee: &[u8],
     gas_limit: &[u8],
 ) -> Result<UnvalidatedSetCodeTransaction<'static>, SetCodeTransactionDecodeError> {
-    let auth = authorization_tuple(&[1], &[4]);
-    let tx = set_code_tx(&[1], priority_fee, max_fee, gas_limit, &[auth]);
+    let auth = authorization_tuple(&expected_chain_id_payload(), &starting_nonce_payload());
+    let tx = set_code_tx(
+        &expected_chain_id_payload(),
+        priority_fee,
+        max_fee,
+        gas_limit,
+        &[auth],
+    );
     let leaked = Vec::leak(tx);
     crate::decode_set_code_transaction(leaked, TEST_LIMITS)
 }
@@ -293,15 +326,15 @@ fn validity_context(minimum_gas_limit: Option<Gas>) -> SetCodeTransactionValidat
     SetCodeTransactionValidationContext {
         fork: ValidationContext {
             fork: ForkSpec {
-                chain_id: ChainId::new(1),
+                chain_id: expected_chain_id(),
                 hardfork: Hardfork::Prague,
                 activation: ForkActivation::BlockAndTimestamp {
-                    activation_block: BlockNumber::new(10),
-                    activation_timestamp: UnixTimestamp::new(20),
+                    activation_block: BlockNumber::new(active_block_number()),
+                    activation_timestamp: UnixTimestamp::new(active_timestamp()),
                 },
             },
-            block_number: BlockNumber::new(10),
-            timestamp: UnixTimestamp::new(20),
+            block_number: BlockNumber::new(active_block_number()),
+            timestamp: UnixTimestamp::new(active_timestamp()),
         },
         minimum_gas_limit,
     }
@@ -309,7 +342,7 @@ fn validity_context(minimum_gas_limit: Option<Gas>) -> SetCodeTransactionValidat
 
 fn inactive_context() -> SetCodeTransactionValidationContext {
     let mut context = validity_context(None);
-    context.fork.block_number = BlockNumber::new(9);
+    context.fork.block_number = BlockNumber::new(inactive_block_number());
     context
 }
 
@@ -332,109 +365,4 @@ fn account(nonce: Nonce, code: SetCodeAuthorityCode) -> SetCodeAuthorityAccount 
         nonce,
         code,
     }
-}
-
-fn authority_address() -> Address {
-    Address::from_bytes(test_address_from_label(b"authority"))
-}
-
-fn set_code_tx(
-    chain_id: &[u8],
-    priority_fee: &[u8],
-    max_fee: &[u8],
-    gas_limit: &[u8],
-    authorizations: &[Vec<u8>],
-) -> Vec<u8> {
-    let mut fields = Vec::new();
-    push_scalar(&mut fields, chain_id);
-    push_scalar(&mut fields, &[2]);
-    push_scalar(&mut fields, priority_fee);
-    push_scalar(&mut fields, max_fee);
-    push_scalar(&mut fields, gas_limit);
-    push_scalar(&mut fields, &test_address_from_label(b"set-code-to"));
-    push_scalar(&mut fields, &[5]);
-    push_scalar(&mut fields, &[]);
-    push_list(&mut fields, &[]);
-
-    let mut auth_list = Vec::new();
-    for authorization in authorizations {
-        auth_list.extend_from_slice(authorization);
-    }
-    push_list(&mut fields, &auth_list);
-
-    push_scalar(&mut fields, &[1]);
-    push_scalar(&mut fields, &[1]);
-    push_scalar(&mut fields, &[2]);
-
-    let mut tx = Vec::new();
-    tx.push(crate::SET_CODE_TRANSACTION_TYPE);
-    push_list(&mut tx, &fields);
-    tx
-}
-
-fn authorization_tuple(chain_id: &[u8], nonce: &[u8]) -> Vec<u8> {
-    let mut fields = Vec::new();
-    push_scalar(&mut fields, chain_id);
-    push_scalar(&mut fields, &test_address_from_label(b"set-code-auth"));
-    push_scalar(&mut fields, nonce);
-    push_scalar(&mut fields, &[1]);
-    push_scalar(&mut fields, &[1]);
-    push_scalar(&mut fields, &[2]);
-
-    let mut tuple = Vec::new();
-    push_list(&mut tuple, &fields);
-    tuple
-}
-
-fn test_address_from_label(label: &[u8]) -> [u8; 20] {
-    let mut bytes = [0_u8; 20];
-    if label.is_empty() {
-        return bytes;
-    }
-    for (index, byte) in bytes.iter_mut().enumerate() {
-        let Some(label_index) = index.checked_rem(label.len()) else {
-            return bytes;
-        };
-        let label_byte = label.get(label_index).copied().unwrap_or_default();
-        *byte = label_byte.wrapping_add(u8::try_from(index).unwrap_or_default());
-    }
-    bytes
-}
-
-fn push_scalar(out: &mut Vec<u8>, payload: &[u8]) {
-    if let Some(byte) = payload
-        .first()
-        .copied()
-        .filter(|byte| payload.len() == 1 && *byte < 0x80)
-    {
-        out.push(byte);
-    } else {
-        push_prefixed(out, 0x80, payload);
-    }
-}
-
-fn push_list(out: &mut Vec<u8>, payload: &[u8]) {
-    push_prefixed(out, 0xc0, payload);
-}
-
-fn push_prefixed(out: &mut Vec<u8>, short_base: u8, payload: &[u8]) {
-    if payload.len() <= 55 {
-        let Ok(length) = u8::try_from(payload.len()) else {
-            return;
-        };
-        let Some(prefix) = short_base.checked_add(length) else {
-            return;
-        };
-        out.push(prefix);
-    } else {
-        let Some(prefix) = short_base.checked_add(56) else {
-            return;
-        };
-        let Ok(length) = u8::try_from(payload.len()) else {
-            return;
-        };
-        out.push(prefix);
-        out.push(length);
-    }
-    out.extend_from_slice(payload);
 }
