@@ -1097,7 +1097,8 @@ Exit criteria:
 
 ### v0.30.0 - Withdrawal And Post-Merge Fields
 
-Status: implementation ready for external pentest.
+Status: implementation, pentest remediation, and clean retest complete; waiting
+for final GitHub checks before tagging.
 
 Goal: model post-merge execution fields explicitly.
 

@@ -1,6 +1,6 @@
 # eth 0.30.0 Release Notes
 
-Status: implementation ready for external pentest
+Status: pentest passed; waiting for final GitHub checks before tagging
 
 ## Summary
 
@@ -59,7 +59,8 @@ checks the 20-byte recipient address, and rejects zero Gwei amounts.
 
 ## Release Gate
 
-- External pentest is required before tagging.
+- External pentest passed after adding the missing withdrawal fuzz seed corpus
+  and documenting the zero-amount field-domain admission rule.
 - Final GitHub checks must pass on the pentest report commit before tagging.
 
 ## Verification

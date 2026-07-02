@@ -35,8 +35,8 @@ dependencies.
 
 ## Current Status
 
-Status: `v0.30.0` withdrawal-list decoding is implemented and ready for
-pentest.
+Status: `v0.30.0` withdrawal-list decoding has passed pentest and is waiting
+for final GitHub checks before tagging.
 
 Implemented now:
 
