@@ -17,6 +17,9 @@ where
     H: Default + Keccak256,
 {
     if let Some(array) = parse_array_type(type_name)? {
+        if depth >= MAX_TYPE_DEPTH {
+            return Err(Eip712EncodeError::RecursionLimit);
+        }
         let Eip712ValueKind::Array(values) = value else {
             return Err(Eip712EncodeError::TypeMismatch);
         };
@@ -28,7 +31,14 @@ where
         let mut hasher = H::default();
         for item in values {
             let mut word = [0_u8; WORD_BYTES];
-            encode_value_word::<H>(types, array.base, *item, &mut word, type_scratch, depth)?;
+            encode_value_word::<H>(
+                types,
+                array.base,
+                *item,
+                &mut word,
+                type_scratch,
+                depth.saturating_add(1),
+            )?;
             hasher.update(&word);
         }
         *out = hasher.finalize().to_bytes();
@@ -156,6 +166,7 @@ pub(super) fn next_dependency<'a>(
 ) -> Result<Option<Eip712StructType<'a>>, Eip712EncodeError> {
     let mut best = None::<Eip712StructType<'a>>;
     for ty in types {
+        reject_reserved_struct_name(ty.name)?;
         if ty.name == primary_type {
             continue;
         }
@@ -178,6 +189,7 @@ pub(super) fn find_struct<'a>(
     types: &'a [Eip712StructType<'a>],
     name: &str,
 ) -> Result<Eip712StructType<'a>, Eip712EncodeError> {
+    reject_reserved_struct_name(name)?;
     types
         .iter()
         .find(|ty| ty.name == name)
@@ -254,7 +266,7 @@ fn struct_references_type(
     target: &str,
     depth: usize,
 ) -> Result<bool, Eip712EncodeError> {
-    if depth > MAX_TYPE_DEPTH {
+    if depth >= MAX_TYPE_DEPTH {
         return Err(Eip712EncodeError::RecursionLimit);
     }
     let ty = find_struct(types, from)?;
@@ -271,6 +283,20 @@ fn struct_references_type(
         }
     }
     Ok(false)
+}
+
+fn reject_reserved_struct_name(name: &str) -> Result<(), Eip712EncodeError> {
+    if is_reserved_atomic_type(name) {
+        return Err(Eip712EncodeError::InvalidType);
+    }
+    Ok(())
+}
+
+fn is_reserved_atomic_type(name: &str) -> bool {
+    matches!(name, "address" | "bool" | "bytes" | "string")
+        || matches!(unsigned_width(name), Ok(Some(_)))
+        || matches!(signed_width(name), Ok(Some(_)))
+        || matches!(fixed_bytes_width(name), Ok(Some(_)))
 }
 
 fn encode_numeric_or_fixed_bytes(

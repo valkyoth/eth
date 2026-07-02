@@ -78,6 +78,10 @@ pub struct Eip712DomainData<'a> {
     /// Optional signing domain version.
     pub version: Option<&'a str>,
     /// Optional EIP-155 chain ID.
+    ///
+    /// [`ChainId`] can represent zero for compatibility with legacy replay
+    /// domains. Callers that require EIP-712 replay protection should reject
+    /// `ChainId(0)` before computing a domain separator.
     pub chain_id: Option<ChainId>,
     /// Optional verifying contract address.
     pub verifying_contract: Option<Address>,
@@ -261,7 +265,7 @@ fn hash_struct_inner<H>(
 where
     H: Default + Keccak256,
 {
-    if depth > MAX_TYPE_DEPTH {
+    if depth >= MAX_TYPE_DEPTH {
         return Err(Eip712EncodeError::RecursionLimit);
     }
     let ty = find_struct(types, primary_type)?;

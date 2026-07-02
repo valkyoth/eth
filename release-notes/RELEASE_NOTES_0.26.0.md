@@ -1,6 +1,7 @@
 # eth 0.26.0 Release Notes
 
-Status: implementation complete; pending external pentest input
+Status: implementation complete; initial external pentest findings remediated;
+pending retest
 
 ## Summary
 
@@ -32,6 +33,21 @@ descriptors and values into the encoder.
 - Added official EIP-712 Ether Mail signer recovery coverage.
 - Added adversarial coverage for missing values, type mismatches, arrays, and
   fixed bytes.
+- Added `eip712_typed` fuzz-target build coverage for bounded type graphs and
+  value hashing.
+
+## Fixed During Pentest
+
+- Reserved EIP-712 atomic type names such as `address`, `bool`, `bytes`,
+  `string`, `uintN`, `intN`, and `bytesN` are now rejected as custom struct
+  names before type-graph traversal.
+- Array dimensionality is now counted against the same recursion limit as
+  struct nesting.
+- The recursion-limit boundary now rejects at the documented maximum instead of
+  admitting one extra level.
+- `Eip712DomainData::chain_id` now documents that callers requiring EIP-712
+  replay protection should reject `ChainId(0)` before computing a domain
+  separator.
 
 ## Security Notes
 

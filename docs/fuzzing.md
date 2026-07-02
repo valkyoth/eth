@@ -5,9 +5,10 @@ EIP-2930 access-list transaction decode, EIP-1559 dynamic-fee transaction
 decode, EIP-4844 blob transaction decode, EIP-7702 set-code transaction decode,
 and transaction encode fuzz/test baseline, including signing-preimage encoding,
 plus Ethereum signature parsing and set-code authorization signature fuzz
-coverage. Decoded transaction signature validation and EIP-712 domain-safety
-coverage are currently unit-test based because they do not parse new untrusted
-byte formats.
+coverage. `v0.26.0` also adds EIP-712 typed-data encoder fuzz build coverage
+for bounded type graphs and value hashing. Decoded transaction signature
+validation and EIP-712 domain-safety coverage are currently unit-test based
+because they do not parse new untrusted byte formats.
 
 The fuzz workspace lives under `fuzz/` and is intentionally separate from the
 published crates. Live corpus growth and crash artifacts are local generated
@@ -26,6 +27,7 @@ state and are ignored by git.
 | `transaction_envelope` | EIP-2718 typed envelope classification, legacy RLP-list shell classification, unvalidated legacy/EIP-2930/EIP-1559/EIP-4844/EIP-7702 field decoding, and fixed-buffer canonical re-encoding for successfully decoded transaction models. |
 | `ethereum_signature` | Ethereum `r || s || y_parity` signature parsing and digest-level sender recovery with a deterministic stub hasher. |
 | `set_code_authorization_signature` | EIP-7702 authorization signing-hash construction and tuple signature validation with input-selected scratch-buffer lengths. |
+| `eip712_typed` | EIP-712 typed-data `encodeType` and hashStruct paths over bounded generated type graphs, reserved-name collisions, primitive values, and one-level arrays. |
 | `decode_limits` | Stateless and accumulator decode-budget APIs. |
 
 Every new parser that accepts untrusted bytes must either extend one of these

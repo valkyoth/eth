@@ -2,6 +2,7 @@ use eth_valkyoth_hash::Keccak256Digest;
 use sha3::Digest;
 extern crate std;
 use std::boxed::Box;
+use std::string::String;
 use std::vec::Vec;
 
 use super::*;
@@ -144,6 +145,62 @@ fn rejects_missing_values_and_type_mismatches() {
     );
 }
 
+#[test]
+fn rejects_reserved_atomic_struct_name_collision() {
+    let types = [
+        Eip712StructType {
+            name: "Person",
+            fields: &[Eip712Field {
+                name: "wallet",
+                type_name: "address",
+            }],
+        },
+        Eip712StructType {
+            name: "address",
+            fields: &[Eip712Field {
+                name: "evil",
+                type_name: "uint256",
+            }],
+        },
+    ];
+    let mut scratch = [0_u8; 128];
+
+    assert_eq!(
+        encode_eip712_type(&types, "Person", &mut scratch),
+        Err(Eip712EncodeError::InvalidType)
+    );
+    assert_eq!(
+        encode_eip712_type(&types, "address", &mut scratch),
+        Err(Eip712EncodeError::InvalidType)
+    );
+}
+
+#[test]
+fn rejects_array_dimensionality_over_recursion_limit() {
+    let mut type_name = String::from("uint256");
+    for _ in 0..MAX_TYPE_DEPTH {
+        type_name.push_str("[]");
+    }
+    let type_name = Box::leak(type_name.into_boxed_str());
+    let types = [Eip712StructType {
+        name: "Deep",
+        fields: &[Eip712Field {
+            name: "value",
+            type_name,
+        }],
+    }];
+    let values = [Eip712Value {
+        name: "value",
+        value: nested_array_value(MAX_TYPE_DEPTH),
+    }];
+    let mut scratch = [0_u8; 128];
+
+    assert_eq!(
+        eip712_hash_struct::<RealKeccak>(&types, "Deep", &values, &mut scratch),
+        Err(Eip712EncodeError::RecursionLimit)
+    );
+}
+
 fn mail_types<'a>() -> &'a [Eip712StructType<'a>] {
     &[
         Eip712StructType {
@@ -224,6 +281,14 @@ fn mail_message<'a>() -> Result<[Eip712Value<'a>; 3], VerifyError> {
             value: Eip712ValueKind::String("Hello, Bob!"),
         },
     ])
+}
+
+fn nested_array_value(depth: usize) -> Eip712ValueKind<'static> {
+    if depth == 0 {
+        return Eip712ValueKind::Uint64(1);
+    }
+    let child = [nested_array_value(depth.saturating_sub(1))];
+    Eip712ValueKind::Array(Box::leak(Box::new(child)))
 }
 
 fn decode_eip712_signature(input: &str) -> Result<EthereumSignature, VerifyError> {
