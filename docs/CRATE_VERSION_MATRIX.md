@@ -1,7 +1,7 @@
 # Crate Version Matrix
 
-Status: `v0.25.0` public RLP derives are implemented and ready for external
-pentest.
+Status: `v0.26.0` EIP-712 typed-data encoding is implemented and ready for
+external pentest.
 
 `eth` uses independent crate versions. The facade crate remains the main user
 entry point, but support crates are published only when their own package
@@ -27,23 +27,23 @@ but must be republished so immutable crates.io package metadata is corrected.
 workspace manifests before release. The script refuses accidental lockstep
 publication when a crate is marked `unchanged`.
 
-## v0.25.0 Tracking Table
+## v0.26.0 Tracking Table
 
 | Crate | Published | Planned | Change | Publish | Reason |
 | --- | --- | --- | --- | --- | --- |
-| `eth-valkyoth-codec` | `0.16.0` | `0.17.0` | `code` | Yes | Adds public `RlpEncode` and `RlpDecode` traits plus derive error support. |
-| `eth-valkyoth-primitives` | `0.10.1` | `0.11.0` | `code` | Yes | Implements the public RLP traits for primitive domain types. |
-| `eth-valkyoth-hash` | `0.10.0` | `0.10.1` | `dependency` | Yes | Depends on `eth-valkyoth-primitives 0.11.0`. |
-| `eth-valkyoth-protocol` | `0.22.0` | `0.22.1` | `dependency` | Yes | Depends on `eth-valkyoth-codec 0.17.0` and `eth-valkyoth-primitives 0.11.0`. |
-| `eth-valkyoth-verify` | `0.14.1` | `0.14.2` | `dependency` | Yes | Depends on the v0.25.0-aligned codec, primitive, hash, and protocol crates. |
-| `eth-valkyoth-derive` | `0.16.1` | `0.17.0` | `code` | Yes | Publishes reviewed `RlpEncode` and `RlpDecode` derive macros with trybuild diagnostics. |
-| `eth-valkyoth-sanitization` | `0.7.1` | `0.7.2` | `dependency` | Yes | Depends on `eth-valkyoth-derive 0.17.0` for the optional derive feature. |
-| `eth-valkyoth-evm` | `0.7.0` | `0.7.0` | `unchanged` | No | No package changes for v0.25.0. |
-| `eth-valkyoth-rpc` | `0.7.0` | `0.7.0` | `unchanged` | No | No package changes for v0.25.0. |
-| `eth-valkyoth-signer` | `0.7.0` | `0.7.1` | `dependency` | Yes | Depends on `eth-valkyoth-primitives 0.11.0`. |
-| `eth-valkyoth-reth` | `0.7.0` | `0.7.0` | `unchanged` | No | No package changes for v0.25.0. |
-| `eth-valkyoth-testkit` | `0.7.0` | `0.7.0` | `unchanged` | No | No package changes for v0.25.0. |
-| `eth` | `0.24.2` | `0.25.0` | `code` | Yes | Re-exports the public RLP trait surface and updates packaged documentation. |
+| `eth-valkyoth-codec` | `0.17.0` | `0.17.0` | `unchanged` | No | No package changes for v0.26.0. |
+| `eth-valkyoth-primitives` | `0.11.0` | `0.11.0` | `unchanged` | No | No package changes for v0.26.0. |
+| `eth-valkyoth-hash` | `0.10.1` | `0.10.1` | `unchanged` | No | No package changes for v0.26.0. |
+| `eth-valkyoth-protocol` | `0.22.1` | `0.22.1` | `unchanged` | No | No package changes for v0.26.0. |
+| `eth-valkyoth-verify` | `0.14.2` | `0.15.0` | `code` | Yes | Adds the no-alloc EIP-712 typed-data encoder and official Ether Mail KAT. |
+| `eth-valkyoth-derive` | `0.17.0` | `0.17.0` | `unchanged` | No | No package changes for v0.26.0. |
+| `eth-valkyoth-sanitization` | `0.7.2` | `0.7.2` | `unchanged` | No | No package changes for v0.26.0. |
+| `eth-valkyoth-evm` | `0.7.0` | `0.7.0` | `unchanged` | No | No package changes for v0.26.0. |
+| `eth-valkyoth-rpc` | `0.7.0` | `0.7.0` | `unchanged` | No | No package changes for v0.26.0. |
+| `eth-valkyoth-signer` | `0.7.1` | `0.7.1` | `unchanged` | No | No package changes for v0.26.0. |
+| `eth-valkyoth-reth` | `0.7.0` | `0.7.0` | `unchanged` | No | No package changes for v0.26.0. |
+| `eth-valkyoth-testkit` | `0.7.0` | `0.7.0` | `unchanged` | No | No package changes for v0.26.0. |
+| `eth` | `0.25.0` | `0.26.0` | `code` | Yes | Re-exports the EIP-712 typed-data encoder and updates packaged documentation. |
 
 Update this table and `release-crates.toml` in the same commit whenever a crate
 changes release state.

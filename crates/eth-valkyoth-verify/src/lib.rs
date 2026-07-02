@@ -9,6 +9,7 @@ use core::fmt;
 use eth_valkyoth_primitives::ChainId;
 
 mod eip712;
+mod eip712_typed;
 mod replay;
 mod sender;
 mod set_code_authorization;
@@ -18,6 +19,11 @@ mod transaction_signature;
 pub use eip712::{
     EIP712_SIGNING_PREFIX, Eip712Domain, Eip712DomainExpectation, eip712_signing_digest,
     recover_eip712_sender, require_eip712_domain,
+};
+pub use eip712_typed::{
+    Eip712DomainData, Eip712EncodeError, Eip712Field, Eip712StructType, Eip712Value,
+    Eip712ValueKind, eip712_domain_separator, eip712_hash_struct, eip712_type_hash,
+    eip712_typed_data_signing_digest, encode_eip712_data, encode_eip712_type,
 };
 pub use replay::{
     require_access_list_replay_domain, require_blob_replay_domain,

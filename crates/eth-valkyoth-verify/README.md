@@ -6,7 +6,7 @@ Most users should depend on the facade crate instead:
 
 ```toml
 [dependencies]
-eth = "0.25"
+eth = "0.26"
 ```
 
 Crates.io: <https://crates.io/crates/eth>
@@ -15,9 +15,15 @@ This package is published separately so the `eth` workspace can keep small,
 auditable crate boundaries. Treat it as a lower-level building block unless the
 `eth` documentation explicitly says otherwise.
 
-The `0.14.2` support-crate release, shipped with `eth` `0.25.0`, aligns the
-published codec, primitive, hash, and protocol dependency ranges for the public
-RLP derive surface.
+The `0.15.0` support-crate release, shipped with `eth` `0.26.0`, adds a
+no-allocation EIP-712 typed-data encoder over caller-provided borrowed
+descriptors. It supports canonical `encodeType`, bounded `encodeData`,
+`hashStruct`, domain separator construction, and final `0x1901` signing digest
+construction without adding a concrete Keccak backend or JSON parser.
+
+The previous `0.14.2` support-crate release aligned the published codec,
+primitive, hash, and protocol dependency ranges for the public RLP derive
+surface.
 
 The previous `0.14.1` support-crate release aligned the protocol dependency
 with the EIP-7702 set-code transaction validity gate.
@@ -41,5 +47,6 @@ non-cryptographic set-code transaction checks.
 
 EIP-712 helpers require the caller to provide both `chainId` and
 `verifyingContract`, then check them against the expected execution context
-before sender recovery. They do not encode arbitrary typed data or prove that a
-domain separator was computed correctly.
+before sender recovery. The typed-data encoder now computes domain separators
+and message hashes from borrowed descriptors, but JSON-RPC typed-data parsing
+remains an application-boundary responsibility.

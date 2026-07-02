@@ -35,8 +35,8 @@ dependencies.
 
 ## Current Status
 
-Status: `v0.25.0` public RLP derives are implemented and ready for external
-pentest.
+Status: `v0.26.0` EIP-712 typed-data encoding is implemented and ready for
+external pentest.
 
 Implemented now:
 
@@ -95,6 +95,9 @@ Implemented now:
   EIP-7702 sender recovery.
 - EIP-712 domain-safety checks for required `chainId` and
   `verifyingContract` fields, plus a domain-gated sender recovery helper.
+- No-allocation EIP-712 typed-data encoder for caller-provided schemas and
+  borrowed values, including `encodeType`, `encodeData`, `hashStruct`, domain
+  separator construction, and typed-data signing digest construction.
 - Public `RlpEncode`/`RlpDecode` traits and derive macros for reviewed simple
   structs, with bounded decode and trybuild compile-fail coverage.
 - Caller-provided Keccak-256 trait boundary without a default hash
@@ -115,7 +118,8 @@ Not implemented yet:
 - No signer or local key storage.
 - No EVM execution adapter.
 - No Reth or P2P integration.
-- No full EIP-712 typed-data encoder yet; scheduled for `v0.26.0`.
+- No JSON-RPC typed-data parser yet; callers provide reviewed borrowed EIP-712
+  descriptors and values to the encoder.
 - No block parser yet.
 - No ABI/contract helper surface yet; scheduled for `v0.47.0` through
   `v0.55.0`.
@@ -146,14 +150,14 @@ Not implemented yet:
 
 ```toml
 [dependencies]
-eth = "0.25"
+eth = "0.26"
 ```
 
 For optional sanitization support:
 
 ```toml
 [dependencies]
-eth = { version = "0.25", features = ["sanitization"] }
+eth = { version = "0.26", features = ["sanitization"] }
 ```
 
 ## Features
@@ -421,50 +425,69 @@ assert_eq!(authorization_hash.to_b256(), B256::from([0x55_u8; 32]));
 # Ok::<(), Box<dyn std::error::Error>>(())
 ```
 
-## EIP-712 Domain Safety
+## EIP-712 Typed Data
 
-EIP-712 signing paths should check the structured-data domain before any
-signature result is trusted:
+EIP-712 signing paths can build the structured-data digest from reviewed
+borrowed type descriptors and values without adding a JSON parser or concrete
+Keccak backend to the default graph:
 
 ```rust
+use eth::hash::Keccak256;
 use eth::primitives::{Address, B256, ChainId};
 use eth::verify::{
-    Eip712Domain, VerifyError, eip712_signing_digest, require_eip712_domain,
+    Eip712DomainData, Eip712Field, Eip712StructType, Eip712Value,
+    Eip712ValueKind, eip712_typed_data_signing_digest,
 };
 
-let expected_chain = ChainId::new(1);
-let expected_contract = Address::from([0xcc_u8; 20]);
-let domain = Eip712Domain::complete(expected_chain, expected_contract);
-
-require_eip712_domain(expected_chain, expected_contract, domain)?;
-assert_eq!(
-    require_eip712_domain(
-        ChainId::new(5),
-        expected_contract,
-        domain,
-    ),
-    Err(VerifyError::WrongChain)
-);
-
-let domain_separator = B256::from([0x11_u8; 32]);
-let message_hash = B256::from([0x22_u8; 32]);
-let _digest = eip712_signing_digest(
-    domain_separator,
-    message_hash,
-    ExampleKeccak {
-        output: B256::from([0x33_u8; 32]),
+let types = [Eip712StructType {
+    name: "Permit",
+    fields: &[
+        Eip712Field { name: "owner", type_name: "address" },
+        Eip712Field { name: "spender", type_name: "address" },
+        Eip712Field { name: "value", type_name: "uint256" },
+    ],
+}];
+let values = [
+    Eip712Value {
+        name: "owner",
+        value: Eip712ValueKind::Address(Address::from([0x11_u8; 20])),
     },
-);
-# struct ExampleKeccak { output: B256 }
+    Eip712Value {
+        name: "spender",
+        value: Eip712ValueKind::Address(Address::from([0x22_u8; 20])),
+    },
+    Eip712Value {
+        name: "value",
+        value: Eip712ValueKind::Uint64(10),
+    },
+];
+let domain = Eip712DomainData {
+    name: Some("Example"),
+    version: Some("1"),
+    chain_id: Some(ChainId::new(1)),
+    verifying_contract: Some(Address::from([0xcc_u8; 20])),
+    salt: None,
+};
+let mut scratch = [0_u8; 256];
+let _digest = eip712_typed_data_signing_digest::<ExampleKeccak>(
+    domain,
+    &types,
+    "Permit",
+    &values,
+    &mut scratch,
+)?;
+# #[derive(Default)]
+# struct ExampleKeccak;
 # impl eth::hash::Keccak256 for ExampleKeccak {
 #     fn update(&mut self, input: &[u8]) { let _ = input; }
-#     fn finalize(self) -> B256 { self.output }
+#     fn finalize(self) -> B256 { B256::from([0x33_u8; 32]) }
 # }
 # Ok::<(), Box<dyn std::error::Error>>(())
 ```
 
-This is not a full EIP-712 encoder. Callers still compute the domain separator
-and `hashStruct(message)` with a conformant typed-data encoder.
+The crate intentionally does not parse JSON typed-data documents in this
+release. Applications should parse and review JSON at their boundary, then pass
+bounded descriptors and values into this encoder.
 
 ## Sender Recovery
 
@@ -784,7 +807,7 @@ friendly, and independently testable.
 | `eth-valkyoth-codec` | yes | Bounded exact-consumption wire codec policy. |
 | `eth-valkyoth-hash` | yes | Keccak-256 trait boundary for caller-provided hash implementations. |
 | `eth-valkyoth-protocol` | yes | Fork-aware validation states and protocol context. |
-| `eth-valkyoth-verify` | yes | Verification boundaries for signatures, proofs, replay domains, and EIP-712 domain checks. |
+| `eth-valkyoth-verify` | yes | Verification boundaries for signatures, proofs, replay domains, and EIP-712 typed-data hashing. |
 | `eth-valkyoth-sanitization` | no | Optional bridge to the `sanitization` crate for secret-bearing Ethereum data. |
 | `eth-valkyoth-derive` | no | Optional sanitization and RLP derive macros. |
 | `eth-valkyoth-evm` | no | Future REVM adapter boundary. |
@@ -798,7 +821,7 @@ friendly, and independently testable.
 The minimum supported Rust version is Rust `1.90.0`. New deployments should use
 the pinned stable Rust `1.96.1` until the toolchain policy is updated.
 
-Compatibility evidence for `0.25.0`:
+Compatibility evidence for `0.26.0`:
 
 | Rust | Local Evidence |
 | --- | --- |
@@ -815,8 +838,8 @@ Compatibility evidence for `0.25.0`:
 
 ```bash
 scripts/checks.sh
-scripts/release_0_25_gate.sh
-scripts/validate-release-readiness.sh v0.25.0
+scripts/release_0_26_gate.sh
+scripts/validate-release-readiness.sh v0.26.0
 ```
 
 For dependency-policy checks, install `cargo-deny` and `cargo-audit`, then run:

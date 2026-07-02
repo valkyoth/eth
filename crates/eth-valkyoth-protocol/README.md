@@ -7,7 +7,7 @@ Most users should depend on the facade crate instead:
 
 ```toml
 [dependencies]
-eth = "0.25"
+eth = "0.26"
 ```
 
 Crates.io: <https://crates.io/crates/eth>
@@ -16,7 +16,7 @@ This package is published separately so the `eth` workspace can keep small,
 auditable crate boundaries. Treat it as a lower-level building block unless the
 `eth` documentation explicitly says otherwise.
 
-The `0.22.1` support-crate release, shipped with `eth` `0.25.0`, aligns the
+The `0.22.1` support-crate release, shipped with `eth` `0.26.0`, aligns the
 published codec and primitive dependency ranges for the public RLP derive
 surface.
 

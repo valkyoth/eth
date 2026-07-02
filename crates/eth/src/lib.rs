@@ -34,8 +34,9 @@ pub mod error {
         TransactionEnvelopeError, TransactionEnvelopeErrorCategory,
     };
     pub use eth_valkyoth_verify::{
-        SetCodeAuthorizationValidationError, SetCodeAuthorizationValidationErrorCategory,
-        TransactionSignatureValidationError, TransactionSignatureValidationErrorCategory,
-        TransactionSigningHashError, VerifyError, VerifyErrorCategory,
+        Eip712EncodeError, SetCodeAuthorizationValidationError,
+        SetCodeAuthorizationValidationErrorCategory, TransactionSignatureValidationError,
+        TransactionSignatureValidationErrorCategory, TransactionSigningHashError, VerifyError,
+        VerifyErrorCategory,
     };
 }

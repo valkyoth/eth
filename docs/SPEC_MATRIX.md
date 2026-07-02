@@ -1,6 +1,6 @@
 # eth Specification Matrix
 
-Status: source revisions pinned for `v0.25.0`; scalar, list, and canonical
+Status: source revisions pinned for `v0.26.0`; scalar, list, and canonical
 integer RLP decoding, canonical RLP encoding helpers, primitive RLP bridging,
 Keccak-256 trait boundary, RLP fuzz harness baseline, and transaction envelope
 shell plus unvalidated legacy, EIP-2930 access-list, EIP-1559 dynamic-fee,
@@ -14,7 +14,9 @@ including EIP-7702 transaction and authorization signature validation.
 EIP-7702 set-code transaction context validity is available through a
 caller-provided authority and account-state boundary.
 EIP-712 domain-safety helpers require `chainId` and `verifyingContract` before
-structured-data sender recovery is trusted.
+structured-data sender recovery is trusted, and the borrowed typed-data encoder
+can compute `encodeType`, `encodeData`, `hashStruct`, domain separators, and
+the final `0x1901` digest without a JSON parser.
 
 Official source and fixture revisions are governed by
 [Spec Source Policy](spec-source-policy.md). Revisions were checked against
@@ -29,7 +31,7 @@ behavior must not be implemented from memory.
 | RLP derives | public conservative surface | v0.25.0 adds public `RlpEncode`/`RlpDecode` traits and derive macros for reviewed structs; generated decoders require `DecodeLimits`; generics, enums, unions, and transaction derives remain rejected |
 | RLP fuzz harness | baseline | `fuzz/` workspace builds; committed hex seeds live under `fuzz/seed-corpus/`; crash reproduction is documented |
 | Keccak-256 hashing | boundary only | `eth-valkyoth-hash` defines caller-provided Keccak-256 trait boundary; no concrete backend admitted |
-| EIP-712 structured data | domain gate | EIP-712 defines the `0x1901` signing digest and optional domain fields; v0.21.0 checks required caller-provided `chainId` and `verifyingContract` fields and builds the signing digest from supplied domain/message hashes; full typed-data encoding is scheduled for v0.26.0 |
+| EIP-712 structured data | typed-data encoder | EIP-712 defines the `0x1901` signing digest, `encodeType`, `encodeData`, `hashStruct`, and optional domain fields; v0.21.0 checks required caller-provided `chainId` and `verifyingContract` fields and builds the signing digest from supplied domain/message hashes; v0.26.0 adds a no-alloc borrowed typed-data encoder for admitted atomic, dynamic, array, and struct fields plus domain separator construction and the official Ether Mail recovery KAT. JSON typed-data parsing remains out of scope. |
 | EIP-2718 typed transactions | partial | `ethereum/EIPs` pinned in `spec-lock.toml`; envelope classification implemented; EIP-2930 type `0x01`, EIP-1559 type `0x02`, EIP-4844 type `0x03`, and EIP-7702 set-code type `0x04` field decode and canonical encode implemented; later typed transaction payloads remain opaque until explicitly admitted |
 | Legacy transactions | field decode/encode | EIP-2718 defines the legacy transaction field list; v0.12.0 decodes fields into an unvalidated model and v0.16.0 encodes that admitted model without signature, sender, chain, or fork validation |
 | EIP-2930 access-list transactions | field decode/encode | EIP-2930 defines type `0x01`, eleven payload fields, and access-list shape; v0.13.0 decodes fields and v0.16.0 encodes the admitted model without signature, sender, gas, duplicate, chain, account-state, or fork validation |

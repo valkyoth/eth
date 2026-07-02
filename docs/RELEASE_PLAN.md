@@ -920,7 +920,7 @@ Implementation note:
 
 ### v0.25.0 - Public RLP Derives
 
-Status: implemented; ready for external pentest.
+Status: tagged and released.
 
 Goal: turn the private RLP derive prototype into a reviewed public derive
 surface.
@@ -947,6 +947,8 @@ Exit criteria:
 
 ### v0.26.0 - EIP-712 Typed-Data Encoder
 
+Status: implemented; ready for external pentest.
+
 Goal: implement the full EIP-712 typed-data hashing pipeline instead of relying
 on caller-provided `domainSeparator` and `hashStruct(message)` values.
 
@@ -958,8 +960,8 @@ Deliverables:
   fields;
 - `hashStruct` helper;
 - EIP-712 domain separator construction;
-- JSON-RPC typed-data model or an explicit no-JSON decision with a separate
-  follow-up milestone;
+- explicit no-JSON decision for this release, with JSON-RPC typed-data parsing
+  scheduled in `v0.26.1`;
 - official EIP-712 test vectors and adversarial type-graph tests;
 - clear recursion, allocation, and input-size limits.
 
@@ -972,6 +974,40 @@ Exit criteria:
 
 - EIP-712 signing APIs no longer need callers to supply externally constructed
   domain and message hashes for standard typed data.
+
+Implementation note:
+
+- `v0.26.0` accepts caller-provided borrowed descriptors and values. It does
+  not parse JSON typed-data documents, so the default crate remains `no_std`
+  and allocation-free. JSON parsing is a separate boundary in `v0.26.1`.
+
+### v0.26.1 - EIP-712 JSON Typed-Data Parser Boundary
+
+Goal: admit a reviewed way to parse JSON-RPC typed-data payloads into the
+borrowed EIP-712 encoder boundary without weakening the default `no_std` graph.
+
+Deliverables:
+
+- decision on optional support crate, feature, or explicit application-owned
+  parser boundary;
+- dependency and license review if a JSON parser is admitted;
+- size limits for type maps, field counts, array lengths, strings, and dynamic
+  bytes;
+- validation that parsed type strings map exactly to the `v0.26.0` descriptor
+  model;
+- JSON fixtures for Ether Mail and adversarial duplicate/missing type fields.
+
+Verification:
+
+- parser-specific tests or documented no-parser decision;
+- `cargo deny check`;
+- release notes documenting whether JSON support is first-party or
+  application-owned.
+
+Exit criteria:
+
+- JSON-RPC typed-data payload handling has an explicit, versioned boundary
+  instead of being treated as an informal caller responsibility.
 
 ### v0.27.0 - Optional Keccak Backend Admission
 

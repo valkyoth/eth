@@ -1,6 +1,6 @@
 # Fuzzing
 
-Status: `v0.25.0` RLP, transaction envelope, legacy transaction decode,
+Status: `v0.26.0` RLP, transaction envelope, legacy transaction decode,
 EIP-2930 access-list transaction decode, EIP-1559 dynamic-fee transaction
 decode, EIP-4844 blob transaction decode, EIP-7702 set-code transaction decode,
 and transaction encode fuzz/test baseline, including signing-preimage encoding,
