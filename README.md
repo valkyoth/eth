@@ -35,8 +35,8 @@ dependencies.
 
 ## Current Status
 
-Status: `v0.30.0` withdrawal-list decoding has passed pentest and is waiting
-for final GitHub checks before tagging.
+Status: `v0.31.0` MPT node decoding is implemented locally and ready for
+pentest.
 
 Implemented now:
 
@@ -81,6 +81,9 @@ Implemented now:
   data.
 - Unvalidated EIP-4895 withdrawal-list decoding, including global withdrawal
   indexes, validator indexes, recipient addresses, and nonzero Gwei amounts.
+- Bounded syntactic MPT node decoding for branch, extension, and leaf nodes,
+  including compact-path validation, eager inline child shape checks, and
+  cumulative proof-node byte/count accounting.
 - Proof-gated transaction typestate transitions for decoded, canonical,
   fork-validated, and sender-recovered state tokens.
 - Replay-domain validation for legacy EIP-155 and typed transaction chain IDs
@@ -134,6 +137,9 @@ Not implemented yet:
 - No block parser yet.
 - No ABI/contract helper surface yet; scheduled for `v0.47.0` through
   `v0.55.0`.
+- No trie-root proof verification yet; MPT node decoding is scheduled to feed
+  inclusion proof verification in `v0.32.0` and account/storage proofs in
+  `v0.33.0`.
 - No consensus/Engine API support yet; scheduled for `v0.56.0` through
   `v0.62.0`.
 - No P2P, txpool, sync, mining, builder, or validator-adjacent boundary yet;
@@ -161,14 +167,14 @@ Not implemented yet:
 
 ```toml
 [dependencies]
-eth = "0.30"
+eth = "0.31"
 ```
 
 For optional sanitization support:
 
 ```toml
 [dependencies]
-eth = { version = "0.30", features = ["sanitization"] }
+eth = { version = "0.31", features = ["sanitization"] }
 ```
 
 ## Features
@@ -192,7 +198,7 @@ Optional reviewed software Keccak backend:
 
 ```toml
 [dependencies]
-eth = { version = "0.30", features = ["keccak-tiny"] }
+eth = { version = "0.31", features = ["keccak-tiny"] }
 ```
 
 ```rust
@@ -783,6 +789,54 @@ assert!(entries.next().is_none());
 # Ok::<(), Box<dyn std::error::Error>>(())
 ```
 
+## MPT Nodes
+
+The verifier crate decodes Merkle Patricia Trie node shape without computing a
+root. Branch nodes must contain sixteen child references plus one scalar value;
+extension and leaf nodes must contain a compact hex-prefix path plus a child
+reference or scalar value:
+
+```rust
+use eth::codec::DecodeLimits;
+use eth::verify::{MptNode, MptNodeReference, decode_mpt_node};
+
+let limits = DecodeLimits {
+    max_input_bytes: 64,
+    max_list_items: 32,
+    max_nesting_depth: 8,
+    max_total_allocation: 64,
+    max_proof_nodes: 4,
+    max_total_items: 64,
+};
+let raw_leaf = [0xc5, 0x20, 0x83, b'd', b'o', b'g'];
+
+let node = decode_mpt_node(&raw_leaf, limits)?;
+
+if let MptNode::Leaf(leaf) = node {
+    assert!(leaf.path.is_leaf());
+    assert_eq!(leaf.path.nibble_count()?, 0);
+    assert_eq!(leaf.value, b"dog");
+} else {
+    assert!(false);
+}
+
+let branch = [0xd1, 0x80, 0x80, 0x80, 0x80, 0x80, 0x80, 0x80, 0x80, 0x80,
+    0x80, 0x80, 0x80, 0x80, 0x80, 0x80, 0x80, 0x80];
+let branch = decode_mpt_node(&branch, limits)?;
+if let MptNode::Branch(branch) = branch {
+    assert!(branch
+        .children()
+        .all(|child| matches!(child, Ok(MptNodeReference::Empty))));
+} else {
+    assert!(false);
+}
+# Ok::<(), Box<dyn std::error::Error>>(())
+```
+
+This is not inclusion proof verification. Transaction, receipt, account,
+storage, and withdrawal root checks remain separate verification milestones.
+See [`docs/mpt-nodes.md`](docs/mpt-nodes.md).
+
 ## Transaction Envelopes
 
 The protocol crate can classify the outer transaction envelope without decoding
@@ -903,7 +957,7 @@ friendly, and independently testable.
 The minimum supported Rust version is Rust `1.90.0`. New deployments should use
 the pinned stable Rust `1.96.1` until the toolchain policy is updated.
 
-Compatibility evidence for `0.30.0`:
+Compatibility evidence for `0.31.0`:
 
 | Rust | Local Evidence |
 | --- | --- |

@@ -1097,8 +1097,7 @@ Exit criteria:
 
 ### v0.30.0 - Withdrawal And Post-Merge Fields
 
-Status: implementation, pentest remediation, and clean retest complete; waiting
-for final GitHub checks before tagging.
+Status: tagged as `v0.30.0`.
 
 Goal: model post-merge execution fields explicitly.
 
@@ -1118,6 +1117,8 @@ Exit criteria:
 - Post-merge fields are not bolted onto pre-merge validation paths.
 
 ### v0.31.0 - MPT Node Decoder
+
+Status: implementation ready for pentest.
 
 Goal: decode trie nodes with strict limits.
 

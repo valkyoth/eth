@@ -4,6 +4,11 @@ All notable changes to `eth` are documented here.
 
 ## Unreleased
 
+- Started `0.31.0` with bounded syntactic Merkle Patricia Trie node decoding in
+  `eth-valkyoth-verify`.
+- Added branch, extension, leaf, compact-path, hash-reference, inline-reference,
+  and proof-node-list types with cumulative proof-node and byte accounting.
+- Added `mpt_node` fuzz coverage and committed malformed-node seed fixtures.
 - Started `0.24.1` with EIP-7702 set-code transaction signing-preimage and
   signing-hash helpers for the type `0x04` transaction domain.
 - Added EIP-7702 authorization tuple signing-preimage and signing-hash helpers

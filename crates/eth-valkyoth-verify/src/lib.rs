@@ -10,6 +10,7 @@ use eth_valkyoth_primitives::ChainId;
 
 mod eip712;
 mod eip712_typed;
+mod mpt;
 mod replay;
 mod sender;
 mod set_code_authorization;
@@ -27,6 +28,13 @@ pub use eip712_typed::{
 };
 #[cfg(feature = "json")]
 pub use eip712_typed::{Eip712JsonError, Eip712JsonLimits, eip712_json_typed_data_signing_digest};
+pub use mpt::{
+    MPT_BRANCH_CHILD_COUNT, MPT_BRANCH_NODE_FIELD_COUNT, MPT_COMPACT_NODE_FIELD_COUNT,
+    MPT_HASH_REFERENCE_BYTES, MPT_INLINE_REFERENCE_DEPTH_LIMIT, MptBranchChildren, MptBranchNode,
+    MptCompactPath, MptCompactPathKind, MptExtensionNode, MptInlineNode, MptLeafNode, MptNode,
+    MptNodeDecodeError, MptNodeDecodeErrorCategory, MptNodeField, MptNodeReference, MptProofNodes,
+    decode_mpt_node, decode_mpt_proof_nodes,
+};
 pub use replay::{
     require_access_list_replay_domain, require_blob_replay_domain,
     require_dynamic_fee_replay_domain, require_legacy_replay_domain,

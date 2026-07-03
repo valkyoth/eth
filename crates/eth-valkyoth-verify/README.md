@@ -6,7 +6,7 @@ Most users should depend on the facade crate instead:
 
 ```toml
 [dependencies]
-eth = "0.30"
+eth = "0.31"
 ```
 
 Crates.io: <https://crates.io/crates/eth>
@@ -15,7 +15,13 @@ This package is published separately so the `eth` workspace can keep small,
 auditable crate boundaries. Treat it as a lower-level building block unless the
 `eth` documentation explicitly says otherwise.
 
-The `0.17.3` support-crate release, shipped with `eth` `0.30.0`, updates the
+The `0.18.0` support-crate release, shipped with `eth` `0.31.0`, adds bounded
+syntactic Merkle Patricia Trie node decoding. It exposes borrowed branch,
+extension, leaf, compact-path, child-reference, and proof-node-list types, and
+enforces cumulative proof-node and encoded-byte budgets. This is not trie-root
+or key-membership verification.
+
+The previous `0.17.3` support-crate release, shipped with `eth` `0.30.0`, updates the
 published dependency range for `eth-valkyoth-protocol 0.25.0`. No verification
 API changes are introduced by this patch release.
 
