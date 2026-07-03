@@ -36,10 +36,7 @@ fn decodes_branch_node_with_empty_children() -> Result<(), &'static str> {
             MptNodeReference::Empty
         );
     }
-    assert_eq!(
-        branch.value().map_err(|_| "branch value must decode")?,
-        &[] as &[u8]
-    );
+    assert_eq!(branch.value(), &[] as &[u8]);
     Ok(())
 }
 
@@ -100,6 +97,23 @@ fn rejects_malformed_inline_reference_node() -> Result<(), &'static str> {
     assert_eq!(
         decode_mpt_node(&parent, TEST_LIMITS),
         Err(MptNodeDecodeError::WrongFieldCount { found: 1 })
+    );
+    Ok(())
+}
+
+#[test]
+fn rejects_inline_reference_at_hash_threshold() -> Result<(), &'static str> {
+    let value: [u8; 29] = core::array::from_fn(|index| u8::try_from(index).unwrap_or(0));
+    let oversized_inline = list(&[scalar(&[0x20])?, scalar(&value[..29])?])?;
+    assert_eq!(oversized_inline.len(), 32);
+    let parent = list(&[scalar(&[0x11])?, oversized_inline])?;
+
+    assert_eq!(
+        decode_mpt_node(&parent, TEST_LIMITS),
+        Err(MptNodeDecodeError::InlineNodeTooLarge {
+            field: MptNodeField::ExtensionChild,
+            found: 32,
+        })
     );
     Ok(())
 }

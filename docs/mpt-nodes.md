@@ -18,8 +18,10 @@ nibble uses only the extension/leaf and odd/even bits, and that even paths use
 zero padding. The child-reference decoder accepts empty branch slots, 32-byte
 hash references, and inline RLP list references. Required extension children
 must not be empty. Inline child lists are shape-checked eagerly under
-`MPT_INLINE_REFERENCE_DEPTH_LIMIT` so a decoded parent cannot hide a malformed
-embedded node behind a lazy accessor.
+`MPT_INLINE_REFERENCE_DEPTH_LIMIT` and must be shorter than
+`MPT_MAX_INLINE_REFERENCE_BYTES` encoded bytes, matching Ethereum's canonical
+hash-or-inline boundary. A decoded parent therefore cannot hide a malformed or
+noncanonical embedded node behind a lazy accessor.
 
 `decode_mpt_proof_nodes` is intentionally allocation-free, but it still accounts
 each proof node against the cumulative proof-node budget and each encoded node

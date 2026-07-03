@@ -62,6 +62,13 @@ pub enum MptNodeDecodeError {
         /// Actual decoded scalar length.
         found: usize,
     },
+    /// Inline child node was encoded at 32 bytes or more.
+    InlineNodeTooLarge {
+        /// Field being decoded.
+        field: MptNodeField,
+        /// Actual encoded child-list length.
+        found: usize,
+    },
     /// Length arithmetic overflowed.
     LengthOverflow,
     /// Inline child nodes exceeded the explicit decoder traversal limit.
@@ -80,6 +87,7 @@ impl MptNodeDecodeError {
             Self::InvalidCompactPathPadding { .. } => "ETH_MPT_INVALID_COMPACT_PATH_PADDING",
             Self::EmptyNodeReference { .. } => "ETH_MPT_EMPTY_NODE_REFERENCE",
             Self::InvalidNodeReferenceLength { .. } => "ETH_MPT_INVALID_NODE_REFERENCE_LENGTH",
+            Self::InlineNodeTooLarge { .. } => "ETH_MPT_INLINE_NODE_TOO_LARGE",
             Self::LengthOverflow => "ETH_MPT_LENGTH_OVERFLOW",
             Self::InlineNodeTooDeep => "ETH_MPT_INLINE_NODE_TOO_DEEP",
         }
@@ -101,6 +109,9 @@ impl MptNodeDecodeError {
             Self::EmptyNodeReference { .. } => "MPT child reference must not be empty",
             Self::InvalidNodeReferenceLength { .. } => {
                 "MPT scalar child reference must be empty or 32 bytes"
+            }
+            Self::InlineNodeTooLarge { .. } => {
+                "MPT inline child reference must be shorter than 32 encoded bytes"
             }
             Self::LengthOverflow => "MPT length arithmetic overflowed",
             Self::InlineNodeTooDeep => "MPT inline child-node depth limit exceeded",
@@ -124,6 +135,7 @@ impl MptNodeDecodeError {
             | Self::InvalidCompactPathPadding { .. }
             | Self::EmptyNodeReference { .. }
             | Self::InvalidNodeReferenceLength { .. }
+            | Self::InlineNodeTooLarge { .. }
             | Self::LengthOverflow => MptNodeDecodeErrorCategory::MalformedInput,
             Self::InlineNodeTooDeep => MptNodeDecodeErrorCategory::ResourceExhaustion,
         }

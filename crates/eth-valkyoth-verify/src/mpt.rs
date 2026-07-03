@@ -1,5 +1,5 @@
 use eth_valkyoth_codec::{
-    DecodeAccumulator, DecodeError, DecodeLimits, RlpItem, RlpList, RlpListItems, RlpScalar,
+    DecodeAccumulator, DecodeError, DecodeLimits, RlpItem, RlpList, RlpScalar,
     decode_rlp_list_partial, require_exact_consumption,
 };
 use eth_valkyoth_primitives::B256;
@@ -15,10 +15,13 @@ pub const MPT_BRANCH_NODE_FIELD_COUNT: usize = 17;
 pub const MPT_COMPACT_NODE_FIELD_COUNT: usize = 2;
 /// Number of bytes in a hashed MPT child reference.
 pub const MPT_HASH_REFERENCE_BYTES: usize = 32;
+/// Maximum encoded byte length for an inline child reference.
+pub const MPT_MAX_INLINE_REFERENCE_BYTES: usize = 32;
 /// Maximum inline child-node depth validated by the MPT decoder.
 pub const MPT_INLINE_REFERENCE_DEPTH_LIMIT: usize = 64;
 
 /// Borrowed syntactic MPT node.
+#[allow(clippy::large_enum_variant)]
 #[derive(Clone, Copy, Debug, Eq, PartialEq)]
 pub enum MptNode<'a> {
     /// Branch node with sixteen child references plus one value slot.
@@ -32,48 +35,37 @@ pub enum MptNode<'a> {
 /// Borrowed MPT branch node.
 #[derive(Clone, Copy, Debug, Eq, PartialEq)]
 pub struct MptBranchNode<'a> {
-    list: RlpList<'a>,
-    depth_remaining: usize,
+    children: [MptNodeReference<'a>; MPT_BRANCH_CHILD_COUNT],
+    value: &'a [u8],
 }
 
 impl<'a> MptBranchNode<'a> {
     /// Returns an iterator over the sixteen child references.
     #[must_use]
-    pub const fn children(self) -> MptBranchChildren<'a> {
+    pub fn children(self) -> MptBranchChildren<'a> {
         MptBranchChildren {
-            items: self.list.items(),
-            emitted: 0,
-            depth_remaining: self.depth_remaining,
+            children: self.children.into_iter(),
         }
     }
 
     /// Returns the branch value slot as scalar bytes.
-    pub fn value(self) -> Result<&'a [u8], MptNodeDecodeError> {
-        let mut items = self.list.items();
-        skip_branch_children(&mut items, self.depth_remaining)?;
-        next_scalar(&mut items, MptNodeField::BranchValue).map(RlpScalar::payload)
+    #[must_use]
+    pub const fn value(self) -> &'a [u8] {
+        self.value
     }
 }
 
 /// Iterator over MPT branch child references.
 #[derive(Clone, Debug)]
 pub struct MptBranchChildren<'a> {
-    items: RlpListItems<'a>,
-    emitted: usize,
-    depth_remaining: usize,
+    children: core::array::IntoIter<MptNodeReference<'a>, MPT_BRANCH_CHILD_COUNT>,
 }
 
 impl<'a> Iterator for MptBranchChildren<'a> {
     type Item = Result<MptNodeReference<'a>, MptNodeDecodeError>;
 
     fn next(&mut self) -> Option<Self::Item> {
-        if self.emitted >= MPT_BRANCH_CHILD_COUNT {
-            return None;
-        }
-        self.emitted = self.emitted.saturating_add(1);
-        self.items.next().map(|item| {
-            decode_node_reference_item(item, MptNodeField::BranchChild, true, self.depth_remaining)
-        })
+        self.children.next().map(Ok)
     }
 }
 
@@ -258,14 +250,16 @@ fn decode_branch_node<'a>(
     depth_remaining: usize,
 ) -> Result<MptNode<'a>, MptNodeDecodeError> {
     let mut items = list.items();
-    for item in (&mut items).take(MPT_BRANCH_CHILD_COUNT) {
-        let _ = decode_node_reference_item(item, MptNodeField::BranchChild, true, depth_remaining)?;
+    let mut children = [MptNodeReference::Empty; MPT_BRANCH_CHILD_COUNT];
+    for slot in &mut children {
+        let item = items.next().ok_or(field_error(
+            MptNodeField::BranchChild,
+            DecodeError::Malformed,
+        ))?;
+        *slot = decode_node_reference_item(item, MptNodeField::BranchChild, true, depth_remaining)?;
     }
-    let _ = next_scalar(&mut items, MptNodeField::BranchValue)?;
-    Ok(MptNode::Branch(MptBranchNode {
-        list,
-        depth_remaining,
-    }))
+    let value = next_scalar(&mut items, MptNodeField::BranchValue)?.payload();
+    Ok(MptNode::Branch(MptBranchNode { children, value }))
 }
 
 fn decode_compact_node<'a>(
@@ -324,6 +318,10 @@ fn decode_node_reference_item<'a>(
     match item.map_err(|source| field_error(field, source))? {
         RlpItem::Scalar(scalar) => decode_scalar_reference(scalar, field, empty_allowed),
         RlpItem::List(list) => {
+            let found = list.encoded_len();
+            if found >= MPT_MAX_INLINE_REFERENCE_BYTES {
+                return Err(MptNodeDecodeError::InlineNodeTooLarge { field, found });
+            }
             let next_depth = depth_remaining
                 .checked_sub(1)
                 .ok_or(MptNodeDecodeError::InlineNodeTooDeep)?;
@@ -354,16 +352,6 @@ fn decode_scalar_reference<'a>(
         .try_into()
         .map_err(|_| MptNodeDecodeError::InvalidNodeReferenceLength { field, found })?;
     Ok(MptNodeReference::Hash(B256::from_bytes(bytes)))
-}
-
-fn skip_branch_children(
-    items: &mut RlpListItems<'_>,
-    depth_remaining: usize,
-) -> Result<(), MptNodeDecodeError> {
-    for item in items.take(MPT_BRANCH_CHILD_COUNT) {
-        let _ = decode_node_reference_item(item, MptNodeField::BranchChild, true, depth_remaining)?;
-    }
-    Ok(())
 }
 
 fn next_scalar<'a>(

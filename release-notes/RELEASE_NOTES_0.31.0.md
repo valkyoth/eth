@@ -35,7 +35,10 @@ Status: implementation ready for pentest.
 - Scalar child references are accepted only as empty branch children or 32-byte
   hash references. Inline child nodes must be RLP lists.
 - Inline child lists are shape-checked eagerly under
-  `MPT_INLINE_REFERENCE_DEPTH_LIMIT`.
+  `MPT_INLINE_REFERENCE_DEPTH_LIMIT` and rejected at
+  `MPT_MAX_INLINE_REFERENCE_BYTES` or larger.
+- Branch nodes store decoded child references and value bytes after the eager
+  validation pass so common accessors do not reparse all branch children.
 - This release does not verify trie roots. Transaction, receipt, account,
   storage, and withdrawal proof verification remain scheduled for later
   releases.
