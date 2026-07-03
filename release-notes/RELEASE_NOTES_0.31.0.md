@@ -1,6 +1,6 @@
 # eth 0.31.0 Release Notes
 
-Status: implementation ready for pentest.
+Status: pentest passed; waiting for final GitHub checks before tagging.
 
 `0.31.0` adds bounded syntactic Merkle Patricia Trie node decoding in
 `eth-valkyoth-verify`.

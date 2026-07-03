@@ -1118,7 +1118,8 @@ Exit criteria:
 
 ### v0.31.0 - MPT Node Decoder
 
-Status: implementation ready for pentest.
+Status: implementation, pentest remediation, and clean retest complete; waiting
+for final GitHub checks before tagging.
 
 Goal: decode trie nodes with strict limits.
 
@@ -1144,6 +1145,9 @@ Deliverables:
 
 - transaction proof verification;
 - receipt proof verification;
+- proof walkers reuse checked MPT node decode state where possible, avoiding
+  duplicate proof-node and inline-child decode work introduced by the
+  allocation-free v0.31.0 syntactic boundary;
 - proof root hashing uses the `eth-valkyoth-hash` trait boundary;
 - transaction hashes, receipt roots, and proof roots use distinct domain
   newtypes instead of raw `B256`;
