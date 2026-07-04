@@ -18,6 +18,11 @@ The Rust integration test lives in `eth-valkyoth-codec` and decodes every
 fixture `out` byte sequence, re-encodes valid canonical cases, and rejects
 fixtures marked `INVALID`.
 
+This is structural RLP conformance coverage. It does not claim Ethereum integer
+domain validation beyond the RLP scalar/list rules exercised by the fixture
+corpus; integer canonicality remains covered by the codec integer tests and
+primitive bridge tests.
+
 ## Commands
 
 Validate the manifest without requiring a local checkout:
@@ -40,3 +45,8 @@ scripts/run_execution_fixtures.py --execution-tests /path/to/ethereum-tests
 
 The runner verifies the checkout origin, pinned commit hash, and clean working
 tree before executing the Rust fixture test.
+
+`scripts/release_0_35_gate.sh` runs this command without `--check`, so the
+pre-tag release gate fails if the pinned fixture checkout is unavailable or
+dirty. General CI uses `--check` to validate the manifest without packaging the
+external corpus.

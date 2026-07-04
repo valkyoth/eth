@@ -16,6 +16,10 @@ The claimed pass set is intentionally narrow. It covers the RLP codec surface
 that this crate already implements and avoids implying support for transaction,
 blockchain, genesis, trie-construction, difficulty, or EOF fixtures.
 
+This report treats `RLPTests` as structural RLP fixture coverage. Cases that are
+valid RLP byte strings but invalid Ethereum integer payloads belong to the
+integer-specific codec tests, not this external fixture oracle.
+
 ## Local Evidence
 
 The conformance run used a filtered checkout of `ethereum/tests` at the pinned
@@ -29,4 +33,10 @@ Release CI validates the fixture manifest with:
 
 ```sh
 scripts/run_execution_fixtures.py --check
+```
+
+The v0.35.0 release gate runs the actual corpus through:
+
+```sh
+scripts/run_execution_fixtures.py
 ```

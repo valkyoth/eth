@@ -9,10 +9,17 @@ use eth_valkyoth_codec::{
 use serde_json::Value;
 
 const FIXTURE_DIR_ENV: &str = "ETH_EXECUTION_TESTS_RLP_DIR";
+const REQUIRE_FIXTURES_ENV: &str = "ETH_REQUIRE_EXECUTION_FIXTURES";
+const MAX_FIXTURE_DIRECTORY_DEPTH: u32 = 32;
 
 #[test]
 fn pinned_ethereum_rlp_fixtures_match_codec() -> Result<(), Box<dyn Error>> {
     let Some(dir) = env::var_os(FIXTURE_DIR_ENV) else {
+        if env::var_os(REQUIRE_FIXTURES_ENV).is_some() {
+            return Err(
+                format!("{FIXTURE_DIR_ENV} must be set when {REQUIRE_FIXTURES_ENV}=1").into(),
+            );
+        }
         return Ok(());
     };
     let paths = json_files(PathBuf::from(dir))?;
@@ -38,17 +45,31 @@ fn pinned_ethereum_rlp_fixtures_match_codec() -> Result<(), Box<dyn Error>> {
 
 fn json_files(root: PathBuf) -> Result<Vec<PathBuf>, Box<dyn Error>> {
     let mut paths = Vec::new();
-    collect_json_files(&root, &mut paths)?;
+    collect_json_files(&root, &mut paths, 0)?;
     paths.sort();
     Ok(paths)
 }
 
-fn collect_json_files(path: &Path, paths: &mut Vec<PathBuf>) -> Result<(), Box<dyn Error>> {
+fn collect_json_files(
+    path: &Path,
+    paths: &mut Vec<PathBuf>,
+    depth: u32,
+) -> Result<(), Box<dyn Error>> {
+    if depth > MAX_FIXTURE_DIRECTORY_DEPTH {
+        return Err("fixture directory nesting exceeds safety limit".into());
+    }
     for entry in fs::read_dir(path)? {
         let entry = entry?;
         let path = entry.path();
-        if path.is_dir() {
-            collect_json_files(&path, paths)?;
+        let file_type = entry.file_type()?;
+        if file_type.is_symlink() {
+            continue;
+        }
+        if file_type.is_dir() {
+            let child_depth = depth
+                .checked_add(1)
+                .ok_or("fixture directory nesting depth overflow")?;
+            collect_json_files(&path, paths, child_depth)?;
         } else if path
             .extension()
             .is_some_and(|extension| extension == "json")

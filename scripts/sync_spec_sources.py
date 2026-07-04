@@ -14,6 +14,8 @@ from pathlib import Path
 ROOT = Path(__file__).resolve().parents[1]
 SPEC_LOCK = ROOT / "spec-lock.toml"
 ALLOWED_REPO = re.compile(r"^https://github\.com/ethereum/[A-Za-z0-9_.-]+$")
+GIT_TIMEOUT_SECONDS = 120
+GIT_STATUS_TIMEOUT_SECONDS = 30
 REPO_KEYS = (
     "execution_specs",
     "execution_tests",
@@ -28,6 +30,18 @@ class Source:
     name: str
     repo: str
     rev: str
+
+
+def validate_repo_url(name: str, repo: object) -> str:
+    if not isinstance(repo, str) or not ALLOWED_REPO.fullmatch(repo):
+        raise ValueError(f"{name}_repo must be an official Ethereum HTTPS repository")
+    return repo
+
+
+def validate_revision(name: str, rev: object) -> str:
+    if not isinstance(rev, str) or len(rev) != 40 or any(char not in "0123456789abcdef" for char in rev):
+        raise ValueError(f"{name}_rev must be a lowercase 40-character commit hash")
+    return rev
 
 
 def parse_spec_lock() -> tuple[Path, list[Source]]:
@@ -48,30 +62,43 @@ def parse_spec_lock() -> tuple[Path, list[Source]]:
     for name in REPO_KEYS:
         repo = values.get(f"{name}_repo")
         rev = values.get(f"{name}_rev")
-        if not isinstance(repo, str) or not isinstance(rev, str) or not repo or not rev:
+        if not repo or not rev:
             raise ValueError(f"spec-lock.toml is missing {name}_repo or {name}_rev")
-        if not ALLOWED_REPO.fullmatch(repo):
-            raise ValueError(f"{name}_repo must be an official Ethereum HTTPS repository")
-        if len(rev) != 40 or any(char not in "0123456789abcdef" for char in rev):
-            raise ValueError(f"{name}_rev must be a lowercase 40-character commit hash")
-        sources.append(Source(name=name, repo=repo, rev=rev))
+        sources.append(Source(name=name, repo=validate_repo_url(name, repo), rev=validate_revision(name, rev)))
     return store, sources
 
 
+def git_env() -> dict[str, str]:
+    return {**os.environ, "GIT_ALLOW_PROTOCOL": "https", "GIT_TERMINAL_PROMPT": "0"}
+
+
+def harden_git_args(args: list[str]) -> list[str]:
+    if not args or args[0] != "git":
+        return args
+    return [
+        "git",
+        "-c",
+        "core.fsmonitor=",
+        "-c",
+        f"core.hooksPath={os.devnull}",
+        "--no-optional-locks",
+        *args[1:],
+    ]
+
+
 def run(args: list[str], cwd: Path | None = None) -> None:
-    env = {**os.environ, "GIT_ALLOW_PROTOCOL": "https"}
-    subprocess.run(args, cwd=cwd, check=True, env=env)
+    subprocess.run(harden_git_args(args), cwd=cwd, check=True, env=git_env(), timeout=GIT_TIMEOUT_SECONDS)
 
 
 def git_stdout(args: list[str], cwd: Path) -> str:
-    env = {**os.environ, "GIT_ALLOW_PROTOCOL": "https"}
     result = subprocess.run(
-        args,
+        harden_git_args(args),
         cwd=cwd,
         check=True,
         text=True,
         capture_output=True,
-        env=env,
+        env=git_env(),
+        timeout=GIT_STATUS_TIMEOUT_SECONDS,
     )
     return result.stdout.strip()
 

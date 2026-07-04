@@ -10,7 +10,7 @@ scripts/run_execution_fixtures.py --check
 scripts/materialize_fuzz_seeds.py --check
 cargo check --manifest-path fuzz/Cargo.toml
 cargo test -p eth --all-features
-cargo test -p eth-valkyoth-codec --test execution_rlp_fixtures --features testing
+scripts/run_execution_fixtures.py
 cargo clippy -p eth --all-targets --all-features -- -D warnings
 cargo clippy -p eth-valkyoth-codec --test execution_rlp_fixtures --features testing -- -D warnings
 cargo deny check
