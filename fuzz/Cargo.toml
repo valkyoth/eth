@@ -15,7 +15,7 @@ eth-valkyoth-codec = { path = "../crates/eth-valkyoth-codec", version = "0.17.0"
 eth-valkyoth-hash = { path = "../crates/eth-valkyoth-hash", version = "0.11.0" }
 eth-valkyoth-primitives = { path = "../crates/eth-valkyoth-primitives", version = "0.11.0" }
 eth-valkyoth-protocol = { path = "../crates/eth-valkyoth-protocol", version = "0.25.0" }
-eth-valkyoth-verify = { path = "../crates/eth-valkyoth-verify", version = "0.18.0", features = ["json"] }
+eth-valkyoth-verify = { path = "../crates/eth-valkyoth-verify", version = "0.19.0", features = ["json"] }
 libfuzzer-sys = "0.4.13"
 
 [[bin]]

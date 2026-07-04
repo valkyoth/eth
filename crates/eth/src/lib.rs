@@ -39,6 +39,7 @@ pub mod error {
     pub use eth_valkyoth_verify::Eip712JsonError;
     pub use eth_valkyoth_verify::{
         Eip712EncodeError, MptNodeDecodeError, MptNodeDecodeErrorCategory,
+        MptProofVerificationError, MptProofVerificationErrorCategory,
         SetCodeAuthorizationValidationError, SetCodeAuthorizationValidationErrorCategory,
         TransactionSignatureValidationError, TransactionSignatureValidationErrorCategory,
         TransactionSigningHashError, VerifyError, VerifyErrorCategory,

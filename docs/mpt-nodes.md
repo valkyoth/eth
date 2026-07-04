@@ -1,6 +1,7 @@
-# MPT Node Decoding
+# MPT Node Decoding And Inclusion Proofs
 
-Status: v0.31.0 adds bounded syntactic Merkle Patricia Trie node decoding.
+Status: v0.32.0 adds transaction and receipt inclusion proof verification on
+top of the bounded v0.31.0 node decoder.
 
 `eth-valkyoth-verify` exposes `decode_mpt_node` for one canonical RLP trie
 node and `decode_mpt_proof_nodes` for a caller-provided list of encoded proof
@@ -29,11 +30,22 @@ byte length against the cumulative allocation budget. This keeps malformed
 proof inputs from bypassing the same byte, item, nesting, and proof-count
 limits used elsewhere in the crate.
 
-This release is not proof verification. It does not compute Keccak-256 trie
-roots, compare roots against headers, verify key-path membership or absence,
-select the transaction/receipt/account/storage/withdrawal trie domain, or
-interpret account/storage values. Those are scheduled as separate proof
-milestones in `docs/RELEASE_PLAN.md`.
+`verify_transaction_inclusion` and `verify_receipt_inclusion` verify that
+caller-provided encoded transaction or receipt bytes are present at
+`rlp(transaction_index)` under a trusted root. The APIs use distinct
+`TransactionTrieRoot` and `ReceiptTrieRoot` newtypes so those domains cannot be
+silently substituted for raw `B256` values. Proof walking hashes each consumed
+encoded proof node through the caller-provided `Keccak256` trait boundary and
+uses one shared `DecodeAccumulator` for the traversal.
+
+The proof APIs distinguish malformed or incomplete proof inputs from
+well-formed absence proofs and wrong-root/value-mismatch proofs. They reject
+unused trailing proof nodes after a successful match.
+
+This release verifies trie inclusion only. It does not prove that a trusted
+root came from a canonical header, decode or execute the included transaction,
+validate receipt semantics, or verify account/storage proofs. Account and
+storage proof verification is scheduled for `v0.33.0`.
 
 Source trail:
 

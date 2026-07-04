@@ -11,6 +11,7 @@ use eth_valkyoth_primitives::ChainId;
 mod eip712;
 mod eip712_typed;
 mod mpt;
+mod mpt_proof;
 mod replay;
 mod sender;
 mod set_code_authorization;
@@ -34,6 +35,11 @@ pub use mpt::{
     MptBranchChildren, MptBranchNode, MptCompactPath, MptCompactPathKind, MptExtensionNode,
     MptInlineNode, MptLeafNode, MptNode, MptNodeDecodeError, MptNodeDecodeErrorCategory,
     MptNodeField, MptNodeReference, MptProofNodes, decode_mpt_node, decode_mpt_proof_nodes,
+};
+pub use mpt_proof::{
+    MptProofRoot, MptProofVerificationError, MptProofVerificationErrorCategory, ReceiptTrieRoot,
+    TransactionTrieRoot, VerifiedReceiptInclusion, VerifiedTransactionInclusion,
+    verify_receipt_inclusion, verify_transaction_inclusion,
 };
 pub use replay::{
     require_access_list_replay_domain, require_blob_replay_domain,

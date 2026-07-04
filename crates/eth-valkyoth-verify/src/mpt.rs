@@ -217,7 +217,7 @@ pub fn decode_mpt_proof_nodes<'a>(
     Ok(MptProofNodes { encoded_nodes })
 }
 
-fn decode_mpt_node_with_accumulator<'a>(
+pub(crate) fn decode_mpt_node_with_accumulator<'a>(
     input: &'a [u8],
     accumulator: &mut DecodeAccumulator,
 ) -> Result<MptNode<'a>, MptNodeDecodeError> {

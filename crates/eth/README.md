@@ -26,7 +26,7 @@
 `eth` is the public facade crate for a `no_std`-first Ethereum
 execution-layer protocol workspace.
 
-The crate is intentionally conservative at `0.31.0`: it provides explicit
+The crate is intentionally conservative at `0.32.0`: it provides explicit
 Ethereum primitive domains, bounded decode-budget policy, stable error
 categories, primitive RLP bridge helpers, a caller-provided Keccak-256 boundary,
 RLP fuzz-harness evidence, a transaction envelope shell, unvalidated legacy
@@ -50,8 +50,8 @@ P2P integrations become real dependencies.
 
 ## Current Status
 
-The current release candidate is `0.31.0`; MPT node decoding has passed pentest
-and is waiting for final GitHub checks before tagging.
+The current release candidate is `0.32.0`; transaction and receipt inclusion
+proof verification is implemented and awaiting pentest.
 
 Implemented now:
 
@@ -97,6 +97,9 @@ Implemented now:
 - Bounded syntactic MPT node decoding for branch, extension, and leaf nodes,
   including compact-path validation, eager inline child shape checks, and
   cumulative proof-node byte/count accounting.
+- Transaction and receipt MPT inclusion proof verification at
+  `rlp(transaction_index)` over the caller-provided Keccak-256 trait boundary,
+  with distinct transaction and receipt root domains.
 - Proof-gated transaction typestate transitions for decoded, canonical,
   fork-validated, and sender-recovered state tokens.
 - Replay-domain validation for legacy EIP-155 and typed transaction chain IDs
@@ -146,9 +149,7 @@ Not implemented yet:
 - No block parser yet.
 - No ABI/contract helper surface yet; scheduled for `v0.47.0` through
   `v0.55.0`.
-- No trie-root proof verification yet; MPT node decoding is scheduled to feed
-  inclusion proof verification in `v0.32.0` and account/storage proofs in
-  `v0.33.0`.
+- No account or storage proof verification yet; scheduled for `v0.33.0`.
 - No consensus/Engine API support yet; scheduled for `v0.56.0` through
   `v0.62.0`.
 - No P2P, txpool, sync, mining, builder, or validator-adjacent boundary yet;
@@ -173,21 +174,21 @@ Not implemented yet:
 
 ```toml
 [dependencies]
-eth = "0.31"
+eth = "0.32"
 ```
 
 Disable defaults explicitly for embedded or freestanding builds:
 
 ```toml
 [dependencies]
-eth = { version = "0.31", default-features = false }
+eth = { version = "0.32", default-features = false }
 ```
 
 Optional sanitization support:
 
 ```toml
 [dependencies]
-eth = { version = "0.31", features = ["sanitization"] }
+eth = { version = "0.32", features = ["sanitization"] }
 ```
 
 ## Features
@@ -211,7 +212,7 @@ Optional reviewed software Keccak backend:
 
 ```toml
 [dependencies]
-eth = { version = "0.31", features = ["keccak-tiny"] }
+eth = { version = "0.32", features = ["keccak-tiny"] }
 ```
 
 ```rust
@@ -850,9 +851,44 @@ if let MptNode::Branch(branch) = branch {
 # Ok::<(), Box<dyn std::error::Error>>(())
 ```
 
-This is not inclusion proof verification. Transaction, receipt, account,
-storage, and withdrawal root checks remain separate verification milestones.
-See [`docs/mpt-nodes.md`](../../docs/mpt-nodes.md).
+Transaction and receipt inclusion proofs can be checked against trusted trie
+roots. The verifier derives the key as `rlp(transaction_index)`, hashes proof
+nodes through the caller-provided Keccak boundary, and compares the included
+value byte-for-byte:
+
+```rust
+use eth::codec::DecodeLimits;
+use eth::hash::TinyKeccak256;
+use eth::primitives::B256;
+use eth::verify::{TransactionTrieRoot, verify_transaction_inclusion};
+
+let limits = DecodeLimits {
+    max_input_bytes: 512,
+    max_list_items: 64,
+    max_nesting_depth: 16,
+    max_total_allocation: 1024,
+    max_proof_nodes: 8,
+    max_total_items: 128,
+};
+
+# let trusted_root = B256::from_bytes([0_u8; 32]);
+# let encoded_transaction = [0x80_u8];
+# let proof_nodes: [&[u8]; 0] = [];
+let root = TransactionTrieRoot::from_b256(trusted_root);
+let result = verify_transaction_inclusion(
+    root,
+    0,
+    &encoded_transaction,
+    &proof_nodes,
+    limits,
+    TinyKeccak256::default,
+);
+
+assert!(result.is_err());
+```
+
+This verifies trie inclusion only. Account and storage proofs remain separate
+verification milestones. See [`docs/mpt-nodes.md`](../../docs/mpt-nodes.md).
 
 ## Transaction Envelopes
 
@@ -972,7 +1008,7 @@ the workspace can keep small, auditable boundaries:
 The minimum supported Rust version is Rust `1.90.0`. New deployments should use
 the latest stable Rust verified by the release gates.
 
-Compatibility evidence for `0.31.0`:
+Compatibility evidence for `0.32.0`:
 
 | Rust | Local Evidence |
 | --- | --- |

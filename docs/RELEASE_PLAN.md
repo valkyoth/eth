@@ -1118,8 +1118,7 @@ Exit criteria:
 
 ### v0.31.0 - MPT Node Decoder
 
-Status: implementation, pentest remediation, and clean retest complete; waiting
-for final GitHub checks before tagging.
+Status: tagged and published.
 
 Goal: decode trie nodes with strict limits.
 
@@ -1138,6 +1137,8 @@ Exit criteria:
 - Trie proof input cannot allocate or recurse without limits.
 
 ### v0.32.0 - Inclusion Proof Verification
+
+Status: implementation in progress; awaiting pentest.
 
 Goal: verify transaction and receipt inclusion proofs.
 
