@@ -6,6 +6,8 @@ use eth_valkyoth_codec::DecodeLimits;
 use eth_valkyoth_hash::{Keccak256, Keccak256Digest};
 use eth_valkyoth_primitives::{Address, B256};
 
+use crate::MAX_PROOF_WALK_DEPTH;
+
 use super::*;
 
 const TEST_LIMITS: DecodeLimits = DecodeLimits {
@@ -128,6 +130,156 @@ fn rejects_storage_value_mismatch() {
     assert_eq!(error, Err(MptProofVerificationError::ValueMismatch));
 }
 
+#[test]
+fn rejects_wrong_account_root() {
+    let address = test_address();
+    let key = test_hash(&address.to_bytes()).to_bytes();
+    let account = account_value();
+    let root_node = leaf_node(&key, &account);
+    let wrong_root = AccountTrieRoot::from_b256(test_hash(b"not-the-account-root"));
+    let proof = [&root_node[..]];
+
+    let error = verify_account_inclusion(
+        wrong_root,
+        address,
+        &account,
+        &proof,
+        TEST_LIMITS,
+        TestHasher::default,
+    );
+
+    assert_eq!(error, Err(MptProofVerificationError::WrongRoot));
+}
+
+#[test]
+fn rejects_wrong_storage_root() {
+    let slot = test_slot();
+    let key = test_hash(&slot.to_b256().to_bytes()).to_bytes();
+    let value = storage_value();
+    let root_node = leaf_node(&key, &value);
+    let wrong_root = StorageTrieRoot::from_b256(test_hash(b"not-the-storage-root"));
+    let proof = [&root_node[..]];
+
+    let error = verify_storage_inclusion(
+        wrong_root,
+        slot,
+        &value,
+        &proof,
+        TEST_LIMITS,
+        TestHasher::default,
+    );
+
+    assert_eq!(error, Err(MptProofVerificationError::WrongRoot));
+}
+
+#[test]
+fn rejects_absent_account_key() -> Result<(), &'static str> {
+    let address = test_address();
+    let key = test_hash(&address.to_bytes()).to_bytes();
+    let child_nibble = key_nibbles(&key).first().copied().ok_or("key nibble")?;
+    let absent_nibble = child_nibble.wrapping_add(1) & 0x0f;
+    let root_node = branch_node(absent_nibble, scalar(b""), scalar(b""));
+    let root = AccountTrieRoot::from_b256(test_hash(&root_node));
+    let proof = [&root_node[..]];
+
+    let error = verify_account_inclusion(
+        root,
+        address,
+        &account_value(),
+        &proof,
+        TEST_LIMITS,
+        TestHasher::default,
+    );
+
+    assert_eq!(error, Err(MptProofVerificationError::Absent));
+    Ok(())
+}
+
+#[test]
+fn rejects_absent_storage_key() -> Result<(), &'static str> {
+    let slot = test_slot();
+    let key = test_hash(&slot.to_b256().to_bytes()).to_bytes();
+    let child_nibble = key_nibbles(&key).first().copied().ok_or("key nibble")?;
+    let absent_nibble = child_nibble.wrapping_add(1) & 0x0f;
+    let root_node = branch_node(absent_nibble, scalar(b""), scalar(b""));
+    let root = StorageTrieRoot::from_b256(test_hash(&root_node));
+    let proof = [&root_node[..]];
+
+    let error = verify_storage_inclusion(
+        root,
+        slot,
+        &storage_value(),
+        &proof,
+        TEST_LIMITS,
+        TestHasher::default,
+    );
+
+    assert_eq!(error, Err(MptProofVerificationError::Absent));
+    Ok(())
+}
+
+#[test]
+fn rejects_account_proof_walk_beyond_fixed_depth_cap() -> Result<(), &'static str> {
+    let address = test_address();
+    let key = test_hash(&address.to_bytes()).to_bytes();
+    let value = account_value();
+    let mut proof_nodes = vec![leaf_node(&key, &value)];
+    for _ in 0..MAX_PROOF_WALK_DEPTH {
+        let child = proof_nodes.first().ok_or("proof node exists")?;
+        let child_hash = test_hash(child).to_bytes();
+        proof_nodes.insert(0, extension_node_hash(&child_hash));
+    }
+    let root_node = proof_nodes.first().ok_or("root node exists")?;
+    let root = AccountTrieRoot::from_b256(test_hash(root_node));
+    let proof = proof_nodes
+        .iter()
+        .map(Vec::as_slice)
+        .collect::<Vec<&[u8]>>();
+
+    let error = verify_account_inclusion(
+        root,
+        address,
+        &value,
+        &proof,
+        deep_limits(),
+        TestHasher::default,
+    );
+
+    assert_eq!(error, Err(MptProofVerificationError::ProofTooDeep));
+    Ok(())
+}
+
+#[test]
+fn rejects_storage_proof_walk_beyond_fixed_depth_cap() -> Result<(), &'static str> {
+    let slot = test_slot();
+    let key = test_hash(&slot.to_b256().to_bytes()).to_bytes();
+    let value = storage_value();
+    let mut proof_nodes = vec![leaf_node(&key, &value)];
+    for _ in 0..MAX_PROOF_WALK_DEPTH {
+        let child = proof_nodes.first().ok_or("proof node exists")?;
+        let child_hash = test_hash(child).to_bytes();
+        proof_nodes.insert(0, extension_node_hash(&child_hash));
+    }
+    let root_node = proof_nodes.first().ok_or("root node exists")?;
+    let root = StorageTrieRoot::from_b256(test_hash(root_node));
+    let proof = proof_nodes
+        .iter()
+        .map(Vec::as_slice)
+        .collect::<Vec<&[u8]>>();
+
+    let error = verify_storage_inclusion(
+        root,
+        slot,
+        &value,
+        &proof,
+        deep_limits(),
+        TestHasher::default,
+    );
+
+    assert_eq!(error, Err(MptProofVerificationError::ProofTooDeep));
+    Ok(())
+}
+
 fn test_hash(input: &[u8]) -> B256 {
     let mut hasher = TestHasher::default();
     hasher.update(input);
@@ -173,6 +325,21 @@ fn branch_node(child_nibble: u8, child: Vec<u8>, value: Vec<u8>) -> Vec<u8> {
     }
     items.push(value);
     list(&items)
+}
+
+fn extension_node_hash(child_hash: &[u8; 32]) -> Vec<u8> {
+    list(&[scalar(&[0x00]), scalar(child_hash)])
+}
+
+fn deep_limits() -> DecodeLimits {
+    DecodeLimits {
+        max_input_bytes: 4096,
+        max_list_items: 256,
+        max_nesting_depth: 16,
+        max_total_allocation: 16_384,
+        max_proof_nodes: 256,
+        max_total_items: 1024,
+    }
 }
 
 fn compact_path_leaf(path: &[u8]) -> Vec<u8> {

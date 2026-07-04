@@ -154,6 +154,10 @@ where
 /// tries. The value is compared byte-for-byte with `encoded_storage_value`;
 /// this function does not interpret the RLP scalar or prove account ownership
 /// of the storage root.
+///
+/// Callers must bind `root` to a verified account proof or another trusted
+/// account-state source before treating this as a full `eth_getProof`
+/// verification result.
 pub fn verify_storage_inclusion<H>(
     root: StorageTrieRoot,
     slot: StorageSlotKey,

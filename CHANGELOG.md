@@ -11,6 +11,10 @@ All notable changes to `eth` are documented here.
   types.
 - Reused the bounded MPT proof walker for exact account and storage value
   membership at `keccak256(address)` and `keccak256(slot_key)`.
+- Addressed v0.33.0 pentest findings by adding real-Keccak fuzz coverage for
+  transaction, receipt, account, and storage proof verification, expanding
+  account/storage negative-path tests for wrong-root, absent, and depth-cap
+  errors, and documenting storage-root composition at the call site.
 - Started `0.32.0` with transaction and receipt Merkle Patricia Trie inclusion
   proof verification in `eth-valkyoth-verify`.
 - Added transaction and receipt root domains, successful proof result tokens,

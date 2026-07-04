@@ -21,7 +21,11 @@ verification in `eth-valkyoth-verify`.
 - Shared internal key-based proof verification that reuses the v0.32.0 bounded
   proof walker for indexed, account, and storage trie proofs.
 - Regression tests for account inclusion, storage inclusion, missing account
-  proof nodes, and storage value mismatches.
+  proof nodes, storage value mismatches, wrong roots, absent keys, and
+  proof-walk depth caps.
+- `mpt_proof` fuzz target that drives transaction, receipt, account, and
+  storage proof verification through the optional real `TinyKeccak256`
+  backend, with committed seed corpus entries.
 
 ## Security Notes
 
@@ -32,7 +36,8 @@ verification in `eth-valkyoth-verify`.
   nonce, balance, storage root, or code hash fields.
 - Storage proof verification does not prove that the supplied storage root
   belongs to a specific account. Callers must compose account proof results and
-  storage proof results at a higher validation layer.
+  storage proof results at a higher validation layer. The call-site
+  documentation now repeats this warning directly on `verify_storage_inclusion`.
 - Storage values are compared as encoded bytes. The verifier does not interpret
   the storage scalar.
 - Proof traversal keeps the v0.32.0 malformed/absent/wrong-root error

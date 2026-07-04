@@ -12,7 +12,7 @@ cargo-fuzz = true
 
 [dependencies]
 eth-valkyoth-codec = { path = "../crates/eth-valkyoth-codec", version = "0.17.0", features = ["testing"] }
-eth-valkyoth-hash = { path = "../crates/eth-valkyoth-hash", version = "0.11.0" }
+eth-valkyoth-hash = { path = "../crates/eth-valkyoth-hash", version = "0.11.0", features = ["tiny-keccak"] }
 eth-valkyoth-primitives = { path = "../crates/eth-valkyoth-primitives", version = "0.11.0" }
 eth-valkyoth-protocol = { path = "../crates/eth-valkyoth-protocol", version = "0.25.0" }
 eth-valkyoth-verify = { path = "../crates/eth-valkyoth-verify", version = "0.20.0", features = ["json"] }
@@ -98,6 +98,13 @@ bench = false
 [[bin]]
 name = "mpt_node"
 path = "fuzz_targets/mpt_node.rs"
+test = false
+doc = false
+bench = false
+
+[[bin]]
+name = "mpt_proof"
+path = "fuzz_targets/mpt_proof.rs"
 test = false
 doc = false
 bench = false
