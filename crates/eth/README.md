@@ -51,7 +51,8 @@ P2P integrations become real dependencies.
 ## Current Status
 
 The current release candidate is `0.33.0`; account and storage MPT inclusion
-proof verification is implemented and ready for pentest.
+proof verification has passed pentest and is waiting for final GitHub checks
+before tagging.
 
 Implemented now:
 

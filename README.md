@@ -35,8 +35,8 @@ dependencies.
 
 ## Current Status
 
-Status: `v0.33.0` account and storage MPT inclusion proof verification is
-implemented and ready for pentest.
+Status: `v0.33.0` account and storage MPT inclusion proof verification has
+passed pentest and is waiting for final GitHub checks before tagging.
 
 Implemented now:
 

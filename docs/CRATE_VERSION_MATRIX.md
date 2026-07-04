@@ -1,7 +1,7 @@
 # Crate Version Matrix
 
-Status: `v0.33.0` account and storage MPT inclusion proof verification is
-implemented and ready for pentest.
+Status: `v0.33.0` account and storage MPT inclusion proof verification has
+passed pentest and is waiting for final GitHub checks before tagging.
 
 `eth` uses independent crate versions. The facade crate remains the main user
 entry point, but support crates are published only when their own package

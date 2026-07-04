@@ -1164,7 +1164,8 @@ Exit criteria:
 
 ### v0.33.0 - Account And Storage Proofs
 
-Status: implementation ready; awaiting pentest.
+Status: implementation, pentest remediation, and clean retest complete; waiting
+for final GitHub checks before tagging.
 
 Goal: verify account and storage proofs against trusted roots.
 
@@ -1176,7 +1177,10 @@ Deliverables:
   boundary;
 - account and storage proof roots use distinct domain newtypes instead of raw
   `B256`;
-- missing-node and wrong-value tests.
+- missing-node and wrong-value tests;
+- wrong-root, absent-key, and proof-depth negative tests;
+- proof-verification fuzz coverage for transaction, receipt, account, and
+  storage entry points through a real Keccak backend.
 
 Verification:
 
