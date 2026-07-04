@@ -1,6 +1,6 @@
 # eth 0.36.0 Release Notes
 
-Status: implementation ready; awaiting pentest.
+Status: pentest passed; waiting for final GitHub checks before tagging.
 
 `0.36.0` adds the first differential test harness. The release compares
 `eth-valkyoth-codec` structural RLP behavior against the independent
@@ -37,6 +37,13 @@ Status: implementation ready; awaiting pentest.
 - Added `fuzz/fuzz_targets/rlp_differential.rs` and committed seed cases so
   arbitrary byte inputs can be compared against `alloy-rlp`, reducing reliance
   on the hand-curated integration-test corpus.
+
+## Pentest
+
+- External pentest passed after remediation of the differential check-gate and
+  randomized differential fuzz-coverage findings.
+- Permanent report: `security/pentest/v0.36.0.md`.
+- Final GitHub checks must pass on the pentest report commit before tagging.
 
 ## Versioning
 

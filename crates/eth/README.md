@@ -52,8 +52,8 @@ before RPC, signer, EVM, Reth, or P2P integrations become real dependencies.
 ## Current Status
 
 The current release candidate is `0.36.0`; structural RLP behavior is compared
-against `alloy-rlp` through the first differential harness; implementation
-ready for pentest.
+against `alloy-rlp` through the first differential harness; pentest passed and
+final GitHub checks are pending before tag.
 
 Implemented now:
 

@@ -36,7 +36,7 @@ dependencies.
 ## Current Status
 
 Status: `v0.36.0` adds the first independent differential RLP harness against
-`alloy-rlp`; implementation ready for pentest.
+`alloy-rlp`; pentest passed and final GitHub checks are pending before tag.
 
 Implemented now:
 

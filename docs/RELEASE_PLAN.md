@@ -1235,7 +1235,8 @@ Exit criteria:
 
 ### v0.36.0 - Differential Test Harness
 
-Status: implementation ready; awaiting pentest.
+Status: implementation, pentest remediation, and clean retest complete; waiting
+for final GitHub checks before tagging.
 
 Goal: compare selected behavior against independent implementations.
 
