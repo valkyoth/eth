@@ -36,7 +36,8 @@ dependencies.
 ## Current Status
 
 Status: `v0.34.0` official Ethereum source revisions are pinned and the
-external reference-store workflow is implemented; ready for pentest.
+external reference-store workflow passed pentest retest; waiting for GitHub
+checks before tagging.
 
 Implemented now:
 

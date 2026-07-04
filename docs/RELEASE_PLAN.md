@@ -1193,7 +1193,8 @@ Exit criteria:
 
 ### v0.34.0 - Spec Lock And Fixture Import
 
-Status: implementation ready; awaiting pentest.
+Status: implementation, pentest remediation, and clean retest complete; waiting
+for GitHub checks before tagging.
 
 Goal: pin official Ethereum specification and fixture revisions.
 

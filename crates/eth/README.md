@@ -51,8 +51,8 @@ P2P integrations become real dependencies.
 ## Current Status
 
 The current release candidate is `0.34.0`; official Ethereum source revisions
-are pinned and the external reference-store workflow is implemented; ready for
-pentest.
+are pinned and the external reference-store workflow passed pentest retest;
+waiting for GitHub checks before tagging.
 
 Implemented now:
 

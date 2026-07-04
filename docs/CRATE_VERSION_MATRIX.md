@@ -1,7 +1,8 @@
 # Crate Version Matrix
 
 Status: `v0.34.0` official Ethereum source revisions are pinned and the
-external reference-store workflow is implemented; ready for pentest.
+external reference-store workflow passed pentest retest; waiting for GitHub
+checks before tagging.
 
 `eth` uses independent crate versions. The facade crate remains the main user
 entry point, but support crates are published only when their own package
