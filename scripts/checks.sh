@@ -9,6 +9,7 @@ scripts/validate-modularity-policy.sh check
 scripts/validate-security-policy.sh
 scripts/release_crates.py --check
 scripts/sync_spec_sources.py --lock-only
+python3 scripts/test-sync-spec-sources.py
 scripts/materialize_fuzz_seeds.py --check
 python3 scripts/test-release-crates.py
 scripts/test-release-readiness.sh

@@ -21,11 +21,19 @@ To clone or update all pinned repositories:
 scripts/sync_spec_sources.py
 ```
 
+The sync helper accepts only official `https://github.com/ethereum/...`
+repositories from `spec-lock.toml` and invokes Git with
+`GIT_ALLOW_PROTOCOL=https`. Existing checkouts have their `origin` reset to the
+pinned repository before fetch.
+
 To verify an existing reference store is checked out at the pinned commits:
 
 ```sh
 scripts/sync_spec_sources.py --check
 ```
+
+`--check` verifies the configured origin, the exact commit hash, and a clean
+working tree for every checkout.
 
 To validate only `spec-lock.toml` without touching the external store:
 

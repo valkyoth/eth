@@ -17,6 +17,8 @@ reproducible external reference-store workflow.
   - consensus-specs: `bd454cb0a6cff1b210ea9de208803df4d9966655`
 - `scripts/sync_spec_sources.py` for cloning, updating, and checking pinned
   upstream repositories in the external reference store.
+- `scripts/test-sync-spec-sources.py` for regression coverage of the sync
+  helper's trust-boundary checks.
 - `docs/reference-store.md` documenting `/home/eldryoth/Work/test/eth`, the
   `ETH_REFERENCE_STORE` override, and fixture license handling.
 - Release checks now validate the spec lock in lock-only mode.
@@ -25,6 +27,16 @@ reproducible external reference-store workflow.
 
 - No protocol behavior changes are introduced in this release.
 - Large upstream repositories remain outside the crate package.
+- Pinned source repositories are restricted to official
+  `https://github.com/ethereum/...` origins.
+- The sync helper sets `GIT_ALLOW_PROTOCOL=https` before invoking Git so
+  remote-helper transports such as `ext::` cannot be used.
+- `--check` verifies the checkout origin, pinned commit, and clean working tree
+  so local fixture-store tampering is detected before conformance work relies
+  on the files.
+- `spec-lock.toml` is parsed with Python 3.11 `tomllib`; inline comments and
+  TOML table structure are handled by the standard parser instead of custom
+  line parsing.
 - Future consensus-sensitive claims must name exact pinned upstream revisions
   before implementation work proceeds.
 

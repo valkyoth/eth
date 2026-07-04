@@ -5,6 +5,7 @@ scripts/checks.sh
 scripts/check_latest_tools.sh
 scripts/release_crates.py --check
 scripts/sync_spec_sources.py --lock-only
+python3 scripts/test-sync-spec-sources.py
 scripts/materialize_fuzz_seeds.py --check
 cargo check --manifest-path fuzz/Cargo.toml
 cargo test -p eth --all-features

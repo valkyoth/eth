@@ -5,12 +5,15 @@ from __future__ import annotations
 
 import argparse
 import os
+import re
 import subprocess
+import tomllib
 from dataclasses import dataclass
 from pathlib import Path
 
 ROOT = Path(__file__).resolve().parents[1]
 SPEC_LOCK = ROOT / "spec-lock.toml"
+ALLOWED_REPO = re.compile(r"^https://github\.com/ethereum/[A-Za-z0-9_.-]+$")
 REPO_KEYS = (
     "execution_specs",
     "execution_tests",
@@ -28,29 +31,27 @@ class Source:
 
 
 def parse_spec_lock() -> tuple[Path, list[Source]]:
-    values: dict[str, str] = {}
-    for line in SPEC_LOCK.read_text(encoding="utf-8").splitlines():
-        stripped = line.strip()
-        if not stripped or stripped.startswith(("#", "[")):
-            continue
-        key, separator, value = stripped.partition("=")
-        if separator != "=":
-            continue
-        values[key.strip()] = value.strip().strip('"')
+    values = tomllib.loads(SPEC_LOCK.read_text(encoding="utf-8")).get("ethereum")
+    if not isinstance(values, dict):
+        raise ValueError("spec-lock.toml is missing [ethereum]")
 
     default_store = values.get("local_reference_store_default")
-    if not default_store:
+    if not isinstance(default_store, str) or not default_store:
         raise ValueError("spec-lock.toml is missing local_reference_store_default")
-    store = Path(os.environ.get(values.get("local_reference_store_env", ""), ""))
-    if not str(store):
-        store = (ROOT / default_store).resolve()
+    env_name = values.get("local_reference_store_env", "")
+    if env_name and not isinstance(env_name, str):
+        raise ValueError("local_reference_store_env must be a string")
+    override = os.environ.get(env_name) if env_name else None
+    store = Path(override).resolve() if override else (ROOT / default_store).resolve()
 
     sources: list[Source] = []
     for name in REPO_KEYS:
         repo = values.get(f"{name}_repo")
         rev = values.get(f"{name}_rev")
-        if not repo or not rev:
+        if not isinstance(repo, str) or not isinstance(rev, str) or not repo or not rev:
             raise ValueError(f"spec-lock.toml is missing {name}_repo or {name}_rev")
+        if not ALLOWED_REPO.fullmatch(repo):
+            raise ValueError(f"{name}_repo must be an official Ethereum HTTPS repository")
         if len(rev) != 40 or any(char not in "0123456789abcdef" for char in rev):
             raise ValueError(f"{name}_rev must be a lowercase 40-character commit hash")
         sources.append(Source(name=name, repo=repo, rev=rev))
@@ -58,16 +59,31 @@ def parse_spec_lock() -> tuple[Path, list[Source]]:
 
 
 def run(args: list[str], cwd: Path | None = None) -> None:
-    subprocess.run(args, cwd=cwd, check=True)
+    env = {**os.environ, "GIT_ALLOW_PROTOCOL": "https"}
+    subprocess.run(args, cwd=cwd, check=True, env=env)
+
+
+def git_stdout(args: list[str], cwd: Path) -> str:
+    env = {**os.environ, "GIT_ALLOW_PROTOCOL": "https"}
+    result = subprocess.run(
+        args,
+        cwd=cwd,
+        check=True,
+        text=True,
+        capture_output=True,
+        env=env,
+    )
+    return result.stdout.strip()
 
 
 def sync_source(store: Path, source: Source) -> None:
     checkout = store / source.name
     if checkout.exists():
+        run(["git", "remote", "set-url", "origin", source.repo], cwd=checkout)
         run(["git", "fetch", "--tags", "--prune", "origin"], cwd=checkout)
     else:
         checkout.parent.mkdir(parents=True, exist_ok=True)
-        run(["git", "clone", source.repo, str(checkout)])
+        run(["git", "clone", "--", source.repo, str(checkout)])
     run(["git", "checkout", "--detach", source.rev], cwd=checkout)
 
 
@@ -75,16 +91,15 @@ def verify_source(store: Path, source: Source) -> None:
     checkout = store / source.name
     if not checkout.exists():
         raise FileNotFoundError(f"{checkout} does not exist; run without --check")
-    result = subprocess.run(
-        ["git", "rev-parse", "HEAD"],
-        cwd=checkout,
-        check=True,
-        text=True,
-        capture_output=True,
-    )
-    actual = result.stdout.strip()
+    origin = git_stdout(["git", "remote", "get-url", "origin"], cwd=checkout)
+    if origin != source.repo:
+        raise ValueError(f"{source.name} origin is {origin}, expected {source.repo}")
+    actual = git_stdout(["git", "rev-parse", "HEAD"], cwd=checkout)
     if actual != source.rev:
         raise ValueError(f"{source.name} is at {actual}, expected {source.rev}")
+    dirty = git_stdout(["git", "status", "--porcelain"], cwd=checkout)
+    if dirty:
+        raise ValueError(f"{source.name} checkout has uncommitted modifications")
 
 
 def main() -> int:
