@@ -6,7 +6,7 @@ Most users should depend on the facade crate instead:
 
 ```toml
 [dependencies]
-eth = "0.27"
+eth = "0.36"
 ```
 
 Crates.io: <https://crates.io/crates/eth>

@@ -1215,7 +1215,7 @@ Exit criteria:
 
 ### v0.35.0 - Execution Test Harness
 
-Status: implementation ready; awaiting pentest.
+Status: tagged as `v0.35.0`.
 
 Goal: run applicable Ethereum execution tests through protocol validation.
 
@@ -1234,6 +1234,8 @@ Exit criteria:
 - Validation behavior is tested against external Ethereum material.
 
 ### v0.36.0 - Differential Test Harness
+
+Status: implementation ready; awaiting pentest.
 
 Goal: compare selected behavior against independent implementations.
 

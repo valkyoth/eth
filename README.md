@@ -35,8 +35,8 @@ dependencies.
 
 ## Current Status
 
-Status: `v0.35.0` adds the first external Ethereum execution fixture harness
-for pinned RLP tests; implementation ready for pentest.
+Status: `v0.36.0` adds the first independent differential RLP harness against
+`alloy-rlp`; implementation ready for pentest.
 
 Implemented now:
 
@@ -137,6 +137,8 @@ Implemented now:
   reference-store sync process for `/home/eldryoth/Work/test/eth`.
 - Execution fixture harness for pinned `ethereum/tests` `RLPTests`, with a
   pass/fail report and explicit unsupported fixture list.
+- Differential structural RLP harness against `alloy-rlp`, with accumulated
+  mismatch reporting.
 
 Not implemented yet:
 
@@ -174,14 +176,14 @@ Not implemented yet:
 
 ```toml
 [dependencies]
-eth = "0.35"
+eth = "0.36"
 ```
 
 For optional sanitization support:
 
 ```toml
 [dependencies]
-eth = { version = "0.35", features = ["sanitization"] }
+eth = { version = "0.36", features = ["sanitization"] }
 ```
 
 ## Features
@@ -205,7 +207,7 @@ Optional reviewed software Keccak backend:
 
 ```toml
 [dependencies]
-eth = { version = "0.35", features = ["keccak-tiny"] }
+eth = { version = "0.36", features = ["keccak-tiny"] }
 ```
 
 ```rust
@@ -1002,7 +1004,7 @@ friendly, and independently testable.
 The minimum supported Rust version is Rust `1.90.0`. New deployments should use
 the pinned stable Rust `1.96.1` until the toolchain policy is updated.
 
-Compatibility evidence for `0.35.0`:
+Compatibility evidence for `0.36.0`:
 
 | Rust | Local Evidence |
 | --- | --- |

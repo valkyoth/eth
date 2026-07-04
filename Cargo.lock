@@ -3,6 +3,15 @@
 version = 4
 
 [[package]]
+name = "alloy-rlp"
+version = "0.3.16"
+source = "registry+https://github.com/rust-lang/crates.io-index"
+checksum = "24671b1f62edcf0f9b62994c7bf72cd621a04a4b99f5020ece1a647b40e2f103"
+dependencies = [
+ "bytes",
+]
+
+[[package]]
 name = "base16ct"
 version = "0.2.0"
 source = "registry+https://github.com/rust-lang/crates.io-index"
@@ -16,6 +25,12 @@ checksum = "3078c7629b62d3f0439517fa394996acacc5cbc91c5a20d8c658e77abd503a71"
 dependencies = [
  "generic-array",
 ]
+
+[[package]]
+name = "bytes"
+version = "1.12.0"
+source = "registry+https://github.com/rust-lang/crates.io-index"
+checksum = "8ae3f5d315924270530207e2a68396c3cc547f6dca3fbdca317cfb1a51edb593"
 
 [[package]]
 name = "cfg-if"
@@ -127,7 +142,7 @@ checksum = "877a4ace8713b0bcf2a4e7eec82529c029f1d0619886d18145fea96c3ffe5c0f"
 
 [[package]]
 name = "eth"
-version = "0.35.0"
+version = "0.36.0"
 dependencies = [
  "eth-valkyoth-codec",
  "eth-valkyoth-evm",
@@ -144,14 +159,15 @@ dependencies = [
 
 [[package]]
 name = "eth-valkyoth-codec"
-version = "0.18.0"
+version = "0.19.0"
 dependencies = [
+ "alloy-rlp",
  "serde_json",
 ]
 
 [[package]]
 name = "eth-valkyoth-derive"
-version = "0.17.1"
+version = "0.17.2"
 dependencies = [
  "eth-valkyoth-codec",
  "eth-valkyoth-primitives",
@@ -167,7 +183,7 @@ version = "0.7.0"
 
 [[package]]
 name = "eth-valkyoth-hash"
-version = "0.11.1"
+version = "0.11.2"
 dependencies = [
  "eth-valkyoth-primitives",
  "tiny-keccak",
@@ -175,7 +191,7 @@ dependencies = [
 
 [[package]]
 name = "eth-valkyoth-primitives"
-version = "0.11.1"
+version = "0.11.2"
 dependencies = [
  "eth-valkyoth-codec",
  "subtle",
@@ -183,7 +199,7 @@ dependencies = [
 
 [[package]]
 name = "eth-valkyoth-protocol"
-version = "0.25.1"
+version = "0.25.2"
 dependencies = [
  "eth-valkyoth-codec",
  "eth-valkyoth-hash",
@@ -200,7 +216,7 @@ version = "0.7.0"
 
 [[package]]
 name = "eth-valkyoth-sanitization"
-version = "0.7.3"
+version = "0.7.4"
 dependencies = [
  "eth-valkyoth-derive",
  "sanitization",
@@ -208,7 +224,7 @@ dependencies = [
 
 [[package]]
 name = "eth-valkyoth-signer"
-version = "0.7.2"
+version = "0.7.3"
 dependencies = [
  "eth-valkyoth-primitives",
 ]
@@ -219,7 +235,7 @@ version = "0.7.0"
 
 [[package]]
 name = "eth-valkyoth-verify"
-version = "0.20.1"
+version = "0.20.2"
 dependencies = [
  "eth-valkyoth-codec",
  "eth-valkyoth-hash",

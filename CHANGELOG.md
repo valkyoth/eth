@@ -4,6 +4,9 @@ All notable changes to `eth` are documented here.
 
 ## Unreleased
 
+- Started `0.36.0` with a dev-only differential structural RLP harness against
+  `alloy-rlp`, a documented runner command, mismatch reporting, and release
+  gate coverage for the independent reference path.
 - Started `0.35.0` with the first external Ethereum execution fixture harness
   for pinned `ethereum/tests` `RLPTests`, explicit unsupported fixture groups,
   and dependency-version planning for the codec conformance package change.

@@ -1,6 +1,6 @@
 # eth 0.35.0 Release Notes
 
-Status: implementation ready; awaiting pentest.
+Status: tagged and published.
 
 `0.35.0` adds the first external Ethereum execution fixture harness. The
 claimed fixture set is deliberately narrow: pinned `ethereum/tests` `RLPTests`

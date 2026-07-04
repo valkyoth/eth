@@ -26,7 +26,7 @@
 `eth` is the public facade crate for a `no_std`-first Ethereum
 execution-layer protocol workspace.
 
-The crate is intentionally conservative at `0.35.0`: it provides explicit
+The crate is intentionally conservative at `0.36.0`: it provides explicit
 Ethereum primitive domains, bounded decode-budget policy, stable error
 categories, primitive RLP bridge helpers, a caller-provided Keccak-256 boundary,
 RLP fuzz-harness evidence, a transaction envelope shell, unvalidated legacy
@@ -45,15 +45,15 @@ descriptors, an opt-in bounded JSON typed-data parser, syntactic block header
 decoding and hashing, syntactic receipt and withdrawal-list decoding, an
 opt-in reviewed
 `tiny-keccak` software backend, small first-party crate boundaries, optional
-sanitization support, external RLP execution-fixture conformance evidence, and
-release evidence before RPC, signer, EVM, Reth, or P2P integrations become real
-dependencies.
+sanitization support, external RLP execution-fixture conformance evidence,
+dev-only differential RLP evidence against `alloy-rlp`, and release evidence
+before RPC, signer, EVM, Reth, or P2P integrations become real dependencies.
 
 ## Current Status
 
-The current release candidate is `0.35.0`; pinned `ethereum/tests` RLP fixtures
-are wired into the first execution fixture harness; implementation ready for
-pentest.
+The current release candidate is `0.36.0`; structural RLP behavior is compared
+against `alloy-rlp` through the first differential harness; implementation
+ready for pentest.
 
 Implemented now:
 
@@ -148,6 +148,8 @@ Implemented now:
   reference-store sync process for `/home/eldryoth/Work/test/eth`.
 - Execution fixture harness for pinned `ethereum/tests` `RLPTests`, with a
   pass/fail report and explicit unsupported fixture list.
+- Differential structural RLP harness against `alloy-rlp`, with accumulated
+  mismatch reporting.
 
 Not implemented yet:
 
@@ -182,21 +184,21 @@ Not implemented yet:
 
 ```toml
 [dependencies]
-eth = "0.35"
+eth = "0.36"
 ```
 
 Disable defaults explicitly for embedded or freestanding builds:
 
 ```toml
 [dependencies]
-eth = { version = "0.35", default-features = false }
+eth = { version = "0.36", default-features = false }
 ```
 
 Optional sanitization support:
 
 ```toml
 [dependencies]
-eth = { version = "0.35", features = ["sanitization"] }
+eth = { version = "0.36", features = ["sanitization"] }
 ```
 
 ## Features
@@ -220,7 +222,7 @@ Optional reviewed software Keccak backend:
 
 ```toml
 [dependencies]
-eth = { version = "0.35", features = ["keccak-tiny"] }
+eth = { version = "0.36", features = ["keccak-tiny"] }
 ```
 
 ```rust
@@ -1019,7 +1021,7 @@ the workspace can keep small, auditable boundaries:
 The minimum supported Rust version is Rust `1.90.0`. New deployments should use
 the latest stable Rust verified by the release gates.
 
-Compatibility evidence for `0.35.0`:
+Compatibility evidence for `0.36.0`:
 
 | Rust | Local Evidence |
 | --- | --- |

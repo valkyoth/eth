@@ -1,12 +1,13 @@
 # eth Specification Matrix
 
-Status: source revisions pinned for `v0.35.0`; scalar, list, and canonical
+Status: source revisions pinned for `v0.36.0`; scalar, list, and canonical
 integer RLP decoding, canonical RLP encoding helpers, primitive RLP bridging,
-Keccak-256 trait boundary, RLP fuzz harness baseline, and transaction envelope
-shell plus unvalidated legacy, EIP-2930 access-list, EIP-1559 dynamic-fee,
-EIP-4844 blob, and EIP-7702 set-code transaction decoding and canonical
-encoding implemented. Explicit chain and fork activation context is available
-for caller-reviewed specs.
+Keccak-256 trait boundary, RLP fuzz harness baseline, external execution
+fixture coverage, dev-only independent RLP differential coverage, and
+transaction envelope shell plus unvalidated legacy, EIP-2930 access-list,
+EIP-1559 dynamic-fee, EIP-4844 blob, and EIP-7702 set-code transaction decoding
+and canonical encoding implemented. Explicit chain and fork activation context
+is available for caller-reviewed specs.
 Transaction typestate promotion is proof-gated. Transaction signing-hash
 construction, digest-level sender recovery, and decoded transaction signature
 validation are available behind the caller-provided Keccak-256 boundary,
@@ -29,7 +30,8 @@ roots. `v0.33.0` adds account and storage inclusion proof verification against
 trusted roots. `v0.34.0` refreshes all official Ethereum source and fixture
 pins and documents the reproducible external reference store. `v0.35.0` adds
 the first external execution fixture harness and claims pinned `ethereum/tests`
-`RLPTests` for the codec surface.
+`RLPTests` for the codec surface. `v0.36.0` adds a dev-only `alloy-rlp`
+structural RLP differential reference path.
 
 Official source and fixture revisions are governed by
 [Spec Source Policy](spec-source-policy.md). `v0.34.0` checked upstream `HEAD`
@@ -42,10 +44,13 @@ Execution fixture claims are tracked in
 [Execution Fixture Harness](execution-fixture-harness.md),
 [Execution Fixture Report](execution-fixture-report.md), and
 [Unsupported Execution Fixtures](unsupported-execution-fixtures.md).
+Differential claims are tracked in
+[Differential Test Harness](differential-test-harness.md) and
+[Differential Test Report](differential-test-report.md).
 
 | Area | Status | Evidence |
 | --- | --- | --- |
-| Execution RLP | claimed for pinned `RLPTests` | `ethereum/tests` pinned in `spec-lock.toml`; scalar byte-string, list, canonical integer decoders, canonical encoding helpers, and public conservative RLP derives implemented; v0.35.0 runs the pinned `RLPTests` corpus through `eth-valkyoth-codec::execution_rlp_fixtures` |
+| Execution RLP | claimed for pinned `RLPTests` plus differential structural RLP | `ethereum/tests` pinned in `spec-lock.toml`; scalar byte-string, list, canonical integer decoders, canonical encoding helpers, and public conservative RLP derives implemented; v0.35.0 runs the pinned `RLPTests` corpus through `eth-valkyoth-codec::execution_rlp_fixtures`; v0.36.0 compares curated structural RLP cases against `alloy-rlp` |
 | RLP derives | public conservative surface | v0.25.0 adds public `RlpEncode`/`RlpDecode` traits and derive macros for reviewed structs; generated decoders require `DecodeLimits`; generics, enums, unions, and transaction derives remain rejected |
 | RLP fuzz harness | baseline | `fuzz/` workspace builds; committed hex seeds live under `fuzz/seed-corpus/`; crash reproduction is documented |
 | Keccak-256 hashing | boundary plus optional backend | `eth-valkyoth-hash` defines a caller-provided Keccak-256 trait boundary; v0.27.0 admits `TinyKeccak256` behind the non-default `tiny-keccak` support-crate feature and `keccak-tiny` facade feature, with empty-input, `abc`, and chunking KAT coverage |

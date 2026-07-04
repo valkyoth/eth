@@ -11,6 +11,7 @@ scripts/release_crates.py --check
 scripts/sync_spec_sources.py --lock-only
 python3 scripts/test-sync-spec-sources.py
 scripts/run_execution_fixtures.py --check
+scripts/run_differential_tests.py --check
 scripts/materialize_fuzz_seeds.py --check
 python3 scripts/test-release-crates.py
 scripts/test-release-readiness.sh

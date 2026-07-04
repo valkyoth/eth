@@ -13,6 +13,7 @@ test -x scripts/release_crates.py
 test -x scripts/sync_spec_sources.py
 test -x scripts/test-sync-spec-sources.py
 test -x scripts/run_execution_fixtures.py
+test -x scripts/run_differential_tests.py
 test -f release-crates.toml
 test -f docs/CRATE_VERSION_MATRIX.md
 test -f conformance/execution-fixtures.toml
@@ -55,6 +56,7 @@ test -f release-notes/RELEASE_NOTES_0.32.0.md
 test -f release-notes/RELEASE_NOTES_0.33.0.md
 test -f release-notes/RELEASE_NOTES_0.34.0.md
 test -f release-notes/RELEASE_NOTES_0.35.0.md
+test -f release-notes/RELEASE_NOTES_0.36.0.md
 test -x scripts/release_0_9_gate.sh
 test -x scripts/release_0_10_gate.sh
 test -x scripts/release_0_11_gate.sh
@@ -83,11 +85,14 @@ test -x scripts/release_0_32_gate.sh
 test -x scripts/release_0_33_gate.sh
 test -x scripts/release_0_34_gate.sh
 test -x scripts/release_0_35_gate.sh
+test -x scripts/release_0_36_gate.sh
 test -f docs/spec-source-policy.md
 test -f docs/reference-store.md
 test -f docs/execution-fixture-harness.md
 test -f docs/execution-fixture-report.md
 test -f docs/unsupported-execution-fixtures.md
+test -f docs/differential-test-harness.md
+test -f docs/differential-test-report.md
 grep -q 'execution_specs_repo' spec-lock.toml
 grep -q 'local_reference_store_env' spec-lock.toml
 grep -q 'local_reference_store_default' spec-lock.toml
