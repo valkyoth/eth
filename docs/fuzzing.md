@@ -1,15 +1,16 @@
 # Fuzzing
 
-Status: `v0.27.0` RLP, transaction envelope, legacy transaction decode,
+Status: `v0.36.0` RLP, transaction envelope, legacy transaction decode,
 EIP-2930 access-list transaction decode, EIP-1559 dynamic-fee transaction
 decode, EIP-4844 blob transaction decode, EIP-7702 set-code transaction decode,
 and transaction encode fuzz/test baseline, including signing-preimage encoding,
 plus Ethereum signature parsing and set-code authorization signature fuzz
 coverage. EIP-712 coverage now includes both borrowed typed-data encoder fuzz
 build coverage and the optional JSON typed-data parser target with committed
-Ether Mail and adversarial JSON seeds. Decoded transaction signature validation
-and EIP-712 domain-safety checks remain unit-test based where they do not parse
-new untrusted byte formats.
+Ether Mail and adversarial JSON seeds. RLP coverage now also includes a
+dev-only differential fuzz target against `alloy-rlp`. Decoded transaction
+signature validation and EIP-712 domain-safety checks remain unit-test based
+where they do not parse new untrusted byte formats.
 
 The fuzz workspace lives under `fuzz/` and is intentionally separate from the
 published crates. Live corpus growth and crash artifacts are local generated
@@ -24,6 +25,7 @@ state and are ignored by git.
 | `rlp_integer` | Canonical integer payload helpers plus exact and partial integer decoders. |
 | `rlp_list` | List exact and partial decoders plus recursive item traversal. |
 | `rlp_encode` | Scalar, integer, list-payload, list-header, and decoded-item encode paths. |
+| `rlp_differential` | Structural RLP accept/reject comparison and exact round-trip checks against `alloy-rlp`, with local resource-budget rejections treated as policy boundaries. |
 | `primitives` | Primitive RLP bridge decoders and canonical integer payload constructors. |
 | `transaction_envelope` | EIP-2718 typed envelope classification, legacy RLP-list shell classification, unvalidated legacy/EIP-2930/EIP-1559/EIP-4844/EIP-7702 field decoding, and fixed-buffer canonical re-encoding for successfully decoded transaction models. |
 | `ethereum_signature` | Ethereum `r || s || y_parity` signature parsing and digest-level sender recovery with a deterministic stub hasher. |
@@ -67,6 +69,7 @@ Install `cargo-fuzz`, then run a target from the repository root:
 
 ```bash
 cargo fuzz run rlp
+cargo fuzz run rlp_differential
 cargo fuzz run rlp_integer
 ```
 

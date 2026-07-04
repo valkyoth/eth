@@ -7,6 +7,9 @@ All notable changes to `eth` are documented here.
 - Started `0.36.0` with a dev-only differential structural RLP harness against
   `alloy-rlp`, a documented runner command, mismatch reporting, and release
   gate coverage for the independent reference path.
+- Addressed v0.36.0 pentest findings by making the differential `--check`
+  command compile the real test target and adding `rlp_differential` fuzz
+  coverage against `alloy-rlp`.
 - Started `0.35.0` with the first external Ethereum execution fixture harness
   for pinned `ethereum/tests` `RLPTests`, explicit unsupported fixture groups,
   and dependency-version planning for the codec conformance package change.

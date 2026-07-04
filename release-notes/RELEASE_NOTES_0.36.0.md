@@ -29,6 +29,15 @@ Status: implementation ready; awaiting pentest.
 - The test accumulates all mismatches before failing so a pentest or CI failure
   can report every observed divergence in one run.
 
+## Fixed During Pentest
+
+- `scripts/run_differential_tests.py --check` now compiles the actual
+  differential integration test with `--no-run` instead of printing a constant
+  success message.
+- Added `fuzz/fuzz_targets/rlp_differential.rs` and committed seed cases so
+  arbitrary byte inputs can be compared against `alloy-rlp`, reducing reliance
+  on the hand-curated integration-test corpus.
+
 ## Versioning
 
 - `eth-valkyoth-codec` publishes as `0.19.0` for the new differential test

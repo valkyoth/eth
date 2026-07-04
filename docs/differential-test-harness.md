@@ -29,6 +29,9 @@ Validate the harness configuration:
 scripts/run_differential_tests.py --check
 ```
 
+The check mode compiles the actual differential integration test with
+`--no-run`; it does not rely on a constant success message.
+
 Run the differential harness:
 
 ```sh
@@ -40,6 +43,12 @@ The runner executes:
 ```sh
 cargo test -p eth-valkyoth-codec --test differential_rlp_reference --features testing
 ```
+
+The fuzz workspace also includes `rlp_differential`, which feeds arbitrary
+bytes to both `eth-valkyoth-codec` and `alloy-rlp`. The target asserts
+structural accept/reject agreement and exact byte-for-byte re-encoding for
+accepted values. Explicit `DecodeLimits` resource rejections are treated as
+local policy differences, not reference mismatches.
 
 ## Mismatch Reporting
 

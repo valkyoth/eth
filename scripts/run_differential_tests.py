@@ -8,6 +8,16 @@ import subprocess
 from pathlib import Path
 
 ROOT = Path(__file__).resolve().parents[1]
+DIFFERENTIAL_TEST = [
+    "cargo",
+    "test",
+    "-p",
+    "eth-valkyoth-codec",
+    "--test",
+    "differential_rlp_reference",
+    "--features",
+    "testing",
+]
 
 
 def run(command: list[str]) -> None:
@@ -24,21 +34,11 @@ def main() -> int:
     args = parser.parse_args()
 
     if args.check:
+        run([*DIFFERENTIAL_TEST, "--no-run"])
         print("validated 1 differential reference path")
         return 0
 
-    run(
-        [
-            "cargo",
-            "test",
-            "-p",
-            "eth-valkyoth-codec",
-            "--test",
-            "differential_rlp_reference",
-            "--features",
-            "testing",
-        ]
-    )
+    run(DIFFERENTIAL_TEST)
     return 0
 
 
