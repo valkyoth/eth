@@ -40,7 +40,10 @@ uses one shared `DecodeAccumulator` for the traversal.
 
 The proof APIs distinguish malformed or incomplete proof inputs from
 well-formed absence proofs and wrong-root/value-mismatch proofs. They reject
-unused trailing proof nodes after a successful match.
+unused trailing proof nodes after a successful match. The proof walker is
+iterative and additionally capped by `MAX_PROOF_WALK_DEPTH`, independent of
+caller-selected `DecodeLimits`, so large `max_proof_nodes` deployments cannot
+turn proof validation into unbounded native stack growth.
 
 This release verifies trie inclusion only. It does not prove that a trusted
 root came from a canonical header, decode or execute the included transaction,

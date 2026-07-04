@@ -16,6 +16,11 @@ pub use root::{
 };
 
 const MAX_RLP_U64_BYTES: usize = 9;
+/// Hard cap on transaction and receipt proof traversal depth.
+///
+/// This is independent from [`DecodeLimits::max_proof_nodes`] so deployments
+/// cannot accidentally configure native call-stack growth into proof walking.
+pub const MAX_PROOF_WALK_DEPTH: usize = 128;
 
 /// Verifies that `encoded_transaction` is included at `transaction_index`.
 ///
@@ -92,7 +97,7 @@ where
     let mut accumulator = limits.accumulator();
     let mut cursor = ProofCursor::new(root, proof_nodes, &mut new_hasher);
     let first = cursor.next_hashed_node(&mut accumulator)?;
-    walk_node(first, key, 0, value, &mut cursor, &mut accumulator)?;
+    walk_to_value(first, key, value, &mut cursor, &mut accumulator)?;
     if cursor.is_consumed() {
         Ok(())
     } else {
@@ -100,95 +105,61 @@ where
     }
 }
 
-fn walk_node<H>(
-    node: MptNode<'_>,
+fn walk_to_value<'a, H>(
+    mut node: MptNode<'a>,
     key: &[u8],
-    key_nibble_offset: usize,
     expected_value: &[u8],
-    cursor: &mut ProofCursor<'_, '_, H>,
+    cursor: &mut ProofCursor<'a, '_, H>,
     accumulator: &mut eth_valkyoth_codec::DecodeAccumulator,
 ) -> Result<(), MptProofVerificationError>
 where
     H: Keccak256,
 {
-    match node {
-        MptNode::Branch(branch) => {
-            if key_nibble_offset == key_nibble_len(key) {
-                return compare_value(branch.value(), expected_value);
-            }
-            let child_index = key_nibble(key, key_nibble_offset)?;
-            let child = branch
-                .children()
-                .nth(usize::from(child_index))
-                .ok_or(MptProofVerificationError::Absent)?
-                .map_err(MptProofVerificationError::MalformedNode)?;
-            walk_reference(
-                child,
-                key,
-                key_nibble_offset.saturating_add(1),
-                expected_value,
-                cursor,
-                accumulator,
-            )
-        }
-        MptNode::Extension(extension) => {
-            let consumed = match_compact_path(extension.path, key, key_nibble_offset)?;
-            walk_reference(
-                extension.child,
-                key,
-                key_nibble_offset.saturating_add(consumed),
-                expected_value,
-                cursor,
-                accumulator,
-            )
-        }
-        MptNode::Leaf(leaf) => {
-            let consumed = match_compact_path(leaf.path, key, key_nibble_offset)?;
-            if key_nibble_offset.saturating_add(consumed) != key_nibble_len(key) {
-                return Err(MptProofVerificationError::Absent);
-            }
-            compare_value(leaf.value, expected_value)
-        }
-    }
-}
+    let mut key_nibble_offset = 0usize;
+    let mut depth = 0usize;
 
-fn walk_reference<H>(
-    reference: MptNodeReference<'_>,
-    key: &[u8],
-    key_nibble_offset: usize,
-    expected_value: &[u8],
-    cursor: &mut ProofCursor<'_, '_, H>,
-    accumulator: &mut eth_valkyoth_codec::DecodeAccumulator,
-) -> Result<(), MptProofVerificationError>
-where
-    H: Keccak256,
-{
-    match reference {
-        MptNodeReference::Empty => Err(MptProofVerificationError::Absent),
-        MptNodeReference::Hash(expected) => {
-            let node = cursor.next_child_node(expected, accumulator)?;
-            walk_node(
-                node,
-                key,
-                key_nibble_offset,
-                expected_value,
-                cursor,
-                accumulator,
-            )
+    loop {
+        depth = depth
+            .checked_add(1)
+            .ok_or(MptProofVerificationError::ProofTooDeep)?;
+        if depth > MAX_PROOF_WALK_DEPTH {
+            return Err(MptProofVerificationError::ProofTooDeep);
         }
-        MptNodeReference::Inline(inline) => {
-            let node = inline
+
+        let reference = match node {
+            MptNode::Branch(branch) => {
+                if key_nibble_offset == key_nibble_len(key) {
+                    return compare_value(branch.value(), expected_value);
+                }
+                let child_index = key_nibble(key, key_nibble_offset)?;
+                key_nibble_offset = key_nibble_offset.saturating_add(1);
+                branch
+                    .children()
+                    .nth(usize::from(child_index))
+                    .ok_or(MptProofVerificationError::Absent)?
+                    .map_err(MptProofVerificationError::MalformedNode)?
+            }
+            MptNode::Extension(extension) => {
+                let consumed = match_compact_path(extension.path, key, key_nibble_offset)?;
+                key_nibble_offset = key_nibble_offset.saturating_add(consumed);
+                extension.child
+            }
+            MptNode::Leaf(leaf) => {
+                let consumed = match_compact_path(leaf.path, key, key_nibble_offset)?;
+                if key_nibble_offset.saturating_add(consumed) != key_nibble_len(key) {
+                    return Err(MptProofVerificationError::Absent);
+                }
+                return compare_value(leaf.value, expected_value);
+            }
+        };
+
+        node = match reference {
+            MptNodeReference::Empty => return Err(MptProofVerificationError::Absent),
+            MptNodeReference::Hash(expected) => cursor.next_child_node(expected, accumulator)?,
+            MptNodeReference::Inline(inline) => inline
                 .node()
-                .map_err(MptProofVerificationError::MalformedNode)?;
-            walk_node(
-                node,
-                key,
-                key_nibble_offset,
-                expected_value,
-                cursor,
-                accumulator,
-            )
-        }
+                .map_err(MptProofVerificationError::MalformedNode)?,
+        };
     }
 }
 

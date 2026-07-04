@@ -23,6 +23,8 @@ pub enum MptProofVerificationError {
     ValueMismatch,
     /// The proof had unused nodes after the matching value was reached.
     TrailingProofNodes,
+    /// The proof traversal exceeded the verifier's fixed stack-safety cap.
+    ProofTooDeep,
 }
 
 impl MptProofVerificationError {
@@ -37,6 +39,7 @@ impl MptProofVerificationError {
             Self::Absent => "ETH_MPT_PROOF_ABSENT",
             Self::ValueMismatch => "ETH_MPT_PROOF_VALUE_MISMATCH",
             Self::TrailingProofNodes => "ETH_MPT_PROOF_TRAILING_NODES",
+            Self::ProofTooDeep => "ETH_MPT_PROOF_TOO_DEEP",
         }
     }
 
@@ -51,6 +54,7 @@ impl MptProofVerificationError {
             Self::Absent => "MPT proof does not contain the requested key",
             Self::ValueMismatch => "MPT proof value does not match the expected value",
             Self::TrailingProofNodes => "MPT proof contains unused trailing nodes",
+            Self::ProofTooDeep => "MPT proof traversal depth limit exceeded",
         }
     }
 
@@ -58,9 +62,10 @@ impl MptProofVerificationError {
     #[must_use]
     pub const fn category(self) -> MptProofVerificationErrorCategory {
         match self {
-            Self::KeyEncode(_) | Self::MalformedNode(_) | Self::MissingProofNode => {
-                MptProofVerificationErrorCategory::Malformed
-            }
+            Self::KeyEncode(_)
+            | Self::MalformedNode(_)
+            | Self::MissingProofNode
+            | Self::ProofTooDeep => MptProofVerificationErrorCategory::Malformed,
             Self::WrongRoot | Self::ValueMismatch | Self::TrailingProofNodes => {
                 MptProofVerificationErrorCategory::WrongRoot
             }

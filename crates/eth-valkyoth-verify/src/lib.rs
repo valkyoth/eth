@@ -37,9 +37,10 @@ pub use mpt::{
     MptNodeField, MptNodeReference, MptProofNodes, decode_mpt_node, decode_mpt_proof_nodes,
 };
 pub use mpt_proof::{
-    MptProofRoot, MptProofVerificationError, MptProofVerificationErrorCategory, ReceiptTrieRoot,
-    TransactionTrieRoot, VerifiedReceiptInclusion, VerifiedTransactionInclusion,
-    verify_receipt_inclusion, verify_transaction_inclusion,
+    MAX_PROOF_WALK_DEPTH, MptProofRoot, MptProofVerificationError,
+    MptProofVerificationErrorCategory, ReceiptTrieRoot, TransactionTrieRoot,
+    VerifiedReceiptInclusion, VerifiedTransactionInclusion, verify_receipt_inclusion,
+    verify_transaction_inclusion,
 };
 pub use replay::{
     require_access_list_replay_domain, require_blob_replay_domain,

@@ -22,6 +22,8 @@ verification in `eth-valkyoth-verify`.
   - malformed or incomplete proof inputs;
   - absence at the requested key;
   - wrong root, hash-reference mismatch, trailing nodes, or value mismatch.
+- `MAX_PROOF_WALK_DEPTH` and `ProofTooDeep` enforcement for stack-safe proof
+  traversal independent of caller-selected proof-node budgets.
 - Proof walking over the `eth-valkyoth-hash::Keccak256` trait boundary via a
   caller-provided hasher factory.
 - Regression tests for transaction inclusion, receipt inclusion through a
@@ -36,9 +38,14 @@ verification in `eth-valkyoth-verify`.
 - Proof node decoding is performed while walking the proof with one shared
   `DecodeAccumulator`, so consumed hashed proof nodes are not pre-decoded and
   decoded again by the verifier.
+- Proof walking is iterative, not mutually recursive, and fails closed at
+  `MAX_PROOF_WALK_DEPTH` before adversarial proof chains can grow native stack
+  usage.
 - Hashed child references are checked by hashing the next encoded proof node
   with the caller-provided Keccak implementation. Inline child references remain
   bounded by the v0.31.0 inline-size and inline-depth decoder rules.
+- Inline child proof traversal is covered by direct success-path regression
+  tests.
 - Extra proof nodes after a successful match are rejected.
 - Account and storage proof verification remain scheduled for `v0.33.0`.
 

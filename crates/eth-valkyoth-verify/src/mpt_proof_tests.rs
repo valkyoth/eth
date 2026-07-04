@@ -85,6 +85,29 @@ fn verifies_receipt_inclusion_through_branch_child() -> Result<(), &'static str>
 }
 
 #[test]
+fn verifies_transaction_inclusion_through_inline_child() -> Result<(), &'static str> {
+    let key = index_key(2)?;
+    let value = tx_value();
+    let key_nibbles = key_nibbles(&key);
+    let child_path = key_nibbles.get(1..).ok_or("child path slice")?;
+    let inline_child = leaf_node_from_nibbles(child_path, &value);
+    if inline_child.len() >= 32 {
+        return Err("inline child fixture must stay below the hash threshold");
+    }
+    let root_node = branch_node(0x00, inline_child, scalar(b""));
+    let root = TransactionTrieRoot::from_b256(test_hash(&root_node));
+    let proof = [&root_node[..]];
+
+    let verified =
+        verify_transaction_inclusion(root, 2, &value, &proof, TEST_LIMITS, TestHasher::default)
+            .map_err(|_| "inline-child proof should verify")?;
+
+    assert_eq!(verified.index(), 2);
+    assert_eq!(verified.root(), root);
+    Ok(())
+}
+
+#[test]
 fn rejects_absent_transaction_key() -> Result<(), &'static str> {
     let key = index_key(1)?;
     let value = tx_value();
@@ -171,6 +194,37 @@ fn rejects_trailing_proof_nodes() -> Result<(), &'static str> {
 }
 
 #[test]
+fn rejects_proof_walk_beyond_fixed_depth_cap() -> Result<(), &'static str> {
+    let key = index_key(0)?;
+    let value = tx_value();
+    let mut proof_nodes = vec![leaf_node(&key, &value)];
+    for _ in 0..MAX_PROOF_WALK_DEPTH {
+        let child = proof_nodes.first().ok_or("proof node exists")?;
+        let child_hash = test_hash(child).to_bytes();
+        proof_nodes.insert(0, extension_node_hash(&child_hash));
+    }
+    let root_node = proof_nodes.first().ok_or("root node exists")?;
+    let root = TransactionTrieRoot::from_b256(test_hash(root_node));
+    let proof = proof_nodes
+        .iter()
+        .map(Vec::as_slice)
+        .collect::<Vec<&[u8]>>();
+    let limits = DecodeLimits {
+        max_input_bytes: 4096,
+        max_list_items: 256,
+        max_nesting_depth: 16,
+        max_total_allocation: 16_384,
+        max_proof_nodes: 256,
+        max_total_items: 1024,
+    };
+
+    let error = verify_transaction_inclusion(root, 0, &value, &proof, limits, TestHasher::default);
+
+    assert_eq!(error, Err(MptProofVerificationError::ProofTooDeep));
+    Ok(())
+}
+
+#[test]
 fn proof_error_categories_distinguish_absent_and_wrong_root() {
     assert_eq!(
         MptProofVerificationError::Absent.category(),
@@ -182,6 +236,10 @@ fn proof_error_categories_distinguish_absent_and_wrong_root() {
     );
     assert_eq!(
         MptProofVerificationError::MissingProofNode.category(),
+        MptProofVerificationErrorCategory::Malformed
+    );
+    assert_eq!(
+        MptProofVerificationError::ProofTooDeep.category(),
         MptProofVerificationErrorCategory::Malformed
     );
 }
@@ -215,6 +273,10 @@ fn leaf_node(key: &[u8], value: &[u8]) -> Vec<u8> {
 
 fn leaf_node_from_nibbles(nibbles: &[u8], value: &[u8]) -> Vec<u8> {
     list(&[scalar(&compact_path_leaf_nibbles(nibbles)), scalar(value)])
+}
+
+fn extension_node_hash(child_hash: &[u8; 32]) -> Vec<u8> {
+    list(&[scalar(&[0x00]), scalar(child_hash)])
 }
 
 fn branch_node(child_nibble: u8, child: Vec<u8>, value: Vec<u8>) -> Vec<u8> {
