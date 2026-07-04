@@ -1,6 +1,6 @@
 # eth Specification Matrix
 
-Status: source revisions pinned for `v0.34.0`; scalar, list, and canonical
+Status: source revisions pinned for `v0.35.0`; scalar, list, and canonical
 integer RLP decoding, canonical RLP encoding helpers, primitive RLP bridging,
 Keccak-256 trait boundary, RLP fuzz harness baseline, and transaction envelope
 shell plus unvalidated legacy, EIP-2930 access-list, EIP-1559 dynamic-fee,
@@ -27,7 +27,9 @@ adds bounded syntactic MPT branch, extension, and leaf node decoding. `v0.32.0`
 adds transaction and receipt inclusion proof verification against trusted
 roots. `v0.33.0` adds account and storage inclusion proof verification against
 trusted roots. `v0.34.0` refreshes all official Ethereum source and fixture
-pins and documents the reproducible external reference store.
+pins and documents the reproducible external reference store. `v0.35.0` adds
+the first external execution fixture harness and claims pinned `ethereum/tests`
+`RLPTests` for the codec surface.
 
 Official source and fixture revisions are governed by
 [Spec Source Policy](spec-source-policy.md). `v0.34.0` checked upstream `HEAD`
@@ -36,10 +38,14 @@ execution-apis, and consensus-specs in `spec-lock.toml`. The external
 reference-store path and license notes are documented in
 [Ethereum Reference Store](reference-store.md). Consensus-sensitive behavior
 must not be implemented from memory.
+Execution fixture claims are tracked in
+[Execution Fixture Harness](execution-fixture-harness.md),
+[Execution Fixture Report](execution-fixture-report.md), and
+[Unsupported Execution Fixtures](unsupported-execution-fixtures.md).
 
 | Area | Status | Evidence |
 | --- | --- | --- |
-| Execution RLP | partial | `ethereum/tests` pinned in `spec-lock.toml`; scalar byte-string, list, canonical integer decoders, canonical encoding helpers, and public conservative RLP derives implemented |
+| Execution RLP | claimed for pinned `RLPTests` | `ethereum/tests` pinned in `spec-lock.toml`; scalar byte-string, list, canonical integer decoders, canonical encoding helpers, and public conservative RLP derives implemented; v0.35.0 runs the pinned `RLPTests` corpus through `eth-valkyoth-codec::execution_rlp_fixtures` |
 | RLP derives | public conservative surface | v0.25.0 adds public `RlpEncode`/`RlpDecode` traits and derive macros for reviewed structs; generated decoders require `DecodeLimits`; generics, enums, unions, and transaction derives remain rejected |
 | RLP fuzz harness | baseline | `fuzz/` workspace builds; committed hex seeds live under `fuzz/seed-corpus/`; crash reproduction is documented |
 | Keccak-256 hashing | boundary plus optional backend | `eth-valkyoth-hash` defines a caller-provided Keccak-256 trait boundary; v0.27.0 admits `TinyKeccak256` behind the non-default `tiny-keccak` support-crate feature and `keccak-tiny` facade feature, with empty-input, `abc`, and chunking KAT coverage |

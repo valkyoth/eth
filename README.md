@@ -35,9 +35,8 @@ dependencies.
 
 ## Current Status
 
-Status: `v0.34.0` official Ethereum source revisions are pinned and the
-external reference-store workflow passed pentest retest; waiting for GitHub
-checks before tagging.
+Status: `v0.35.0` adds the first external Ethereum execution fixture harness
+for pinned RLP tests; implementation ready for pentest.
 
 Implemented now:
 
@@ -136,6 +135,8 @@ Implemented now:
 - Independent support-crate release planning for crates.io push limits.
 - Pinned official Ethereum source revisions plus a reproducible external
   reference-store sync process for `/home/eldryoth/Work/test/eth`.
+- Execution fixture harness for pinned `ethereum/tests` `RLPTests`, with a
+  pass/fail report and explicit unsupported fixture list.
 
 Not implemented yet:
 
@@ -173,14 +174,14 @@ Not implemented yet:
 
 ```toml
 [dependencies]
-eth = "0.34"
+eth = "0.35"
 ```
 
 For optional sanitization support:
 
 ```toml
 [dependencies]
-eth = { version = "0.34", features = ["sanitization"] }
+eth = { version = "0.35", features = ["sanitization"] }
 ```
 
 ## Features
@@ -204,7 +205,7 @@ Optional reviewed software Keccak backend:
 
 ```toml
 [dependencies]
-eth = { version = "0.34", features = ["keccak-tiny"] }
+eth = { version = "0.35", features = ["keccak-tiny"] }
 ```
 
 ```rust
@@ -1001,7 +1002,7 @@ friendly, and independently testable.
 The minimum supported Rust version is Rust `1.90.0`. New deployments should use
 the pinned stable Rust `1.96.1` until the toolchain policy is updated.
 
-Compatibility evidence for `0.34.0`:
+Compatibility evidence for `0.35.0`:
 
 | Rust | Local Evidence |
 | --- | --- |

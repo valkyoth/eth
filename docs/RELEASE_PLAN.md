@@ -1193,8 +1193,7 @@ Exit criteria:
 
 ### v0.34.0 - Spec Lock And Fixture Import
 
-Status: implementation, pentest remediation, and clean retest complete; waiting
-for GitHub checks before tagging.
+Status: tagged as `v0.34.0`.
 
 Goal: pin official Ethereum specification and fixture revisions.
 
@@ -1215,6 +1214,8 @@ Exit criteria:
 - Every conformance claim names exact upstream revisions.
 
 ### v0.35.0 - Execution Test Harness
+
+Status: implementation ready; awaiting pentest.
 
 Goal: run applicable Ethereum execution tests through protocol validation.
 

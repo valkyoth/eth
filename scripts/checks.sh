@@ -10,6 +10,7 @@ scripts/validate-security-policy.sh
 scripts/release_crates.py --check
 scripts/sync_spec_sources.py --lock-only
 python3 scripts/test-sync-spec-sources.py
+scripts/run_execution_fixtures.py --check
 scripts/materialize_fuzz_seeds.py --check
 python3 scripts/test-release-crates.py
 scripts/test-release-readiness.sh
@@ -38,7 +39,8 @@ for package in \
     eth-valkyoth-protocol)
         cargo package -p "$package" --allow-dirty \
             --config 'patch.crates-io.eth-valkyoth-codec.path="crates/eth-valkyoth-codec"' \
-            --config 'patch.crates-io.eth-valkyoth-primitives.path="crates/eth-valkyoth-primitives"'
+            --config 'patch.crates-io.eth-valkyoth-primitives.path="crates/eth-valkyoth-primitives"' \
+            --config 'patch.crates-io.eth-valkyoth-hash.path="crates/eth-valkyoth-hash"'
         ;;
     eth-valkyoth-sanitization)
         cargo package -p "$package" --allow-dirty \

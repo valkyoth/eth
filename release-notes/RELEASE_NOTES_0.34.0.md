@@ -1,7 +1,6 @@
 # eth 0.34.0 Release Notes
 
-Status: pentest remediation and clean retest complete; waiting for GitHub
-checks before tagging.
+Status: tagged and pushed.
 
 `0.34.0` refreshes official Ethereum source and fixture pins and adds a
 reproducible external reference-store workflow.

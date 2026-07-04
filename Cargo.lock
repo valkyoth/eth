@@ -127,7 +127,7 @@ checksum = "877a4ace8713b0bcf2a4e7eec82529c029f1d0619886d18145fea96c3ffe5c0f"
 
 [[package]]
 name = "eth"
-version = "0.34.0"
+version = "0.35.0"
 dependencies = [
  "eth-valkyoth-codec",
  "eth-valkyoth-evm",
@@ -144,11 +144,14 @@ dependencies = [
 
 [[package]]
 name = "eth-valkyoth-codec"
-version = "0.17.0"
+version = "0.18.0"
+dependencies = [
+ "serde_json",
+]
 
 [[package]]
 name = "eth-valkyoth-derive"
-version = "0.17.0"
+version = "0.17.1"
 dependencies = [
  "eth-valkyoth-codec",
  "eth-valkyoth-primitives",
@@ -164,7 +167,7 @@ version = "0.7.0"
 
 [[package]]
 name = "eth-valkyoth-hash"
-version = "0.11.0"
+version = "0.11.1"
 dependencies = [
  "eth-valkyoth-primitives",
  "tiny-keccak",
@@ -172,7 +175,7 @@ dependencies = [
 
 [[package]]
 name = "eth-valkyoth-primitives"
-version = "0.11.0"
+version = "0.11.1"
 dependencies = [
  "eth-valkyoth-codec",
  "subtle",
@@ -180,7 +183,7 @@ dependencies = [
 
 [[package]]
 name = "eth-valkyoth-protocol"
-version = "0.25.0"
+version = "0.25.1"
 dependencies = [
  "eth-valkyoth-codec",
  "eth-valkyoth-hash",
@@ -197,7 +200,7 @@ version = "0.7.0"
 
 [[package]]
 name = "eth-valkyoth-sanitization"
-version = "0.7.2"
+version = "0.7.3"
 dependencies = [
  "eth-valkyoth-derive",
  "sanitization",
@@ -205,7 +208,7 @@ dependencies = [
 
 [[package]]
 name = "eth-valkyoth-signer"
-version = "0.7.1"
+version = "0.7.2"
 dependencies = [
  "eth-valkyoth-primitives",
 ]
@@ -216,7 +219,7 @@ version = "0.7.0"
 
 [[package]]
 name = "eth-valkyoth-verify"
-version = "0.20.0"
+version = "0.20.1"
 dependencies = [
  "eth-valkyoth-codec",
  "eth-valkyoth-hash",

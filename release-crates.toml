@@ -1,94 +1,94 @@
 [release]
-version = "0.34.0"
+version = "0.35.0"
 policy = "independent"
 
 [crates."eth-valkyoth-codec"]
 previous_version = "0.17.0"
-version = "0.17.0"
-change = "unchanged"
-publish = false
-reason = "No package changes for v0.34.0."
+version = "0.18.0"
+change = "code"
+publish = true
+reason = "Adds the v0.35.0 external execution RLP fixture integration test harness."
 
 [crates."eth-valkyoth-primitives"]
 previous_version = "0.11.0"
-version = "0.11.0"
-change = "unchanged"
-publish = false
-reason = "No package changes for v0.34.0."
+version = "0.11.1"
+change = "dependency"
+publish = true
+reason = "Refreshes the published eth-valkyoth-codec dependency to 0.18.0."
 
 [crates."eth-valkyoth-hash"]
 previous_version = "0.11.0"
-version = "0.11.0"
-change = "unchanged"
-publish = false
-reason = "No package changes for v0.34.0."
+version = "0.11.1"
+change = "dependency"
+publish = true
+reason = "Refreshes the published eth-valkyoth-primitives dependency to 0.11.1."
 
 [crates."eth-valkyoth-protocol"]
 previous_version = "0.25.0"
-version = "0.25.0"
-change = "unchanged"
-publish = false
-reason = "No package changes for v0.34.0."
+version = "0.25.1"
+change = "dependency"
+publish = true
+reason = "Refreshes published codec, primitives, and hash dependency versions for v0.35.0."
 
 [crates."eth-valkyoth-verify"]
 previous_version = "0.20.0"
-version = "0.20.0"
-change = "unchanged"
-publish = false
-reason = "No package changes for v0.34.0."
+version = "0.20.1"
+change = "dependency"
+publish = true
+reason = "Refreshes published codec, primitives, hash, and protocol dependency versions for v0.35.0."
 
 [crates."eth-valkyoth-derive"]
 previous_version = "0.17.0"
-version = "0.17.0"
-change = "unchanged"
-publish = false
-reason = "No package changes for v0.34.0."
+version = "0.17.1"
+change = "dependency"
+publish = true
+reason = "Refreshes published codec and primitives dependency versions for v0.35.0."
 
 [crates."eth-valkyoth-sanitization"]
 previous_version = "0.7.2"
-version = "0.7.2"
-change = "unchanged"
-publish = false
-reason = "No package changes for v0.34.0."
+version = "0.7.3"
+change = "dependency"
+publish = true
+reason = "Refreshes the optional published derive dependency to 0.17.1."
 
 [crates."eth-valkyoth-evm"]
 previous_version = "0.7.0"
 version = "0.7.0"
 change = "unchanged"
 publish = false
-reason = "No package changes for v0.34.0."
+reason = "No package changes for v0.35.0."
 
 [crates."eth-valkyoth-rpc"]
 previous_version = "0.7.0"
 version = "0.7.0"
 change = "unchanged"
 publish = false
-reason = "No package changes for v0.34.0."
+reason = "No package changes for v0.35.0."
 
 [crates."eth-valkyoth-signer"]
 previous_version = "0.7.1"
-version = "0.7.1"
-change = "unchanged"
-publish = false
-reason = "No package changes for v0.34.0."
+version = "0.7.2"
+change = "dependency"
+publish = true
+reason = "Refreshes the published eth-valkyoth-primitives dependency to 0.11.1."
 
 [crates."eth-valkyoth-reth"]
 previous_version = "0.7.0"
 version = "0.7.0"
 change = "unchanged"
 publish = false
-reason = "No package changes for v0.34.0."
+reason = "No package changes for v0.35.0."
 
 [crates."eth-valkyoth-testkit"]
 previous_version = "0.7.0"
 version = "0.7.0"
 change = "unchanged"
 publish = false
-reason = "No package changes for v0.34.0."
+reason = "No package changes for v0.35.0."
 
 [crates.eth]
-previous_version = "0.33.0"
-version = "0.34.0"
-change = "metadata"
+previous_version = "0.34.0"
+version = "0.35.0"
+change = "code"
 publish = true
-reason = "Updates packaged documentation for v0.34.0 spec-lock and reference-store workflow."
+reason = "Exposes v0.35.0 documentation and refreshed dependency graph for the execution fixture harness."

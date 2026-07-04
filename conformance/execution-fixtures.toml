@@ -1,0 +1,34 @@
+[execution_fixtures]
+version = "0.35.0"
+source = "ethereum/tests"
+revision = "c67e485ff8b5be9abc8ad15345ec21aa22e290d9"
+
+[[claimed]]
+name = "RLP canonical and invalid fixture corpus"
+path = "RLPTests"
+runner = "eth-valkyoth-codec::execution_rlp_fixtures"
+status = "claimed"
+
+[[unsupported]]
+name = "TransactionTests"
+reason = "Transaction semantic validation remains staged after syntactic typed transaction decode and signature validation."
+
+[[unsupported]]
+name = "BlockchainTests"
+reason = "Full block execution, EVM state transition, and consensus header validation are not implemented yet."
+
+[[unsupported]]
+name = "GenesisTests"
+reason = "Genesis state construction and chain configuration import are not implemented yet."
+
+[[unsupported]]
+name = "TrieTests"
+reason = "MPT proof verification exists, but generic trie construction fixtures are not admitted yet."
+
+[[unsupported]]
+name = "DifficultyTests"
+reason = "Difficulty and post-Merge terminal validation rules are not implemented yet."
+
+[[unsupported]]
+name = "EOFTests"
+reason = "EOF/EVM bytecode validation is scheduled with optional execution support."

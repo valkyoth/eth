@@ -11,11 +11,11 @@ license = "MIT OR Apache-2.0"
 cargo-fuzz = true
 
 [dependencies]
-eth-valkyoth-codec = { path = "../crates/eth-valkyoth-codec", version = "0.17.0", features = ["testing"] }
-eth-valkyoth-hash = { path = "../crates/eth-valkyoth-hash", version = "0.11.0", features = ["tiny-keccak"] }
-eth-valkyoth-primitives = { path = "../crates/eth-valkyoth-primitives", version = "0.11.0" }
-eth-valkyoth-protocol = { path = "../crates/eth-valkyoth-protocol", version = "0.25.0" }
-eth-valkyoth-verify = { path = "../crates/eth-valkyoth-verify", version = "0.20.0", features = ["json"] }
+eth-valkyoth-codec = { path = "../crates/eth-valkyoth-codec", version = "0.18.0", features = ["testing"] }
+eth-valkyoth-hash = { path = "../crates/eth-valkyoth-hash", version = "0.11.1", features = ["tiny-keccak"] }
+eth-valkyoth-primitives = { path = "../crates/eth-valkyoth-primitives", version = "0.11.1" }
+eth-valkyoth-protocol = { path = "../crates/eth-valkyoth-protocol", version = "0.25.1" }
+eth-valkyoth-verify = { path = "../crates/eth-valkyoth-verify", version = "0.20.1", features = ["json"] }
 libfuzzer-sys = "0.4.13"
 
 [[bin]]

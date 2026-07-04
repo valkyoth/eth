@@ -4,6 +4,9 @@ All notable changes to `eth` are documented here.
 
 ## Unreleased
 
+- Started `0.35.0` with the first external Ethereum execution fixture harness
+  for pinned `ethereum/tests` `RLPTests`, explicit unsupported fixture groups,
+  and dependency-version planning for the codec conformance package change.
 - Started `0.34.0` with refreshed official Ethereum source pins, required
   spec-lock validation, and a reproducible external reference-store sync
   workflow for `/home/eldryoth/Work/test/eth`.
