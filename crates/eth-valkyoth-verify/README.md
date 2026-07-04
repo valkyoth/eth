@@ -6,7 +6,7 @@ Most users should depend on the facade crate instead:
 
 ```toml
 [dependencies]
-eth = "0.32"
+eth = "0.33"
 ```
 
 Crates.io: <https://crates.io/crates/eth>
@@ -15,7 +15,16 @@ This package is published separately so the `eth` workspace can keep small,
 auditable crate boundaries. Treat it as a lower-level building block unless the
 `eth` documentation explicitly says otherwise.
 
-The `0.19.0` support-crate release, shipped with `eth` `0.32.0`, adds
+The `0.20.0` support-crate release, shipped with `eth` `0.33.0`, adds account
+and storage MPT inclusion proof verification. The new
+`verify_account_inclusion` and `verify_storage_inclusion` APIs verify exact
+encoded account or storage value bytes at `keccak256(address)` or
+`keccak256(slot_key)` under distinct `AccountTrieRoot` and `StorageTrieRoot`
+domains. They prove byte-exact trie membership only; they do not decode account
+fields, prove that a storage root belongs to a specific account, or interpret
+the included storage scalar.
+
+The previous `0.19.0` support-crate release, shipped with `eth` `0.32.0`, adds
 transaction and receipt MPT inclusion proof verification. The new
 `verify_transaction_inclusion` and `verify_receipt_inclusion` APIs verify exact
 encoded transaction or receipt bytes at `rlp(transaction_index)` under distinct

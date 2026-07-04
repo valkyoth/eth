@@ -1,7 +1,7 @@
 # Crate Version Matrix
 
-Status: `v0.32.0` transaction and receipt inclusion proof verification has
-passed pentest and is waiting for final GitHub checks before tagging.
+Status: `v0.33.0` account and storage MPT inclusion proof verification is
+implemented and ready for pentest.
 
 `eth` uses independent crate versions. The facade crate remains the main user
 entry point, but support crates are published only when their own package
@@ -27,23 +27,23 @@ but must be republished so immutable crates.io package metadata is corrected.
 workspace manifests before release. The script refuses accidental lockstep
 publication when a crate is marked `unchanged`.
 
-## v0.32.0 Tracking Table
+## v0.33.0 Tracking Table
 
 | Crate | Published | Planned | Change | Publish | Reason |
 | --- | --- | --- | --- | --- | --- |
-| `eth-valkyoth-codec` | `0.17.0` | `0.17.0` | `unchanged` | No | No package changes for v0.32.0. |
-| `eth-valkyoth-primitives` | `0.11.0` | `0.11.0` | `unchanged` | No | No package changes for v0.32.0. |
-| `eth-valkyoth-hash` | `0.11.0` | `0.11.0` | `unchanged` | No | No package changes for v0.32.0. |
-| `eth-valkyoth-protocol` | `0.25.0` | `0.25.0` | `unchanged` | No | No package changes for v0.32.0. |
-| `eth-valkyoth-verify` | `0.18.0` | `0.19.0` | `code` | Yes | Adds transaction and receipt MPT inclusion proof verification over the Keccak trait boundary. |
-| `eth-valkyoth-derive` | `0.17.0` | `0.17.0` | `unchanged` | No | No package changes for v0.32.0. |
-| `eth-valkyoth-sanitization` | `0.7.2` | `0.7.2` | `unchanged` | No | No package changes for v0.32.0. |
-| `eth-valkyoth-evm` | `0.7.0` | `0.7.0` | `unchanged` | No | No package changes for v0.32.0. |
-| `eth-valkyoth-rpc` | `0.7.0` | `0.7.0` | `unchanged` | No | No package changes for v0.32.0. |
-| `eth-valkyoth-signer` | `0.7.1` | `0.7.1` | `unchanged` | No | No package changes for v0.32.0. |
-| `eth-valkyoth-reth` | `0.7.0` | `0.7.0` | `unchanged` | No | No package changes for v0.32.0. |
-| `eth-valkyoth-testkit` | `0.7.0` | `0.7.0` | `unchanged` | No | No package changes for v0.32.0. |
-| `eth` | `0.31.0` | `0.32.0` | `code` | Yes | Re-exports the new transaction and receipt proof verification APIs and updates packaged documentation. |
+| `eth-valkyoth-codec` | `0.17.0` | `0.17.0` | `unchanged` | No | No package changes for v0.33.0. |
+| `eth-valkyoth-primitives` | `0.11.0` | `0.11.0` | `unchanged` | No | No package changes for v0.33.0. |
+| `eth-valkyoth-hash` | `0.11.0` | `0.11.0` | `unchanged` | No | No package changes for v0.33.0. |
+| `eth-valkyoth-protocol` | `0.25.0` | `0.25.0` | `unchanged` | No | No package changes for v0.33.0. |
+| `eth-valkyoth-verify` | `0.19.0` | `0.20.0` | `code` | Yes | Adds account and storage MPT inclusion proof verification over the Keccak trait boundary. |
+| `eth-valkyoth-derive` | `0.17.0` | `0.17.0` | `unchanged` | No | No package changes for v0.33.0. |
+| `eth-valkyoth-sanitization` | `0.7.2` | `0.7.2` | `unchanged` | No | No package changes for v0.33.0. |
+| `eth-valkyoth-evm` | `0.7.0` | `0.7.0` | `unchanged` | No | No package changes for v0.33.0. |
+| `eth-valkyoth-rpc` | `0.7.0` | `0.7.0` | `unchanged` | No | No package changes for v0.33.0. |
+| `eth-valkyoth-signer` | `0.7.1` | `0.7.1` | `unchanged` | No | No package changes for v0.33.0. |
+| `eth-valkyoth-reth` | `0.7.0` | `0.7.0` | `unchanged` | No | No package changes for v0.33.0. |
+| `eth-valkyoth-testkit` | `0.7.0` | `0.7.0` | `unchanged` | No | No package changes for v0.33.0. |
+| `eth` | `0.32.0` | `0.33.0` | `code` | Yes | Re-exports the new account and storage proof verification APIs and updates packaged documentation. |
 
 Update this table and `release-crates.toml` in the same commit whenever a crate
 changes release state.

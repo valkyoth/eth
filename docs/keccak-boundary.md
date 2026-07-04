@@ -1,13 +1,15 @@
 # Keccak-256 Boundary
 
-Status: v0.32.0 boundary consumed by transaction signing hashes, decoded
+Status: v0.33.0 boundary consumed by transaction signing hashes, decoded
 transaction signature validation, sender recovery, EIP-712 digest framing, and
 block header hashing; optional `tiny-keccak` backend admitted behind a
 non-default feature. Receipt decoding added in v0.29.0 does not add a new hash
 call site. Withdrawal-list decoding added in v0.30.0 also does not add a new
 hash call site. MPT node decoding added in v0.31.0 does not add a new hash call
 site. Transaction and receipt inclusion proof verification added in v0.32.0
-hashes proof nodes through this boundary.
+hashes proof nodes through this boundary. Account and storage proof
+verification added in v0.33.0 also derives trie keys as `keccak256(address)`
+and `keccak256(slot_key)` through this boundary.
 
 Ethereum execution-layer hashing uses Keccak-256, not FIPS SHA3-256. The hash
 boundary must be explicit before transaction hashes, recovered sender addresses,
@@ -35,7 +37,8 @@ backend behind the `tiny-keccak` support-crate feature and the `keccak-tiny`
 facade feature. The default crate graph still does not include a concrete
 Keccak backend. `v0.32.0` transaction and receipt inclusion proof verification
 uses caller-provided Keccak implementations for trusted-root and hashed-child
-reference checks.
+reference checks. `v0.33.0` account and storage proof verification additionally
+uses the same boundary for account-address and storage-slot trie-key hashing.
 
 ## Rationale
 

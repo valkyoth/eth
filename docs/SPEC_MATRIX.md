@@ -1,6 +1,6 @@
 # eth Specification Matrix
 
-Status: source revisions pinned for `v0.32.0`; scalar, list, and canonical
+Status: source revisions pinned for `v0.33.0`; scalar, list, and canonical
 integer RLP decoding, canonical RLP encoding helpers, primitive RLP bridging,
 Keccak-256 trait boundary, RLP fuzz harness baseline, and transaction envelope
 shell plus unvalidated legacy, EIP-2930 access-list, EIP-1559 dynamic-fee,
@@ -25,7 +25,8 @@ decoding with borrowed logs and explicit status/root handling. `v0.30.0` adds
 syntactic EIP-4895 withdrawal-list decoding with borrowed entries. `v0.31.0`
 adds bounded syntactic MPT branch, extension, and leaf node decoding. `v0.32.0`
 adds transaction and receipt inclusion proof verification against trusted
-roots.
+roots. `v0.33.0` adds account and storage inclusion proof verification against
+trusted roots.
 
 Official source and fixture revisions are governed by
 [Spec Source Policy](spec-source-policy.md). Revisions were checked against
@@ -58,7 +59,7 @@ for `v0.31.0` and reused for v0.32.0 proof walking.
 | Header validation | planned | `execution-specs` pinned in `spec-lock.toml`; ancestry, root, gas, base-fee, fork-activation, and consensus-layer commitment validation not implemented |
 | Receipt and withdrawal validation | planned | `execution-specs` pinned in `spec-lock.toml`; receipt-trie membership, block `receipts_root` matching, transaction/receipt type matching, cumulative gas monotonicity, withdrawal trie-root matching, and withdrawal state application are not implemented |
 | MPT node decoding | syntactic decode | `execution-specs` pinned in `spec-lock.toml`; v0.31.0 decodes branch, extension, and leaf node shape with compact-path and child-reference checks plus cumulative proof-node count/byte accounting |
-| MPT proofs | transaction/receipt inclusion | `execution-specs` pinned in `spec-lock.toml`; v0.32.0 verifies transaction and receipt inclusion at `rlp(transaction_index)` against trusted root newtypes through the Keccak trait boundary, distinguishing malformed, absent, and wrong-root/value-mismatch proofs; account and storage proofs remain scheduled for v0.33.0 |
+| MPT proofs | transaction/receipt/account/storage inclusion | `execution-specs` pinned in `spec-lock.toml`; v0.32.0 verifies transaction and receipt inclusion at `rlp(transaction_index)` against trusted root newtypes through the Keccak trait boundary, and v0.33.0 verifies account and storage inclusion at `keccak256(address)` and `keccak256(slot_key)` with distinct root/key domains. The APIs distinguish malformed, absent, and wrong-root/value-mismatch proofs without claiming header-root, account-state, or storage-root composition validity. |
 | JSON-RPC | scheduled | `execution-apis` pinned in `spec-lock.toml`; RPC dependency admission starts at v0.40.0 and trust models follow at v0.41.0 |
 | ABI encoding | scheduled | ABI type modeling starts at v0.47.0, value encode/decode at v0.48.0, and contract event/error decoding at v0.49.0 |
 | Contract standards | scheduled | Common token standards, ENS, permit helpers, and interface helpers are scheduled for v0.51.0 through v0.54.0 |

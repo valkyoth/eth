@@ -4,6 +4,18 @@ All notable changes to `eth` are documented here.
 
 ## Unreleased
 
+- Started `0.33.0` with account and storage Merkle Patricia Trie inclusion
+  proof verification in `eth-valkyoth-verify`.
+- Added `AccountTrieRoot`, `StorageTrieRoot`, `StorageSlotKey`,
+  `VerifiedAccountInclusion`, and `VerifiedStorageInclusion` domain/result
+  types.
+- Reused the bounded MPT proof walker for exact account and storage value
+  membership at `keccak256(address)` and `keccak256(slot_key)`.
+- Started `0.32.0` with transaction and receipt Merkle Patricia Trie inclusion
+  proof verification in `eth-valkyoth-verify`.
+- Added transaction and receipt root domains, successful proof result tokens,
+  malformed/absent/wrong-root proof error categories, and fixed proof-walk
+  depth enforcement.
 - Started `0.31.0` with bounded syntactic Merkle Patricia Trie node decoding in
   `eth-valkyoth-verify`.
 - Added branch, extension, leaf, compact-path, hash-reference, inline-reference,

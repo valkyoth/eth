@@ -15,6 +15,7 @@ mod mpt_proof;
 mod replay;
 mod sender;
 mod set_code_authorization;
+mod state_proof;
 mod transaction_hash;
 mod transaction_signature;
 
@@ -54,6 +55,10 @@ pub use sender::{
 pub use set_code_authorization::{
     SetCodeAuthorizationValidationError, SetCodeAuthorizationValidationErrorCategory,
     ValidatedSetCodeAuthorization, validate_set_code_authorization_signature,
+};
+pub use state_proof::{
+    AccountTrieRoot, StorageSlotKey, StorageTrieRoot, VerifiedAccountInclusion,
+    VerifiedStorageInclusion, verify_account_inclusion, verify_storage_inclusion,
 };
 pub use transaction_hash::{
     SetCodeAuthorizationSigningHash, TransactionSigningHash, TransactionSigningHashError,

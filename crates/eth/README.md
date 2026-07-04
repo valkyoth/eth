@@ -26,7 +26,7 @@
 `eth` is the public facade crate for a `no_std`-first Ethereum
 execution-layer protocol workspace.
 
-The crate is intentionally conservative at `0.32.0`: it provides explicit
+The crate is intentionally conservative at `0.33.0`: it provides explicit
 Ethereum primitive domains, bounded decode-budget policy, stable error
 categories, primitive RLP bridge helpers, a caller-provided Keccak-256 boundary,
 RLP fuzz-harness evidence, a transaction envelope shell, unvalidated legacy
@@ -50,9 +50,8 @@ P2P integrations become real dependencies.
 
 ## Current Status
 
-The current release candidate is `0.32.0`; transaction and receipt inclusion
-proof verification has passed pentest and is waiting for final GitHub checks
-before tagging.
+The current release candidate is `0.33.0`; account and storage MPT inclusion
+proof verification is implemented and ready for pentest.
 
 Implemented now:
 
@@ -101,6 +100,9 @@ Implemented now:
 - Transaction and receipt MPT inclusion proof verification at
   `rlp(transaction_index)` over the caller-provided Keccak-256 trait boundary,
   with distinct transaction and receipt root domains.
+- Account and storage MPT inclusion proof verification at
+  `keccak256(address)` and `keccak256(slot_key)` over the caller-provided
+  Keccak-256 trait boundary, with distinct account and storage root domains.
 - Proof-gated transaction typestate transitions for decoded, canonical,
   fork-validated, and sender-recovered state tokens.
 - Replay-domain validation for legacy EIP-155 and typed transaction chain IDs
@@ -150,7 +152,6 @@ Not implemented yet:
 - No block parser yet.
 - No ABI/contract helper surface yet; scheduled for `v0.47.0` through
   `v0.55.0`.
-- No account or storage proof verification yet; scheduled for `v0.33.0`.
 - No consensus/Engine API support yet; scheduled for `v0.56.0` through
   `v0.62.0`.
 - No P2P, txpool, sync, mining, builder, or validator-adjacent boundary yet;
@@ -175,21 +176,21 @@ Not implemented yet:
 
 ```toml
 [dependencies]
-eth = "0.32"
+eth = "0.33"
 ```
 
 Disable defaults explicitly for embedded or freestanding builds:
 
 ```toml
 [dependencies]
-eth = { version = "0.32", default-features = false }
+eth = { version = "0.33", default-features = false }
 ```
 
 Optional sanitization support:
 
 ```toml
 [dependencies]
-eth = { version = "0.32", features = ["sanitization"] }
+eth = { version = "0.33", features = ["sanitization"] }
 ```
 
 ## Features
@@ -213,7 +214,7 @@ Optional reviewed software Keccak backend:
 
 ```toml
 [dependencies]
-eth = { version = "0.32", features = ["keccak-tiny"] }
+eth = { version = "0.33", features = ["keccak-tiny"] }
 ```
 
 ```rust
@@ -888,8 +889,11 @@ let result = verify_transaction_inclusion(
 assert!(result.is_err());
 ```
 
-This verifies trie inclusion only. Account and storage proofs remain separate
-verification milestones. See [`docs/mpt-nodes.md`](../../docs/mpt-nodes.md).
+Account and storage proof APIs derive keys as `keccak256(address)` and
+`keccak256(slot_key)`, then compare the encoded account or storage value
+byte-for-byte. They do not decode account fields, prove that a storage root
+belongs to a specific account, or interpret the storage scalar. See
+[`docs/mpt-nodes.md`](../../docs/mpt-nodes.md).
 
 ## Transaction Envelopes
 
@@ -1009,7 +1013,7 @@ the workspace can keep small, auditable boundaries:
 The minimum supported Rust version is Rust `1.90.0`. New deployments should use
 the latest stable Rust verified by the release gates.
 
-Compatibility evidence for `0.32.0`:
+Compatibility evidence for `0.33.0`:
 
 | Rust | Local Evidence |
 | --- | --- |

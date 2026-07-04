@@ -1,6 +1,6 @@
 # eth 0.32.0 Release Notes
 
-Status: pentest passed; waiting for final GitHub checks before tagging.
+Status: tagged and published.
 
 `0.32.0` adds transaction and receipt Merkle Patricia Trie inclusion proof
 verification in `eth-valkyoth-verify`.

@@ -1018,8 +1018,7 @@ Exit criteria:
 
 ### v0.27.0 - Optional Keccak Backend Admission
 
-Status: implementation, pentest remediation, and clean retest complete; waiting
-for final GitHub checks before tagging.
+Status: tagged and published.
 
 Goal: optionally provide a reviewed software Keccak-256 backend without adding
 it to the default core graph.
@@ -1164,6 +1163,8 @@ Exit criteria:
 - Inclusion proof APIs distinguish malformed, absent, and wrong-root proofs.
 
 ### v0.33.0 - Account And Storage Proofs
+
+Status: implementation ready; awaiting pentest.
 
 Goal: verify account and storage proofs against trusted roots.
 

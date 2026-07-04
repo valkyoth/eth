@@ -1,7 +1,7 @@
 # MPT Node Decoding And Inclusion Proofs
 
-Status: v0.32.0 adds transaction and receipt inclusion proof verification on
-top of the bounded v0.31.0 node decoder.
+Status: v0.33.0 adds account and storage inclusion proof verification on top
+of the v0.32.0 transaction and receipt proof verifier.
 
 `eth-valkyoth-verify` exposes `decode_mpt_node` for one canonical RLP trie
 node and `decode_mpt_proof_nodes` for a caller-provided list of encoded proof
@@ -38,6 +38,14 @@ silently substituted for raw `B256` values. Proof walking hashes each consumed
 encoded proof node through the caller-provided `Keccak256` trait boundary and
 uses one shared `DecodeAccumulator` for the traversal.
 
+`verify_account_inclusion` and `verify_storage_inclusion` verify that
+caller-provided encoded account or storage value bytes are present at
+`keccak256(address)` or `keccak256(slot_key)` under a trusted root. The APIs
+use distinct `AccountTrieRoot`, `StorageTrieRoot`, and `StorageSlotKey`
+newtypes. They prove byte-exact trie membership only; they do not decode
+account fields, prove that a storage root belongs to a specific account, or
+interpret the included storage scalar.
+
 The proof APIs distinguish malformed or incomplete proof inputs from
 well-formed absence proofs and wrong-root/value-mismatch proofs. They reject
 unused trailing proof nodes after a successful match. The proof walker is
@@ -47,8 +55,8 @@ turn proof validation into unbounded native stack growth.
 
 This release verifies trie inclusion only. It does not prove that a trusted
 root came from a canonical header, decode or execute the included transaction,
-validate receipt semantics, or verify account/storage proofs. Account and
-storage proof verification is scheduled for `v0.33.0`.
+validate receipt semantics, decode account state, or compose account and
+storage proofs into full JSON-RPC `eth_getProof` semantics.
 
 Source trail:
 

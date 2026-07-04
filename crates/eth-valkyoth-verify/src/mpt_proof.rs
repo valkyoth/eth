@@ -82,7 +82,7 @@ fn verify_indexed_inclusion<H>(
     value: &[u8],
     proof_nodes: &[&[u8]],
     limits: DecodeLimits,
-    mut new_hasher: impl FnMut() -> H,
+    new_hasher: impl FnMut() -> H,
 ) -> Result<(), MptProofVerificationError>
 where
     H: Keccak256,
@@ -94,6 +94,20 @@ where
         .ok_or(MptProofVerificationError::KeyEncode(
             DecodeError::OffsetOutOfBounds,
         ))?;
+    verify_key_inclusion(root, key, value, proof_nodes, limits, new_hasher)
+}
+
+pub(crate) fn verify_key_inclusion<H>(
+    root: MptProofRoot,
+    key: &[u8],
+    value: &[u8],
+    proof_nodes: &[&[u8]],
+    limits: DecodeLimits,
+    mut new_hasher: impl FnMut() -> H,
+) -> Result<(), MptProofVerificationError>
+where
+    H: Keccak256,
+{
     let mut accumulator = limits.accumulator();
     let mut cursor = ProofCursor::new(root, proof_nodes, &mut new_hasher);
     let first = cursor.next_hashed_node(&mut accumulator)?;
