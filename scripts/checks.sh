@@ -8,6 +8,7 @@ scripts/validate-release-metadata.sh
 scripts/validate-modularity-policy.sh check
 scripts/validate-security-policy.sh
 scripts/release_crates.py --check
+scripts/sync_spec_sources.py --lock-only
 scripts/materialize_fuzz_seeds.py --check
 python3 scripts/test-release-crates.py
 scripts/test-release-readiness.sh

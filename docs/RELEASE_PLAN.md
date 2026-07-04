@@ -1051,8 +1051,7 @@ Exit criteria:
 
 ### v0.28.0 - Header Decode And Hashing
 
-Status: implementation, pentest remediation, and clean retest complete; waiting
-for final GitHub checks before tagging.
+Status: tagged and published.
 
 Goal: parse and hash execution-layer block headers.
 
@@ -1194,6 +1193,8 @@ Exit criteria:
 
 ### v0.34.0 - Spec Lock And Fixture Import
 
+Status: implementation ready; awaiting pentest.
+
 Goal: pin official Ethereum specification and fixture revisions.
 
 Deliverables:
@@ -1201,7 +1202,7 @@ Deliverables:
 - populated `spec-lock.toml`;
 - fixture import or download process;
 - fixture license notes;
-- reproducible fixture path.
+- reproducible fixture path;
 - `/home/eldryoth/Work/test/eth` documented as the local reference store.
 
 Verification:

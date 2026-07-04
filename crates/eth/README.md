@@ -26,7 +26,7 @@
 `eth` is the public facade crate for a `no_std`-first Ethereum
 execution-layer protocol workspace.
 
-The crate is intentionally conservative at `0.33.0`: it provides explicit
+The crate is intentionally conservative at `0.34.0`: it provides explicit
 Ethereum primitive domains, bounded decode-budget policy, stable error
 categories, primitive RLP bridge helpers, a caller-provided Keccak-256 boundary,
 RLP fuzz-harness evidence, a transaction envelope shell, unvalidated legacy
@@ -50,9 +50,9 @@ P2P integrations become real dependencies.
 
 ## Current Status
 
-The current release candidate is `0.33.0`; account and storage MPT inclusion
-proof verification has passed pentest and is waiting for final GitHub checks
-before tagging.
+The current release candidate is `0.34.0`; official Ethereum source revisions
+are pinned and the external reference-store workflow is implemented; ready for
+pentest.
 
 Implemented now:
 
@@ -143,6 +143,8 @@ Implemented now:
   set.
 - Release gates for formatting, clippy, tests, packaging, MSRV compatibility,
   dependency policy, audit, SBOM, and pentest evidence.
+- Pinned official Ethereum source revisions plus a reproducible external
+  reference-store sync process for `/home/eldryoth/Work/test/eth`.
 
 Not implemented yet:
 
@@ -177,21 +179,21 @@ Not implemented yet:
 
 ```toml
 [dependencies]
-eth = "0.33"
+eth = "0.34"
 ```
 
 Disable defaults explicitly for embedded or freestanding builds:
 
 ```toml
 [dependencies]
-eth = { version = "0.33", default-features = false }
+eth = { version = "0.34", default-features = false }
 ```
 
 Optional sanitization support:
 
 ```toml
 [dependencies]
-eth = { version = "0.33", features = ["sanitization"] }
+eth = { version = "0.34", features = ["sanitization"] }
 ```
 
 ## Features
@@ -215,7 +217,7 @@ Optional reviewed software Keccak backend:
 
 ```toml
 [dependencies]
-eth = { version = "0.33", features = ["keccak-tiny"] }
+eth = { version = "0.34", features = ["keccak-tiny"] }
 ```
 
 ```rust
@@ -1014,7 +1016,7 @@ the workspace can keep small, auditable boundaries:
 The minimum supported Rust version is Rust `1.90.0`. New deployments should use
 the latest stable Rust verified by the release gates.
 
-Compatibility evidence for `0.33.0`:
+Compatibility evidence for `0.34.0`:
 
 | Rust | Local Evidence |
 | --- | --- |

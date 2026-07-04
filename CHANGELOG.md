@@ -4,6 +4,9 @@ All notable changes to `eth` are documented here.
 
 ## Unreleased
 
+- Started `0.34.0` with refreshed official Ethereum source pins, required
+  spec-lock validation, and a reproducible external reference-store sync
+  workflow for `/home/eldryoth/Work/test/eth`.
 - Started `0.33.0` with account and storage Merkle Patricia Trie inclusion
   proof verification in `eth-valkyoth-verify`.
 - Added `AccountTrieRoot`, `StorageTrieRoot`, `StorageSlotKey`,

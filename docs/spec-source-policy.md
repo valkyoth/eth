@@ -52,6 +52,18 @@ the location with `ETH_REFERENCE_STORE`.
 This repository records revision metadata and test expectations, not large
 upstream repositories unless a release explicitly requires vendored fixtures.
 
+Use `scripts/sync_spec_sources.py` to materialize or verify the pinned
+repositories:
+
+```sh
+scripts/sync_spec_sources.py
+scripts/sync_spec_sources.py --check
+scripts/sync_spec_sources.py --lock-only
+```
+
+See [Ethereum Reference Store](reference-store.md) for the current pinned
+revisions, local path, and fixture license notes.
+
 ## Dependency And Tool Review
 
 When a spec milestone requires third-party crates or tooling, review the latest

@@ -35,8 +35,8 @@ dependencies.
 
 ## Current Status
 
-Status: `v0.33.0` account and storage MPT inclusion proof verification has
-passed pentest and is waiting for final GitHub checks before tagging.
+Status: `v0.34.0` official Ethereum source revisions are pinned and the
+external reference-store workflow is implemented; ready for pentest.
 
 Implemented now:
 
@@ -133,6 +133,8 @@ Implemented now:
 - Security, modularity, supply-chain, implementation, and release planning docs.
 - Local check, release-gate, dependency-policy, SBOM, and pentest evidence.
 - Independent support-crate release planning for crates.io push limits.
+- Pinned official Ethereum source revisions plus a reproducible external
+  reference-store sync process for `/home/eldryoth/Work/test/eth`.
 
 Not implemented yet:
 
@@ -170,14 +172,14 @@ Not implemented yet:
 
 ```toml
 [dependencies]
-eth = "0.33"
+eth = "0.34"
 ```
 
 For optional sanitization support:
 
 ```toml
 [dependencies]
-eth = { version = "0.33", features = ["sanitization"] }
+eth = { version = "0.34", features = ["sanitization"] }
 ```
 
 ## Features
@@ -201,7 +203,7 @@ Optional reviewed software Keccak backend:
 
 ```toml
 [dependencies]
-eth = { version = "0.33", features = ["keccak-tiny"] }
+eth = { version = "0.34", features = ["keccak-tiny"] }
 ```
 
 ```rust
@@ -998,7 +1000,7 @@ friendly, and independently testable.
 The minimum supported Rust version is Rust `1.90.0`. New deployments should use
 the pinned stable Rust `1.96.1` until the toolchain policy is updated.
 
-Compatibility evidence for `0.33.0`:
+Compatibility evidence for `0.34.0`:
 
 | Rust | Local Evidence |
 | --- | --- |

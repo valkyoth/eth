@@ -1,5 +1,5 @@
 [release]
-version = "0.33.0"
+version = "0.34.0"
 policy = "independent"
 
 [crates."eth-valkyoth-codec"]
@@ -7,88 +7,88 @@ previous_version = "0.17.0"
 version = "0.17.0"
 change = "unchanged"
 publish = false
-reason = "No package changes for v0.33.0."
+reason = "No package changes for v0.34.0."
 
 [crates."eth-valkyoth-primitives"]
 previous_version = "0.11.0"
 version = "0.11.0"
 change = "unchanged"
 publish = false
-reason = "No package changes for v0.33.0."
+reason = "No package changes for v0.34.0."
 
 [crates."eth-valkyoth-hash"]
 previous_version = "0.11.0"
 version = "0.11.0"
 change = "unchanged"
 publish = false
-reason = "No package changes for v0.33.0."
+reason = "No package changes for v0.34.0."
 
 [crates."eth-valkyoth-protocol"]
 previous_version = "0.25.0"
 version = "0.25.0"
 change = "unchanged"
 publish = false
-reason = "No package changes for v0.33.0."
+reason = "No package changes for v0.34.0."
 
 [crates."eth-valkyoth-verify"]
-previous_version = "0.19.0"
+previous_version = "0.20.0"
 version = "0.20.0"
-change = "code"
-publish = true
-reason = "Adds account and storage MPT inclusion proof verification over the Keccak trait boundary."
+change = "unchanged"
+publish = false
+reason = "No package changes for v0.34.0."
 
 [crates."eth-valkyoth-derive"]
 previous_version = "0.17.0"
 version = "0.17.0"
 change = "unchanged"
 publish = false
-reason = "No package changes for v0.33.0."
+reason = "No package changes for v0.34.0."
 
 [crates."eth-valkyoth-sanitization"]
 previous_version = "0.7.2"
 version = "0.7.2"
 change = "unchanged"
 publish = false
-reason = "No package changes for v0.33.0."
+reason = "No package changes for v0.34.0."
 
 [crates."eth-valkyoth-evm"]
 previous_version = "0.7.0"
 version = "0.7.0"
 change = "unchanged"
 publish = false
-reason = "No package changes for v0.33.0."
+reason = "No package changes for v0.34.0."
 
 [crates."eth-valkyoth-rpc"]
 previous_version = "0.7.0"
 version = "0.7.0"
 change = "unchanged"
 publish = false
-reason = "No package changes for v0.33.0."
+reason = "No package changes for v0.34.0."
 
 [crates."eth-valkyoth-signer"]
 previous_version = "0.7.1"
 version = "0.7.1"
 change = "unchanged"
 publish = false
-reason = "No package changes for v0.33.0."
+reason = "No package changes for v0.34.0."
 
 [crates."eth-valkyoth-reth"]
 previous_version = "0.7.0"
 version = "0.7.0"
 change = "unchanged"
 publish = false
-reason = "No package changes for v0.33.0."
+reason = "No package changes for v0.34.0."
 
 [crates."eth-valkyoth-testkit"]
 previous_version = "0.7.0"
 version = "0.7.0"
 change = "unchanged"
 publish = false
-reason = "No package changes for v0.33.0."
+reason = "No package changes for v0.34.0."
 
 [crates.eth]
-previous_version = "0.32.0"
-version = "0.33.0"
-change = "code"
+previous_version = "0.33.0"
+version = "0.34.0"
+change = "metadata"
 publish = true
-reason = "Re-exports the new account and storage proof verification APIs and updates packaged documentation."
+reason = "Updates packaged documentation for v0.34.0 spec-lock and reference-store workflow."

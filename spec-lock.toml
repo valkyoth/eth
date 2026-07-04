@@ -1,20 +1,21 @@
-# Pinned upstream specification and fixture revisions.
+# Pinned upstream specification and fixture revisions for v0.34.0.
 #
-# v0.11.0 starts transaction envelope work from pinned upstream revisions.
-# Broader transaction validation and fixture coverage remain gated by the
-# spec-source policy.
-# See docs/spec-source-policy.md for the required source-check workflow.
+# These revisions were checked against official Ethereum repositories on
+# 2026-07-04. See docs/spec-source-policy.md and
+# docs/reference-store.md for the required source-check workflow.
 
 [ethereum]
+spec_required = true
+checked_at = "2026-07-04"
 execution_specs_repo = "https://github.com/ethereum/execution-specs"
-execution_specs_rev = "26f47861dfbbd6b33d6a050ece5dae0ee4611285"
+execution_specs_rev = "4f5c7d19adc916a268b7eadc196756068a325515"
 execution_tests_repo = "https://github.com/ethereum/tests"
 execution_tests_rev = "c67e485ff8b5be9abc8ad15345ec21aa22e290d9"
 eips_repo = "https://github.com/ethereum/EIPs"
-eips_rev = "f3a406aa315339acdb2cbe38f7e11b63972e96e0"
+eips_rev = "1b4e9a44c1fd51ffd8afe4f0c404cf51d84cff64"
 execution_apis_repo = "https://github.com/ethereum/execution-apis"
-execution_apis_rev = "ff44b23305f3b85334216f8c93e6d0b5e7a5867e"
+execution_apis_rev = "f74de4b86e3b011384808c294c3d71f2854729a2"
 consensus_specs_repo = "https://github.com/ethereum/consensus-specs"
-consensus_specs_rev = "bb85898493a38d117a40f8004d8c2befb735e412"
+consensus_specs_rev = "bd454cb0a6cff1b210ea9de208803df4d9966655"
 local_reference_store_env = "ETH_REFERENCE_STORE"
 local_reference_store_default = "../../test/eth"

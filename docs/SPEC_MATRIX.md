@@ -1,6 +1,6 @@
 # eth Specification Matrix
 
-Status: source revisions pinned for `v0.33.0`; scalar, list, and canonical
+Status: source revisions pinned for `v0.34.0`; scalar, list, and canonical
 integer RLP decoding, canonical RLP encoding helpers, primitive RLP bridging,
 Keccak-256 trait boundary, RLP fuzz harness baseline, and transaction envelope
 shell plus unvalidated legacy, EIP-2930 access-list, EIP-1559 dynamic-fee,
@@ -26,17 +26,16 @@ syntactic EIP-4895 withdrawal-list decoding with borrowed entries. `v0.31.0`
 adds bounded syntactic MPT branch, extension, and leaf node decoding. `v0.32.0`
 adds transaction and receipt inclusion proof verification against trusted
 roots. `v0.33.0` adds account and storage inclusion proof verification against
-trusted roots.
+trusted roots. `v0.34.0` refreshes all official Ethereum source and fixture
+pins and documents the reproducible external reference store.
 
 Official source and fixture revisions are governed by
-[Spec Source Policy](spec-source-policy.md). Revisions were checked against
-upstream `HEAD` on 2026-07-01 for `v0.18.0`; later execution-apis,
-consensus-specs, ABI, contract-standard, and networking milestones must refresh
-their own pinned source evidence before implementation. Consensus-sensitive
-behavior must not be implemented from memory. EIP-4895 was checked at the
-pinned EIPs revision in `spec-lock.toml` on 2026-07-02 for `v0.30.0`. The
-pinned `execution-specs` Merkle Patricia Trie source was checked on 2026-07-03
-for `v0.31.0` and reused for v0.32.0 proof walking.
+[Spec Source Policy](spec-source-policy.md). `v0.34.0` checked upstream `HEAD`
+on 2026-07-04 and pinned execution-specs, execution tests, EIPs,
+execution-apis, and consensus-specs in `spec-lock.toml`. The external
+reference-store path and license notes are documented in
+[Ethereum Reference Store](reference-store.md). Consensus-sensitive behavior
+must not be implemented from memory.
 
 | Area | Status | Evidence |
 | --- | --- | --- |
