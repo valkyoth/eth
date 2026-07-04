@@ -46,7 +46,7 @@ scripts/run_execution_fixtures.py --execution-tests /path/to/ethereum-tests
 The runner verifies the checkout origin, pinned commit hash, and clean working
 tree before executing the Rust fixture test.
 
-`scripts/release_0_35_gate.sh` runs this command without `--check`, so the
-pre-tag release gate fails if the pinned fixture checkout is unavailable or
-dirty. General CI uses `--check` to validate the manifest without packaging the
-external corpus.
+`scripts/release_0_35_gate.sh` first materializes the pinned `execution_tests`
+checkout with `scripts/sync_spec_sources.py --only execution_tests`, then runs
+this command without `--check`. General CI uses `--check` to validate the
+manifest without packaging the external corpus.

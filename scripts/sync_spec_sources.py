@@ -14,7 +14,7 @@ from pathlib import Path
 ROOT = Path(__file__).resolve().parents[1]
 SPEC_LOCK = ROOT / "spec-lock.toml"
 ALLOWED_REPO = re.compile(r"^https://github\.com/ethereum/[A-Za-z0-9_.-]+$")
-GIT_TIMEOUT_SECONDS = 120
+GIT_TIMEOUT_SECONDS = 600
 GIT_STATUS_TIMEOUT_SECONDS = 30
 REPO_KEYS = (
     "execution_specs",
@@ -66,6 +66,12 @@ def parse_spec_lock() -> tuple[Path, list[Source]]:
             raise ValueError(f"spec-lock.toml is missing {name}_repo or {name}_rev")
         sources.append(Source(name=name, repo=validate_repo_url(name, repo), rev=validate_revision(name, rev)))
     return store, sources
+
+
+def selected_sources(sources: list[Source], only: str | None) -> list[Source]:
+    if only is None:
+        return sources
+    return [source for source in sources if source.name == only]
 
 
 def git_env() -> dict[str, str]:
@@ -141,9 +147,15 @@ def main() -> int:
         action="store_true",
         help="validate spec-lock.toml without requiring local checkouts",
     )
+    parser.add_argument(
+        "--only",
+        choices=REPO_KEYS,
+        help="limit synchronization or verification to one pinned source",
+    )
     args = parser.parse_args()
 
     store, sources = parse_spec_lock()
+    sources = selected_sources(sources, args.only)
     if args.lock_only:
         print(f"validated {len(sources)} pinned Ethereum sources")
         return 0

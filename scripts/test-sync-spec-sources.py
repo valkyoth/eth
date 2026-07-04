@@ -65,7 +65,7 @@ def expect_error(message: str, func) -> None:
 def test_default_store_fallback_and_repo_validation(tmp: Path) -> None:
     spec_lock = tmp / "spec-lock.toml"
     repo_root = tmp / "repo"
-    repo_root.mkdir()
+    repo_root.mkdir(exist_ok=True)
 
     sync_spec_sources.SPEC_LOCK = spec_lock
     sync_spec_sources.ROOT = repo_root
@@ -83,6 +83,20 @@ def test_default_store_fallback_and_repo_validation(tmp: Path) -> None:
 
     write_spec_lock(spec_lock, "ext::sh -c 'id > /tmp/pwned'")
     expect_error("official Ethereum HTTPS repository", sync_spec_sources.parse_spec_lock)
+
+
+def test_selected_sources_limits_sync_scope(tmp: Path) -> None:
+    spec_lock = tmp / "spec-lock.toml"
+    repo_root = tmp / "repo"
+    repo_root.mkdir(exist_ok=True)
+
+    sync_spec_sources.SPEC_LOCK = spec_lock
+    sync_spec_sources.ROOT = repo_root
+    write_spec_lock(spec_lock, "https://github.com/ethereum/execution-specs")
+
+    _, sources = sync_spec_sources.parse_spec_lock()
+    selected = sync_spec_sources.selected_sources(sources, "execution_tests")
+    assert [source.name for source in selected] == ["execution_tests"]
 
 
 def test_verify_source_rejects_dirty_checkout(tmp: Path) -> None:
@@ -115,6 +129,7 @@ def main() -> int:
     with tempfile.TemporaryDirectory() as directory:
         tmp = Path(directory)
         test_default_store_fallback_and_repo_validation(tmp)
+        test_selected_sources_limits_sync_scope(tmp)
         test_verify_source_rejects_dirty_checkout(tmp)
     print("sync_spec_sources.py tests passed")
     return 0

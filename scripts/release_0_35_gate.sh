@@ -5,6 +5,7 @@ scripts/checks.sh
 scripts/check_latest_tools.sh
 scripts/release_crates.py --check
 scripts/sync_spec_sources.py --lock-only
+scripts/sync_spec_sources.py --only execution_tests
 python3 scripts/test-sync-spec-sources.py
 scripts/run_execution_fixtures.py --check
 scripts/materialize_fuzz_seeds.py --check

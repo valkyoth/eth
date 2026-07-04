@@ -30,9 +30,10 @@ unsupported until their matching protocol layers exist.
 - The fixture runner reuses the spec-source repository and revision validators
   and hardens git subprocess calls with disabled hooks/fsmonitor, HTTPS-only git
   transport, disabled terminal prompts, and timeouts.
-- The v0.35.0 release gate runs the actual pinned corpus before tagging. Release
-  CI validates the fixture manifest in `--check` mode without requiring large
-  upstream fixture repositories in the crate package.
+- The v0.35.0 release gate materializes the pinned `execution_tests` checkout
+  and runs the actual pinned corpus before tagging. Release CI validates the
+  fixture manifest in `--check` mode without requiring large upstream fixture
+  repositories in the crate package.
 - The Rust fixture walker skips symlinks and caps directory recursion depth.
 - No broad execution-test compatibility is implied by this release. Only the
   `RLPTests` fixture group is claimed, and that claim is structural RLP fixture
