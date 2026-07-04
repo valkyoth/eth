@@ -1138,7 +1138,8 @@ Exit criteria:
 
 ### v0.32.0 - Inclusion Proof Verification
 
-Status: implementation in progress; awaiting pentest.
+Status: implementation, pentest remediation, and clean retest complete; waiting
+for final GitHub checks before tagging.
 
 Goal: verify transaction and receipt inclusion proofs.
 

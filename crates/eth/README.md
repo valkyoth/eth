@@ -51,7 +51,8 @@ P2P integrations become real dependencies.
 ## Current Status
 
 The current release candidate is `0.32.0`; transaction and receipt inclusion
-proof verification is implemented and awaiting pentest.
+proof verification has passed pentest and is waiting for final GitHub checks
+before tagging.
 
 Implemented now:
 

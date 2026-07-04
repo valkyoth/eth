@@ -35,8 +35,8 @@ dependencies.
 
 ## Current Status
 
-Status: `v0.32.0` transaction and receipt inclusion proof verification is
-implemented and awaiting pentest.
+Status: `v0.32.0` transaction and receipt inclusion proof verification has
+passed pentest and is waiting for final GitHub checks before tagging.
 
 Implemented now:
 
