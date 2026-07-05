@@ -305,6 +305,33 @@ fn rejects_raw_json_structural_depth_before_parser_walk() {
     );
 }
 
+#[test]
+fn rejects_raw_json_array_width_before_parser_walk() {
+    let mut json = String::from(
+        r#"{"types":{"Value":[]},"primaryType":"Value","domain":{},"message":{},"unused":["#,
+    );
+    for index in 0..513 {
+        if index != 0 {
+            json.push(',');
+        }
+        json.push('0');
+    }
+    json.push_str("]}");
+
+    assert_json_error(&json, Eip712JsonLimits::DEFAULT, Eip712JsonError::Json);
+}
+
+#[test]
+fn rejects_raw_json_string_length_before_parser_walk() {
+    let mut json = String::from(
+        r#"{"types":{"Value":[]},"primaryType":"Value","domain":{},"message":{},"unused":""#,
+    );
+    json.push_str(&"x".repeat(8195));
+    json.push_str(r#""}"#);
+
+    assert_json_error(&json, Eip712JsonLimits::DEFAULT, Eip712JsonError::Json);
+}
+
 fn assert_json_error(json: &str, limits: Eip712JsonLimits, expected: Eip712JsonError) {
     let mut scratch = [0_u8; 512];
     assert_eq!(

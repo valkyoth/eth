@@ -16,6 +16,8 @@ core dependency independence audit.
   by the gate.
 - `scripts/release_0_37_5_gate.sh` captures default, `eip712-json`,
   `sanitization`, and all-feature cargo-tree evidence.
+- Raw EIP-712 JSON fuzz seeds now cover wide object, wide array, and deep
+  nesting parser paths.
 
 ## Changed
 
@@ -24,6 +26,8 @@ core dependency independence audit.
   facade package.
 - `docs/core-independence-audit.md`, `docs/CRATE_VERSION_MATRIX.md`, and the
   README files now name `v0.37.5` as the optional-boundary evidence release.
+- The EIP-712 JSON DOM rejects oversized raw arrays and strings before keeping
+  them in the parsed DOM.
 
 ## Security Notes
 
@@ -31,6 +35,7 @@ core dependency independence audit.
   `eth-valkyoth-sanitization`, or `sanitization`.
 - `eip712-json` remains an explicit `std` parser boundary and admits
   `serde`/`serde_json` only through `eth-valkyoth-verify/json`.
+- `serde_json/unbounded_depth` is now an executable release-gate invariant.
 - `sanitization` remains an explicit secret-clearing bridge and admits the
   external `sanitization` crate only through `eth-valkyoth-sanitization`.
 

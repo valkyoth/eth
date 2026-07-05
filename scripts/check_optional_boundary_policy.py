@@ -16,6 +16,7 @@ SANITIZATION_MANIFEST = ROOT / "crates" / "eth-valkyoth-sanitization" / "Cargo.t
 DEFAULT_FORBIDDEN = frozenset(("eth-valkyoth-sanitization", "sanitization", "serde", "serde_json"))
 JSON_REQUIRED = frozenset(("serde", "serde_json"))
 SANITIZATION_REQUIRED = frozenset(("eth-valkyoth-sanitization", "sanitization"))
+DEPENDENCY_TABLES = ("dependencies", "dev-dependencies", "build-dependencies")
 
 
 def load_toml(path: Path) -> dict:
@@ -40,6 +41,52 @@ def dependency(manifest: dict, name: str) -> object:
 def optional_dependency(manifest: dict, name: str) -> bool:
     entry = dependency(manifest, name)
     return isinstance(entry, dict) and entry.get("optional") is True
+
+
+def dependency_feature_enabled(entry: object, package: str, feature_name: str) -> bool:
+    if not isinstance(entry, dict):
+        return False
+    if entry.get("package", package) != package:
+        return False
+    features = entry.get("features")
+    return isinstance(features, list) and feature_name in features
+
+
+def manifest_dependency_tables(manifest: dict) -> list[dict]:
+    tables: list[dict] = []
+    for table_name in DEPENDENCY_TABLES:
+        table = manifest.get(table_name)
+        if isinstance(table, dict):
+            tables.append(table)
+    targets = manifest.get("target")
+    if isinstance(targets, dict):
+        for target in targets.values():
+            if isinstance(target, dict):
+                for table_name in DEPENDENCY_TABLES:
+                    table = target.get(table_name)
+                    if isinstance(table, dict):
+                        tables.append(table)
+    return tables
+
+
+def check_serde_json_depth_feature() -> list[str]:
+    errors: list[str] = []
+    for manifest_path in sorted(ROOT.rglob("Cargo.toml")):
+        if "target" in manifest_path.parts:
+            continue
+        manifest = load_toml(manifest_path)
+        for table in manifest_dependency_tables(manifest):
+            for name, entry in table.items():
+                is_serde_json = name == "serde_json" or (
+                    isinstance(entry, dict) and entry.get("package") == "serde_json"
+                )
+                if is_serde_json and dependency_feature_enabled(
+                    entry, "serde_json", "unbounded_depth"
+                ):
+                    errors.append(
+                        f"{manifest_path.relative_to(ROOT)} must not enable serde_json/unbounded_depth"
+                    )
+    return errors
 
 
 def cargo_tree(*args: str) -> str:
@@ -115,6 +162,7 @@ def check_graphs() -> list[str]:
 
 def main() -> int:
     errors = check_feature_wiring()
+    errors.extend(check_serde_json_depth_feature())
     errors.extend(check_graphs())
     if errors:
         for error in errors:

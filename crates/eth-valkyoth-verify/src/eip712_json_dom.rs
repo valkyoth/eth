@@ -8,7 +8,9 @@ use std::vec::Vec;
 
 use super::Eip712JsonError;
 
+const MAX_JSON_ARRAY_ITEMS: usize = 512;
 const MAX_JSON_OBJECT_KEYS: usize = 512;
+const MAX_JSON_STRING_BYTES: usize = 8194;
 
 pub(super) enum Json {
     Null,
@@ -109,10 +111,19 @@ impl<'de> Visitor<'de> for JsonVisitor {
     where
         E: serde::de::Error,
     {
+        if value.len() > MAX_JSON_STRING_BYTES {
+            return Err(E::custom("string exceeds raw JSON DOM limit"));
+        }
         Ok(Json::String(value.to_string()))
     }
 
-    fn visit_string<E>(self, value: String) -> Result<Self::Value, E> {
+    fn visit_string<E>(self, value: String) -> Result<Self::Value, E>
+    where
+        E: serde::de::Error,
+    {
+        if value.len() > MAX_JSON_STRING_BYTES {
+            return Err(E::custom("string exceeds raw JSON DOM limit"));
+        }
         Ok(Json::String(value))
     }
 
@@ -130,6 +141,9 @@ impl<'de> Visitor<'de> for JsonVisitor {
     {
         let mut values = Vec::new();
         while let Some(value) = seq.next_element()? {
+            if values.len() >= MAX_JSON_ARRAY_ITEMS {
+                return Err(A::Error::custom("array exceeds raw JSON DOM limit"));
+            }
             values.push(value);
         }
         Ok(Json::Array(values))

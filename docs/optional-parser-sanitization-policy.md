@@ -34,8 +34,10 @@ must remain opt-in because it admits parser dependencies and accepts untrusted
 JSON text. The boundary keeps these constraints:
 
 - duplicate JSON object keys are rejected;
-- explicit parser limits cap input bytes, object members, arrays, strings, and
-  typed-data structures;
+- raw JSON DOM construction has fixed caps on object members, array items, and
+  string byte length before values are retained;
+- explicit typed-data parser limits cap input bytes, EIP-712 array items,
+  EIP-712 string values, and typed-data structures;
 - raw JSON structural depth is checked before the typed-data walker;
 - `serde_json/unbounded_depth` is not admitted;
 - parsing does not add a concrete Keccak or secp256k1 implementation.
@@ -78,6 +80,7 @@ features are also enabled.
 - `eth-valkyoth-verify/json` explicitly requires `std`, `serde`, and
   `serde_json`;
 - `serde` and `serde_json` remain optional in `eth-valkyoth-verify`;
+- no manifest enables `serde_json/unbounded_depth`;
 - the default graph excludes JSON parser and sanitization crates;
 - the JSON graph includes `serde` and `serde_json` but excludes sanitization;
 - the sanitization graph includes `eth-valkyoth-sanitization` and

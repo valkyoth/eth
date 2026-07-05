@@ -29,6 +29,16 @@ def main() -> int:
     assert "eth-valkyoth-sanitization" in checker.DEFAULT_FORBIDDEN
     assert checker.JSON_REQUIRED == frozenset(("serde", "serde_json"))
     assert checker.SANITIZATION_REQUIRED == frozenset(("eth-valkyoth-sanitization", "sanitization"))
+    assert checker.dependency_feature_enabled(
+        {"package": "serde_json", "features": ["unbounded_depth"]},
+        "serde_json",
+        "unbounded_depth",
+    )
+    assert not checker.dependency_feature_enabled(
+        {"package": "serde_json", "features": ["preserve_order"]},
+        "serde_json",
+        "unbounded_depth",
+    )
 
     print("optional boundary policy tests passed")
     return 0
