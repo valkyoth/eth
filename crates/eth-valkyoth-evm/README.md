@@ -25,8 +25,9 @@ first execution boundary types:
   transaction envelope shell;
 - `StateSnapshot` supplies account/storage state behind a caller-provided
   snapshot ID;
-- `ExecutionReport` records the exact environment, transaction type, and state
-  snapshot selected for an execution attempt.
+- `ExecutionReport` records the exact environment, transaction type,
+  caller-computed transaction hash, and state snapshot selected for an
+  execution attempt.
 
 No execution backend is admitted yet. The previous REVM dependency review
 remains in force: current REVM candidates are rejected by this repository's

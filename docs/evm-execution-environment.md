@@ -46,10 +46,13 @@ attempt can report which state identity was used.
 
 - the exact `ExecutionEnvironment`;
 - the transaction type domain;
+- the caller-computed Keccak-256 hash of the exact raw transaction bytes;
 - the state snapshot ID.
 
 `ExecutionResult` is present as the future backend result envelope. It carries
-status, gas used, and the report. No function currently performs EVM execution;
+status, gas used, and the report. The EVM boundary does not compute Keccak-256;
+callers must pass a transaction hash computed by their reviewed hash backend
+when constructing the report. No function currently performs EVM execution;
 `ExecutionError::BackendUnavailable` records that a backend is not admitted by
 this crate version.
 
@@ -58,5 +61,8 @@ this crate version.
 - REVM remains rejected by the existing dependency review and runtime
   dependency policy.
 - The boundary is `no_std` and uses only first-party workspace crates.
+- Reports bind both transaction type and transaction hash so two transactions
+  of the same type cannot produce identical audit reports under the same block
+  and snapshot.
 - Later gas estimation and execution backends must accept this boundary rather
   than inventing parallel fork, block, transaction, or snapshot inputs.

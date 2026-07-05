@@ -85,12 +85,17 @@ impl<'a, S: StateSnapshot + ?Sized> ExecutionRequest<'a, S> {
         self.snapshot
     }
 
-    /// Builds a report that binds fork, block, transaction, and snapshot IDs.
+    /// Builds a report with a caller-computed transaction hash.
+    ///
+    /// This crate does not compute Keccak-256 here because concrete hash
+    /// implementations stay outside the EVM boundary. Callers must supply the
+    /// hash of [`ExecutionTransaction::raw`] using their reviewed hash backend.
     #[must_use]
-    pub fn report(&self) -> ExecutionReport {
+    pub fn report(&self, transaction_hash: B256) -> ExecutionReport {
         ExecutionReport {
             environment: self.environment,
             transaction_type: self.transaction.transaction_type(),
+            transaction_hash,
             snapshot_id: self.snapshot.snapshot_id(),
         }
     }
@@ -103,6 +108,8 @@ pub struct ExecutionReport {
     pub environment: ExecutionEnvironment,
     /// Legacy or typed transaction domain selected for execution.
     pub transaction_type: TransactionType,
+    /// Caller-computed Keccak-256 hash of the exact raw transaction bytes.
+    pub transaction_hash: B256,
     /// Caller-provided state snapshot identity.
     pub snapshot_id: B256,
 }

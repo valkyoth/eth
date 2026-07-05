@@ -16,7 +16,8 @@ admit REVM or any other concrete execution backend.
 - `ExecutionTransaction::decode` binds raw transaction bytes to a bounded
   protocol `TransactionEnvelope` shell through `decode_transaction_envelope`.
 - `ExecutionRequest::report` records the exact fork/block environment,
-  transaction type domain, and caller-provided snapshot ID.
+  transaction type domain, caller-computed transaction hash, and
+  caller-provided snapshot ID.
 - `docs/evm-execution-environment.md` documents the boundary.
 - `scripts/release_0_38_gate.sh` captures default, `evm`, and all-feature
   dependency tree evidence.
@@ -33,6 +34,9 @@ admit REVM or any other concrete execution backend.
 
 - No third-party EVM engine is admitted by this release.
 - REVM remains rejected by the existing dependency review and dependency gates.
+- Execution reports require a caller-computed transaction hash so reports bind
+  the exact transaction identity without pulling a concrete Keccak backend into
+  this crate.
 - Future execution and gas-estimation code must consume the explicit
   environment, transaction, and snapshot boundary.
 

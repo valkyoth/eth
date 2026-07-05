@@ -56,6 +56,43 @@ fn revm_dependency_is_not_admitted_until_policy_passes() {
 }
 
 #[test]
+fn environment_rejects_inactive_fork() {
+    let mut context = validation_context();
+    context.block_number = BlockNumber::new(1);
+    context.timestamp = UnixTimestamp::new(1);
+    let mut block = block_context();
+    block.block_number = BlockNumber::new(1);
+    block.timestamp = UnixTimestamp::new(1);
+
+    assert_eq!(
+        ExecutionEnvironment::try_new(context, block),
+        Err(ExecutionEnvironmentError::InactiveFork)
+    );
+}
+
+#[test]
+fn environment_rejects_chain_mismatch() {
+    let mut block = block_context();
+    block.chain_id = ChainId::new(2);
+
+    assert_eq!(
+        ExecutionEnvironment::try_new(validation_context(), block),
+        Err(ExecutionEnvironmentError::ChainMismatch)
+    );
+}
+
+#[test]
+fn environment_rejects_block_number_mismatch() {
+    let mut block = block_context();
+    block.block_number = BlockNumber::new(999);
+
+    assert_eq!(
+        ExecutionEnvironment::try_new(validation_context(), block),
+        Err(ExecutionEnvironmentError::BlockNumberMismatch)
+    );
+}
+
+#[test]
 fn environment_rejects_mismatched_block_context() {
     let mut block = block_context();
     block.timestamp = UnixTimestamp::new(13);
@@ -100,15 +137,17 @@ fn request_report_binds_environment_transaction_and_snapshot() {
     let snapshot = TestSnapshot {
         id: B256::from_bytes([0x22; 32]),
     };
+    let transaction_hash = B256::from_bytes([0x99; 32]);
 
     let request = ExecutionRequest::new(environment, transaction, &snapshot);
-    let report = request.report();
+    let report = request.report(transaction_hash);
 
     assert_eq!(request.environment(), environment);
     assert_eq!(request.transaction().raw(), &[0xc0]);
     assert_eq!(request.snapshot().snapshot_id(), snapshot.id);
     assert_eq!(report.environment, environment);
     assert_eq!(report.transaction_type.get(), 0);
+    assert_eq!(report.transaction_hash, transaction_hash);
     assert_eq!(report.snapshot_id, snapshot.id);
 }
 
