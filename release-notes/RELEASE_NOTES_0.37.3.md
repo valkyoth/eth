@@ -38,6 +38,9 @@ the reviewed compatibility adapter with `secp256k1-k256`.
 - Backend implementations must reject malformed scalars, enforce low-s,
   accept only y-parity values `0` and `1`, and return only a 64-byte
   uncompressed public-key payload.
+- After pentest feedback, scalar and EIP-2 low-s validation are enforced
+  centrally before any caller-provided backend is invoked. Backend revalidation
+  is defense in depth, not the only malleability control.
 - Address derivation remains first-party and uses the caller-provided
   Keccak-256 boundary.
 - Concrete hashers and secp256k1 backends that hold mutable cryptographic state
@@ -52,7 +55,8 @@ the reviewed compatibility adapter with `secp256k1-k256`.
 
 ## Pentest
 
-- External pentest is required before tagging.
+- Initial external pentest findings have been remediated; clean retest is
+  required before tagging.
 - Permanent report path after clean retest:
   `security/pentest/v0.37.3.md`.
 

@@ -18,13 +18,14 @@ Implementations of `RecoverableSecp256k1` must:
 
 - recover the 64-byte uncompressed public-key payload `x || y` for the exact
   signing digest and signature;
-- reject malformed or zero `r`/`s` scalars;
-- enforce the EIP-2 low-s rule;
-- accept only Ethereum y-parity recovery IDs `0` and `1`;
-- return `VerifyError::InvalidSignature` for malformed signatures or failed
-  recovery;
+- return `VerifyError::InvalidSignature` for failed recovery;
 - document any state-clearing guarantees if the backend holds mutable
   cryptographic state.
+
+The library validates the Ethereum signature scalar policy before the backend
+is invoked: `r` and `s` must be nonzero secp256k1 scalars, and `s` must satisfy
+the EIP-2 low-s bound. Backends may repeat those checks defensively, but
+malleability protection does not rely on backend prose.
 
 The trait does not require `alloc`, `std`, or a software curve crate. HSM,
 platform, WASM, embedded, or audited software backends can all implement the
