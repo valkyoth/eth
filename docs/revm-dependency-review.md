@@ -47,3 +47,9 @@ The release plan includes a follow-up dependency recheck before any temporary
 execution adapter is implemented. `v0.40.0` through `v0.47.0` reserve the
 first-party native EVM engine path, so a future REVM adapter is reference or
 compatibility infrastructure rather than the trusted 1.0 execution core.
+
+That recheck also creates the advisory upstream-monitoring script used for
+maintenance planning. The script must check the latest REVM registry line and
+official Ethereum hardfork/spec and fixture revisions, then report whether a
+maintenance release may be needed for fork, opcode, gas, precompile,
+transaction-type, or fixture changes.

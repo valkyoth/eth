@@ -69,3 +69,12 @@ revisions, local path, and fixture license notes.
 When a spec milestone requires third-party crates or tooling, review the latest
 versions at the same time as the official Ethereum sources. Dependency
 admission still follows [Supply-Chain Security](supply-chain-security.md).
+
+When execution or fork-aware behavior is active, maintain an advisory upstream
+check script that compares the pinned `spec-lock.toml` revisions with current
+official Ethereum hardfork/spec repositories, execution fixtures, and any
+temporary reference engine such as REVM. The script should report when a
+maintenance release may be needed for new fork rules, opcodes, gas schedules,
+precompiles, transaction types, or fixtures. Upstream movement alone is not a
+release claim; claims are updated only after the new sources are pinned,
+implemented, tested, and pentested.

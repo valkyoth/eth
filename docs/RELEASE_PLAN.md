@@ -68,6 +68,14 @@ A version is not tag-ready until:
 Run it before updating pinned tools and before release when network access is
 available, but do not make tag readiness depend on live upstream state.
 
+Ethereum upstream monitoring is also a maintenance requirement. When the EVM
+or fork-aware protocol surface is active, the planned automation must check the
+latest REVM registry line, official Ethereum hardfork/spec sources, and pinned
+fixture revisions, then report whether a maintenance release is needed for new
+fork rules, opcodes, gas costs, precompiles, transaction types, or test
+fixtures. Live upstream checks are advisory inputs; concrete release claims
+still depend on pinned revisions in `spec-lock.toml`.
+
 When a version's implementation criteria are done, stop and say:
 
 ```text
@@ -1280,18 +1288,27 @@ Exit criteria:
 
 ### v0.37.1 - REVM Dependency Recheck
 
-Goal: recheck the REVM ecosystem before execution adapter work starts.
+Goal: recheck the REVM ecosystem before execution adapter work starts and add
+automation so future REVM/fork drift is visible.
 
 Deliverables:
 
 - latest REVM version check;
 - MSRV-compatible REVM line check;
 - dependency-policy result update;
+- `scripts/check_ethereum_upstream.sh` or equivalent networked advisory check
+  for latest REVM, official Ethereum hardfork/spec revisions, and pinned
+  execution fixture revisions;
+- maintenance-release report format for newly detected fork rules, opcode/gas
+  schedule changes, precompile changes, transaction type changes, or fixture
+  updates;
 - decision on REVM, a narrower REVM subcrate, or an alternate execution
   boundary.
 
 Verification:
 
+- upstream-check script documents its sources and exits non-zero only for local
+  policy/script failures, not merely because upstream moved;
 - `cargo deny check`
 - `cargo check --workspace --all-features`
 

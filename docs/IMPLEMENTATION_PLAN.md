@@ -102,6 +102,11 @@ store, and update [Spec Matrix](SPEC_MATRIX.md) before claiming support.
 If a behavior is consensus-sensitive and no pinned source or fixture exists,
 implementation stops until the ambiguity is documented and reviewed.
 
+Execution and fork-aware maintenance must include an advisory upstream checker.
+The checker tracks latest REVM, official Ethereum hardfork/spec sources, and
+execution fixture revisions so new fork rules or execution changes become a
+planned maintenance release instead of an accidental drift.
+
 ## Phase 1: Repository Foundation
 
 Create the workspace, policy docs, local check scripts, CI, dependency policy,
