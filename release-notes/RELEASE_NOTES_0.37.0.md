@@ -27,8 +27,9 @@ added to the published dependency graph.
 ## Security Notes
 
 - Pentest remediation replaced the literal-only REVM review test with a
-  lockfile check proving `revm` and `revm-primitives` are absent from the
-  dependency graph.
+  workspace-level lockfile policy script proving `revm` and `revm-primitives`
+  are absent from the dependency graph without shipping monorepo-relative file
+  paths inside the published support crate.
 - Pentest remediation added review and re-review dates to
   `REVM_DEPENDENCY_REVIEW`, and the planned upstream checker now explicitly
   forbids executing fetched network content.

@@ -88,6 +88,7 @@ test -x scripts/release_0_34_gate.sh
 test -x scripts/release_0_35_gate.sh
 test -x scripts/release_0_36_gate.sh
 test -x scripts/release_0_37_gate.sh
+test -x scripts/test-workspace-dependency-policy.py
 test -f docs/spec-source-policy.md
 test -f docs/reference-store.md
 test -f docs/execution-fixture-harness.md

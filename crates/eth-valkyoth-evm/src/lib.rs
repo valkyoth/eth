@@ -63,11 +63,4 @@ mod tests {
         let review = revm_dependency_review();
         assert!(!review.admitted);
     }
-
-    #[test]
-    fn revm_is_absent_from_the_dependency_graph() {
-        let lock = include_str!(concat!(env!("CARGO_MANIFEST_DIR"), "/../../Cargo.lock"));
-        assert!(!lock.contains("name = \"revm\""));
-        assert!(!lock.contains("name = \"revm-primitives\""));
-    }
 }
