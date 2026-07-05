@@ -23,6 +23,8 @@ pub use eth_valkyoth_verify as verify;
 /// Stable error types re-exported by the facade crate.
 pub mod error {
     pub use eth_valkyoth_codec::{DecodeError, DecodeErrorCategory, ResourceError, RlpDeriveError};
+    #[cfg(feature = "evm")]
+    pub use eth_valkyoth_evm::{ExecutionEnvironmentError, ExecutionError, SnapshotError};
     pub use eth_valkyoth_protocol::{
         AccessListTransactionDecodeError, AccessListTransactionDecodeErrorCategory,
         BlobTransactionDecodeError, BlobTransactionDecodeErrorCategory, BlockHeaderDecodeError,

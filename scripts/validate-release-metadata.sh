@@ -69,6 +69,7 @@ test -f release-notes/RELEASE_NOTES_0.37.2.md
 test -f release-notes/RELEASE_NOTES_0.37.3.md
 test -f release-notes/RELEASE_NOTES_0.37.4.md
 test -f release-notes/RELEASE_NOTES_0.37.5.md
+test -f release-notes/RELEASE_NOTES_0.38.0.md
 test -x scripts/release_0_9_gate.sh
 test -x scripts/release_0_10_gate.sh
 test -x scripts/release_0_11_gate.sh
@@ -104,6 +105,7 @@ test -x scripts/release_0_37_2_gate.sh
 test -x scripts/release_0_37_3_gate.sh
 test -x scripts/release_0_37_4_gate.sh
 test -x scripts/release_0_37_5_gate.sh
+test -x scripts/release_0_38_gate.sh
 test -x scripts/test-workspace-dependency-policy.py
 test -f docs/spec-source-policy.md
 test -f docs/reference-store.md
@@ -117,6 +119,7 @@ test -f docs/ethereum-upstream-check.md
 test -f docs/core-independence-audit.md
 test -f docs/constant-time-reference-policy.md
 test -f docs/optional-parser-sanitization-policy.md
+test -f docs/evm-execution-environment.md
 grep -q 'execution_specs_repo' spec-lock.toml
 grep -q 'local_reference_store_env' spec-lock.toml
 grep -q 'local_reference_store_default' spec-lock.toml
@@ -137,4 +140,4 @@ grep -q 'license = "MIT OR Apache-2.0"' Cargo.toml
 grep -q 'repository = "https://github.com/valkyoth/eth"' Cargo.toml
 grep -q 'channel = "1.96.1"' rust-toolchain.toml
 grep -q 'rust-version = "1.90"' Cargo.toml
-grep -q 'valkyoth-eth-upstream-check/0.37.5' scripts/check_ethereum_upstream.py
+grep -q 'valkyoth-eth-upstream-check/0.38.0' scripts/check_ethereum_upstream.py

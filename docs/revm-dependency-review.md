@@ -5,12 +5,13 @@ non-admitted.
 
 ## Decision
 
-REVM is not part of the `eth` dependency graph in v0.37.1.
+REVM is not part of the `eth` dependency graph in v0.38.0.
 
 The review was performed on 2026-07-05. It must be refreshed before
-2026-10-05, or before any `eth-valkyoth-evm` feature work, whichever is sooner.
-The review checked the latest registry line and the newest line compatible
-with the workspace's Rust `1.90.0` floor:
+2026-10-05, or before any REVM/external execution backend is admitted,
+whichever is sooner. First-party boundary-only work in `eth-valkyoth-evm` does
+not admit REVM. The review checked the latest registry line and the newest line
+compatible with the workspace's Rust `1.90.0` floor:
 
 | Candidate | Version | Rust requirement | Result |
 | --- | --- | --- | --- |
@@ -37,7 +38,8 @@ issue but still introduces duplicate crypto/hash lines and the unmaintained
 
 `eth-valkyoth-evm` publishes a first-party `RevmDependencyReview` value in
 v0.37.0 so downstream users can see the reviewed decision from code and docs.
-No REVM feature or dependency is exposed until a future review can pass:
+`v0.38.0` adds first-party execution boundary types only. No REVM feature or
+dependency is exposed until a future review can pass:
 
 - `cargo deny check`;
 - Rust `1.90.0` through `1.96.1` compatibility;

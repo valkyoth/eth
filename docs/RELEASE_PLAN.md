@@ -1464,21 +1464,30 @@ Exit criteria:
 
 ### v0.38.0 - Explicit Execution Environment
 
+Status: implementation ready; awaiting pentest.
+
 Goal: execute with explicit fork, block, transaction, and snapshot inputs.
 
 Deliverables:
 
-- environment conversion;
-- state snapshot trait;
-- execution result model.
+- `ExecutionEnvironment` and `BlockExecutionContext` with fork/block
+  consistency checks;
+- `ExecutionTransaction` binding raw bytes to decoded envelope evidence;
+- `StateSnapshot` trait and `SnapshotAccount` view;
+- `ExecutionRequest`, `ExecutionReport`, and future `ExecutionResult` model;
+- documentation and release gate for the no-backend execution boundary.
 
 Verification:
 
-- `cargo test -p eth-valkyoth-evm`
+- `cargo test -p eth-valkyoth-evm`;
+- `cargo check -p eth --features evm`;
+- `cargo tree -p eth --no-default-features --features evm -e normal`;
+- `scripts/release_0_38_gate.sh`.
 
 Exit criteria:
 
 - Simulation reports the exact state and fork configuration used.
+- No concrete EVM backend is admitted by this release.
 
 ### v0.39.0 - Bounded Gas Estimation
 

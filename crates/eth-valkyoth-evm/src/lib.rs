@@ -1,6 +1,20 @@
 #![no_std]
 #![forbid(unsafe_code)]
-//! Optional REVM adapter boundary for `eth`.
+//! Explicit no_std EVM execution boundary for `eth`.
+
+#[cfg(feature = "std")]
+extern crate std;
+
+mod environment;
+mod result;
+mod snapshot;
+
+pub use environment::{BlockExecutionContext, ExecutionEnvironment, ExecutionEnvironmentError};
+pub use result::{
+    ExecutionError, ExecutionReport, ExecutionRequest, ExecutionResult, ExecutionStatus,
+    ExecutionTransaction,
+};
+pub use snapshot::{SnapshotAccount, SnapshotError, StateSnapshot};
 
 /// Placeholder proving the EVM adapter is explicit and feature-gated.
 #[derive(Clone, Copy, Debug, Eq, PartialEq)]
@@ -50,17 +64,5 @@ pub const fn revm_dependency_review() -> RevmDependencyReview {
 }
 
 #[cfg(test)]
-mod tests {
-    use super::{EvmAdapterBoundary, revm_dependency_review};
-
-    #[test]
-    fn boundary_is_explicit() {
-        assert_eq!(EvmAdapterBoundary, EvmAdapterBoundary);
-    }
-
-    #[test]
-    fn revm_dependency_is_not_admitted_until_policy_passes() {
-        let review = revm_dependency_review();
-        assert!(!review.admitted);
-    }
-}
+#[path = "tests.rs"]
+mod tests;

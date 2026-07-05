@@ -35,9 +35,9 @@ dependencies.
 
 ## Current Status
 
-Status: `v0.37.5` adds optional parser and sanitization boundary evidence.
-The default facade graph excludes JSON parser and sanitization crates; they
-enter only through explicit opt-in features.
+Status: `v0.38.0` adds the explicit EVM execution environment boundary.
+The optional `evm` feature now exposes no_std execution request, snapshot,
+and report types without admitting REVM or another execution backend.
 
 Implemented now:
 
@@ -104,6 +104,9 @@ Implemented now:
   non-empty authorization lists, fee order, caller-computed gas policy, and
   caller-provided authority account-state checks. Per-authorization failures
   are counted as skipped tuples instead of rejecting the whole transaction.
+- Optional `evm` feature exposing explicit no-std execution environment,
+  transaction input, state snapshot, and result report boundary types without
+  admitting an EVM backend.
 - Digest-level secp256k1 sender recovery through a caller-provided backend
   boundary, with low-s rejection, Ethereum y-parity policy, and caller-provided
   Keccak-256 public-key hashing.
@@ -187,14 +190,14 @@ Not implemented yet:
 
 ```toml
 [dependencies]
-eth = "0.37.5"
+eth = "0.38.0"
 ```
 
 For optional sanitization support:
 
 ```toml
 [dependencies]
-eth = { version = "0.37.5", features = ["sanitization"] }
+eth = { version = "0.38.0", features = ["sanitization"] }
 ```
 
 ## Features
@@ -202,7 +205,7 @@ eth = { version = "0.37.5", features = ["sanitization"] }
 | Feature | Default | Purpose |
 | --- | --- | --- |
 | `std` | no | Enables `std` support in admitted core crates. |
-| `evm` | no | Explicit EVM adapter boundary with REVM dependency review metadata. |
+| `evm` | no | Explicit no_std EVM execution environment, snapshot, and result boundary. |
 | `rpc` | no | Future explicit RPC trust-policy boundary. |
 | `eip712-json` | no | Enables the optional `std` JSON-RPC EIP-712 typed-data parser boundary. |
 | `keccak-tiny` | no | Enables the optional reviewed `tiny-keccak` software backend. |
@@ -213,13 +216,13 @@ eth = { version = "0.37.5", features = ["sanitization"] }
 | `testkit` | no | Test fixtures, conformance helpers, and adversarial inputs. |
 
 Default builds do not enable networking, signing, local key storage, Reth, P2P,
-REVM, or EVM execution.
+REVM, or concrete EVM execution. The optional `evm` feature provides boundary types only.
 
 Optional reviewed software Keccak backend:
 
 ```toml
 [dependencies]
-eth = { version = "0.37.5", features = ["keccak-tiny"] }
+eth = { version = "0.38.0", features = ["keccak-tiny"] }
 ```
 
 ```rust
@@ -233,7 +236,7 @@ Optional reviewed secp256k1 recovery adapter:
 
 ```toml
 [dependencies]
-eth = { version = "0.37.5", features = ["secp256k1-k256"] }
+eth = { version = "0.38.0", features = ["secp256k1-k256"] }
 ```
 
 ## Primitive Domains
@@ -1028,7 +1031,7 @@ friendly, and independently testable.
 | `eth-valkyoth-verify` | yes | Verification boundaries for signatures, proofs, replay domains, and EIP-712 typed-data hashing. |
 | `eth-valkyoth-sanitization` | no | Optional bridge to the `sanitization` crate for secret-bearing Ethereum data. |
 | `eth-valkyoth-derive` | no | Optional sanitization and RLP derive macros. |
-| `eth-valkyoth-evm` | no | EVM adapter boundary with REVM dependency review metadata. |
+| `eth-valkyoth-evm` | no | Explicit no_std EVM execution boundary; no backend admitted yet. |
 | `eth-valkyoth-rpc` | no | Future explicit RPC trust-policy boundary. |
 | `eth-valkyoth-signer` | no | Future signer isolation boundary. |
 | `eth-valkyoth-reth` | no | Future Reth integration boundary. |
@@ -1039,7 +1042,7 @@ friendly, and independently testable.
 The minimum supported Rust version is Rust `1.90.0`. New deployments should use
 the pinned stable Rust `1.96.1` until the toolchain policy is updated.
 
-Compatibility evidence for `0.37.5`:
+Compatibility evidence for `0.38.0`:
 
 | Rust | Local Evidence |
 | --- | --- |
@@ -1056,7 +1059,7 @@ Compatibility evidence for `0.37.5`:
 
 ```bash
 scripts/checks.sh
-scripts/release_0_37_5_gate.sh
+scripts/release_0_38_gate.sh
 ```
 
 For dependency-policy checks, install `cargo-deny` and `cargo-audit`, then run:
