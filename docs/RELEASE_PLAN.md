@@ -1464,7 +1464,8 @@ Exit criteria:
 
 ### v0.38.0 - Explicit Execution Environment
 
-Status: implementation ready; awaiting pentest.
+Status: implementation, pentest remediation, and clean retest complete; waiting
+for GitHub checks before tagging.
 
 Goal: execute with explicit fork, block, transaction, and snapshot inputs.
 
@@ -1488,6 +1489,8 @@ Exit criteria:
 
 - Simulation reports the exact state and fork configuration used.
 - No concrete EVM backend is admitted by this release.
+- The permanent pentest report is committed at
+  `security/pentest/v0.38.0.md`.
 
 ### v0.39.0 - Bounded Gas Estimation
 

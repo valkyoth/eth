@@ -1,6 +1,7 @@
 # eth 0.38.0 Release Notes
 
-Status: implementation ready; awaiting pentest before tagging.
+Status: implementation, pentest remediation, and clean retest complete; waiting
+for final GitHub checks before tagging.
 
 `0.38.0` starts the explicit EVM execution environment boundary. It does not
 admit REVM or any other concrete execution backend.
@@ -42,17 +43,24 @@ admit REVM or any other concrete execution backend.
 
 ## Verification
 
+- `cargo fmt --all --check`
 - `cargo test -p eth-valkyoth-evm`
+- `cargo test --workspace --all-features`
 - `cargo check -p eth --features evm`
 - `cargo clippy -p eth-valkyoth-evm -p eth --all-targets --all-features -- -D warnings`
 - `cargo tree -p eth --no-default-features --features evm -e normal`
+- `cargo deny check`
+- `cargo audit`
 - `scripts/release_0_38_gate.sh`
 
 ## Pentest
 
-- Run pentest on the implementation commit before tagging.
-- Permanent report path after clean retest:
-  `security/pentest/v0.38.0.md`.
+- External pentest found two low findings and one process caveat.
+- Remediation added missing environment rejection tests, made
+  `ExecutionReport` bind a caller-computed transaction hash, and confirmed the
+  supply-chain gates locally.
+- Clean retest passed.
+- Permanent report: `security/pentest/v0.38.0.md`.
 
 ## Versioning
 
