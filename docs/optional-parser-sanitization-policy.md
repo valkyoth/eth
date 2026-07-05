@@ -1,6 +1,6 @@
 # Optional Parser And Sanitization Boundary Policy
 
-Status: `v0.37.5` policy implemented; awaiting pentest before tagging.
+Status: `v0.37.5` policy implemented, pentest remediated, and retest clean.
 
 This document closes the optional parser and sanitization dependency slice from
 the core independence audit. It records exactly when `serde`, `serde_json`,

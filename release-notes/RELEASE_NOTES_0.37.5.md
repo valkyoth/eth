@@ -1,6 +1,7 @@
 # eth 0.37.5 Release Notes
 
-Status: implementation ready; awaiting pentest before tagging.
+Status: implementation, pentest remediation, and clean retest complete; waiting
+for GitHub checks before tagging.
 
 `0.37.5` closes the optional parser and sanitization boundary review from the
 core dependency independence audit.
@@ -55,9 +56,12 @@ core dependency independence audit.
 
 ## Pentest
 
-- Run pentest on the implementation commit before tagging.
-- Permanent report path after clean retest:
-  `security/pentest/v0.37.5.md`.
+- First pass found one low documentation/parser-boundary mismatch and two
+  actionable informational hardening items.
+- Remediation added raw JSON DOM array/string caps, fuzz seeds for raw JSON
+  edge cases, and an executable `serde_json/unbounded_depth` gate.
+- Clean retest passed.
+- Permanent report path: `security/pentest/v0.37.5.md`.
 
 ## Versioning
 
