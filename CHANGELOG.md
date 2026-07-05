@@ -7,6 +7,11 @@ All notable changes to `eth` are documented here.
 - Started `0.37.0` with the REVM dependency admission review, recording that
   current REVM candidates are not admitted because they fail cargo-deny/MSRV
   policy, and adding a code-visible review result in `eth-valkyoth-evm`.
+- Expanded the roadmap for the first-party-core goal: core dependency
+  independence audit, signature/crypto backend boundaries, native EVM
+  execution, full block/state validity, trie-root construction, blob/KZG
+  boundaries, and full execution fixture admission are now explicitly
+  versioned before RPC/Reth/node work.
 - Started `0.36.0` with a dev-only differential structural RLP harness against
   `alloy-rlp`, a documented runner command, mismatch reporting, and release
   gate coverage for the independent reference path.

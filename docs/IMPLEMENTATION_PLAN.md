@@ -5,25 +5,31 @@ Status: planning document
 Crate name: `eth`
 
 1.0 target: a serious production-ready Ethereum toolkit for bounded decoding,
-fork-aware validation, cryptographic verification, contract ABI helpers,
-consensus and Engine API boundaries, explicit RPC trust policy, optional
-first-party EVM execution, optional signer isolation, optional networking/sync
-boundaries, and optional Reth integration.
+fork-aware validation, cryptographic verification, first-party execution-layer
+state transition and block validation, contract ABI helpers, consensus and
+Engine API boundaries, explicit RPC trust policy, optional signer isolation,
+optional networking/sync boundaries, and optional Reth integration.
 
 ## Core Position
 
 `eth` is not a generic re-export of upstream Ethereum crates and must not hide
-networking, signing, consensus, or node behavior behind defaults. It is a
-security-oriented workspace that gives applications stable, testable, explicit
-boundaries around Ethereum operations. The 1.0 roadmap includes optional
-contract, consensus, Engine API, networking, sync, and node-adjacent tracks, but
-the default facade remains conservative and explicit.
+networking, signing, consensus, execution, or node behavior behind defaults. It
+is a security-oriented workspace that gives applications stable, testable,
+explicit boundaries around Ethereum operations. Core Ethereum behavior should
+be first-party where practical. Third-party crates are acceptable only as
+reviewed optional backends, reference implementations, compatibility adapters,
+or explicitly justified cryptographic backends with conformance evidence and a
+boundary. The 1.0 roadmap includes optional contract, consensus, Engine API,
+networking, sync, and node-adjacent tracks, but the default facade remains
+conservative and explicit.
 
 The first production value is:
 
 - bounded canonical decoding of untrusted Ethereum data;
 - explicit chain and fork context;
 - stable protocol types and validation states;
+- first-party execution-layer state transition, trie-root construction, and
+  block-validity support for every claimed fork;
 - signer and key isolation;
 - RPC trust models that do not imply state correctness;
 - contract ABI and common standard helpers that do not imply contract trust;
@@ -44,6 +50,12 @@ The first production value is:
 - Main crate `eth` is a facade over focused crates.
 - Third-party crates require review, current-version checks, license checks,
   feature review, and tests before admission.
+- Third-party crates that implement core Ethereum behavior require an explicit
+  boundary and classification: optional backend, reference-only,
+  compatibility adapter, temporary debt, or documented cryptographic exception.
+- Core protocol claims must not depend solely on an upstream implementation
+  unless the release plan contains a replacement, differential, or audit
+  milestone for that dependency.
 - First-party protocol-facing crates use `#![forbid(unsafe_code)]`.
 - Normal `.rs` files must stay below 500 lines.
 - Security documentation, release notes, and test evidence are release
@@ -200,18 +212,24 @@ Release gate:
 ## Phase 6: Optional Execution Boundary And Native EVM
 
 Review REVM only as a temporary/reference adapter behind `eth-valkyoth-evm`.
-The long-term production path is a first-party native EVM engine built in small
-audited releases. Require explicit fork/spec ID, block environment,
-transaction environment, state snapshot, execution limits, gas accounting,
-state commit policy, official state-test evidence, and differential evidence
-where available.
+The long-term production path is a first-party native EVM engine and full
+execution-layer state transition built in small audited releases. Require
+explicit fork/spec ID, block environment, transaction environment, state
+snapshot, execution limits, gas accounting, state commit policy, genesis
+handling, transaction semantic validity, block validity, trie-root
+construction, blob/KZG boundary decisions, official execution fixture evidence,
+and differential evidence where available.
 
 Release gate:
 
+- core dependency independence audit exists before deeper execution work;
 - REVM cannot enter the graph unless dependency, MSRV, license, feature, and
   cargo-deny policy pass;
 - native engine milestones are covered by official Ethereum state tests for
   claimed forks;
+- full execution claims pass the relevant `TransactionTests`, `BlockchainTests`,
+  `GenesisTests`, `TrieTests`, `DifficultyTests`, EOF tests, and state tests for
+  the claimed fork set;
 - differential tests compare claimed behavior against at least one independent
   implementation when available;
 - gas estimation is bounded by execution count, gas cap, and timeout policy.

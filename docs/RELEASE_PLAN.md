@@ -37,6 +37,11 @@ Every release should prefer:
 - one protocol boundary at a time;
 - fixtures before broad implementation;
 - pinned official Ethereum source revisions before consensus-sensitive code;
+- first-party implementations for core Ethereum wire formats, state machines,
+  validation rules, and execution behavior;
+- third-party crates only as reviewed optional backends, references, or
+  compatibility adapters unless a cryptographic primitive is explicitly
+  accepted with a first-party boundary and replacement/audit plan;
 - negative and adversarial tests with each parser;
 - explicit fork and chain context over global "latest" behavior;
 - optional local Ethereum node smoke fixtures before RPC functionality is
@@ -152,12 +157,14 @@ relevant dependency point.
 | Full EIP-712 `encodeType`/`encodeData`/`hashStruct` support was missing from the roadmap. | Added `v0.26.0 - EIP-712 Typed-Data Encoder`. |
 | EIP-712 JSON-RPC typed-data parsing was deferred from the no-JSON typed encoder without a visible patch milestone. | Added `v0.26.1 - EIP-712 JSON Typed-Data Parser Boundary`. |
 | A first-party optional software Keccak backend was deferred without a versioned admission point. | Added `v0.27.0 - Optional Keccak Backend Admission`. |
-| Formal verification evidence was not scheduled. | Added `v0.79.0 - Kani Formal Verification Harness` as extra assurance, not a replacement for fuzzing, conformance tests, pentest, or audit. |
-| ABI encoding, Engine API, SSZ, and DevP2P/RLPx were marked deferred. | Added `v0.55.0` through `v0.77.0` feature tracks so they are versioned before 1.0. |
-| ENS and common ERC/application standards were not scheduled. | Added `v0.60.0` through `v0.63.0` for ENS and common contract standards. |
-| Node-level sync, txpool, mining/validator boundaries, and observability were not scheduled. | Added `v0.73.0` through `v0.77.0` with explicit library-boundary scope and validation gates. |
+| Formal verification evidence was not scheduled. | Added `v0.87.0 - Kani Formal Verification Harness` as extra assurance, not a replacement for fuzzing, conformance tests, pentest, or audit. |
+| ABI encoding, Engine API, SSZ, and DevP2P/RLPx were marked deferred. | Added `v0.63.0` through `v0.85.0` feature tracks so they are versioned before 1.0. |
+| ENS and common ERC/application standards were not scheduled. | Added `v0.67.0` through `v0.70.0` for common token, ENS, permit, and interface helpers. |
+| Node-level sync, txpool, mining/validator boundaries, and observability were not scheduled. | Added `v0.83.0` through `v0.85.0` with explicit library-boundary scope and validation gates. |
 | REVM dependency admission failed the existing dependency policy. | Added `v0.37.1 - REVM Dependency Recheck` before execution work may continue. |
 | Native audited EVM execution was not explicitly versioned; REVM could look like the long-term core. | Added `v0.40.0` through `v0.47.0` as the first-party EVM engine phase and shifted later versions upward. |
+| Default verification still depends directly on `k256` and `sha3`, which conflicts with the long-term first-party-core goal. | Added `v0.37.2` and `v0.37.3` to audit core dependencies, move cryptographic implementation crates behind explicit boundaries/features, and document any accepted cryptographic backend plan. |
+| Native opcodes alone do not make full Ethereum execution support; genesis, full block validity, trie-root construction, state transition integration, blob/KZG validation, and full execution fixtures were not versioned before RPC/Reth work. | Added `v0.48.0` through `v0.55.0` for full execution state and block-validity work, then shifted later integration tracks upward. |
 
 ## Phase 0: Repository And Release Discipline
 
@@ -1317,6 +1324,67 @@ Exit criteria:
 - Execution work is either unblocked by a clean admitted graph or remains
   explicitly blocked with a documented reason.
 
+### v0.37.2 - Core Dependency Independence Audit
+
+Goal: review every dependency that touches core Ethereum behavior and decide
+whether it is first-party, optional backend, reference-only, or temporary debt.
+
+Deliverables:
+
+- `docs/core-independence-audit.md`;
+- inventory of default, optional, dev-only, and test-only dependencies that
+  influence hashing, signatures, RLP, trie/proof behavior, execution, consensus,
+  networking, or RPC semantics;
+- explicit assessment of current default `k256` use in sender recovery;
+- explicit assessment of current `sha3` use in verification tests and whether
+  it should be dev-only, feature-gated, or replaced by `eth-valkyoth-hash`;
+- policy for cryptographic primitives where a fully first-party implementation
+  would be higher risk than a reviewed backend;
+- versioned follow-up rows for every core dependency that remains in the graph.
+
+Verification:
+
+- `cargo tree -e features` evidence captured in the audit;
+- `cargo deny check`;
+- `cargo audit`.
+
+Exit criteria:
+
+- No core Ethereum dependency is accidental or undocumented.
+- Every third-party core implementation has a boundary, an optional/reference
+  classification, or a first-party replacement milestone.
+
+### v0.37.3 - Signature And Crypto Backend Boundaries
+
+Goal: remove direct default dependence on cryptographic implementation crates
+from verification APIs where a first-party boundary is feasible.
+
+Deliverables:
+
+- recoverable secp256k1 verification trait or backend boundary;
+- `k256` moved behind an explicit reviewed backend feature, compatibility
+  adapter, or documented exception with no hidden default expansion;
+- verification tests use the project hashing boundary instead of a direct
+  default `sha3` dependency where practical;
+- KATs and malformed-signature vectors that run against every admitted
+  secp256k1 backend;
+- documentation for HSM, platform, WASM, or audited software backends;
+- migration notes for callers that used direct sender-recovery helpers.
+
+Verification:
+
+- `cargo test -p eth-valkyoth-verify --all-features`;
+- default `eth` dependency graph check proving no unintended concrete
+  signature or hashing implementation enters by default;
+- `cargo deny check`;
+- `cargo audit`.
+
+Exit criteria:
+
+- Core signature verification APIs are boundary-driven.
+- Concrete cryptographic implementation crates are explicit choices, not
+  invisible protocol-core dependencies.
+
 ### v0.38.0 - Explicit Execution Environment
 
 Goal: execute with explicit fork, block, transaction, and snapshot inputs.
@@ -1532,9 +1600,200 @@ Exit criteria:
 - Native execution is the preferred long-term path; any REVM adapter remains a
   reference or compatibility layer.
 
-## Phase 9: Optional RPC And Signer Boundaries
+## Phase 9: Full Execution State And Block Validity
 
-### v0.48.0 - RPC Dependency Admission
+This phase turns native opcode execution into full execution-layer behavior.
+It covers the upstream fixture groups currently listed as unsupported:
+`TransactionTests`, `BlockchainTests`, `GenesisTests`, `TrieTests`,
+`DifficultyTests`, and fork-specific EOF/state-transition tests.
+
+### v0.48.0 - Genesis And Chain Configuration Import
+
+Goal: construct initial state and chain configuration from explicit genesis
+inputs without trusting a node client.
+
+Deliverables:
+
+- genesis account, storage, code, balance, nonce, and allocation model;
+- chain configuration import with fork activation rules;
+- genesis header construction and hash calculation;
+- genesis state root construction boundary;
+- `GenesisTests` fixture harness.
+
+Verification:
+
+- `GenesisTests` pass for claimed forks/chains;
+- `cargo test -p eth-valkyoth-protocol -p eth-valkyoth-verify`.
+
+Exit criteria:
+
+- A claimed chain can start from reproducible first-party genesis data.
+
+### v0.49.0 - Transaction Semantic Validity
+
+Goal: validate transaction semantics before state transition execution.
+
+Deliverables:
+
+- intrinsic gas calculation for every admitted transaction type;
+- nonce, balance, gas-limit, fee-cap, priority-fee, blob-fee, and access-list
+  semantic checks;
+- EIP-4844 blob-hash count/version/fork checks;
+- EIP-7702 account/delegation integration with sender-state validation;
+- `TransactionTests` harness for claimed transaction families.
+
+Verification:
+
+- official transaction fixtures for claimed forks;
+- adversarial fee, nonce, access-list, blob, and authorization tests.
+
+Exit criteria:
+
+- Decoded and signature-valid transactions are not treated as executable until
+  semantic validity passes against explicit state and fork context.
+
+### v0.50.0 - Header And Block Validity
+
+Goal: validate execution block headers and block-level constraints.
+
+Deliverables:
+
+- parent/number/timestamp/gas/base-fee/blob-gas/excess-blob-gas validation;
+- difficulty and pre/post-Merge terminal-total-difficulty boundary rules;
+- withdrawals-root, transactions-root, receipts-root, logs-bloom, state-root,
+  and requests-hash validation hooks where fork-applicable;
+- ommers/uncles handling for pre-Merge forks and explicit post-Merge rejection;
+- fork activation and optional field consistency checks.
+
+Verification:
+
+- `BlockchainTests` header/block-validity fixture subset for claimed forks;
+- `DifficultyTests` for claimed historical forks.
+
+Exit criteria:
+
+- Block headers are no longer only syntactically decoded and hashed; they can be
+  validated against parent/fork context for claimed forks.
+
+### v0.51.0 - State Transition Integration
+
+Goal: apply valid transactions through the native EVM and update account state.
+
+Deliverables:
+
+- account journal and commit/revert model wired to native EVM execution;
+- gas purchase/refund, miner/beneficiary fee accounting, and sender nonce
+  updates;
+- contract code deployment and account creation/destruction rules;
+- access-list warm/cold state integration;
+- fork-specific state-transition hooks.
+
+Verification:
+
+- official state tests for claimed forks and opcode families;
+- differential comparison against admitted reference engines when available.
+
+Exit criteria:
+
+- The crate can execute claimed transactions against explicit state and produce
+  deterministic post-state.
+
+### v0.52.0 - Receipts, Logs, Bloom, And Withdrawals State Application
+
+Goal: produce and validate execution outputs that bind state transition to
+block roots.
+
+Deliverables:
+
+- receipt construction from execution results;
+- cumulative-gas accounting and receipt type matching;
+- log bloom construction and validation;
+- withdrawal state application and withdrawals-root validation;
+- receipt trie construction boundary.
+
+Verification:
+
+- receipt, withdrawal, and block fixture subsets for claimed forks;
+- malformed cumulative-gas and bloom tests.
+
+Exit criteria:
+
+- Receipts and withdrawals are tied to execution results and block roots, not
+  only decoded as standalone data.
+
+### v0.53.0 - Trie Construction And Root Computation
+
+Goal: build canonical Merkle Patricia tries, not only verify supplied proofs.
+
+Deliverables:
+
+- first-party trie insertion/update/delete model;
+- transaction trie, receipt trie, account trie, and storage trie root builders;
+- compact-path and node-encoding reuse from the bounded MPT decoder;
+- state-root and storage-root recomputation fixtures;
+- memory and node-count limits for hostile trie construction inputs.
+
+Verification:
+
+- `TrieTests` pass for claimed trie behavior;
+- fuzz target for trie construction and root computation.
+
+Exit criteria:
+
+- Root values can be computed first-party for claimed block/state data.
+
+### v0.54.0 - Blob, KZG, And Data-Availability Boundaries
+
+Goal: validate blob-transaction execution-layer commitments without hiding
+cryptographic backend assumptions.
+
+Deliverables:
+
+- KZG commitment/proof backend boundary with dependency/first-party decision;
+- blob versioned-hash validation, count limits, fee accounting, and fork rules;
+- point-evaluation precompile integration if fork-applicable;
+- trusted setup handling policy;
+- blob-related official fixture coverage.
+
+Verification:
+
+- KZG and blob transaction vectors for claimed forks;
+- `cargo deny check`;
+- documented backend conformance command.
+
+Exit criteria:
+
+- Blob transaction support is no longer only syntactic; every cryptographic
+  assumption is explicit.
+
+### v0.55.0 - Full Execution Fixture Admission
+
+Goal: claim full execution support only where all relevant official fixture
+groups pass.
+
+Deliverables:
+
+- `TransactionTests`, `BlockchainTests`, `GenesisTests`, `TrieTests`,
+  `DifficultyTests`, EOF tests, and state tests admitted or explicitly scoped
+  with unsupported reasons;
+- supported fork matrix with per-fork feature flags and exclusions;
+- conformance report generated by local scripts;
+- release-blocking fixture drift check.
+
+Verification:
+
+- full execution fixture command documented and passing for claimed fork set;
+- differential report against at least one independent client or engine for
+  the claimed fork set.
+
+Exit criteria:
+
+- Execution-layer support claims are backed by official fixtures and a
+  published unsupported-scope list.
+
+## Phase 10: Optional RPC And Signer Boundaries
+
+### v0.56.0 - RPC Dependency Admission
 
 Goal: admit provider/transport crates behind `eth-valkyoth-rpc` and add the
 local node harness used by later live integration tests.
@@ -1563,7 +1822,7 @@ Exit criteria:
 - The project can spin up and destroy a local Ethereum node for integration
   tests without depending on a developer's existing node.
 
-### v0.49.0 - RPC Trust Models
+### v0.57.0 - RPC Trust Models
 
 Goal: implement trusted, quorum, and verified response models.
 
@@ -1581,7 +1840,7 @@ Exit criteria:
 
 - TLS endpoint trust is documented as separate from Ethereum state trust.
 
-### v0.50.0 - RPC Retry And Redaction
+### v0.58.0 - RPC Retry And Redaction
 
 Goal: make network behavior and logs safe by default.
 
@@ -1600,7 +1859,7 @@ Exit criteria:
 
 - RPC errors and logs do not leak sensitive payloads by default.
 
-### v0.51.0 - Signer Interface
+### v0.59.0 - Signer Interface
 
 Goal: add domain-specific signer APIs without local keys by default.
 
@@ -1620,7 +1879,7 @@ Exit criteria:
 
 - Signing APIs make domain separation explicit.
 
-### v0.52.0 - Local Signer Fallback
+### v0.60.0 - Local Signer Fallback
 
 Goal: add optional local signing only after secret-handling review.
 
@@ -1641,9 +1900,9 @@ Exit criteria:
 
 - Local key material cannot enter default builds.
 
-## Phase 10: Optional Reth And P2P Decisions
+## Phase 11: Optional Reth And P2P Decisions
 
-### v0.53.0 - Reth Dependency Admission
+### v0.61.0 - Reth Dependency Admission
 
 Goal: integrate selected Reth concepts without leaking node internals.
 
@@ -1663,7 +1922,7 @@ Exit criteria:
 
 - Reth remains an adapter, not a protocol-core foundation.
 
-### v0.54.0 - P2P Threat Model Decision
+### v0.62.0 - P2P Threat Model Decision
 
 Goal: decide whether P2P belongs in this crate family.
 
@@ -1682,9 +1941,9 @@ Exit criteria:
 
 - P2P is either explicitly deferred or split into its own future release plan.
 
-## Phase 11: Contract Interaction And Application Standards
+## Phase 12: Contract Interaction And Application Standards
 
-### v0.55.0 - ABI Type System
+### v0.63.0 - ABI Type System
 
 Goal: model Solidity ABI types without pulling contract interaction into the
 default core graph.
@@ -1707,7 +1966,7 @@ Exit criteria:
 
 - ABI types can be parsed and rendered without encoding values yet.
 
-### v0.56.0 - ABI Encode And Decode
+### v0.64.0 - ABI Encode And Decode
 
 Goal: encode and decode ABI values under explicit size limits.
 
@@ -1728,7 +1987,7 @@ Exit criteria:
 
 - Contract call payloads can be handled without ad hoc downstream encoders.
 
-### v0.57.0 - Contract Event And Error Decoding
+### v0.65.0 - Contract Event And Error Decoding
 
 Goal: decode logs and revert data with ABI-aware domain types.
 
@@ -1749,7 +2008,7 @@ Exit criteria:
 - Contract events and errors can be decoded without implying RPC trust or
   contract semantic validity.
 
-### v0.58.0 - Contract Call Builders
+### v0.66.0 - Contract Call Builders
 
 Goal: provide safe contract call builders over ABI primitives.
 
@@ -1771,7 +2030,7 @@ Exit criteria:
 - Users can build and decode contract calls while networking and signing remain
   explicit separate layers.
 
-### v0.59.0 - Common Token Standards
+### v0.67.0 - Common Token Standards
 
 Goal: add typed helpers for the most common token standards without making
 contract wrappers part of the core protocol.
@@ -1793,7 +2052,7 @@ Exit criteria:
 - Common token interaction helpers are typed convenience APIs over ABI, not
   trusted contract clients.
 
-### v0.60.0 - ENS Namehash And Resolution Primitives
+### v0.68.0 - ENS Namehash And Resolution Primitives
 
 Goal: support ENS primitives and resolver-call construction.
 
@@ -1815,7 +2074,7 @@ Exit criteria:
 - ENS support is available as explicit contract-call construction and decoding,
   not as hidden RPC behavior.
 
-### v0.61.0 - Permit And Typed Authorization Standards
+### v0.69.0 - Permit And Typed Authorization Standards
 
 Goal: support common signature-based contract authorization flows.
 
@@ -1835,7 +2094,7 @@ Exit criteria:
 
 - Permit helpers use the same EIP-712 safety boundary as core signing APIs.
 
-### v0.62.0 - Contract Interface Registry
+### v0.70.0 - Contract Interface Registry
 
 Goal: expose safe helpers for interface identifiers and contract metadata.
 
@@ -1854,7 +2113,7 @@ Exit criteria:
 
 - Contract interface helpers are deterministic local computations only.
 
-### v0.63.0 - ABI And Contract Fuzzing
+### v0.71.0 - ABI And Contract Fuzzing
 
 Goal: fuzz ABI and contract-helper parsers before they are treated as stable.
 
@@ -1873,9 +2132,9 @@ Exit criteria:
 
 - Every ABI parser that accepts untrusted bytes has fuzz coverage.
 
-## Phase 12: Consensus, Engine, And Beacon Boundaries
+## Phase 13: Consensus, Engine, And Beacon Boundaries
 
-### v0.64.0 - SSZ Codec Boundary
+### v0.72.0 - SSZ Codec Boundary
 
 Goal: admit or implement bounded SSZ encoding and decoding for consensus-layer
 data.
@@ -1897,7 +2156,7 @@ Exit criteria:
 - Consensus data can be decoded without weakening the execution-layer default
   graph.
 
-### v0.65.0 - Beacon Block And State Headers
+### v0.73.0 - Beacon Block And State Headers
 
 Goal: model beacon-chain headers and execution payload references.
 
@@ -1918,7 +2177,7 @@ Exit criteria:
 - Execution and consensus headers can be linked without claiming full consensus
   validation.
 
-### v0.66.0 - Consensus Light Client Updates
+### v0.74.0 - Consensus Light Client Updates
 
 Goal: verify consensus light-client update structures.
 
@@ -1939,7 +2198,7 @@ Exit criteria:
 - Beacon evidence used by execution-layer callers has an explicit verification
   path.
 
-### v0.67.0 - Engine API Types
+### v0.75.0 - Engine API Types
 
 Goal: model Engine API request and response types without implementing a client.
 
@@ -1960,7 +2219,7 @@ Exit criteria:
 - Engine API data can be represented without opening networking or consensus
   validation claims.
 
-### v0.68.0 - Engine API Validation Helpers
+### v0.76.0 - Engine API Validation Helpers
 
 Goal: validate Engine API payload boundaries before optional transport work.
 
@@ -1979,7 +2238,7 @@ Exit criteria:
 
 - Engine API helpers fail closed on malformed or inconsistent payload context.
 
-### v0.69.0 - Beacon API Boundary
+### v0.77.0 - Beacon API Boundary
 
 Goal: model Beacon REST API responses as optional, trust-scoped inputs.
 
@@ -1998,7 +2257,7 @@ Exit criteria:
 
 - Beacon API data is treated as untrusted transport data until verified.
 
-### v0.70.0 - Consensus And Engine Fuzzing
+### v0.78.0 - Consensus And Engine Fuzzing
 
 Goal: fuzz consensus and Engine API parsers before claiming support.
 
@@ -2016,9 +2275,9 @@ Exit criteria:
 
 - Consensus and Engine parser boundaries have adversarial coverage.
 
-## Phase 13: Networking, Node, And Operations Boundaries
+## Phase 14: Networking, Node, And Operations Boundaries
 
-### v0.71.0 - DevP2P And Discovery Threat Model
+### v0.79.0 - DevP2P And Discovery Threat Model
 
 Goal: decide and document the exact networking scope before implementation.
 
@@ -2038,7 +2297,7 @@ Exit criteria:
 
 - No P2P code lands before the attack surface is scoped.
 
-### v0.72.0 - RLPx And Discovery Dependency Admission
+### v0.80.0 - RLPx And Discovery Dependency Admission
 
 Goal: admit networking dependencies behind optional crates only.
 
@@ -2058,7 +2317,7 @@ Exit criteria:
 
 - Networking dependencies are isolated from protocol-core users.
 
-### v0.73.0 - Eth Wire Protocol Messages
+### v0.81.0 - Eth Wire Protocol Messages
 
 Goal: encode and decode Ethereum wire protocol messages with strict limits.
 
@@ -2079,7 +2338,7 @@ Exit criteria:
 
 - Wire messages are parser-safe before peer management is attempted.
 
-### v0.74.0 - Snap Protocol Messages
+### v0.82.0 - Snap Protocol Messages
 
 Goal: encode and decode snap-sync protocol messages.
 
@@ -2097,7 +2356,7 @@ Exit criteria:
 
 - Snap data remains untrusted until verified by trie/proof helpers.
 
-### v0.75.0 - Txpool And Mempool Policy
+### v0.83.0 - Txpool And Mempool Policy
 
 Goal: provide transaction pool policy helpers without running an implicit node.
 
@@ -2118,7 +2377,7 @@ Exit criteria:
 - Mempool helpers are deterministic policy tools, not a hidden networking
   service.
 
-### v0.76.0 - Sync Orchestration Boundaries
+### v0.84.0 - Sync Orchestration Boundaries
 
 Goal: model sync workflows as explicit state machines.
 
@@ -2141,7 +2400,7 @@ Exit criteria:
   evidence, and operational diagnostics do not leak sensitive transaction or
   endpoint material.
 
-### v0.77.0 - Mining, Builder, And Validator Boundary Decision
+### v0.85.0 - Mining, Builder, And Validator Boundary Decision
 
 Goal: decide what local block production or validator-adjacent support belongs
 in this crate family.
@@ -2163,9 +2422,9 @@ Exit criteria:
 - Block-production and validator-adjacent scope is either versioned or
   explicitly excluded from 1.0 with documented rationale.
 
-## Phase 14: Production Hardening
+## Phase 15: Production Hardening
 
-### v0.78.0 - Platform Matrix
+### v0.86.0 - Platform Matrix
 
 Goal: verify supported operating systems and targets.
 
@@ -2183,7 +2442,7 @@ Exit criteria:
 
 - Platform support claims match tested evidence.
 
-### v0.79.0 - Kani Formal Verification Harness
+### v0.87.0 - Kani Formal Verification Harness
 
 Goal: add bounded formal verification evidence for the highest-risk arithmetic,
 parser, and typestate invariants.
@@ -2210,7 +2469,7 @@ Exit criteria:
 - Formal verification covers selected bounded invariants before API stability
   and external audit remediation begin.
 
-### v0.80.0 - Public API Stability Pass
+### v0.88.0 - Public API Stability Pass
 
 Goal: stabilize the public API shape before 1.0.
 
@@ -2229,7 +2488,7 @@ Exit criteria:
 
 - The remaining 1.0 work is hardening, not API invention.
 
-### v0.81.0 - Independent Audit Remediation
+### v0.89.0 - Independent Audit Remediation
 
 Goal: fix findings from external review.
 
@@ -2249,7 +2508,7 @@ Exit criteria:
 
 - No unresolved critical or high findings remain.
 
-### v0.82.0 - Release Evidence Dry Run
+### v0.90.0 - Release Evidence Dry Run
 
 Goal: prove the release-evidence process before 1.0.
 
@@ -2263,7 +2522,7 @@ Deliverables:
 
 Verification:
 
-- release-readiness script for `v0.82.0`.
+- release-readiness script for `v0.90.0`.
 
 Exit criteria:
 

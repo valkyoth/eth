@@ -67,17 +67,22 @@ Differential claims are tracked in
 | Header decoding and hashing | syntactic decode/hash | `execution-specs` pinned in `spec-lock.toml`; v0.28.0 decodes legacy, London, Shanghai, Cancun, and Prague header field sets and hashes canonical header RLP through the Keccak trait boundary without claiming full header validity |
 | Receipt decoding | syntactic decode | EIP-658 and EIP-2718 checked for status/root and typed receipt envelopes; v0.29.0 decodes legacy and typed receipts, validates bloom/log/topic shape, and does not itself claim receipt-trie or block-root validity |
 | Withdrawal decoding | syntactic decode | EIP-4895 checked for withdrawal list and entry shape; v0.30.0 decodes canonical withdrawal lists with `uint64` indexes, 20-byte recipient addresses, and nonzero Gwei amounts, and does not claim consensus-layer dequeue correctness, header `withdrawals_root` matching, or state-balance application |
-| Header validation | planned | `execution-specs` pinned in `spec-lock.toml`; ancestry, root, gas, base-fee, fork-activation, and consensus-layer commitment validation not implemented |
-| Receipt and withdrawal validation | planned | `execution-specs` pinned in `spec-lock.toml`; receipt-trie membership, block `receipts_root` matching, transaction/receipt type matching, cumulative gas monotonicity, withdrawal trie-root matching, and withdrawal state application are not implemented |
+| Core dependency independence | scheduled | `v0.37.2` audits every dependency that touches core Ethereum behavior, and `v0.37.3` moves signature and hashing implementation crates behind explicit backend boundaries where feasible. Current `k256` and `sha3` use is treated as remediation work, not final architecture. |
+| Native EVM execution | scheduled | `v0.40.0` through `v0.47.0` build the first-party audited EVM core, opcode execution, gas accounting, state access, calls/create, precompiles, official state-test harness, and engine hardening. REVM remains reference/compatibility only if admitted. |
+| Header validation | scheduled | `execution-specs` pinned in `spec-lock.toml`; `v0.50.0` schedules parent, gas, base-fee, blob-gas, fork-activation, difficulty/TTD, optional field, and block-root validation for claimed forks. |
+| Receipt and withdrawal validation | scheduled | `execution-specs` pinned in `spec-lock.toml`; `v0.52.0` schedules receipt construction, receipt trie/root matching, cumulative gas, bloom validation, withdrawal root validation, and withdrawal state application. |
 | MPT node decoding | syntactic decode | `execution-specs` pinned in `spec-lock.toml`; v0.31.0 decodes branch, extension, and leaf node shape with compact-path and child-reference checks plus cumulative proof-node count/byte accounting |
 | MPT proofs | transaction/receipt/account/storage inclusion | `execution-specs` pinned in `spec-lock.toml`; v0.32.0 verifies transaction and receipt inclusion at `rlp(transaction_index)` against trusted root newtypes through the Keccak trait boundary, and v0.33.0 verifies account and storage inclusion at `keccak256(address)` and `keccak256(slot_key)` with distinct root/key domains. The APIs distinguish malformed, absent, and wrong-root/value-mismatch proofs without claiming header-root, account-state, or storage-root composition validity. |
-| JSON-RPC | scheduled | `execution-apis` pinned in `spec-lock.toml`; RPC dependency admission starts at v0.40.0 and trust models follow at v0.41.0 |
-| ABI encoding | scheduled | ABI type modeling starts at v0.47.0, value encode/decode at v0.48.0, and contract event/error decoding at v0.49.0 |
-| Contract standards | scheduled | Common token standards, ENS, permit helpers, and interface helpers are scheduled for v0.51.0 through v0.54.0 |
-| Engine API | scheduled | Engine API types and validation helpers are scheduled for v0.59.0 and v0.60.0 |
-| SSZ and beacon consensus | scheduled | SSZ, beacon headers, light-client updates, and Beacon API boundaries are scheduled for v0.56.0 through v0.58.0 and v0.61.0 |
-| DevP2P/RLPx and discovery | scheduled | Networking threat model, dependency admission, eth wire messages, and snap messages are scheduled for v0.63.0 through v0.66.0 |
-| Txpool, sync, and node-adjacent boundaries | scheduled | Txpool policy, sync orchestration, and mining/builder/validator scope decisions are scheduled for v0.67.0 through v0.69.0 |
+| Trie construction and roots | scheduled | `v0.53.0` schedules first-party transaction, receipt, account, and storage trie root builders so root values can be computed, not only verified from supplied proofs. |
+| Blob/KZG validation | scheduled | `v0.54.0` schedules KZG/backend policy, blob versioned-hash validation, blob count, blob fee accounting, point-evaluation precompile integration, trusted setup handling, and blob fixture coverage. |
+| Full execution fixtures | scheduled | `v0.55.0` schedules `TransactionTests`, `BlockchainTests`, `GenesisTests`, `TrieTests`, `DifficultyTests`, EOF tests, and state tests for claimed fork sets with unsupported-scope reporting. |
+| JSON-RPC | scheduled | `execution-apis` pinned in `spec-lock.toml`; RPC dependency admission starts at v0.56.0 and trust models follow at v0.57.0 |
+| ABI encoding | scheduled | ABI type modeling starts at v0.63.0, value encode/decode at v0.64.0, and contract event/error decoding at v0.65.0 |
+| Contract standards | scheduled | Common token standards, ENS, permit helpers, and interface helpers are scheduled for v0.67.0 through v0.70.0 |
+| Engine API | scheduled | Engine API types and validation helpers are scheduled for v0.75.0 and v0.76.0 |
+| SSZ and beacon consensus | scheduled | SSZ, beacon headers, light-client updates, and Beacon API boundaries are scheduled for v0.72.0 through v0.74.0 and v0.77.0 |
+| DevP2P/RLPx and discovery | scheduled | Networking threat model, dependency admission, eth wire messages, and snap messages are scheduled for v0.79.0 through v0.82.0 |
+| Txpool, sync, and node-adjacent boundaries | scheduled | Txpool policy, sync orchestration, and mining/builder/validator scope decisions are scheduled for v0.83.0 through v0.85.0 |
 
 Every release that claims support for a fork, EIP, RPC method, or wire protocol
 must update this matrix and `spec-lock.toml`.

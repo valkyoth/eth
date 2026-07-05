@@ -18,6 +18,11 @@ added to the published dependency graph.
 - `scripts/checks.sh` now patches all optional facade support crates during
   local package verification so pre-publish checks can validate a support-crate
   bump before that crate exists in the crates.io index.
+- `docs/RELEASE_PLAN.md`, `docs/IMPLEMENTATION_PLAN.md`, `docs/SCOPE.md`, and
+  `docs/SPEC_MATRIX.md` now make the first-party-core goal explicit: current
+  cryptographic implementation dependencies must be audited behind boundaries,
+  native EVM execution is followed by full execution state/block validity, and
+  RPC/Reth/node work moves after full execution fixture admission.
 
 ## Security Notes
 
