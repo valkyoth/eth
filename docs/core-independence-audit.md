@@ -63,9 +63,9 @@ feature.
 | --- | --- | --- | --- |
 | `tiny-keccak 2.0.2` | `eth/keccak-tiny -> eth-valkyoth-hash/tiny-keccak` | Optional backend | Keep outside default. Backend admission remains documented in `docs/keccak-boundary.md`; future native Keccak work belongs to the hashing track. |
 | `k256 0.13.4` | `eth/secp256k1-k256 -> eth-valkyoth-verify/secp256k1-k256` | Optional backend | Keep outside default. Backend admission remains documented in `docs/dependency-admission-k256.md` and `docs/signature-backend-boundary.md`. |
-| `sanitization 1.2.2` | `eth/sanitization -> eth-valkyoth-sanitization` | Optional backend | `v0.37.5` reviews optional sanitization bridge wording before execution/signing state grows. |
-| `serde 1.0.228` | `eth/eip712-json -> eth-valkyoth-verify/json` | Optional backend | `v0.37.5` reviews JSON/parser boundary policy and ensures no default parser dependency creep. |
-| `serde_json 1.0.150` | `eth/eip712-json -> eth-valkyoth-verify/json` | Optional backend | `v0.37.5` reviews JSON/parser boundary policy and checks duplicate-key and limit gates remain documented. |
+| `sanitization 1.2.2` | `eth/sanitization -> eth-valkyoth-sanitization` | Optional backend | `v0.37.5` documents and gates the optional sanitization bridge path. |
+| `serde 1.0.228` | `eth/eip712-json -> eth-valkyoth-verify/json` | Optional backend | `v0.37.5` documents and gates the optional JSON parser boundary. |
+| `serde_json 1.0.150` | `eth/eip712-json -> eth-valkyoth-verify/json` | Optional backend | `v0.37.5` documents and gates the optional JSON parser boundary plus existing duplicate-key and limit checks. |
 
 Optional dependencies must remain absent from the default `eth` graph. Any
 release that changes their feature path must include a cargo-tree check.
@@ -134,13 +134,19 @@ fixture-only `serde_json`, optional parser crates, optional backends,
 sanitization, REVM, and direct hash/signature implementation crates out of the
 default runtime graph.
 
+`v0.37.5` resolves the optional parser and sanitization bridge follow-up by
+adding `scripts/check_optional_boundary_policy.py`, documenting the exact
+`eip712-json` and `sanitization` feature paths, and capturing separate
+dependency-tree evidence for default, JSON, sanitization, and all-feature
+graphs.
+
 ## Follow-Up Register
 
 | Release | Dependency work |
 | --- | --- |
 | `v0.37.3` | Completed: secp256k1 recovery moved behind explicit backend/API boundaries and direct `sha3` verify test usage removed. |
 | `v0.37.4` | Completed: retained `subtle` as a narrow reviewed exception and added executable quarantine checks for `alloy-rlp` plus dev fixture `serde_json`. |
-| `v0.37.5` | Review optional parser and sanitization bridges so `serde`, `serde_json`, and `sanitization` cannot become accidental defaults. |
+| `v0.37.5` | Completed: documented and gated optional parser and sanitization bridges so `serde`, `serde_json`, and `sanitization` cannot become accidental defaults. |
 | `v0.40.0` through `v0.47.0` | Build first-party EVM execution phases; REVM remains reference or compatibility only if admitted. |
 | `v0.54.0` | Admit or reject KZG/blob cryptography backends before blob consensus validation is claimed. |
 | `v0.87.0` | Add Kani proof harnesses as extra assurance for selected critical invariants. |

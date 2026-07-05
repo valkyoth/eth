@@ -51,7 +51,7 @@ must not be re-exported.
 
 The optional EIP-712 JSON parser boundary in `eth-valkyoth-verify` is a
 separate feature-gated parser path. Its detailed parser and sanitization policy
-is scheduled for `v0.37.5`.
+is documented in `docs/optional-parser-sanitization-policy.md`.
 
 ## Executable Gate
 

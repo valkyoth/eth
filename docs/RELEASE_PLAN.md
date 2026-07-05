@@ -1429,6 +1429,8 @@ Exit criteria:
 
 ### v0.37.5 - Optional Parser And Sanitization Boundary Review
 
+Status: implementation ready; awaiting pentest.
+
 Goal: make optional parser and secret-sanitization bridges explicit before
 execution, signing, and JSON-facing surfaces expand.
 

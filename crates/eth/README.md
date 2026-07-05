@@ -35,9 +35,9 @@ dependencies.
 
 ## Current Status
 
-Status: `v0.37.4` adds constant-time and reference dependency policy evidence.
-The default facade graph keeps `subtle` as a reviewed exception and gates
-reference-only crates out of runtime paths.
+Status: `v0.37.5` adds optional parser and sanitization boundary evidence.
+The default facade graph excludes JSON parser and sanitization crates; they
+enter only through explicit opt-in features.
 
 Implemented now:
 
@@ -127,6 +127,9 @@ Implemented now:
   dev/reference `alloy-rlp` usage.
 - Runtime dependency policy gate proving reference crates and optional
   backend/parser crates do not enter the default facade graph.
+- Optional parser and sanitization policy gate proving `serde`, `serde_json`,
+  `eth-valkyoth-sanitization`, and `sanitization` enter only through explicit
+  opt-in features.
 - Public `RlpEncode`/`RlpDecode` traits and derive macros for reviewed simple
   structs, with bounded decode and trybuild compile-fail coverage.
 - Caller-provided Keccak-256 trait boundary with no default hash
@@ -184,14 +187,14 @@ Not implemented yet:
 
 ```toml
 [dependencies]
-eth = "0.37.4"
+eth = "0.37.5"
 ```
 
 For optional sanitization support:
 
 ```toml
 [dependencies]
-eth = { version = "0.37.4", features = ["sanitization"] }
+eth = { version = "0.37.5", features = ["sanitization"] }
 ```
 
 ## Features
@@ -216,7 +219,7 @@ Optional reviewed software Keccak backend:
 
 ```toml
 [dependencies]
-eth = { version = "0.37.4", features = ["keccak-tiny"] }
+eth = { version = "0.37.5", features = ["keccak-tiny"] }
 ```
 
 ```rust
@@ -230,7 +233,7 @@ Optional reviewed secp256k1 recovery adapter:
 
 ```toml
 [dependencies]
-eth = { version = "0.37.4", features = ["secp256k1-k256"] }
+eth = { version = "0.37.5", features = ["secp256k1-k256"] }
 ```
 
 ## Primitive Domains
@@ -1036,7 +1039,7 @@ friendly, and independently testable.
 The minimum supported Rust version is Rust `1.90.0`. New deployments should use
 the pinned stable Rust `1.96.1` until the toolchain policy is updated.
 
-Compatibility evidence for `0.37.4`:
+Compatibility evidence for `0.37.5`:
 
 | Rust | Local Evidence |
 | --- | --- |
@@ -1053,7 +1056,7 @@ Compatibility evidence for `0.37.4`:
 
 ```bash
 scripts/checks.sh
-scripts/release_0_37_4_gate.sh
+scripts/release_0_37_5_gate.sh
 ```
 
 For dependency-policy checks, install `cargo-deny` and `cargo-audit`, then run:

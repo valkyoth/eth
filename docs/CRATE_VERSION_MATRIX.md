@@ -1,8 +1,9 @@
 # Crate Version Matrix
 
-Status: `v0.37.4` adds constant-time and reference dependency policy evidence.
-The default facade graph keeps `subtle` as a reviewed exception and gates
-reference-only crates out of runtime paths.
+Status: `v0.37.5` adds optional parser and sanitization boundary evidence.
+The default facade graph excludes `serde`, `serde_json`,
+`eth-valkyoth-sanitization`, and `sanitization`; those crates enter only
+through explicit opt-in features.
 
 `eth` uses independent crate versions. The facade crate remains the main user
 entry point, but support crates are published only when their own package
@@ -28,23 +29,23 @@ but must be republished so immutable crates.io package metadata is corrected.
 workspace manifests before release. The script refuses accidental lockstep
 publication when a crate is marked `unchanged`.
 
-## v0.37.4 Tracking Table
+## v0.37.5 Tracking Table
 
 | Crate | Published | Planned | Change | Publish | Reason |
 | --- | --- | --- | --- | --- | --- |
-| `eth-valkyoth-codec` | `0.19.0` | `0.19.0` | `unchanged` | No | No package changes for v0.37.4. |
-| `eth-valkyoth-primitives` | `0.11.2` | `0.11.2` | `unchanged` | No | No package changes for v0.37.4. |
-| `eth-valkyoth-hash` | `0.11.2` | `0.11.2` | `unchanged` | No | No package changes for v0.37.4. |
-| `eth-valkyoth-protocol` | `0.25.2` | `0.25.2` | `unchanged` | No | No package changes for v0.37.4. |
-| `eth-valkyoth-verify` | `0.21.0` | `0.21.0` | `unchanged` | No | No package changes for v0.37.4. |
-| `eth-valkyoth-derive` | `0.17.2` | `0.17.2` | `unchanged` | No | No package changes for v0.37.4. |
-| `eth-valkyoth-sanitization` | `0.7.4` | `0.7.4` | `unchanged` | No | No package changes for v0.37.4. |
-| `eth-valkyoth-evm` | `0.8.0` | `0.8.0` | `unchanged` | No | No package changes for v0.37.4. |
-| `eth-valkyoth-rpc` | `0.7.0` | `0.7.0` | `unchanged` | No | No package changes for v0.37.4. |
-| `eth-valkyoth-signer` | `0.7.3` | `0.7.3` | `unchanged` | No | No package changes for v0.37.4. |
-| `eth-valkyoth-reth` | `0.7.0` | `0.7.0` | `unchanged` | No | No package changes for v0.37.4. |
-| `eth-valkyoth-testkit` | `0.7.0` | `0.7.0` | `unchanged` | No | No package changes for v0.37.4. |
-| `eth` | `0.37.3` | `0.37.4` | `metadata` | Yes | Publishes facade documentation for constant-time and reference dependency policy evidence. |
+| `eth-valkyoth-codec` | `0.19.0` | `0.19.0` | `unchanged` | No | No package changes for v0.37.5. |
+| `eth-valkyoth-primitives` | `0.11.2` | `0.11.2` | `unchanged` | No | No package changes for v0.37.5. |
+| `eth-valkyoth-hash` | `0.11.2` | `0.11.2` | `unchanged` | No | No package changes for v0.37.5. |
+| `eth-valkyoth-protocol` | `0.25.2` | `0.25.2` | `unchanged` | No | No package changes for v0.37.5. |
+| `eth-valkyoth-verify` | `0.21.0` | `0.21.0` | `unchanged` | No | No package changes for v0.37.5. |
+| `eth-valkyoth-derive` | `0.17.2` | `0.17.2` | `unchanged` | No | No package changes for v0.37.5. |
+| `eth-valkyoth-sanitization` | `0.7.4` | `0.7.4` | `unchanged` | No | No package changes for v0.37.5. |
+| `eth-valkyoth-evm` | `0.8.0` | `0.8.0` | `unchanged` | No | No package changes for v0.37.5. |
+| `eth-valkyoth-rpc` | `0.7.0` | `0.7.0` | `unchanged` | No | No package changes for v0.37.5. |
+| `eth-valkyoth-signer` | `0.7.3` | `0.7.3` | `unchanged` | No | No package changes for v0.37.5. |
+| `eth-valkyoth-reth` | `0.7.0` | `0.7.0` | `unchanged` | No | No package changes for v0.37.5. |
+| `eth-valkyoth-testkit` | `0.7.0` | `0.7.0` | `unchanged` | No | No package changes for v0.37.5. |
+| `eth` | `0.37.4` | `0.37.5` | `metadata` | Yes | Publishes facade documentation for optional parser and sanitization boundary evidence. |
 
 Update this table and `release-crates.toml` in the same commit whenever a crate
 changes release state.
