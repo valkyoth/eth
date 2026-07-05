@@ -1,6 +1,7 @@
 # Signature Backend Boundary
 
-Status: `v0.37.3` implementation ready for pentest.
+Status: implemented and pentested in `v0.37.3`; current facade examples use
+`v0.37.4`.
 
 `eth-valkyoth-verify` no longer requires a concrete secp256k1 implementation in
 the default runtime graph. Sender recovery is split into:
@@ -50,7 +51,7 @@ The `K256Secp256k1Backend` adapter is available only with:
 
 ```toml
 [dependencies]
-eth = { version = "0.37.3", features = ["secp256k1-k256"] }
+eth = { version = "0.37.4", features = ["secp256k1-k256"] }
 ```
 
 The default `eth` dependency graph must not include `k256` or `sha3`.

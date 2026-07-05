@@ -1,6 +1,7 @@
 # Core Dependency Independence Audit
 
-Status: updated by `v0.37.3` signature backend boundary work.
+Status: updated by `v0.37.4` constant-time and reference dependency policy
+work.
 
 This audit records every third-party dependency that can influence core
 Ethereum behavior before execution work continues. The long-term project goal
@@ -50,7 +51,7 @@ The default third-party runtime dependencies visible from that graph are:
 
 | Crate | Path | Classification | Follow-up |
 | --- | --- | --- | --- |
-| `subtle 2.6.1` | `eth -> eth-valkyoth-primitives -> subtle` | Reviewed exception | `v0.37.4` reviews constant-time utility policy and decides whether to retain `subtle`, wrap it more narrowly, or replace the public use with first-party code. |
+| `subtle 2.6.1` | `eth -> eth-valkyoth-primitives -> subtle` | Reviewed exception | `v0.37.4` keeps `subtle` as the narrow reviewed exception for fixed-width constant-time equality composition. See `docs/constant-time-reference-policy.md`. |
 
 `k256` and its transitive cryptographic crates no longer enter the default
 facade graph. They are admitted only through the explicit `secp256k1-k256`
@@ -73,8 +74,8 @@ release that changes their feature path must include a cargo-tree check.
 
 | Crate | Path | Classification | Follow-up |
 | --- | --- | --- | --- |
-| `alloy-rlp 0.3.16` | `eth-valkyoth-codec` dev-dependency and `fuzz/` dependency | Reference-only | `v0.37.4` documents the quarantine rule for third-party reference oracles and keeps `alloy-rlp` out of runtime crates. |
-| `serde_json 1.0.150` | `eth-valkyoth-codec` dev-dependency | Reference-only | `v0.37.4` documents reference-only fixture parsing rules. |
+| `alloy-rlp 0.3.16` | `eth-valkyoth-codec` dev-dependency and `fuzz/` dependency | Reference-only | `v0.37.4` documents and gates the quarantine rule for third-party reference oracles. |
+| `serde_json 1.0.150` | `eth-valkyoth-codec` dev-dependency | Reference-only | `v0.37.4` documents and gates the dev-only fixture parser rule. |
 | `trybuild 1.0.117` | `eth-valkyoth-derive` dev-dependency | Compile-time only | No runtime core impact; keep dev-only. |
 
 Reference-only crates must never be re-exported by runtime crates or used as
@@ -126,12 +127,19 @@ hardware/HSM integrations, the project uses this order:
 `k256` behind the explicit `secp256k1-k256` backend feature and adding
 backend-aware sender, EIP-712, transaction, and set-code authorization APIs.
 
+`v0.37.4` resolves the constant-time and reference-only follow-up by accepting
+`subtle` as the narrow reviewed exception and adding
+`scripts/check_runtime_dependency_policy.py` to keep `alloy-rlp`,
+fixture-only `serde_json`, optional parser crates, optional backends,
+sanitization, REVM, and direct hash/signature implementation crates out of the
+default runtime graph.
+
 ## Follow-Up Register
 
 | Release | Dependency work |
 | --- | --- |
 | `v0.37.3` | Completed: secp256k1 recovery moved behind explicit backend/API boundaries and direct `sha3` verify test usage removed. |
-| `v0.37.4` | Review `subtle` constant-time utility policy and quarantine rules for reference-only crates such as `alloy-rlp` and dev `serde_json`. |
+| `v0.37.4` | Completed: retained `subtle` as a narrow reviewed exception and added executable quarantine checks for `alloy-rlp` plus dev fixture `serde_json`. |
 | `v0.37.5` | Review optional parser and sanitization bridges so `serde`, `serde_json`, and `sanitization` cannot become accidental defaults. |
 | `v0.40.0` through `v0.47.0` | Build first-party EVM execution phases; REVM remains reference or compatibility only if admitted. |
 | `v0.54.0` | Admit or reject KZG/blob cryptography backends before blob consensus validation is claimed. |

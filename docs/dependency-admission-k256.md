@@ -53,7 +53,7 @@ features are not admitted by accident. The `ecdsa` feature is required for
 
 ## Verification
 
-Expected checks before tagging `v0.37.3`:
+Admission checks used for `v0.37.3`:
 
 ```bash
 cargo test -p eth-valkyoth-verify --all-features

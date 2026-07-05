@@ -35,9 +35,9 @@ dependencies.
 
 ## Current Status
 
-Status: `v0.37.3` adds the signature backend boundary before execution work
-continues. The default facade graph no longer selects `k256`; callers opt into
-the reviewed compatibility adapter with the explicit `secp256k1-k256` feature.
+Status: `v0.37.4` adds constant-time and reference dependency policy evidence.
+The default facade graph keeps `subtle` as a reviewed exception and gates
+reference-only crates out of runtime paths.
 
 Implemented now:
 
@@ -125,6 +125,8 @@ Implemented now:
 - Core dependency independence audit covering default `subtle`, optional
   `k256`, `tiny-keccak`, `serde`, `serde_json`, and `sanitization` paths, and
   dev/reference `alloy-rlp` usage.
+- Runtime dependency policy gate proving reference crates and optional
+  backend/parser crates do not enter the default facade graph.
 - Public `RlpEncode`/`RlpDecode` traits and derive macros for reviewed simple
   structs, with bounded decode and trybuild compile-fail coverage.
 - Caller-provided Keccak-256 trait boundary with no default hash
@@ -168,7 +170,7 @@ Not implemented yet:
 | MSRV | Rust `1.90.0` |
 | Pinned toolchain | Rust `1.96.1` |
 | Default target | `no_std` |
-| Default runtime dependencies | protocol-core support crates only |
+| Default runtime dependencies | protocol-core support crates plus reviewed `subtle` exception |
 | Optional hardening dependencies | `sanitization` and proc-macro tooling behind opt-in crates/features |
 | Unsafe policy | first-party crates use `#![forbid(unsafe_code)]` |
 | Default features | protocol-core only |
@@ -182,14 +184,14 @@ Not implemented yet:
 
 ```toml
 [dependencies]
-eth = "0.37.3"
+eth = "0.37.4"
 ```
 
 For optional sanitization support:
 
 ```toml
 [dependencies]
-eth = { version = "0.37.3", features = ["sanitization"] }
+eth = { version = "0.37.4", features = ["sanitization"] }
 ```
 
 ## Features
@@ -214,7 +216,7 @@ Optional reviewed software Keccak backend:
 
 ```toml
 [dependencies]
-eth = { version = "0.37.3", features = ["keccak-tiny"] }
+eth = { version = "0.37.4", features = ["keccak-tiny"] }
 ```
 
 ```rust
@@ -228,7 +230,7 @@ Optional reviewed secp256k1 recovery adapter:
 
 ```toml
 [dependencies]
-eth = { version = "0.37.3", features = ["secp256k1-k256"] }
+eth = { version = "0.37.4", features = ["secp256k1-k256"] }
 ```
 
 ## Primitive Domains
@@ -1034,7 +1036,7 @@ friendly, and independently testable.
 The minimum supported Rust version is Rust `1.90.0`. New deployments should use
 the pinned stable Rust `1.96.1` until the toolchain policy is updated.
 
-Compatibility evidence for `0.37.3`:
+Compatibility evidence for `0.37.4`:
 
 | Rust | Local Evidence |
 | --- | --- |
@@ -1051,7 +1053,7 @@ Compatibility evidence for `0.37.3`:
 
 ```bash
 scripts/checks.sh
-scripts/release_0_37_3_gate.sh
+scripts/release_0_37_4_gate.sh
 ```
 
 For dependency-policy checks, install `cargo-deny` and `cargo-audit`, then run:

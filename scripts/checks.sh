@@ -16,6 +16,7 @@ scripts/run_execution_fixtures.py --check
 scripts/run_differential_tests.py --check
 scripts/materialize_fuzz_seeds.py --check
 python3 scripts/test-workspace-dependency-policy.py
+scripts/check_runtime_dependency_policy.py
 python3 scripts/test-release-crates.py
 scripts/test-release-readiness.sh
 for package in \
