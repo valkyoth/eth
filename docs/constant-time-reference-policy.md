@@ -1,6 +1,6 @@
 # Constant-Time And Reference Dependency Policy
 
-Status: `v0.37.4` policy implemented; awaiting pentest before tagging.
+Status: `v0.37.4` policy implemented, pentest remediated, and retest clean.
 
 This document closes the `v0.37.4` dependency-policy slice from the core
 independence audit. It covers the default `subtle` runtime dependency and the

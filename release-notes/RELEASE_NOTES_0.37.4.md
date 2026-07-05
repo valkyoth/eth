@@ -1,6 +1,7 @@
 # eth 0.37.4 Release Notes
 
-Status: implementation ready; awaiting pentest before tagging.
+Status: pentest remediation and clean retest complete; awaiting final GitHub
+checks before tagging.
 
 `0.37.4` closes the constant-time and reference dependency policy slice from
 the core dependency independence audit.
@@ -45,7 +46,7 @@ the core dependency independence audit.
 
 ## Pentest
 
-- Run pentest on the implementation commit before tagging.
+- Initial external pentest finding has been remediated and the retest is clean.
 - Permanent report path after clean retest:
   `security/pentest/v0.37.4.md`.
 

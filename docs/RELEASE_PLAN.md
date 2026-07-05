@@ -1398,7 +1398,8 @@ Exit criteria:
 
 ### v0.37.4 - Constant-Time And Reference Dependency Policy
 
-Status: implementation ready; awaiting pentest.
+Status: implementation, pentest remediation, and clean retest complete; waiting
+for final GitHub checks before tagging.
 
 Goal: close the remaining default/runtime utility and reference-oracle policy
 items found by the v0.37.2 audit.
