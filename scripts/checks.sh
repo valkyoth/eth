@@ -69,8 +69,12 @@ cargo package -p eth --allow-dirty \
     --config 'patch.crates-io.eth-valkyoth-primitives.path="crates/eth-valkyoth-primitives"' \
     --config 'patch.crates-io.eth-valkyoth-hash.path="crates/eth-valkyoth-hash"' \
     --config 'patch.crates-io.eth-valkyoth-protocol.path="crates/eth-valkyoth-protocol"' \
+    --config 'patch.crates-io.eth-valkyoth-evm.path="crates/eth-valkyoth-evm"' \
+    --config 'patch.crates-io.eth-valkyoth-reth.path="crates/eth-valkyoth-reth"' \
+    --config 'patch.crates-io.eth-valkyoth-rpc.path="crates/eth-valkyoth-rpc"' \
     --config 'patch.crates-io.eth-valkyoth-sanitization.path="crates/eth-valkyoth-sanitization"' \
     --config 'patch.crates-io.eth-valkyoth-signer.path="crates/eth-valkyoth-signer"' \
+    --config 'patch.crates-io.eth-valkyoth-testkit.path="crates/eth-valkyoth-testkit"' \
     --config 'patch.crates-io.eth-valkyoth-verify.path="crates/eth-valkyoth-verify"'
 cargo clippy --workspace --all-targets --all-features -- -D warnings
 cargo test --workspace --all-features

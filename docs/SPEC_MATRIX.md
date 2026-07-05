@@ -1,6 +1,6 @@
 # eth Specification Matrix
 
-Status: source revisions pinned for `v0.36.0`; scalar, list, and canonical
+Status: source revisions pinned for `v0.37.0`; scalar, list, and canonical
 integer RLP decoding, canonical RLP encoding helpers, primitive RLP bridging,
 Keccak-256 trait boundary, RLP fuzz harness baseline, external execution
 fixture coverage, dev-only independent RLP differential coverage, and
@@ -31,7 +31,8 @@ trusted roots. `v0.34.0` refreshes all official Ethereum source and fixture
 pins and documents the reproducible external reference store. `v0.35.0` adds
 the first external execution fixture harness and claims pinned `ethereum/tests`
 `RLPTests` for the codec surface. `v0.36.0` adds a dev-only `alloy-rlp`
-structural RLP differential reference path.
+structural RLP differential reference path. `v0.37.0` reviews REVM for the
+EVM adapter boundary and does not admit it until dependency policy passes.
 
 Official source and fixture revisions are governed by
 [Spec Source Policy](spec-source-policy.md). `v0.34.0` checked upstream `HEAD`

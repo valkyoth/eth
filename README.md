@@ -35,8 +35,9 @@ dependencies.
 
 ## Current Status
 
-Status: `v0.36.0` adds the first independent differential RLP harness against
-`alloy-rlp`; pentest passed and final GitHub checks are pending before tag.
+Status: `v0.37.0` adds the REVM dependency admission review and keeps REVM out
+of the dependency graph until cargo-deny, MSRV, and feature policy pass;
+implementation ready for pentest.
 
 Implemented now:
 
@@ -176,14 +177,14 @@ Not implemented yet:
 
 ```toml
 [dependencies]
-eth = "0.36"
+eth = "0.37"
 ```
 
 For optional sanitization support:
 
 ```toml
 [dependencies]
-eth = { version = "0.36", features = ["sanitization"] }
+eth = { version = "0.37", features = ["sanitization"] }
 ```
 
 ## Features
@@ -191,7 +192,7 @@ eth = { version = "0.36", features = ["sanitization"] }
 | Feature | Default | Purpose |
 | --- | --- | --- |
 | `std` | no | Enables `std` support in admitted core crates. |
-| `evm` | no | Future explicit EVM adapter boundary. |
+| `evm` | no | Explicit EVM adapter boundary with REVM dependency review metadata. |
 | `rpc` | no | Future explicit RPC trust-policy boundary. |
 | `eip712-json` | no | Enables the optional `std` JSON-RPC EIP-712 typed-data parser boundary. |
 | `keccak-tiny` | no | Enables the optional reviewed `tiny-keccak` software backend. |
@@ -201,13 +202,13 @@ eth = { version = "0.36", features = ["sanitization"] }
 | `testkit` | no | Test fixtures, conformance helpers, and adversarial inputs. |
 
 Default builds do not enable networking, signing, local key storage, Reth, P2P,
-or EVM execution.
+REVM, or EVM execution.
 
 Optional reviewed software Keccak backend:
 
 ```toml
 [dependencies]
-eth = { version = "0.36", features = ["keccak-tiny"] }
+eth = { version = "0.37", features = ["keccak-tiny"] }
 ```
 
 ```rust
@@ -993,7 +994,7 @@ friendly, and independently testable.
 | `eth-valkyoth-verify` | yes | Verification boundaries for signatures, proofs, replay domains, and EIP-712 typed-data hashing. |
 | `eth-valkyoth-sanitization` | no | Optional bridge to the `sanitization` crate for secret-bearing Ethereum data. |
 | `eth-valkyoth-derive` | no | Optional sanitization and RLP derive macros. |
-| `eth-valkyoth-evm` | no | Future REVM adapter boundary. |
+| `eth-valkyoth-evm` | no | EVM adapter boundary with REVM dependency review metadata. |
 | `eth-valkyoth-rpc` | no | Future explicit RPC trust-policy boundary. |
 | `eth-valkyoth-signer` | no | Future signer isolation boundary. |
 | `eth-valkyoth-reth` | no | Future Reth integration boundary. |
@@ -1004,7 +1005,7 @@ friendly, and independently testable.
 The minimum supported Rust version is Rust `1.90.0`. New deployments should use
 the pinned stable Rust `1.96.1` until the toolchain policy is updated.
 
-Compatibility evidence for `0.36.0`:
+Compatibility evidence for `0.37.0`:
 
 | Rust | Local Evidence |
 | --- | --- |
@@ -1021,7 +1022,7 @@ Compatibility evidence for `0.36.0`:
 
 ```bash
 scripts/checks.sh
-scripts/release_0_32_gate.sh
+scripts/release_0_37_gate.sh
 ```
 
 For dependency-policy checks, install `cargo-deny` and `cargo-audit`, then run:

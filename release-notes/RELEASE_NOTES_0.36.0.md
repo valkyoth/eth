@@ -1,6 +1,6 @@
 # eth 0.36.0 Release Notes
 
-Status: pentest passed; waiting for final GitHub checks before tagging.
+Status: tagged as `v0.36.0`.
 
 `0.36.0` adds the first differential test harness. The release compares
 `eth-valkyoth-codec` structural RLP behavior against the independent

@@ -26,7 +26,7 @@
 `eth` is the public facade crate for a `no_std`-first Ethereum
 execution-layer protocol workspace.
 
-The crate is intentionally conservative at `0.36.0`: it provides explicit
+The crate is intentionally conservative at `0.37.0`: it provides explicit
 Ethereum primitive domains, bounded decode-budget policy, stable error
 categories, primitive RLP bridge helpers, a caller-provided Keccak-256 boundary,
 RLP fuzz-harness evidence, a transaction envelope shell, unvalidated legacy
@@ -51,9 +51,9 @@ before RPC, signer, EVM, Reth, or P2P integrations become real dependencies.
 
 ## Current Status
 
-The current release candidate is `0.36.0`; structural RLP behavior is compared
-against `alloy-rlp` through the first differential harness; pentest passed and
-final GitHub checks are pending before tag.
+The current release candidate is `0.37.0`; REVM has been reviewed for the EVM
+adapter boundary but is not admitted until the dependency graph passes
+cargo-deny, MSRV, and feature policy; implementation ready for pentest.
 
 Implemented now:
 
@@ -184,21 +184,21 @@ Not implemented yet:
 
 ```toml
 [dependencies]
-eth = "0.36"
+eth = "0.37"
 ```
 
 Disable defaults explicitly for embedded or freestanding builds:
 
 ```toml
 [dependencies]
-eth = { version = "0.36", default-features = false }
+eth = { version = "0.37", default-features = false }
 ```
 
 Optional sanitization support:
 
 ```toml
 [dependencies]
-eth = { version = "0.36", features = ["sanitization"] }
+eth = { version = "0.37", features = ["sanitization"] }
 ```
 
 ## Features
@@ -206,7 +206,7 @@ eth = { version = "0.36", features = ["sanitization"] }
 | Feature | Default | Purpose |
 | --- | --- | --- |
 | `std` | no | Enables `std` support in admitted core crates. |
-| `evm` | no | Future explicit EVM adapter boundary. |
+| `evm` | no | Explicit EVM adapter boundary with REVM dependency review metadata. |
 | `rpc` | no | Future explicit RPC trust-policy boundary. |
 | `eip712-json` | no | Enables the optional `std` JSON-RPC EIP-712 typed-data parser boundary. |
 | `keccak-tiny` | no | Enables the optional reviewed `tiny-keccak` software backend. |
@@ -216,13 +216,13 @@ eth = { version = "0.36", features = ["sanitization"] }
 | `testkit` | no | Test fixtures, conformance helpers, and adversarial inputs. |
 
 Default builds do not enable networking, signing, local key storage, Reth, P2P,
-or EVM execution.
+REVM, or EVM execution.
 
 Optional reviewed software Keccak backend:
 
 ```toml
 [dependencies]
-eth = { version = "0.36", features = ["keccak-tiny"] }
+eth = { version = "0.37", features = ["keccak-tiny"] }
 ```
 
 ```rust
@@ -1010,7 +1010,7 @@ the workspace can keep small, auditable boundaries:
 | `eth-valkyoth-verify` | yes | Verification boundaries for signatures, proofs, replay domains, and EIP-712 typed-data hashing. |
 | `eth-valkyoth-sanitization` | no | Optional bridge to the `sanitization` crate. |
 | `eth-valkyoth-derive` | no | Optional sanitization and RLP derive macros. |
-| `eth-valkyoth-evm` | no | Future EVM adapter boundary. |
+| `eth-valkyoth-evm` | no | EVM adapter boundary with REVM dependency review metadata. |
 | `eth-valkyoth-rpc` | no | Future RPC trust-policy boundary. |
 | `eth-valkyoth-signer` | no | Future signer isolation boundary. |
 | `eth-valkyoth-reth` | no | Future Reth integration boundary. |
@@ -1021,7 +1021,7 @@ the workspace can keep small, auditable boundaries:
 The minimum supported Rust version is Rust `1.90.0`. New deployments should use
 the latest stable Rust verified by the release gates.
 
-Compatibility evidence for `0.36.0`:
+Compatibility evidence for `0.37.0`:
 
 | Rust | Local Evidence |
 | --- | --- |

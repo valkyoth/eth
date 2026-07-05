@@ -148,6 +148,7 @@ relevant dependency point.
 | ABI encoding, Engine API, SSZ, and DevP2P/RLPx were marked deferred. | Added `v0.47.0` through `v0.69.0` feature tracks so they are versioned before 1.0. |
 | ENS and common ERC/application standards were not scheduled. | Added `v0.53.0` through `v0.55.0` for ENS and common contract standards. |
 | Node-level sync, txpool, mining/validator boundaries, and observability were not scheduled. | Added `v0.65.0` through `v0.69.0` with explicit library-boundary scope and validation gates. |
+| REVM dependency admission failed the existing dependency policy. | Added `v0.37.1 - REVM Dependency Recheck` before execution work may continue. |
 
 ## Phase 0: Repository And Release Discipline
 
@@ -869,7 +870,7 @@ Implementation note:
 
 ### v0.24.2 - Set-Code Transaction Validity Gate
 
-Status: tagged as `v0.28.0`.
+Status: tagged as `v0.24.2`.
 
 Goal: add the non-cryptographic EIP-7702 validity checks that decide whether a
 decoded set-code transaction can advance beyond the unvalidated state.
@@ -984,7 +985,7 @@ Implementation note:
 
 ### v0.26.1 - EIP-712 JSON Typed-Data Parser Boundary
 
-Status: tagged as `v0.29.0`.
+Status: tagged as `v0.26.1`.
 
 Goal: admit a reviewed way to parse JSON-RPC typed-data payloads into the
 borrowed EIP-712 encoder boundary without weakening the default `no_std` graph.
@@ -1073,8 +1074,7 @@ Exit criteria:
 
 ### v0.29.0 - Receipt Decode
 
-Status: implementation, pentest remediation, and clean retest complete; waiting
-for final GitHub checks before tagging.
+Status: tagged as `v0.29.0`.
 
 Goal: parse legacy and typed receipts.
 
@@ -1235,8 +1235,7 @@ Exit criteria:
 
 ### v0.36.0 - Differential Test Harness
 
-Status: implementation, pentest remediation, and clean retest complete; waiting
-for final GitHub checks before tagging.
+Status: tagged as `v0.36.0`.
 
 Goal: compare selected behavior against independent implementations.
 
@@ -1256,15 +1255,18 @@ Exit criteria:
 
 ## Phase 7: Optional Execution
 
-### v0.37.0 - REVM Dependency Admission
+### v0.37.0 - REVM Dependency Admission Review
 
-Goal: admit REVM behind `eth-valkyoth-evm` with reviewed features.
+Status: implementation ready; awaiting pentest.
+
+Goal: review REVM for optional admission behind `eth-valkyoth-evm` without
+weakening dependency policy.
 
 Deliverables:
 
 - dependency review;
-- no default feature expansion;
-- minimal compile-only adapter.
+- explicit non-admission result when policy fails;
+- code-visible review metadata.
 
 Verification:
 
@@ -1273,7 +1275,29 @@ Verification:
 
 Exit criteria:
 
-- REVM is optional and cannot enter the default core graph.
+- REVM cannot enter the graph until cargo-deny, MSRV, and feature policy pass.
+
+### v0.37.1 - REVM Dependency Recheck
+
+Goal: recheck the REVM ecosystem before execution adapter work starts.
+
+Deliverables:
+
+- latest REVM version check;
+- MSRV-compatible REVM line check;
+- dependency-policy result update;
+- decision on REVM, a narrower REVM subcrate, or an alternate execution
+  boundary.
+
+Verification:
+
+- `cargo deny check`
+- `cargo check --workspace --all-features`
+
+Exit criteria:
+
+- Execution work is either unblocked by a clean admitted graph or remains
+  explicitly blocked with a documented reason.
 
 ### v0.38.0 - Explicit Execution Environment
 
