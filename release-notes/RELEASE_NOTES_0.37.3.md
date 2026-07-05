@@ -1,6 +1,7 @@
 # eth 0.37.3 Release Notes
 
-Status: implementation ready; awaiting pentest before tagging.
+Status: pentest remediation and clean retest complete; awaiting final GitHub
+checks before tagging.
 
 `0.37.3` moves Ethereum sender recovery behind an explicit secp256k1 backend
 boundary. The default `eth` graph no longer selects `k256`; callers can opt into
@@ -55,8 +56,8 @@ the reviewed compatibility adapter with `secp256k1-k256`.
 
 ## Pentest
 
-- Initial external pentest findings have been remediated; clean retest is
-  required before tagging.
+- Initial external pentest findings have been remediated and the retest is
+  clean.
 - Permanent report path after clean retest:
   `security/pentest/v0.37.3.md`.
 

@@ -1364,7 +1364,8 @@ Exit criteria:
 
 ### v0.37.3 - Signature And Crypto Backend Boundaries
 
-Status: implementation ready; awaiting pentest.
+Status: implementation, pentest remediation, and clean retest complete; waiting
+for final GitHub checks before tagging.
 
 Goal: remove direct default dependence on cryptographic implementation crates
 from verification APIs where a first-party boundary is feasible.
