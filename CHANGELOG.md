@@ -10,6 +10,9 @@ All notable changes to `eth` are documented here.
 - Scheduled `0.37.4` and `0.37.5` so `subtle`, `alloy-rlp`, dev
   `serde_json`, optional `serde`/`serde_json`, and optional `sanitization`
   have explicit follow-up releases before execution work continues.
+- Addressed v0.37.2 pentest findings by removing a duplicate release-gate test
+  invocation, normalizing dependency-audit taxonomy labels, and checking the
+  upstream user-agent release string in metadata validation.
 - Started `0.37.1` with a safe upstream advisory checker for latest REVM
   registry metadata, Rust `1.90.0`-compatible REVM lines, and official
   Ethereum source drift.

@@ -10,7 +10,6 @@ cargo tree -e features --workspace
 scripts/release_crates.py --check
 scripts/sync_spec_sources.py --lock-only
 python3 scripts/test-sync-spec-sources.py
-python3 scripts/test-ethereum-upstream.py
 scripts/run_execution_fixtures.py --check
 scripts/run_differential_tests.py --check
 scripts/run_differential_tests.py

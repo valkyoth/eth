@@ -50,7 +50,7 @@ The default third-party runtime dependencies visible from that graph are:
 | Crate | Path | Classification | Follow-up |
 | --- | --- | --- | --- |
 | `k256 0.13.4` | `eth -> eth-valkyoth-verify -> k256` | Temporary debt | `v0.37.3` moves secp256k1 recovery behind an explicit backend boundary, compatibility adapter, or documented cryptographic exception. |
-| `subtle 2.6.1` | `eth -> eth-valkyoth-primitives -> subtle` | Reviewed exception pending review | `v0.37.4` reviews constant-time utility policy and decides whether to retain `subtle`, wrap it more narrowly, or replace the public use with first-party code. |
+| `subtle 2.6.1` | `eth -> eth-valkyoth-primitives -> subtle` | Reviewed exception | `v0.37.4` reviews constant-time utility policy and decides whether to retain `subtle`, wrap it more narrowly, or replace the public use with first-party code. |
 
 `k256` currently brings transitive cryptographic crates such as `ecdsa`,
 `elliptic-curve`, `sha2`, `digest`, `crypto-bigint`, `ff`, `group`,
@@ -62,9 +62,9 @@ The default third-party runtime dependencies visible from that graph are:
 | Crate | Feature path | Classification | Follow-up |
 | --- | --- | --- | --- |
 | `tiny-keccak 2.0.2` | `eth/keccak-tiny -> eth-valkyoth-hash/tiny-keccak` | Optional backend | Keep outside default. Backend admission remains documented in `docs/keccak-boundary.md`; future native Keccak work belongs to the hashing track. |
-| `sanitization 1.2.2` | `eth/sanitization -> eth-valkyoth-sanitization` | Optional bridge backend | `v0.37.5` reviews optional sanitization boundary wording before execution/signing state grows. |
-| `serde 1.0.228` | `eth/eip712-json -> eth-valkyoth-verify/json` | Optional parser support | `v0.37.5` reviews JSON/parser boundary policy and ensures no default parser dependency creep. |
-| `serde_json 1.0.150` | `eth/eip712-json -> eth-valkyoth-verify/json` | Optional parser support | `v0.37.5` reviews JSON/parser boundary policy and checks duplicate-key and limit gates remain documented. |
+| `sanitization 1.2.2` | `eth/sanitization -> eth-valkyoth-sanitization` | Optional backend | `v0.37.5` reviews optional sanitization bridge wording before execution/signing state grows. |
+| `serde 1.0.228` | `eth/eip712-json -> eth-valkyoth-verify/json` | Optional backend | `v0.37.5` reviews JSON/parser boundary policy and ensures no default parser dependency creep. |
+| `serde_json 1.0.150` | `eth/eip712-json -> eth-valkyoth-verify/json` | Optional backend | `v0.37.5` reviews JSON/parser boundary policy and checks duplicate-key and limit gates remain documented. |
 
 Optional dependencies must remain absent from the default `eth` graph. Any
 release that changes their feature path must include a cargo-tree check.
@@ -74,9 +74,9 @@ release that changes their feature path must include a cargo-tree check.
 | Crate | Path | Classification | Follow-up |
 | --- | --- | --- | --- |
 | `alloy-rlp 0.3.16` | `eth-valkyoth-codec` dev-dependency and `fuzz/` dependency | Reference-only | `v0.37.4` documents the quarantine rule for third-party reference oracles and keeps `alloy-rlp` out of runtime crates. |
-| `sha3 0.10.9` | `eth-valkyoth-verify` dev-dependency | Reference-only test oracle | `v0.37.3` replaces direct test use with the project hash boundary where practical, or records why it remains a dev-only independent KAT oracle. |
-| `serde_json 1.0.150` | `eth-valkyoth-codec` dev-dependency | Reference/test parser | `v0.37.4` documents reference-only fixture parsing rules. |
-| `trybuild 1.0.117` | `eth-valkyoth-derive` dev-dependency | Compile-test tool | No runtime core impact; keep dev-only. |
+| `sha3 0.10.9` | `eth-valkyoth-verify` dev-dependency | Reference-only | `v0.37.3` replaces direct test use with the project hash boundary where practical, or records why it remains a dev-only independent KAT oracle. |
+| `serde_json 1.0.150` | `eth-valkyoth-codec` dev-dependency | Reference-only | `v0.37.4` documents reference-only fixture parsing rules. |
+| `trybuild 1.0.117` | `eth-valkyoth-derive` dev-dependency | Compile-time only | No runtime core impact; keep dev-only. |
 
 Reference-only crates must never be re-exported by runtime crates or used as
 the implementation source of consensus behavior. Their job is to catch
@@ -104,7 +104,7 @@ enter the default runtime facade graph.
 | Fork/context validation | First-party `eth-valkyoth-protocol` and `eth-valkyoth-verify` | No runtime third-party source. |
 | MPT decode/proofs | First-party `eth-valkyoth-verify` | Caller-provided Keccak backend only. |
 | Sender recovery | First-party policy around `k256` backend | `k256` is current default temporary debt. |
-| EIP-712 JSON parsing | First-party limits over optional `serde_json` parser | Optional parser support only. |
+| EIP-712 JSON parsing | First-party limits over optional `serde_json` parser | Optional backend parser support only. |
 | EVM execution | First-party plan, REVM not admitted | No REVM dependency in graph. |
 | RPC, Reth, networking | Placeholder first-party crates | No third-party network dependency admitted. |
 

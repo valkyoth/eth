@@ -125,3 +125,4 @@ grep -q 'license = "MIT OR Apache-2.0"' Cargo.toml
 grep -q 'repository = "https://github.com/valkyoth/eth"' Cargo.toml
 grep -q 'channel = "1.96.1"' rust-toolchain.toml
 grep -q 'rust-version = "1.90"' Cargo.toml
+grep -q 'valkyoth-eth-upstream-check/0.37.2' scripts/check_ethereum_upstream.py

@@ -41,9 +41,19 @@ or new execution dependencies.
 - `cargo tree -e features --workspace`
 - `scripts/release_0_37_2_gate.sh`
 
+## Fixed During Pentest
+
+- Removed a duplicate `test-ethereum-upstream.py` invocation from the v0.37.2
+  release gate. `scripts/checks.sh` already runs that test.
+- Normalized the dependency-audit classification tables to the documented
+  taxonomy so future linting can rely on closed labels.
+- Updated the upstream-checker user-agent from `0.37.1` to `0.37.2` and added
+  release-metadata validation for that string.
+
 ## Pentest
 
-- Pentest is required before tagging.
+- External pentest findings have been remediated; clean retest is required
+  before tagging.
 - Permanent report path after clean retest:
   `security/pentest/v0.37.2.md`.
 
