@@ -37,7 +37,7 @@ dependencies.
 
 Status: `v0.37.0` adds the REVM dependency admission review and keeps REVM out
 of the dependency graph until cargo-deny, MSRV, and feature policy pass;
-implementation ready for pentest.
+pentest passed, with final GitHub checks required before tagging.
 
 Implemented now:
 

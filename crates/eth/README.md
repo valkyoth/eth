@@ -53,7 +53,8 @@ before RPC, signer, EVM, Reth, or P2P integrations become real dependencies.
 
 The current release candidate is `0.37.0`; REVM has been reviewed for the EVM
 adapter boundary but is not admitted until the dependency graph passes
-cargo-deny, MSRV, and feature policy; implementation ready for pentest.
+cargo-deny, MSRV, and feature policy; pentest passed, with final GitHub checks
+required before tagging.
 
 Implemented now:
 

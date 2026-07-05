@@ -1273,7 +1273,8 @@ Exit criteria:
 
 ### v0.37.0 - REVM Dependency Admission Review
 
-Status: implementation ready; awaiting pentest.
+Status: implementation, remediation, and external pentest retest complete;
+waiting for final GitHub checks before tagging.
 
 Goal: review REVM for optional admission behind `eth-valkyoth-evm` without
 weakening dependency policy.

@@ -1,6 +1,6 @@
 # eth 0.37.0 Release Notes
 
-Status: implementation ready; awaiting pentest.
+Status: pentest passed; waiting for final GitHub checks before tagging.
 
 `0.37.0` performs the REVM dependency admission review for the optional EVM
 adapter boundary. The result is a deliberate non-admission: current REVM
@@ -33,6 +33,8 @@ added to the published dependency graph.
 - Pentest remediation added review and re-review dates to
   `REVM_DEPENDENCY_REVIEW`, and the planned upstream checker now explicitly
   forbids executing fetched network content.
+- External pentest and retest passed before tagging.
+- Final GitHub checks must pass on the pentest report commit before tagging.
 - `revm 41.0.0` was current during review, but it requires Rust `1.91.0`; this
   workspace still supports Rust `1.90.0`.
 - `revm 36.0.0` is the newest reviewed `revm` line compatible with Rust
