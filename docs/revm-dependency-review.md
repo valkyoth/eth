@@ -1,10 +1,11 @@
 # REVM Dependency Review
 
-Status: v0.37.0 reviewed REVM for optional admission and did not admit it.
+Status: v0.37.1 adds the upstream recheck automation; REVM remains
+non-admitted.
 
 ## Decision
 
-REVM is not part of the `eth` dependency graph in v0.37.0.
+REVM is not part of the `eth` dependency graph in v0.37.1.
 
 The review was performed on 2026-07-05. It must be refreshed before
 2026-10-05, or before any `eth-valkyoth-evm` feature work, whichever is sooner.
@@ -45,16 +46,16 @@ No REVM feature or dependency is exposed until a future review can pass:
 
 ## Recheck
 
-The release plan includes a follow-up dependency recheck before any temporary
-execution adapter is implemented. `v0.40.0` through `v0.47.0` reserve the
-first-party native EVM engine path, so a future REVM adapter is reference or
-compatibility infrastructure rather than the trusted 1.0 execution core.
+The v0.37.1 release adds `scripts/check_ethereum_upstream.py` as the follow-up
+dependency recheck before any temporary execution adapter is implemented.
+`v0.40.0` through `v0.47.0` reserve the first-party native EVM engine path, so
+a future REVM adapter is reference or compatibility infrastructure rather than
+the trusted 1.0 execution core.
 
-That recheck also creates the advisory upstream-monitoring script used for
-maintenance planning. The script must check the latest REVM registry line and
-official Ethereum hardfork/spec and fixture revisions, then report whether a
-maintenance release may be needed for fork, opcode, gas, precompile,
-transaction-type, or fixture changes.
+The advisory upstream-monitoring script is used for maintenance planning. It
+checks the latest REVM registry line and official Ethereum hardfork/spec and
+fixture revisions, then reports whether a maintenance release may be needed for
+fork, opcode, gas, precompile, transaction-type, or fixture changes.
 
 The upstream checker must fetch metadata only and compare it to pinned local
 state. It must not pipe network responses to a shell, use `eval`, or execute

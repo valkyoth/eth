@@ -35,9 +35,9 @@ dependencies.
 
 ## Current Status
 
-Status: `v0.37.0` adds the REVM dependency admission review and keeps REVM out
-of the dependency graph until cargo-deny, MSRV, and feature policy pass;
-pentest passed, with final GitHub checks required before tagging.
+Status: `v0.37.1` adds the safe REVM and official Ethereum upstream advisory
+checker while keeping REVM out of the dependency graph until cargo-deny, MSRV,
+and feature policy pass; implementation ready for pentest.
 
 Implemented now:
 
@@ -133,6 +133,7 @@ Implemented now:
 - MIT OR Apache-2.0 license.
 - Security, modularity, supply-chain, implementation, and release planning docs.
 - Local check, release-gate, dependency-policy, SBOM, and pentest evidence.
+- Safe upstream advisory checking for REVM and official Ethereum source drift.
 - Independent support-crate release planning for crates.io push limits.
 - Pinned official Ethereum source revisions plus a reproducible external
   reference-store sync process for `/home/eldryoth/Work/test/eth`.
@@ -1005,7 +1006,7 @@ friendly, and independently testable.
 The minimum supported Rust version is Rust `1.90.0`. New deployments should use
 the pinned stable Rust `1.96.1` until the toolchain policy is updated.
 
-Compatibility evidence for `0.37.0`:
+Compatibility evidence for `0.37.1`:
 
 | Rust | Local Evidence |
 | --- | --- |
@@ -1022,7 +1023,7 @@ Compatibility evidence for `0.37.0`:
 
 ```bash
 scripts/checks.sh
-scripts/release_0_37_gate.sh
+scripts/release_0_37_1_gate.sh
 ```
 
 For dependency-policy checks, install `cargo-deny` and `cargo-audit`, then run:

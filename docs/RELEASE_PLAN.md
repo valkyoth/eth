@@ -1273,8 +1273,7 @@ Exit criteria:
 
 ### v0.37.0 - REVM Dependency Admission Review
 
-Status: implementation, remediation, and external pentest retest complete;
-waiting for final GitHub checks before tagging.
+Status: tagged as `v0.37.0`.
 
 Goal: review REVM for optional admission behind `eth-valkyoth-evm` without
 weakening dependency policy.
@@ -1295,6 +1294,8 @@ Exit criteria:
 - REVM cannot enter the graph until cargo-deny, MSRV, and feature policy pass.
 
 ### v0.37.1 - REVM Dependency Recheck
+
+Status: implementation ready; awaiting pentest.
 
 Goal: recheck the REVM ecosystem before execution adapter work starts and add
 automation so future REVM/fork drift is visible.

@@ -1,7 +1,8 @@
 # Crate Version Matrix
 
-Status: `v0.37.0` adds the explicit REVM dependency admission review and keeps
-REVM out of the dependency graph until the dependency policy passes.
+Status: `v0.37.1` adds the safe upstream advisory checker for REVM and
+official Ethereum source drift while keeping REVM out of the dependency graph
+until the dependency policy passes.
 
 `eth` uses independent crate versions. The facade crate remains the main user
 entry point, but support crates are published only when their own package
@@ -27,23 +28,23 @@ but must be republished so immutable crates.io package metadata is corrected.
 workspace manifests before release. The script refuses accidental lockstep
 publication when a crate is marked `unchanged`.
 
-## v0.37.0 Tracking Table
+## v0.37.1 Tracking Table
 
 | Crate | Published | Planned | Change | Publish | Reason |
 | --- | --- | --- | --- | --- | --- |
-| `eth-valkyoth-codec` | `0.19.0` | `0.19.0` | `unchanged` | No | No package changes for v0.37.0. |
-| `eth-valkyoth-primitives` | `0.11.2` | `0.11.2` | `unchanged` | No | No package changes for v0.37.0. |
-| `eth-valkyoth-hash` | `0.11.2` | `0.11.2` | `unchanged` | No | No package changes for v0.37.0. |
-| `eth-valkyoth-protocol` | `0.25.2` | `0.25.2` | `unchanged` | No | No package changes for v0.37.0. |
-| `eth-valkyoth-verify` | `0.20.2` | `0.20.2` | `unchanged` | No | No package changes for v0.37.0. |
-| `eth-valkyoth-derive` | `0.17.2` | `0.17.2` | `unchanged` | No | No package changes for v0.37.0. |
-| `eth-valkyoth-sanitization` | `0.7.4` | `0.7.4` | `unchanged` | No | No package changes for v0.37.0. |
-| `eth-valkyoth-evm` | `0.7.0` | `0.8.0` | `code` | Yes | Adds the v0.37.0 REVM dependency admission review result and keeps REVM out of the dependency graph until policy passes. |
-| `eth-valkyoth-rpc` | `0.7.0` | `0.7.0` | `unchanged` | No | No package changes for v0.37.0. |
-| `eth-valkyoth-signer` | `0.7.3` | `0.7.3` | `unchanged` | No | No package changes for v0.37.0. |
-| `eth-valkyoth-reth` | `0.7.0` | `0.7.0` | `unchanged` | No | No package changes for v0.37.0. |
-| `eth-valkyoth-testkit` | `0.7.0` | `0.7.0` | `unchanged` | No | No package changes for v0.37.0. |
-| `eth` | `0.36.0` | `0.37.0` | `code` | Yes | Exposes v0.37.0 documentation and the explicit EVM dependency-review boundary. |
+| `eth-valkyoth-codec` | `0.19.0` | `0.19.0` | `unchanged` | No | No package changes for v0.37.1. |
+| `eth-valkyoth-primitives` | `0.11.2` | `0.11.2` | `unchanged` | No | No package changes for v0.37.1. |
+| `eth-valkyoth-hash` | `0.11.2` | `0.11.2` | `unchanged` | No | No package changes for v0.37.1. |
+| `eth-valkyoth-protocol` | `0.25.2` | `0.25.2` | `unchanged` | No | No package changes for v0.37.1. |
+| `eth-valkyoth-verify` | `0.20.2` | `0.20.2` | `unchanged` | No | No package changes for v0.37.1. |
+| `eth-valkyoth-derive` | `0.17.2` | `0.17.2` | `unchanged` | No | No package changes for v0.37.1. |
+| `eth-valkyoth-sanitization` | `0.7.4` | `0.7.4` | `unchanged` | No | No package changes for v0.37.1. |
+| `eth-valkyoth-evm` | `0.8.0` | `0.8.0` | `unchanged` | No | No package changes for v0.37.1. |
+| `eth-valkyoth-rpc` | `0.7.0` | `0.7.0` | `unchanged` | No | No package changes for v0.37.1. |
+| `eth-valkyoth-signer` | `0.7.3` | `0.7.3` | `unchanged` | No | No package changes for v0.37.1. |
+| `eth-valkyoth-reth` | `0.7.0` | `0.7.0` | `unchanged` | No | No package changes for v0.37.1. |
+| `eth-valkyoth-testkit` | `0.7.0` | `0.7.0` | `unchanged` | No | No package changes for v0.37.1. |
+| `eth` | `0.37.0` | `0.37.1` | `metadata` | Yes | Publishes v0.37.1 facade release documentation for the upstream advisory checker. |
 
 Update this table and `release-crates.toml` in the same commit whenever a crate
 changes release state.

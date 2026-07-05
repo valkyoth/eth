@@ -4,6 +4,11 @@ All notable changes to `eth` are documented here.
 
 ## Unreleased
 
+- Started `0.37.1` with a safe upstream advisory checker for latest REVM
+  registry metadata, Rust `1.90.0`-compatible REVM lines, and official
+  Ethereum source drift.
+- Added `docs/ethereum-upstream-check.md` and the `0.37.1` release gate so
+  future fork/spec movement is visible before execution adapter work continues.
 - Started `0.37.0` with the REVM dependency admission review, recording that
   current REVM candidates are not admitted because they fail cargo-deny/MSRV
   policy, and adding a code-visible review result in `eth-valkyoth-evm`.

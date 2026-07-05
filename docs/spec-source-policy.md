@@ -78,3 +78,6 @@ maintenance release may be needed for new fork rules, opcodes, gas schedules,
 precompiles, transaction types, or fixtures. Upstream movement alone is not a
 release claim; claims are updated only after the new sources are pinned,
 implemented, tested, and pentested.
+
+The current checker is `scripts/check_ethereum_upstream.py`; see
+[Ethereum Upstream Check](ethereum-upstream-check.md).

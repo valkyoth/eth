@@ -1,6 +1,6 @@
 # eth Specification Matrix
 
-Status: source revisions pinned for `v0.37.0`; scalar, list, and canonical
+Status: source revisions pinned for `v0.37.1`; scalar, list, and canonical
 integer RLP decoding, canonical RLP encoding helpers, primitive RLP bridging,
 Keccak-256 trait boundary, RLP fuzz harness baseline, external execution
 fixture coverage, dev-only independent RLP differential coverage, and
@@ -33,6 +33,8 @@ the first external execution fixture harness and claims pinned `ethereum/tests`
 `RLPTests` for the codec surface. `v0.36.0` adds a dev-only `alloy-rlp`
 structural RLP differential reference path. `v0.37.0` reviews REVM for the
 EVM adapter boundary and does not admit it until dependency policy passes.
+`v0.37.1` adds the safe upstream advisory checker for REVM registry metadata
+and official Ethereum source drift.
 
 Official source and fixture revisions are governed by
 [Spec Source Policy](spec-source-policy.md). `v0.34.0` checked upstream `HEAD`
@@ -48,6 +50,8 @@ Execution fixture claims are tracked in
 Differential claims are tracked in
 [Differential Test Harness](differential-test-harness.md) and
 [Differential Test Report](differential-test-report.md).
+Upstream drift is tracked with
+[Ethereum Upstream Check](ethereum-upstream-check.md).
 
 | Area | Status | Evidence |
 | --- | --- | --- |
