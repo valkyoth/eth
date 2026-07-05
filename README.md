@@ -37,7 +37,8 @@ dependencies.
 
 Status: `v0.37.1` adds the safe REVM and official Ethereum upstream advisory
 checker while keeping REVM out of the dependency graph until cargo-deny, MSRV,
-and feature policy pass; implementation ready for pentest.
+and feature policy pass; pentest passed, with final GitHub checks required
+before tagging.
 
 Implemented now:
 

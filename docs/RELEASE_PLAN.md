@@ -1295,7 +1295,8 @@ Exit criteria:
 
 ### v0.37.1 - REVM Dependency Recheck
 
-Status: implementation ready; awaiting pentest.
+Status: implementation, pentest remediation, and clean retest complete; waiting
+for final GitHub checks before tagging.
 
 Goal: recheck the REVM ecosystem before execution adapter work starts and add
 automation so future REVM/fork drift is visible.

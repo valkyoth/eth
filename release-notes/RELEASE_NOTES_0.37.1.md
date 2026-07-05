@@ -1,6 +1,6 @@
 # eth 0.37.1 Release Notes
 
-Status: implementation complete; pending external pentest input.
+Status: pentest passed; waiting for final GitHub checks before tagging.
 
 `0.37.1` adds the REVM and Ethereum upstream advisory checker required before
 execution adapter work continues. REVM remains non-admitted.
@@ -36,6 +36,13 @@ execution adapter work continues. REVM remains non-admitted.
 - crates.io versions with unknown `rust_version` metadata are no longer treated
   as evidence of Rust `1.90.0` compatibility.
 - Added focused regression tests for both checker hardening cases.
+
+## Pentest
+
+- External pentest passed after remediation of the upstream-checker robustness
+  findings.
+- Permanent report: `security/pentest/v0.37.1.md`.
+- Final GitHub checks must pass on the pentest report commit before tagging.
 
 ## Versioning
 
