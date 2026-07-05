@@ -6,9 +6,9 @@ Crate name: `eth`
 
 1.0 target: a serious production-ready Ethereum toolkit for bounded decoding,
 fork-aware validation, cryptographic verification, contract ABI helpers,
-consensus and Engine API boundaries, explicit RPC trust policy, optional EVM
-execution, optional signer isolation, optional networking/sync boundaries, and
-optional Reth integration.
+consensus and Engine API boundaries, explicit RPC trust policy, optional
+first-party EVM execution, optional signer isolation, optional networking/sync
+boundaries, and optional Reth integration.
 
 ## Core Position
 
@@ -65,8 +65,12 @@ The first production value is:
   signature validation, sender recovery, replay-domain checks, EIP-712
   validation and typed-data hashing, header/hash checks, and MPT proof
   verification.
-- `eth-valkyoth-evm`: optional REVM adapter boundary with explicit fork, block,
-  transaction, snapshot, limit, and commit policy.
+- `eth-valkyoth-evm`: optional execution boundary. REVM may be admitted only as
+  a temporary/reference adapter, while production execution moves through the
+  first-party audited native EVM plan.
+- `eth-valkyoth-evm-core`: planned no_std-first native EVM engine crate with
+  explicit fork, block, transaction, stack, memory, gas, state, call-frame,
+  precompile, and commit policy.
 - `eth-valkyoth-rpc`: optional RPC policy over admitted provider transports.
 - `eth-valkyoth-abi`: optional ABI, contract-call, event, error, and common
   contract-standard helpers.
@@ -188,14 +192,23 @@ Release gate:
   flows;
 - signature and domain errors never expose secret material.
 
-## Phase 6: Optional REVM Adapter
+## Phase 6: Optional Execution Boundary And Native EVM
 
-Admit REVM behind `eth-valkyoth-evm`. Require explicit fork/spec ID, block environment,
-transaction environment, state snapshot, execution limits, and commit policy.
+Review REVM only as a temporary/reference adapter behind `eth-valkyoth-evm`.
+The long-term production path is a first-party native EVM engine built in small
+audited releases. Require explicit fork/spec ID, block environment,
+transaction environment, state snapshot, execution limits, gas accounting,
+state commit policy, official state-test evidence, and differential evidence
+where available.
 
 Release gate:
 
-- Ethereum state tests agree with reference outputs for claimed forks;
+- REVM cannot enter the graph unless dependency, MSRV, license, feature, and
+  cargo-deny policy pass;
+- native engine milestones are covered by official Ethereum state tests for
+  claimed forks;
+- differential tests compare claimed behavior against at least one independent
+  implementation when available;
 - gas estimation is bounded by execution count, gas cap, and timeout policy.
 
 ## Phase 7: Optional RPC And Signer Boundaries

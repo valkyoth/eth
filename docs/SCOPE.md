@@ -7,7 +7,9 @@
 - Bounded canonical decoding of execution-layer data.
 - Typed transaction envelopes and fork-aware validation.
 - Header, receipt, transaction, and proof verification.
-- Optional EVM execution through REVM.
+- Optional EVM execution through a first-party audited native engine.
+- Optional REVM adapter only as a temporary/reference path after dependency
+  admission passes.
 - Optional RPC client policy with explicit trust models.
 - Optional signer boundary with external-signer-first design.
 - Optional Reth integration at adapter boundaries.

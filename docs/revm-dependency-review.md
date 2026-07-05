@@ -43,6 +43,7 @@ No REVM feature or dependency is exposed until a future review can pass:
 
 ## Recheck
 
-The release plan includes a follow-up dependency recheck before any execution
-adapter is implemented. EVM execution work must not start until the dependency
-graph is admitted cleanly or a different reviewed execution boundary is chosen.
+The release plan includes a follow-up dependency recheck before any temporary
+execution adapter is implemented. `v0.40.0` through `v0.47.0` reserve the
+first-party native EVM engine path, so a future REVM adapter is reference or
+compatibility infrastructure rather than the trusted 1.0 execution core.
