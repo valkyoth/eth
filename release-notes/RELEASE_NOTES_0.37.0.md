@@ -26,6 +26,12 @@ added to the published dependency graph.
 
 ## Security Notes
 
+- Pentest remediation replaced the literal-only REVM review test with a
+  lockfile check proving `revm` and `revm-primitives` are absent from the
+  dependency graph.
+- Pentest remediation added review and re-review dates to
+  `REVM_DEPENDENCY_REVIEW`, and the planned upstream checker now explicitly
+  forbids executing fetched network content.
 - `revm 41.0.0` was current during review, but it requires Rust `1.91.0`; this
   workspace still supports Rust `1.90.0`.
 - `revm 36.0.0` is the newest reviewed `revm` line compatible with Rust

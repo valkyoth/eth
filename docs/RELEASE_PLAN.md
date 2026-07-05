@@ -1306,6 +1306,9 @@ Deliverables:
 - `scripts/check_ethereum_upstream.sh` or equivalent networked advisory check
   for latest REVM, official Ethereum hardfork/spec revisions, and pinned
   execution fixture revisions;
+- safe network-fetch policy: metadata-only requests, no `curl | sh`, no `eval`,
+  no execution of fetched content, and pinned commit/tag SHAs before any source
+  is trusted for implementation work;
 - maintenance-release report format for newly detected fork rules, opcode/gas
   schedule changes, precompile changes, transaction type changes, or fixture
   updates;

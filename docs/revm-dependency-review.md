@@ -6,8 +6,10 @@ Status: v0.37.0 reviewed REVM for optional admission and did not admit it.
 
 REVM is not part of the `eth` dependency graph in v0.37.0.
 
-The review checked the latest registry line and the newest line compatible with
-the workspace's Rust `1.90.0` floor:
+The review was performed on 2026-07-05. It must be refreshed before
+2026-10-05, or before any `eth-valkyoth-evm` feature work, whichever is sooner.
+The review checked the latest registry line and the newest line compatible
+with the workspace's Rust `1.90.0` floor:
 
 | Candidate | Version | Rust requirement | Result |
 | --- | --- | --- | --- |
@@ -53,3 +55,8 @@ maintenance planning. The script must check the latest REVM registry line and
 official Ethereum hardfork/spec and fixture revisions, then report whether a
 maintenance release may be needed for fork, opcode, gas, precompile,
 transaction-type, or fixture changes.
+
+The upstream checker must fetch metadata only and compare it to pinned local
+state. It must not pipe network responses to a shell, use `eval`, or execute
+fetched content. Official sources become implementation inputs only after exact
+commit or tag SHAs are pinned.
