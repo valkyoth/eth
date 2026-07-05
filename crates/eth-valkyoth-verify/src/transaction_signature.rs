@@ -3,18 +3,20 @@ use core::fmt;
 use eth_valkyoth_hash::Keccak256;
 use eth_valkyoth_primitives::{Address, ChainId};
 use eth_valkyoth_protocol::{
-    SignatureYParity, UnvalidatedAccessListTransaction, UnvalidatedBlobTransaction,
-    UnvalidatedDynamicFeeTransaction, UnvalidatedLegacyTransaction, UnvalidatedSetCodeTransaction,
-    UnvalidatedTransaction,
+    UnvalidatedAccessListTransaction, UnvalidatedBlobTransaction, UnvalidatedDynamicFeeTransaction,
+    UnvalidatedLegacyTransaction, UnvalidatedTransaction,
 };
 
+#[cfg(feature = "secp256k1-k256")]
+use crate::K256Secp256k1Backend;
+pub(crate) use crate::transaction_signature_set_code::validate_set_code_transaction_signature_with_backend;
 use crate::{
-    EthereumSignature, TransactionSigningHash, TransactionSigningHashError, VerifyError,
-    access_list_transaction_signing_hash, blob_transaction_signing_hash,
+    EthereumSignature, RecoverableSecp256k1, TransactionSigningHash, TransactionSigningHashError,
+    VerifyError, access_list_transaction_signing_hash, blob_transaction_signing_hash,
     dynamic_fee_transaction_signing_hash, legacy_eip155_transaction_signing_hash,
-    recover_sender_from_digest, require_access_list_replay_domain, require_blob_replay_domain,
+    require_access_list_replay_domain, require_blob_replay_domain,
     require_dynamic_fee_replay_domain, require_legacy_replay_domain,
-    require_set_code_replay_domain, set_code_transaction_signing_hash,
+    transaction_signature_helpers::{legacy_signature, recover_and_check},
 };
 
 #[cfg(test)]
@@ -149,6 +151,7 @@ pub enum TransactionSignatureValidationErrorCategory {
 /// treating the authorization list as authenticated. Applying a delegation from
 /// an unchecked authorization tuple is equivalent to skipping signature
 /// verification for that authorizing account.
+#[cfg(feature = "secp256k1-k256")]
 pub fn validate_transaction_signature<H1, H2>(
     expected_chain: ChainId,
     transaction: UnvalidatedTransaction<'_>,
@@ -161,51 +164,93 @@ where
     H1: Keccak256,
     H2: Keccak256,
 {
+    validate_transaction_signature_with_backend(
+        expected_chain,
+        transaction,
+        expected_sender,
+        scratch,
+        signing_hasher,
+        K256Secp256k1Backend,
+        address_hasher,
+    )
+}
+
+/// Validates any supported decoded transaction signature through a caller-provided backend.
+///
+/// This is the default dependency-free sender-recovery entry point. Use the
+/// `secp256k1-k256` feature only when the reviewed `k256` adapter is the
+/// desired concrete backend.
+pub fn validate_transaction_signature_with_backend<B, H1, H2>(
+    expected_chain: ChainId,
+    transaction: UnvalidatedTransaction<'_>,
+    expected_sender: Option<Address>,
+    scratch: &mut [u8],
+    signing_hasher: H1,
+    mut secp256k1_backend: B,
+    address_hasher: H2,
+) -> Result<ValidatedTransactionSignature, TransactionSignatureValidationError>
+where
+    B: RecoverableSecp256k1,
+    H1: Keccak256,
+    H2: Keccak256,
+{
     match transaction {
-        UnvalidatedTransaction::Legacy(tx) => validate_legacy_transaction_signature(
+        UnvalidatedTransaction::Legacy(tx) => validate_legacy_transaction_signature_with_backend(
             expected_chain,
             &tx,
             expected_sender,
             scratch,
             signing_hasher,
+            &mut secp256k1_backend,
             address_hasher,
         ),
-        UnvalidatedTransaction::AccessList(tx) => validate_access_list_transaction_signature(
+        UnvalidatedTransaction::AccessList(tx) => {
+            validate_access_list_transaction_signature_with_backend(
+                expected_chain,
+                &tx,
+                expected_sender,
+                scratch,
+                signing_hasher,
+                &mut secp256k1_backend,
+                address_hasher,
+            )
+        }
+        UnvalidatedTransaction::DynamicFee(tx) => {
+            validate_dynamic_fee_transaction_signature_with_backend(
+                expected_chain,
+                &tx,
+                expected_sender,
+                scratch,
+                signing_hasher,
+                &mut secp256k1_backend,
+                address_hasher,
+            )
+        }
+        UnvalidatedTransaction::Blob(tx) => validate_blob_transaction_signature_with_backend(
             expected_chain,
             &tx,
             expected_sender,
             scratch,
             signing_hasher,
+            &mut secp256k1_backend,
             address_hasher,
         ),
-        UnvalidatedTransaction::DynamicFee(tx) => validate_dynamic_fee_transaction_signature(
-            expected_chain,
-            &tx,
-            expected_sender,
-            scratch,
-            signing_hasher,
-            address_hasher,
-        ),
-        UnvalidatedTransaction::Blob(tx) => validate_blob_transaction_signature(
-            expected_chain,
-            &tx,
-            expected_sender,
-            scratch,
-            signing_hasher,
-            address_hasher,
-        ),
-        UnvalidatedTransaction::SetCode(tx) => validate_set_code_transaction_signature(
-            expected_chain,
-            &tx,
-            expected_sender,
-            scratch,
-            signing_hasher,
-            address_hasher,
-        ),
+        UnvalidatedTransaction::SetCode(tx) => {
+            validate_set_code_transaction_signature_with_backend(
+                expected_chain,
+                &tx,
+                expected_sender,
+                scratch,
+                signing_hasher,
+                &mut secp256k1_backend,
+                address_hasher,
+            )
+        }
     }
 }
 
 /// Validates a decoded legacy EIP-155 transaction signature.
+#[cfg(feature = "secp256k1-k256")]
 pub fn validate_legacy_transaction_signature<H1, H2>(
     expected_chain: ChainId,
     transaction: &UnvalidatedLegacyTransaction<'_>,
@@ -218,15 +263,48 @@ where
     H1: Keccak256,
     H2: Keccak256,
 {
+    validate_legacy_transaction_signature_with_backend(
+        expected_chain,
+        transaction,
+        expected_sender,
+        scratch,
+        signing_hasher,
+        K256Secp256k1Backend,
+        address_hasher,
+    )
+}
+
+/// Validates a decoded legacy EIP-155 transaction signature through a backend.
+pub fn validate_legacy_transaction_signature_with_backend<B, H1, H2>(
+    expected_chain: ChainId,
+    transaction: &UnvalidatedLegacyTransaction<'_>,
+    expected_sender: Option<Address>,
+    scratch: &mut [u8],
+    signing_hasher: H1,
+    secp256k1_backend: B,
+    address_hasher: H2,
+) -> Result<ValidatedTransactionSignature, TransactionSignatureValidationError>
+where
+    B: RecoverableSecp256k1,
+    H1: Keccak256,
+    H2: Keccak256,
+{
     require_legacy_replay_domain(expected_chain, transaction)
         .map_err(TransactionSignatureValidationError::ReplayDomain)?;
     let signing_hash = legacy_eip155_transaction_signing_hash(transaction, scratch, signing_hasher)
         .map_err(TransactionSignatureValidationError::SigningHash)?;
     let signature = legacy_signature(transaction)?;
-    recover_and_check(signing_hash, signature, expected_sender, address_hasher)
+    recover_and_check(
+        signing_hash,
+        signature,
+        expected_sender,
+        secp256k1_backend,
+        address_hasher,
+    )
 }
 
 /// Validates a decoded EIP-2930 transaction signature.
+#[cfg(feature = "secp256k1-k256")]
 pub fn validate_access_list_transaction_signature<H1, H2>(
     expected_chain: ChainId,
     transaction: &UnvalidatedAccessListTransaction<'_>,
@@ -239,16 +317,49 @@ where
     H1: Keccak256,
     H2: Keccak256,
 {
+    validate_access_list_transaction_signature_with_backend(
+        expected_chain,
+        transaction,
+        expected_sender,
+        scratch,
+        signing_hasher,
+        K256Secp256k1Backend,
+        address_hasher,
+    )
+}
+
+/// Validates a decoded EIP-2930 transaction signature through a backend.
+pub fn validate_access_list_transaction_signature_with_backend<B, H1, H2>(
+    expected_chain: ChainId,
+    transaction: &UnvalidatedAccessListTransaction<'_>,
+    expected_sender: Option<Address>,
+    scratch: &mut [u8],
+    signing_hasher: H1,
+    secp256k1_backend: B,
+    address_hasher: H2,
+) -> Result<ValidatedTransactionSignature, TransactionSignatureValidationError>
+where
+    B: RecoverableSecp256k1,
+    H1: Keccak256,
+    H2: Keccak256,
+{
     require_access_list_replay_domain(expected_chain, transaction)
         .map_err(TransactionSignatureValidationError::ReplayDomain)?;
     let signing_hash = access_list_transaction_signing_hash(transaction, scratch, signing_hasher)
         .map_err(TransactionSignatureValidationError::SigningHash)?;
     let signature =
         EthereumSignature::from_parts(transaction.r, transaction.s, transaction.y_parity);
-    recover_and_check(signing_hash, signature, expected_sender, address_hasher)
+    recover_and_check(
+        signing_hash,
+        signature,
+        expected_sender,
+        secp256k1_backend,
+        address_hasher,
+    )
 }
 
 /// Validates a decoded EIP-1559 transaction signature.
+#[cfg(feature = "secp256k1-k256")]
 pub fn validate_dynamic_fee_transaction_signature<H1, H2>(
     expected_chain: ChainId,
     transaction: &UnvalidatedDynamicFeeTransaction<'_>,
@@ -261,16 +372,49 @@ where
     H1: Keccak256,
     H2: Keccak256,
 {
+    validate_dynamic_fee_transaction_signature_with_backend(
+        expected_chain,
+        transaction,
+        expected_sender,
+        scratch,
+        signing_hasher,
+        K256Secp256k1Backend,
+        address_hasher,
+    )
+}
+
+/// Validates a decoded EIP-1559 transaction signature through a backend.
+pub fn validate_dynamic_fee_transaction_signature_with_backend<B, H1, H2>(
+    expected_chain: ChainId,
+    transaction: &UnvalidatedDynamicFeeTransaction<'_>,
+    expected_sender: Option<Address>,
+    scratch: &mut [u8],
+    signing_hasher: H1,
+    secp256k1_backend: B,
+    address_hasher: H2,
+) -> Result<ValidatedTransactionSignature, TransactionSignatureValidationError>
+where
+    B: RecoverableSecp256k1,
+    H1: Keccak256,
+    H2: Keccak256,
+{
     require_dynamic_fee_replay_domain(expected_chain, transaction)
         .map_err(TransactionSignatureValidationError::ReplayDomain)?;
     let signing_hash = dynamic_fee_transaction_signing_hash(transaction, scratch, signing_hasher)
         .map_err(TransactionSignatureValidationError::SigningHash)?;
     let signature =
         EthereumSignature::from_parts(transaction.r, transaction.s, transaction.y_parity);
-    recover_and_check(signing_hash, signature, expected_sender, address_hasher)
+    recover_and_check(
+        signing_hash,
+        signature,
+        expected_sender,
+        secp256k1_backend,
+        address_hasher,
+    )
 }
 
 /// Validates a decoded EIP-4844 transaction signature.
+#[cfg(feature = "secp256k1-k256")]
 pub fn validate_blob_transaction_signature<H1, H2>(
     expected_chain: ChainId,
     transaction: &UnvalidatedBlobTransaction<'_>,
@@ -283,95 +427,43 @@ where
     H1: Keccak256,
     H2: Keccak256,
 {
+    validate_blob_transaction_signature_with_backend(
+        expected_chain,
+        transaction,
+        expected_sender,
+        scratch,
+        signing_hasher,
+        K256Secp256k1Backend,
+        address_hasher,
+    )
+}
+
+/// Validates a decoded EIP-4844 transaction signature through a backend.
+pub fn validate_blob_transaction_signature_with_backend<B, H1, H2>(
+    expected_chain: ChainId,
+    transaction: &UnvalidatedBlobTransaction<'_>,
+    expected_sender: Option<Address>,
+    scratch: &mut [u8],
+    signing_hasher: H1,
+    secp256k1_backend: B,
+    address_hasher: H2,
+) -> Result<ValidatedTransactionSignature, TransactionSignatureValidationError>
+where
+    B: RecoverableSecp256k1,
+    H1: Keccak256,
+    H2: Keccak256,
+{
     require_blob_replay_domain(expected_chain, transaction)
         .map_err(TransactionSignatureValidationError::ReplayDomain)?;
     let signing_hash = blob_transaction_signing_hash(transaction, scratch, signing_hasher)
         .map_err(TransactionSignatureValidationError::SigningHash)?;
     let signature =
         EthereumSignature::from_parts(transaction.r, transaction.s, transaction.y_parity);
-    recover_and_check(signing_hash, signature, expected_sender, address_hasher)
-}
-
-/// Validates a decoded EIP-7702 set-code transaction sender signature.
-///
-/// This validates only the outer transaction signature. Authorization-list
-/// tuple signatures use [`crate::validate_set_code_authorization_signature`]
-/// because EIP-7702 defines a distinct authorization signing domain.
-pub fn validate_set_code_transaction_signature<H1, H2>(
-    expected_chain: ChainId,
-    transaction: &UnvalidatedSetCodeTransaction<'_>,
-    expected_sender: Option<Address>,
-    scratch: &mut [u8],
-    signing_hasher: H1,
-    address_hasher: H2,
-) -> Result<ValidatedTransactionSignature, TransactionSignatureValidationError>
-where
-    H1: Keccak256,
-    H2: Keccak256,
-{
-    require_set_code_replay_domain(expected_chain, transaction)
-        .map_err(TransactionSignatureValidationError::ReplayDomain)?;
-    let signing_hash = set_code_transaction_signing_hash(transaction, scratch, signing_hasher)
-        .map_err(TransactionSignatureValidationError::SigningHash)?;
-    let signature =
-        EthereumSignature::from_parts(transaction.r, transaction.s, transaction.y_parity);
-    recover_and_check(signing_hash, signature, expected_sender, address_hasher)
-}
-
-fn recover_and_check<H>(
-    signing_hash: TransactionSigningHash,
-    signature: EthereumSignature,
-    expected_sender: Option<Address>,
-    address_hasher: H,
-) -> Result<ValidatedTransactionSignature, TransactionSignatureValidationError>
-where
-    H: Keccak256,
-{
-    let sender = recover_sender_from_digest(signing_hash.to_b256(), signature, address_hasher)
-        .map_err(|_| TransactionSignatureValidationError::InvalidSignature)?;
-    if let Some(expected) = expected_sender
-        && sender != expected
-    {
-        return Err(TransactionSignatureValidationError::WrongSender);
-    }
-    Ok(ValidatedTransactionSignature::new(sender, signing_hash))
-}
-
-fn legacy_signature(
-    transaction: &UnvalidatedLegacyTransaction<'_>,
-) -> Result<EthereumSignature, TransactionSignatureValidationError> {
-    let chain_id =
-        transaction
-            .eip155_chain_id()
-            .ok_or(TransactionSignatureValidationError::ReplayDomain(
-                VerifyError::MissingReplayDomain,
-            ))?;
-    let v = legacy_v_u64(transaction.v).ok_or(
-        TransactionSignatureValidationError::ReplayDomain(VerifyError::MissingReplayDomain),
-    )?;
-    let base = chain_id
-        .get()
-        .checked_mul(2)
-        .and_then(|value| value.checked_add(35))
-        .ok_or(TransactionSignatureValidationError::InvalidSignature)?;
-    let y_parity = v
-        .checked_sub(base)
-        .and_then(|value| SignatureYParity::try_new(value).ok())
-        .ok_or(TransactionSignatureValidationError::InvalidSignature)?;
-    Ok(EthereumSignature::from_parts(
-        transaction.r,
-        transaction.s,
-        y_parity,
-    ))
-}
-
-fn legacy_v_u64(value: [u8; 32]) -> Option<u64> {
-    const U64_TAIL_START: usize = 24;
-
-    let high = value.get(..U64_TAIL_START)?;
-    if high.iter().any(|byte| *byte != 0) {
-        return None;
-    }
-    let tail = value.get(U64_TAIL_START..)?.try_into().ok()?;
-    Some(u64::from_be_bytes(tail))
+    recover_and_check(
+        signing_hash,
+        signature,
+        expected_sender,
+        secp256k1_backend,
+        address_hasher,
+    )
 }

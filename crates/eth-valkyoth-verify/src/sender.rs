@@ -1,6 +1,7 @@
 use eth_valkyoth_hash::{Keccak256, hash_one};
 use eth_valkyoth_primitives::{Address, B256};
 use eth_valkyoth_protocol::SignatureYParity;
+#[cfg(feature = "secp256k1-k256")]
 use k256::ecdsa::{
     RecoveryId as Secp256k1RecoveryId, Signature as Secp256k1Signature,
     VerifyingKey as Secp256k1VerifyingKey,
@@ -16,6 +17,44 @@ pub const ETHEREUM_SIGNATURE_BYTES: usize = 65;
 pub const SIGNING_DIGEST_BYTES: usize = 32;
 /// Uncompressed secp256k1 public key payload length without the SEC1 prefix.
 pub const ETHEREUM_PUBLIC_KEY_BYTES: usize = 64;
+
+/// Recoverable secp256k1 backend boundary for Ethereum sender recovery.
+///
+/// Implementations must recover the uncompressed public key payload for the
+/// exact `(digest, signature)` pair, enforce Ethereum's `r`/`s` scalar policy,
+/// enforce the EIP-2 low-s rule, and accept only y-parity recovery IDs `0` and
+/// `1`. Backends that hold private implementation state should document and
+/// test their state-clearing behavior for key-adjacent hashing paths.
+pub trait RecoverableSecp256k1 {
+    /// Recovers the uncompressed public key payload without the SEC1 `0x04`
+    /// prefix.
+    fn recover_uncompressed_public_key(
+        &mut self,
+        signing_digest: B256,
+        signature: EthereumSignature,
+    ) -> Result<[u8; ETHEREUM_PUBLIC_KEY_BYTES], VerifyError>;
+}
+
+impl<T> RecoverableSecp256k1 for &mut T
+where
+    T: RecoverableSecp256k1 + ?Sized,
+{
+    fn recover_uncompressed_public_key(
+        &mut self,
+        signing_digest: B256,
+        signature: EthereumSignature,
+    ) -> Result<[u8; ETHEREUM_PUBLIC_KEY_BYTES], VerifyError> {
+        (**self).recover_uncompressed_public_key(signing_digest, signature)
+    }
+}
+
+/// Reviewed `k256` recoverable secp256k1 adapter.
+///
+/// This adapter is available only with the explicit `secp256k1-k256` feature.
+/// The default crate graph exposes only [`RecoverableSecp256k1`].
+#[cfg(feature = "secp256k1-k256")]
+#[derive(Clone, Copy, Debug, Default)]
+pub struct K256Secp256k1Backend;
 
 /// Ethereum secp256k1 ECDSA signature with explicit y parity.
 ///
@@ -82,6 +121,7 @@ impl EthereumSignature {
         self.y_parity
     }
 
+    #[cfg(feature = "secp256k1-k256")]
     fn secp256k1_signature(self) -> Result<Secp256k1Signature, VerifyError> {
         let signature = Secp256k1Signature::from_scalars(self.r, self.s)
             .map_err(|_| VerifyError::InvalidSignature)?;
@@ -91,13 +131,34 @@ impl EthereumSignature {
         Ok(signature)
     }
 
+    #[cfg(feature = "secp256k1-k256")]
     fn secp256k1_recovery_id(self) -> Result<Secp256k1RecoveryId, VerifyError> {
         Secp256k1RecoveryId::try_from(self.y_parity.get())
             .map_err(|_| VerifyError::InvalidSignature)
     }
 }
 
-/// Recovers an Ethereum sender address from a signing digest and signature.
+#[cfg(feature = "secp256k1-k256")]
+impl RecoverableSecp256k1 for K256Secp256k1Backend {
+    fn recover_uncompressed_public_key(
+        &mut self,
+        signing_digest: B256,
+        signature: EthereumSignature,
+    ) -> Result<[u8; ETHEREUM_PUBLIC_KEY_BYTES], VerifyError> {
+        let secp256k1_signature = signature.secp256k1_signature()?;
+        let recovery_id = signature.secp256k1_recovery_id()?;
+        let digest_bytes = <[u8; SIGNING_DIGEST_BYTES]>::from(signing_digest);
+        let verifying_key = Secp256k1VerifyingKey::recover_from_prehash(
+            &digest_bytes,
+            &secp256k1_signature,
+            recovery_id,
+        )
+        .map_err(|_| VerifyError::InvalidSignature)?;
+        public_key_payload_from_verifying_key(verifying_key)
+    }
+}
+
+/// Recovers an Ethereum sender address through a caller-provided secp256k1 backend.
 ///
 /// `signing_digest` must already be the Ethereum transaction signing hash for
 /// the relevant transaction type. This function does not build the transaction
@@ -108,6 +169,27 @@ impl EthereumSignature {
 /// should provide a hasher with an explicit state-clearing policy for this
 /// path; the optional sanitization bridge is the preferred place to enforce
 /// `SecureSanitize` on concrete stateful hashers.
+pub fn recover_sender_from_digest_with_backend<B, H>(
+    signing_digest: B256,
+    signature: EthereumSignature,
+    mut backend: B,
+    hasher: H,
+) -> Result<Address, VerifyError>
+where
+    B: RecoverableSecp256k1,
+    H: Keccak256,
+{
+    let public_key = backend.recover_uncompressed_public_key(signing_digest, signature)?;
+    address_from_uncompressed_public_key(public_key, hasher)
+}
+
+/// Recovers an Ethereum sender address with the reviewed `k256` adapter.
+///
+/// This convenience function is available only with the explicit
+/// `secp256k1-k256` feature. Default builds should call
+/// [`recover_sender_from_digest_with_backend`] with a deployment-selected
+/// hardware, platform, WASM, or audited software backend.
+#[cfg(feature = "secp256k1-k256")]
 pub fn recover_sender_from_digest<H>(
     signing_digest: B256,
     signature: EthereumSignature,
@@ -116,25 +198,13 @@ pub fn recover_sender_from_digest<H>(
 where
     H: Keccak256,
 {
-    let secp256k1_signature = signature.secp256k1_signature()?;
-    let recovery_id = signature.secp256k1_recovery_id()?;
-    let digest_bytes = <[u8; SIGNING_DIGEST_BYTES]>::from(signing_digest);
-    let verifying_key = Secp256k1VerifyingKey::recover_from_prehash(
-        &digest_bytes,
-        &secp256k1_signature,
-        recovery_id,
-    )
-    .map_err(|_| VerifyError::InvalidSignature)?;
-    address_from_verifying_key(verifying_key, hasher)
+    recover_sender_from_digest_with_backend(signing_digest, signature, K256Secp256k1Backend, hasher)
 }
 
-fn address_from_verifying_key<H>(
+#[cfg(feature = "secp256k1-k256")]
+fn public_key_payload_from_verifying_key(
     verifying_key: Secp256k1VerifyingKey,
-    hasher: H,
-) -> Result<Address, VerifyError>
-where
-    H: Keccak256,
-{
+) -> Result<[u8; ETHEREUM_PUBLIC_KEY_BYTES], VerifyError> {
     let encoded = verifying_key.to_encoded_point(false);
     let public_key = encoded
         .as_bytes()
@@ -143,7 +213,22 @@ where
     if public_key.len() != ETHEREUM_PUBLIC_KEY_BYTES {
         return Err(VerifyError::InvalidSignature);
     }
-    let digest = hash_one(hasher, public_key);
+    <[u8; ETHEREUM_PUBLIC_KEY_BYTES]>::try_from(public_key)
+        .map_err(|_| VerifyError::InvalidSignature)
+}
+
+/// Converts an uncompressed secp256k1 public key payload into an Ethereum address.
+///
+/// `public_key` must be the 64-byte `x || y` payload without the SEC1 `0x04`
+/// prefix. The address is the low 20 bytes of `keccak256(public_key)`.
+pub fn address_from_uncompressed_public_key<H>(
+    public_key: [u8; ETHEREUM_PUBLIC_KEY_BYTES],
+    hasher: H,
+) -> Result<Address, VerifyError>
+where
+    H: Keccak256,
+{
+    let digest = hash_one(hasher, &public_key);
     let digest_bytes = <[u8; SIGNING_DIGEST_BYTES]>::from(digest);
     let address = digest_bytes
         .get(12..)
@@ -155,8 +240,8 @@ where
 #[cfg(test)]
 mod tests {
     use super::*;
+    use crate::test_crypto::{RealKeccak, TestSecp256k1Backend};
     use k256::ecdsa::SigningKey;
-    use sha3::Digest;
 
     struct AddressFromPublicKeyHasher {
         digest: [u8; 32],
@@ -181,31 +266,6 @@ mod tests {
 
         fn finalize(self) -> B256 {
             B256::from_bytes(self.digest)
-        }
-    }
-
-    struct RealKeccak {
-        inner: sha3::Keccak256,
-    }
-
-    impl RealKeccak {
-        fn new() -> Self {
-            Self {
-                inner: sha3::Keccak256::new(),
-            }
-        }
-    }
-
-    impl Keccak256 for RealKeccak {
-        fn update(&mut self, input: &[u8]) {
-            self.inner.update(input);
-        }
-
-        fn finalize(self) -> B256 {
-            let digest = self.inner.finalize();
-            let mut bytes = [0_u8; SIGNING_DIGEST_BYTES];
-            bytes.copy_from_slice(&digest);
-            B256::from_bytes(bytes)
         }
     }
 
@@ -265,7 +325,7 @@ mod tests {
             0x10, 0x9f, 0xc8, 0xdf, 0x28, 0x30, 0x27, 0xb6, 0x28, 0x5c, 0xc8, 0x89, 0xf5, 0xaa,
             0x62, 0x4e, 0xac, 0x1f, 0x55, 0x84, 0x3b, 0x9a, 0xca, 0x00, 0x80, 0x01, 0x80, 0x80,
         ];
-        let signing_digest = eth_valkyoth_hash::hash_one(RealKeccak::new(), &message);
+        let signing_digest = eth_valkyoth_hash::hash_one(RealKeccak::default(), &message);
         let signature = EthereumSignature::from_parts(
             [
                 0xc9, 0xcf, 0x86, 0x33, 0x3b, 0xcb, 0x06, 0x5d, 0x14, 0x00, 0x32, 0xec, 0xaa, 0xb5,
@@ -285,7 +345,12 @@ mod tests {
         ]);
 
         assert_eq!(
-            recover_sender_from_digest(signing_digest, signature, RealKeccak::new()),
+            recover_sender_from_digest_with_backend(
+                signing_digest,
+                signature,
+                TestSecp256k1Backend,
+                RealKeccak::default()
+            ),
             Ok(expected)
         );
     }
@@ -299,9 +364,10 @@ mod tests {
 
         if let (Ok(signature), Ok(expected)) = (signature, expected) {
             assert_eq!(
-                recover_sender_from_digest(
+                recover_sender_from_digest_with_backend(
                     signing_digest(),
                     signature,
+                    TestSecp256k1Backend,
                     AddressFromPublicKeyHasher::new()
                 ),
                 Ok(expected)
@@ -323,9 +389,10 @@ mod tests {
             EthereumSignature::from_parts([0_u8; 32], [1_u8; 32], SignatureYParity::Even);
 
         assert_eq!(
-            recover_sender_from_digest(
+            recover_sender_from_digest_with_backend(
                 signing_digest(),
                 signature,
+                TestSecp256k1Backend,
                 AddressFromPublicKeyHasher::new()
             ),
             Err(VerifyError::InvalidSignature)
@@ -349,9 +416,10 @@ mod tests {
         );
 
         assert_eq!(
-            recover_sender_from_digest(
+            recover_sender_from_digest_with_backend(
                 signing_digest(),
                 signature,
+                TestSecp256k1Backend,
                 AddressFromPublicKeyHasher::new()
             ),
             Err(VerifyError::InvalidSignature)

@@ -163,7 +163,7 @@ relevant dependency point.
 | Node-level sync, txpool, mining/validator boundaries, and observability were not scheduled. | Added `v0.83.0` through `v0.85.0` with explicit library-boundary scope and validation gates. |
 | REVM dependency admission failed the existing dependency policy. | Added `v0.37.1 - REVM Dependency Recheck` before execution work may continue. |
 | Native audited EVM execution was not explicitly versioned; REVM could look like the long-term core. | Added `v0.40.0` through `v0.47.0` as the first-party EVM engine phase and shifted later versions upward. |
-| Default verification still depends directly on `k256` and `sha3`, which conflicts with the long-term first-party-core goal. | Added `v0.37.2` and `v0.37.3` to audit core dependencies, move cryptographic implementation crates behind explicit boundaries/features, and document any accepted cryptographic backend plan. |
+| Default verification previously depended directly on `k256` and used direct `sha3` test wrappers, which conflicted with the long-term first-party-core goal. | Added `v0.37.2` and `v0.37.3` to audit core dependencies, move cryptographic implementation crates behind explicit boundaries/features, and document any accepted cryptographic backend plan. |
 | `subtle`, `alloy-rlp`, dev `serde_json`, optional `serde`/`serde_json`, and optional `sanitization` need explicit long-term dependency classifications before execution grows. | Added `v0.37.4` and `v0.37.5` so constant-time helpers, reference oracles, JSON parser support, and sanitization bridges remain deliberate dependency choices. |
 | Native opcodes alone do not make full Ethereum execution support; genesis, full block validity, trie-root construction, state transition integration, blob/KZG validation, and full execution fixtures were not versioned before RPC/Reth work. | Added `v0.48.0` through `v0.55.0` for full execution state and block-validity work, then shifted later integration tracks upward. |
 
@@ -1332,7 +1332,7 @@ Exit criteria:
 
 ### v0.37.2 - Core Dependency Independence Audit
 
-Status: implementation ready; awaiting pentest.
+Status: complete and tagged.
 
 Goal: review every dependency that touches core Ethereum behavior and decide
 whether it is first-party, optional backend, reference-only, or temporary debt.
@@ -1363,6 +1363,8 @@ Exit criteria:
   classification, or a first-party replacement milestone.
 
 ### v0.37.3 - Signature And Crypto Backend Boundaries
+
+Status: implementation ready; awaiting pentest.
 
 Goal: remove direct default dependence on cryptographic implementation crates
 from verification APIs where a first-party boundary is feasible.

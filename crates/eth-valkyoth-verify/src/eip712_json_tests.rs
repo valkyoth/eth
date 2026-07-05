@@ -1,30 +1,7 @@
-use eth_valkyoth_hash::Keccak256Digest;
-use sha3::Digest;
 use std::format;
 
 use super::*;
-
-struct RealKeccak {
-    inner: sha3::Keccak256,
-}
-
-impl Default for RealKeccak {
-    fn default() -> Self {
-        Self {
-            inner: sha3::Keccak256::new(),
-        }
-    }
-}
-
-impl Keccak256 for RealKeccak {
-    fn update(&mut self, input: &[u8]) {
-        Digest::update(&mut self.inner, input);
-    }
-
-    fn finalize(self) -> Keccak256Digest {
-        B256::from_bytes(self.inner.finalize().into())
-    }
-}
+use crate::test_crypto::RealKeccak;
 
 #[test]
 fn parses_ether_mail_json() {

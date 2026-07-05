@@ -246,13 +246,13 @@ where
 #[cfg(test)]
 mod tests {
     use super::*;
+    use crate::test_crypto::RealKeccak;
     use eth_valkyoth_codec::DecodeLimits;
     use eth_valkyoth_hash::Keccak256Digest;
     use eth_valkyoth_protocol::{
         decode_access_list_transaction, decode_blob_transaction, decode_dynamic_fee_transaction,
         decode_legacy_transaction,
     };
-    use sha3::Digest;
 
     const TEST_LIMITS: DecodeLimits = DecodeLimits {
         max_input_bytes: 128,
@@ -283,28 +283,6 @@ mod tests {
 
         fn finalize(self) -> Keccak256Digest {
             B256::from_bytes(self.output)
-        }
-    }
-
-    struct RealKeccak {
-        inner: sha3::Keccak256,
-    }
-
-    impl RealKeccak {
-        fn new() -> Self {
-            Self {
-                inner: sha3::Keccak256::new(),
-            }
-        }
-    }
-
-    impl Keccak256 for RealKeccak {
-        fn update(&mut self, input: &[u8]) {
-            Digest::update(&mut self.inner, input);
-        }
-
-        fn finalize(self) -> Keccak256Digest {
-            B256::from_bytes(self.inner.finalize().into())
         }
     }
 
@@ -411,8 +389,12 @@ mod tests {
         {
             let mut scratch = [0_u8; 128];
             assert_eq!(
-                legacy_eip155_transaction_signing_hash(&legacy, &mut scratch, RealKeccak::new())
-                    .map(TransactionSigningHash::to_b256),
+                legacy_eip155_transaction_signing_hash(
+                    &legacy,
+                    &mut scratch,
+                    RealKeccak::default()
+                )
+                .map(TransactionSigningHash::to_b256),
                 Ok(B256::from_bytes([
                     0xda, 0xf5, 0xa7, 0x79, 0xae, 0x97, 0x2f, 0x97, 0x21, 0x97, 0x30, 0x3d, 0x7b,
                     0x57, 0x47, 0x46, 0xc7, 0xef, 0x83, 0xea, 0xda, 0xc0, 0xf2, 0x79, 0x1a, 0xd2,
@@ -420,8 +402,12 @@ mod tests {
                 ]))
             );
             assert_eq!(
-                access_list_transaction_signing_hash(&access_list, &mut scratch, RealKeccak::new())
-                    .map(TransactionSigningHash::to_b256),
+                access_list_transaction_signing_hash(
+                    &access_list,
+                    &mut scratch,
+                    RealKeccak::default()
+                )
+                .map(TransactionSigningHash::to_b256),
                 Ok(B256::from_bytes([
                     0xc1, 0x2d, 0xe1, 0x45, 0x2f, 0x6c, 0xf1, 0xbe, 0xd2, 0x67, 0xef, 0xfc, 0x37,
                     0x20, 0xc6, 0xf3, 0x94, 0x6a, 0x96, 0x75, 0x1d, 0x76, 0xd6, 0x79, 0x7e, 0x5b,
@@ -429,8 +415,12 @@ mod tests {
                 ]))
             );
             assert_eq!(
-                dynamic_fee_transaction_signing_hash(&dynamic_fee, &mut scratch, RealKeccak::new())
-                    .map(TransactionSigningHash::to_b256),
+                dynamic_fee_transaction_signing_hash(
+                    &dynamic_fee,
+                    &mut scratch,
+                    RealKeccak::default()
+                )
+                .map(TransactionSigningHash::to_b256),
                 Ok(B256::from_bytes([
                     0x23, 0x3e, 0xd8, 0xc0, 0xf5, 0xda, 0x09, 0xf6, 0xd7, 0x63, 0x33, 0x37, 0x88,
                     0x57, 0x50, 0x5c, 0x87, 0xb1, 0x8f, 0xfb, 0x85, 0xa1, 0x0d, 0x5a, 0xd4, 0x44,
@@ -438,7 +428,7 @@ mod tests {
                 ]))
             );
             assert_eq!(
-                blob_transaction_signing_hash(&blob, &mut scratch, RealKeccak::new())
+                blob_transaction_signing_hash(&blob, &mut scratch, RealKeccak::default())
                     .map(TransactionSigningHash::to_b256),
                 Ok(B256::from_bytes([
                     0x1a, 0x8b, 0xce, 0x34, 0xe3, 0x2f, 0x6a, 0x3c, 0x95, 0x7c, 0xcb, 0x04, 0x02,

@@ -4,9 +4,12 @@ use eth_valkyoth_hash::Keccak256;
 use eth_valkyoth_primitives::Address;
 use eth_valkyoth_protocol::SetCodeAuthorization;
 
+#[cfg(feature = "secp256k1-k256")]
+use crate::K256Secp256k1Backend;
 use crate::{
-    EthereumSignature, SetCodeAuthorizationSigningHash, TransactionSigningHashError,
-    recover_sender_from_digest, set_code_authorization_signing_hash,
+    EthereumSignature, RecoverableSecp256k1, SetCodeAuthorizationSigningHash,
+    TransactionSigningHashError, recover_sender_from_digest_with_backend,
+    set_code_authorization_signing_hash,
 };
 
 /// A decoded EIP-7702 authorization tuple signature that recovered correctly.
@@ -114,6 +117,7 @@ pub enum SetCodeAuthorizationValidationErrorCategory {
 /// `keccak256(0x05 || rlp([chain_id, address, nonce]))`. Chain-ID policy,
 /// nonce/account-state checks, delegation indicator checks, and empty-list
 /// rejection are the v0.24.2 transaction-validity gate.
+#[cfg(feature = "secp256k1-k256")]
 pub fn validate_set_code_authorization_signature<H1, H2>(
     authorization: SetCodeAuthorization,
     expected_authority: Option<Address>,
@@ -125,12 +129,41 @@ where
     H1: Keccak256,
     H2: Keccak256,
 {
+    validate_set_code_authorization_signature_with_backend(
+        authorization,
+        expected_authority,
+        scratch,
+        signing_hasher,
+        K256Secp256k1Backend,
+        address_hasher,
+    )
+}
+
+/// Validates a decoded EIP-7702 authorization tuple signature through a backend.
+pub fn validate_set_code_authorization_signature_with_backend<B, H1, H2>(
+    authorization: SetCodeAuthorization,
+    expected_authority: Option<Address>,
+    scratch: &mut [u8],
+    signing_hasher: H1,
+    secp256k1_backend: B,
+    address_hasher: H2,
+) -> Result<ValidatedSetCodeAuthorization, SetCodeAuthorizationValidationError>
+where
+    B: RecoverableSecp256k1,
+    H1: Keccak256,
+    H2: Keccak256,
+{
     let signing_hash = set_code_authorization_signing_hash(authorization, scratch, signing_hasher)
         .map_err(SetCodeAuthorizationValidationError::SigningHash)?;
     let signature =
         EthereumSignature::from_parts(authorization.r, authorization.s, authorization.y_parity);
-    let authority = recover_sender_from_digest(signing_hash.to_b256(), signature, address_hasher)
-        .map_err(|_| SetCodeAuthorizationValidationError::InvalidSignature)?;
+    let authority = recover_sender_from_digest_with_backend(
+        signing_hash.to_b256(),
+        signature,
+        secp256k1_backend,
+        address_hasher,
+    )
+    .map_err(|_| SetCodeAuthorizationValidationError::InvalidSignature)?;
     if let Some(expected) = expected_authority
         && authority != expected
     {
@@ -142,36 +175,13 @@ where
 #[cfg(test)]
 mod tests {
     use super::*;
-    use eth_valkyoth_hash::Keccak256Digest;
-    use eth_valkyoth_primitives::{B256, Nonce};
+    use crate::test_crypto::{RealKeccak, TestSecp256k1Backend};
+    use eth_valkyoth_primitives::Nonce;
     use eth_valkyoth_protocol::{
         SET_CODE_AUTHORIZATION_MAGIC, SetCodeAuthorizationChainId, SignatureYParity,
         encode_set_code_authorization_signing_preimage,
     };
     use k256::ecdsa::SigningKey;
-    use sha3::Digest;
-
-    struct RealKeccak {
-        inner: sha3::Keccak256,
-    }
-
-    impl RealKeccak {
-        fn new() -> Self {
-            Self {
-                inner: sha3::Keccak256::new(),
-            }
-        }
-    }
-
-    impl Keccak256 for RealKeccak {
-        fn update(&mut self, input: &[u8]) {
-            Digest::update(&mut self.inner, input);
-        }
-
-        fn finalize(self) -> Keccak256Digest {
-            B256::from_bytes(self.inner.finalize().into())
-        }
-    }
 
     fn signing_key() -> Result<SigningKey, SetCodeAuthorizationValidationError> {
         SigningKey::from_bytes((&fixture_bytes(b"set-code authorization test key")).into())
@@ -197,7 +207,7 @@ mod tests {
         let authorization = unsigned_authorization();
         let mut scratch = [0_u8; 128];
         let signing_hash =
-            set_code_authorization_signing_hash(authorization, &mut scratch, RealKeccak::new())
+            set_code_authorization_signing_hash(authorization, &mut scratch, RealKeccak::default())
                 .map_err(SetCodeAuthorizationValidationError::SigningHash)?;
         let key = signing_key()?;
         let (signature, recovery_id) = key
@@ -229,7 +239,7 @@ mod tests {
             .as_bytes()
             .get(1..)
             .ok_or(SetCodeAuthorizationValidationError::InvalidSignature)?;
-        let digest = eth_valkyoth_hash::hash_one(RealKeccak::new(), public_key);
+        let digest = eth_valkyoth_hash::hash_one(RealKeccak::default(), public_key);
         let bytes = <[u8; 32]>::from(digest);
         let address = bytes
             .get(12..)
@@ -272,12 +282,13 @@ mod tests {
 
         if let (Ok(authorization), Ok(expected)) = (authorization, expected) {
             let mut scratch = [0_u8; 128];
-            let result = validate_set_code_authorization_signature(
+            let result = validate_set_code_authorization_signature_with_backend(
                 authorization,
                 Some(expected),
                 &mut scratch,
-                RealKeccak::new(),
-                RealKeccak::new(),
+                RealKeccak::default(),
+                TestSecp256k1Backend,
+                RealKeccak::default(),
             );
             assert_eq!(
                 result.map(ValidatedSetCodeAuthorization::authority),
@@ -305,24 +316,26 @@ mod tests {
         if let Ok(authorization) = authorization {
             let mut scratch = [0_u8; 128];
             assert_eq!(
-                validate_set_code_authorization_signature(
+                validate_set_code_authorization_signature_with_backend(
                     authorization,
                     Some(Address::from_bytes(address_bytes(b"wrong"))),
                     &mut scratch,
-                    RealKeccak::new(),
-                    RealKeccak::new(),
+                    RealKeccak::default(),
+                    TestSecp256k1Backend,
+                    RealKeccak::default(),
                 ),
                 Err(SetCodeAuthorizationValidationError::WrongAuthority)
             );
 
             let mut short = [0_u8; 8];
             assert!(matches!(
-                validate_set_code_authorization_signature(
+                validate_set_code_authorization_signature_with_backend(
                     authorization,
                     None,
                     &mut short,
-                    RealKeccak::new(),
-                    RealKeccak::new(),
+                    RealKeccak::default(),
+                    TestSecp256k1Backend,
+                    RealKeccak::default(),
                 ),
                 Err(SetCodeAuthorizationValidationError::SigningHash(_))
             ));

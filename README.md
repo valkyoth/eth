@@ -35,11 +35,9 @@ dependencies.
 
 ## Current Status
 
-Status: `v0.37.2` adds the core dependency independence audit before execution
-work continues. The audit documents default, optional, reference-only,
-dev-only, and compile-time dependencies that can influence Ethereum behavior,
-and schedules follow-up releases for every remaining third-party core
-dependency.
+Status: `v0.37.3` adds the signature backend boundary before execution work
+continues. The default facade graph no longer selects `k256`; callers opt into
+the reviewed compatibility adapter with the explicit `secp256k1-k256` feature.
 
 Implemented now:
 
@@ -106,8 +104,9 @@ Implemented now:
   non-empty authorization lists, fee order, caller-computed gas policy, and
   caller-provided authority account-state checks. Per-authorization failures
   are counted as skipped tuples instead of rejecting the whole transaction.
-- Digest-level secp256k1 sender recovery with low-s rejection, Ethereum
-  y-parity policy, and caller-provided Keccak-256 public-key hashing.
+- Digest-level secp256k1 sender recovery through a caller-provided backend
+  boundary, with low-s rejection, Ethereum y-parity policy, and caller-provided
+  Keccak-256 public-key hashing.
 - Decoded transaction signature validation helpers that combine replay-domain
   checks, signing hashes, low-s/y-parity policy, sender recovery, and optional
   expected-sender comparison.
@@ -123,9 +122,9 @@ Implemented now:
   impact.
 - Optional `keccak-tiny` software backend using reviewed `tiny-keccak`,
   disabled by default and covered by Keccak-256 KATs.
-- Core dependency independence audit covering default `k256` and `subtle`
-  runtime paths, optional `tiny-keccak`, `serde`, `serde_json`, and
-  `sanitization` paths, and dev/reference `alloy-rlp` and `sha3` usage.
+- Core dependency independence audit covering default `subtle`, optional
+  `k256`, `tiny-keccak`, `serde`, `serde_json`, and `sanitization` paths, and
+  dev/reference `alloy-rlp` usage.
 - Public `RlpEncode`/`RlpDecode` traits and derive macros for reviewed simple
   structs, with bounded decode and trybuild compile-fail coverage.
 - Caller-provided Keccak-256 trait boundary with no default hash
@@ -183,14 +182,14 @@ Not implemented yet:
 
 ```toml
 [dependencies]
-eth = "0.37"
+eth = "0.37.3"
 ```
 
 For optional sanitization support:
 
 ```toml
 [dependencies]
-eth = { version = "0.37", features = ["sanitization"] }
+eth = { version = "0.37.3", features = ["sanitization"] }
 ```
 
 ## Features
@@ -202,6 +201,7 @@ eth = { version = "0.37", features = ["sanitization"] }
 | `rpc` | no | Future explicit RPC trust-policy boundary. |
 | `eip712-json` | no | Enables the optional `std` JSON-RPC EIP-712 typed-data parser boundary. |
 | `keccak-tiny` | no | Enables the optional reviewed `tiny-keccak` software backend. |
+| `secp256k1-k256` | no | Enables the optional reviewed `k256` sender-recovery adapter. |
 | `sanitization` | no | Re-exports optional secret sanitization bridge APIs. |
 | `signer` | no | Future signer isolation boundary. |
 | `reth` | no | Future Reth integration boundary. |
@@ -214,7 +214,7 @@ Optional reviewed software Keccak backend:
 
 ```toml
 [dependencies]
-eth = { version = "0.37", features = ["keccak-tiny"] }
+eth = { version = "0.37.3", features = ["keccak-tiny"] }
 ```
 
 ```rust
@@ -222,6 +222,13 @@ use eth::hash::{KECCAK256_ABC, TinyKeccak256, hash_one};
 
 let digest = hash_one(TinyKeccak256::default(), b"abc");
 assert_eq!(<[u8; 32]>::from(digest), KECCAK256_ABC);
+```
+
+Optional reviewed secp256k1 recovery adapter:
+
+```toml
+[dependencies]
+eth = { version = "0.37.3", features = ["secp256k1-k256"] }
 ```
 
 ## Primitive Domains
@@ -567,7 +574,9 @@ Keccak-256 backend:
 use eth::hash::Keccak256;
 use eth::primitives::B256;
 use eth::protocol::SignatureYParity;
-use eth::verify::{EthereumSignature, recover_sender_from_digest};
+use eth::verify::{
+    EthereumSignature, RecoverableSecp256k1, recover_sender_from_digest_with_backend,
+};
 
 struct PlatformKeccak {
     output: B256,
@@ -583,6 +592,19 @@ impl Keccak256 for PlatformKeccak {
     }
 }
 
+struct PlatformSecp256k1;
+
+impl RecoverableSecp256k1 for PlatformSecp256k1 {
+    fn recover_uncompressed_public_key(
+        &mut self,
+        signing_digest: B256,
+        signature: EthereumSignature,
+    ) -> Result<[u8; 64], eth::error::VerifyError> {
+        let _ = (signing_digest, signature);
+        Ok([0x55_u8; 64])
+    }
+}
+
 let digest = B256::from([0x44_u8; 32]);
 let signature = EthereumSignature::from_parts(
     [0x11_u8; 32],
@@ -590,9 +612,10 @@ let signature = EthereumSignature::from_parts(
     SignatureYParity::Even,
 );
 
-let _result = recover_sender_from_digest(
+let _result = recover_sender_from_digest_with_backend(
     digest,
     signature,
+    PlatformSecp256k1,
     PlatformKeccak {
         output: B256::from([0x33_u8; 32]),
     },
@@ -604,9 +627,9 @@ non-Ethereum recovery IDs. The example hasher above is illustrative only and
 does not compute a real digest. Production hashers must implement Ethereum
 Keccak-256, not FIPS SHA3-256, and should be checked with
 `eth::hash::verify_empty_digest_with` before being wired into
-`recover_sender_from_digest`. A wrong backend produces a wrong sender address
-silently; there is no runtime cross-check. A successful recovered address is
-still not a full transaction-validity proof.
+`recover_sender_from_digest_with_backend`. A wrong secp256k1 or Keccak backend
+produces a wrong sender address silently; there is no runtime cross-check. A
+successful recovered address is still not a full transaction-validity proof.
 
 ## Constant-Time Composition
 
@@ -1011,7 +1034,7 @@ friendly, and independently testable.
 The minimum supported Rust version is Rust `1.90.0`. New deployments should use
 the pinned stable Rust `1.96.1` until the toolchain policy is updated.
 
-Compatibility evidence for `0.37.2`:
+Compatibility evidence for `0.37.3`:
 
 | Rust | Local Evidence |
 | --- | --- |
@@ -1028,7 +1051,7 @@ Compatibility evidence for `0.37.2`:
 
 ```bash
 scripts/checks.sh
-scripts/release_0_37_1_gate.sh
+scripts/release_0_37_3_gate.sh
 ```
 
 For dependency-policy checks, install `cargo-deny` and `cargo-audit`, then run:

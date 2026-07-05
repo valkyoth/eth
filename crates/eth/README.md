@@ -6,11 +6,11 @@
 <div align="center">
   <a href="https://docs.rs/eth">Docs.rs</a>
   |
-  <a href="https://github.com/valkyoth/eth/blob/main/docs/RELEASE_PLAN.md">Release Plan</a>
+  <a href="docs/RELEASE_PLAN.md">Release Plan</a>
   |
-  <a href="https://github.com/valkyoth/eth/blob/main/docs/threat-model.md">Threat Model</a>
+  <a href="docs/threat-model.md">Threat Model</a>
   |
-  <a href="https://github.com/valkyoth/eth/blob/main/SECURITY.md">Security</a>
+  <a href="SECURITY.md">Security</a>
 </div>
 
 <br>
@@ -23,45 +23,28 @@
 
 # eth
 
-`eth` is the public facade crate for a `no_std`-first Ethereum
-execution-layer protocol workspace.
+`eth` is a `no_std`-first Rust workspace for Ethereum execution-layer protocol
+building blocks.
 
-The crate is intentionally conservative at `0.37.2`: it provides explicit
-Ethereum primitive domains, bounded decode-budget policy, stable error
-categories, primitive RLP bridge helpers, a caller-provided Keccak-256 boundary,
-RLP fuzz-harness evidence, a transaction envelope shell, unvalidated legacy
-transaction field decoding, unvalidated EIP-2930 access-list transaction field
-decoding, unvalidated EIP-1559 dynamic-fee transaction field decoding,
-unvalidated EIP-4844 blob transaction field decoding, unvalidated EIP-7702
-set-code transaction field decoding, no-allocation canonical transaction
-envelope encoding for admitted decoded domains, explicit chain and fork
-activation context, proof-gated transaction typestate transitions, replay-domain
-validation for transaction chain binding, transaction signing-hash helpers,
-EIP-7702 authorization signing and signer recovery helpers, an EIP-7702
-set-code transaction validity gate, decoded transaction signature validation
-helpers, public RLP derive support, digest-level secp256k1 sender recovery,
-EIP-712 domain-safety checks, EIP-712 typed-data hashing over borrowed
-descriptors, an opt-in bounded JSON typed-data parser, syntactic block header
-decoding and hashing, syntactic receipt and withdrawal-list decoding, an
-opt-in reviewed
-`tiny-keccak` software backend, small first-party crate boundaries, optional
-sanitization support, external RLP execution-fixture conformance evidence,
-dev-only differential RLP evidence against `alloy-rlp`, a core dependency
-independence audit, and release evidence before RPC, signer, EVM, Reth, or P2P
-integrations become real dependencies.
+The project target is a production-ready Ethereum crate at `1.0.0`, reached
+through small releases with explicit security, conformance, and dependency
+evidence. The first implementation work is intentionally conservative:
+explicit domains, bounded decode policy, stable crate boundaries, and security
+documentation before RPC, signer, REVM, Reth, or P2P adapters become real
+dependencies.
 
 ## Current Status
 
-The current release candidate is `0.37.2`; the core dependency independence
-audit is in place before execution work continues. Default `k256` and
-`subtle`, optional `tiny-keccak`, `serde`, `serde_json`, and `sanitization`,
-and dev/reference `alloy-rlp` and `sha3` usage are explicitly classified with
-follow-up releases where needed.
+Status: `v0.37.3` adds the signature backend boundary before execution work
+continues. The default facade graph no longer selects `k256`; callers opt into
+the reviewed compatibility adapter with the explicit `secp256k1-k256` feature.
 
 Implemented now:
 
-- `no_std` facade with small first-party support crates.
-- Ethereum domain newtypes for chain, block, gas, nonce, timestamp, address,
+- Rust workspace pinned to stable `1.96.1`.
+- MSRV policy for Rust `1.90.0` through `1.96.1`.
+- `no_std` facade and focused first-party crates.
+- Explicit primitive domains for chain, block, gas, nonce, timestamp, address,
   hash, wei, and transaction type values.
 - Constant-time equality composition for fixed-width hash and wei values.
 - Bounded decode limits plus stateful cumulative allocation, item, and proof-node
@@ -121,11 +104,14 @@ Implemented now:
   non-empty authorization lists, fee order, caller-computed gas policy, and
   caller-provided authority account-state checks. Per-authorization failures
   are counted as skipped tuples instead of rejecting the whole transaction.
-- Digest-level secp256k1 sender recovery with low-s rejection, Ethereum
-  y-parity policy, and caller-provided Keccak-256 public-key hashing.
+- Digest-level secp256k1 sender recovery through a caller-provided backend
+  boundary, with low-s rejection, Ethereum y-parity policy, and caller-provided
+  Keccak-256 public-key hashing.
 - Decoded transaction signature validation helpers that combine replay-domain
   checks, signing hashes, low-s/y-parity policy, sender recovery, and optional
   expected-sender comparison.
+- External raw mainnet transaction KATs for EIP-2930, EIP-1559, EIP-4844, and
+  EIP-7702 sender recovery.
 - EIP-712 domain-safety checks for required `chainId` and
   `verifyingContract` fields, plus a domain-gated sender recovery helper.
 - No-allocation EIP-712 typed-data encoder for caller-provided schemas and
@@ -136,8 +122,9 @@ Implemented now:
   impact.
 - Optional `keccak-tiny` software backend using reviewed `tiny-keccak`,
   disabled by default and covered by Keccak-256 KATs.
-- Core dependency independence audit covering default, optional, dev-only,
-  reference-only, and compile-time dependency classes.
+- Core dependency independence audit covering default `subtle`, optional
+  `k256`, `tiny-keccak`, `serde`, `serde_json`, and `sanitization` paths, and
+  dev/reference `alloy-rlp` usage.
 - Public `RlpEncode`/`RlpDecode` traits and derive macros for reviewed simple
   structs, with bounded decode and trybuild compile-fail coverage.
 - Caller-provided Keccak-256 trait boundary with no default hash
@@ -145,11 +132,13 @@ Implemented now:
 - RLP fuzz harness with committed hex seed corpus and crash reproduction docs.
 - Stable error codes, messages, categories, and formatting for codec,
   protocol, fork, feature, resource, and verification failures.
-- Optional sanitization bridge and derive macros outside the default feature
+- Optional sanitization and derive support crates outside the default feature
   set.
-- Release gates for formatting, clippy, tests, packaging, MSRV compatibility,
-  dependency policy, audit, SBOM, and pentest evidence.
+- MIT OR Apache-2.0 license.
+- Security, modularity, supply-chain, implementation, and release planning docs.
+- Local check, release-gate, dependency-policy, SBOM, and pentest evidence.
 - Safe upstream advisory checking for REVM and official Ethereum source drift.
+- Independent support-crate release planning for crates.io push limits.
 - Pinned official Ethereum source revisions plus a reproducible external
   reference-store sync process for `/home/eldryoth/Work/test/eth`.
 - Execution fixture harness for pinned `ethereum/tests` `RLPTests`, with a
@@ -177,34 +166,30 @@ Not implemented yet:
 | --- | --- |
 | License | `MIT OR Apache-2.0` |
 | MSRV | Rust `1.90.0` |
-| Latest verified stable | Rust `1.96.1` |
+| Pinned toolchain | Rust `1.96.1` |
 | Default target | `no_std` |
-| Default features | protocol-core only |
-| Default networking/signing | none |
+| Default runtime dependencies | protocol-core support crates only |
+| Optional hardening dependencies | `sanitization` and proc-macro tooling behind opt-in crates/features |
 | Unsafe policy | first-party crates use `#![forbid(unsafe_code)]` |
+| Default features | protocol-core only |
+| Network/signing defaults | none |
 | Release evidence | local gates, cargo-deny, cargo-audit, SBOM, pentest report |
 | Formal verification | Kani harness planned for `v0.71.0` as extra assurance |
-| Crate versions | tracked in the [version matrix](https://github.com/valkyoth/eth/blob/main/docs/CRATE_VERSION_MATRIX.md) |
+| Crate versions | tracked in [`docs/CRATE_VERSION_MATRIX.md`](docs/CRATE_VERSION_MATRIX.md) |
+| 1.0 target | serious production-ready Ethereum execution-layer toolkit |
 
 ## Install
 
 ```toml
 [dependencies]
-eth = "0.37"
+eth = "0.37.3"
 ```
 
-Disable defaults explicitly for embedded or freestanding builds:
+For optional sanitization support:
 
 ```toml
 [dependencies]
-eth = { version = "0.37", default-features = false }
-```
-
-Optional sanitization support:
-
-```toml
-[dependencies]
-eth = { version = "0.37", features = ["sanitization"] }
+eth = { version = "0.37.3", features = ["sanitization"] }
 ```
 
 ## Features
@@ -216,6 +201,7 @@ eth = { version = "0.37", features = ["sanitization"] }
 | `rpc` | no | Future explicit RPC trust-policy boundary. |
 | `eip712-json` | no | Enables the optional `std` JSON-RPC EIP-712 typed-data parser boundary. |
 | `keccak-tiny` | no | Enables the optional reviewed `tiny-keccak` software backend. |
+| `secp256k1-k256` | no | Enables the optional reviewed `k256` sender-recovery adapter. |
 | `sanitization` | no | Re-exports optional secret sanitization bridge APIs. |
 | `signer` | no | Future signer isolation boundary. |
 | `reth` | no | Future Reth integration boundary. |
@@ -228,7 +214,7 @@ Optional reviewed software Keccak backend:
 
 ```toml
 [dependencies]
-eth = { version = "0.37", features = ["keccak-tiny"] }
+eth = { version = "0.37.3", features = ["keccak-tiny"] }
 ```
 
 ```rust
@@ -236,6 +222,13 @@ use eth::hash::{KECCAK256_ABC, TinyKeccak256, hash_one};
 
 let digest = hash_one(TinyKeccak256::default(), b"abc");
 assert_eq!(<[u8; 32]>::from(digest), KECCAK256_ABC);
+```
+
+Optional reviewed secp256k1 recovery adapter:
+
+```toml
+[dependencies]
+eth = { version = "0.37.3", features = ["secp256k1-k256"] }
 ```
 
 ## Primitive Domains
@@ -265,10 +258,6 @@ assert_eq!(<[u8; 32]>::from(hash), [0x22_u8; 32]);
 assert_eq!(value.to_be_bytes()[31], 0);
 assert_eq!(tx_type.map(u8::from), Ok(2));
 ```
-
-Legacy transactions are not typed EIP-2718 envelopes. Use
-`TransactionType::LEGACY` for APIs that need a legacy domain value, and
-`try_new_typed` for type bytes that will be encoded as typed envelopes.
 
 Primitive domains bridge directly to the bounded codec without allocation:
 
@@ -585,7 +574,9 @@ Keccak-256 backend:
 use eth::hash::Keccak256;
 use eth::primitives::B256;
 use eth::protocol::SignatureYParity;
-use eth::verify::{EthereumSignature, recover_sender_from_digest};
+use eth::verify::{
+    EthereumSignature, RecoverableSecp256k1, recover_sender_from_digest_with_backend,
+};
 
 struct PlatformKeccak {
     output: B256,
@@ -601,6 +592,19 @@ impl Keccak256 for PlatformKeccak {
     }
 }
 
+struct PlatformSecp256k1;
+
+impl RecoverableSecp256k1 for PlatformSecp256k1 {
+    fn recover_uncompressed_public_key(
+        &mut self,
+        signing_digest: B256,
+        signature: EthereumSignature,
+    ) -> Result<[u8; 64], eth::error::VerifyError> {
+        let _ = (signing_digest, signature);
+        Ok([0x55_u8; 64])
+    }
+}
+
 let digest = B256::from([0x44_u8; 32]);
 let signature = EthereumSignature::from_parts(
     [0x11_u8; 32],
@@ -608,9 +612,10 @@ let signature = EthereumSignature::from_parts(
     SignatureYParity::Even,
 );
 
-let _result = recover_sender_from_digest(
+let _result = recover_sender_from_digest_with_backend(
     digest,
     signature,
+    PlatformSecp256k1,
     PlatformKeccak {
         output: B256::from([0x33_u8; 32]),
     },
@@ -622,9 +627,9 @@ non-Ethereum recovery IDs. The example hasher above is illustrative only and
 does not compute a real digest. Production hashers must implement Ethereum
 Keccak-256, not FIPS SHA3-256, and should be checked with
 `eth::hash::verify_empty_digest_with` before being wired into
-`recover_sender_from_digest`. A wrong backend produces a wrong sender address
-silently; there is no runtime cross-check. A successful recovered address is
-still not a full transaction-validity proof.
+`recover_sender_from_digest_with_backend`. A wrong secp256k1 or Keccak backend
+produces a wrong sender address silently; there is no runtime cross-check. A
+successful recovered address is still not a full transaction-validity proof.
 
 ## Constant-Time Composition
 
@@ -680,9 +685,9 @@ let digest = hash_one(
 assert_eq!(<[u8; 32]>::from(digest), [0x44_u8; 32]);
 ```
 
-Implementations must compute Ethereum Keccak-256, not FIPS SHA3-256. See the
-[Keccak boundary document](https://github.com/valkyoth/eth/blob/main/docs/keccak-boundary.md)
-for the dependency decision and future backend admission checklist.
+Implementations must compute Ethereum Keccak-256, not FIPS SHA3-256. See
+[`docs/keccak-boundary.md`](docs/keccak-boundary.md) for the dependency
+decision and future backend admission checklist.
 
 ## Stable Errors
 
@@ -783,8 +788,8 @@ assert_eq!(list_output.get(..9), Some([0xc8, 0x83, b'c', b'a', b't', 0x83, b'd',
 ```
 
 The RLP parser surface has cargo-fuzz targets and committed seed fixtures. See
-the [fuzzing guide](https://github.com/valkyoth/eth/blob/main/docs/fuzzing.md)
-for seed materialization, target scope, and crash reproduction.
+[`docs/fuzzing.md`](docs/fuzzing.md) for seed materialization, target scope, and
+crash reproduction.
 
 ## Withdrawals
 
@@ -907,7 +912,7 @@ Account and storage proof APIs derive keys as `keccak256(address)` and
 `keccak256(slot_key)`, then compare the encoded account or storage value
 byte-for-byte. They do not decode account fields, prove that a storage root
 belongs to a specific account, or interpret the storage scalar. See
-[`docs/mpt-nodes.md`](../../docs/mpt-nodes.md).
+[`docs/mpt-nodes.md`](docs/mpt-nodes.md).
 
 ## Transaction Envelopes
 
@@ -1002,32 +1007,34 @@ The derive surface is intentionally conservative. It supports reviewed structs
 only, rejects generics/enums/unions, requires `DecodeLimits` for decode, and
 keeps skipped fields explicit with `#[eth_rlp(skip, default, reason = "...")]`.
 
-## Support Crates
+## Workspace Shape
 
-Most users should depend on `eth`. The `eth-valkyoth-*` crates are published so
-the workspace can keep small, auditable boundaries:
+Most users should depend on the facade crate, `eth`. The support crates are
+published separately so implementation boundaries stay small, `no_std`
+friendly, and independently testable.
 
 | Crate | Default | Purpose |
 | --- | --- | --- |
-| `eth-valkyoth-primitives` | yes | Chain, block, gas, nonce, address, hash, wei, and transaction type domains. |
+| `eth` | yes | Facade crate over stable protocol-core crates. |
+| `eth-valkyoth-primitives` | yes | Chain, fork, block, gas, nonce, address, hash, wei, and bounded value types. |
 | `eth-valkyoth-codec` | yes | Bounded exact-consumption wire codec policy. |
 | `eth-valkyoth-hash` | yes | Keccak-256 trait boundary for caller-provided hash implementations. |
 | `eth-valkyoth-protocol` | yes | Fork-aware validation states and protocol context. |
 | `eth-valkyoth-verify` | yes | Verification boundaries for signatures, proofs, replay domains, and EIP-712 typed-data hashing. |
-| `eth-valkyoth-sanitization` | no | Optional bridge to the `sanitization` crate. |
+| `eth-valkyoth-sanitization` | no | Optional bridge to the `sanitization` crate for secret-bearing Ethereum data. |
 | `eth-valkyoth-derive` | no | Optional sanitization and RLP derive macros. |
 | `eth-valkyoth-evm` | no | EVM adapter boundary with REVM dependency review metadata. |
-| `eth-valkyoth-rpc` | no | Future RPC trust-policy boundary. |
+| `eth-valkyoth-rpc` | no | Future explicit RPC trust-policy boundary. |
 | `eth-valkyoth-signer` | no | Future signer isolation boundary. |
 | `eth-valkyoth-reth` | no | Future Reth integration boundary. |
-| `eth-valkyoth-testkit` | no | Future fixtures and conformance helpers. |
+| `eth-valkyoth-testkit` | no | Test fixtures, conformance helpers, and adversarial inputs. |
 
 ## Rust Version Support
 
 The minimum supported Rust version is Rust `1.90.0`. New deployments should use
-the latest stable Rust verified by the release gates.
+the pinned stable Rust `1.96.1` until the toolchain policy is updated.
 
-Compatibility evidence for `0.37.2`:
+Compatibility evidence for `0.37.3`:
 
 | Rust | Local Evidence |
 | --- | --- |
@@ -1039,6 +1046,42 @@ Compatibility evidence for `0.37.2`:
 | `1.95.0` | `cargo check --workspace --all-features` |
 | `1.96.0` | `cargo check --workspace --all-features` |
 | `1.96.1` | full release gate |
+
+## Checks
+
+```bash
+scripts/checks.sh
+scripts/release_0_37_3_gate.sh
+```
+
+For dependency-policy checks, install `cargo-deny` and `cargo-audit`, then run:
+
+```bash
+cargo deny check
+cargo audit
+```
+
+## Documentation
+
+- [Implementation Plan](docs/IMPLEMENTATION_PLAN.md)
+- [Release Plan](docs/RELEASE_PLAN.md)
+- [Block Headers](docs/block-headers.md)
+- [Receipts](docs/receipts.md)
+- [Withdrawals](docs/withdrawals.md)
+- [Keccak Boundary](docs/keccak-boundary.md)
+- [Transaction Signing Hashes](docs/transaction-signing-hashes.md)
+- [Transaction Signature Validation](docs/transaction-signature-validation.md)
+- [k256 Dependency Admission](docs/dependency-admission-k256.md)
+- [Fuzzing](docs/fuzzing.md)
+- [Scope](docs/SCOPE.md)
+- [Threat Model](docs/threat-model.md)
+- [Spec Matrix](docs/SPEC_MATRIX.md)
+- [Spec Source Policy](docs/spec-source-policy.md)
+- [GitHub Security Settings](docs/github-security-settings.md)
+- [Secret Handling Policy](docs/secret-handling-policy.md)
+- [Modularity Policy](docs/modularity-policy.md)
+- [Supply-Chain Security](docs/supply-chain-security.md)
+- [Unsafe Policy](docs/unsafe-policy.md)
 
 ## License
 

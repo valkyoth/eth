@@ -1,7 +1,11 @@
 use eth_valkyoth_hash::{Keccak256, hash_chunks};
 use eth_valkyoth_primitives::{Address, B256, ChainId};
 
-use crate::{EthereumSignature, VerifyError, recover_sender_from_digest};
+#[cfg(feature = "secp256k1-k256")]
+use crate::K256Secp256k1Backend;
+use crate::{
+    EthereumSignature, RecoverableSecp256k1, VerifyError, recover_sender_from_digest_with_backend,
+};
 
 /// EIP-191 versioned prefix used by EIP-712 structured-data signing.
 pub const EIP712_SIGNING_PREFIX: [u8; 2] = [0x19, 0x01];
@@ -141,6 +145,7 @@ where
 /// Callers must compute `domain_separator` from the same `chainId` and
 /// `verifyingContract` values passed here, using a conformant EIP-712 encoder;
 /// otherwise the checked domain and signed digest can silently diverge.
+#[cfg(feature = "secp256k1-k256")]
 pub fn recover_eip712_sender<DH, AH>(
     expected_domain: Eip712DomainExpectation,
     domain: Eip712Domain,
@@ -154,20 +159,49 @@ where
     DH: Keccak256,
     AH: Keccak256,
 {
+    recover_eip712_sender_with_backend(
+        expected_domain,
+        domain,
+        domain_separator,
+        message_hash,
+        signature,
+        digest_hasher,
+        K256Secp256k1Backend,
+        address_hasher,
+    )
+}
+
+/// Recovers an EIP-712 sender through a caller-provided secp256k1 backend.
+#[allow(clippy::too_many_arguments)]
+pub fn recover_eip712_sender_with_backend<B, DH, AH>(
+    expected_domain: Eip712DomainExpectation,
+    domain: Eip712Domain,
+    domain_separator: B256,
+    message_hash: B256,
+    signature: EthereumSignature,
+    digest_hasher: DH,
+    secp256k1_backend: B,
+    address_hasher: AH,
+) -> Result<Address, VerifyError>
+where
+    B: RecoverableSecp256k1,
+    DH: Keccak256,
+    AH: Keccak256,
+{
     require_eip712_domain(
         expected_domain.chain_id(),
         expected_domain.verifying_contract(),
         domain,
     )?;
     let digest = eip712_signing_digest(domain_separator, message_hash, digest_hasher);
-    recover_sender_from_digest(digest, signature, address_hasher)
+    recover_sender_from_digest_with_backend(digest, signature, secp256k1_backend, address_hasher)
 }
 
 #[cfg(test)]
 mod tests {
     use super::*;
+    use crate::test_crypto::{RealKeccak, TestSecp256k1Backend};
     use k256::ecdsa::SigningKey;
-    use sha3::Digest;
 
     const TEST_PRIVATE_KEY: [u8; 32] = [
         0x4c, 0x08, 0x83, 0xa6, 0x91, 0x02, 0x93, 0x7d, 0x62, 0x31, 0x47, 0x1b, 0x5d, 0xbb, 0x62,
@@ -188,18 +222,6 @@ mod tests {
 
     struct FixedHasher {
         digest: B256,
-    }
-
-    struct RealKeccak {
-        inner: sha3::Keccak256,
-    }
-
-    impl RealKeccak {
-        fn new() -> Self {
-            Self {
-                inner: sha3::Keccak256::new(),
-            }
-        }
     }
 
     impl Eip712TranscriptHasher {
@@ -240,19 +262,6 @@ mod tests {
 
         fn finalize(self) -> B256 {
             self.digest
-        }
-    }
-
-    impl Keccak256 for RealKeccak {
-        fn update(&mut self, input: &[u8]) {
-            self.inner.update(input);
-        }
-
-        fn finalize(self) -> B256 {
-            let digest = self.inner.finalize();
-            let mut bytes = [0_u8; 32];
-            bytes.copy_from_slice(&digest);
-            B256::from_bytes(bytes)
         }
     }
 
@@ -369,18 +378,19 @@ mod tests {
     fn recovers_known_eip712_vector() -> Result<(), VerifyError> {
         let domain_separator = B256::from_bytes([0x11_u8; 32]);
         let message_hash = B256::from_bytes([0x22_u8; 32]);
-        let digest = eip712_signing_digest(domain_separator, message_hash, RealKeccak::new());
+        let digest = eip712_signing_digest(domain_separator, message_hash, RealKeccak::default());
         let signature = sign_digest(digest)?;
 
         assert_eq!(
-            recover_eip712_sender(
+            recover_eip712_sender_with_backend(
                 expected_domain(),
                 complete_domain(),
                 domain_separator,
                 message_hash,
                 signature,
-                RealKeccak::new(),
-                RealKeccak::new(),
+                RealKeccak::default(),
+                TestSecp256k1Backend,
+                RealKeccak::default(),
             ),
             Ok(TEST_PRIVATE_KEY_ADDRESS)
         );
@@ -392,7 +402,7 @@ mod tests {
         let domain = Eip712Domain::complete(ChainId::new(5), expected_contract());
 
         assert_eq!(
-            recover_eip712_sender(
+            recover_eip712_sender_with_backend(
                 expected_domain(),
                 domain,
                 B256::from_bytes([0x11_u8; 32]),
@@ -401,6 +411,7 @@ mod tests {
                 FixedHasher {
                     digest: B256::from_bytes([0x33_u8; 32])
                 },
+                TestSecp256k1Backend,
                 FixedHasher {
                     digest: B256::from_bytes([0x44_u8; 32])
                 },
@@ -412,7 +423,7 @@ mod tests {
     #[test]
     fn eip712_recovery_uses_signature_after_complete_domain() {
         assert_eq!(
-            recover_eip712_sender(
+            recover_eip712_sender_with_backend(
                 expected_domain(),
                 complete_domain(),
                 B256::from_bytes([0x11_u8; 32]),
@@ -421,6 +432,7 @@ mod tests {
                 FixedHasher {
                     digest: B256::from_bytes([0x33_u8; 32])
                 },
+                TestSecp256k1Backend,
                 FixedHasher {
                     digest: B256::from_bytes([0x44_u8; 32])
                 },

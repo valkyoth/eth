@@ -203,7 +203,7 @@ dependencies = [
 
 [[package]]
 name = "eth-valkyoth-verify"
-version = "0.20.2"
+version = "0.21.0"
 dependencies = [
  "eth-valkyoth-codec",
  "eth-valkyoth-hash",

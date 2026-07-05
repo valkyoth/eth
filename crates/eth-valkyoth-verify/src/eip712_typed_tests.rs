@@ -1,37 +1,16 @@
-use eth_valkyoth_hash::Keccak256Digest;
-use sha3::Digest;
 extern crate std;
 use std::boxed::Box;
 use std::string::String;
 use std::vec::Vec;
 
 use super::*;
-use crate::{EthereumSignature, VerifyError, recover_sender_from_digest};
+use crate::{
+    EthereumSignature, VerifyError, recover_sender_from_digest_with_backend,
+    test_crypto::{RealKeccak, TestSecp256k1Backend},
+};
 
 const EIP712_SIGNATURE: &str = "0x4355c47d63924e8a72e509b65029052eb6c299d53a04e167c5775fd466751c9d07299936d304c153f6443dfa05f40ff007d72911b6f72307f996231605b915621c";
 const EIP712_SIGNER: &str = "0xCD2a3d9F938E13CD947Ec05AbC7FE734Df8DD826";
-
-struct RealKeccak {
-    inner: sha3::Keccak256,
-}
-
-impl Default for RealKeccak {
-    fn default() -> Self {
-        Self {
-            inner: sha3::Keccak256::new(),
-        }
-    }
-}
-
-impl Keccak256 for RealKeccak {
-    fn update(&mut self, input: &[u8]) {
-        Digest::update(&mut self.inner, input);
-    }
-
-    fn finalize(self) -> Keccak256Digest {
-        B256::from_bytes(self.inner.finalize().into())
-    }
-}
 
 #[test]
 fn encodes_official_eip712_mail_type() -> Result<(), Eip712EncodeError> {
@@ -66,7 +45,12 @@ fn recovers_official_eip712_mail_signer() -> Result<(), VerifyError> {
     let expected = decode_address(EIP712_SIGNER)?;
 
     assert_eq!(
-        recover_sender_from_digest(digest, signature, RealKeccak::default()),
+        recover_sender_from_digest_with_backend(
+            digest,
+            signature,
+            TestSecp256k1Backend,
+            RealKeccak::default()
+        ),
         Ok(expected)
     );
     Ok(())

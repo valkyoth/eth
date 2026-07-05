@@ -1,6 +1,5 @@
 use eth_valkyoth_codec::DecodeLimits;
-use eth_valkyoth_hash::Keccak256Digest;
-use eth_valkyoth_primitives::{Address, B256, ChainId};
+use eth_valkyoth_primitives::{Address, ChainId};
 use eth_valkyoth_protocol::{
     SignatureYParity, UnvalidatedAccessListTransaction, UnvalidatedBlobTransaction,
     UnvalidatedDynamicFeeTransaction, UnvalidatedLegacyTransaction, UnvalidatedSetCodeTransaction,
@@ -8,9 +7,12 @@ use eth_valkyoth_protocol::{
     decode_dynamic_fee_transaction, decode_legacy_transaction, decode_set_code_transaction,
 };
 use k256::ecdsa::SigningKey;
-use sha3::Digest;
 
 use super::*;
+use crate::{
+    set_code_transaction_signing_hash,
+    test_crypto::{RealKeccak, TestSecp256k1Backend},
+};
 
 const TEST_LIMITS: DecodeLimits = DecodeLimits {
     max_input_bytes: 128,
@@ -45,28 +47,6 @@ const SET_CODE_TX: [u8; 37] = [
     0xc0, 0xc0, 0x01, 0x01, 0x02,
 ];
 
-struct RealKeccak {
-    inner: sha3::Keccak256,
-}
-
-impl RealKeccak {
-    fn new() -> Self {
-        Self {
-            inner: sha3::Keccak256::new(),
-        }
-    }
-}
-
-impl Keccak256 for RealKeccak {
-    fn update(&mut self, input: &[u8]) {
-        Digest::update(&mut self.inner, input);
-    }
-
-    fn finalize(self) -> Keccak256Digest {
-        B256::from_bytes(self.inner.finalize().into())
-    }
-}
-
 fn signing_key() -> Result<SigningKey, TransactionSignatureValidationError> {
     SigningKey::from_bytes(
         (&[
@@ -86,7 +66,7 @@ fn expected_sender() -> Result<Address, TransactionSignatureValidationError> {
         .as_bytes()
         .get(1..)
         .ok_or(TransactionSignatureValidationError::InvalidSignature)?;
-    let digest = eth_valkyoth_hash::hash_one(RealKeccak::new(), public_key);
+    let digest = eth_valkyoth_hash::hash_one(RealKeccak::default(), public_key);
     let bytes = <[u8; 32]>::from(digest);
     let address = bytes
         .get(12..)
@@ -150,8 +130,9 @@ fn signed_legacy()
 -> Result<UnvalidatedLegacyTransaction<'static>, TransactionSignatureValidationError> {
     let tx = legacy_fixture()?;
     let mut scratch = [0_u8; 128];
-    let signing_hash = legacy_eip155_transaction_signing_hash(&tx, &mut scratch, RealKeccak::new())
-        .map_err(TransactionSignatureValidationError::SigningHash)?;
+    let signing_hash =
+        legacy_eip155_transaction_signing_hash(&tx, &mut scratch, RealKeccak::default())
+            .map_err(TransactionSignatureValidationError::SigningHash)?;
     let (r, s, y_parity) = sign_hash(signing_hash)?;
     let mut v = [0_u8; 32];
     let v_value = 35_u64
@@ -170,8 +151,9 @@ fn signed_access_list()
 -> Result<UnvalidatedAccessListTransaction<'static>, TransactionSignatureValidationError> {
     let tx = access_list_fixture()?;
     let mut scratch = [0_u8; 128];
-    let signing_hash = access_list_transaction_signing_hash(&tx, &mut scratch, RealKeccak::new())
-        .map_err(TransactionSignatureValidationError::SigningHash)?;
+    let signing_hash =
+        access_list_transaction_signing_hash(&tx, &mut scratch, RealKeccak::default())
+            .map_err(TransactionSignatureValidationError::SigningHash)?;
     let (r, s, y_parity) = sign_hash(signing_hash)?;
     Ok(UnvalidatedAccessListTransaction {
         y_parity,
@@ -185,8 +167,9 @@ fn signed_dynamic_fee()
 -> Result<UnvalidatedDynamicFeeTransaction<'static>, TransactionSignatureValidationError> {
     let tx = dynamic_fee_fixture()?;
     let mut scratch = [0_u8; 128];
-    let signing_hash = dynamic_fee_transaction_signing_hash(&tx, &mut scratch, RealKeccak::new())
-        .map_err(TransactionSignatureValidationError::SigningHash)?;
+    let signing_hash =
+        dynamic_fee_transaction_signing_hash(&tx, &mut scratch, RealKeccak::default())
+            .map_err(TransactionSignatureValidationError::SigningHash)?;
     let (r, s, y_parity) = sign_hash(signing_hash)?;
     Ok(UnvalidatedDynamicFeeTransaction {
         y_parity,
@@ -200,7 +183,7 @@ fn signed_blob() -> Result<UnvalidatedBlobTransaction<'static>, TransactionSigna
 {
     let tx = blob_fixture()?;
     let mut scratch = [0_u8; 128];
-    let signing_hash = blob_transaction_signing_hash(&tx, &mut scratch, RealKeccak::new())
+    let signing_hash = blob_transaction_signing_hash(&tx, &mut scratch, RealKeccak::default())
         .map_err(TransactionSignatureValidationError::SigningHash)?;
     let (r, s, y_parity) = sign_hash(signing_hash)?;
     Ok(UnvalidatedBlobTransaction {
@@ -215,7 +198,7 @@ fn signed_set_code()
 -> Result<UnvalidatedSetCodeTransaction<'static>, TransactionSignatureValidationError> {
     let tx = set_code_fixture()?;
     let mut scratch = [0_u8; 128];
-    let signing_hash = set_code_transaction_signing_hash(&tx, &mut scratch, RealKeccak::new())
+    let signing_hash = set_code_transaction_signing_hash(&tx, &mut scratch, RealKeccak::default())
         .map_err(TransactionSignatureValidationError::SigningHash)?;
     let (r, s, y_parity) = sign_hash(signing_hash)?;
     Ok(UnvalidatedSetCodeTransaction {
@@ -247,73 +230,79 @@ fn validates_supported_transaction_signatures() {
         let mut scratch = [0_u8; 128];
 
         assert_eq!(
-            validate_legacy_transaction_signature(
+            validate_legacy_transaction_signature_with_backend(
                 ChainId::new(1),
                 &legacy,
                 Some(expected),
                 &mut scratch,
-                RealKeccak::new(),
-                RealKeccak::new(),
+                RealKeccak::default(),
+                TestSecp256k1Backend,
+                RealKeccak::default(),
             )
             .map(ValidatedTransactionSignature::sender),
             Ok(expected)
         );
         assert_eq!(
-            validate_transaction_signature(
+            validate_transaction_signature_with_backend(
                 ChainId::new(1),
                 UnvalidatedTransaction::AccessList(access_list),
                 Some(expected),
                 &mut scratch,
-                RealKeccak::new(),
-                RealKeccak::new(),
+                RealKeccak::default(),
+                TestSecp256k1Backend,
+                RealKeccak::default(),
             )
             .map(ValidatedTransactionSignature::sender),
             Ok(expected)
         );
         assert_eq!(
-            validate_dynamic_fee_transaction_signature(
+            validate_dynamic_fee_transaction_signature_with_backend(
                 ChainId::new(1),
                 &dynamic_fee,
                 Some(expected),
                 &mut scratch,
-                RealKeccak::new(),
-                RealKeccak::new(),
+                RealKeccak::default(),
+                TestSecp256k1Backend,
+                RealKeccak::default(),
             )
             .map(ValidatedTransactionSignature::sender),
             Ok(expected)
         );
         assert_eq!(
-            validate_blob_transaction_signature(
+            validate_blob_transaction_signature_with_backend(
                 ChainId::new(1),
                 &blob,
                 Some(expected),
                 &mut scratch,
-                RealKeccak::new(),
-                RealKeccak::new(),
+                RealKeccak::default(),
+                TestSecp256k1Backend,
+                RealKeccak::default(),
             )
             .map(ValidatedTransactionSignature::sender),
             Ok(expected)
         );
         assert_eq!(
-            validate_set_code_transaction_signature(
+            validate_set_code_transaction_signature_with_backend(
                 ChainId::new(1),
                 &set_code,
                 Some(expected),
                 &mut scratch,
-                RealKeccak::new(),
-                RealKeccak::new(),
+                RealKeccak::default(),
+                TestSecp256k1Backend,
+                RealKeccak::default(),
             )
             .map(ValidatedTransactionSignature::sender),
             Ok(expected)
         );
         assert_eq!(
-            validate_transaction_signature(
+            validate_transaction_signature_with_backend(
                 ChainId::new(1),
                 UnvalidatedTransaction::SetCode(set_code),
                 Some(expected),
                 &mut scratch,
-                RealKeccak::new(),
-                RealKeccak::new(),
+                RealKeccak::default(),
+                TestSecp256k1Backend,
+                RealKeccak::default(),
             )
             .map(ValidatedTransactionSignature::sender),
             Ok(expected)
@@ -328,26 +317,28 @@ fn rejects_wrong_chain_and_wrong_sender() {
     if let Ok(tx) = tx {
         let mut scratch = [0_u8; 128];
         assert_eq!(
-            validate_access_list_transaction_signature(
+            validate_access_list_transaction_signature_with_backend(
                 ChainId::new(5),
                 &tx,
                 None,
                 &mut scratch,
-                RealKeccak::new(),
-                RealKeccak::new(),
+                RealKeccak::default(),
+                TestSecp256k1Backend,
+                RealKeccak::default(),
             ),
             Err(TransactionSignatureValidationError::ReplayDomain(
                 VerifyError::WrongChain
             ))
         );
         assert_eq!(
-            validate_access_list_transaction_signature(
+            validate_access_list_transaction_signature_with_backend(
                 ChainId::new(1),
                 &tx,
                 Some(Address::from_bytes([0x44; 20])),
                 &mut scratch,
-                RealKeccak::new(),
-                RealKeccak::new(),
+                RealKeccak::default(),
+                TestSecp256k1Backend,
+                RealKeccak::default(),
             ),
             Err(TransactionSignatureValidationError::WrongSender)
         );
@@ -369,13 +360,14 @@ fn rejects_high_s_and_malformed_scalars() {
             ..tx
         };
         assert_eq!(
-            validate_dynamic_fee_transaction_signature(
+            validate_dynamic_fee_transaction_signature_with_backend(
                 ChainId::new(1),
                 &high_s,
                 None,
                 &mut scratch,
-                RealKeccak::new(),
-                RealKeccak::new(),
+                RealKeccak::default(),
+                TestSecp256k1Backend,
+                RealKeccak::default(),
             ),
             Err(TransactionSignatureValidationError::InvalidSignature)
         );
@@ -385,13 +377,14 @@ fn rejects_high_s_and_malformed_scalars() {
             ..tx
         };
         assert_eq!(
-            validate_dynamic_fee_transaction_signature(
+            validate_dynamic_fee_transaction_signature_with_backend(
                 ChainId::new(1),
                 &malformed,
                 None,
                 &mut scratch,
-                RealKeccak::new(),
-                RealKeccak::new(),
+                RealKeccak::default(),
+                TestSecp256k1Backend,
+                RealKeccak::default(),
             ),
             Err(TransactionSignatureValidationError::InvalidSignature)
         );
@@ -404,13 +397,14 @@ fn reports_signing_hash_construction_failures() {
     assert!(tx.is_ok());
     if let Ok(tx) = tx {
         let mut scratch = [0_u8; 8];
-        let result = validate_blob_transaction_signature(
+        let result = validate_blob_transaction_signature_with_backend(
             ChainId::new(1),
             &tx,
             None,
             &mut scratch,
-            RealKeccak::new(),
-            RealKeccak::new(),
+            RealKeccak::default(),
+            TestSecp256k1Backend,
+            RealKeccak::default(),
         );
         assert!(matches!(
             result,
@@ -425,13 +419,14 @@ fn set_code_transaction_signature_uses_transaction_domain() {
     assert!(tx.is_ok());
     if let Ok(tx) = tx {
         let mut scratch = [0_u8; 128];
-        let result = validate_set_code_transaction_signature(
+        let result = validate_set_code_transaction_signature_with_backend(
             ChainId::new(5),
             &tx,
             None,
             &mut scratch,
-            RealKeccak::new(),
-            RealKeccak::new(),
+            RealKeccak::default(),
+            TestSecp256k1Backend,
+            RealKeccak::default(),
         );
         assert_eq!(
             result,

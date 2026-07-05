@@ -1,10 +1,11 @@
 # k256 Dependency Admission
 
-Status: admitted for `v0.20.0`
+Status: admitted as an explicit optional backend for `v0.37.3`
 
-`eth-valkyoth-verify` admits `k256` for secp256k1 ECDSA public-key recovery.
-This is the first cryptographic implementation dependency in the default
-protocol-core graph, so it is scoped to digest-level sender recovery only.
+`eth-valkyoth-verify` admits `k256` for secp256k1 ECDSA public-key recovery
+only behind the explicit `secp256k1-k256` feature. The default protocol-core
+graph exposes the first-party `RecoverableSecp256k1` boundary and does not
+select a concrete curve implementation.
 
 ## Version Decision
 
@@ -16,17 +17,15 @@ protocol-core graph, so it is scoped to digest-level sender recovery only.
 
 The selected version was checked with `cargo info k256@0.13.4` on 2026-07-01.
 It declares `rust-version = 1.65`, below this workspace's Rust `1.90.0` MSRV.
-The independent recovery test uses `sha3` `0.10.9` as a dev-only Keccak
-backend because it stays on the same RustCrypto `digest 0.10` dependency line
-as `k256` `0.13.4`. `sha3` `0.12.0` is newer, but admitting it here would add a
-second `digest` major line and violate `cargo-deny` duplicate-version policy.
+Recovery tests now use the project `eth-valkyoth-hash` Keccak boundary with the
+optional `tiny-keccak` test backend instead of a direct `sha3` dev-dependency.
 
 ## Feature Decision
 
-`eth` uses:
+`eth-valkyoth-verify` uses:
 
 ```toml
-k256 = { version = "0.13.4", default-features = false, features = ["ecdsa"] }
+k256 = { version = "0.13.4", default-features = false, features = ["ecdsa"], optional = true }
 ```
 
 Default features are disabled so `std`, PKCS#8, Schnorr, and precomputed-table
@@ -54,12 +53,13 @@ features are not admitted by accident. The `ecdsa` feature is required for
 
 ## Verification
 
-Expected checks before tagging `v0.20.0`:
+Expected checks before tagging `v0.37.3`:
 
 ```bash
 cargo test -p eth-valkyoth-verify --all-features
 cargo clippy -p eth-valkyoth-verify --all-targets --all-features -- -D warnings
+cargo tree -p eth --no-default-features
 cargo deny check
 cargo audit
-scripts/release_0_20_gate.sh
+scripts/release_0_37_3_gate.sh
 ```

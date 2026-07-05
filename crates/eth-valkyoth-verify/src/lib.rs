@@ -16,12 +16,18 @@ mod replay;
 mod sender;
 mod set_code_authorization;
 mod state_proof;
+#[cfg(test)]
+mod test_crypto;
 mod transaction_hash;
 mod transaction_signature;
+mod transaction_signature_helpers;
+mod transaction_signature_set_code;
 
+#[cfg(feature = "secp256k1-k256")]
+pub use eip712::recover_eip712_sender;
 pub use eip712::{
     EIP712_SIGNING_PREFIX, Eip712Domain, Eip712DomainExpectation, eip712_signing_digest,
-    recover_eip712_sender, require_eip712_domain,
+    recover_eip712_sender_with_backend, require_eip712_domain,
 };
 pub use eip712_typed::{
     Eip712DomainData, Eip712EncodeError, Eip712Field, Eip712StructType, Eip712Value,
@@ -50,11 +56,16 @@ pub use replay::{
 };
 pub use sender::{
     COMPACT_SIGNATURE_BYTES, ETHEREUM_PUBLIC_KEY_BYTES, ETHEREUM_SIGNATURE_BYTES,
-    EthereumSignature, SIGNING_DIGEST_BYTES, recover_sender_from_digest,
+    EthereumSignature, RecoverableSecp256k1, SIGNING_DIGEST_BYTES,
+    address_from_uncompressed_public_key, recover_sender_from_digest_with_backend,
 };
+#[cfg(feature = "secp256k1-k256")]
+pub use sender::{K256Secp256k1Backend, recover_sender_from_digest};
+#[cfg(feature = "secp256k1-k256")]
+pub use set_code_authorization::validate_set_code_authorization_signature;
 pub use set_code_authorization::{
     SetCodeAuthorizationValidationError, SetCodeAuthorizationValidationErrorCategory,
-    ValidatedSetCodeAuthorization, validate_set_code_authorization_signature,
+    ValidatedSetCodeAuthorization, validate_set_code_authorization_signature_with_backend,
 };
 pub use state_proof::{
     AccountTrieRoot, StorageSlotKey, StorageTrieRoot, VerifiedAccountInclusion,
@@ -68,11 +79,21 @@ pub use transaction_hash::{
 };
 pub use transaction_signature::{
     TransactionSignatureValidationError, TransactionSignatureValidationErrorCategory,
-    ValidatedTransactionSignature, validate_access_list_transaction_signature,
-    validate_blob_transaction_signature, validate_dynamic_fee_transaction_signature,
-    validate_legacy_transaction_signature, validate_set_code_transaction_signature,
+    ValidatedTransactionSignature, validate_access_list_transaction_signature_with_backend,
+    validate_blob_transaction_signature_with_backend,
+    validate_dynamic_fee_transaction_signature_with_backend,
+    validate_legacy_transaction_signature_with_backend,
+    validate_transaction_signature_with_backend,
+};
+#[cfg(feature = "secp256k1-k256")]
+pub use transaction_signature::{
+    validate_access_list_transaction_signature, validate_blob_transaction_signature,
+    validate_dynamic_fee_transaction_signature, validate_legacy_transaction_signature,
     validate_transaction_signature,
 };
+#[cfg(feature = "secp256k1-k256")]
+pub use transaction_signature_set_code::validate_set_code_transaction_signature;
+pub use transaction_signature_set_code::validate_set_code_transaction_signature_with_backend;
 
 /// Verification failure categories.
 #[non_exhaustive]
