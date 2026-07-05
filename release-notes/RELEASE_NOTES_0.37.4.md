@@ -35,7 +35,7 @@ the core dependency independence audit.
 ## Verification
 
 - `scripts/check_runtime_dependency_policy.py`
-- `cargo tree -p eth --no-default-features -e normal`
+- `cargo tree -p eth -e normal`
 - `cargo tree -p eth -e features --all-features`
 - `cargo test --workspace --all-features`
 - `cargo clippy --workspace --all-targets --all-features -- -D warnings`

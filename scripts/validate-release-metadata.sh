@@ -17,6 +17,7 @@ test -x scripts/test-sync-spec-sources.py
 test -x scripts/run_execution_fixtures.py
 test -x scripts/run_differential_tests.py
 test -x scripts/check_runtime_dependency_policy.py
+test -x scripts/test-runtime-dependency-policy.py
 test -f release-crates.toml
 test -f docs/CRATE_VERSION_MATRIX.md
 test -f conformance/execution-fixtures.toml

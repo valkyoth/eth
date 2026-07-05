@@ -5,8 +5,9 @@ scripts/checks.sh
 scripts/check_latest_tools.sh
 scripts/check_ethereum_upstream.py
 scripts/check_runtime_dependency_policy.py
+python3 scripts/test-runtime-dependency-policy.py
 mkdir -p target
-cargo tree -p eth --no-default-features -e normal > target/release_0_37_4_default_runtime_tree.txt
+cargo tree -p eth -e normal > target/release_0_37_4_default_runtime_tree.txt
 cargo tree -p eth -e features --all-features > target/release_0_37_4_all_features_tree.txt
 scripts/release_crates.py --check
 cargo test --workspace --all-features

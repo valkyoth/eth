@@ -27,6 +27,16 @@ DEFAULT_FORBIDDEN = frozenset(
 )
 REFERENCE_ORACLES = frozenset(("alloy-rlp",))
 FIXTURE_PARSERS = frozenset(("serde_json",))
+DEFAULT_RUNTIME_TREE_COMMAND = (
+    "cargo",
+    "tree",
+    "-p",
+    "eth",
+    "-e",
+    "normal",
+    "--prefix",
+    "none",
+)
 
 
 def fail(message: str) -> int:
@@ -98,17 +108,7 @@ def check_reference_dependency_manifests() -> list[str]:
 
 def cargo_tree_default_runtime() -> str:
     return subprocess.check_output(
-        [
-            "cargo",
-            "tree",
-            "-p",
-            "eth",
-            "--no-default-features",
-            "-e",
-            "normal",
-            "--prefix",
-            "none",
-        ],
+        list(DEFAULT_RUNTIME_TREE_COMMAND),
         cwd=ROOT,
         text=True,
     )
