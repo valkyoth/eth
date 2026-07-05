@@ -1,6 +1,6 @@
 # eth 0.37.1 Release Notes
 
-Status: pentest passed; waiting for final GitHub checks before tagging.
+Status: tagged as `v0.37.1`.
 
 `0.37.1` adds the REVM and Ethereum upstream advisory checker required before
 execution adapter work continues. REVM remains non-admitted.
@@ -42,7 +42,7 @@ execution adapter work continues. REVM remains non-admitted.
 - External pentest passed after remediation of the upstream-checker robustness
   findings.
 - Permanent report: `security/pentest/v0.37.1.md`.
-- Final GitHub checks must pass on the pentest report commit before tagging.
+- Final GitHub checks passed before tagging.
 
 ## Versioning
 

@@ -61,6 +61,7 @@ test -f release-notes/RELEASE_NOTES_0.35.0.md
 test -f release-notes/RELEASE_NOTES_0.36.0.md
 test -f release-notes/RELEASE_NOTES_0.37.0.md
 test -f release-notes/RELEASE_NOTES_0.37.1.md
+test -f release-notes/RELEASE_NOTES_0.37.2.md
 test -x scripts/release_0_9_gate.sh
 test -x scripts/release_0_10_gate.sh
 test -x scripts/release_0_11_gate.sh
@@ -92,6 +93,7 @@ test -x scripts/release_0_35_gate.sh
 test -x scripts/release_0_36_gate.sh
 test -x scripts/release_0_37_gate.sh
 test -x scripts/release_0_37_1_gate.sh
+test -x scripts/release_0_37_2_gate.sh
 test -x scripts/test-workspace-dependency-policy.py
 test -f docs/spec-source-policy.md
 test -f docs/reference-store.md
@@ -102,6 +104,7 @@ test -f docs/differential-test-harness.md
 test -f docs/differential-test-report.md
 test -f docs/revm-dependency-review.md
 test -f docs/ethereum-upstream-check.md
+test -f docs/core-independence-audit.md
 grep -q 'execution_specs_repo' spec-lock.toml
 grep -q 'local_reference_store_env' spec-lock.toml
 grep -q 'local_reference_store_default' spec-lock.toml

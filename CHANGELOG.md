@@ -4,6 +4,12 @@ All notable changes to `eth` are documented here.
 
 ## Unreleased
 
+- Started `0.37.2` with `docs/core-independence-audit.md`, classifying
+  default, optional, dev-only, reference-only, and compile-time dependencies
+  that can influence core Ethereum behavior.
+- Scheduled `0.37.4` and `0.37.5` so `subtle`, `alloy-rlp`, dev
+  `serde_json`, optional `serde`/`serde_json`, and optional `sanitization`
+  have explicit follow-up releases before execution work continues.
 - Started `0.37.1` with a safe upstream advisory checker for latest REVM
   registry metadata, Rust `1.90.0`-compatible REVM lines, and official
   Ethereum source drift.

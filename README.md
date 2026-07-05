@@ -35,10 +35,11 @@ dependencies.
 
 ## Current Status
 
-Status: `v0.37.1` adds the safe REVM and official Ethereum upstream advisory
-checker while keeping REVM out of the dependency graph until cargo-deny, MSRV,
-and feature policy pass; pentest passed, with final GitHub checks required
-before tagging.
+Status: `v0.37.2` adds the core dependency independence audit before execution
+work continues. The audit documents default, optional, reference-only,
+dev-only, and compile-time dependencies that can influence Ethereum behavior,
+and schedules follow-up releases for every remaining third-party core
+dependency.
 
 Implemented now:
 
@@ -122,6 +123,9 @@ Implemented now:
   impact.
 - Optional `keccak-tiny` software backend using reviewed `tiny-keccak`,
   disabled by default and covered by Keccak-256 KATs.
+- Core dependency independence audit covering default `k256` and `subtle`
+  runtime paths, optional `tiny-keccak`, `serde`, `serde_json`, and
+  `sanitization` paths, and dev/reference `alloy-rlp` and `sha3` usage.
 - Public `RlpEncode`/`RlpDecode` traits and derive macros for reviewed simple
   structs, with bounded decode and trybuild compile-fail coverage.
 - Caller-provided Keccak-256 trait boundary with no default hash
@@ -1007,7 +1011,7 @@ friendly, and independently testable.
 The minimum supported Rust version is Rust `1.90.0`. New deployments should use
 the pinned stable Rust `1.96.1` until the toolchain policy is updated.
 
-Compatibility evidence for `0.37.1`:
+Compatibility evidence for `0.37.2`:
 
 | Rust | Local Evidence |
 | --- | --- |

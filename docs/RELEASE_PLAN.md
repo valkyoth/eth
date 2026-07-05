@@ -164,6 +164,7 @@ relevant dependency point.
 | REVM dependency admission failed the existing dependency policy. | Added `v0.37.1 - REVM Dependency Recheck` before execution work may continue. |
 | Native audited EVM execution was not explicitly versioned; REVM could look like the long-term core. | Added `v0.40.0` through `v0.47.0` as the first-party EVM engine phase and shifted later versions upward. |
 | Default verification still depends directly on `k256` and `sha3`, which conflicts with the long-term first-party-core goal. | Added `v0.37.2` and `v0.37.3` to audit core dependencies, move cryptographic implementation crates behind explicit boundaries/features, and document any accepted cryptographic backend plan. |
+| `subtle`, `alloy-rlp`, dev `serde_json`, optional `serde`/`serde_json`, and optional `sanitization` need explicit long-term dependency classifications before execution grows. | Added `v0.37.4` and `v0.37.5` so constant-time helpers, reference oracles, JSON parser support, and sanitization bridges remain deliberate dependency choices. |
 | Native opcodes alone do not make full Ethereum execution support; genesis, full block validity, trie-root construction, state transition integration, blob/KZG validation, and full execution fixtures were not versioned before RPC/Reth work. | Added `v0.48.0` through `v0.55.0` for full execution state and block-validity work, then shifted later integration tracks upward. |
 
 ## Phase 0: Repository And Release Discipline
@@ -1295,8 +1296,7 @@ Exit criteria:
 
 ### v0.37.1 - REVM Dependency Recheck
 
-Status: implementation, pentest remediation, and clean retest complete; waiting
-for final GitHub checks before tagging.
+Status: tagged as `v0.37.1`.
 
 Goal: recheck the REVM ecosystem before execution adapter work starts and add
 automation so future REVM/fork drift is visible.
@@ -1331,6 +1331,8 @@ Exit criteria:
   explicitly blocked with a documented reason.
 
 ### v0.37.2 - Core Dependency Independence Audit
+
+Status: implementation ready; awaiting pentest.
 
 Goal: review every dependency that touches core Ethereum behavior and decide
 whether it is first-party, optional backend, reference-only, or temporary debt.
@@ -1390,6 +1392,64 @@ Exit criteria:
 - Core signature verification APIs are boundary-driven.
 - Concrete cryptographic implementation crates are explicit choices, not
   invisible protocol-core dependencies.
+
+### v0.37.4 - Constant-Time And Reference Dependency Policy
+
+Goal: close the remaining default/runtime utility and reference-oracle policy
+items found by the v0.37.2 audit.
+
+Deliverables:
+
+- reviewed long-term decision for `subtle` in primitive constant-time equality;
+- wrapper or replacement plan if direct `subtle` use remains too broad;
+- documented quarantine rule for `alloy-rlp` as a dev/fuzz reference oracle;
+- documented fixture-parser rule for dev-only `serde_json` use in codec tests;
+- cargo-tree assertions proving reference dependencies do not enter runtime
+  crates.
+
+Verification:
+
+- default and all-feature cargo-tree checks documented in release notes;
+- `cargo test --workspace --all-features`;
+- `cargo deny check`;
+- `cargo audit`.
+
+Exit criteria:
+
+- Constant-time helper behavior is either first-party-wrapped or explicitly
+  accepted as a reviewed exception.
+- Reference oracle crates are documented as test/fuzz-only and cannot silently
+  become runtime protocol dependencies.
+
+### v0.37.5 - Optional Parser And Sanitization Boundary Review
+
+Goal: make optional parser and secret-sanitization bridges explicit before
+execution, signing, and JSON-facing surfaces expand.
+
+Deliverables:
+
+- review `serde` and `serde_json` feature boundaries for EIP-712 JSON parsing;
+- review `eth-valkyoth-sanitization` and external `sanitization` feature
+  propagation;
+- documentation that optional parser/sanitization crates are not part of the
+  default facade graph;
+- release-gate checks for default graph absence of optional parser and
+  sanitization dependencies;
+- follow-up milestones for any optional bridge that needs a narrower
+  first-party wrapper.
+
+Verification:
+
+- `cargo tree -p eth -e features --no-default-features`;
+- `cargo tree -p eth -e features --all-features`;
+- `cargo test --workspace --all-features`;
+- `cargo deny check`;
+- `cargo audit`.
+
+Exit criteria:
+
+- Optional JSON parsing and sanitization support remain deliberate opt-ins.
+- Downstream callers can see exactly when those dependencies enter the graph.
 
 ### v0.38.0 - Explicit Execution Environment
 

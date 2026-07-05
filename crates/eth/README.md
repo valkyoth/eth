@@ -26,7 +26,7 @@
 `eth` is the public facade crate for a `no_std`-first Ethereum
 execution-layer protocol workspace.
 
-The crate is intentionally conservative at `0.37.1`: it provides explicit
+The crate is intentionally conservative at `0.37.2`: it provides explicit
 Ethereum primitive domains, bounded decode-budget policy, stable error
 categories, primitive RLP bridge helpers, a caller-provided Keccak-256 boundary,
 RLP fuzz-harness evidence, a transaction envelope shell, unvalidated legacy
@@ -46,15 +46,17 @@ decoding and hashing, syntactic receipt and withdrawal-list decoding, an
 opt-in reviewed
 `tiny-keccak` software backend, small first-party crate boundaries, optional
 sanitization support, external RLP execution-fixture conformance evidence,
-dev-only differential RLP evidence against `alloy-rlp`, and release evidence
-before RPC, signer, EVM, Reth, or P2P integrations become real dependencies.
+dev-only differential RLP evidence against `alloy-rlp`, a core dependency
+independence audit, and release evidence before RPC, signer, EVM, Reth, or P2P
+integrations become real dependencies.
 
 ## Current Status
 
-The current release candidate is `0.37.1`; REVM has been reviewed for the EVM
-adapter boundary and the safe upstream advisory checker is in place. REVM is
-not admitted until the dependency graph passes cargo-deny, MSRV, and feature
-policy; pentest passed, with final GitHub checks required before tagging.
+The current release candidate is `0.37.2`; the core dependency independence
+audit is in place before execution work continues. Default `k256` and
+`subtle`, optional `tiny-keccak`, `serde`, `serde_json`, and `sanitization`,
+and dev/reference `alloy-rlp` and `sha3` usage are explicitly classified with
+follow-up releases where needed.
 
 Implemented now:
 
@@ -134,6 +136,8 @@ Implemented now:
   impact.
 - Optional `keccak-tiny` software backend using reviewed `tiny-keccak`,
   disabled by default and covered by Keccak-256 KATs.
+- Core dependency independence audit covering default, optional, dev-only,
+  reference-only, and compile-time dependency classes.
 - Public `RlpEncode`/`RlpDecode` traits and derive macros for reviewed simple
   structs, with bounded decode and trybuild compile-fail coverage.
 - Caller-provided Keccak-256 trait boundary with no default hash
@@ -1023,7 +1027,7 @@ the workspace can keep small, auditable boundaries:
 The minimum supported Rust version is Rust `1.90.0`. New deployments should use
 the latest stable Rust verified by the release gates.
 
-Compatibility evidence for `0.37.1`:
+Compatibility evidence for `0.37.2`:
 
 | Rust | Local Evidence |
 | --- | --- |

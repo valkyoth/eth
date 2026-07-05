@@ -25,6 +25,12 @@ Before adding a third-party crate:
 Core crates must not gain network, signer, filesystem, clock, TLS, Reth, or P2P
 dependencies.
 
+`docs/core-independence-audit.md` is the release-level inventory for
+dependencies that can affect Ethereum hashing, signatures, RLP, trie/proof
+behavior, execution, consensus, networking, or RPC semantics. Update that
+audit, or the follow-up release that supersedes it, whenever a core-impacting
+dependency changes classification.
+
 ## Admitted Third-Party Crates
 
 | Crate | Version | License | Default Features | Reason |

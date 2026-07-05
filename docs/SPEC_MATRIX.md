@@ -1,6 +1,6 @@
 # eth Specification Matrix
 
-Status: source revisions pinned for `v0.37.1`; scalar, list, and canonical
+Status: source revisions pinned for `v0.37.2`; scalar, list, and canonical
 integer RLP decoding, canonical RLP encoding helpers, primitive RLP bridging,
 Keccak-256 trait boundary, RLP fuzz harness baseline, external execution
 fixture coverage, dev-only independent RLP differential coverage, and
@@ -34,7 +34,9 @@ the first external execution fixture harness and claims pinned `ethereum/tests`
 structural RLP differential reference path. `v0.37.0` reviews REVM for the
 EVM adapter boundary and does not admit it until dependency policy passes.
 `v0.37.1` adds the safe upstream advisory checker for REVM registry metadata
-and official Ethereum source drift.
+and official Ethereum source drift. `v0.37.2` adds the core dependency
+independence audit and schedules every remaining third-party core dependency
+classification follow-up before execution work continues.
 
 Official source and fixture revisions are governed by
 [Spec Source Policy](spec-source-policy.md). `v0.34.0` checked upstream `HEAD`
@@ -71,7 +73,7 @@ Upstream drift is tracked with
 | Header decoding and hashing | syntactic decode/hash | `execution-specs` pinned in `spec-lock.toml`; v0.28.0 decodes legacy, London, Shanghai, Cancun, and Prague header field sets and hashes canonical header RLP through the Keccak trait boundary without claiming full header validity |
 | Receipt decoding | syntactic decode | EIP-658 and EIP-2718 checked for status/root and typed receipt envelopes; v0.29.0 decodes legacy and typed receipts, validates bloom/log/topic shape, and does not itself claim receipt-trie or block-root validity |
 | Withdrawal decoding | syntactic decode | EIP-4895 checked for withdrawal list and entry shape; v0.30.0 decodes canonical withdrawal lists with `uint64` indexes, 20-byte recipient addresses, and nonzero Gwei amounts, and does not claim consensus-layer dequeue correctness, header `withdrawals_root` matching, or state-balance application |
-| Core dependency independence | scheduled | `v0.37.2` audits every dependency that touches core Ethereum behavior, and `v0.37.3` moves signature and hashing implementation crates behind explicit backend boundaries where feasible. Current `k256` and `sha3` use is treated as remediation work, not final architecture. |
+| Core dependency independence | audited, remediation scheduled | `v0.37.2` audits every dependency that touches core Ethereum behavior, classifying `k256` as default temporary debt, `subtle` as a reviewed-exception candidate, `tiny-keccak`, `serde`, `serde_json`, and `sanitization` as optional paths, and `alloy-rlp` plus `sha3` as dev/reference paths. `v0.37.3` moves signature and hashing implementation crates behind explicit backend boundaries where feasible, while `v0.37.4` and `v0.37.5` cover constant-time/reference and optional parser/sanitization policy. |
 | Native EVM execution | scheduled | `v0.40.0` through `v0.47.0` build the first-party audited EVM core, opcode execution, gas accounting, state access, calls/create, precompiles, official state-test harness, and engine hardening. REVM remains reference/compatibility only if admitted. |
 | Header validation | scheduled | `execution-specs` pinned in `spec-lock.toml`; `v0.50.0` schedules parent, gas, base-fee, blob-gas, fork-activation, difficulty/TTD, optional field, and block-root validation for claimed forks. |
 | Receipt and withdrawal validation | scheduled | `execution-specs` pinned in `spec-lock.toml`; `v0.52.0` schedules receipt construction, receipt trie/root matching, cumulative gas, bloom validation, withdrawal root validation, and withdrawal state application. |
