@@ -29,6 +29,14 @@ execution adapter work continues. REVM remains non-admitted.
   No implementation source was updated in this release; the drift is recorded
   as maintenance input.
 
+## Fixed During Pentest
+
+- Empty `git ls-remote` output is now reported as a controlled checker error
+  instead of an uncaught `IndexError`.
+- crates.io versions with unknown `rust_version` metadata are no longer treated
+  as evidence of Rust `1.90.0` compatibility.
+- Added focused regression tests for both checker hardening cases.
+
 ## Versioning
 
 - The facade crate publishes as `eth` `0.37.1` for updated package

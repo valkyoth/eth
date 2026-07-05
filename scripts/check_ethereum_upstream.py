@@ -72,10 +72,12 @@ def parse_version(version: str | None) -> tuple[int, ...]:
 
 
 def version_leq(left: str | None, right: str) -> bool:
+    if left is None:
+        return False
     left_parts = parse_version(left)
     right_parts = parse_version(right)
     if not left_parts or not right_parts:
-        return left is None
+        return False
     length = max(len(left_parts), len(right_parts))
     return left_parts + (0,) * (length - len(left_parts)) <= right_parts + (
         0,
@@ -176,7 +178,10 @@ def remote_head(repo: str) -> str:
         env=git_env(),
         timeout=GIT_TIMEOUT_SECONDS,
     )
-    head = result.stdout.split()[0]
+    tokens = result.stdout.split()
+    if not tokens:
+        raise RuntimeError(f"{repo} returned no ls-remote output for HEAD")
+    head = tokens[0]
     if not SHA40.fullmatch(head):
         raise RuntimeError(f"{repo} returned an invalid HEAD hash")
     return head

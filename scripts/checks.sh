@@ -10,6 +10,7 @@ scripts/validate-security-policy.sh
 scripts/release_crates.py --check
 scripts/sync_spec_sources.py --lock-only
 python3 scripts/test-sync-spec-sources.py
+python3 scripts/test-ethereum-upstream.py
 scripts/check_ethereum_upstream.py --local-only
 scripts/run_execution_fixtures.py --check
 scripts/run_differential_tests.py --check

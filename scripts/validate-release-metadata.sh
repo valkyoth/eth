@@ -10,6 +10,7 @@ test -x scripts/validate-release-readiness.sh
 test -x scripts/test-release-readiness.sh
 test -x scripts/check_latest_tools.sh
 test -x scripts/check_ethereum_upstream.py
+test -x scripts/test-ethereum-upstream.py
 test -x scripts/release_crates.py
 test -x scripts/sync_spec_sources.py
 test -x scripts/test-sync-spec-sources.py
