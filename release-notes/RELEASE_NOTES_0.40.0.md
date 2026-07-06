@@ -1,6 +1,7 @@
 # eth 0.40.0 Release Notes
 
-Status: implementation ready; awaiting pentest.
+Status: implementation, pentest remediation, and clean retest complete; waiting
+for final GitHub checks before tagging.
 
 `0.40.0` starts the native first-party EVM engine path with
 `eth-valkyoth-evm-core`. This release adds dependency-free `no_std` EVM core
@@ -63,8 +64,8 @@ execution backend.
 - The informational zeroize note is intentionally deferred until execution
   paths can carry secret-bearing or precompile-derived data through stack or
   memory.
-- Retest pending. The release must not be tagged until the local `PENTEST.md`
-  is converted into `security/pentest/v0.40.0.md` and the retest is clean.
+- Clean retest passed.
+- Permanent report: `security/pentest/v0.40.0.md`.
 
 ## Versioning
 
