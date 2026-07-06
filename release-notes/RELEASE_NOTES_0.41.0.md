@@ -1,6 +1,6 @@
 # eth 0.41.0 Release Notes
 
-Status: implementation ready; awaiting pentest.
+Status: release candidate; pentest clean.
 
 `0.41.0` adds the first deterministic native EVM opcode execution pass to
 `eth-valkyoth-evm-core`. The interpreter is intentionally narrow: it executes
@@ -62,8 +62,12 @@ access, calls, creates, logs, precompiles, or host behavior.
 
 ## Pentest
 
-- Pending. The release must not be tagged until the local `PENTEST.md` is
-  converted into `security/pentest/v0.41.0.md` and the retest is clean.
+- `security/pentest/v0.41.0.md` records one high algorithmic-complexity DoS
+  finding and two low/informational findings from the first pass.
+- Remediation added an EIP-170-sized bytecode ceiling, one-time no-alloc
+  jumpdest bitmap validation, executable-subset documentation, and regression
+  coverage.
+- Retest was clean. No new findings were reported.
 
 ## Versioning
 

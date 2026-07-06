@@ -74,6 +74,7 @@ test -f release-notes/RELEASE_NOTES_0.39.0.md
 test -f release-notes/RELEASE_NOTES_0.40.0.md
 test -f release-notes/RELEASE_NOTES_0.41.0.md
 test -f security/pentest/v0.40.0.md
+test -f security/pentest/v0.41.0.md
 test -x scripts/release_0_9_gate.sh
 test -x scripts/release_0_10_gate.sh
 test -x scripts/release_0_11_gate.sh
