@@ -20,6 +20,7 @@ test -x scripts/check_runtime_dependency_policy.py
 test -x scripts/test-runtime-dependency-policy.py
 test -x scripts/check_optional_boundary_policy.py
 test -x scripts/test-optional-boundary-policy.py
+test -x scripts/test-release-metadata.py
 test -f release-crates.toml
 test -f docs/CRATE_VERSION_MATRIX.md
 test -f conformance/execution-fixtures.toml
@@ -76,6 +77,12 @@ test -f release-notes/RELEASE_NOTES_0.41.0.md
 test -f release-notes/RELEASE_NOTES_0.42.0.md
 test -f security/pentest/v0.40.0.md
 test -f security/pentest/v0.41.0.md
+release_version="$(sed -n 's/^version = "\(.*\)"/\1/p' release-crates.toml | sed -n '1p')"
+eth_manifest_version="$(sed -n 's/^version = "\(.*\)"/\1/p' crates/eth/Cargo.toml | sed -n '1p')"
+test "$release_version" = "$eth_manifest_version"
+current_pentest_report="security/pentest/v${release_version}.md"
+test -f "$current_pentest_report"
+grep -q '^Status: PASS$' "$current_pentest_report"
 test -x scripts/release_0_9_gate.sh
 test -x scripts/release_0_10_gate.sh
 test -x scripts/release_0_11_gate.sh

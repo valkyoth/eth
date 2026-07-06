@@ -65,6 +65,10 @@ A version is not tag-ready until:
 - the pentest report has `Status: PASS`;
 - the pentest report has non-blank `Tester:` and `Scope:` fields;
 - the pentest report has a `Date: YYYY-MM-DD` field;
+- `scripts/validate-release-metadata.sh` derives the current version from
+  `release-crates.toml`, checks it matches the `eth` manifest version, and
+  requires the matching `security/pentest/vX.Y.Z.md` report to have
+  `Status: PASS`;
 - `sbom/eth.spdx.json` exists and is non-empty;
 - the tag does not already exist locally;
 - `scripts/validate-release-readiness.sh vX.Y.Z` passes.
@@ -1584,7 +1588,8 @@ Exit criteria:
 
 ### v0.42.0 - Native EVM Gas Accounting
 
-Status: implementation ready; awaiting pentest.
+Status: implementation ready; initial pentest found a release-gate issue under
+remediation.
 
 Goal: make gas costs and memory expansion fork-aware and auditable.
 

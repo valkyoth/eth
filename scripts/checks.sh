@@ -20,6 +20,7 @@ scripts/check_runtime_dependency_policy.py
 python3 scripts/test-runtime-dependency-policy.py
 scripts/check_optional_boundary_policy.py
 python3 scripts/test-optional-boundary-policy.py
+python3 scripts/test-release-metadata.py
 python3 scripts/test-release-crates.py
 scripts/test-release-readiness.sh
 for package in \

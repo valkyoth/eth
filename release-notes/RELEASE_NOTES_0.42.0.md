@@ -1,6 +1,7 @@
 # eth 0.42.0 Release Notes
 
-Status: implementation ready; awaiting pentest.
+Status: implementation ready; initial pentest found a release-gate issue under
+remediation.
 
 `0.42.0` adds fork-scoped gas accounting to the native
 `eth-valkyoth-evm-core` interpreter. The release keeps the execution scope
@@ -21,6 +22,8 @@ tracking, or production-valid execution.
 - Fail-closed gas errors for zero gas limits, oversized gas limits, out of gas,
   and gas/memory-expansion arithmetic overflow.
 - Regression coverage proving gas is charged before stack side effects.
+- Release metadata validation now derives the current release version and
+  requires the matching pentest report to exist with `Status: PASS`.
 
 ## Changed
 
@@ -56,6 +59,9 @@ tracking, or production-valid execution.
 
 - Pending. The release must not be tagged until the local `PENTEST.md` is
   converted into `security/pentest/v0.42.0.md` and the retest is clean.
+- Initial pentest found that `scripts/validate-release-metadata.sh` did not
+  enforce the v0.42.0 pentest report; this remediation makes the check
+  version-derived instead of hand-appended.
 
 ## Versioning
 
