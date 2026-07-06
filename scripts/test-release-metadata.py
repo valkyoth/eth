@@ -27,6 +27,10 @@ def main() -> int:
     validator = VALIDATOR.read_text(encoding="utf-8")
     assert "release_version=" in validator
     assert "eth_manifest_version=" in validator
+    assert "tomllib.load" in validator
+    assert '["release"]["version"]' in validator
+    assert '["package"]["version"]' in validator
+    assert "sed -n" not in validator
     assert "test \"$release_version\" = \"$eth_manifest_version\"" in validator
     assert 'current_pentest_report="security/pentest/v${release_version}.md"' in validator
     assert 'test -f "$current_pentest_report"' in validator

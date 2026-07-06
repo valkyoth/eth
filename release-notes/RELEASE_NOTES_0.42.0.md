@@ -62,6 +62,8 @@ tracking, or production-valid execution.
 - Initial pentest found that `scripts/validate-release-metadata.sh` did not
   enforce the v0.42.0 pentest report; this remediation makes the check
   version-derived instead of hand-appended.
+- Retest noted that the first remediation extracted versions with line-based
+  `sed`; the gate now parses the named TOML tables with `tomllib`.
 
 ## Versioning
 

@@ -77,8 +77,8 @@ test -f release-notes/RELEASE_NOTES_0.41.0.md
 test -f release-notes/RELEASE_NOTES_0.42.0.md
 test -f security/pentest/v0.40.0.md
 test -f security/pentest/v0.41.0.md
-release_version="$(sed -n 's/^version = "\(.*\)"/\1/p' release-crates.toml | sed -n '1p')"
-eth_manifest_version="$(sed -n 's/^version = "\(.*\)"/\1/p' crates/eth/Cargo.toml | sed -n '1p')"
+release_version="$(python3 -c 'import tomllib; print(tomllib.load(open("release-crates.toml", "rb"))["release"]["version"])')"
+eth_manifest_version="$(python3 -c 'import tomllib; print(tomllib.load(open("crates/eth/Cargo.toml", "rb"))["package"]["version"])')"
 test "$release_version" = "$eth_manifest_version"
 current_pentest_report="security/pentest/v${release_version}.md"
 test -f "$current_pentest_report"
