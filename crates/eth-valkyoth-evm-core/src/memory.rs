@@ -54,6 +54,17 @@ impl<'a> EvmMemory<'a> {
         Ok(())
     }
 
+    /// Checks whether a memory range is fully inside the view.
+    pub fn check_range(&self, offset: usize, len: usize) -> Result<(), EvmCoreError> {
+        let end = offset
+            .checked_add(len)
+            .ok_or(EvmCoreError::MemoryOffsetOutOfBounds)?;
+        if end > self.len() {
+            return Err(EvmCoreError::MemoryOffsetOutOfBounds);
+        }
+        Ok(())
+    }
+
     /// Borrows the memory bytes.
     #[must_use]
     pub const fn as_slice(&self) -> &[u8] {

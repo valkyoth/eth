@@ -1,5 +1,6 @@
 use crate::{
-    EVM_MEMORY_LIMIT_BYTES, EvmCoreError, EvmFork, EvmMemory, EvmOpcode, EvmStack, EvmWord,
+    EVM_DEFAULT_STEP_LIMIT, EVM_MAX_STEP_LIMIT, EVM_MEMORY_LIMIT_BYTES, EvmCoreError, EvmExecution,
+    EvmFork, EvmMemory, EvmOpcode, EvmStack, EvmWord, ExecutionLimits, ExecutionStatus,
     OpcodeClass, OpcodeTable, ProgramCounter,
 };
 
@@ -97,4 +98,135 @@ fn opcode_table_rejects_unsupported_forks() {
         OpcodeTable::try_new(EvmFork::new(999)),
         Err(EvmCoreError::UnsupportedFork)
     );
+}
+
+#[test]
+fn word_arithmetic_wraps_at_256_bits() -> Result<(), EvmCoreError> {
+    let max = EvmWord::from_be_bytes([0xffu8; EvmWord::LEN]);
+    assert_eq!(
+        max.wrapping_add_word(EvmWord::from_be_slice(&[1])?),
+        EvmWord::ZERO
+    );
+    assert_eq!(
+        EvmWord::ZERO.wrapping_sub_word(EvmWord::from_be_slice(&[1])?),
+        max
+    );
+    assert_eq!(
+        EvmWord::from_be_slice(&[3])?.wrapping_mul_word(EvmWord::from_be_slice(&[7])?),
+        EvmWord::from_be_slice(&[21])?
+    );
+    Ok(())
+}
+
+#[test]
+fn execution_runs_arithmetic_bitwise_and_comparison_subset() -> Result<(), EvmCoreError> {
+    let mut memory = [0u8; 0];
+    let mut execution = EvmExecution::<16>::try_new(&mut memory)?;
+    let code = [
+        0x60, 0x02, 0x60, 0x03, 0x01, 0x60, 0x05, 0x14, 0x60, 0xf0, 0x60, 0x0f, 0x17, 0x60, 0xff,
+        0x14, 0x00,
+    ];
+    let report = execution.run(&code, ExecutionLimits::try_new(EVM_DEFAULT_STEP_LIMIT)?)?;
+
+    assert_eq!(report.status, ExecutionStatus::Stopped);
+    assert_eq!(execution.stack().peek(1)?, EvmWord::from_bool(true));
+    assert_eq!(execution.stack().peek(0)?, EvmWord::from_bool(true));
+    Ok(())
+}
+
+#[test]
+fn execution_validates_dynamic_jumpdest() -> Result<(), EvmCoreError> {
+    let mut memory = [0u8; 0];
+    let mut execution = EvmExecution::<16>::try_new(&mut memory)?;
+    let code = [0x60, 0x04, 0x56, 0x00, 0x5b, 0x60, 0x07, 0x00];
+    let report = execution.run(&code, ExecutionLimits::try_new(EVM_DEFAULT_STEP_LIMIT)?)?;
+
+    assert_eq!(report.status, ExecutionStatus::Stopped);
+    assert_eq!(execution.stack().peek(0)?, EvmWord::from_be_slice(&[7])?);
+    Ok(())
+}
+
+#[test]
+fn execution_rejects_jump_into_push_immediate() -> Result<(), EvmCoreError> {
+    let mut memory = [0u8; 0];
+    let mut execution = EvmExecution::<16>::try_new(&mut memory)?;
+    let code = [0x60, 0x01, 0x56];
+
+    assert_eq!(
+        execution.run(&code, ExecutionLimits::try_new(EVM_DEFAULT_STEP_LIMIT)?),
+        Err(EvmCoreError::InvalidJumpDestination)
+    );
+    Ok(())
+}
+
+#[test]
+fn execution_false_jumpi_advances_to_next_instruction() -> Result<(), EvmCoreError> {
+    let mut memory = [0u8; 0];
+    let mut execution = EvmExecution::<16>::try_new(&mut memory)?;
+    let code = [
+        0x60, 0x00, 0x60, 0x08, 0x57, 0x60, 0x09, 0x00, 0x5b, 0x60, 0x01, 0x00,
+    ];
+    let report = execution.run(&code, ExecutionLimits::try_new(EVM_DEFAULT_STEP_LIMIT)?)?;
+
+    assert_eq!(report.status, ExecutionStatus::Stopped);
+    assert_eq!(execution.stack().peek(0)?, EvmWord::from_be_slice(&[9])?);
+    Ok(())
+}
+
+#[test]
+fn execution_reports_return_and_revert_ranges() -> Result<(), EvmCoreError> {
+    let mut return_memory = [0u8; 4];
+    let mut return_execution = EvmExecution::<16>::try_new(&mut return_memory)?;
+    let return_code = [0x60, 0x02, 0x60, 0x01, 0xf3];
+    let return_report = return_execution.run(
+        &return_code,
+        ExecutionLimits::try_new(EVM_DEFAULT_STEP_LIMIT)?,
+    )?;
+    assert_eq!(
+        return_report.status,
+        ExecutionStatus::Returned { offset: 1, len: 2 }
+    );
+
+    let mut revert_memory = [0u8; 4];
+    let mut revert_execution = EvmExecution::<16>::try_new(&mut revert_memory)?;
+    let revert_code = [0x60, 0x02, 0x60, 0x01, 0xfd];
+    let revert_report = revert_execution.run(
+        &revert_code,
+        ExecutionLimits::try_new(EVM_DEFAULT_STEP_LIMIT)?,
+    )?;
+    assert_eq!(
+        revert_report.status,
+        ExecutionStatus::Reverted { offset: 1, len: 2 }
+    );
+    Ok(())
+}
+
+#[test]
+fn execution_fails_closed_on_truncated_push_and_step_limit() -> Result<(), EvmCoreError> {
+    let mut truncated_memory = [0u8; 0];
+    let mut truncated_execution = EvmExecution::<16>::try_new(&mut truncated_memory)?;
+    assert_eq!(
+        truncated_execution.run(
+            &[0x61, 0x01],
+            ExecutionLimits::try_new(EVM_DEFAULT_STEP_LIMIT)?
+        ),
+        Err(EvmCoreError::PushImmediateOutOfBounds)
+    );
+
+    let mut loop_memory = [0u8; 0];
+    let mut loop_execution = EvmExecution::<16>::try_new(&mut loop_memory)?;
+    let code = [0x5b, 0x60, 0x00, 0x56];
+    assert_eq!(
+        loop_execution.run(&code, ExecutionLimits::try_new(4)?),
+        Err(EvmCoreError::ExecutionStepLimitReached)
+    );
+    assert_eq!(
+        ExecutionLimits::try_new(0),
+        Err(EvmCoreError::ExecutionStepLimitZero)
+    );
+    assert_eq!(
+        ExecutionLimits::try_new(EVM_MAX_STEP_LIMIT + 1),
+        Err(EvmCoreError::ExecutionStepLimitTooLarge)
+    );
+    Ok(())
 }

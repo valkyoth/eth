@@ -11,6 +11,22 @@ impl EvmOpcode {
     pub const MUL: Self = Self(0x02);
     /// `SUB`.
     pub const SUB: Self = Self(0x03);
+    /// `LT`.
+    pub const LT: Self = Self(0x10);
+    /// `GT`.
+    pub const GT: Self = Self(0x11);
+    /// `EQ`.
+    pub const EQ: Self = Self(0x14);
+    /// `ISZERO`.
+    pub const ISZERO: Self = Self(0x15);
+    /// `AND`.
+    pub const AND: Self = Self(0x16);
+    /// `OR`.
+    pub const OR: Self = Self(0x17);
+    /// `XOR`.
+    pub const XOR: Self = Self(0x18);
+    /// `NOT`.
+    pub const NOT: Self = Self(0x19);
     /// `POP`.
     pub const POP: Self = Self(0x50);
     /// `MLOAD`.
@@ -21,6 +37,10 @@ impl EvmOpcode {
     pub const JUMP: Self = Self(0x56);
     /// `JUMPI`.
     pub const JUMPI: Self = Self(0x57);
+    /// `PC`.
+    pub const PC: Self = Self(0x58);
+    /// `JUMPDEST`.
+    pub const JUMPDEST: Self = Self(0x5b);
     /// First `PUSHn` opcode.
     pub const PUSH1: Self = Self(0x60);
     /// Last `PUSHn` opcode.
@@ -33,6 +53,10 @@ impl EvmOpcode {
     pub const SWAP1: Self = Self(0x90);
     /// Last `SWAPn` opcode.
     pub const SWAP16: Self = Self(0x9f);
+    /// `RETURN`.
+    pub const RETURN: Self = Self(0xf3);
+    /// `REVERT`.
+    pub const REVERT: Self = Self(0xfd);
 
     /// Constructs an opcode domain from a raw byte.
     #[must_use]
@@ -60,6 +84,36 @@ impl EvmOpcode {
         }
         self.0.checked_sub(0x5f)
     }
+
+    /// Returns whether this opcode is in the `DUP1..=DUP16` range.
+    #[must_use]
+    pub const fn is_dup(self) -> bool {
+        self.0 >= Self::DUP1.0 && self.0 <= Self::DUP16.0
+    }
+
+    /// Returns the zero-based stack depth for a `DUPn` opcode.
+    #[must_use]
+    pub const fn dup_depth(self) -> Option<u8> {
+        if !self.is_dup() {
+            return None;
+        }
+        self.0.checked_sub(Self::DUP1.0)
+    }
+
+    /// Returns whether this opcode is in the `SWAP1..=SWAP16` range.
+    #[must_use]
+    pub const fn is_swap(self) -> bool {
+        self.0 >= Self::SWAP1.0 && self.0 <= Self::SWAP16.0
+    }
+
+    /// Returns the one-based stack depth for a `SWAPn` opcode.
+    #[must_use]
+    pub const fn swap_depth(self) -> Option<u8> {
+        if !self.is_swap() {
+            return None;
+        }
+        self.0.checked_sub(0x8f)
+    }
 }
 
 /// Coarse opcode category used by the skeleton table.
@@ -71,6 +125,10 @@ pub enum OpcodeClass {
     Arithmetic,
     /// Stack-only operation.
     Stack,
+    /// Bitwise stack operation.
+    Bitwise,
+    /// Comparison stack operation.
+    Comparison,
     /// Memory operation.
     Memory,
     /// Control-flow operation.

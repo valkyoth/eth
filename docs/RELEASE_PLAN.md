@@ -1557,6 +1557,8 @@ Exit criteria:
 
 ### v0.41.0 - Native EVM Arithmetic And Control Flow
 
+Status: implementation ready; awaiting pentest.
+
 Goal: implement deterministic opcode execution for arithmetic, comparison, and
 control-flow basics.
 
@@ -1570,7 +1572,9 @@ Deliverables:
 
 Verification:
 
-- official execution-state vectors for the claimed opcode set;
+- deterministic local vectors for the claimed opcode set;
+- explicit unsupported-fixture documentation until full official state-test
+  admission lands;
 - differential tests against at least one independent engine when available.
 
 Exit criteria:

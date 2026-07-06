@@ -6,6 +6,7 @@
 extern crate std;
 
 mod error;
+mod execution;
 mod fork;
 mod memory;
 mod opcode;
@@ -14,6 +15,10 @@ mod stack;
 mod word;
 
 pub use error::EvmCoreError;
+pub use execution::{
+    EVM_DEFAULT_STEP_LIMIT, EVM_MAX_STEP_LIMIT, EvmExecution, ExecutionLimits, ExecutionReport,
+    ExecutionStatus,
+};
 pub use fork::{EvmFork, OpcodeTable};
 pub use memory::{EVM_MEMORY_LIMIT_BYTES, EvmMemory};
 pub use opcode::{EvmOpcode, OpcodeClass, OpcodeInfo};

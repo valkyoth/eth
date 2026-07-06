@@ -1,5 +1,5 @@
 [release]
-version = "0.40.0"
+version = "0.41.0"
 policy = "independent"
 
 [crates."eth-valkyoth-codec"]
@@ -7,95 +7,95 @@ previous_version = "0.19.0"
 version = "0.19.0"
 change = "unchanged"
 publish = false
-reason = "No package changes for v0.40.0."
+reason = "No package changes for v0.41.0."
 
 [crates."eth-valkyoth-primitives"]
 previous_version = "0.11.2"
 version = "0.11.2"
 change = "unchanged"
 publish = false
-reason = "No package changes for v0.40.0."
+reason = "No package changes for v0.41.0."
 
 [crates."eth-valkyoth-hash"]
 previous_version = "0.11.2"
 version = "0.11.2"
 change = "unchanged"
 publish = false
-reason = "No package changes for v0.40.0."
+reason = "No package changes for v0.41.0."
 
 [crates."eth-valkyoth-protocol"]
 previous_version = "0.25.2"
 version = "0.25.2"
 change = "unchanged"
 publish = false
-reason = "No package changes for v0.40.0."
+reason = "No package changes for v0.41.0."
 
 [crates."eth-valkyoth-verify"]
 previous_version = "0.21.0"
 version = "0.21.0"
 change = "unchanged"
 publish = false
-reason = "No package changes for v0.40.0."
+reason = "No package changes for v0.41.0."
 
 [crates."eth-valkyoth-derive"]
 previous_version = "0.17.2"
 version = "0.17.2"
 change = "unchanged"
 publish = false
-reason = "No package changes for v0.40.0."
+reason = "No package changes for v0.41.0."
 
 [crates."eth-valkyoth-sanitization"]
 previous_version = "0.7.4"
 version = "0.7.4"
 change = "unchanged"
 publish = false
-reason = "No package changes for v0.40.0."
+reason = "No package changes for v0.41.0."
 
 [crates."eth-valkyoth-evm-core"]
-previous_version = "0.0.0"
-version = "0.1.0"
+previous_version = "0.1.0"
+version = "0.2.0"
 change = "code"
 publish = true
-reason = "Adds the first-party dependency-free EVM core type foundation with bounded stack, memory, word, opcode, program-counter, fork, and error domains."
+reason = "Adds deterministic no-alloc execution for the basic native EVM opcode subset, including stack arithmetic, bitwise/comparison, PUSH/DUP/SWAP/POP/PC, dynamic jump validation, and RETURN/REVERT shells."
 
 [crates."eth-valkyoth-evm"]
 previous_version = "0.10.0"
 version = "0.10.0"
 change = "unchanged"
 publish = false
-reason = "No package changes for v0.40.0."
+reason = "No package changes for v0.41.0."
 
 [crates."eth-valkyoth-rpc"]
 previous_version = "0.7.0"
 version = "0.7.0"
 change = "unchanged"
 publish = false
-reason = "No package changes for v0.40.0."
+reason = "No package changes for v0.41.0."
 
 [crates."eth-valkyoth-signer"]
 previous_version = "0.7.3"
 version = "0.7.3"
 change = "unchanged"
 publish = false
-reason = "No package changes for v0.40.0."
+reason = "No package changes for v0.41.0."
 
 [crates."eth-valkyoth-reth"]
 previous_version = "0.7.0"
 version = "0.7.0"
 change = "unchanged"
 publish = false
-reason = "No package changes for v0.40.0."
+reason = "No package changes for v0.41.0."
 
 [crates."eth-valkyoth-testkit"]
 previous_version = "0.7.0"
 version = "0.7.0"
 change = "unchanged"
 publish = false
-reason = "No package changes for v0.40.0."
+reason = "No package changes for v0.41.0."
 
 [crates.eth]
-previous_version = "0.39.0"
-version = "0.40.0"
+previous_version = "0.40.0"
+version = "0.41.0"
 change = "code"
 publish = true
-reason = "Adds the optional evm-core feature, re-exports eth-valkyoth-evm-core, and documents the first-party native EVM core type foundation."
+reason = "Updates the optional evm-core dependency to eth-valkyoth-evm-core 0.2.0 and documents the first native basic opcode execution pass."

@@ -82,8 +82,9 @@ The first production value is:
   first-party audited native EVM plan.
 - `eth-valkyoth-evm-core`: no_std-first native EVM engine crate. `v0.40.0`
   starts it with dependency-free word, stack, memory, opcode, fork,
-  program-counter, and error domains; later releases add gas, state,
-  call-frame, precompile, and commit policy.
+  program-counter, and error domains. `v0.41.0` adds the first bounded basic
+  opcode execution pass; later releases add gas, state, call-frame,
+  precompile, and commit policy.
 - `eth-valkyoth-rpc`: optional RPC policy over admitted provider transports.
 - `eth-valkyoth-abi`: optional ABI, contract-call, event, error, and common
   contract-standard helpers.

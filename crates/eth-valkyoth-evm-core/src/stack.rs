@@ -70,6 +70,62 @@ impl<const N: usize> EvmStack<N> {
         Ok(value)
     }
 
+    /// Returns a word by depth, where depth zero is the top item.
+    pub fn peek(&self, depth: usize) -> Result<EvmWord, EvmCoreError> {
+        let offset = depth.checked_add(1).ok_or(EvmCoreError::StackUnderflow)?;
+        let index = self
+            .len
+            .checked_sub(offset)
+            .ok_or(EvmCoreError::StackUnderflow)?;
+        self.values
+            .get(index)
+            .copied()
+            .ok_or(EvmCoreError::StackUnderflow)
+    }
+
+    /// Duplicates a word by depth, where depth zero is `DUP1`.
+    pub fn dup(&mut self, depth: usize) -> Result<(), EvmCoreError> {
+        let value = self.peek(depth)?;
+        self.push(value)
+    }
+
+    /// Swaps the top word with a deeper stack item, where depth one is `SWAP1`.
+    pub fn swap_with_top(&mut self, depth: usize) -> Result<(), EvmCoreError> {
+        if depth == 0 {
+            return Err(EvmCoreError::StackUnderflow);
+        }
+        let top_index = self
+            .len
+            .checked_sub(1)
+            .ok_or(EvmCoreError::StackUnderflow)?;
+        let offset = depth.checked_add(1).ok_or(EvmCoreError::StackUnderflow)?;
+        let other_index = self
+            .len
+            .checked_sub(offset)
+            .ok_or(EvmCoreError::StackUnderflow)?;
+        let top = self
+            .values
+            .get(top_index)
+            .copied()
+            .ok_or(EvmCoreError::StackUnderflow)?;
+        let other = self
+            .values
+            .get(other_index)
+            .copied()
+            .ok_or(EvmCoreError::StackUnderflow)?;
+        let top_slot = self
+            .values
+            .get_mut(top_index)
+            .ok_or(EvmCoreError::StackUnderflow)?;
+        *top_slot = other;
+        let other_slot = self
+            .values
+            .get_mut(other_index)
+            .ok_or(EvmCoreError::StackUnderflow)?;
+        *other_slot = top;
+        Ok(())
+    }
+
     #[cfg(test)]
     pub(crate) fn debug_raw_slot(&self, offset: usize) -> Option<EvmWord> {
         self.values.get(offset).copied()

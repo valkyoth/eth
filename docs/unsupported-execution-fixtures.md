@@ -2,8 +2,9 @@
 
 Status: v0.35.0 unsupported fixture list.
 
-`eth` does not claim broad Ethereum execution-test compatibility yet. The
-following upstream fixture groups remain explicitly unsupported until the
+`eth` does not claim broad Ethereum execution-test compatibility yet. `v0.41.0`
+adds a local deterministic vector suite for the first basic native opcode
+subset, but official state-test groups remain explicitly unsupported until the
 matching protocol layers exist:
 
 | Fixture group | Reason |

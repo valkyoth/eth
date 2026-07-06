@@ -67,9 +67,11 @@ impl OpcodeTable {
         let class = match opcode.byte() {
             0x00 => OpcodeClass::Stop,
             0x01..=0x03 => OpcodeClass::Arithmetic,
-            0x50 | 0x60..=0x9f => OpcodeClass::Stack,
+            0x10 | 0x11 | 0x14 | 0x15 => OpcodeClass::Comparison,
+            0x16..=0x19 => OpcodeClass::Bitwise,
+            0x50 | 0x58 | 0x5b | 0x60..=0x9f => OpcodeClass::Stack,
             0x51 | 0x52 => OpcodeClass::Memory,
-            0x56 | 0x57 => OpcodeClass::ControlFlow,
+            0x56 | 0x57 | 0xf3 | 0xfd => OpcodeClass::ControlFlow,
             _ => return Err(EvmCoreError::UnsupportedOpcode),
         };
         Ok(OpcodeInfo { opcode, class })

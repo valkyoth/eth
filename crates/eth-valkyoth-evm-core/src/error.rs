@@ -17,6 +17,20 @@ pub enum EvmCoreError {
     MemoryOffsetOutOfBounds,
     /// Advancing the program counter would overflow `usize`.
     ProgramCounterOverflow,
+    /// A word constructor received more than 32 bytes.
+    WordInputTooLarge,
+    /// The execution step limit is zero.
+    ExecutionStepLimitZero,
+    /// The execution step limit exceeds the release hard limit.
+    ExecutionStepLimitTooLarge,
+    /// Execution reached the configured step limit before halting.
+    ExecutionStepLimitReached,
+    /// A `PUSHn` immediate extends beyond the bytecode input.
+    PushImmediateOutOfBounds,
+    /// A dynamic jump target is not a valid `JUMPDEST`.
+    InvalidJumpDestination,
+    /// A return or revert range is outside the memory view.
+    ReturnRangeOutOfBounds,
     /// The opcode byte is not supported by the current skeleton table.
     UnsupportedOpcode,
     /// The fork identifier is not supported by the current skeleton table.
@@ -35,6 +49,13 @@ impl EvmCoreError {
             Self::MemoryTooLarge => "memory_too_large",
             Self::MemoryOffsetOutOfBounds => "memory_offset_out_of_bounds",
             Self::ProgramCounterOverflow => "program_counter_overflow",
+            Self::WordInputTooLarge => "word_input_too_large",
+            Self::ExecutionStepLimitZero => "execution_step_limit_zero",
+            Self::ExecutionStepLimitTooLarge => "execution_step_limit_too_large",
+            Self::ExecutionStepLimitReached => "execution_step_limit_reached",
+            Self::PushImmediateOutOfBounds => "push_immediate_out_of_bounds",
+            Self::InvalidJumpDestination => "invalid_jump_destination",
+            Self::ReturnRangeOutOfBounds => "return_range_out_of_bounds",
             Self::UnsupportedOpcode => "unsupported_opcode",
             Self::UnsupportedFork => "unsupported_fork",
         }
