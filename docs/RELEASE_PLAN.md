@@ -1494,22 +1494,30 @@ Exit criteria:
 
 ### v0.39.0 - Bounded Gas Estimation
 
+Status: implementation ready; awaiting pentest.
+
 Goal: make gas estimation bounded and auditable.
 
 Deliverables:
 
-- maximum execution count;
-- gas cap;
-- timeout or worker isolation policy;
-- deterministic error classification.
+- `GasEstimationPolicy` with maximum execution attempts, gas cap, and
+  deterministic termination guard;
+- timeout, worker-isolation, and backend-step termination policy variants;
+- `GasEstimationRequest` binding policy to the explicit execution request;
+- `GasEstimationReport` binding outcomes to execution reports;
+- deterministic `GasEstimationError` codes and messages.
 
 Verification:
 
-- adversarial gas-estimation tests.
+- adversarial gas-estimation tests;
+- `cargo test -p eth-valkyoth-evm`;
+- `cargo check -p eth --features evm`;
+- `scripts/release_0_39_gate.sh`.
 
 Exit criteria:
 
 - Gas estimation cannot become an unbounded execution loop.
+- No concrete EVM backend is admitted by this release.
 
 ## Phase 8: Native Audited EVM Engine
 

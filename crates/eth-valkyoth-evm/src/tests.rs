@@ -8,8 +8,9 @@ use eth_valkyoth_protocol::{
 
 use super::{
     BlockExecutionContext, EvmAdapterBoundary, ExecutionEnvironment, ExecutionEnvironmentError,
-    ExecutionRequest, ExecutionTransaction, SnapshotAccount, SnapshotError, StateSnapshot,
-    revm_dependency_review,
+    ExecutionRequest, ExecutionTransaction, GasEstimationError, GasEstimationPolicy,
+    GasEstimationRequest, GasEstimationStatus, GasEstimationTermination, SnapshotAccount,
+    SnapshotError, StateSnapshot, revm_dependency_review,
 };
 
 const LIMITS: DecodeLimits = DecodeLimits {
@@ -151,6 +152,153 @@ fn request_report_binds_environment_transaction_and_snapshot() {
     assert_eq!(report.snapshot_id, snapshot.id);
 }
 
+#[test]
+fn gas_estimation_policy_rejects_unbounded_inputs() {
+    assert_eq!(
+        GasEstimationPolicy::try_new(
+            0,
+            Gas::new(21_000),
+            GasEstimationTermination::BackendStepLimit {
+                max_backend_steps: 1,
+            },
+        ),
+        Err(GasEstimationError::ZeroMaxAttempts)
+    );
+    assert_eq!(
+        GasEstimationPolicy::try_new(
+            1,
+            Gas::new(0),
+            GasEstimationTermination::BackendStepLimit {
+                max_backend_steps: 1,
+            },
+        ),
+        Err(GasEstimationError::ZeroGasCap)
+    );
+    assert_eq!(
+        GasEstimationPolicy::try_new(
+            1,
+            Gas::new(21_000),
+            GasEstimationTermination::BackendStepLimit {
+                max_backend_steps: 0,
+            },
+        ),
+        Err(GasEstimationError::UnboundedTerminationPolicy)
+    );
+}
+
+#[test]
+fn gas_estimation_rejects_cap_above_block_limit() {
+    let execution = execution_request();
+    assert!(execution.is_some(), "{execution:?}");
+    let execution = match execution {
+        Some(execution) => execution,
+        None => return,
+    };
+    let policy = gas_policy(30_000_001);
+    assert!(policy.is_some(), "{policy:?}");
+    let policy = match policy {
+        Some(policy) => policy,
+        None => return,
+    };
+
+    let rejected = GasEstimationRequest::try_new(execution, policy);
+    assert!(rejected.is_err(), "{rejected:?}");
+    if let Err(error) = rejected {
+        assert_eq!(error, GasEstimationError::GasCapExceedsBlockLimit);
+    }
+}
+
+#[test]
+fn gas_estimation_report_enforces_attempt_and_gas_caps() {
+    let execution = execution_request();
+    assert!(execution.is_some(), "{execution:?}");
+    let execution = match execution {
+        Some(execution) => execution,
+        None => return,
+    };
+    let policy = gas_policy(50_000);
+    assert!(policy.is_some(), "{policy:?}");
+    let policy = match policy {
+        Some(policy) => policy,
+        None => return,
+    };
+    let request_result = GasEstimationRequest::try_new(execution, policy);
+    assert!(request_result.is_ok(), "{request_result:?}");
+    let request = match request_result {
+        Ok(request) => request,
+        Err(_) => return,
+    };
+    let transaction_hash = B256::from_bytes([0x66; 32]);
+
+    assert_eq!(
+        request.report(
+            transaction_hash,
+            GasEstimationStatus::BackendUnavailable,
+            5,
+            None,
+        ),
+        Err(GasEstimationError::AttemptLimitExceeded)
+    );
+    assert_eq!(
+        request.report(
+            transaction_hash,
+            GasEstimationStatus::Estimated,
+            policy.max_attempts(),
+            Some(Gas::new(50_001)),
+        ),
+        Err(GasEstimationError::EstimateExceedsGasCap)
+    );
+}
+
+#[test]
+fn gas_estimation_report_binds_policy_execution_and_result() {
+    let execution = execution_request();
+    assert!(execution.is_some(), "{execution:?}");
+    let execution = match execution {
+        Some(execution) => execution,
+        None => return,
+    };
+    let policy = GasEstimationPolicy::try_new(
+        7,
+        Gas::new(50_000),
+        GasEstimationTermination::WorkerIsolation {
+            timeout_millis: 500,
+        },
+    );
+    assert!(policy.is_ok(), "{policy:?}");
+    let policy = match policy {
+        Ok(policy) => policy,
+        Err(_) => return,
+    };
+    let request_result = GasEstimationRequest::try_new(execution, policy);
+    assert!(request_result.is_ok(), "{request_result:?}");
+    let request = match request_result {
+        Ok(request) => request,
+        Err(_) => return,
+    };
+    let transaction_hash = B256::from_bytes([0x77; 32]);
+
+    let report = request.report(
+        transaction_hash,
+        GasEstimationStatus::Estimated,
+        3,
+        Some(Gas::new(42_000)),
+    );
+    assert!(report.is_ok(), "{report:?}");
+    let report = match report {
+        Ok(report) => report,
+        Err(_) => return,
+    };
+
+    assert_eq!(request.policy(), policy);
+    assert_eq!(request.execution().transaction().raw(), &[0xc0]);
+    assert_eq!(report.policy, policy);
+    assert_eq!(report.status, GasEstimationStatus::Estimated);
+    assert_eq!(report.attempts, 3);
+    assert_eq!(report.estimated_gas, Some(Gas::new(42_000)));
+    assert_eq!(report.execution.transaction_hash, transaction_hash);
+}
+
 fn validation_context() -> ValidationContext {
     ValidationContext {
         fork: ForkSpec {
@@ -176,4 +324,36 @@ fn block_context() -> BlockExecutionContext {
         base_fee_per_gas: Wei::from_u128(1_000_000_000),
         prev_randao: B256::from_bytes([0x33; 32]),
     }
+}
+
+fn execution_request() -> Option<ExecutionRequest<'static, TestSnapshot>> {
+    let environment_result = ExecutionEnvironment::try_new(validation_context(), block_context());
+    assert!(environment_result.is_ok(), "{environment_result:?}");
+    let environment = match environment_result {
+        Ok(environment) => environment,
+        Err(_) => return None,
+    };
+    let decoded = ExecutionTransaction::decode(&[0xc0], LIMITS);
+    assert!(decoded.is_ok(), "{decoded:?}");
+    let transaction = match decoded {
+        Ok(transaction) => transaction,
+        Err(_) => return None,
+    };
+    static SNAPSHOT: TestSnapshot = TestSnapshot {
+        id: B256::from_bytes([0x88; 32]),
+    };
+
+    Some(ExecutionRequest::new(environment, transaction, &SNAPSHOT))
+}
+
+fn gas_policy(gas_cap: u64) -> Option<GasEstimationPolicy> {
+    let policy = GasEstimationPolicy::try_new(
+        4,
+        Gas::new(gas_cap),
+        GasEstimationTermination::BackendStepLimit {
+            max_backend_steps: 128,
+        },
+    );
+    assert!(policy.is_ok(), "{policy:?}");
+    policy.ok()
 }

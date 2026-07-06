@@ -35,9 +35,10 @@ dependencies.
 
 ## Current Status
 
-Status: `v0.38.0` adds the explicit EVM execution environment boundary.
+Status: `v0.39.0` adds the bounded gas-estimation boundary.
 The optional `evm` feature now exposes no_std execution request, snapshot,
-and report types without admitting REVM or another execution backend.
+result report, and gas-estimation policy types without admitting REVM or
+another execution backend.
 
 Implemented now:
 
@@ -105,8 +106,8 @@ Implemented now:
   caller-provided authority account-state checks. Per-authorization failures
   are counted as skipped tuples instead of rejecting the whole transaction.
 - Optional `evm` feature exposing explicit no-std execution environment,
-  transaction input, state snapshot, and result report boundary types without
-  admitting an EVM backend.
+  transaction input, state snapshot, result report, and bounded gas-estimation
+  policy types without admitting an EVM backend.
 - Digest-level secp256k1 sender recovery through a caller-provided backend
   boundary, with low-s rejection, Ethereum y-parity policy, and caller-provided
   Keccak-256 public-key hashing.
@@ -190,14 +191,14 @@ Not implemented yet:
 
 ```toml
 [dependencies]
-eth = "0.38.0"
+eth = "0.39.0"
 ```
 
 For optional sanitization support:
 
 ```toml
 [dependencies]
-eth = { version = "0.38.0", features = ["sanitization"] }
+eth = { version = "0.39.0", features = ["sanitization"] }
 ```
 
 ## Features
@@ -205,7 +206,7 @@ eth = { version = "0.38.0", features = ["sanitization"] }
 | Feature | Default | Purpose |
 | --- | --- | --- |
 | `std` | no | Enables `std` support in admitted core crates. |
-| `evm` | no | Explicit no_std EVM execution environment, snapshot, and result boundary. |
+| `evm` | no | Explicit no_std EVM execution environment, snapshot, result, and bounded gas-estimation boundary. |
 | `rpc` | no | Future explicit RPC trust-policy boundary. |
 | `eip712-json` | no | Enables the optional `std` JSON-RPC EIP-712 typed-data parser boundary. |
 | `keccak-tiny` | no | Enables the optional reviewed `tiny-keccak` software backend. |
@@ -216,13 +217,14 @@ eth = { version = "0.38.0", features = ["sanitization"] }
 | `testkit` | no | Test fixtures, conformance helpers, and adversarial inputs. |
 
 Default builds do not enable networking, signing, local key storage, Reth, P2P,
-REVM, or concrete EVM execution. The optional `evm` feature provides boundary types only.
+REVM, or concrete EVM execution. The optional `evm` feature provides boundary
+types only.
 
 Optional reviewed software Keccak backend:
 
 ```toml
 [dependencies]
-eth = { version = "0.38.0", features = ["keccak-tiny"] }
+eth = { version = "0.39.0", features = ["keccak-tiny"] }
 ```
 
 ```rust
@@ -236,7 +238,112 @@ Optional reviewed secp256k1 recovery adapter:
 
 ```toml
 [dependencies]
-eth = { version = "0.38.0", features = ["secp256k1-k256"] }
+eth = { version = "0.39.0", features = ["secp256k1-k256"] }
+```
+
+Optional bounded EVM gas-estimation boundary:
+
+```toml
+[dependencies]
+eth = { version = "0.39.0", features = ["evm"] }
+```
+
+```rust
+use eth::codec::DecodeLimits;
+use eth::evm::{
+    BlockExecutionContext, ExecutionEnvironment, ExecutionRequest, ExecutionTransaction,
+    GasEstimationPolicy, GasEstimationRequest, GasEstimationStatus,
+    GasEstimationTermination, SnapshotAccount, SnapshotError, StateSnapshot,
+};
+use eth::primitives::{Address, B256, BlockNumber, ChainId, Gas, Nonce, UnixTimestamp, Wei};
+use eth::protocol::{ForkActivation, ForkSpec, Hardfork, ValidationContext};
+
+struct Snapshot;
+
+impl StateSnapshot for Snapshot {
+    fn snapshot_id(&self) -> B256 {
+        B256::from_bytes([0_u8; 32])
+    }
+
+    fn account(&self, _address: Address) -> Result<Option<SnapshotAccount>, SnapshotError> {
+        Ok(Some(SnapshotAccount {
+            nonce: Nonce::new(0),
+            balance: Wei::from_u128(0),
+            code_hash: B256::from_bytes([0_u8; 32]),
+        }))
+    }
+
+    fn storage(&self, _address: Address, _slot: B256) -> Result<B256, SnapshotError> {
+        Ok(B256::from_bytes([0_u8; 32]))
+    }
+}
+
+let context = ValidationContext {
+    fork: ForkSpec {
+        chain_id: ChainId::new(1),
+        hardfork: Hardfork::Prague,
+        activation: ForkActivation::BlockAndTimestamp {
+            activation_block: BlockNumber::new(10),
+            activation_timestamp: UnixTimestamp::new(20),
+        },
+    },
+    block_number: BlockNumber::new(12),
+    timestamp: UnixTimestamp::new(22),
+};
+let block = BlockExecutionContext {
+    chain_id: ChainId::new(1),
+    block_number: BlockNumber::new(12),
+    timestamp: UnixTimestamp::new(22),
+    beneficiary: Address::from_bytes([0_u8; 20]),
+    gas_limit: Gas::new(30_000_000),
+    base_fee_per_gas: Wei::from_u128(1_000_000_000),
+    prev_randao: B256::from_bytes([0_u8; 32]),
+};
+let limits = DecodeLimits {
+    max_input_bytes: 64,
+    max_list_items: 16,
+    max_nesting_depth: 8,
+    max_total_allocation: 64,
+    max_proof_nodes: 4,
+    max_total_items: 32,
+};
+
+let environment = match ExecutionEnvironment::try_new(context, block) {
+    Ok(environment) => environment,
+    Err(error) => return Err(error.message()),
+};
+let transaction = match ExecutionTransaction::decode(&[0xc0], limits) {
+    Ok(transaction) => transaction,
+    Err(error) => return Err(error.message()),
+};
+let snapshot = Snapshot;
+let execution = ExecutionRequest::new(environment, transaction, &snapshot);
+let policy = match GasEstimationPolicy::try_new(
+    8,
+    Gas::new(50_000),
+    GasEstimationTermination::BackendStepLimit {
+        max_backend_steps: 1_000,
+    },
+) {
+    Ok(policy) => policy,
+    Err(error) => return Err(error.message()),
+};
+let request = match GasEstimationRequest::try_new(execution, policy) {
+    Ok(request) => request,
+    Err(error) => return Err(error.message()),
+};
+let report = match request.report(
+    B256::from_bytes([0_u8; 32]),
+    GasEstimationStatus::BackendUnavailable,
+    0,
+    None,
+) {
+    Ok(report) => report,
+    Err(error) => return Err(error.message()),
+};
+
+assert_eq!(report.policy.gas_cap(), Gas::new(50_000));
+# Ok::<(), &'static str>(())
 ```
 
 ## Primitive Domains
@@ -1042,7 +1149,7 @@ friendly, and independently testable.
 The minimum supported Rust version is Rust `1.90.0`. New deployments should use
 the pinned stable Rust `1.96.1` until the toolchain policy is updated.
 
-Compatibility evidence for `0.38.0`:
+Compatibility evidence for `0.39.0`:
 
 | Rust | Local Evidence |
 | --- | --- |
@@ -1059,7 +1166,7 @@ Compatibility evidence for `0.38.0`:
 
 ```bash
 scripts/checks.sh
-scripts/release_0_38_gate.sh
+scripts/release_0_39_gate.sh
 ```
 
 For dependency-policy checks, install `cargo-deny` and `cargo-audit`, then run:

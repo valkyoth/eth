@@ -1,7 +1,7 @@
 # EVM Execution Environment Boundary
 
-Status: `v0.38.0` implementation, pentest remediation, and clean retest
-complete; waiting for final GitHub checks before tagging.
+Status: `v0.39.0` adds the bounded gas-estimation boundary; awaiting pentest
+before tagging.
 
 This document records the first explicit execution boundary for
 `eth-valkyoth-evm`. The crate still does not admit REVM or any other concrete
@@ -57,6 +57,34 @@ when constructing the report. No function currently performs EVM execution;
 `ExecutionError::BackendUnavailable` records that a backend is not admitted by
 this crate version.
 
+## Gas Estimation Boundary
+
+`GasEstimationPolicy` records the limits that every future estimator must carry:
+
+- non-zero maximum backend attempts;
+- non-zero gas cap;
+- one non-zero termination guard:
+  - deterministic backend step limit;
+  - caller-enforced worker timeout;
+  - isolated worker timeout.
+
+`GasEstimationRequest::try_new` binds that policy to an `ExecutionRequest` and
+rejects any gas cap above the selected block gas limit. This keeps gas
+estimation subordinate to the same fork, block, transaction, and state snapshot
+identity as execution.
+
+`GasEstimationReport` records:
+
+- the execution report;
+- the reviewed gas-estimation policy;
+- a deterministic status class;
+- the number of attempts performed;
+- the estimated gas, when a backend can produce one.
+
+Reports reject attempt counts above policy and estimates above the selected gas
+cap. The current crate still has no backend, so `BackendUnavailable` remains
+the expected status for callers using only this release's first-party boundary.
+
 ## Security Notes
 
 - REVM remains rejected by the existing dependency review and runtime
@@ -65,5 +93,7 @@ this crate version.
 - Reports bind both transaction type and transaction hash so two transactions
   of the same type cannot produce identical audit reports under the same block
   and snapshot.
+- Gas-estimation requests must carry attempt, gas, and termination bounds
+  before any future backend can run.
 - Later gas estimation and execution backends must accept this boundary rather
   than inventing parallel fork, block, transaction, or snapshot inputs.

@@ -5,7 +5,7 @@ non-admitted.
 
 ## Decision
 
-REVM is not part of the `eth` dependency graph in v0.38.0.
+REVM is not part of the `eth` dependency graph in v0.39.0.
 
 The review was performed on 2026-07-05. It must be refreshed before
 2026-10-05, or before any REVM/external execution backend is admitted,
@@ -38,7 +38,8 @@ issue but still introduces duplicate crypto/hash lines and the unmaintained
 
 `eth-valkyoth-evm` publishes a first-party `RevmDependencyReview` value in
 v0.37.0 so downstream users can see the reviewed decision from code and docs.
-`v0.38.0` adds first-party execution boundary types only. No REVM feature or
+`v0.38.0` adds first-party execution boundary types and `v0.39.0` adds
+first-party bounded gas-estimation boundary types only. No REVM feature or
 dependency is exposed until a future review can pass:
 
 - `cargo deny check`;

@@ -7,7 +7,7 @@ Most users should depend on the facade crate instead:
 
 ```toml
 [dependencies]
-eth = { version = "0.38.0", features = ["evm"] }
+eth = { version = "0.39.0", features = ["evm"] }
 ```
 
 Crates.io: <https://crates.io/crates/eth>
@@ -16,8 +16,8 @@ This package is published separately so the `eth` workspace can keep small,
 auditable crate boundaries. Treat it as a lower-level building block unless the
 `eth` documentation explicitly says otherwise.
 
-The `0.9.0` support-crate release, shipped with `eth` `0.38.0`, adds the
-first execution boundary types:
+The `0.10.0` support-crate release, shipped with `eth` `0.39.0`, adds the
+bounded gas-estimation boundary on top of the first execution boundary types:
 
 - `ExecutionEnvironment` binds an active fork validation context to a matching
   block context;
@@ -28,6 +28,9 @@ first execution boundary types:
 - `ExecutionReport` records the exact environment, transaction type,
   caller-computed transaction hash, and state snapshot selected for an
   execution attempt.
+- `GasEstimationPolicy`, `GasEstimationRequest`, and `GasEstimationReport`
+  require maximum attempts, a gas cap, and a deterministic termination guard
+  before future estimators can run.
 
 No execution backend is admitted yet. The previous REVM dependency review
 remains in force: current REVM candidates are rejected by this repository's

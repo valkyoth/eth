@@ -6,10 +6,15 @@
 extern crate std;
 
 mod environment;
+mod gas_estimation;
 mod result;
 mod snapshot;
 
 pub use environment::{BlockExecutionContext, ExecutionEnvironment, ExecutionEnvironmentError};
+pub use gas_estimation::{
+    GasEstimationError, GasEstimationPolicy, GasEstimationReport, GasEstimationRequest,
+    GasEstimationStatus, GasEstimationTermination,
+};
 pub use result::{
     ExecutionError, ExecutionReport, ExecutionRequest, ExecutionResult, ExecutionStatus,
     ExecutionTransaction,
