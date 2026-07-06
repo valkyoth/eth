@@ -1,6 +1,7 @@
 # eth 0.39.0 Release Notes
 
-Status: implementation ready; awaiting pentest before tagging.
+Status: implementation, pentest remediation, and clean retest complete; waiting
+for final GitHub checks before tagging.
 
 `0.39.0` adds the bounded gas-estimation boundary. It still does not admit an
 EVM execution backend.
@@ -62,9 +63,13 @@ EVM execution backend.
 
 ## Pentest
 
-- Run pentest on the implementation commit before tagging.
-- Permanent report path after clean retest:
-  `security/pentest/v0.39.0.md`.
+- External pentest found one medium bounded-resource issue and one low
+  coverage gap.
+- Remediation added hard release ceilings for gas-estimation attempts, gas cap,
+  backend steps, and worker timeout values, plus missing worker-termination
+  coverage.
+- Clean retest passed.
+- Permanent report: `security/pentest/v0.39.0.md`.
 
 ## Versioning
 

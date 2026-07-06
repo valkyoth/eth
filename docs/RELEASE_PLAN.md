@@ -1494,7 +1494,8 @@ Exit criteria:
 
 ### v0.39.0 - Bounded Gas Estimation
 
-Status: implementation ready; awaiting pentest.
+Status: implementation, pentest remediation, and clean retest complete; waiting
+for GitHub checks before tagging.
 
 Goal: make gas estimation bounded and auditable.
 
@@ -1521,6 +1522,8 @@ Exit criteria:
 - Gas estimation cannot become an unbounded execution loop, including through
   practically infinite caller-provided limit values.
 - No concrete EVM backend is admitted by this release.
+- The permanent pentest report is committed at
+  `security/pentest/v0.39.0.md`.
 
 ## Phase 8: Native Audited EVM Engine
 

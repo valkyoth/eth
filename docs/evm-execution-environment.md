@@ -1,7 +1,7 @@
 # EVM Execution Environment Boundary
 
-Status: `v0.39.0` adds the bounded gas-estimation boundary; awaiting pentest
-before tagging.
+Status: `v0.39.0` implementation, pentest remediation, and clean retest
+complete; waiting for final GitHub checks before tagging.
 
 This document records the first explicit execution boundary for
 `eth-valkyoth-evm`. The crate still does not admit REVM or any other concrete
