@@ -64,7 +64,7 @@ impl EvmFork {
     /// Returns whether warm/cold state gas is claimed for this fork.
     #[must_use]
     pub const fn supports_warm_cold_state_access(self) -> bool {
-        self.0 >= Self::LONDON.0 && self.0 <= Self::PRAGUE.0
+        self.0 >= Self::LONDON.0 && self.is_supported()
     }
 
     /// Returns the first fork where the modeled opcode exists.

@@ -233,6 +233,19 @@ fn gas_schedule_charges_claimed_opcode_subset() -> Result<(), EvmCoreError> {
 }
 
 #[test]
+fn gas_schedule_rejects_opcode_before_introduction() -> Result<(), EvmCoreError> {
+    let frontier = EvmGasSchedule::for_fork(EvmFork::FRONTIER)?;
+    let byzantium = EvmGasSchedule::for_fork(EvmFork::BYZANTIUM)?;
+
+    assert_eq!(
+        frontier.base_cost(EvmOpcode::REVERT),
+        Err(EvmCoreError::UnsupportedOpcode)
+    );
+    assert_eq!(byzantium.base_cost(EvmOpcode::REVERT)?, EvmGas::new(0));
+    Ok(())
+}
+
+#[test]
 fn gas_schedule_computes_memory_expansion_costs() -> Result<(), EvmCoreError> {
     let schedule = EvmGasSchedule::for_fork(EvmFork::CANCUN)?;
 
@@ -370,6 +383,25 @@ fn execution_reports_return_and_revert_ranges() -> Result<(), EvmCoreError> {
         ExecutionStatus::Reverted { offset: 1, len: 2 }
     );
     assert_eq!(revert_report.gas_used, EvmGas::new(9));
+    Ok(())
+}
+
+#[test]
+fn execution_rejects_opcode_before_introduction() -> Result<(), EvmCoreError> {
+    let mut memory = [0u8; 4];
+    let mut execution = EvmExecution::<16>::try_new(&mut memory)?;
+    let code = [0x60, 0x02, 0x60, 0x01, 0xfd];
+    let limits = ExecutionLimits::try_new(
+        EVM_DEFAULT_STEP_LIMIT,
+        EVM_DEFAULT_GAS_LIMIT,
+        EvmFork::FRONTIER,
+    )?;
+
+    assert_eq!(
+        execution.run(&code, limits),
+        Err(EvmCoreError::UnsupportedOpcode)
+    );
+    assert_eq!(execution.stack().len(), 2);
     Ok(())
 }
 

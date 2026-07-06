@@ -196,6 +196,9 @@ impl<'a, const STACK: usize> EvmExecution<'a, STACK> {
                 .checked_add(1)
                 .ok_or(EvmCoreError::ExecutionStepLimitReached)?;
             let opcode = EvmOpcode::new(opcode_byte);
+            if !schedule.fork().opcode_is_introduced(opcode) {
+                return Err(EvmCoreError::UnsupportedOpcode);
+            }
             if opcode.is_state_access() {
                 host.execute_state_opcode(self, opcode, schedule, &mut gas_meter)?;
             } else {

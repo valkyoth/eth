@@ -59,6 +59,9 @@ tests historical pricing.
 
 - Pending. The release must not be tagged until the local `PENTEST.md` is
   converted into `security/pentest/v0.43.1.md` and the retest is clean.
+- Initial pentest found an interpreter-vs-`OpcodeTable` fork-boundary
+  enforcement gap and a duplicated warm/cold support ceiling. Both have been
+  remediated before retest.
 
 ## Versioning
 

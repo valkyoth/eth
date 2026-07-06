@@ -93,6 +93,9 @@ impl EvmGasSchedule {
 
     /// Returns the fixed base gas for an executable opcode.
     pub const fn base_cost(self, opcode: EvmOpcode) -> Result<EvmGas, EvmCoreError> {
+        if !self.fork.opcode_is_introduced(opcode) {
+            return Err(EvmCoreError::UnsupportedOpcode);
+        }
         match opcode.byte() {
             0x00 | 0xf3 | 0xfd => Ok(self.gas_zero),
             0x02 => Ok(self.gas_low),
