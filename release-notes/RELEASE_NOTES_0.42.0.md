@@ -1,7 +1,6 @@
 # eth 0.42.0 Release Notes
 
-Status: implementation ready; initial pentest found a release-gate issue under
-remediation.
+Status: pentest passed; waiting for final GitHub checks before tagging.
 
 `0.42.0` adds fork-scoped gas accounting to the native
 `eth-valkyoth-evm-core` interpreter. The release keeps the execution scope
@@ -57,13 +56,14 @@ tracking, or production-valid execution.
 
 ## Pentest
 
-- Pending. The release must not be tagged until the local `PENTEST.md` is
-  converted into `security/pentest/v0.42.0.md` and the retest is clean.
 - Initial pentest found that `scripts/validate-release-metadata.sh` did not
   enforce the v0.42.0 pentest report; this remediation makes the check
   version-derived instead of hand-appended.
 - Retest noted that the first remediation extracted versions with line-based
   `sed`; the gate now parses the named TOML tables with `tomllib`.
+- External pentest and retest passed before tagging.
+- Permanent report: `security/pentest/v0.42.0.md`.
+- Final GitHub checks must pass on the pentest report commit before tagging.
 
 ## Versioning
 
