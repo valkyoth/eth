@@ -142,10 +142,11 @@ checksum = "877a4ace8713b0bcf2a4e7eec82529c029f1d0619886d18145fea96c3ffe5c0f"
 
 [[package]]
 name = "eth"
-version = "0.39.0"
+version = "0.40.0"
 dependencies = [
  "eth-valkyoth-codec",
  "eth-valkyoth-evm",
+ "eth-valkyoth-evm-core",
  "eth-valkyoth-hash",
  "eth-valkyoth-primitives",
  "eth-valkyoth-protocol",
@@ -185,6 +186,10 @@ dependencies = [
  "eth-valkyoth-primitives",
  "eth-valkyoth-protocol",
 ]
+
+[[package]]
+name = "eth-valkyoth-evm-core"
+version = "0.1.0"
 
 [[package]]
 name = "eth-valkyoth-hash"

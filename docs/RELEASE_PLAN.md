@@ -1533,6 +1533,8 @@ trusted core for 1.0 production execution claims.
 
 ### v0.40.0 - Native EVM Core Types
 
+Status: implementation ready; awaiting pentest.
+
 Goal: introduce the first-party execution crate and bounded core domains.
 
 Deliverables:

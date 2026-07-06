@@ -1,8 +1,9 @@
 # Crate Version Matrix
 
-Status: `v0.39.0` adds the bounded gas-estimation boundary.
-`eth-valkyoth-evm` now exposes no_std gas-estimation policy, request, report,
-status, and error types without admitting a concrete execution backend.
+Status: `v0.40.0` adds the native EVM core type foundation.
+`eth-valkyoth-evm-core` now exposes dependency-free `no_std` stack, memory,
+word, opcode, program-counter, fork, and error domains without admitting a
+bytecode interpreter or concrete execution backend.
 
 `eth` uses independent crate versions. The facade crate remains the main user
 entry point, but support crates are published only when their own package
@@ -28,23 +29,24 @@ but must be republished so immutable crates.io package metadata is corrected.
 workspace manifests before release. The script refuses accidental lockstep
 publication when a crate is marked `unchanged`.
 
-## v0.39.0 Tracking Table
+## v0.40.0 Tracking Table
 
 | Crate | Published | Planned | Change | Publish | Reason |
 | --- | --- | --- | --- | --- | --- |
-| `eth-valkyoth-codec` | `0.19.0` | `0.19.0` | `unchanged` | No | No package changes for v0.39.0. |
-| `eth-valkyoth-primitives` | `0.11.2` | `0.11.2` | `unchanged` | No | No package changes for v0.39.0. |
-| `eth-valkyoth-hash` | `0.11.2` | `0.11.2` | `unchanged` | No | No package changes for v0.39.0. |
-| `eth-valkyoth-protocol` | `0.25.2` | `0.25.2` | `unchanged` | No | No package changes for v0.39.0. |
-| `eth-valkyoth-verify` | `0.21.0` | `0.21.0` | `unchanged` | No | No package changes for v0.39.0. |
-| `eth-valkyoth-derive` | `0.17.2` | `0.17.2` | `unchanged` | No | No package changes for v0.39.0. |
-| `eth-valkyoth-sanitization` | `0.7.4` | `0.7.4` | `unchanged` | No | No package changes for v0.39.0. |
-| `eth-valkyoth-evm` | `0.9.0` | `0.10.0` | `code` | Yes | Adds bounded gas-estimation policy, request, report, status, and deterministic error APIs. |
-| `eth-valkyoth-rpc` | `0.7.0` | `0.7.0` | `unchanged` | No | No package changes for v0.39.0. |
-| `eth-valkyoth-signer` | `0.7.3` | `0.7.3` | `unchanged` | No | No package changes for v0.39.0. |
-| `eth-valkyoth-reth` | `0.7.0` | `0.7.0` | `unchanged` | No | No package changes for v0.39.0. |
-| `eth-valkyoth-testkit` | `0.7.0` | `0.7.0` | `unchanged` | No | No package changes for v0.39.0. |
-| `eth` | `0.38.0` | `0.39.0` | `code` | Yes | Re-exports gas-estimation errors, updates the optional `evm` dependency to `eth-valkyoth-evm 0.10.0`, and documents the bounded gas-estimation boundary. |
+| `eth-valkyoth-codec` | `0.19.0` | `0.19.0` | `unchanged` | No | No package changes for v0.40.0. |
+| `eth-valkyoth-primitives` | `0.11.2` | `0.11.2` | `unchanged` | No | No package changes for v0.40.0. |
+| `eth-valkyoth-hash` | `0.11.2` | `0.11.2` | `unchanged` | No | No package changes for v0.40.0. |
+| `eth-valkyoth-protocol` | `0.25.2` | `0.25.2` | `unchanged` | No | No package changes for v0.40.0. |
+| `eth-valkyoth-verify` | `0.21.0` | `0.21.0` | `unchanged` | No | No package changes for v0.40.0. |
+| `eth-valkyoth-derive` | `0.17.2` | `0.17.2` | `unchanged` | No | No package changes for v0.40.0. |
+| `eth-valkyoth-sanitization` | `0.7.4` | `0.7.4` | `unchanged` | No | No package changes for v0.40.0. |
+| `eth-valkyoth-evm-core` | none | `0.1.0` | `code` | Yes | Adds the first-party dependency-free EVM core type foundation with bounded stack, memory, word, opcode, program-counter, fork, and error domains. |
+| `eth-valkyoth-evm` | `0.10.0` | `0.10.0` | `unchanged` | No | No package changes for v0.40.0. |
+| `eth-valkyoth-rpc` | `0.7.0` | `0.7.0` | `unchanged` | No | No package changes for v0.40.0. |
+| `eth-valkyoth-signer` | `0.7.3` | `0.7.3` | `unchanged` | No | No package changes for v0.40.0. |
+| `eth-valkyoth-reth` | `0.7.0` | `0.7.0` | `unchanged` | No | No package changes for v0.40.0. |
+| `eth-valkyoth-testkit` | `0.7.0` | `0.7.0` | `unchanged` | No | No package changes for v0.40.0. |
+| `eth` | `0.39.0` | `0.40.0` | `code` | Yes | Adds the optional `evm-core` feature, re-exports `eth-valkyoth-evm-core`, and documents the first-party native EVM core type foundation. |
 
 Update this table and `release-crates.toml` in the same commit whenever a crate
 changes release state.

@@ -29,6 +29,7 @@ PUBLISH_ORDER = (
     "eth-valkyoth-verify",
     "eth-valkyoth-derive",
     "eth-valkyoth-sanitization",
+    "eth-valkyoth-evm-core",
     "eth-valkyoth-evm",
     "eth-valkyoth-rpc",
     "eth-valkyoth-signer",

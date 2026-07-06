@@ -32,6 +32,7 @@ for package in \
     eth-valkyoth-rpc \
     eth-valkyoth-derive \
     eth-valkyoth-sanitization \
+    eth-valkyoth-evm-core \
     eth-valkyoth-signer \
     eth-valkyoth-testkit \
     eth-valkyoth-verify; do
@@ -77,6 +78,7 @@ cargo package -p eth --allow-dirty \
     --config 'patch.crates-io.eth-valkyoth-hash.path="crates/eth-valkyoth-hash"' \
     --config 'patch.crates-io.eth-valkyoth-protocol.path="crates/eth-valkyoth-protocol"' \
     --config 'patch.crates-io.eth-valkyoth-evm.path="crates/eth-valkyoth-evm"' \
+    --config 'patch.crates-io.eth-valkyoth-evm-core.path="crates/eth-valkyoth-evm-core"' \
     --config 'patch.crates-io.eth-valkyoth-reth.path="crates/eth-valkyoth-reth"' \
     --config 'patch.crates-io.eth-valkyoth-rpc.path="crates/eth-valkyoth-rpc"' \
     --config 'patch.crates-io.eth-valkyoth-sanitization.path="crates/eth-valkyoth-sanitization"' \

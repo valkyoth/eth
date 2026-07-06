@@ -1,0 +1,19 @@
+[package]
+name = "eth-valkyoth-evm-core"
+description = "Dependency-free no_std Ethereum EVM core domains for eth."
+version = "0.1.0"
+edition.workspace = true
+rust-version.workspace = true
+license.workspace = true
+homepage.workspace = true
+repository.workspace = true
+readme = "README.md"
+
+[features]
+default = []
+std = []
+
+[dependencies]
+
+[lints]
+workspace = true

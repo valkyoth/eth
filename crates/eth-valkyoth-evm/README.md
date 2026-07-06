@@ -7,7 +7,7 @@ Most users should depend on the facade crate instead:
 
 ```toml
 [dependencies]
-eth = { version = "0.39.0", features = ["evm"] }
+eth = { version = "0.40.0", features = ["evm"] }
 ```
 
 Crates.io: <https://crates.io/crates/eth>

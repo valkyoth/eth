@@ -80,9 +80,10 @@ The first production value is:
 - `eth-valkyoth-evm`: optional execution boundary. REVM may be admitted only as
   a temporary/reference adapter, while production execution moves through the
   first-party audited native EVM plan.
-- `eth-valkyoth-evm-core`: planned no_std-first native EVM engine crate with
-  explicit fork, block, transaction, stack, memory, gas, state, call-frame,
-  precompile, and commit policy.
+- `eth-valkyoth-evm-core`: no_std-first native EVM engine crate. `v0.40.0`
+  starts it with dependency-free word, stack, memory, opcode, fork,
+  program-counter, and error domains; later releases add gas, state,
+  call-frame, precompile, and commit policy.
 - `eth-valkyoth-rpc`: optional RPC policy over admitted provider transports.
 - `eth-valkyoth-abi`: optional ABI, contract-call, event, error, and common
   contract-standard helpers.

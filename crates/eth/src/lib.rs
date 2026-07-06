@@ -5,6 +5,8 @@
 pub use eth_valkyoth_codec as codec;
 #[cfg(feature = "evm")]
 pub use eth_valkyoth_evm as evm;
+#[cfg(feature = "evm-core")]
+pub use eth_valkyoth_evm_core as evm_core;
 pub use eth_valkyoth_hash as hash;
 pub use eth_valkyoth_primitives as primitives;
 pub use eth_valkyoth_protocol as protocol;
@@ -27,6 +29,8 @@ pub mod error {
     pub use eth_valkyoth_evm::{
         ExecutionEnvironmentError, ExecutionError, GasEstimationError, SnapshotError,
     };
+    #[cfg(feature = "evm-core")]
+    pub use eth_valkyoth_evm_core::EvmCoreError;
     pub use eth_valkyoth_protocol::{
         AccessListTransactionDecodeError, AccessListTransactionDecodeErrorCategory,
         BlobTransactionDecodeError, BlobTransactionDecodeErrorCategory, BlockHeaderDecodeError,
