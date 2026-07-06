@@ -1,6 +1,6 @@
 # eth 0.43.2 Release Notes
 
-Status: implementation ready; awaiting pentest.
+Status: release candidate; pentest clean; awaiting final GitHub checks.
 
 `0.43.2` adds historical state-read gas schedules to the dependency-free
 native EVM core. The release replaces the temporary pre-Berlin state-access
@@ -59,8 +59,8 @@ execution.
 
 ## Pentest
 
-- Pending. The release must not be tagged until the local `PENTEST.md` is
-  converted into `security/pentest/v0.43.2.md` and the retest is clean.
+- Permanent report: `security/pentest/v0.43.2.md`.
+- Pentest was clean. No blocking findings remain for the v0.43.2 release scope.
 
 ## Versioning
 

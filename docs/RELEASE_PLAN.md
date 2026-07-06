@@ -1667,7 +1667,7 @@ Exit criteria:
 
 ### v0.43.2 - Native EVM Pre-Berlin State Gas Schedules
 
-Status: implemented; ready for pentest.
+Status: release candidate; pentest clean; awaiting final GitHub checks.
 
 Goal: replace the temporary pre-London state-access fail-closed behavior with
 real historical state gas schedules where the current opcode subset is claimed.
