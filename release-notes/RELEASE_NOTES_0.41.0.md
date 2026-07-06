@@ -11,7 +11,7 @@ access, calls, creates, logs, precompiles, or host behavior.
 ## Added
 
 - `EvmExecution` no-alloc interpreter context over a fixed-capacity
-  `EvmStack` and caller-provided `EvmMemory`.
+  `EvmStack`, caller-provided `EvmMemory`, and hard-capped bytecode input.
 - `ExecutionLimits` with a non-zero maximum instruction count and a release
   hard ceiling.
 - `ExecutionStatus` and `ExecutionReport` for stopped, returned, and reverted
@@ -23,11 +23,12 @@ access, calls, creates, logs, precompiles, or host behavior.
   `ISZERO`, `AND`, `OR`, `XOR`, `NOT`, `POP`, `PC`, `PUSH1..=PUSH32`,
   `DUP1..=DUP16`, `SWAP1..=SWAP16`, `JUMP`, `JUMPI`, `JUMPDEST`, `RETURN`,
   and `REVERT`.
-- Dynamic jump validation that accepts only real `JUMPDEST` bytes outside PUSH
-  immediate data.
+- One-time no-alloc jumpdest bitmap construction so dynamic jump validation
+  accepts only real `JUMPDEST` bytes outside PUSH immediate data without
+  repeated linear bytecode rescans.
 - Fail-closed errors for zero or oversized step limits, step-limit exhaustion,
-  truncated PUSH immediates, invalid jump destinations, oversized word inputs,
-  and out-of-range return/revert memory spans.
+  oversized bytecode, truncated PUSH immediates, invalid jump destinations,
+  oversized word inputs, and out-of-range return/revert memory spans.
 
 ## Changed
 
@@ -46,6 +47,8 @@ access, calls, creates, logs, precompiles, or host behavior.
   output bytes or commit state.
 - Step limits are mandatory and capped so malformed code cannot run
   indefinitely or request impractically large local runs.
+- Bytecode length is capped at the EIP-170 code-size ceiling and jump targets
+  are precomputed once per `run` call to avoid repeated per-jump disassembly.
 
 ## Verification
 

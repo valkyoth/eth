@@ -1,7 +1,7 @@
 use crate::{
-    EVM_DEFAULT_STEP_LIMIT, EVM_MAX_STEP_LIMIT, EVM_MEMORY_LIMIT_BYTES, EvmCoreError, EvmExecution,
-    EvmFork, EvmMemory, EvmOpcode, EvmStack, EvmWord, ExecutionLimits, ExecutionStatus,
-    OpcodeClass, OpcodeTable, ProgramCounter,
+    EVM_DEFAULT_STEP_LIMIT, EVM_MAX_BYTECODE_LEN, EVM_MAX_STEP_LIMIT, EVM_MEMORY_LIMIT_BYTES,
+    EvmCoreError, EvmExecution, EvmFork, EvmMemory, EvmOpcode, EvmStack, EvmWord, ExecutionLimits,
+    ExecutionStatus, OpcodeClass, OpcodeTable, ProgramCounter,
 };
 
 #[test]
@@ -143,6 +143,41 @@ fn execution_validates_dynamic_jumpdest() -> Result<(), EvmCoreError> {
 
     assert_eq!(report.status, ExecutionStatus::Stopped);
     assert_eq!(execution.stack().peek(0)?, EvmWord::from_be_slice(&[7])?);
+    Ok(())
+}
+
+#[test]
+fn execution_precomputes_jumpdests_with_bounded_bytecode() -> Result<(), EvmCoreError> {
+    let mut memory = [0u8; 0];
+    let mut execution = EvmExecution::<16>::try_new(&mut memory)?;
+    let mut code = [0u8; EVM_MAX_BYTECODE_LEN];
+    let target = EVM_MAX_BYTECODE_LEN - 1;
+    code[0] = 0x61;
+    code[1] = 0x5f;
+    code[2] = 0xff;
+    code[3] = 0x56;
+    if let Some(slot) = code.get_mut(target) {
+        *slot = 0x5b;
+    }
+
+    let report = execution.run(&code, ExecutionLimits::try_new(EVM_DEFAULT_STEP_LIMIT)?)?;
+
+    assert_eq!(report.status, ExecutionStatus::Stopped);
+    assert_eq!(report.steps, 3);
+    assert_eq!(report.pc.get(), target + 1);
+    Ok(())
+}
+
+#[test]
+fn execution_rejects_oversized_bytecode() -> Result<(), EvmCoreError> {
+    let mut memory = [0u8; 0];
+    let mut execution = EvmExecution::<16>::try_new(&mut memory)?;
+    let code = [0u8; EVM_MAX_BYTECODE_LEN + 1];
+
+    assert_eq!(
+        execution.run(&code, ExecutionLimits::try_new(EVM_DEFAULT_STEP_LIMIT)?),
+        Err(EvmCoreError::BytecodeTooLarge)
+    );
     Ok(())
 }
 

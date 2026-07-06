@@ -56,7 +56,12 @@ impl OpcodeTable {
         self.fork
     }
 
-    /// Looks up opcode metadata for the current fork skeleton.
+    /// Looks up coarse opcode metadata for the current fork skeleton.
+    ///
+    /// The table may classify opcode domains before the bootstrap interpreter
+    /// executes them. Use [`crate::EvmExecution`] for the authoritative
+    /// currently executable subset; unsupported dispatcher arms still fail
+    /// closed with [`EvmCoreError::UnsupportedOpcode`].
     ///
     /// # Invariants
     ///

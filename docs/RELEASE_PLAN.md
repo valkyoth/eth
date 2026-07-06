@@ -1567,7 +1567,7 @@ Deliverables:
 - STOP, arithmetic, bitwise, comparison, PUSH, DUP, SWAP, POP, PC, JUMP, and
   JUMPI support;
 - checked stack underflow/overflow behavior;
-- jumpdest validation;
+- hard bytecode length ceiling plus one-time no-alloc jumpdest validation;
 - RETURN and REVERT shell behavior without state commits.
 
 Verification:

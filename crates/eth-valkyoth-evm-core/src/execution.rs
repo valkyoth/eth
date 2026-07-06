@@ -5,6 +5,10 @@ use core::cmp::Ordering;
 pub const EVM_DEFAULT_STEP_LIMIT: usize = 100_000;
 /// Hard maximum instruction count accepted by the bootstrap interpreter.
 pub const EVM_MAX_STEP_LIMIT: usize = 1_000_000;
+/// Hard maximum bytecode length accepted by the bootstrap interpreter.
+pub const EVM_MAX_BYTECODE_LEN: usize = 24_576;
+const JUMPDEST_MAP_WORD_BITS: usize = usize::BITS as usize;
+const JUMPDEST_MAP_WORDS: usize = EVM_MAX_BYTECODE_LEN.div_ceil(JUMPDEST_MAP_WORD_BITS);
 
 /// Bounded execution limits for the native EVM core interpreter.
 #[derive(Clone, Copy, Debug, Eq, PartialEq)]
@@ -106,6 +110,7 @@ impl<'a, const STACK: usize> EvmExecution<'a, STACK> {
         bytecode: &[u8],
         limits: ExecutionLimits,
     ) -> Result<ExecutionReport, EvmCoreError> {
+        let jumpdests = JumpdestMap::try_new(bytecode)?;
         let mut steps = 0usize;
         loop {
             if steps >= limits.max_steps() {
@@ -136,8 +141,8 @@ impl<'a, const STACK: usize> EvmExecution<'a, STACK> {
                 0x50 => {
                     let _ = self.stack.pop()?;
                 }
-                0x56 => self.jump(bytecode)?,
-                0x57 => self.jumpi(bytecode)?,
+                0x56 => self.jump(&jumpdests)?,
+                0x57 => self.jumpi(&jumpdests)?,
                 0x58 => self.stack.push(EvmWord::from_usize(pc))?,
                 0x5b => {}
                 0x60..=0x7f => self.push_immediate(bytecode, opcode)?,
@@ -147,7 +152,7 @@ impl<'a, const STACK: usize> EvmExecution<'a, STACK> {
                 0xfd => return self.return_or_revert(steps, true),
                 _ => return Err(EvmCoreError::UnsupportedOpcode),
             }
-            self.pc = self.next_pc(bytecode, pc, opcode)?;
+            self.pc = self.next_pc(pc, opcode)?;
         }
     }
 
@@ -160,12 +165,7 @@ impl<'a, const STACK: usize> EvmExecution<'a, STACK> {
         }
     }
 
-    fn next_pc(
-        &self,
-        bytecode: &[u8],
-        pc: usize,
-        opcode: EvmOpcode,
-    ) -> Result<ProgramCounter, EvmCoreError> {
+    fn next_pc(&self, pc: usize, opcode: EvmOpcode) -> Result<ProgramCounter, EvmCoreError> {
         if opcode.byte() == EvmOpcode::JUMP.byte() || opcode.byte() == EvmOpcode::JUMPI.byte() {
             return Ok(self.pc);
         }
@@ -176,9 +176,6 @@ impl<'a, const STACK: usize> EvmExecution<'a, STACK> {
         let next = pc
             .checked_add(advance)
             .ok_or(EvmCoreError::ProgramCounterOverflow)?;
-        if width > 0 && next > bytecode.len() {
-            return Err(EvmCoreError::PushImmediateOutOfBounds);
-        }
         Ok(ProgramCounter::new(next))
     }
 
@@ -258,23 +255,23 @@ impl<'a, const STACK: usize> EvmExecution<'a, STACK> {
         self.stack.swap_with_top(depth)
     }
 
-    fn jump(&mut self, bytecode: &[u8]) -> Result<(), EvmCoreError> {
+    fn jump(&mut self, jumpdests: &JumpdestMap) -> Result<(), EvmCoreError> {
         let target = self.stack.pop()?.to_usize()?;
-        if !valid_jumpdest(bytecode, target)? {
+        if !jumpdests.contains(target) {
             return Err(EvmCoreError::InvalidJumpDestination);
         }
         self.pc = ProgramCounter::new(target);
         Ok(())
     }
 
-    fn jumpi(&mut self, bytecode: &[u8]) -> Result<(), EvmCoreError> {
+    fn jumpi(&mut self, jumpdests: &JumpdestMap) -> Result<(), EvmCoreError> {
         let target = self.stack.pop()?.to_usize()?;
         let condition = self.stack.pop()?;
         if condition.is_zero() {
             self.pc = self.pc.advance(1)?;
             return Ok(());
         }
-        if !valid_jumpdest(bytecode, target)? {
+        if !jumpdests.contains(target) {
             return Err(EvmCoreError::InvalidJumpDestination);
         }
         self.pc = ProgramCounter::new(target);
@@ -300,26 +297,61 @@ impl<'a, const STACK: usize> EvmExecution<'a, STACK> {
     }
 }
 
-fn valid_jumpdest(bytecode: &[u8], target: usize) -> Result<bool, EvmCoreError> {
-    if target >= bytecode.len() {
-        return Ok(false);
-    }
-    let mut pc = 0usize;
-    while pc < bytecode.len() {
-        let opcode = match bytecode.get(pc) {
-            Some(byte) => EvmOpcode::new(*byte),
-            None => return Ok(false),
-        };
-        if pc == target {
-            return Ok(opcode.byte() == EvmOpcode::JUMPDEST.byte());
+struct JumpdestMap {
+    words: [usize; JUMPDEST_MAP_WORDS],
+    len: usize,
+}
+
+impl JumpdestMap {
+    fn try_new(bytecode: &[u8]) -> Result<Self, EvmCoreError> {
+        if bytecode.len() > EVM_MAX_BYTECODE_LEN {
+            return Err(EvmCoreError::BytecodeTooLarge);
         }
-        let width = usize::from(opcode.push_width().unwrap_or(0));
-        let advance = 1usize
-            .checked_add(width)
-            .ok_or(EvmCoreError::ProgramCounterOverflow)?;
-        pc = pc
-            .checked_add(advance)
-            .ok_or(EvmCoreError::ProgramCounterOverflow)?;
+        let mut map = Self {
+            words: [0usize; JUMPDEST_MAP_WORDS],
+            len: bytecode.len(),
+        };
+        let mut pc = 0usize;
+        while pc < bytecode.len() {
+            let opcode = EvmOpcode::new(
+                *bytecode
+                    .get(pc)
+                    .ok_or(EvmCoreError::ProgramCounterOverflow)?,
+            );
+            if opcode.byte() == EvmOpcode::JUMPDEST.byte() {
+                map.insert(pc);
+            }
+            let width = usize::from(opcode.push_width().unwrap_or(0));
+            let advance = 1usize
+                .checked_add(width)
+                .ok_or(EvmCoreError::ProgramCounterOverflow)?;
+            let next = pc
+                .checked_add(advance)
+                .ok_or(EvmCoreError::ProgramCounterOverflow)?;
+            if width > 0 && next > bytecode.len() {
+                return Err(EvmCoreError::PushImmediateOutOfBounds);
+            }
+            pc = next;
+        }
+        Ok(map)
     }
-    Ok(false)
+
+    fn insert(&mut self, target: usize) {
+        let word = target / JUMPDEST_MAP_WORD_BITS;
+        let bit = target % JUMPDEST_MAP_WORD_BITS;
+        if let Some(slot) = self.words.get_mut(word) {
+            *slot |= 1usize << bit;
+        }
+    }
+
+    fn contains(&self, target: usize) -> bool {
+        if target >= self.len {
+            return false;
+        }
+        let word = target / JUMPDEST_MAP_WORD_BITS;
+        let bit = target % JUMPDEST_MAP_WORD_BITS;
+        self.words
+            .get(word)
+            .is_some_and(|slot| (*slot & (1usize << bit)) != 0)
+    }
 }

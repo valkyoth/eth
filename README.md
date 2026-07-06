@@ -38,8 +38,8 @@ dependencies.
 Status: `v0.41.0` adds the first native basic opcode execution pass.
 The optional `evm-core` feature now exposes dependency-free no_std word, stack,
 memory, opcode, program-counter, fork, opcode-table, and bounded interpreter
-domains for basic stack/control-flow bytecode without admitting REVM or another
-execution backend.
+domains for hard-capped basic stack/control-flow bytecode without admitting
+REVM or another execution backend.
 
 Implemented now:
 
@@ -111,7 +111,8 @@ Implemented now:
   gas-estimation policy types without admitting an EVM backend.
 - Optional `evm-core` feature exposing first-party no_std EVM word, stack,
   memory, opcode, program-counter, fork, opcode-table, and basic bounded
-  interpreter domains as the native execution foundation.
+  interpreter domains with bytecode and step ceilings as the native execution
+  foundation.
 - Digest-level secp256k1 sender recovery through a caller-provided backend
   boundary, with low-s rejection, Ethereum y-parity policy, and caller-provided
   Keccak-256 public-key hashing.

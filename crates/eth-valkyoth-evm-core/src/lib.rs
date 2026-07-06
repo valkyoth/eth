@@ -16,8 +16,8 @@ mod word;
 
 pub use error::EvmCoreError;
 pub use execution::{
-    EVM_DEFAULT_STEP_LIMIT, EVM_MAX_STEP_LIMIT, EvmExecution, ExecutionLimits, ExecutionReport,
-    ExecutionStatus,
+    EVM_DEFAULT_STEP_LIMIT, EVM_MAX_BYTECODE_LEN, EVM_MAX_STEP_LIMIT, EvmExecution,
+    ExecutionLimits, ExecutionReport, ExecutionStatus,
 };
 pub use fork::{EvmFork, OpcodeTable};
 pub use memory::{EVM_MEMORY_LIMIT_BYTES, EvmMemory};

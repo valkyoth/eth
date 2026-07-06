@@ -19,6 +19,8 @@ pub enum EvmCoreError {
     ProgramCounterOverflow,
     /// A word constructor received more than 32 bytes.
     WordInputTooLarge,
+    /// The bytecode input is larger than the release hard limit.
+    BytecodeTooLarge,
     /// The execution step limit is zero.
     ExecutionStepLimitZero,
     /// The execution step limit exceeds the release hard limit.
@@ -50,6 +52,7 @@ impl EvmCoreError {
             Self::MemoryOffsetOutOfBounds => "memory_offset_out_of_bounds",
             Self::ProgramCounterOverflow => "program_counter_overflow",
             Self::WordInputTooLarge => "word_input_too_large",
+            Self::BytecodeTooLarge => "bytecode_too_large",
             Self::ExecutionStepLimitZero => "execution_step_limit_zero",
             Self::ExecutionStepLimitTooLarge => "execution_step_limit_too_large",
             Self::ExecutionStepLimitReached => "execution_step_limit_reached",
