@@ -27,6 +27,14 @@ pub enum EvmCoreError {
     ExecutionStepLimitTooLarge,
     /// Execution reached the configured step limit before halting.
     ExecutionStepLimitReached,
+    /// The execution gas limit is zero.
+    ExecutionGasLimitZero,
+    /// The execution gas limit exceeds the release hard limit.
+    ExecutionGasLimitTooLarge,
+    /// Execution ran out of gas before applying opcode side effects.
+    OutOfGas,
+    /// Gas or memory expansion arithmetic overflowed.
+    GasOverflow,
     /// A `PUSHn` immediate extends beyond the bytecode input.
     PushImmediateOutOfBounds,
     /// A dynamic jump target is not a valid `JUMPDEST`.
@@ -56,6 +64,10 @@ impl EvmCoreError {
             Self::ExecutionStepLimitZero => "execution_step_limit_zero",
             Self::ExecutionStepLimitTooLarge => "execution_step_limit_too_large",
             Self::ExecutionStepLimitReached => "execution_step_limit_reached",
+            Self::ExecutionGasLimitZero => "execution_gas_limit_zero",
+            Self::ExecutionGasLimitTooLarge => "execution_gas_limit_too_large",
+            Self::OutOfGas => "out_of_gas",
+            Self::GasOverflow => "gas_overflow",
             Self::PushImmediateOutOfBounds => "push_immediate_out_of_bounds",
             Self::InvalidJumpDestination => "invalid_jump_destination",
             Self::ReturnRangeOutOfBounds => "return_range_out_of_bounds",

@@ -1,4 +1,7 @@
-use crate::{EvmCoreError, EvmMemory, EvmOpcode, EvmStack, EvmWord, ProgramCounter};
+use crate::{
+    EvmCoreError, EvmFork, EvmGas, EvmGasMeter, EvmGasSchedule, EvmMemory, EvmOpcode, EvmStack,
+    EvmWord, ProgramCounter,
+};
 use core::cmp::Ordering;
 
 /// Default maximum instruction count for local deterministic execution tests.
@@ -14,24 +17,55 @@ const JUMPDEST_MAP_WORDS: usize = EVM_MAX_BYTECODE_LEN.div_ceil(JUMPDEST_MAP_WOR
 #[derive(Clone, Copy, Debug, Eq, PartialEq)]
 pub struct ExecutionLimits {
     max_steps: usize,
+    gas_limit: EvmGas,
+    fork: EvmFork,
 }
 
 impl ExecutionLimits {
     /// Constructs execution limits.
-    pub const fn try_new(max_steps: usize) -> Result<Self, EvmCoreError> {
+    pub const fn try_new(
+        max_steps: usize,
+        gas_limit: u64,
+        fork: EvmFork,
+    ) -> Result<Self, EvmCoreError> {
         if max_steps == 0 {
             return Err(EvmCoreError::ExecutionStepLimitZero);
         }
         if max_steps > EVM_MAX_STEP_LIMIT {
             return Err(EvmCoreError::ExecutionStepLimitTooLarge);
         }
-        Ok(Self { max_steps })
+        let gas_limit = EvmGas::new(gas_limit);
+        match EvmGasSchedule::for_fork(fork) {
+            Ok(_) => {}
+            Err(error) => return Err(error),
+        }
+        match EvmGasMeter::try_new(gas_limit) {
+            Ok(_) => {}
+            Err(error) => return Err(error),
+        }
+        Ok(Self {
+            max_steps,
+            gas_limit,
+            fork,
+        })
     }
 
     /// Returns the maximum number of executed instructions.
     #[must_use]
     pub const fn max_steps(self) -> usize {
         self.max_steps
+    }
+
+    /// Returns the maximum gas admitted for this execution.
+    #[must_use]
+    pub const fn gas_limit(self) -> EvmGas {
+        self.gas_limit
+    }
+
+    /// Returns the fork used for opcode gas costs.
+    #[must_use]
+    pub const fn fork(self) -> EvmFork {
+        self.fork
     }
 }
 
@@ -67,6 +101,10 @@ pub struct ExecutionReport {
     pub pc: ProgramCounter,
     /// Final stack depth.
     pub stack_len: usize,
+    /// Gas consumed by executed opcodes and memory expansion.
+    pub gas_used: EvmGas,
+    /// Gas remaining when execution halted.
+    pub gas_remaining: EvmGas,
 }
 
 /// Small no-alloc interpreter for the audited bootstrap opcode set.
@@ -111,6 +149,8 @@ impl<'a, const STACK: usize> EvmExecution<'a, STACK> {
         limits: ExecutionLimits,
     ) -> Result<ExecutionReport, EvmCoreError> {
         let jumpdests = JumpdestMap::try_new(bytecode)?;
+        let schedule = EvmGasSchedule::for_fork(limits.fork())?;
+        let mut gas_meter = EvmGasMeter::try_new(limits.gas_limit())?;
         let mut steps = 0usize;
         loop {
             if steps >= limits.max_steps() {
@@ -119,14 +159,15 @@ impl<'a, const STACK: usize> EvmExecution<'a, STACK> {
             let pc = self.pc.get();
             let opcode_byte = match bytecode.get(pc) {
                 Some(byte) => *byte,
-                None => return Ok(self.report(ExecutionStatus::Stopped, steps)),
+                None => return self.report(ExecutionStatus::Stopped, steps, gas_meter),
             };
             steps = steps
                 .checked_add(1)
                 .ok_or(EvmCoreError::ExecutionStepLimitReached)?;
             let opcode = EvmOpcode::new(opcode_byte);
+            gas_meter.charge(schedule.base_cost(opcode)?)?;
             match opcode.byte() {
-                0x00 => return Ok(self.report(ExecutionStatus::Stopped, steps)),
+                0x00 => return self.report(ExecutionStatus::Stopped, steps, gas_meter),
                 0x01 => self.binary_word(EvmWord::wrapping_add_word)?,
                 0x02 => self.binary_word(EvmWord::wrapping_mul_word)?,
                 0x03 => self.binary_word(EvmWord::wrapping_sub_word)?,
@@ -148,21 +189,28 @@ impl<'a, const STACK: usize> EvmExecution<'a, STACK> {
                 0x60..=0x7f => self.push_immediate(bytecode, opcode)?,
                 0x80..=0x8f => self.dup(opcode)?,
                 0x90..=0x9f => self.swap(opcode)?,
-                0xf3 => return self.return_or_revert(steps, false),
-                0xfd => return self.return_or_revert(steps, true),
+                0xf3 => return self.return_or_revert(steps, false, schedule, &mut gas_meter),
+                0xfd => return self.return_or_revert(steps, true, schedule, &mut gas_meter),
                 _ => return Err(EvmCoreError::UnsupportedOpcode),
             }
             self.pc = self.next_pc(pc, opcode)?;
         }
     }
 
-    fn report(&self, status: ExecutionStatus, steps: usize) -> ExecutionReport {
-        ExecutionReport {
+    fn report(
+        &self,
+        status: ExecutionStatus,
+        steps: usize,
+        gas_meter: EvmGasMeter,
+    ) -> Result<ExecutionReport, EvmCoreError> {
+        Ok(ExecutionReport {
             status,
             steps,
             pc: self.pc,
             stack_len: self.stack.len(),
-        }
+            gas_used: gas_meter.used(),
+            gas_remaining: gas_meter.remaining()?,
+        })
     }
 
     fn next_pc(&self, pc: usize, opcode: EvmOpcode) -> Result<ProgramCounter, EvmCoreError> {
@@ -282,18 +330,23 @@ impl<'a, const STACK: usize> EvmExecution<'a, STACK> {
         &mut self,
         steps: usize,
         revert: bool,
+        schedule: EvmGasSchedule,
+        gas_meter: &mut EvmGasMeter,
     ) -> Result<ExecutionReport, EvmCoreError> {
-        let offset = self.stack.pop()?.to_usize()?;
-        let len = self.stack.pop()?.to_usize()?;
+        let offset = self.stack.peek(0)?.to_usize()?;
+        let len = self.stack.peek(1)?.to_usize()?;
         self.memory
             .check_range(offset, len)
             .map_err(|_| EvmCoreError::ReturnRangeOutOfBounds)?;
+        gas_meter.charge_memory_range(schedule, offset, len)?;
+        let offset = self.stack.pop()?.to_usize()?;
+        let len = self.stack.pop()?.to_usize()?;
         let status = if revert {
             ExecutionStatus::Reverted { offset, len }
         } else {
             ExecutionStatus::Returned { offset, len }
         };
-        Ok(self.report(status, steps))
+        self.report(status, steps, *gas_meter)
     }
 }
 

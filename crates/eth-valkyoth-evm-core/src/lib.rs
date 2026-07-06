@@ -8,6 +8,7 @@ extern crate std;
 mod error;
 mod execution;
 mod fork;
+mod gas;
 mod memory;
 mod opcode;
 mod program_counter;
@@ -20,6 +21,7 @@ pub use execution::{
     ExecutionLimits, ExecutionReport, ExecutionStatus,
 };
 pub use fork::{EvmFork, OpcodeTable};
+pub use gas::{EVM_DEFAULT_GAS_LIMIT, EVM_MAX_GAS_LIMIT, EvmGas, EvmGasMeter, EvmGasSchedule};
 pub use memory::{EVM_MEMORY_LIMIT_BYTES, EvmMemory};
 pub use opcode::{EvmOpcode, OpcodeClass, OpcodeInfo};
 pub use program_counter::ProgramCounter;

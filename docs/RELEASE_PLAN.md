@@ -1584,6 +1584,8 @@ Exit criteria:
 
 ### v0.42.0 - Native EVM Gas Accounting
 
+Status: implementation ready; awaiting pentest.
+
 Goal: make gas costs and memory expansion fork-aware and auditable.
 
 Deliverables:

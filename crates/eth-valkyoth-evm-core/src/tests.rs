@@ -1,8 +1,17 @@
 use crate::{
-    EVM_DEFAULT_STEP_LIMIT, EVM_MAX_BYTECODE_LEN, EVM_MAX_STEP_LIMIT, EVM_MEMORY_LIMIT_BYTES,
-    EvmCoreError, EvmExecution, EvmFork, EvmMemory, EvmOpcode, EvmStack, EvmWord, ExecutionLimits,
-    ExecutionStatus, OpcodeClass, OpcodeTable, ProgramCounter,
+    EVM_DEFAULT_GAS_LIMIT, EVM_DEFAULT_STEP_LIMIT, EVM_MAX_BYTECODE_LEN, EVM_MAX_GAS_LIMIT,
+    EVM_MAX_STEP_LIMIT, EVM_MEMORY_LIMIT_BYTES, EvmCoreError, EvmExecution, EvmFork, EvmGas,
+    EvmGasSchedule, EvmMemory, EvmOpcode, EvmStack, EvmWord, ExecutionLimits, ExecutionStatus,
+    OpcodeClass, OpcodeTable, ProgramCounter,
 };
+
+fn execution_limits() -> Result<ExecutionLimits, EvmCoreError> {
+    ExecutionLimits::try_new(
+        EVM_DEFAULT_STEP_LIMIT,
+        EVM_DEFAULT_GAS_LIMIT,
+        EvmFork::CANCUN,
+    )
+}
 
 #[test]
 fn stack_push_pop_tracks_depth_and_clears_slots() -> Result<(), EvmCoreError> {
@@ -119,6 +128,48 @@ fn word_arithmetic_wraps_at_256_bits() -> Result<(), EvmCoreError> {
 }
 
 #[test]
+fn gas_schedule_charges_claimed_opcode_subset() -> Result<(), EvmCoreError> {
+    let schedule = EvmGasSchedule::for_fork(EvmFork::CANCUN)?;
+
+    assert_eq!(schedule.base_cost(EvmOpcode::STOP)?, EvmGas::new(0));
+    assert_eq!(schedule.base_cost(EvmOpcode::ADD)?, EvmGas::new(3));
+    assert_eq!(schedule.base_cost(EvmOpcode::MUL)?, EvmGas::new(5));
+    assert_eq!(schedule.base_cost(EvmOpcode::POP)?, EvmGas::new(2));
+    assert_eq!(schedule.base_cost(EvmOpcode::JUMP)?, EvmGas::new(8));
+    assert_eq!(schedule.base_cost(EvmOpcode::JUMPI)?, EvmGas::new(10));
+    assert_eq!(schedule.base_cost(EvmOpcode::JUMPDEST)?, EvmGas::new(1));
+    assert_eq!(schedule.base_cost(EvmOpcode::PUSH1)?, EvmGas::new(3));
+    assert_eq!(
+        schedule.base_cost(EvmOpcode::MLOAD),
+        Err(EvmCoreError::UnsupportedOpcode)
+    );
+    Ok(())
+}
+
+#[test]
+fn gas_schedule_computes_memory_expansion_costs() -> Result<(), EvmCoreError> {
+    let schedule = EvmGasSchedule::for_fork(EvmFork::CANCUN)?;
+
+    assert_eq!(
+        schedule.memory_expansion_cost(0, 0, 0)?,
+        (0, EvmGas::new(0))
+    );
+    assert_eq!(
+        schedule.memory_expansion_cost(0, 0, 32)?,
+        (1, EvmGas::new(3))
+    );
+    assert_eq!(
+        schedule.memory_expansion_cost(1, 32, 1)?,
+        (2, EvmGas::new(3))
+    );
+    assert_eq!(
+        schedule.memory_expansion_cost(0, usize::MAX, 1),
+        Err(EvmCoreError::GasOverflow)
+    );
+    Ok(())
+}
+
+#[test]
 fn execution_runs_arithmetic_bitwise_and_comparison_subset() -> Result<(), EvmCoreError> {
     let mut memory = [0u8; 0];
     let mut execution = EvmExecution::<16>::try_new(&mut memory)?;
@@ -126,9 +177,10 @@ fn execution_runs_arithmetic_bitwise_and_comparison_subset() -> Result<(), EvmCo
         0x60, 0x02, 0x60, 0x03, 0x01, 0x60, 0x05, 0x14, 0x60, 0xf0, 0x60, 0x0f, 0x17, 0x60, 0xff,
         0x14, 0x00,
     ];
-    let report = execution.run(&code, ExecutionLimits::try_new(EVM_DEFAULT_STEP_LIMIT)?)?;
+    let report = execution.run(&code, execution_limits()?)?;
 
     assert_eq!(report.status, ExecutionStatus::Stopped);
+    assert_eq!(report.gas_used, EvmGas::new(30));
     assert_eq!(execution.stack().peek(1)?, EvmWord::from_bool(true));
     assert_eq!(execution.stack().peek(0)?, EvmWord::from_bool(true));
     Ok(())
@@ -139,9 +191,10 @@ fn execution_validates_dynamic_jumpdest() -> Result<(), EvmCoreError> {
     let mut memory = [0u8; 0];
     let mut execution = EvmExecution::<16>::try_new(&mut memory)?;
     let code = [0x60, 0x04, 0x56, 0x00, 0x5b, 0x60, 0x07, 0x00];
-    let report = execution.run(&code, ExecutionLimits::try_new(EVM_DEFAULT_STEP_LIMIT)?)?;
+    let report = execution.run(&code, execution_limits()?)?;
 
     assert_eq!(report.status, ExecutionStatus::Stopped);
+    assert_eq!(report.gas_used, EvmGas::new(15));
     assert_eq!(execution.stack().peek(0)?, EvmWord::from_be_slice(&[7])?);
     Ok(())
 }
@@ -160,9 +213,10 @@ fn execution_precomputes_jumpdests_with_bounded_bytecode() -> Result<(), EvmCore
         *slot = 0x5b;
     }
 
-    let report = execution.run(&code, ExecutionLimits::try_new(EVM_DEFAULT_STEP_LIMIT)?)?;
+    let report = execution.run(&code, execution_limits()?)?;
 
     assert_eq!(report.status, ExecutionStatus::Stopped);
+    assert_eq!(report.gas_used, EvmGas::new(12));
     assert_eq!(report.steps, 3);
     assert_eq!(report.pc.get(), target + 1);
     Ok(())
@@ -175,7 +229,7 @@ fn execution_rejects_oversized_bytecode() -> Result<(), EvmCoreError> {
     let code = [0u8; EVM_MAX_BYTECODE_LEN + 1];
 
     assert_eq!(
-        execution.run(&code, ExecutionLimits::try_new(EVM_DEFAULT_STEP_LIMIT)?),
+        execution.run(&code, execution_limits()?),
         Err(EvmCoreError::BytecodeTooLarge)
     );
     Ok(())
@@ -188,7 +242,7 @@ fn execution_rejects_jump_into_push_immediate() -> Result<(), EvmCoreError> {
     let code = [0x60, 0x01, 0x56];
 
     assert_eq!(
-        execution.run(&code, ExecutionLimits::try_new(EVM_DEFAULT_STEP_LIMIT)?),
+        execution.run(&code, execution_limits()?),
         Err(EvmCoreError::InvalidJumpDestination)
     );
     Ok(())
@@ -201,9 +255,10 @@ fn execution_false_jumpi_advances_to_next_instruction() -> Result<(), EvmCoreErr
     let code = [
         0x60, 0x00, 0x60, 0x08, 0x57, 0x60, 0x09, 0x00, 0x5b, 0x60, 0x01, 0x00,
     ];
-    let report = execution.run(&code, ExecutionLimits::try_new(EVM_DEFAULT_STEP_LIMIT)?)?;
+    let report = execution.run(&code, execution_limits()?)?;
 
     assert_eq!(report.status, ExecutionStatus::Stopped);
+    assert_eq!(report.gas_used, EvmGas::new(19));
     assert_eq!(execution.stack().peek(0)?, EvmWord::from_be_slice(&[9])?);
     Ok(())
 }
@@ -213,26 +268,34 @@ fn execution_reports_return_and_revert_ranges() -> Result<(), EvmCoreError> {
     let mut return_memory = [0u8; 4];
     let mut return_execution = EvmExecution::<16>::try_new(&mut return_memory)?;
     let return_code = [0x60, 0x02, 0x60, 0x01, 0xf3];
-    let return_report = return_execution.run(
-        &return_code,
-        ExecutionLimits::try_new(EVM_DEFAULT_STEP_LIMIT)?,
-    )?;
+    let return_report = return_execution.run(&return_code, execution_limits()?)?;
     assert_eq!(
         return_report.status,
         ExecutionStatus::Returned { offset: 1, len: 2 }
     );
+    assert_eq!(return_report.gas_used, EvmGas::new(9));
 
     let mut revert_memory = [0u8; 4];
     let mut revert_execution = EvmExecution::<16>::try_new(&mut revert_memory)?;
     let revert_code = [0x60, 0x02, 0x60, 0x01, 0xfd];
-    let revert_report = revert_execution.run(
-        &revert_code,
-        ExecutionLimits::try_new(EVM_DEFAULT_STEP_LIMIT)?,
-    )?;
+    let revert_report = revert_execution.run(&revert_code, execution_limits()?)?;
     assert_eq!(
         revert_report.status,
         ExecutionStatus::Reverted { offset: 1, len: 2 }
     );
+    assert_eq!(revert_report.gas_used, EvmGas::new(9));
+    Ok(())
+}
+
+#[test]
+fn execution_charges_gas_before_stack_side_effects() -> Result<(), EvmCoreError> {
+    let mut memory = [0u8; 0];
+    let mut execution = EvmExecution::<16>::try_new(&mut memory)?;
+    let code = [0x60, 0x01, 0x00];
+    let limits = ExecutionLimits::try_new(EVM_DEFAULT_STEP_LIMIT, 2, EvmFork::CANCUN)?;
+
+    assert_eq!(execution.run(&code, limits), Err(EvmCoreError::OutOfGas));
+    assert!(execution.stack().is_empty());
     Ok(())
 }
 
@@ -241,10 +304,7 @@ fn execution_fails_closed_on_truncated_push_and_step_limit() -> Result<(), EvmCo
     let mut truncated_memory = [0u8; 0];
     let mut truncated_execution = EvmExecution::<16>::try_new(&mut truncated_memory)?;
     assert_eq!(
-        truncated_execution.run(
-            &[0x61, 0x01],
-            ExecutionLimits::try_new(EVM_DEFAULT_STEP_LIMIT)?
-        ),
+        truncated_execution.run(&[0x61, 0x01], execution_limits()?),
         Err(EvmCoreError::PushImmediateOutOfBounds)
     );
 
@@ -252,16 +312,35 @@ fn execution_fails_closed_on_truncated_push_and_step_limit() -> Result<(), EvmCo
     let mut loop_execution = EvmExecution::<16>::try_new(&mut loop_memory)?;
     let code = [0x5b, 0x60, 0x00, 0x56];
     assert_eq!(
-        loop_execution.run(&code, ExecutionLimits::try_new(4)?),
+        loop_execution.run(
+            &code,
+            ExecutionLimits::try_new(4, EVM_DEFAULT_GAS_LIMIT, EvmFork::CANCUN)?
+        ),
         Err(EvmCoreError::ExecutionStepLimitReached)
     );
     assert_eq!(
-        ExecutionLimits::try_new(0),
+        ExecutionLimits::try_new(0, EVM_DEFAULT_GAS_LIMIT, EvmFork::CANCUN),
         Err(EvmCoreError::ExecutionStepLimitZero)
     );
     assert_eq!(
-        ExecutionLimits::try_new(EVM_MAX_STEP_LIMIT + 1),
+        ExecutionLimits::try_new(
+            EVM_MAX_STEP_LIMIT + 1,
+            EVM_DEFAULT_GAS_LIMIT,
+            EvmFork::CANCUN
+        ),
         Err(EvmCoreError::ExecutionStepLimitTooLarge)
+    );
+    assert_eq!(
+        ExecutionLimits::try_new(EVM_DEFAULT_STEP_LIMIT, 0, EvmFork::CANCUN),
+        Err(EvmCoreError::ExecutionGasLimitZero)
+    );
+    assert_eq!(
+        ExecutionLimits::try_new(
+            EVM_DEFAULT_STEP_LIMIT,
+            EVM_MAX_GAS_LIMIT + 1,
+            EvmFork::CANCUN
+        ),
+        Err(EvmCoreError::ExecutionGasLimitTooLarge)
     );
     Ok(())
 }
