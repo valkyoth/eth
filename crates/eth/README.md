@@ -35,12 +35,13 @@ dependencies.
 
 ## Current Status
 
-Status: `v0.43.0` adds explicit bounded native EVM state access.
+Status: `v0.43.1` adds the native EVM historical fork matrix.
 The optional `evm-core` feature now exposes dependency-free no_std word, stack,
 memory, opcode, program-counter, fork, gas schedule, opcode-table, host-state,
-warm/cold access, and bounded interpreter domains for hard-capped basic
-stack/control-flow bytecode plus explicit state reads without admitting REVM or
-another execution backend.
+warm/cold access, historical fork identifiers, opcode-introduction metadata,
+and bounded interpreter domains for hard-capped basic stack/control-flow
+bytecode plus explicit state reads without admitting REVM or another execution
+backend.
 
 Implemented now:
 
@@ -198,14 +199,14 @@ Not implemented yet:
 
 ```toml
 [dependencies]
-eth = "0.43.0"
+eth = "0.43.1"
 ```
 
 For optional sanitization support:
 
 ```toml
 [dependencies]
-eth = { version = "0.43.0", features = ["sanitization"] }
+eth = { version = "0.43.1", features = ["sanitization"] }
 ```
 
 ## Features
@@ -232,7 +233,7 @@ Optional reviewed software Keccak backend:
 
 ```toml
 [dependencies]
-eth = { version = "0.43.0", features = ["keccak-tiny"] }
+eth = { version = "0.43.1", features = ["keccak-tiny"] }
 ```
 
 ```rust
@@ -246,14 +247,14 @@ Optional reviewed secp256k1 recovery adapter:
 
 ```toml
 [dependencies]
-eth = { version = "0.43.0", features = ["secp256k1-k256"] }
+eth = { version = "0.43.1", features = ["secp256k1-k256"] }
 ```
 
 Optional bounded EVM gas-estimation boundary:
 
 ```toml
 [dependencies]
-eth = { version = "0.43.0", features = ["evm"] }
+eth = { version = "0.43.1", features = ["evm"] }
 ```
 
 ```rust
@@ -358,13 +359,15 @@ Optional native EVM core domains:
 
 ```toml
 [dependencies]
-eth = { version = "0.43.0", features = ["evm-core"] }
+eth = { version = "0.43.1", features = ["evm-core"] }
 ```
 
 State access uses explicit host-state traits and caller-provided fixed-capacity
 warm/cold access sets. The current state-access gas model is admitted only for
 `EvmFork::LONDON` and later; pre-Berlin historical state schedules fail closed
-until a fork-specific schedule is implemented.
+until a fork-specific schedule is implemented. See
+[`docs/evm-fork-matrix.md`](docs/evm-fork-matrix.md) for the current native EVM
+fork and opcode support matrix.
 
 ```rust
 use eth::evm_core::{
@@ -1194,7 +1197,7 @@ friendly, and independently testable.
 The minimum supported Rust version is Rust `1.90.0`. New deployments should use
 the pinned stable Rust `1.96.1` until the toolchain policy is updated.
 
-Compatibility evidence for `0.43.0`:
+Compatibility evidence for `0.43.1`:
 
 | Rust | Local Evidence |
 | --- | --- |
@@ -1211,7 +1214,7 @@ Compatibility evidence for `0.43.0`:
 
 ```bash
 scripts/checks.sh
-scripts/release_0_43_gate.sh
+scripts/release_0_43_1_gate.sh
 ```
 
 For dependency-policy checks, install `cargo-deny` and `cargo-audit`, then run:

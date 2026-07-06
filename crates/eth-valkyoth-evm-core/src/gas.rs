@@ -85,7 +85,7 @@ impl EvmGasSchedule {
 
     /// Returns whether this schedule admits warm/cold state-access gas.
     pub const fn require_warm_cold_state_access(self) -> Result<(), EvmCoreError> {
-        if self.fork.get() < EvmFork::LONDON.get() {
+        if !self.fork.supports_warm_cold_state_access() {
             return Err(EvmCoreError::UnsupportedFork);
         }
         Ok(())

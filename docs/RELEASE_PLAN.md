@@ -1611,7 +1611,7 @@ Exit criteria:
 
 ### v0.43.0 - Native EVM State Access
 
-Status: release candidate; pentest clean; awaiting final GitHub checks.
+Status: released.
 
 Goal: add explicit account, code, balance, and storage access through bounded
 state traits.
@@ -1634,6 +1634,8 @@ Exit criteria:
 - State access is explicit, bounded, and fork-aware.
 
 ### v0.43.1 - Native EVM Historical Fork Matrix
+
+Status: implementation ready; awaiting pentest.
 
 Goal: make every historical execution fork explicit before more stateful
 opcodes depend on fork selection.

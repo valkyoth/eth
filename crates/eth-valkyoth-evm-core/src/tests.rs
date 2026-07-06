@@ -89,6 +89,54 @@ fn opcode_domain_exposes_push_widths() {
 }
 
 #[test]
+fn historical_fork_identifiers_are_ordered_and_bounded() {
+    assert_eq!(EvmFork::FRONTIER.get(), 0);
+    assert_eq!(EvmFork::HOMESTEAD.get(), 1);
+    assert_eq!(EvmFork::TANGERINE_WHISTLE.get(), 2);
+    assert_eq!(EvmFork::SPURIOUS_DRAGON.get(), 3);
+    assert_eq!(EvmFork::BYZANTIUM.get(), 4);
+    assert_eq!(EvmFork::CONSTANTINOPLE.get(), 5);
+    assert_eq!(EvmFork::PETERSBURG.get(), 6);
+    assert_eq!(EvmFork::ISTANBUL.get(), 7);
+    assert_eq!(EvmFork::BERLIN.get(), 8);
+    assert_eq!(EvmFork::LONDON.get(), 9);
+    assert_eq!(EvmFork::SHANGHAI.get(), 10);
+    assert_eq!(EvmFork::CANCUN.get(), 11);
+    assert_eq!(EvmFork::PRAGUE.get(), 12);
+    assert_eq!(EvmFork::AMSTERDAM.get(), 13);
+
+    assert!(EvmFork::PRAGUE.is_supported());
+    assert!(EvmFork::AMSTERDAM.is_known());
+    assert!(!EvmFork::AMSTERDAM.is_supported());
+}
+
+#[test]
+fn opcode_introduction_boundaries_are_explicit() {
+    assert_eq!(
+        EvmFork::opcode_introduced_in(EvmOpcode::ADD),
+        Some(EvmFork::FRONTIER)
+    );
+    assert_eq!(
+        EvmFork::opcode_introduced_in(EvmOpcode::REVERT),
+        Some(EvmFork::BYZANTIUM)
+    );
+    assert_eq!(
+        EvmFork::opcode_introduced_in(EvmOpcode::EXTCODEHASH),
+        Some(EvmFork::CONSTANTINOPLE)
+    );
+    assert_eq!(
+        EvmFork::opcode_introduced_in(EvmOpcode::SELFBALANCE),
+        Some(EvmFork::ISTANBUL)
+    );
+    assert_eq!(EvmFork::opcode_introduced_in(EvmOpcode::new(0xef)), None);
+
+    assert!(!EvmFork::FRONTIER.opcode_is_introduced(EvmOpcode::REVERT));
+    assert!(EvmFork::BYZANTIUM.opcode_is_introduced(EvmOpcode::REVERT));
+    assert!(!EvmFork::PETERSBURG.opcode_is_introduced(EvmOpcode::SELFBALANCE));
+    assert!(EvmFork::ISTANBUL.opcode_is_introduced(EvmOpcode::SELFBALANCE));
+}
+
+#[test]
 fn opcode_table_supports_known_skeleton_and_rejects_unknowns() -> Result<(), EvmCoreError> {
     let table = OpcodeTable::try_new(EvmFork::CANCUN)?;
     let info = table.instruction(EvmOpcode::ADD)?;
@@ -99,7 +147,25 @@ fn opcode_table_supports_known_skeleton_and_rejects_unknowns() -> Result<(), Evm
         Err(EvmCoreError::UnsupportedOpcode)
     );
     assert_eq!(
+        OpcodeTable::try_new(EvmFork::FRONTIER)?.instruction(EvmOpcode::REVERT),
+        Err(EvmCoreError::UnsupportedOpcode)
+    );
+    assert_eq!(
+        OpcodeTable::try_new(EvmFork::BYZANTIUM)?
+            .instruction(EvmOpcode::REVERT)?
+            .class,
+        OpcodeClass::ControlFlow
+    );
+    assert_eq!(
         OpcodeTable::try_new(EvmFork::FRONTIER)?.instruction(EvmOpcode::BALANCE),
+        Err(EvmCoreError::UnsupportedOpcode)
+    );
+    assert_eq!(
+        OpcodeTable::try_new(EvmFork::CONSTANTINOPLE)?.instruction(EvmOpcode::EXTCODEHASH),
+        Err(EvmCoreError::UnsupportedOpcode)
+    );
+    assert_eq!(
+        OpcodeTable::try_new(EvmFork::PETERSBURG)?.instruction(EvmOpcode::SELFBALANCE),
         Err(EvmCoreError::UnsupportedOpcode)
     );
     assert_eq!(
@@ -113,6 +179,10 @@ fn opcode_table_supports_known_skeleton_and_rejects_unknowns() -> Result<(), Evm
 
 #[test]
 fn opcode_table_rejects_unsupported_forks() {
+    assert_eq!(
+        OpcodeTable::try_new(EvmFork::AMSTERDAM),
+        Err(EvmCoreError::UnsupportedFork)
+    );
     assert_eq!(
         OpcodeTable::try_new(EvmFork::new(999)),
         Err(EvmCoreError::UnsupportedFork)
