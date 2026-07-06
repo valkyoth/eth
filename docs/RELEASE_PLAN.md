@@ -1635,7 +1635,7 @@ Exit criteria:
 
 ### v0.43.1 - Native EVM Historical Fork Matrix
 
-Status: implementation ready; awaiting pentest.
+Status: release candidate; pentest clean; awaiting final GitHub checks.
 
 Goal: make every historical execution fork explicit before more stateful
 opcodes depend on fork selection.

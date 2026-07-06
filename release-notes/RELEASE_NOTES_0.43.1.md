@@ -1,6 +1,6 @@
 # eth 0.43.1 Release Notes
 
-Status: implementation ready; awaiting pentest.
+Status: release candidate; pentest clean; awaiting final GitHub checks.
 
 `0.43.1` adds the native EVM historical fork matrix. The release makes older
 Ethereum execution forks explicit in `eth-valkyoth-evm-core` before later
@@ -54,14 +54,18 @@ tests historical pricing.
 - `cargo test -p eth-valkyoth-evm-core`
 - `cargo check -p eth --features evm-core`
 - `cargo clippy -p eth-valkyoth-evm-core --all-targets --all-features -- -D warnings`
+- `cargo test --workspace --all-features`
+- `cargo clippy --workspace --all-targets --all-features -- -D warnings`
+- `scripts/release_crates.py --check`
+- `scripts/release_0_43_1_gate.sh`
 
 ## Pentest
 
-- Pending. The release must not be tagged until the local `PENTEST.md` is
-  converted into `security/pentest/v0.43.1.md` and the retest is clean.
+- Permanent report: `security/pentest/v0.43.1.md`.
 - Initial pentest found an interpreter-vs-`OpcodeTable` fork-boundary
   enforcement gap and a duplicated warm/cold support ceiling. Both have been
   remediated before retest.
+- Retest was clean. No blocking findings remain for the v0.43.1 release scope.
 
 ## Versioning
 
