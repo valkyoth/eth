@@ -6,6 +6,7 @@ pub const EVM_DEFAULT_GAS_LIMIT: u64 = 30_000_000;
 pub const EVM_MAX_GAS_LIMIT: u64 = 1_000_000_000;
 const EVM_MEMORY_WORD_BYTES: usize = 32;
 const EVM_MEMORY_QUADRATIC_DIVISOR: u64 = 512;
+const EVM_COPY_GAS_WORD_BYTES: usize = 32;
 
 /// Bounded gas amount used by the native EVM core.
 #[derive(Clone, Copy, Debug, Default, Eq, Ord, PartialEq, PartialOrd)]
@@ -45,6 +46,11 @@ pub struct EvmGasSchedule {
     gas_high: EvmGas,
     gas_jumpdest: EvmGas,
     gas_memory: EvmGas,
+    gas_selfbalance: EvmGas,
+    gas_warm_access: EvmGas,
+    gas_cold_account_access: EvmGas,
+    gas_cold_sload: EvmGas,
+    gas_copy: EvmGas,
 }
 
 impl EvmGasSchedule {
@@ -63,6 +69,11 @@ impl EvmGasSchedule {
             gas_high: EvmGas::new(10),
             gas_jumpdest: EvmGas::new(1),
             gas_memory: EvmGas::new(3),
+            gas_selfbalance: EvmGas::new(5),
+            gas_warm_access: EvmGas::new(100),
+            gas_cold_account_access: EvmGas::new(2_600),
+            gas_cold_sload: EvmGas::new(2_100),
+            gas_copy: EvmGas::new(3),
         })
     }
 
@@ -84,6 +95,50 @@ impl EvmGasSchedule {
             0x01 | 0x03 | 0x10 | 0x11 | 0x14..=0x19 | 0x60..=0x9f => Ok(self.gas_very_low),
             _ => Err(EvmCoreError::UnsupportedOpcode),
         }
+    }
+
+    /// Returns the gas for `SELFBALANCE`.
+    #[must_use]
+    pub const fn selfbalance_cost(self) -> EvmGas {
+        self.gas_selfbalance
+    }
+
+    /// Returns the account access gas for warm or cold account reads.
+    #[must_use]
+    pub const fn account_access_cost(self, warm: bool) -> EvmGas {
+        if warm {
+            self.gas_warm_access
+        } else {
+            self.gas_cold_account_access
+        }
+    }
+
+    /// Returns the storage access gas for warm or cold slot reads.
+    #[must_use]
+    pub const fn storage_access_cost(self, warm: bool) -> EvmGas {
+        if warm {
+            self.gas_warm_access
+        } else {
+            self.gas_cold_sload
+        }
+    }
+
+    /// Returns copy gas for a byte length.
+    pub fn copy_cost(self, len: usize) -> Result<EvmGas, EvmCoreError> {
+        if len == 0 {
+            return Ok(EvmGas::new(0));
+        }
+        let rounded = len
+            .checked_add(EVM_COPY_GAS_WORD_BYTES - 1)
+            .ok_or(EvmCoreError::GasOverflow)?;
+        let words = rounded
+            .checked_div(EVM_COPY_GAS_WORD_BYTES)
+            .ok_or(EvmCoreError::GasOverflow)?;
+        let words = u64::try_from(words).map_err(|_| EvmCoreError::GasOverflow)?;
+        let cost = words
+            .checked_mul(self.gas_copy.get())
+            .ok_or(EvmCoreError::GasOverflow)?;
+        Ok(EvmGas::new(cost))
     }
 
     /// Computes memory expansion cost for a new active memory word count.

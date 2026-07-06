@@ -9,10 +9,13 @@ mod error;
 mod execution;
 mod fork;
 mod gas;
+mod jumpdest;
 mod memory;
 mod opcode;
 mod program_counter;
 mod stack;
+mod state;
+mod state_execution;
 mod word;
 
 pub use error::EvmCoreError;
@@ -26,8 +29,13 @@ pub use memory::{EVM_MEMORY_LIMIT_BYTES, EvmMemory};
 pub use opcode::{EvmOpcode, OpcodeClass, OpcodeInfo};
 pub use program_counter::ProgramCounter;
 pub use stack::{EVM_STACK_LIMIT, EvmStack};
+pub use state::{EvmAccessSet, EvmAccessStatus, EvmAccount, EvmAddress, EvmState, EvmStateContext};
 pub use word::EvmWord;
 
 #[cfg(test)]
 #[path = "tests.rs"]
 mod tests;
+
+#[cfg(test)]
+#[path = "state_tests.rs"]
+mod state_tests;

@@ -1610,6 +1610,8 @@ Exit criteria:
 
 ### v0.43.0 - Native EVM State Access
 
+Status: implementation ready; awaiting pentest.
+
 Goal: add explicit account, code, balance, and storage access through bounded
 state traits.
 

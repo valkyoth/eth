@@ -143,6 +143,12 @@ fn gas_schedule_charges_claimed_opcode_subset() -> Result<(), EvmCoreError> {
         schedule.base_cost(EvmOpcode::MLOAD),
         Err(EvmCoreError::UnsupportedOpcode)
     );
+    assert_eq!(schedule.account_access_cost(false), EvmGas::new(2_600));
+    assert_eq!(schedule.account_access_cost(true), EvmGas::new(100));
+    assert_eq!(schedule.storage_access_cost(false), EvmGas::new(2_100));
+    assert_eq!(schedule.storage_access_cost(true), EvmGas::new(100));
+    assert_eq!(schedule.selfbalance_cost(), EvmGas::new(5));
+    assert_eq!(schedule.copy_cost(33)?, EvmGas::new(6));
     Ok(())
 }
 

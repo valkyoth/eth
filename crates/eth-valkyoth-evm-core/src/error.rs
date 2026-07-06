@@ -35,6 +35,22 @@ pub enum EvmCoreError {
     OutOfGas,
     /// Gas or memory expansion arithmetic overflowed.
     GasOverflow,
+    /// The host state access list cannot track any address or storage slot.
+    StateAccessListTooSmall,
+    /// The host state access list capacity was exhausted.
+    StateAccessListFull,
+    /// A host account read failed.
+    StateAccountReadFailed,
+    /// A host storage read failed.
+    StateStorageReadFailed,
+    /// A host code read failed.
+    StateCodeReadFailed,
+    /// Host account code exceeds the release hard code-size cap.
+    StateCodeTooLarge,
+    /// A state opcode was executed without an explicit host state snapshot.
+    StateAccessUnavailable,
+    /// State writes are not admitted until the journaled call/create release.
+    StateWriteUnsupported,
     /// A `PUSHn` immediate extends beyond the bytecode input.
     PushImmediateOutOfBounds,
     /// A dynamic jump target is not a valid `JUMPDEST`.
@@ -68,6 +84,14 @@ impl EvmCoreError {
             Self::ExecutionGasLimitTooLarge => "execution_gas_limit_too_large",
             Self::OutOfGas => "out_of_gas",
             Self::GasOverflow => "gas_overflow",
+            Self::StateAccessListTooSmall => "state_access_list_too_small",
+            Self::StateAccessListFull => "state_access_list_full",
+            Self::StateAccountReadFailed => "state_account_read_failed",
+            Self::StateStorageReadFailed => "state_storage_read_failed",
+            Self::StateCodeReadFailed => "state_code_read_failed",
+            Self::StateCodeTooLarge => "state_code_too_large",
+            Self::StateAccessUnavailable => "state_access_unavailable",
+            Self::StateWriteUnsupported => "state_write_unsupported",
             Self::PushImmediateOutOfBounds => "push_immediate_out_of_bounds",
             Self::InvalidJumpDestination => "invalid_jump_destination",
             Self::ReturnRangeOutOfBounds => "return_range_out_of_bounds",

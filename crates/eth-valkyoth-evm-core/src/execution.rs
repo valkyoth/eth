@@ -1,6 +1,8 @@
 use crate::{
-    EvmCoreError, EvmFork, EvmGas, EvmGasMeter, EvmGasSchedule, EvmMemory, EvmOpcode, EvmStack,
-    EvmWord, ProgramCounter,
+    EvmAccessSet, EvmCoreError, EvmFork, EvmGas, EvmGasMeter, EvmGasSchedule, EvmMemory, EvmOpcode,
+    EvmStack, EvmState, EvmStateContext, EvmWord, ProgramCounter,
+    jumpdest::JumpdestMap,
+    state_execution::{HostState, NoState, StateExecutionHost},
 };
 use core::cmp::Ordering;
 
@@ -10,8 +12,6 @@ pub const EVM_DEFAULT_STEP_LIMIT: usize = 100_000;
 pub const EVM_MAX_STEP_LIMIT: usize = 1_000_000;
 /// Hard maximum bytecode length accepted by the bootstrap interpreter.
 pub const EVM_MAX_BYTECODE_LEN: usize = 24_576;
-const JUMPDEST_MAP_WORD_BITS: usize = usize::BITS as usize;
-const JUMPDEST_MAP_WORDS: usize = EVM_MAX_BYTECODE_LEN.div_ceil(JUMPDEST_MAP_WORD_BITS);
 
 /// Bounded execution limits for the native EVM core interpreter.
 #[derive(Clone, Copy, Debug, Eq, PartialEq)]
@@ -142,11 +142,42 @@ impl<'a, const STACK: usize> EvmExecution<'a, STACK> {
         &self.memory
     }
 
+    /// Mutably returns the execution memory view inside this crate.
+    pub(crate) fn memory_mut(&mut self) -> &mut EvmMemory<'a> {
+        &mut self.memory
+    }
+
     /// Executes bytecode until it halts or fails closed.
     pub fn run(
         &mut self,
         bytecode: &[u8],
         limits: ExecutionLimits,
+    ) -> Result<ExecutionReport, EvmCoreError> {
+        self.run_inner(bytecode, limits, &mut NoState)
+    }
+
+    /// Executes bytecode with an explicit host state snapshot.
+    pub fn run_with_state<const ADDRESSES: usize, const STORAGE: usize, S: EvmState>(
+        &mut self,
+        bytecode: &[u8],
+        limits: ExecutionLimits,
+        context: EvmStateContext,
+        state: &mut S,
+        accesses: &mut EvmAccessSet<ADDRESSES, STORAGE>,
+    ) -> Result<ExecutionReport, EvmCoreError> {
+        let mut host = HostState {
+            context,
+            state,
+            accesses,
+        };
+        self.run_inner(bytecode, limits, &mut host)
+    }
+
+    fn run_inner<H: StateExecutionHost>(
+        &mut self,
+        bytecode: &[u8],
+        limits: ExecutionLimits,
+        host: &mut H,
     ) -> Result<ExecutionReport, EvmCoreError> {
         let jumpdests = JumpdestMap::try_new(bytecode)?;
         let schedule = EvmGasSchedule::for_fork(limits.fork())?;
@@ -165,33 +196,37 @@ impl<'a, const STACK: usize> EvmExecution<'a, STACK> {
                 .checked_add(1)
                 .ok_or(EvmCoreError::ExecutionStepLimitReached)?;
             let opcode = EvmOpcode::new(opcode_byte);
-            gas_meter.charge(schedule.base_cost(opcode)?)?;
-            match opcode.byte() {
-                0x00 => return self.report(ExecutionStatus::Stopped, steps, gas_meter),
-                0x01 => self.binary_word(EvmWord::wrapping_add_word)?,
-                0x02 => self.binary_word(EvmWord::wrapping_mul_word)?,
-                0x03 => self.binary_word(EvmWord::wrapping_sub_word)?,
-                0x10 => self.compare_word(Ordering::Less)?,
-                0x11 => self.compare_word(Ordering::Greater)?,
-                0x14 => self.equal_word()?,
-                0x15 => self.iszero_word()?,
-                0x16 => self.binary_word(EvmWord::bitand_word)?,
-                0x17 => self.binary_word(EvmWord::bitor_word)?,
-                0x18 => self.binary_word(EvmWord::bitxor_word)?,
-                0x19 => self.unary_word(EvmWord::bitnot_word)?,
-                0x50 => {
-                    let _ = self.stack.pop()?;
+            if opcode.is_state_access() {
+                host.execute_state_opcode(self, opcode, schedule, &mut gas_meter)?;
+            } else {
+                gas_meter.charge(schedule.base_cost(opcode)?)?;
+                match opcode.byte() {
+                    0x00 => return self.report(ExecutionStatus::Stopped, steps, gas_meter),
+                    0x01 => self.binary_word(EvmWord::wrapping_add_word)?,
+                    0x02 => self.binary_word(EvmWord::wrapping_mul_word)?,
+                    0x03 => self.binary_word(EvmWord::wrapping_sub_word)?,
+                    0x10 => self.compare_word(Ordering::Less)?,
+                    0x11 => self.compare_word(Ordering::Greater)?,
+                    0x14 => self.equal_word()?,
+                    0x15 => self.iszero_word()?,
+                    0x16 => self.binary_word(EvmWord::bitand_word)?,
+                    0x17 => self.binary_word(EvmWord::bitor_word)?,
+                    0x18 => self.binary_word(EvmWord::bitxor_word)?,
+                    0x19 => self.unary_word(EvmWord::bitnot_word)?,
+                    0x50 => {
+                        let _ = self.stack.pop()?;
+                    }
+                    0x56 => self.jump(&jumpdests)?,
+                    0x57 => self.jumpi(&jumpdests)?,
+                    0x58 => self.stack.push(EvmWord::from_usize(pc))?,
+                    0x5b => {}
+                    0x60..=0x7f => self.push_immediate(bytecode, opcode)?,
+                    0x80..=0x8f => self.dup(opcode)?,
+                    0x90..=0x9f => self.swap(opcode)?,
+                    0xf3 => return self.return_or_revert(steps, false, schedule, &mut gas_meter),
+                    0xfd => return self.return_or_revert(steps, true, schedule, &mut gas_meter),
+                    _ => return Err(EvmCoreError::UnsupportedOpcode),
                 }
-                0x56 => self.jump(&jumpdests)?,
-                0x57 => self.jumpi(&jumpdests)?,
-                0x58 => self.stack.push(EvmWord::from_usize(pc))?,
-                0x5b => {}
-                0x60..=0x7f => self.push_immediate(bytecode, opcode)?,
-                0x80..=0x8f => self.dup(opcode)?,
-                0x90..=0x9f => self.swap(opcode)?,
-                0xf3 => return self.return_or_revert(steps, false, schedule, &mut gas_meter),
-                0xfd => return self.return_or_revert(steps, true, schedule, &mut gas_meter),
-                _ => return Err(EvmCoreError::UnsupportedOpcode),
             }
             self.pc = self.next_pc(pc, opcode)?;
         }
@@ -347,64 +382,5 @@ impl<'a, const STACK: usize> EvmExecution<'a, STACK> {
             ExecutionStatus::Returned { offset, len }
         };
         self.report(status, steps, *gas_meter)
-    }
-}
-
-struct JumpdestMap {
-    words: [usize; JUMPDEST_MAP_WORDS],
-    len: usize,
-}
-
-impl JumpdestMap {
-    fn try_new(bytecode: &[u8]) -> Result<Self, EvmCoreError> {
-        if bytecode.len() > EVM_MAX_BYTECODE_LEN {
-            return Err(EvmCoreError::BytecodeTooLarge);
-        }
-        let mut map = Self {
-            words: [0usize; JUMPDEST_MAP_WORDS],
-            len: bytecode.len(),
-        };
-        let mut pc = 0usize;
-        while pc < bytecode.len() {
-            let opcode = EvmOpcode::new(
-                *bytecode
-                    .get(pc)
-                    .ok_or(EvmCoreError::ProgramCounterOverflow)?,
-            );
-            if opcode.byte() == EvmOpcode::JUMPDEST.byte() {
-                map.insert(pc);
-            }
-            let width = usize::from(opcode.push_width().unwrap_or(0));
-            let advance = 1usize
-                .checked_add(width)
-                .ok_or(EvmCoreError::ProgramCounterOverflow)?;
-            let next = pc
-                .checked_add(advance)
-                .ok_or(EvmCoreError::ProgramCounterOverflow)?;
-            if width > 0 && next > bytecode.len() {
-                return Err(EvmCoreError::PushImmediateOutOfBounds);
-            }
-            pc = next;
-        }
-        Ok(map)
-    }
-
-    fn insert(&mut self, target: usize) {
-        let word = target / JUMPDEST_MAP_WORD_BITS;
-        let bit = target % JUMPDEST_MAP_WORD_BITS;
-        if let Some(slot) = self.words.get_mut(word) {
-            *slot |= 1usize << bit;
-        }
-    }
-
-    fn contains(&self, target: usize) -> bool {
-        if target >= self.len {
-            return false;
-        }
-        let word = target / JUMPDEST_MAP_WORD_BITS;
-        let bit = target % JUMPDEST_MAP_WORD_BITS;
-        self.words
-            .get(word)
-            .is_some_and(|slot| (*slot & (1usize << bit)) != 0)
     }
 }

@@ -1,5 +1,5 @@
 [release]
-version = "0.42.0"
+version = "0.43.0"
 policy = "independent"
 
 [crates."eth-valkyoth-codec"]
@@ -7,95 +7,95 @@ previous_version = "0.19.0"
 version = "0.19.0"
 change = "unchanged"
 publish = false
-reason = "No package changes for v0.42.0."
+reason = "No package changes for v0.43.0."
 
 [crates."eth-valkyoth-primitives"]
 previous_version = "0.11.2"
 version = "0.11.2"
 change = "unchanged"
 publish = false
-reason = "No package changes for v0.42.0."
+reason = "No package changes for v0.43.0."
 
 [crates."eth-valkyoth-hash"]
 previous_version = "0.11.2"
 version = "0.11.2"
 change = "unchanged"
 publish = false
-reason = "No package changes for v0.42.0."
+reason = "No package changes for v0.43.0."
 
 [crates."eth-valkyoth-protocol"]
 previous_version = "0.25.2"
 version = "0.25.2"
 change = "unchanged"
 publish = false
-reason = "No package changes for v0.42.0."
+reason = "No package changes for v0.43.0."
 
 [crates."eth-valkyoth-verify"]
 previous_version = "0.21.0"
 version = "0.21.0"
 change = "unchanged"
 publish = false
-reason = "No package changes for v0.42.0."
+reason = "No package changes for v0.43.0."
 
 [crates."eth-valkyoth-derive"]
 previous_version = "0.17.2"
 version = "0.17.2"
 change = "unchanged"
 publish = false
-reason = "No package changes for v0.42.0."
+reason = "No package changes for v0.43.0."
 
 [crates."eth-valkyoth-sanitization"]
 previous_version = "0.7.4"
 version = "0.7.4"
 change = "unchanged"
 publish = false
-reason = "No package changes for v0.42.0."
+reason = "No package changes for v0.43.0."
 
 [crates."eth-valkyoth-evm-core"]
-previous_version = "0.2.0"
-version = "0.3.0"
+previous_version = "0.3.0"
+version = "0.4.0"
 change = "code"
 publish = true
-reason = "Adds fork-scoped gas scheduling, gas-metered execution limits, gas-used reports, out-of-gas errors, and memory expansion gas accounting for the currently executable native EVM opcode subset."
+reason = "Adds explicit no_std host-state traits, fixed-capacity warm/cold access tracking, state-read opcodes, EXTCODECOPY, SELFBALANCE, SLOAD, and a fail-closed SSTORE shell for the native EVM core."
 
 [crates."eth-valkyoth-evm"]
 previous_version = "0.10.0"
 version = "0.10.0"
 change = "unchanged"
 publish = false
-reason = "No package changes for v0.42.0."
+reason = "No package changes for v0.43.0."
 
 [crates."eth-valkyoth-rpc"]
 previous_version = "0.7.0"
 version = "0.7.0"
 change = "unchanged"
 publish = false
-reason = "No package changes for v0.42.0."
+reason = "No package changes for v0.43.0."
 
 [crates."eth-valkyoth-signer"]
 previous_version = "0.7.3"
 version = "0.7.3"
 change = "unchanged"
 publish = false
-reason = "No package changes for v0.42.0."
+reason = "No package changes for v0.43.0."
 
 [crates."eth-valkyoth-reth"]
 previous_version = "0.7.0"
 version = "0.7.0"
 change = "unchanged"
 publish = false
-reason = "No package changes for v0.42.0."
+reason = "No package changes for v0.43.0."
 
 [crates."eth-valkyoth-testkit"]
 previous_version = "0.7.0"
 version = "0.7.0"
 change = "unchanged"
 publish = false
-reason = "No package changes for v0.42.0."
+reason = "No package changes for v0.43.0."
 
 [crates.eth]
-previous_version = "0.41.0"
-version = "0.42.0"
+previous_version = "0.42.0"
+version = "0.43.0"
 change = "code"
 publish = true
-reason = "Updates the optional evm-core dependency to eth-valkyoth-evm-core 0.3.0 and documents gas-metered native EVM execution for the claimed opcode subset."
+reason = "Updates the optional evm-core dependency to eth-valkyoth-evm-core 0.4.0 and documents explicit bounded state access for the native EVM core."

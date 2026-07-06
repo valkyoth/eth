@@ -15,6 +15,16 @@ impl EvmOpcode {
     pub const LT: Self = Self(0x10);
     /// `GT`.
     pub const GT: Self = Self(0x11);
+    /// `BALANCE`.
+    pub const BALANCE: Self = Self(0x31);
+    /// `EXTCODESIZE`.
+    pub const EXTCODESIZE: Self = Self(0x3b);
+    /// `EXTCODECOPY`.
+    pub const EXTCODECOPY: Self = Self(0x3c);
+    /// `EXTCODEHASH`.
+    pub const EXTCODEHASH: Self = Self(0x3f);
+    /// `SELFBALANCE`.
+    pub const SELFBALANCE: Self = Self(0x47);
     /// `EQ`.
     pub const EQ: Self = Self(0x14);
     /// `ISZERO`.
@@ -29,6 +39,10 @@ impl EvmOpcode {
     pub const NOT: Self = Self(0x19);
     /// `POP`.
     pub const POP: Self = Self(0x50);
+    /// `SLOAD`.
+    pub const SLOAD: Self = Self(0x54);
+    /// `SSTORE`.
+    pub const SSTORE: Self = Self(0x55);
     /// `MLOAD`.
     pub const MLOAD: Self = Self(0x51);
     /// `MSTORE`.
@@ -114,6 +128,12 @@ impl EvmOpcode {
         }
         self.0.checked_sub(0x8f)
     }
+
+    /// Returns whether this opcode requires explicit host state.
+    #[must_use]
+    pub const fn is_state_access(self) -> bool {
+        matches!(self.0, 0x31 | 0x3b | 0x3c | 0x3f | 0x47 | 0x54 | 0x55)
+    }
 }
 
 /// Coarse opcode category used by the skeleton table.
@@ -131,6 +151,8 @@ pub enum OpcodeClass {
     Comparison,
     /// Memory operation.
     Memory,
+    /// State access operation.
+    State,
     /// Control-flow operation.
     ControlFlow,
 }

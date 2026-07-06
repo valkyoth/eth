@@ -9,18 +9,18 @@ Most users should depend on `eth` and enable the optional `evm-core` feature:
 
 ```toml
 [dependencies]
-eth = { version = "0.42.0", features = ["evm-core"] }
+eth = { version = "0.43.0", features = ["evm-core"] }
 ```
 
-This crate executes only the first audited basic opcode subset. It exposes
+This crate executes only the audited bootstrap opcode subset. It exposes
 bounded types for EVM words, stacks, memory, program counters, opcode
-classification, fork identifiers, deterministic core errors, and a no-alloc
+classification, fork identifiers, deterministic core errors, explicit
+host-state traits, fixed-capacity warm/cold access tracking, and a no-alloc
 interpreter for stack arithmetic, bitwise/comparison, stack manipulation,
-dynamic jumps, and return/revert shells. The interpreter now charges fork-scoped
-gas for the admitted opcode subset and memory expansion for return/revert
-ranges. Bytecode input is capped at the EIP-170 code-size ceiling, and valid
-jump destinations are precomputed once per run with a fixed-size no-alloc
-bitset.
+dynamic jumps, return/revert shells, state reads, `EXTCODECOPY`, and a
+fail-closed `SSTORE` shell. Bytecode input is capped at the EIP-170 code-size
+ceiling, and valid jump destinations are precomputed once per run with a
+fixed-size no-alloc bitset.
 
 ## Security posture
 
@@ -29,6 +29,8 @@ bitset.
 - Unsafe code is forbidden.
 - Stack, memory, bytecode, execution-step, and gas limits are explicit
   constants.
+- State access is available only through explicit host-state traits and
+  caller-provided fixed-capacity warm/cold access sets.
 - Unsupported opcodes and unsupported forks are rejected with named errors.
-- No state, call/create, log, precompile, refund, or storage warm/cold
-  accounting is claimed yet.
+- No call/create, log, precompile, refund, or committed storage-write semantics
+  are claimed yet.

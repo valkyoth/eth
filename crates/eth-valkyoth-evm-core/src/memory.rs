@@ -54,6 +54,33 @@ impl<'a> EvmMemory<'a> {
         Ok(())
     }
 
+    /// Writes a checked byte range into memory.
+    pub fn write_range(&mut self, offset: usize, value: &[u8]) -> Result<(), EvmCoreError> {
+        let end = offset
+            .checked_add(value.len())
+            .ok_or(EvmCoreError::MemoryOffsetOutOfBounds)?;
+        let target = self
+            .bytes
+            .get_mut(offset..end)
+            .ok_or(EvmCoreError::MemoryOffsetOutOfBounds)?;
+        target.copy_from_slice(value);
+        Ok(())
+    }
+
+    /// Returns a checked mutable memory range.
+    pub(crate) fn checked_range_mut(
+        &mut self,
+        offset: usize,
+        len: usize,
+    ) -> Result<&mut [u8], EvmCoreError> {
+        let end = offset
+            .checked_add(len)
+            .ok_or(EvmCoreError::MemoryOffsetOutOfBounds)?;
+        self.bytes
+            .get_mut(offset..end)
+            .ok_or(EvmCoreError::MemoryOffsetOutOfBounds)
+    }
+
     /// Checks whether a memory range is fully inside the view.
     pub fn check_range(&self, offset: usize, len: usize) -> Result<(), EvmCoreError> {
         let end = offset
