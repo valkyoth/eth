@@ -83,6 +83,14 @@ impl EvmGasSchedule {
         self.fork
     }
 
+    /// Returns whether this schedule admits warm/cold state-access gas.
+    pub const fn require_warm_cold_state_access(self) -> Result<(), EvmCoreError> {
+        if self.fork.get() < EvmFork::LONDON.get() {
+            return Err(EvmCoreError::UnsupportedFork);
+        }
+        Ok(())
+    }
+
     /// Returns the fixed base gas for an executable opcode.
     pub const fn base_cost(self, opcode: EvmOpcode) -> Result<EvmGas, EvmCoreError> {
         match opcode.byte() {

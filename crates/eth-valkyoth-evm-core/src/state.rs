@@ -134,6 +134,10 @@ struct StorageSlotAccess {
 }
 
 /// Fixed-capacity warm access tracker.
+///
+/// Membership checks are linear scans over caller-chosen fixed-capacity
+/// arrays. Keep capacities bounded relative to the execution gas limit and
+/// deployment policy; this type deliberately avoids allocation and hashing.
 #[derive(Clone, Copy, Debug, Eq, PartialEq)]
 pub struct EvmAccessSet<const ADDRESSES: usize, const STORAGE: usize> {
     addresses: [EvmAddress; ADDRESSES],
@@ -176,7 +180,11 @@ impl<const ADDRESSES: usize, const STORAGE: usize> EvmAccessSet<ADDRESSES, STORA
 
     /// Marks an address warm and returns its previous access status.
     pub fn warm_address(&mut self, address: EvmAddress) -> Result<EvmAccessStatus, EvmCoreError> {
-        if self.addresses[..self.address_len].contains(&address) {
+        if self
+            .addresses
+            .get(..self.address_len)
+            .is_some_and(|addresses| addresses.contains(&address))
+        {
             return Ok(EvmAccessStatus::Warm);
         }
         let slot = self
@@ -198,8 +206,37 @@ impl<const ADDRESSES: usize, const STORAGE: usize> EvmAccessSet<ADDRESSES, STORA
         key: EvmWord,
     ) -> Result<EvmAccessStatus, EvmCoreError> {
         let access = StorageSlotAccess { address, key };
-        if self.storage[..self.storage_len].contains(&access) {
+        if self
+            .storage
+            .get(..self.storage_len)
+            .is_some_and(|storage| storage.contains(&access))
+        {
             return Ok(EvmAccessStatus::Warm);
+        }
+        let address_is_warm = self
+            .addresses
+            .get(..self.address_len)
+            .is_some_and(|addresses| addresses.contains(&address));
+        if !address_is_warm {
+            let _ = self
+                .addresses
+                .get(self.address_len)
+                .ok_or(EvmCoreError::StateAccessListFull)?;
+        }
+        let _ = self
+            .storage
+            .get(self.storage_len)
+            .ok_or(EvmCoreError::StateAccessListFull)?;
+        if !address_is_warm {
+            let slot = self
+                .addresses
+                .get_mut(self.address_len)
+                .ok_or(EvmCoreError::StateAccessListFull)?;
+            *slot = address;
+            self.address_len = self
+                .address_len
+                .checked_add(1)
+                .ok_or(EvmCoreError::StateAccessListFull)?;
         }
         let slot = self
             .storage
@@ -210,7 +247,6 @@ impl<const ADDRESSES: usize, const STORAGE: usize> EvmAccessSet<ADDRESSES, STORA
             .storage_len
             .checked_add(1)
             .ok_or(EvmCoreError::StateAccessListFull)?;
-        let _ = self.warm_address(address)?;
         Ok(EvmAccessStatus::Cold)
     }
 }

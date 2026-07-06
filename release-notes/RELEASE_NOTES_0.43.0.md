@@ -48,6 +48,12 @@ and full official state-test execution remain future releases.
   supplies an explicit host-state trait implementation.
 - Warm/cold access tracking is deterministic, fixed-capacity, and allocation
   free. Capacity exhaustion fails closed with `StateAccessListFull`.
+- Warm/cold state-access gas is admitted only for `EvmFork::LONDON` and later
+  in this release. Pre-Berlin historical state gas schedules are not guessed;
+  state opcodes fail closed under `EvmFork::FRONTIER`.
+- `EvmAccessSet` uses linear scans over caller-selected fixed capacities.
+  Integrators should keep capacities bounded relative to the execution gas
+  limit and deployment policy.
 - `EXTCODECOPY` validates memory bounds and charges account access, copy gas,
   and memory expansion before writing into memory.
 - `SSTORE` intentionally does not commit state in this release. Journaled
@@ -64,6 +70,9 @@ and full official state-test execution remain future releases.
 
 - Pending. The release must not be tagged until the local `PENTEST.md` is
   converted into `security/pentest/v0.43.0.md` and the retest is clean.
+- Initial pentest found fork-gating, access-set atomicity, array-slice lint
+  coverage, and documentation/test-coverage issues; these have been remediated
+  before retest.
 
 ## Versioning
 

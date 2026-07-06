@@ -27,6 +27,35 @@ fn state_access_requires_explicit_host() -> Result<(), EvmCoreError> {
 }
 
 #[test]
+fn state_access_rejects_pre_berlin_fork() -> Result<(), EvmCoreError> {
+    let mut memory = [0u8; 0];
+    let mut execution = EvmExecution::<16>::try_new(&mut memory)?;
+    let mut state = FixtureState::new();
+    let mut accesses = EvmAccessSet::<4, 4>::try_new()?;
+    let code = [0x60, 0x02, 0x31];
+    let limits = ExecutionLimits::try_new(
+        EVM_DEFAULT_STEP_LIMIT,
+        EVM_DEFAULT_GAS_LIMIT,
+        EvmFork::FRONTIER,
+    )?;
+
+    assert_eq!(
+        execution.run_with_state(
+            &code,
+            limits,
+            EvmStateContext::new(FixtureState::SELF_ADDRESS),
+            &mut state,
+            &mut accesses,
+        ),
+        Err(EvmCoreError::UnsupportedFork)
+    );
+    assert_eq!(state.account_reads, 0);
+    assert_eq!(accesses.address_len(), 0);
+    assert_eq!(execution.stack().peek(0)?, EvmWord::from_be_slice(&[2])?);
+    Ok(())
+}
+
+#[test]
 fn state_access_reads_balance_and_tracks_warm_accounts() -> Result<(), EvmCoreError> {
     let mut memory = [0u8; 0];
     let mut execution = EvmExecution::<16>::try_new(&mut memory)?;
@@ -138,6 +167,22 @@ fn state_access_set_rejects_missing_capacity() {
         EvmAccessSet::<1, 0>::try_new(),
         Err(EvmCoreError::StateAccessListTooSmall)
     );
+}
+
+#[test]
+fn warm_storage_is_atomic_when_address_capacity_is_full() -> Result<(), EvmCoreError> {
+    let mut accesses = EvmAccessSet::<1, 2>::try_new()?;
+    let first = EvmAddress::from_bytes(address_bytes(1));
+    let second = EvmAddress::from_bytes(address_bytes(2));
+
+    let _ = accesses.warm_address(first)?;
+    assert_eq!(
+        accesses.warm_storage(second, EvmWord::from_be_bytes(value_word(3))),
+        Err(EvmCoreError::StateAccessListFull)
+    );
+    assert_eq!(accesses.address_len(), 1);
+    assert_eq!(accesses.storage_len(), 0);
+    Ok(())
 }
 
 struct FixtureState {

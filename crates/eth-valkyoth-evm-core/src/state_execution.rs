@@ -43,6 +43,7 @@ impl<const ADDRESSES: usize, const STORAGE: usize, S: EvmState> StateExecutionHo
         schedule: EvmGasSchedule,
         gas_meter: &mut EvmGasMeter,
     ) -> Result<(), EvmCoreError> {
+        schedule.require_warm_cold_state_access()?;
         match opcode.byte() {
             0x31 => balance(execution, schedule, gas_meter, self),
             0x3b => extcodesize(execution, schedule, gas_meter, self),

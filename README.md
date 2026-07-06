@@ -361,6 +361,11 @@ Optional native EVM core domains:
 eth = { version = "0.43.0", features = ["evm-core"] }
 ```
 
+State access uses explicit host-state traits and caller-provided fixed-capacity
+warm/cold access sets. The current state-access gas model is admitted only for
+`EvmFork::LONDON` and later; pre-Berlin historical state schedules fail closed
+until a fork-specific schedule is implemented.
+
 ```rust
 use eth::evm_core::{
     EVM_DEFAULT_GAS_LIMIT, EVM_DEFAULT_STEP_LIMIT, EvmExecution, EvmFork, EvmOpcode, EvmStack,

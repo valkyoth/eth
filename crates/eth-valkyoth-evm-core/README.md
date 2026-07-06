@@ -31,6 +31,10 @@ fixed-size no-alloc bitset.
   constants.
 - State access is available only through explicit host-state traits and
   caller-provided fixed-capacity warm/cold access sets.
+- Warm/cold access sets are linear-scan, allocation-free structures; choose
+  capacities that are bounded relative to the gas limit and deployment policy.
+- Warm/cold state-access gas is admitted only for `EvmFork::LONDON` and later;
+  pre-Berlin historical state gas schedules are rejected rather than guessed.
 - Unsupported opcodes and unsupported forks are rejected with named errors.
 - No call/create, log, precompile, refund, or committed storage-write semantics
   are claimed yet.

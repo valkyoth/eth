@@ -98,6 +98,16 @@ fn opcode_table_supports_known_skeleton_and_rejects_unknowns() -> Result<(), Evm
         table.instruction(EvmOpcode::new(0xef)),
         Err(EvmCoreError::UnsupportedOpcode)
     );
+    assert_eq!(
+        OpcodeTable::try_new(EvmFork::FRONTIER)?.instruction(EvmOpcode::BALANCE),
+        Err(EvmCoreError::UnsupportedOpcode)
+    );
+    assert_eq!(
+        OpcodeTable::try_new(EvmFork::LONDON)?
+            .instruction(EvmOpcode::BALANCE)?
+            .class,
+        OpcodeClass::State
+    );
     Ok(())
 }
 
