@@ -84,7 +84,11 @@ The first production value is:
   starts it with dependency-free word, stack, memory, opcode, fork,
   program-counter, and error domains. `v0.41.0` adds the first bounded basic
   opcode execution pass; `v0.42.0` adds fork-scoped gas metering for the
-  admitted subset; later releases add state, call-frame,
+  admitted subset; `v0.43.0` adds bounded state access for the currently
+  claimed fork range; `v0.43.1` and `v0.43.2` add the historical fork matrix
+  and pre-Berlin state gas schedules so older forks are implemented explicitly
+  before more stateful execution layers depend on them; later releases add
+  call-frame,
   precompile, and commit policy.
 - `eth-valkyoth-rpc`: optional RPC policy over admitted provider transports.
 - `eth-valkyoth-abi`: optional ABI, contract-call, event, error, and common

@@ -170,6 +170,7 @@ relevant dependency point.
 | Default verification previously depended directly on `k256` and used direct `sha3` test wrappers, which conflicted with the long-term first-party-core goal. | Added `v0.37.2` and `v0.37.3` to audit core dependencies, move cryptographic implementation crates behind explicit boundaries/features, and document any accepted cryptographic backend plan. |
 | `subtle`, `alloy-rlp`, dev `serde_json`, optional `serde`/`serde_json`, and optional `sanitization` need explicit long-term dependency classifications before execution grows. | Added `v0.37.4` and `v0.37.5` so constant-time helpers, reference oracles, JSON parser support, and sanitization bridges remain deliberate dependency choices. |
 | Native opcodes alone do not make full Ethereum execution support; genesis, full block validity, trie-root construction, state transition integration, blob/KZG validation, and full execution fixtures were not versioned before RPC/Reth work. | Added `v0.48.0` through `v0.55.0` for full execution state and block-validity work, then shifted later integration tracks upward. |
+| The native EVM state-access pass intentionally fails closed for pre-London forks until historical gas/opcode rules are implemented. | Added `v0.43.1 - Native EVM Historical Fork Matrix` and `v0.43.2 - Native EVM Pre-Berlin State Gas Schedules` before calls/create build on state access. |
 
 ## Phase 0: Repository And Release Discipline
 
@@ -1631,6 +1632,66 @@ Verification:
 Exit criteria:
 
 - State access is explicit, bounded, and fork-aware.
+
+### v0.43.1 - Native EVM Historical Fork Matrix
+
+Goal: make every historical execution fork explicit before more stateful
+opcodes depend on fork selection.
+
+Deliverables:
+
+- first-party `EvmFork` coverage for Frontier, Homestead, Tangerine Whistle,
+  Spurious Dragon, Byzantium, Constantinople, Petersburg, Istanbul, Berlin,
+  London, Shanghai, Cancun, Prague/Pectra, and scheduled future forks;
+- opcode-introduction gates for state opcodes and other already-modeled
+  opcodes, including explicit unsupported-opcode errors before the introducing
+  fork;
+- public support matrix documenting which forks are admitted, fail-closed, or
+  fixture-claimed for the current native engine subset;
+- alignment notes between protocol `Hardfork` identities and native
+  `EvmFork` identifiers.
+
+Verification:
+
+- fork-order and fork-identity tests;
+- opcode-table tests at every introducing hardfork boundary;
+- documentation check that no historical fork is silently collapsed into a
+  later gas model.
+
+Exit criteria:
+
+- A caller can select every historical Ethereum execution fork by name, and
+  unsupported behavior fails with explicit fork/opcode errors.
+
+### v0.43.2 - Native EVM Pre-Berlin State Gas Schedules
+
+Goal: replace the temporary pre-London state-access fail-closed behavior with
+real historical state gas schedules where the current opcode subset is claimed.
+
+Deliverables:
+
+- Frontier, Homestead, Tangerine Whistle, Spurious Dragon, Byzantium,
+  Constantinople/Petersburg, Istanbul, and Berlin gas-schedule entries for the
+  currently executable state-opcode subset;
+- fork-specific BALANCE, SLOAD, SSTORE-shell, EXTCODESIZE, EXTCODECOPY,
+  EXTCODEHASH, and SELFBALANCE admission and pricing;
+- explicit transition from pre-Berlin flat state gas to Berlin/London+
+  warm/cold access accounting;
+- tests proving that historical forks no longer use London/Berlin pricing by
+  accident.
+
+Verification:
+
+- official or independently derived historical gas vectors for each claimed
+  fork boundary;
+- state-access fixture subset for claimed historical forks;
+- regression test that a missing historical schedule fails closed instead of
+  falling through to the latest schedule.
+
+Exit criteria:
+
+- Pre-London state execution is enabled only for forks with implemented,
+  reviewed, and tested historical gas/opcode rules.
 
 ### v0.44.0 - Native EVM Calls And Create
 
