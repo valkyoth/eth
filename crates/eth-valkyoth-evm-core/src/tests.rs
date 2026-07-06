@@ -13,6 +13,7 @@ fn stack_push_pop_tracks_depth_and_clears_slots() -> Result<(), EvmCoreError> {
     assert_eq!(stack.len(), 1);
     assert_eq!(stack.pop()?, word);
     assert!(stack.is_empty());
+    assert_eq!(stack.debug_raw_slot(0), Some(EvmWord::ZERO));
     assert_eq!(stack.pop(), Err(EvmCoreError::StackUnderflow));
     Ok(())
 }

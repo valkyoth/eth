@@ -69,4 +69,9 @@ impl<const N: usize> EvmStack<N> {
         self.len = next_len;
         Ok(value)
     }
+
+    #[cfg(test)]
+    pub(crate) fn debug_raw_slot(&self, offset: usize) -> Option<EvmWord> {
+        self.values.get(offset).copied()
+    }
 }

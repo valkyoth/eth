@@ -55,8 +55,16 @@ execution backend.
 
 ## Pentest
 
-- Pending. The release must not be tagged until the local `PENTEST.md` is
-  converted into `security/pentest/v0.40.0.md` and the retest is clean.
+- Initial pentest found one low unreachable-guard/documentation issue in
+  `OpcodeTable::instruction` and one low stack-zeroing coverage gap.
+- Remediation removed the redundant fork re-check, documented the
+  `OpcodeTable` construction invariant, and added test-only raw-slot coverage
+  proving `EvmStack::pop` clears the vacated slot.
+- The informational zeroize note is intentionally deferred until execution
+  paths can carry secret-bearing or precompile-derived data through stack or
+  memory.
+- Retest pending. The release must not be tagged until the local `PENTEST.md`
+  is converted into `security/pentest/v0.40.0.md` and the retest is clean.
 
 ## Versioning
 

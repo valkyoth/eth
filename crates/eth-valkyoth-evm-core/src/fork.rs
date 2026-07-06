@@ -57,10 +57,13 @@ impl OpcodeTable {
     }
 
     /// Looks up opcode metadata for the current fork skeleton.
+    ///
+    /// # Invariants
+    ///
+    /// `OpcodeTable` is constructed only through [`Self::try_new`], which
+    /// rejects unsupported fork identifiers. Future mutators must preserve that
+    /// invariant instead of relying on a second check here.
     pub const fn instruction(self, opcode: EvmOpcode) -> Result<OpcodeInfo, EvmCoreError> {
-        if !self.fork.is_supported() {
-            return Err(EvmCoreError::UnsupportedFork);
-        }
         let class = match opcode.byte() {
             0x00 => OpcodeClass::Stop,
             0x01..=0x03 => OpcodeClass::Arithmetic,
