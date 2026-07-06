@@ -1502,6 +1502,8 @@ Deliverables:
 
 - `GasEstimationPolicy` with maximum execution attempts, gas cap, and
   deterministic termination guard;
+- hard release ceilings for maximum attempts, gas cap, backend steps, and
+  worker timeout values;
 - timeout, worker-isolation, and backend-step termination policy variants;
 - `GasEstimationRequest` binding policy to the explicit execution request;
 - `GasEstimationReport` binding outcomes to execution reports;
@@ -1516,7 +1518,8 @@ Verification:
 
 Exit criteria:
 
-- Gas estimation cannot become an unbounded execution loop.
+- Gas estimation cannot become an unbounded execution loop, including through
+  practically infinite caller-provided limit values.
 - No concrete EVM backend is admitted by this release.
 
 ## Phase 8: Native Audited EVM Engine

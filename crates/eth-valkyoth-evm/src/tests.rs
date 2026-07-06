@@ -9,8 +9,9 @@ use eth_valkyoth_protocol::{
 use super::{
     BlockExecutionContext, EvmAdapterBoundary, ExecutionEnvironment, ExecutionEnvironmentError,
     ExecutionRequest, ExecutionTransaction, GasEstimationError, GasEstimationPolicy,
-    GasEstimationRequest, GasEstimationStatus, GasEstimationTermination, SnapshotAccount,
-    SnapshotError, StateSnapshot, revm_dependency_review,
+    GasEstimationRequest, GasEstimationStatus, GasEstimationTermination,
+    MAX_GAS_ESTIMATION_ATTEMPTS, SnapshotAccount, SnapshotError, StateSnapshot,
+    revm_dependency_review,
 };
 
 const LIMITS: DecodeLimits = DecodeLimits {
@@ -183,6 +184,76 @@ fn gas_estimation_policy_rejects_unbounded_inputs() {
             },
         ),
         Err(GasEstimationError::UnboundedTerminationPolicy)
+    );
+    assert_eq!(
+        GasEstimationPolicy::try_new(
+            1,
+            Gas::new(21_000),
+            GasEstimationTermination::WorkerTimeout { timeout_millis: 0 },
+        ),
+        Err(GasEstimationError::UnboundedTerminationPolicy)
+    );
+    assert_eq!(
+        GasEstimationPolicy::try_new(
+            1,
+            Gas::new(21_000),
+            GasEstimationTermination::WorkerIsolation { timeout_millis: 0 },
+        ),
+        Err(GasEstimationError::UnboundedTerminationPolicy)
+    );
+}
+
+#[test]
+fn gas_estimation_policy_rejects_limits_above_release_ceilings() {
+    assert_eq!(
+        GasEstimationPolicy::try_new(
+            33,
+            Gas::new(21_000),
+            GasEstimationTermination::BackendStepLimit {
+                max_backend_steps: 1,
+            },
+        ),
+        Err(GasEstimationError::AttemptLimitTooHigh)
+    );
+    assert_eq!(
+        GasEstimationPolicy::try_new(
+            MAX_GAS_ESTIMATION_ATTEMPTS,
+            Gas::new(1_000_000_001),
+            GasEstimationTermination::BackendStepLimit {
+                max_backend_steps: 1,
+            },
+        ),
+        Err(GasEstimationError::GasCapTooHigh)
+    );
+    assert_eq!(
+        GasEstimationPolicy::try_new(
+            MAX_GAS_ESTIMATION_ATTEMPTS,
+            Gas::new(21_000),
+            GasEstimationTermination::BackendStepLimit {
+                max_backend_steps: 10_000_001,
+            },
+        ),
+        Err(GasEstimationError::TerminationLimitTooHigh)
+    );
+    assert_eq!(
+        GasEstimationPolicy::try_new(
+            MAX_GAS_ESTIMATION_ATTEMPTS,
+            Gas::new(21_000),
+            GasEstimationTermination::WorkerTimeout {
+                timeout_millis: 30_001,
+            },
+        ),
+        Err(GasEstimationError::TerminationLimitTooHigh)
+    );
+    assert_eq!(
+        GasEstimationPolicy::try_new(
+            MAX_GAS_ESTIMATION_ATTEMPTS,
+            Gas::new(21_000),
+            GasEstimationTermination::WorkerIsolation {
+                timeout_millis: 30_001,
+            },
+        ),
+        Err(GasEstimationError::TerminationLimitTooHigh)
     );
 }
 

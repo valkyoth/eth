@@ -37,8 +37,8 @@ dependencies.
 
 Status: `v0.39.0` adds the bounded gas-estimation boundary.
 The optional `evm` feature now exposes no_std execution request, snapshot,
-result report, and gas-estimation policy types without admitting REVM or
-another execution backend.
+result report, and hard-ceiling gas-estimation policy types without admitting
+REVM or another execution backend.
 
 Implemented now:
 
@@ -106,8 +106,8 @@ Implemented now:
   caller-provided authority account-state checks. Per-authorization failures
   are counted as skipped tuples instead of rejecting the whole transaction.
 - Optional `evm` feature exposing explicit no-std execution environment,
-  transaction input, state snapshot, result report, and bounded gas-estimation
-  policy types without admitting an EVM backend.
+  transaction input, state snapshot, result report, and hard-ceiling
+  gas-estimation policy types without admitting an EVM backend.
 - Digest-level secp256k1 sender recovery through a caller-provided backend
   boundary, with low-s rejection, Ethereum y-parity policy, and caller-provided
   Keccak-256 public-key hashing.

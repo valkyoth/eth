@@ -4,6 +4,15 @@ use eth_valkyoth_primitives::{B256, Gas};
 
 use crate::{ExecutionReport, ExecutionRequest, StateSnapshot};
 
+/// Maximum backend attempts admitted for one gas-estimation request.
+pub const MAX_GAS_ESTIMATION_ATTEMPTS: u32 = 32;
+/// Maximum gas cap admitted for one gas-estimation request.
+pub const MAX_GAS_ESTIMATION_GAS_CAP: Gas = Gas::new(1_000_000_000);
+/// Maximum backend steps admitted for one gas-estimation attempt.
+pub const MAX_GAS_ESTIMATION_BACKEND_STEPS: u64 = 10_000_000;
+/// Maximum worker timeout admitted for one gas-estimation attempt.
+pub const MAX_GAS_ESTIMATION_TIMEOUT_MILLIS: u64 = 30_000;
+
 /// Termination guard required for every future gas-estimation backend.
 #[derive(Clone, Copy, Debug, Eq, PartialEq)]
 pub enum GasEstimationTermination {
@@ -25,14 +34,35 @@ pub enum GasEstimationTermination {
 }
 
 impl GasEstimationTermination {
-    /// Returns `true` when the termination policy has a non-zero bound.
+    /// Returns `true` when the termination policy has a non-zero reviewed bound.
     #[must_use]
     pub const fn is_bounded(self) -> bool {
-        match self {
-            Self::BackendStepLimit { max_backend_steps } => max_backend_steps > 0,
-            Self::WorkerTimeout { timeout_millis } => timeout_millis > 0,
-            Self::WorkerIsolation { timeout_millis } => timeout_millis > 0,
+        match self.validate() {
+            Ok(()) => true,
+            Err(_) => false,
         }
+    }
+
+    const fn validate(self) -> Result<(), GasEstimationError> {
+        match self {
+            Self::BackendStepLimit { max_backend_steps } => {
+                if max_backend_steps == 0 {
+                    return Err(GasEstimationError::UnboundedTerminationPolicy);
+                }
+                if max_backend_steps > MAX_GAS_ESTIMATION_BACKEND_STEPS {
+                    return Err(GasEstimationError::TerminationLimitTooHigh);
+                }
+            }
+            Self::WorkerTimeout { timeout_millis } | Self::WorkerIsolation { timeout_millis } => {
+                if timeout_millis == 0 {
+                    return Err(GasEstimationError::UnboundedTerminationPolicy);
+                }
+                if timeout_millis > MAX_GAS_ESTIMATION_TIMEOUT_MILLIS {
+                    return Err(GasEstimationError::TerminationLimitTooHigh);
+                }
+            }
+        }
+        Ok(())
     }
 }
 
@@ -54,11 +84,17 @@ impl GasEstimationPolicy {
         if max_attempts == 0 {
             return Err(GasEstimationError::ZeroMaxAttempts);
         }
+        if max_attempts > MAX_GAS_ESTIMATION_ATTEMPTS {
+            return Err(GasEstimationError::AttemptLimitTooHigh);
+        }
         if gas_cap.get() == 0 {
             return Err(GasEstimationError::ZeroGasCap);
         }
-        if !termination.is_bounded() {
-            return Err(GasEstimationError::UnboundedTerminationPolicy);
+        if gas_cap.get() > MAX_GAS_ESTIMATION_GAS_CAP.get() {
+            return Err(GasEstimationError::GasCapTooHigh);
+        }
+        if let Err(error) = termination.validate() {
+            return Err(error);
         }
         Ok(Self {
             max_attempts,
@@ -181,6 +217,12 @@ pub enum GasEstimationError {
     ZeroGasCap,
     /// Termination policy must have a non-zero bound.
     UnboundedTerminationPolicy,
+    /// `max_attempts` exceeds the hard release ceiling.
+    AttemptLimitTooHigh,
+    /// `gas_cap` exceeds the hard release ceiling.
+    GasCapTooHigh,
+    /// Termination policy exceeds the hard release ceiling.
+    TerminationLimitTooHigh,
     /// The estimation gas cap exceeds the selected block gas limit.
     GasCapExceedsBlockLimit,
     /// A report attempted to record more attempts than the policy admits.
@@ -197,6 +239,9 @@ impl GasEstimationError {
             Self::ZeroMaxAttempts => "ETH_EVM_GAS_ESTIMATION_ZERO_MAX_ATTEMPTS",
             Self::ZeroGasCap => "ETH_EVM_GAS_ESTIMATION_ZERO_GAS_CAP",
             Self::UnboundedTerminationPolicy => "ETH_EVM_GAS_ESTIMATION_UNBOUNDED_POLICY",
+            Self::AttemptLimitTooHigh => "ETH_EVM_GAS_ESTIMATION_ATTEMPT_LIMIT_TOO_HIGH",
+            Self::GasCapTooHigh => "ETH_EVM_GAS_ESTIMATION_GAS_CAP_TOO_HIGH",
+            Self::TerminationLimitTooHigh => "ETH_EVM_GAS_ESTIMATION_TERMINATION_LIMIT_TOO_HIGH",
             Self::GasCapExceedsBlockLimit => "ETH_EVM_GAS_ESTIMATION_CAP_EXCEEDS_BLOCK",
             Self::AttemptLimitExceeded => "ETH_EVM_GAS_ESTIMATION_ATTEMPT_LIMIT_EXCEEDED",
             Self::EstimateExceedsGasCap => "ETH_EVM_GAS_ESTIMATION_ESTIMATE_EXCEEDS_CAP",
@@ -211,6 +256,11 @@ impl GasEstimationError {
             Self::ZeroGasCap => "gas-estimation gas cap must be non-zero",
             Self::UnboundedTerminationPolicy => {
                 "gas-estimation termination policy must have a non-zero bound"
+            }
+            Self::AttemptLimitTooHigh => "gas-estimation maximum attempts exceed release ceiling",
+            Self::GasCapTooHigh => "gas-estimation gas cap exceeds release ceiling",
+            Self::TerminationLimitTooHigh => {
+                "gas-estimation termination policy exceeds release ceiling"
             }
             Self::GasCapExceedsBlockLimit => "gas-estimation gas cap exceeds block gas limit",
             Self::AttemptLimitExceeded => "gas-estimation attempt count exceeds policy limit",

@@ -59,14 +59,18 @@ this crate version.
 
 ## Gas Estimation Boundary
 
-`GasEstimationPolicy` records the limits that every future estimator must carry:
+`GasEstimationPolicy` records the limits that every future estimator must carry
+and enforces hard release ceilings for each resource class:
 
-- non-zero maximum backend attempts;
-- non-zero gas cap;
-- one non-zero termination guard:
-  - deterministic backend step limit;
-  - caller-enforced worker timeout;
-  - isolated worker timeout.
+- maximum backend attempts from `1` through `MAX_GAS_ESTIMATION_ATTEMPTS`;
+- gas cap from `1` through `MAX_GAS_ESTIMATION_GAS_CAP`;
+- one termination guard:
+  - deterministic backend step limit from `1` through
+    `MAX_GAS_ESTIMATION_BACKEND_STEPS`;
+  - caller-enforced worker timeout from `1` through
+    `MAX_GAS_ESTIMATION_TIMEOUT_MILLIS`;
+  - isolated worker timeout from `1` through
+    `MAX_GAS_ESTIMATION_TIMEOUT_MILLIS`.
 
 `GasEstimationRequest::try_new` binds that policy to an `ExecutionRequest` and
 rejects any gas cap above the selected block gas limit. This keeps gas
@@ -93,7 +97,7 @@ the expected status for callers using only this release's first-party boundary.
 - Reports bind both transaction type and transaction hash so two transactions
   of the same type cannot produce identical audit reports under the same block
   and snapshot.
-- Gas-estimation requests must carry attempt, gas, and termination bounds
-  before any future backend can run.
+- Gas-estimation requests must carry attempt, gas, and termination bounds below
+  hard release ceilings before any future backend can run.
 - Later gas estimation and execution backends must accept this boundary rather
   than inventing parallel fork, block, transaction, or snapshot inputs.

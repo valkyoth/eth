@@ -13,7 +13,9 @@ mod snapshot;
 pub use environment::{BlockExecutionContext, ExecutionEnvironment, ExecutionEnvironmentError};
 pub use gas_estimation::{
     GasEstimationError, GasEstimationPolicy, GasEstimationReport, GasEstimationRequest,
-    GasEstimationStatus, GasEstimationTermination,
+    GasEstimationStatus, GasEstimationTermination, MAX_GAS_ESTIMATION_ATTEMPTS,
+    MAX_GAS_ESTIMATION_BACKEND_STEPS, MAX_GAS_ESTIMATION_GAS_CAP,
+    MAX_GAS_ESTIMATION_TIMEOUT_MILLIS,
 };
 pub use result::{
     ExecutionError, ExecutionReport, ExecutionRequest, ExecutionResult, ExecutionStatus,

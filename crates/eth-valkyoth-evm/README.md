@@ -30,7 +30,7 @@ bounded gas-estimation boundary on top of the first execution boundary types:
   execution attempt.
 - `GasEstimationPolicy`, `GasEstimationRequest`, and `GasEstimationReport`
   require maximum attempts, a gas cap, and a deterministic termination guard
-  before future estimators can run.
+  under hard release ceilings before future estimators can run.
 
 No execution backend is admitted yet. The previous REVM dependency review
 remains in force: current REVM candidates are rejected by this repository's

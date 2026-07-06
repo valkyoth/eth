@@ -11,7 +11,8 @@ EVM execution backend.
   `GasEstimationTermination`, `GasEstimationRequest`, `GasEstimationReport`,
   `GasEstimationStatus`, and `GasEstimationError`.
 - Gas-estimation policies require a non-zero maximum attempt count, non-zero
-  gas cap, and non-zero termination guard.
+  gas cap, non-zero termination guard, and hard release ceilings for all three
+  resource classes.
 - Estimation requests reject gas caps above the selected block gas limit.
 - Estimation reports reject attempt counts above policy and estimates above
   the selected gas cap.
@@ -32,6 +33,10 @@ EVM execution backend.
   this release.
 - Future estimators must carry a reviewed maximum attempt count, gas cap, and
   deterministic termination policy before they can run.
+- `MAX_GAS_ESTIMATION_ATTEMPTS`, `MAX_GAS_ESTIMATION_GAS_CAP`,
+  `MAX_GAS_ESTIMATION_BACKEND_STEPS`, and
+  `MAX_GAS_ESTIMATION_TIMEOUT_MILLIS` prevent callers from treating
+  practically infinite values as a bounded policy.
 - The gas cap is bound to the block gas limit at request construction time.
 - Reports bind gas-estimation outcomes to the existing execution report, which
   already carries fork, block, transaction hash, and snapshot identity.
@@ -45,6 +50,15 @@ EVM execution backend.
 - `cargo tree -p eth --no-default-features --features evm -e normal`
 - `cargo update --dry-run --verbose`
 - `scripts/release_0_39_gate.sh`
+
+## Pentest Remediation
+
+- Initial pentest found that `GasEstimationPolicy::try_new` rejected zero
+  resource limits but did not reject practically unbounded maximum values.
+- Remediation added hard release ceilings for attempts, gas cap, backend steps,
+  and worker timeout values, plus deterministic too-high error variants.
+- Remediation also added coverage for zero `WorkerTimeout` and
+  `WorkerIsolation` policies.
 
 ## Pentest
 
