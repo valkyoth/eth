@@ -1,6 +1,6 @@
 # eth 0.43.0 Release Notes
 
-Status: implementation ready; awaiting pentest.
+Status: release candidate; pentest clean; awaiting final GitHub checks.
 
 `0.43.0` adds explicit bounded state access to the dependency-free native EVM
 core. The release keeps state access caller-owned: bytecode can read account
@@ -65,14 +65,18 @@ and full official state-test execution remain future releases.
 - `cargo test -p eth-valkyoth-evm-core`
 - `cargo check -p eth --features evm-core`
 - `cargo clippy -p eth-valkyoth-evm-core --all-targets --all-features -- -D warnings`
+- `cargo test --workspace --all-features`
+- `cargo clippy --workspace --all-targets --all-features -- -D warnings`
+- `scripts/release_crates.py --check`
+- `scripts/release_0_43_gate.sh`
 
 ## Pentest
 
-- Pending. The release must not be tagged until the local `PENTEST.md` is
-  converted into `security/pentest/v0.43.0.md` and the retest is clean.
+- Permanent report: `security/pentest/v0.43.0.md`.
 - Initial pentest found fork-gating, access-set atomicity, array-slice lint
   coverage, and documentation/test-coverage issues; these have been remediated
   before retest.
+- Retest was clean. No blocking findings remain for the v0.43.0 release scope.
 
 ## Versioning
 
