@@ -9,7 +9,7 @@ Most users should depend on `eth` and enable the optional `evm-core` feature:
 
 ```toml
 [dependencies]
-eth = { version = "0.43.1", features = ["evm-core"] }
+eth = { version = "0.43.2", features = ["evm-core"] }
 ```
 
 This crate executes only the audited bootstrap opcode subset. It exposes
@@ -34,8 +34,9 @@ fixed-size no-alloc bitset.
   caller-provided fixed-capacity warm/cold access sets.
 - Warm/cold access sets are linear-scan, allocation-free structures; choose
   capacities that are bounded relative to the gas limit and deployment policy.
-- Warm/cold state-access gas is admitted only for `EvmFork::LONDON` and later;
-  pre-Berlin historical state gas schedules are rejected rather than guessed.
+- Frontier through Istanbul use explicit flat historical state-read pricing for
+  the currently executable subset; Berlin and later use warm/cold state-access
+  gas.
 - Historical fork identifiers are explicit through Prague. Amsterdam is known
   to the roadmap but is rejected by the executable table until a concrete scope
   is admitted.

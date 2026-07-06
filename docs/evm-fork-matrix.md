@@ -1,6 +1,6 @@
 # Native EVM Fork Matrix
 
-Status: `v0.43.1`.
+Status: `v0.43.2`.
 
 This document describes the first-party `eth-valkyoth-evm-core` fork model.
 It is a support matrix for the native engine bootstrap, not a full Ethereum
@@ -10,15 +10,15 @@ execution-validity claim.
 
 | Native fork | Identifier | Protocol hardfork alignment | Current native engine status |
 | --- | ---: | --- | --- |
-| `EvmFork::FRONTIER` | `0` | `Hardfork::Frontier` | Recognized; basic stack/control-flow opcodes only. State execution fails closed until historical gas is implemented. |
-| `EvmFork::HOMESTEAD` | `1` | `Hardfork::Homestead` | Recognized; basic stack/control-flow opcodes only. |
-| `EvmFork::TANGERINE_WHISTLE` | `2` | More granular than current protocol `Hardfork` enum | Recognized; historical gas schedule planned. |
-| `EvmFork::SPURIOUS_DRAGON` | `3` | More granular than current protocol `Hardfork` enum | Recognized; historical gas schedule planned. |
+| `EvmFork::FRONTIER` | `0` | `Hardfork::Frontier` | Supported for the current basic opcode and bounded state-read subset with Frontier state-read gas. |
+| `EvmFork::HOMESTEAD` | `1` | `Hardfork::Homestead` | Supported for the current basic opcode and bounded state-read subset with Frontier-equivalent state-read gas. |
+| `EvmFork::TANGERINE_WHISTLE` | `2` | More granular than current protocol `Hardfork` enum | Supported for the current state-read subset with EIP-150 IO repricing. |
+| `EvmFork::SPURIOUS_DRAGON` | `3` | More granular than current protocol `Hardfork` enum | Supported for the current state-read subset with EIP-150 IO repricing. |
 | `EvmFork::BYZANTIUM` | `4` | `Hardfork::Byzantium` | Recognized; `REVERT` is introduced here. |
-| `EvmFork::CONSTANTINOPLE` | `5` | More granular than current protocol `Hardfork` enum | Recognized; `EXTCODEHASH` is introduced here but state execution still fails closed until historical gas is implemented. |
-| `EvmFork::PETERSBURG` | `6` | More granular than current protocol `Hardfork` enum | Recognized as a Constantinople correction boundary. |
-| `EvmFork::ISTANBUL` | `7` | More granular than current protocol `Hardfork` enum | Recognized; `SELFBALANCE` is introduced here but state execution still fails closed until historical gas is implemented. |
-| `EvmFork::BERLIN` | `8` | More granular than current protocol `Hardfork` enum | Recognized; warm/cold state accounting begins here conceptually, but this release keeps state execution claimed only for London and later. |
+| `EvmFork::CONSTANTINOPLE` | `5` | More granular than current protocol `Hardfork` enum | Supported for the current state-read subset; `EXTCODEHASH` is introduced at 400 gas. |
+| `EvmFork::PETERSBURG` | `6` | More granular than current protocol `Hardfork` enum | Supported as a Constantinople correction boundary for the current state-read subset. |
+| `EvmFork::ISTANBUL` | `7` | More granular than current protocol `Hardfork` enum | Supported for the current state-read subset; EIP-1884 pricing and `SELFBALANCE` are admitted. |
+| `EvmFork::BERLIN` | `8` | More granular than current protocol `Hardfork` enum | Supported for the current state-read subset; EIP-2929 warm/cold state accounting begins here. |
 | `EvmFork::LONDON` | `9` | `Hardfork::London` | Supported for the current warm/cold state-access model. |
 | `EvmFork::SHANGHAI` | `10` | `Hardfork::Shanghai` | Supported for the current native engine subset. |
 | `EvmFork::CANCUN` | `11` | `Hardfork::Cancun` | Supported for the current native engine subset. |
@@ -34,32 +34,42 @@ The native engine now records the introduction fork for every modeled opcode:
 
 | Opcode domain | Introduction boundary | Execution status |
 | --- | --- | --- |
-| Current arithmetic, bitwise, comparison, stack, memory, jump, `RETURN`, and base state opcodes | Frontier | Basic non-state execution is supported. Pre-London state execution fails closed until `v0.43.2`. |
+| Current arithmetic, bitwise, comparison, stack, memory, jump, `RETURN`, and base state opcodes | Frontier | Basic execution and bounded state reads are supported with fork-specific gas for the current subset. |
 | `REVERT` | Byzantium | Supported in the current control-flow shell. |
-| `EXTCODEHASH` | Constantinople | Recognized as introduced, executable only for the currently claimed London-and-later state model. |
-| `SELFBALANCE` | Istanbul | Recognized as introduced, executable only for the currently claimed London-and-later state model. |
+| `EXTCODEHASH` | Constantinople | Supported with Constantinople/Petersburg pricing and later Istanbul/Berlin repricing. |
+| `SELFBALANCE` | Istanbul | Supported at EIP-1884 `GasFastStep` pricing. |
 
 `EvmFork::opcode_introduced_in(opcode)` exposes the introduction boundary.
 `EvmFork::opcode_is_introduced(opcode)` answers whether a fork is at or after
 that boundary.
 
-`OpcodeTable::instruction(opcode)` remains stricter than historical existence:
-it returns metadata only when the native engine admits that opcode for the
-selected fork. This prevents old forks from accidentally using later gas
-schedules.
+`OpcodeTable::instruction(opcode)` returns metadata only when the modeled
+opcode exists at the selected fork. The interpreter and gas schedule still fail
+closed for unimplemented dispatcher arms.
 
-## Deferred Historical Gas Work
+## Historical State Gas
 
-`v0.43.2` is the scheduled pass for pre-Berlin state gas schedules. Until that
-release implements and tests historical state pricing, state opcodes under
-Frontier through Berlin fail closed rather than falling through to the
-London/Berlin warm/cold constants.
+`v0.43.2` claims historical gas only for the currently executable state-read
+subset:
+
+| Fork range | `BALANCE` | `EXTCODESIZE` / `EXTCODECOPY` | `EXTCODEHASH` | `SLOAD` | Access tracking |
+| --- | ---: | ---: | ---: | ---: | --- |
+| Frontier through Homestead | 20 | 20 | not introduced | 50 | none |
+| Tangerine Whistle through Byzantium | 400 | 700 | not introduced | 200 | none |
+| Constantinople through Petersburg | 400 | 700 | 400 | 200 | none |
+| Istanbul | 700 | 700 | 700 | 800 | none |
+| Berlin and later supported forks | cold 2600 / warm 100 | cold 2600 / warm 100 | cold 2600 / warm 100 | cold 2100 / warm 100 | Berlin warm/cold sets |
 
 This split is deliberate:
 
 - `v0.43.1` makes the fork and opcode matrix explicit.
-- `v0.43.2` fills in historical state gas where the current state-opcode subset
+- `v0.43.2` fills in historical state gas where the current state-read subset
   is claimed.
 - Later execution releases can build calls/create, precompiles, logs, refunds,
   and full fixture claims on top of a named fork matrix instead of a compressed
   "latest-like" fork model.
+
+`SSTORE` remains a write shell. The engine charges the fork-specific storage
+access precharge before returning `StateWriteUnsupported`; full net metering,
+refunds, committed writes, and journal interaction are scheduled for later
+state-write releases.

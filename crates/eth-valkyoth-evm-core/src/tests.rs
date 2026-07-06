@@ -108,6 +108,8 @@ fn historical_fork_identifiers_are_ordered_and_bounded() {
     assert!(EvmFork::PRAGUE.is_supported());
     assert!(EvmFork::AMSTERDAM.is_known());
     assert!(!EvmFork::AMSTERDAM.is_supported());
+    assert!(!EvmFork::ISTANBUL.supports_warm_cold_state_access());
+    assert!(EvmFork::BERLIN.supports_warm_cold_state_access());
 }
 
 #[test]
@@ -157,12 +159,16 @@ fn opcode_table_supports_known_skeleton_and_rejects_unknowns() -> Result<(), Evm
         OpcodeClass::ControlFlow
     );
     assert_eq!(
-        OpcodeTable::try_new(EvmFork::FRONTIER)?.instruction(EvmOpcode::BALANCE),
-        Err(EvmCoreError::UnsupportedOpcode)
+        OpcodeTable::try_new(EvmFork::FRONTIER)?
+            .instruction(EvmOpcode::BALANCE)?
+            .class,
+        OpcodeClass::State
     );
     assert_eq!(
-        OpcodeTable::try_new(EvmFork::CONSTANTINOPLE)?.instruction(EvmOpcode::EXTCODEHASH),
-        Err(EvmCoreError::UnsupportedOpcode)
+        OpcodeTable::try_new(EvmFork::CONSTANTINOPLE)?
+            .instruction(EvmOpcode::EXTCODEHASH)?
+            .class,
+        OpcodeClass::State
     );
     assert_eq!(
         OpcodeTable::try_new(EvmFork::PETERSBURG)?.instruction(EvmOpcode::SELFBALANCE),
@@ -223,8 +229,14 @@ fn gas_schedule_charges_claimed_opcode_subset() -> Result<(), EvmCoreError> {
         schedule.base_cost(EvmOpcode::MLOAD),
         Err(EvmCoreError::UnsupportedOpcode)
     );
-    assert_eq!(schedule.account_access_cost(false), EvmGas::new(2_600));
-    assert_eq!(schedule.account_access_cost(true), EvmGas::new(100));
+    assert_eq!(
+        schedule.account_access_cost(EvmOpcode::BALANCE, false)?,
+        EvmGas::new(2_600)
+    );
+    assert_eq!(
+        schedule.account_access_cost(EvmOpcode::BALANCE, true)?,
+        EvmGas::new(100)
+    );
     assert_eq!(schedule.storage_access_cost(false), EvmGas::new(2_100));
     assert_eq!(schedule.storage_access_cost(true), EvmGas::new(100));
     assert_eq!(schedule.selfbalance_cost(), EvmGas::new(5));

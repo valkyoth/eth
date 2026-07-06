@@ -8,6 +8,42 @@ const EVM_MEMORY_WORD_BYTES: usize = 32;
 const EVM_MEMORY_QUADRATIC_DIVISOR: u64 = 512;
 const EVM_COPY_GAS_WORD_BYTES: usize = 32;
 
+const fn gas_balance(fork: EvmFork) -> EvmGas {
+    if fork.get() < EvmFork::TANGERINE_WHISTLE.get() {
+        EvmGas::new(20)
+    } else if fork.get() < EvmFork::ISTANBUL.get() {
+        EvmGas::new(400)
+    } else {
+        EvmGas::new(700)
+    }
+}
+
+const fn gas_ext_code(fork: EvmFork) -> EvmGas {
+    if fork.get() < EvmFork::TANGERINE_WHISTLE.get() {
+        EvmGas::new(20)
+    } else {
+        EvmGas::new(700)
+    }
+}
+
+const fn gas_ext_code_hash(fork: EvmFork) -> EvmGas {
+    if fork.get() < EvmFork::ISTANBUL.get() {
+        EvmGas::new(400)
+    } else {
+        EvmGas::new(700)
+    }
+}
+
+const fn gas_sload(fork: EvmFork) -> EvmGas {
+    if fork.get() < EvmFork::TANGERINE_WHISTLE.get() {
+        EvmGas::new(50)
+    } else if fork.get() < EvmFork::ISTANBUL.get() {
+        EvmGas::new(200)
+    } else {
+        EvmGas::new(800)
+    }
+}
+
 /// Bounded gas amount used by the native EVM core.
 #[derive(Clone, Copy, Debug, Default, Eq, Ord, PartialEq, PartialOrd)]
 pub struct EvmGas(u64);
@@ -46,6 +82,10 @@ pub struct EvmGasSchedule {
     gas_high: EvmGas,
     gas_jumpdest: EvmGas,
     gas_memory: EvmGas,
+    gas_balance: EvmGas,
+    gas_ext_code: EvmGas,
+    gas_ext_code_hash: EvmGas,
+    gas_sload: EvmGas,
     gas_selfbalance: EvmGas,
     gas_warm_access: EvmGas,
     gas_cold_account_access: EvmGas,
@@ -69,6 +109,10 @@ impl EvmGasSchedule {
             gas_high: EvmGas::new(10),
             gas_jumpdest: EvmGas::new(1),
             gas_memory: EvmGas::new(3),
+            gas_balance: gas_balance(fork),
+            gas_ext_code: gas_ext_code(fork),
+            gas_ext_code_hash: gas_ext_code_hash(fork),
+            gas_sload: gas_sload(fork),
             gas_selfbalance: EvmGas::new(5),
             gas_warm_access: EvmGas::new(100),
             gas_cold_account_access: EvmGas::new(2_600),
@@ -83,12 +127,10 @@ impl EvmGasSchedule {
         self.fork
     }
 
-    /// Returns whether this schedule admits warm/cold state-access gas.
-    pub const fn require_warm_cold_state_access(self) -> Result<(), EvmCoreError> {
-        if !self.fork.supports_warm_cold_state_access() {
-            return Err(EvmCoreError::UnsupportedFork);
-        }
-        Ok(())
+    /// Returns whether this schedule uses Berlin warm/cold state accounting.
+    #[must_use]
+    pub const fn tracks_warm_cold_state_access(self) -> bool {
+        self.fork.supports_warm_cold_state_access()
     }
 
     /// Returns the fixed base gas for an executable opcode.
@@ -114,23 +156,39 @@ impl EvmGasSchedule {
         self.gas_selfbalance
     }
 
-    /// Returns the account access gas for warm or cold account reads.
-    #[must_use]
-    pub const fn account_access_cost(self, warm: bool) -> EvmGas {
-        if warm {
-            self.gas_warm_access
-        } else {
-            self.gas_cold_account_access
+    /// Returns account-read gas for a state opcode in this fork.
+    pub const fn account_access_cost(
+        self,
+        opcode: EvmOpcode,
+        warm: bool,
+    ) -> Result<EvmGas, EvmCoreError> {
+        let historical = match opcode.byte() {
+            0x31 => self.gas_balance,
+            0x3b | 0x3c => self.gas_ext_code,
+            0x3f => self.gas_ext_code_hash,
+            _ => return Err(EvmCoreError::UnsupportedOpcode),
+        };
+        if self.tracks_warm_cold_state_access() {
+            return Ok(if warm {
+                self.gas_warm_access
+            } else {
+                self.gas_cold_account_access
+            });
         }
+        Ok(historical)
     }
 
-    /// Returns the storage access gas for warm or cold slot reads.
+    /// Returns storage-read gas for `SLOAD` in this fork.
     #[must_use]
     pub const fn storage_access_cost(self, warm: bool) -> EvmGas {
-        if warm {
-            self.gas_warm_access
+        if self.tracks_warm_cold_state_access() {
+            if warm {
+                self.gas_warm_access
+            } else {
+                self.gas_cold_sload
+            }
         } else {
-            self.gas_cold_sload
+            self.gas_sload
         }
     }
 

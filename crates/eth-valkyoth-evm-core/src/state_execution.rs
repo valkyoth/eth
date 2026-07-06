@@ -43,7 +43,6 @@ impl<const ADDRESSES: usize, const STORAGE: usize, S: EvmState> StateExecutionHo
         schedule: EvmGasSchedule,
         gas_meter: &mut EvmGasMeter,
     ) -> Result<(), EvmCoreError> {
-        schedule.require_warm_cold_state_access()?;
         match opcode.byte() {
             0x31 => balance(execution, schedule, gas_meter, self),
             0x3b => extcodesize(execution, schedule, gas_meter, self),
@@ -59,12 +58,17 @@ impl<const ADDRESSES: usize, const STORAGE: usize, S: EvmState> StateExecutionHo
 
 fn charge_account_access<const ADDRESSES: usize, const STORAGE: usize, S: EvmState>(
     address: EvmAddress,
+    opcode: EvmOpcode,
     schedule: EvmGasSchedule,
     gas_meter: &mut EvmGasMeter,
     host: &mut HostState<'_, ADDRESSES, STORAGE, S>,
 ) -> Result<(), EvmCoreError> {
-    let warm = host.accesses.warm_address(address)? == EvmAccessStatus::Warm;
-    gas_meter.charge(schedule.account_access_cost(warm))
+    let warm = if schedule.tracks_warm_cold_state_access() {
+        host.accesses.warm_address(address)? == EvmAccessStatus::Warm
+    } else {
+        false
+    };
+    gas_meter.charge(schedule.account_access_cost(opcode, warm)?)
 }
 
 fn map_account_error(error: EvmCoreError) -> EvmCoreError {
@@ -82,7 +86,7 @@ fn balance<const STACK: usize, const ADDRESSES: usize, const STORAGE: usize, S: 
     host: &mut HostState<'_, ADDRESSES, STORAGE, S>,
 ) -> Result<(), EvmCoreError> {
     let address = EvmAddress::from_word(execution.stack().peek(0)?);
-    charge_account_access(address, schedule, gas_meter, host)?;
+    charge_account_access(address, EvmOpcode::BALANCE, schedule, gas_meter, host)?;
     let account = host.state.account(address).map_err(map_account_error)?;
     let _ = execution.stack_mut().pop()?;
     execution.stack_mut().push(account.balance)
@@ -95,7 +99,7 @@ fn extcodesize<const STACK: usize, const ADDRESSES: usize, const STORAGE: usize,
     host: &mut HostState<'_, ADDRESSES, STORAGE, S>,
 ) -> Result<(), EvmCoreError> {
     let address = EvmAddress::from_word(execution.stack().peek(0)?);
-    charge_account_access(address, schedule, gas_meter, host)?;
+    charge_account_access(address, EvmOpcode::EXTCODESIZE, schedule, gas_meter, host)?;
     let account = host.state.account(address).map_err(map_account_error)?;
     let _ = execution.stack_mut().pop()?;
     execution
@@ -110,7 +114,7 @@ fn extcodehash<const STACK: usize, const ADDRESSES: usize, const STORAGE: usize,
     host: &mut HostState<'_, ADDRESSES, STORAGE, S>,
 ) -> Result<(), EvmCoreError> {
     let address = EvmAddress::from_word(execution.stack().peek(0)?);
-    charge_account_access(address, schedule, gas_meter, host)?;
+    charge_account_access(address, EvmOpcode::EXTCODEHASH, schedule, gas_meter, host)?;
     let account = host.state.account(address).map_err(map_account_error)?;
     let _ = execution.stack_mut().pop()?;
     execution.stack_mut().push(if account.exists {
@@ -131,7 +135,7 @@ fn extcodecopy<const STACK: usize, const ADDRESSES: usize, const STORAGE: usize,
     let code_offset = execution.stack().peek(2)?.to_usize()?;
     let len = execution.stack().peek(3)?.to_usize()?;
     execution.memory().check_range(memory_offset, len)?;
-    charge_account_access(address, schedule, gas_meter, host)?;
+    charge_account_access(address, EvmOpcode::EXTCODECOPY, schedule, gas_meter, host)?;
     gas_meter.charge(schedule.copy_cost(len)?)?;
     gas_meter.charge_memory_range(schedule, memory_offset, len)?;
     let output = execution
@@ -167,7 +171,11 @@ fn sload<const STACK: usize, const ADDRESSES: usize, const STORAGE: usize, S: Ev
     host: &mut HostState<'_, ADDRESSES, STORAGE, S>,
 ) -> Result<(), EvmCoreError> {
     let key = execution.stack().peek(0)?;
-    let warm = host.accesses.warm_storage(host.context.address, key)? == EvmAccessStatus::Warm;
+    let warm = if schedule.tracks_warm_cold_state_access() {
+        host.accesses.warm_storage(host.context.address, key)? == EvmAccessStatus::Warm
+    } else {
+        false
+    };
     gas_meter.charge(schedule.storage_access_cost(warm))?;
     let value = host
         .state
@@ -185,7 +193,11 @@ fn sstore_shell<const STACK: usize, const ADDRESSES: usize, const STORAGE: usize
 ) -> Result<(), EvmCoreError> {
     let key = execution.stack().peek(0)?;
     let _value = execution.stack().peek(1)?;
-    let warm = host.accesses.warm_storage(host.context.address, key)? == EvmAccessStatus::Warm;
+    let warm = if schedule.tracks_warm_cold_state_access() {
+        host.accesses.warm_storage(host.context.address, key)? == EvmAccessStatus::Warm
+    } else {
+        false
+    };
     gas_meter.charge(schedule.storage_access_cost(warm))?;
     Err(EvmCoreError::StateWriteUnsupported)
 }

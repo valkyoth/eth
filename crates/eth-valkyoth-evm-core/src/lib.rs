@@ -39,3 +39,7 @@ mod tests;
 #[cfg(test)]
 #[path = "state_tests.rs"]
 mod state_tests;
+
+#[cfg(test)]
+#[path = "historical_gas_tests.rs"]
+mod historical_gas_tests;

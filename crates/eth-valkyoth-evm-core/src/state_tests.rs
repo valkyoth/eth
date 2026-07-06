@@ -27,31 +27,31 @@ fn state_access_requires_explicit_host() -> Result<(), EvmCoreError> {
 }
 
 #[test]
-fn state_access_rejects_pre_berlin_fork() -> Result<(), EvmCoreError> {
+fn state_access_uses_frontier_flat_account_gas() -> Result<(), EvmCoreError> {
     let mut memory = [0u8; 0];
     let mut execution = EvmExecution::<16>::try_new(&mut memory)?;
     let mut state = FixtureState::new();
     let mut accesses = EvmAccessSet::<4, 4>::try_new()?;
-    let code = [0x60, 0x02, 0x31];
+    let code = [0x60, 0x02, 0x31, 0x00];
     let limits = ExecutionLimits::try_new(
         EVM_DEFAULT_STEP_LIMIT,
         EVM_DEFAULT_GAS_LIMIT,
         EvmFork::FRONTIER,
     )?;
 
-    assert_eq!(
-        execution.run_with_state(
-            &code,
-            limits,
-            EvmStateContext::new(FixtureState::SELF_ADDRESS),
-            &mut state,
-            &mut accesses,
-        ),
-        Err(EvmCoreError::UnsupportedFork)
-    );
-    assert_eq!(state.account_reads, 0);
+    let report = execution.run_with_state(
+        &code,
+        limits,
+        EvmStateContext::new(FixtureState::SELF_ADDRESS),
+        &mut state,
+        &mut accesses,
+    )?;
+
+    assert_eq!(report.status, ExecutionStatus::Stopped);
+    assert_eq!(report.gas_used, EvmGas::new(23));
+    assert_eq!(state.account_reads, 1);
     assert_eq!(accesses.address_len(), 0);
-    assert_eq!(execution.stack().peek(0)?, EvmWord::from_be_slice(&[2])?);
+    assert_eq!(execution.stack().peek(0)?, FixtureState::BALANCE);
     Ok(())
 }
 

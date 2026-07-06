@@ -1,12 +1,12 @@
 # Crate Version Matrix
 
-Status: `v0.43.1` adds the native EVM historical fork matrix.
+Status: `v0.43.2` adds native EVM pre-Berlin state gas schedules.
 `eth-valkyoth-evm-core` now exposes dependency-free `no_std` stack, memory,
 word, opcode, program-counter, fork, gas, state, error, and bounded
 interpreter domains for basic stack/control-flow bytecode plus explicit host
-state reads. The fork domain now includes explicit historical Ethereum fork
-identifiers and opcode-introduction metadata without admitting a concrete
-production execution backend.
+state reads. The fork domain includes explicit historical Ethereum fork
+identifiers, opcode-introduction metadata, and fork-specific state-read pricing
+for the currently executable state opcode subset.
 
 `eth` uses independent crate versions. The facade crate remains the main user
 entry point, but support crates are published only when their own package
@@ -32,24 +32,24 @@ but must be republished so immutable crates.io package metadata is corrected.
 workspace manifests before release. The script refuses accidental lockstep
 publication when a crate is marked `unchanged`.
 
-## v0.43.1 Tracking Table
+## v0.43.2 Tracking Table
 
 | Crate | Published | Planned | Change | Publish | Reason |
 | --- | --- | --- | --- | --- | --- |
-| `eth-valkyoth-codec` | `0.19.0` | `0.19.0` | `unchanged` | No | No package changes for v0.43.1. |
-| `eth-valkyoth-primitives` | `0.11.2` | `0.11.2` | `unchanged` | No | No package changes for v0.43.1. |
-| `eth-valkyoth-hash` | `0.11.2` | `0.11.2` | `unchanged` | No | No package changes for v0.43.1. |
-| `eth-valkyoth-protocol` | `0.25.2` | `0.25.2` | `unchanged` | No | No package changes for v0.43.1. |
-| `eth-valkyoth-verify` | `0.21.0` | `0.21.0` | `unchanged` | No | No package changes for v0.43.1. |
-| `eth-valkyoth-derive` | `0.17.2` | `0.17.2` | `unchanged` | No | No package changes for v0.43.1. |
-| `eth-valkyoth-sanitization` | `0.7.4` | `0.7.4` | `unchanged` | No | No package changes for v0.43.1. |
-| `eth-valkyoth-evm-core` | `0.4.0` | `0.5.0` | `code` | Yes | Adds explicit historical EVM fork identifiers, opcode-introduction metadata, fork boundary tests, and documentation for the native EVM core. |
-| `eth-valkyoth-evm` | `0.10.0` | `0.10.0` | `unchanged` | No | No package changes for v0.43.1. |
-| `eth-valkyoth-rpc` | `0.7.0` | `0.7.0` | `unchanged` | No | No package changes for v0.43.1. |
-| `eth-valkyoth-signer` | `0.7.3` | `0.7.3` | `unchanged` | No | No package changes for v0.43.1. |
-| `eth-valkyoth-reth` | `0.7.0` | `0.7.0` | `unchanged` | No | No package changes for v0.43.1. |
-| `eth-valkyoth-testkit` | `0.7.0` | `0.7.0` | `unchanged` | No | No package changes for v0.43.1. |
-| `eth` | `0.43.0` | `0.43.1` | `code` | Yes | Updates the optional `evm-core` dependency to `eth-valkyoth-evm-core 0.5.0` and documents the native EVM historical fork matrix. |
+| `eth-valkyoth-codec` | `0.19.0` | `0.19.0` | `unchanged` | No | No package changes for v0.43.2. |
+| `eth-valkyoth-primitives` | `0.11.2` | `0.11.2` | `unchanged` | No | No package changes for v0.43.2. |
+| `eth-valkyoth-hash` | `0.11.2` | `0.11.2` | `unchanged` | No | No package changes for v0.43.2. |
+| `eth-valkyoth-protocol` | `0.25.2` | `0.25.2` | `unchanged` | No | No package changes for v0.43.2. |
+| `eth-valkyoth-verify` | `0.21.0` | `0.21.0` | `unchanged` | No | No package changes for v0.43.2. |
+| `eth-valkyoth-derive` | `0.17.2` | `0.17.2` | `unchanged` | No | No package changes for v0.43.2. |
+| `eth-valkyoth-sanitization` | `0.7.4` | `0.7.4` | `unchanged` | No | No package changes for v0.43.2. |
+| `eth-valkyoth-evm-core` | `0.5.0` | `0.6.0` | `code` | Yes | Adds historical pre-Berlin state gas schedules and Berlin warm/cold boundary tests for the native EVM core. |
+| `eth-valkyoth-evm` | `0.10.0` | `0.10.0` | `unchanged` | No | No package changes for v0.43.2. |
+| `eth-valkyoth-rpc` | `0.7.0` | `0.7.0` | `unchanged` | No | No package changes for v0.43.2. |
+| `eth-valkyoth-signer` | `0.7.3` | `0.7.3` | `unchanged` | No | No package changes for v0.43.2. |
+| `eth-valkyoth-reth` | `0.7.0` | `0.7.0` | `unchanged` | No | No package changes for v0.43.2. |
+| `eth-valkyoth-testkit` | `0.7.0` | `0.7.0` | `unchanged` | No | No package changes for v0.43.2. |
+| `eth` | `0.43.1` | `0.43.2` | `code` | Yes | Updates the optional `evm-core` dependency to `eth-valkyoth-evm-core 0.6.0` and documents historical pre-Berlin state gas schedules. |
 
 Update this table and `release-crates.toml` in the same commit whenever a crate
 changes release state.

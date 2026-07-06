@@ -64,7 +64,7 @@ impl EvmFork {
     /// Returns whether warm/cold state gas is claimed for this fork.
     #[must_use]
     pub const fn supports_warm_cold_state_access(self) -> bool {
-        self.0 >= Self::LONDON.0 && self.is_supported()
+        self.0 >= Self::BERLIN.0 && self.is_supported()
     }
 
     /// Returns the first fork where the modeled opcode exists.
@@ -145,12 +145,7 @@ impl OpcodeTable {
             0x01..=0x03 => OpcodeClass::Arithmetic,
             0x10 | 0x11 | 0x14 | 0x15 => OpcodeClass::Comparison,
             0x16..=0x19 => OpcodeClass::Bitwise,
-            0x31 | 0x3b | 0x3c | 0x3f | 0x47 | 0x54 | 0x55 => {
-                if !self.fork.supports_warm_cold_state_access() {
-                    return Err(EvmCoreError::UnsupportedOpcode);
-                }
-                OpcodeClass::State
-            }
+            0x31 | 0x3b | 0x3c | 0x3f | 0x47 | 0x54 | 0x55 => OpcodeClass::State,
             0x50 | 0x58 | 0x5b | 0x60..=0x9f => OpcodeClass::Stack,
             0x51 | 0x52 => OpcodeClass::Memory,
             0x56 | 0x57 | 0xf3 | 0xfd => OpcodeClass::ControlFlow,
