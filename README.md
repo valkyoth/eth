@@ -35,14 +35,16 @@ dependencies.
 
 ## Current Status
 
-Status: `v0.44.0` adds the native EVM call/create safety boundary.
+Status: `v0.45.0` adds the native EVM precompile registry boundary.
 The optional `evm-core` feature now exposes dependency-free no_std word, stack,
 memory, opcode, program-counter, fork, gas schedule, opcode-table, host-state,
 warm/cold access, historical fork identifiers, opcode-introduction metadata,
 call/create planning domains, return-data ranges, journal checkpoint policy,
-and bounded interpreter domains for hard-capped basic stack/control-flow
-bytecode plus explicit state reads. Call/create opcodes are recognized and
-validated, then fail closed until nested execution is implemented.
+fork-aware precompile descriptors, bounded precompile input/gas policies, and
+bounded interpreter domains for hard-capped basic stack/control-flow bytecode
+plus explicit state reads. Identity can execute without dependencies; crypto
+precompiles are admitted as fail-closed descriptors until reviewed backends are
+added.
 
 Implemented now:
 
@@ -115,8 +117,8 @@ Implemented now:
 - Optional `evm-core` feature exposing first-party no_std EVM word, stack,
   memory, opcode, program-counter, fork, gas schedule, opcode-table,
   host-state traits, warm/cold access tracking, and basic bounded interpreter
-  domains with bytecode, step, gas, and state-access ceilings as the native
-  execution foundation.
+  domains with bytecode, step, gas, state-access, call/create, and precompile
+  ceilings as the native execution foundation.
 - Digest-level secp256k1 sender recovery through a caller-provided backend
   boundary, with low-s rejection, Ethereum y-parity policy, and caller-provided
   Keccak-256 public-key hashing.
@@ -200,14 +202,14 @@ Not implemented yet:
 
 ```toml
 [dependencies]
-eth = "0.44.0"
+eth = "0.45.0"
 ```
 
 For optional sanitization support:
 
 ```toml
 [dependencies]
-eth = { version = "0.44.0", features = ["sanitization"] }
+eth = { version = "0.45.0", features = ["sanitization"] }
 ```
 
 ## Features
@@ -216,7 +218,7 @@ eth = { version = "0.44.0", features = ["sanitization"] }
 | --- | --- | --- |
 | `std` | no | Enables `std` support in admitted core crates. |
 | `evm` | no | Explicit no_std EVM execution environment, snapshot, result, and bounded gas-estimation boundary. |
-| `evm-core` | no | Dependency-free native EVM core domains, gas-metered basic opcode execution, and explicit bounded state-access traits. |
+| `evm-core` | no | Dependency-free native EVM core domains, gas-metered basic opcode execution, explicit bounded state-access traits, and precompile planning. |
 | `rpc` | no | Future explicit RPC trust-policy boundary. |
 | `eip712-json` | no | Enables the optional `std` JSON-RPC EIP-712 typed-data parser boundary. |
 | `keccak-tiny` | no | Enables the optional reviewed `tiny-keccak` software backend. |
@@ -234,7 +236,7 @@ Optional reviewed software Keccak backend:
 
 ```toml
 [dependencies]
-eth = { version = "0.44.0", features = ["keccak-tiny"] }
+eth = { version = "0.45.0", features = ["keccak-tiny"] }
 ```
 
 ```rust
@@ -248,14 +250,14 @@ Optional reviewed secp256k1 recovery adapter:
 
 ```toml
 [dependencies]
-eth = { version = "0.44.0", features = ["secp256k1-k256"] }
+eth = { version = "0.45.0", features = ["secp256k1-k256"] }
 ```
 
 Optional bounded EVM gas-estimation boundary:
 
 ```toml
 [dependencies]
-eth = { version = "0.44.0", features = ["evm"] }
+eth = { version = "0.45.0", features = ["evm"] }
 ```
 
 ```rust
@@ -360,7 +362,7 @@ Optional native EVM core domains:
 
 ```toml
 [dependencies]
-eth = { version = "0.44.0", features = ["evm-core"] }
+eth = { version = "0.45.0", features = ["evm-core"] }
 ```
 
 State access uses explicit host-state traits and caller-provided fixed-capacity
@@ -391,6 +393,24 @@ let report = execution.run(
 )?;
 assert_eq!(report.stack_len, 1);
 assert_eq!(report.gas_used.get(), 9);
+# Ok::<(), eth::error::EvmCoreError>(())
+```
+
+Precompiles are explicit and fork-aware. The dependency-free identity
+precompile can execute now; cryptographic precompiles are exposed as bounded
+plans and return a backend-unavailable error until audited backends are
+admitted.
+
+```rust
+use eth::evm_core::{EvmFork, EvmPrecompileKind, EvmPrecompilePlan, EvmPrecompileRegistry};
+
+let registry = EvmPrecompileRegistry::try_new(EvmFork::CANCUN)?;
+let descriptor = registry.descriptor(EvmPrecompileKind::Identity)?;
+let plan = EvmPrecompilePlan::try_new(descriptor, b"eth")?;
+let mut output = [0_u8; 3];
+
+assert_eq!(plan.execute_identity(b"eth", &mut output)?, 3);
+assert_eq!(&output, b"eth");
 # Ok::<(), eth::error::EvmCoreError>(())
 ```
 
@@ -1187,7 +1207,7 @@ friendly, and independently testable.
 | `eth-valkyoth-sanitization` | no | Optional bridge to the `sanitization` crate for secret-bearing Ethereum data. |
 | `eth-valkyoth-derive` | no | Optional sanitization and RLP derive macros. |
 | `eth-valkyoth-evm` | no | Explicit no_std EVM execution boundary; no backend admitted yet. |
-| `eth-valkyoth-evm-core` | no | Dependency-free native EVM core domains plus gas-metered basic bounded opcode execution, explicit host-state reads, and fail-closed call/create planning. |
+| `eth-valkyoth-evm-core` | no | Dependency-free native EVM core domains plus gas-metered basic bounded opcode execution, explicit host-state reads, fail-closed call/create planning, and bounded precompile descriptors. |
 | `eth-valkyoth-rpc` | no | Future explicit RPC trust-policy boundary. |
 | `eth-valkyoth-signer` | no | Future signer isolation boundary. |
 | `eth-valkyoth-reth` | no | Future Reth integration boundary. |
@@ -1198,7 +1218,7 @@ friendly, and independently testable.
 The minimum supported Rust version is Rust `1.90.0`. New deployments should use
 the pinned stable Rust `1.96.1` until the toolchain policy is updated.
 
-Compatibility evidence for `0.44.0`:
+Compatibility evidence for `0.45.0`:
 
 | Rust | Local Evidence |
 | --- | --- |
@@ -1215,7 +1235,7 @@ Compatibility evidence for `0.44.0`:
 
 ```bash
 scripts/checks.sh
-scripts/release_0_44_gate.sh
+scripts/release_0_45_gate.sh
 ```
 
 For dependency-policy checks, install `cargo-deny` and `cargo-audit`, then run:

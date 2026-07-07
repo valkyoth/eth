@@ -1,6 +1,6 @@
 # Native EVM Fork Matrix
 
-Status: `v0.44.0`.
+Status: `v0.45.0`.
 
 This document describes the first-party `eth-valkyoth-evm-core` fork model.
 It is a support matrix for the native engine bootstrap, not a full Ethereum
@@ -100,3 +100,23 @@ This is intentionally narrower than full call execution. Later releases must
 wire nested execution, gas forwarding/stipends, account creation, value
 transfer, returndata copying, and journaled state writes before the native EVM
 claims call/create execution compatibility.
+
+## Precompile Registry Boundary
+
+`v0.45.0` adds fork-aware precompile descriptors and bounded precompile plans.
+The registry recognizes the canonical low-address accounts for Frontier
+precompiles, Byzantium modular exponentiation and BN254 precompiles, Istanbul
+BLAKE2F, Cancun KZG point evaluation, and Prague BLS12-381 precompiles.
+
+| Precompile domain | Address range | First admitted native fork | Execution status |
+| --- | ---: | --- | --- |
+| `ecrecover`, SHA-256, RIPEMD-160, identity | `0x01..=0x04` | Frontier | Identity executes dependency-free; crypto precompiles are bounded plans only. |
+| Modular exponentiation and BN254 add/mul/pairing | `0x05..=0x08` | Byzantium | Bounded plans only; BN254 gas policy distinguishes Byzantium and Istanbul pricing. |
+| BLAKE2F | `0x09` | Istanbul | Exact 213-byte input planning and round-count gas extraction; execution fails closed without a backend. |
+| KZG point evaluation | `0x0a` | Cancun | Exact 192-byte input planning and fixed 50,000 gas; proof verification backend is deferred. |
+| BLS12-381 precompiles | `0x0b..=0x11` | Prague | Address/fork admission only until audited BLS backends and vectors are added. |
+
+The registry is intentionally not a full precompile executor. Plans enforce the
+release input ceiling before gas calculation, expose fixed output sizes where
+known, and return `PrecompileBackendUnavailable` for cryptographic execution
+until reviewed backend crates or first-party implementations are admitted.

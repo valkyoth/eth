@@ -1699,7 +1699,7 @@ Exit criteria:
 
 ### v0.44.0 - Native EVM Calls And Create
 
-Status: release candidate; pentest clean; awaiting final GitHub checks.
+Status: tagged as `v0.44.0`.
 
 Goal: implement call-frame semantics without hidden host behavior.
 
@@ -1726,21 +1726,28 @@ Exit criteria:
 
 ### v0.45.0 - Native EVM Precompiles
 
+Status: implementation ready; awaiting pentest.
+
 Goal: admit precompiles as fork-aware, bounded execution units.
 
 Deliverables:
 
 - precompile registry by fork;
-- identity, sha256, ripemd160, ecrecover, modexp, bn128, blake2f, and newer
-  precompile admission decisions;
-- gas and input/output limit policies;
-- dependency review for any cryptographic helper crate.
+- identity execution without third-party dependencies;
+- sha256, ripemd160, ecrecover, modexp, BN254, blake2f, KZG point-evaluation,
+  and BLS12-381 precompile admission decisions;
+- bounded gas and input/output limit policies;
+- fail-closed backend boundary for cryptographic precompiles until audited
+  backends are admitted.
 
 Verification:
 
-- official precompile vectors;
-- `cargo deny check`
-- fuzz target for precompile input parsing where applicable.
+- official precompile address, fork, length, and gas-policy tests;
+- `cargo test -p eth-valkyoth-evm-core`;
+- `cargo clippy -p eth-valkyoth-evm-core --all-targets --all-features -- -D warnings`;
+- `cargo deny check`;
+- fuzz target for precompile input parsing where applicable in the backend
+  admission release.
 
 Exit criteria:
 

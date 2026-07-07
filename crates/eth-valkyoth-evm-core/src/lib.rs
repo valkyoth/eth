@@ -13,6 +13,7 @@ mod gas;
 mod jumpdest;
 mod memory;
 mod opcode;
+mod precompile;
 mod program_counter;
 mod stack;
 mod state;
@@ -32,6 +33,11 @@ pub use fork::{EvmFork, OpcodeTable};
 pub use gas::{EVM_DEFAULT_GAS_LIMIT, EVM_MAX_GAS_LIMIT, EvmGas, EvmGasMeter, EvmGasSchedule};
 pub use memory::{EVM_MEMORY_LIMIT_BYTES, EvmMemory};
 pub use opcode::{EvmOpcode, OpcodeClass, OpcodeInfo};
+pub use precompile::{
+    EVM_PRECOMPILE_INPUT_LIMIT, EvmPrecompileDescriptor, EvmPrecompileGasPolicy,
+    EvmPrecompileImplementation, EvmPrecompileInputPolicy, EvmPrecompileKind, EvmPrecompilePlan,
+    EvmPrecompileRegistry, execute_identity,
+};
 pub use program_counter::ProgramCounter;
 pub use stack::{EVM_STACK_LIMIT, EvmStack};
 pub use state::{EvmAccessSet, EvmAccessStatus, EvmAccount, EvmAddress, EvmState, EvmStateContext};
@@ -52,3 +58,7 @@ mod historical_gas_tests;
 #[cfg(test)]
 #[path = "call_tests.rs"]
 mod call_tests;
+
+#[cfg(test)]
+#[path = "precompile_tests.rs"]
+mod precompile_tests;

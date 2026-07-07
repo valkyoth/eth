@@ -67,6 +67,18 @@ pub enum EvmCoreError {
     JournalCheckpointMismatch,
     /// A journal commit or revert was requested without an active checkpoint.
     JournalCheckpointMissing,
+    /// The requested precompile does not exist in the selected fork.
+    PrecompileNotAvailableInFork,
+    /// The precompile input exceeds the release hard limit.
+    PrecompileInputTooLarge,
+    /// The precompile input length violates the fork-scoped precompile policy.
+    PrecompileInvalidInputLength,
+    /// Precompile gas arithmetic overflowed.
+    PrecompileGasOverflow,
+    /// The provided precompile output buffer is too small.
+    PrecompileOutputTooSmall,
+    /// The selected precompile needs a cryptographic backend not admitted here.
+    PrecompileBackendUnavailable,
     /// A `PUSHn` immediate extends beyond the bytecode input.
     PushImmediateOutOfBounds,
     /// A dynamic jump target is not a valid `JUMPDEST`.
@@ -116,6 +128,12 @@ impl EvmCoreError {
             Self::JournalCheckpointOverflow => "journal_checkpoint_overflow",
             Self::JournalCheckpointMismatch => "journal_checkpoint_mismatch",
             Self::JournalCheckpointMissing => "journal_checkpoint_missing",
+            Self::PrecompileNotAvailableInFork => "precompile_not_available_in_fork",
+            Self::PrecompileInputTooLarge => "precompile_input_too_large",
+            Self::PrecompileInvalidInputLength => "precompile_invalid_input_length",
+            Self::PrecompileGasOverflow => "precompile_gas_overflow",
+            Self::PrecompileOutputTooSmall => "precompile_output_too_small",
+            Self::PrecompileBackendUnavailable => "precompile_backend_unavailable",
             Self::PushImmediateOutOfBounds => "push_immediate_out_of_bounds",
             Self::InvalidJumpDestination => "invalid_jump_destination",
             Self::ReturnRangeOutOfBounds => "return_range_out_of_bounds",
