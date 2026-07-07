@@ -187,6 +187,20 @@ fn ripemd160_precompile_matches_known_vectors() -> Result<(), EvmCoreError> {
 }
 
 #[test]
+fn hash_precompile_matches_padding_boundary_vectors() -> Result<(), EvmCoreError> {
+    for case in HASH_BOUNDARY_CASES {
+        let input = repeated_a_input(case.len);
+        let mut output = [0u8; 32];
+        assert_eq!(execute_sha256(input, &mut output)?, 32);
+        assert_eq!(output, hex_word(case.sha256));
+
+        assert_eq!(execute_ripemd160(input, &mut output)?, 32);
+        assert_eq!(output, ripemd160_word(case.ripemd160));
+    }
+    Ok(())
+}
+
+#[test]
 fn hash_precompile_output_buffer_is_checked_before_write() {
     let mut output = [7u8; 31];
     assert_eq!(
@@ -257,9 +271,72 @@ fn known_precompile_gas_policies_are_bounded() -> Result<(), EvmCoreError> {
     Ok(())
 }
 
+struct HashBoundaryCase {
+    len: usize,
+    sha256: &'static str,
+    ripemd160: &'static str,
+}
+
+const HASH_BOUNDARY_CASES: &[HashBoundaryCase] = &[
+    HashBoundaryCase {
+        len: 55,
+        sha256: "9f4390f8d30c2dd92ec9f095b65e2b9ae9b0a925a5258e241c9f1e910f734318",
+        ripemd160: "0d8a8c9063a48576a7c97e9f95253a6e53ff6765",
+    },
+    HashBoundaryCase {
+        len: 56,
+        sha256: "b35439a4ac6f0948b6d6f9e3c6af0f5f590ce20f1bde7090ef7970686ec6738a",
+        ripemd160: "e72334b46c83cc70bef979e15453706c95b888be",
+    },
+    HashBoundaryCase {
+        len: 64,
+        sha256: "ffe054fe7ae0cb6dc65c3af9b61d5209f439851db43d0ba5997337df154668eb",
+        ripemd160: "9dfb7d374ad924f3f88de96291c33e9abed53e32",
+    },
+    HashBoundaryCase {
+        len: 119,
+        sha256: "31eba51c313a5c08226adf18d4a359cfdfd8d2e816b13f4af952f7ea6584dcfb",
+        ripemd160: "23e398ff2bac815aa1bbb57ca2a669c841872919",
+    },
+    HashBoundaryCase {
+        len: 120,
+        sha256: "2f3d335432c70b580af0e8e1b3674a7c020d683aa5f73aaaedfdc55af904c21c",
+        ripemd160: "c476770a6dae31fcee8d25efe6559a05c8024595",
+    },
+];
+
+static REPEATED_A_120: [u8; 120] = [b'a'; 120];
+
+fn repeated_a_input(len: usize) -> &'static [u8] {
+    match REPEATED_A_120.get(..len) {
+        Some(input) => input,
+        None => &[],
+    }
+}
+
 fn hex_word(hex: &str) -> [u8; 32] {
     assert_eq!(hex.len(), 64);
     let mut output = [0u8; 32];
+    for (target, pair) in output.iter_mut().zip(hex.as_bytes().chunks_exact(2)) {
+        let high = pair.first().copied().map(hex_nibble).unwrap_or(0);
+        let low = pair.get(1).copied().map(hex_nibble).unwrap_or(0);
+        *target = (high << 4) | low;
+    }
+    output
+}
+
+fn ripemd160_word(hex: &str) -> [u8; 32] {
+    assert_eq!(hex.len(), 40);
+    let mut output = [0u8; 32];
+    let digest = hex20(hex);
+    if let Some(target) = output.get_mut(12..) {
+        target.copy_from_slice(&digest);
+    }
+    output
+}
+
+fn hex20(hex: &str) -> [u8; 20] {
+    let mut output = [0u8; 20];
     for (target, pair) in output.iter_mut().zip(hex.as_bytes().chunks_exact(2)) {
         let high = pair.first().copied().map(hex_nibble).unwrap_or(0);
         let low = pair.get(1).copied().map(hex_nibble).unwrap_or(0);

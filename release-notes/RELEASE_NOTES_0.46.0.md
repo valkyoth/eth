@@ -21,7 +21,8 @@ slices are admitted.
 - `EvmPrecompileImplementation::NativeRipemd160`.
 - `execute_sha256` and `EvmPrecompilePlan::execute_sha256`.
 - `execute_ripemd160` and `EvmPrecompilePlan::execute_ripemd160`.
-- Known-answer vector tests for empty and short inputs.
+- Known-answer vector tests for empty, short, one-block, multi-block, and
+  padding-boundary inputs.
 - Output-buffer no-mutation tests for too-small hash precompile buffers.
 - Wrong-kind and wrong-input-length regression tests for hash precompile plans.
 
@@ -66,8 +67,13 @@ slices are admitted.
 
 ## Pentest
 
-- Pending. Permanent report will be added as `security/pentest/v0.46.0.md`
-  after the release-scope pentest and retest are complete.
+- Initial pentest found one low/informational committed-test coverage gap:
+  padding-boundary hash KATs were not yet stored in the repo.
+- Remediation adds SHA-256 and RIPEMD-160 vectors at 55, 56, 64, 119, and
+  120-byte inputs so the one-block, two-block, and final-extra-block padding
+  paths are release-gated.
+- Permanent report will be added as `security/pentest/v0.46.0.md` after retest
+  is complete.
 
 ## Versioning
 
