@@ -1,6 +1,6 @@
 # eth 0.44.0 Release Notes
 
-Status: implementation ready; awaiting pentest.
+Status: release candidate; pentest clean; awaiting final GitHub checks.
 
 `0.44.0` adds the native EVM call/create safety boundary. The release admits
 CALL, CALLCODE, DELEGATECALL, STATICCALL, CREATE, and CREATE2 as explicit
@@ -66,8 +66,13 @@ creation, and journaled state writes are implemented and pentested.
 
 ## Pentest
 
-- Pending. The release must not be tagged until the local `PENTEST.md` is
-  converted into `security/pentest/v0.44.0.md` and the retest is clean.
+- Permanent report: `security/pentest/v0.44.0.md`.
+- Initial pentest found a high-severity call/create operand-ordering bug in
+  the planning layer. The issue was contained by fail-closed execution but
+  would have become consensus-critical when nested execution is wired.
+- The operand mapping was corrected and covered with direct parsed-plan
+  regression tests.
+- Retest was clean. No blocking findings remain for the v0.44.0 release scope.
 
 ## Versioning
 

@@ -1699,7 +1699,7 @@ Exit criteria:
 
 ### v0.44.0 - Native EVM Calls And Create
 
-Status: implemented; ready for pentest.
+Status: release candidate; pentest clean; awaiting final GitHub checks.
 
 Goal: implement call-frame semantics without hidden host behavior.
 
