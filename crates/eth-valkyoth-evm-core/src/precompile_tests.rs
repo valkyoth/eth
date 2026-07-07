@@ -63,6 +63,22 @@ fn lookup_rejects_unknown_and_future_precompile_addresses() -> Result<(), EvmCor
 }
 
 #[test]
+fn lookup_returns_descriptors_for_known_addresses() -> Result<(), EvmCoreError> {
+    let identity = registry(EvmFork::FRONTIER)?
+        .lookup(EvmPrecompileKind::Identity.address())?
+        .ok_or(EvmCoreError::PrecompileNotAvailableInFork)?;
+    assert_eq!(identity.kind, EvmPrecompileKind::Identity);
+    assert_eq!(identity.fork, EvmFork::FRONTIER);
+
+    let kzg = registry(EvmFork::CANCUN)?
+        .lookup(EvmPrecompileKind::KzgPointEvaluation.address())?
+        .ok_or(EvmCoreError::PrecompileNotAvailableInFork)?;
+    assert_eq!(kzg.kind, EvmPrecompileKind::KzgPointEvaluation);
+    assert_eq!(kzg.fork, EvmFork::CANCUN);
+    Ok(())
+}
+
+#[test]
 fn identity_plan_computes_word_gas_and_executes() -> Result<(), EvmCoreError> {
     let descriptor = registry(EvmFork::FRONTIER)?.descriptor(EvmPrecompileKind::Identity)?;
     let plan = EvmPrecompilePlan::try_new(descriptor, &[1u8; 33])?;
@@ -149,6 +165,22 @@ fn known_precompile_gas_policies_are_bounded() -> Result<(), EvmCoreError> {
     assert_eq!(
         EvmPrecompilePlan::try_new(blake, &blake_input)?.gas_cost(),
         Some(EvmGas::new(12))
+    );
+    Ok(())
+}
+
+#[test]
+fn deferred_dynamic_precompile_gas_is_not_zero_cost() -> Result<(), EvmCoreError> {
+    let modexp = registry(EvmFork::BYZANTIUM)?.descriptor(EvmPrecompileKind::Modexp)?;
+    assert_eq!(
+        EvmPrecompilePlan::try_new(modexp, &[0u8; 96])?.gas_cost(),
+        None
+    );
+
+    let bls = registry(EvmFork::PRAGUE)?.descriptor(EvmPrecompileKind::Bls12PairingCheck)?;
+    assert_eq!(
+        EvmPrecompilePlan::try_new(bls, &[0u8; 384])?.gas_cost(),
+        None
     );
     Ok(())
 }

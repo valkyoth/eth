@@ -1774,6 +1774,8 @@ Verification:
 - official or independently reproduced precompile vectors;
 - `cargo test -p eth-valkyoth-evm-core`;
 - `cargo deny check`;
+- dispatcher regression test proving precompile lookup happens before ordinary
+  contract-call handling when CALL execution is wired;
 - fuzz target for hash-precompile input length and output-buffer behavior.
 
 Exit criteria:
@@ -1888,6 +1890,7 @@ Deliverables:
 
 - exact 213-byte input parser;
 - final-block flag validation;
+- rejection of final-block indicator bytes outside `{0, 1}`;
 - round-count gas semantics;
 - first-party or reviewed backend implementation decision;
 - output buffer behavior matching EIP-152.
