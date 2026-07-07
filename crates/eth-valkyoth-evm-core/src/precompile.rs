@@ -1,6 +1,6 @@
-use crate::{EvmAddress, EvmCoreError, EvmFork, EvmGas};
+use crate::{EvmAddress, EvmCoreError, EvmFork, EvmGas, hash_precompile};
 
-/// Maximum precompile calldata bytes admitted by the v0.45 planning boundary.
+/// Maximum precompile calldata bytes admitted by the native planning boundary.
 pub const EVM_PRECOMPILE_INPUT_LIMIT: usize = 1_048_576;
 const WORD_BYTES: usize = 32;
 const PAIRING_ITEM_BYTES: usize = 192;
@@ -104,6 +104,10 @@ impl EvmPrecompileKind {
 pub enum EvmPrecompileImplementation {
     /// The release can execute this precompile without third-party crypto.
     NativeIdentity,
+    /// The release can execute SHA-256 dependency-free.
+    NativeSha256,
+    /// The release can execute RIPEMD-160 dependency-free.
+    NativeRipemd160,
     /// The release admits planning only; execution must fail closed.
     RequiresCryptoBackend,
 }
@@ -211,6 +215,28 @@ impl EvmPrecompilePlan {
         }
         execute_identity(input, output)
     }
+
+    /// Executes the dependency-free SHA-256 precompile into `output`.
+    pub fn execute_sha256(self, input: &[u8], output: &mut [u8]) -> Result<usize, EvmCoreError> {
+        if self.descriptor.kind != EvmPrecompileKind::Sha256 {
+            return Err(EvmCoreError::PrecompileBackendUnavailable);
+        }
+        if input.len() != self.input_len {
+            return Err(EvmCoreError::PrecompileInvalidInputLength);
+        }
+        execute_sha256(input, output)
+    }
+
+    /// Executes the dependency-free RIPEMD-160 precompile into `output`.
+    pub fn execute_ripemd160(self, input: &[u8], output: &mut [u8]) -> Result<usize, EvmCoreError> {
+        if self.descriptor.kind != EvmPrecompileKind::Ripemd160 {
+            return Err(EvmCoreError::PrecompileBackendUnavailable);
+        }
+        if input.len() != self.input_len {
+            return Err(EvmCoreError::PrecompileInvalidInputLength);
+        }
+        execute_ripemd160(input, output)
+    }
 }
 
 /// Fork-aware precompile registry.
@@ -269,6 +295,16 @@ pub fn execute_identity(input: &[u8], output: &mut [u8]) -> Result<usize, EvmCor
     Ok(input.len())
 }
 
+/// Executes the dependency-free SHA-256 precompile.
+pub fn execute_sha256(input: &[u8], output: &mut [u8]) -> Result<usize, EvmCoreError> {
+    hash_precompile::execute_sha256(input, output)
+}
+
+/// Executes the dependency-free RIPEMD-160 precompile.
+pub fn execute_ripemd160(input: &[u8], output: &mut [u8]) -> Result<usize, EvmCoreError> {
+    hash_precompile::execute_ripemd160(input, output)
+}
+
 const fn precompile_address(value: u16) -> EvmAddress {
     let mut bytes = [0u8; EvmAddress::LEN];
     let low = value.to_be_bytes();
@@ -310,6 +346,8 @@ fn prefix_is_zero(bytes: &[u8; EvmAddress::LEN]) -> bool {
 
 const fn descriptor_for_kind(kind: EvmPrecompileKind, fork: EvmFork) -> EvmPrecompileDescriptor {
     let implementation = match kind {
+        EvmPrecompileKind::Sha256 => EvmPrecompileImplementation::NativeSha256,
+        EvmPrecompileKind::Ripemd160 => EvmPrecompileImplementation::NativeRipemd160,
         EvmPrecompileKind::Identity => EvmPrecompileImplementation::NativeIdentity,
         _ => EvmPrecompileImplementation::RequiresCryptoBackend,
     };

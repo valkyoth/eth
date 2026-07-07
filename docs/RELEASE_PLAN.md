@@ -1727,7 +1727,7 @@ Exit criteria:
 
 ### v0.45.0 - Native EVM Precompiles
 
-Status: release candidate; pentest clean; awaiting final GitHub checks.
+Status: tagged as `v0.45.0`.
 
 Goal: admit precompiles as fork-aware, bounded execution units.
 
@@ -1756,6 +1756,8 @@ Exit criteria:
   dependencies into the default graph.
 
 ### v0.46.0 - Native EVM Hash Precompiles
+
+Status: implementation ready; awaiting pentest.
 
 Goal: execute the Frontier SHA-256 and RIPEMD-160 precompiles behind explicit
 first-party or reviewed-backend decisions.

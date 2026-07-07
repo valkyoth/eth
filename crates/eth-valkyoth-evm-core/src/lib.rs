@@ -10,11 +10,14 @@ mod error;
 mod execution;
 mod fork;
 mod gas;
+mod hash_precompile;
 mod jumpdest;
 mod memory;
 mod opcode;
 mod precompile;
 mod program_counter;
+mod ripemd160;
+mod sha256;
 mod stack;
 mod state;
 mod state_execution;
@@ -36,7 +39,7 @@ pub use opcode::{EvmOpcode, OpcodeClass, OpcodeInfo};
 pub use precompile::{
     EVM_PRECOMPILE_INPUT_LIMIT, EvmPrecompileDescriptor, EvmPrecompileGasPolicy,
     EvmPrecompileImplementation, EvmPrecompileInputPolicy, EvmPrecompileKind, EvmPrecompilePlan,
-    EvmPrecompileRegistry, execute_identity,
+    EvmPrecompileRegistry, execute_identity, execute_ripemd160, execute_sha256,
 };
 pub use program_counter::ProgramCounter;
 pub use stack::{EVM_STACK_LIMIT, EvmStack};
