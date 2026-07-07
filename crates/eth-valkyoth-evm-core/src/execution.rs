@@ -2,6 +2,7 @@ use crate::{
     EvmAccessSet, EvmCallFramePolicy, EvmCallKind, EvmCallPlan, EvmCoreError, EvmCreateKind,
     EvmCreatePlan, EvmFork, EvmGas, EvmGasMeter, EvmGasSchedule, EvmMemory, EvmMemoryRange,
     EvmOpcode, EvmStack, EvmState, EvmStateContext, EvmWord, ProgramCounter,
+    call::EvmCallCreatePlan,
     jumpdest::JumpdestMap,
     state_execution::{HostState, NoState, StateExecutionHost},
 };
@@ -204,7 +205,7 @@ impl<'a, const STACK: usize> EvmExecution<'a, STACK> {
             if opcode.is_state_access() {
                 host.execute_state_opcode(self, opcode, schedule, &mut gas_meter)?;
             } else if opcode.is_call_create() {
-                self.plan_call_create(opcode, frame)?;
+                let _ = self.plan_call_create(opcode, frame)?;
                 return Err(EvmCoreError::CallCreateExecutionUnsupported);
             } else {
                 gas_meter.charge(schedule.base_cost(opcode)?)?;
@@ -392,22 +393,23 @@ impl<'a, const STACK: usize> EvmExecution<'a, STACK> {
         self.report(status, steps, *gas_meter)
     }
 
-    fn plan_call_create(
+    pub(crate) fn plan_call_create(
         &self,
         opcode: EvmOpcode,
         frame: EvmCallFramePolicy,
-    ) -> Result<(), EvmCoreError> {
+    ) -> Result<EvmCallCreatePlan, EvmCoreError> {
         match opcode.byte() {
             0xf0 => {
-                let value = self.stack.peek(2)?;
-                let init_code = self.memory_range(1, 0)?;
-                let _ = EvmCreatePlan::try_new(
+                let value = self.stack.peek(0)?;
+                let init_code = self.memory_range(1, 2)?;
+                let plan = EvmCreatePlan::try_new(
                     EvmCreateKind::Create,
                     value,
                     init_code,
                     EvmWord::ZERO,
                     frame,
                 )?;
+                Ok(EvmCallCreatePlan::Create(plan))
             }
             0xf1 | 0xf2 => {
                 let kind = if opcode.byte() == 0xf1 {
@@ -415,15 +417,16 @@ impl<'a, const STACK: usize> EvmExecution<'a, STACK> {
                 } else {
                     EvmCallKind::CallCode
                 };
-                let _ = EvmCallPlan::try_new(
+                let plan = EvmCallPlan::try_new(
                     kind,
-                    self.stack.peek(6)?,
-                    crate::EvmAddress::from_word(self.stack.peek(5)?),
-                    self.stack.peek(4)?,
-                    self.memory_range(3, 2)?,
-                    self.memory_range(1, 0)?,
+                    self.stack.peek(0)?,
+                    crate::EvmAddress::from_word(self.stack.peek(1)?),
+                    self.stack.peek(2)?,
+                    self.memory_range(3, 4)?,
+                    self.memory_range(5, 6)?,
                     frame,
                 )?;
+                Ok(EvmCallCreatePlan::Call(plan))
             }
             0xf4 | 0xfa => {
                 let kind = if opcode.byte() == 0xf4 {
@@ -431,30 +434,31 @@ impl<'a, const STACK: usize> EvmExecution<'a, STACK> {
                 } else {
                     EvmCallKind::StaticCall
                 };
-                let _ = EvmCallPlan::try_new(
+                let plan = EvmCallPlan::try_new(
                     kind,
-                    self.stack.peek(5)?,
-                    crate::EvmAddress::from_word(self.stack.peek(4)?),
+                    self.stack.peek(0)?,
+                    crate::EvmAddress::from_word(self.stack.peek(1)?),
                     EvmWord::ZERO,
-                    self.memory_range(3, 2)?,
-                    self.memory_range(1, 0)?,
+                    self.memory_range(2, 3)?,
+                    self.memory_range(4, 5)?,
                     frame,
                 )?;
+                Ok(EvmCallCreatePlan::Call(plan))
             }
             0xf5 => {
-                let value = self.stack.peek(3)?;
-                let init_code = self.memory_range(2, 1)?;
-                let _ = EvmCreatePlan::try_new(
+                let value = self.stack.peek(0)?;
+                let init_code = self.memory_range(1, 2)?;
+                let plan = EvmCreatePlan::try_new(
                     EvmCreateKind::Create2,
                     value,
                     init_code,
-                    self.stack.peek(0)?,
+                    self.stack.peek(3)?,
                     frame,
                 )?;
+                Ok(EvmCallCreatePlan::Create(plan))
             }
-            _ => return Err(EvmCoreError::UnsupportedOpcode),
+            _ => Err(EvmCoreError::UnsupportedOpcode),
         }
-        Ok(())
     }
 
     fn memory_range(

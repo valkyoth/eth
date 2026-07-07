@@ -213,6 +213,15 @@ impl EvmCreatePlan {
     }
 }
 
+/// Parsed call/create plan used by the fail-closed interpreter boundary.
+#[derive(Clone, Copy, Debug, Eq, PartialEq)]
+pub(crate) enum EvmCallCreatePlan {
+    /// Parsed call-family plan.
+    Call(EvmCallPlan),
+    /// Parsed create-family plan.
+    Create(EvmCreatePlan),
+}
+
 /// Return-data range retained after a child call.
 #[derive(Clone, Copy, Debug, Eq, PartialEq)]
 pub struct EvmReturnDataRange(EvmMemoryRange);

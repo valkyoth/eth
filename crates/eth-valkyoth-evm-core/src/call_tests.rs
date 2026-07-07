@@ -1,11 +1,28 @@
 use crate::{
-    EVM_CALL_DEPTH_LIMIT, EVM_DEFAULT_GAS_LIMIT, EVM_DEFAULT_STEP_LIMIT, EvmCallFramePolicy,
-    EvmCallKind, EvmCoreError, EvmCreateKind, EvmExecution, EvmFork, EvmJournal, EvmOpcode,
-    EvmReturnDataRange, EvmWord, ExecutionLimits, OpcodeClass, OpcodeTable,
+    EVM_CALL_DEPTH_LIMIT, EVM_DEFAULT_GAS_LIMIT, EVM_DEFAULT_STEP_LIMIT, EvmAddress,
+    EvmCallFramePolicy, EvmCallKind, EvmCoreError, EvmCreateKind, EvmExecution, EvmFork,
+    EvmJournal, EvmOpcode, EvmReturnDataRange, EvmWord, ExecutionLimits, OpcodeClass, OpcodeTable,
+    call::EvmCallCreatePlan,
 };
 
 fn limits(fork: EvmFork) -> Result<ExecutionLimits, EvmCoreError> {
     ExecutionLimits::try_new(EVM_DEFAULT_STEP_LIMIT, EVM_DEFAULT_GAS_LIMIT, fork)
+}
+
+fn push_words<const STACK: usize>(
+    execution: &mut EvmExecution<'_, STACK>,
+    words: &[EvmWord],
+) -> Result<(), EvmCoreError> {
+    for word in words {
+        execution.stack_mut().push(*word)?;
+    }
+    Ok(())
+}
+
+fn address(value: u8) -> EvmAddress {
+    let mut bytes = [0u8; EvmAddress::LEN];
+    bytes[EvmAddress::LEN - 1] = value;
+    EvmAddress::from_bytes(bytes)
 }
 
 #[test]
@@ -76,6 +93,153 @@ fn call_frame_policy_enforces_static_and_depth_rules() -> Result<(), EvmCoreErro
 }
 
 #[test]
+fn call_plan_reads_stack_operands_in_yellow_paper_order() -> Result<(), EvmCoreError> {
+    let mut memory = [0u8; 16];
+    let mut execution = EvmExecution::<16>::try_new(&mut memory)?;
+    let target = address(0x77);
+
+    push_words(
+        &mut execution,
+        &[
+            EvmWord::from_usize(6),
+            EvmWord::from_usize(5),
+            EvmWord::from_usize(4),
+            EvmWord::from_usize(3),
+            EvmWord::from_usize(2),
+            target.to_word(),
+            EvmWord::from_usize(1),
+        ],
+    )?;
+
+    let plan = execution.plan_call_create(EvmOpcode::CALL, EvmCallFramePolicy::root())?;
+    let EvmCallCreatePlan::Call(plan) = plan else {
+        return Err(EvmCoreError::UnsupportedOpcode);
+    };
+
+    assert_eq!(plan.kind, EvmCallKind::Call);
+    assert_eq!(plan.gas, EvmWord::from_usize(1));
+    assert_eq!(plan.target, target);
+    assert_eq!(plan.value, EvmWord::from_usize(2));
+    assert_eq!(plan.input.offset, 3);
+    assert_eq!(plan.input.len, 4);
+    assert_eq!(plan.output.offset, 5);
+    assert_eq!(plan.output.len, 6);
+    assert_eq!(plan.child_frame.depth(), 1);
+    Ok(())
+}
+
+#[test]
+fn value_less_call_plan_reads_shifted_operands_in_yellow_paper_order() -> Result<(), EvmCoreError> {
+    let mut memory = [0u8; 16];
+    let mut execution = EvmExecution::<16>::try_new(&mut memory)?;
+    let target = address(0x99);
+
+    push_words(
+        &mut execution,
+        &[
+            EvmWord::from_usize(6),
+            EvmWord::from_usize(5),
+            EvmWord::from_usize(4),
+            EvmWord::from_usize(3),
+            target.to_word(),
+            EvmWord::from_usize(1),
+        ],
+    )?;
+
+    let plan = execution.plan_call_create(EvmOpcode::STATICCALL, EvmCallFramePolicy::root())?;
+    let EvmCallCreatePlan::Call(plan) = plan else {
+        return Err(EvmCoreError::UnsupportedOpcode);
+    };
+
+    assert_eq!(plan.kind, EvmCallKind::StaticCall);
+    assert_eq!(plan.gas, EvmWord::from_usize(1));
+    assert_eq!(plan.target, target);
+    assert_eq!(plan.value, EvmWord::ZERO);
+    assert_eq!(plan.input.offset, 3);
+    assert_eq!(plan.input.len, 4);
+    assert_eq!(plan.output.offset, 5);
+    assert_eq!(plan.output.len, 6);
+    assert!(plan.child_frame.is_static());
+    Ok(())
+}
+
+#[test]
+fn create_plan_reads_stack_operands_in_yellow_paper_order() -> Result<(), EvmCoreError> {
+    let mut memory = [0u8; 16];
+    let mut execution = EvmExecution::<16>::try_new(&mut memory)?;
+
+    push_words(
+        &mut execution,
+        &[
+            EvmWord::from_usize(4),
+            EvmWord::from_usize(3),
+            EvmWord::from_usize(2),
+        ],
+    )?;
+
+    let plan = execution.plan_call_create(EvmOpcode::CREATE, EvmCallFramePolicy::root())?;
+    let EvmCallCreatePlan::Create(plan) = plan else {
+        return Err(EvmCoreError::UnsupportedOpcode);
+    };
+
+    assert_eq!(plan.kind, EvmCreateKind::Create);
+    assert_eq!(plan.value, EvmWord::from_usize(2));
+    assert_eq!(plan.init_code.offset, 3);
+    assert_eq!(plan.init_code.len, 4);
+    assert_eq!(plan.salt, EvmWord::ZERO);
+
+    let mut memory = [0u8; 16];
+    let mut execution = EvmExecution::<16>::try_new(&mut memory)?;
+    push_words(
+        &mut execution,
+        &[
+            EvmWord::from_usize(7),
+            EvmWord::from_usize(4),
+            EvmWord::from_usize(3),
+            EvmWord::from_usize(2),
+        ],
+    )?;
+
+    let plan = execution.plan_call_create(EvmOpcode::CREATE2, EvmCallFramePolicy::root())?;
+    let EvmCallCreatePlan::Create(plan) = plan else {
+        return Err(EvmCoreError::UnsupportedOpcode);
+    };
+
+    assert_eq!(plan.kind, EvmCreateKind::Create2);
+    assert_eq!(plan.value, EvmWord::from_usize(2));
+    assert_eq!(plan.init_code.offset, 3);
+    assert_eq!(plan.init_code.len, 4);
+    assert_eq!(plan.salt, EvmWord::from_usize(7));
+    Ok(())
+}
+
+#[test]
+fn static_call_value_check_uses_call_value_operand() -> Result<(), EvmCoreError> {
+    let mut memory = [0u8; 16];
+    let mut execution = EvmExecution::<16>::try_new(&mut memory)?;
+    let static_frame = EvmCallFramePolicy::try_new(0, true)?;
+
+    push_words(
+        &mut execution,
+        &[
+            EvmWord::ZERO,
+            EvmWord::ZERO,
+            EvmWord::ZERO,
+            EvmWord::ZERO,
+            EvmWord::from_usize(1),
+            address(0x55).to_word(),
+            EvmWord::from_usize(2),
+        ],
+    )?;
+
+    assert_eq!(
+        execution.plan_call_create(EvmOpcode::CALL, static_frame),
+        Err(EvmCoreError::StaticStateChange)
+    );
+    Ok(())
+}
+
+#[test]
 fn return_data_range_checks_bounded_copies() -> Result<(), EvmCoreError> {
     let returndata = EvmReturnDataRange::try_new(4, 8)?;
 
@@ -128,7 +292,7 @@ fn call_opcode_plans_then_fails_closed_without_stack_changes() -> Result<(), Evm
     let mut memory = [0u8; 0];
     let mut execution = EvmExecution::<16>::try_new(&mut memory)?;
     let code = [
-        0x60, 0x00, 0x60, 0x01, 0x60, 0x00, 0x60, 0x00, 0x60, 0x00, 0x60, 0x00, 0x60, 0x00, 0xf1,
+        0x60, 0x00, 0x60, 0x00, 0x60, 0x00, 0x60, 0x00, 0x60, 0x00, 0x60, 0x00, 0x60, 0x00, 0xf1,
     ];
 
     assert_eq!(
@@ -184,7 +348,7 @@ fn call_create_memory_ranges_are_checked_before_fail_closed() -> Result<(), EvmC
     let mut memory = [0u8; 4];
     let mut execution = EvmExecution::<16>::try_new(&mut memory)?;
     let code = [
-        0x60, 0x00, 0x60, 0x01, 0x60, 0x00, 0x60, 0x00, 0x60, 0x05, 0x60, 0x00, 0x60, 0x00, 0xf1,
+        0x60, 0x00, 0x60, 0x00, 0x60, 0x00, 0x60, 0x05, 0x60, 0x00, 0x60, 0x00, 0x60, 0x00, 0xf1,
     ];
 
     assert_eq!(
@@ -194,10 +358,10 @@ fn call_create_memory_ranges_are_checked_before_fail_closed() -> Result<(), EvmC
     assert_eq!(execution.stack().len(), 7);
     assert_eq!(execution.stack().peek(0)?, EvmWord::ZERO);
     assert_eq!(execution.stack().peek(1)?, EvmWord::ZERO);
-    assert_eq!(execution.stack().peek(2)?, EvmWord::from_usize(5));
-    assert_eq!(execution.stack().peek(3)?, EvmWord::ZERO);
+    assert_eq!(execution.stack().peek(2)?, EvmWord::ZERO);
+    assert_eq!(execution.stack().peek(3)?, EvmWord::from_usize(5));
     assert_eq!(execution.stack().peek(4)?, EvmWord::ZERO);
-    assert_eq!(execution.stack().peek(5)?, EvmWord::from_usize(1));
+    assert_eq!(execution.stack().peek(5)?, EvmWord::ZERO);
     assert_eq!(execution.stack().peek(6)?, EvmWord::ZERO);
     Ok(())
 }
