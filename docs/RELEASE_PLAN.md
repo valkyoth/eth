@@ -1727,7 +1727,7 @@ Exit criteria:
 
 ### v0.45.0 - Native EVM Precompiles
 
-Status: implementation ready; awaiting pentest.
+Status: release candidate; pentest clean; awaiting final GitHub checks.
 
 Goal: admit precompiles as fork-aware, bounded execution units.
 

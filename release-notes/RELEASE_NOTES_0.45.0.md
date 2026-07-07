@@ -1,6 +1,6 @@
 # eth 0.45.0 Release Notes
 
-Status: implementation ready; awaiting pentest.
+Status: release candidate; pentest clean; awaiting final GitHub checks.
 
 `0.45.0` adds the native EVM precompile registry boundary. The release admits
 precompile addresses as fork-aware descriptors, validates bounded input shape,
@@ -87,8 +87,14 @@ until reviewed backends or first-party implementations are admitted.
 
 ## Pentest
 
-- Pending. The permanent report must be added as
-  `security/pentest/v0.45.0.md` before tagging.
+- Permanent report: `security/pentest/v0.45.0.md`.
+- Initial pentest reported no critical, high, or medium findings.
+- Informational items covered future CALL precompile dispatch wiring,
+  BLAKE2F final-block flag validation, and additional tests for deferred gas
+  and known-address lookup.
+- The test coverage items were remediated, and the forward-looking items were
+  pinned to concrete roadmap releases.
+- Retest was clean. No blocking findings remain for the v0.45.0 release scope.
 
 ## Versioning
 
