@@ -1757,7 +1757,7 @@ Exit criteria:
 
 ### v0.46.0 - Native EVM Hash Precompiles
 
-Status: implementation ready; awaiting pentest.
+Status: release candidate; pentest clean; awaiting final GitHub checks.
 
 Goal: execute the Frontier SHA-256 and RIPEMD-160 precompiles behind explicit
 first-party or reviewed-backend decisions.

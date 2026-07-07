@@ -1,6 +1,6 @@
 # eth 0.46.0 Release Notes
 
-Status: implementation ready; awaiting pentest.
+Status: release candidate; pentest clean; awaiting final GitHub checks.
 
 `0.46.0` adds dependency-free execution for the Frontier SHA-256 and
 RIPEMD-160 precompiles. The implementations live in `eth-valkyoth-evm-core`,
@@ -72,8 +72,8 @@ slices are admitted.
 - Remediation adds SHA-256 and RIPEMD-160 vectors at 55, 56, 64, 119, and
   120-byte inputs so the one-block, two-block, and final-extra-block padding
   paths are release-gated.
-- Permanent report will be added as `security/pentest/v0.46.0.md` after retest
-  is complete.
+- Permanent report: `security/pentest/v0.46.0.md`.
+- Retest was clean. No blocking findings remain for the v0.46.0 release scope.
 
 ## Versioning
 
