@@ -35,13 +35,14 @@ dependencies.
 
 ## Current Status
 
-Status: `v0.43.2` adds native EVM pre-Berlin state gas schedules.
+Status: `v0.44.0` adds the native EVM call/create safety boundary.
 The optional `evm-core` feature now exposes dependency-free no_std word, stack,
 memory, opcode, program-counter, fork, gas schedule, opcode-table, host-state,
 warm/cold access, historical fork identifiers, opcode-introduction metadata,
+call/create planning domains, return-data ranges, journal checkpoint policy,
 and bounded interpreter domains for hard-capped basic stack/control-flow
-bytecode plus explicit state reads without admitting REVM or another execution
-backend.
+bytecode plus explicit state reads. Call/create opcodes are recognized and
+validated, then fail closed until nested execution is implemented.
 
 Implemented now:
 
@@ -199,14 +200,14 @@ Not implemented yet:
 
 ```toml
 [dependencies]
-eth = "0.43.2"
+eth = "0.44.0"
 ```
 
 For optional sanitization support:
 
 ```toml
 [dependencies]
-eth = { version = "0.43.2", features = ["sanitization"] }
+eth = { version = "0.44.0", features = ["sanitization"] }
 ```
 
 ## Features
@@ -233,7 +234,7 @@ Optional reviewed software Keccak backend:
 
 ```toml
 [dependencies]
-eth = { version = "0.43.2", features = ["keccak-tiny"] }
+eth = { version = "0.44.0", features = ["keccak-tiny"] }
 ```
 
 ```rust
@@ -247,14 +248,14 @@ Optional reviewed secp256k1 recovery adapter:
 
 ```toml
 [dependencies]
-eth = { version = "0.43.2", features = ["secp256k1-k256"] }
+eth = { version = "0.44.0", features = ["secp256k1-k256"] }
 ```
 
 Optional bounded EVM gas-estimation boundary:
 
 ```toml
 [dependencies]
-eth = { version = "0.43.2", features = ["evm"] }
+eth = { version = "0.44.0", features = ["evm"] }
 ```
 
 ```rust
@@ -359,7 +360,7 @@ Optional native EVM core domains:
 
 ```toml
 [dependencies]
-eth = { version = "0.43.2", features = ["evm-core"] }
+eth = { version = "0.44.0", features = ["evm-core"] }
 ```
 
 State access uses explicit host-state traits and caller-provided fixed-capacity
@@ -1186,7 +1187,7 @@ friendly, and independently testable.
 | `eth-valkyoth-sanitization` | no | Optional bridge to the `sanitization` crate for secret-bearing Ethereum data. |
 | `eth-valkyoth-derive` | no | Optional sanitization and RLP derive macros. |
 | `eth-valkyoth-evm` | no | Explicit no_std EVM execution boundary; no backend admitted yet. |
-| `eth-valkyoth-evm-core` | no | Dependency-free native EVM core domains plus gas-metered basic bounded opcode execution and explicit host-state reads; no calls/creates yet. |
+| `eth-valkyoth-evm-core` | no | Dependency-free native EVM core domains plus gas-metered basic bounded opcode execution, explicit host-state reads, and fail-closed call/create planning. |
 | `eth-valkyoth-rpc` | no | Future explicit RPC trust-policy boundary. |
 | `eth-valkyoth-signer` | no | Future signer isolation boundary. |
 | `eth-valkyoth-reth` | no | Future Reth integration boundary. |
@@ -1197,7 +1198,7 @@ friendly, and independently testable.
 The minimum supported Rust version is Rust `1.90.0`. New deployments should use
 the pinned stable Rust `1.96.1` until the toolchain policy is updated.
 
-Compatibility evidence for `0.43.2`:
+Compatibility evidence for `0.44.0`:
 
 | Rust | Local Evidence |
 | --- | --- |
@@ -1214,7 +1215,7 @@ Compatibility evidence for `0.43.2`:
 
 ```bash
 scripts/checks.sh
-scripts/release_0_43_2_gate.sh
+scripts/release_0_44_gate.sh
 ```
 
 For dependency-policy checks, install `cargo-deny` and `cargo-audit`, then run:

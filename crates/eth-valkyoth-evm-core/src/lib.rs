@@ -5,6 +5,7 @@
 #[cfg(feature = "std")]
 extern crate std;
 
+mod call;
 mod error;
 mod execution;
 mod fork;
@@ -18,6 +19,10 @@ mod state;
 mod state_execution;
 mod word;
 
+pub use call::{
+    EVM_CALL_DEPTH_LIMIT, EvmCallFramePolicy, EvmCallKind, EvmCallPlan, EvmCreateKind,
+    EvmCreatePlan, EvmJournal, EvmJournalCheckpoint, EvmMemoryRange, EvmReturnDataRange,
+};
 pub use error::EvmCoreError;
 pub use execution::{
     EVM_DEFAULT_STEP_LIMIT, EVM_MAX_BYTECODE_LEN, EVM_MAX_STEP_LIMIT, EvmExecution,
@@ -43,3 +48,7 @@ mod state_tests;
 #[cfg(test)]
 #[path = "historical_gas_tests.rs"]
 mod historical_gas_tests;
+
+#[cfg(test)]
+#[path = "call_tests.rs"]
+mod call_tests;

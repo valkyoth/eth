@@ -87,9 +87,10 @@ The first production value is:
   admitted subset; `v0.43.0` adds bounded state access for the currently
   claimed fork range; `v0.43.1` and `v0.43.2` add the historical fork matrix
   and pre-Berlin state gas schedules so older forks are implemented explicitly
-  before more stateful execution layers depend on them; later releases add
-  call-frame,
-  precompile, and commit policy.
+  before more stateful execution layers depend on them; `v0.44.0` adds the
+  call/create safety boundary with explicit frame, return-data, and journal
+  policy before later releases add nested execution, precompiles, and committed
+  state writes.
 - `eth-valkyoth-rpc`: optional RPC policy over admitted provider transports.
 - `eth-valkyoth-abi`: optional ABI, contract-call, event, error, and common
   contract-standard helpers.

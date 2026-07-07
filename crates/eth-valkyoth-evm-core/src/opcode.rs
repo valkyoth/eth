@@ -43,6 +43,18 @@ impl EvmOpcode {
     pub const SLOAD: Self = Self(0x54);
     /// `SSTORE`.
     pub const SSTORE: Self = Self(0x55);
+    /// `CREATE`.
+    pub const CREATE: Self = Self(0xf0);
+    /// `CALL`.
+    pub const CALL: Self = Self(0xf1);
+    /// `CALLCODE`.
+    pub const CALLCODE: Self = Self(0xf2);
+    /// `DELEGATECALL`.
+    pub const DELEGATECALL: Self = Self(0xf4);
+    /// `CREATE2`.
+    pub const CREATE2: Self = Self(0xf5);
+    /// `STATICCALL`.
+    pub const STATICCALL: Self = Self(0xfa);
     /// `MLOAD`.
     pub const MLOAD: Self = Self(0x51);
     /// `MSTORE`.
@@ -134,6 +146,12 @@ impl EvmOpcode {
     pub const fn is_state_access(self) -> bool {
         matches!(self.0, 0x31 | 0x3b | 0x3c | 0x3f | 0x47 | 0x54 | 0x55)
     }
+
+    /// Returns whether this opcode is in the call/create family.
+    #[must_use]
+    pub const fn is_call_create(self) -> bool {
+        matches!(self.0, 0xf0..=0xf2 | 0xf4 | 0xf5 | 0xfa)
+    }
 }
 
 /// Coarse opcode category used by the skeleton table.
@@ -155,6 +173,8 @@ pub enum OpcodeClass {
     State,
     /// Control-flow operation.
     ControlFlow,
+    /// Call/create operation.
+    CallCreate,
 }
 
 /// Fork-aware opcode metadata.

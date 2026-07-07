@@ -85,8 +85,12 @@ impl EvmFork {
             | 0x54..=0x58
             | 0x5b
             | 0x60..=0x9f
+            | 0xf0..=0xf2
             | 0xf3 => Some(Self::FRONTIER),
+            0xf4 => Some(Self::HOMESTEAD),
+            0xf5 => Some(Self::CONSTANTINOPLE),
             0xfd => Some(Self::BYZANTIUM),
+            0xfa => Some(Self::BYZANTIUM),
             0x3f => Some(Self::CONSTANTINOPLE),
             0x47 => Some(Self::ISTANBUL),
             _ => None,
@@ -149,6 +153,7 @@ impl OpcodeTable {
             0x50 | 0x58 | 0x5b | 0x60..=0x9f => OpcodeClass::Stack,
             0x51 | 0x52 => OpcodeClass::Memory,
             0x56 | 0x57 | 0xf3 | 0xfd => OpcodeClass::ControlFlow,
+            0xf0..=0xf2 | 0xf4 | 0xf5 | 0xfa => OpcodeClass::CallCreate,
             _ => return Err(EvmCoreError::UnsupportedOpcode),
         };
         Ok(OpcodeInfo { opcode, class })

@@ -1,6 +1,6 @@
 # Native EVM Fork Matrix
 
-Status: `v0.43.2`.
+Status: `v0.44.0`.
 
 This document describes the first-party `eth-valkyoth-evm-core` fork model.
 It is a support matrix for the native engine bootstrap, not a full Ethereum
@@ -35,8 +35,12 @@ The native engine now records the introduction fork for every modeled opcode:
 | Opcode domain | Introduction boundary | Execution status |
 | --- | --- | --- |
 | Current arithmetic, bitwise, comparison, stack, memory, jump, `RETURN`, and base state opcodes | Frontier | Basic execution and bounded state reads are supported with fork-specific gas for the current subset. |
+| `CREATE`, `CALL`, `CALLCODE` | Frontier | Recognized and stack/memory/policy validated, then fail closed with `CallCreateExecutionUnsupported`. |
+| `DELEGATECALL` | Homestead | Recognized and stack/memory/policy validated, then fail closed with `CallCreateExecutionUnsupported`. |
 | `REVERT` | Byzantium | Supported in the current control-flow shell. |
+| `STATICCALL` | Byzantium | Recognized with static-frame policy, then fail closed with `CallCreateExecutionUnsupported`. |
 | `EXTCODEHASH` | Constantinople | Supported with Constantinople/Petersburg pricing and later Istanbul/Berlin repricing. |
+| `CREATE2` | Constantinople | Recognized and stack/memory/policy validated, then fail closed with `CallCreateExecutionUnsupported`. |
 | `SELFBALANCE` | Istanbul | Supported at EIP-1884 `GasFastStep` pricing. |
 
 `EvmFork::opcode_introduced_in(opcode)` exposes the introduction boundary.
@@ -73,3 +77,26 @@ This split is deliberate:
 access precharge before returning `StateWriteUnsupported`; full net metering,
 refunds, committed writes, and journal interaction are scheduled for later
 state-write releases.
+
+## Call/Create Safety Boundary
+
+`v0.44.0` admits call/create metadata and planning without admitting nested
+execution. The interpreter validates call/create stack shape, memory ranges,
+fork introduction boundaries, static-frame value/create restrictions, and
+call-depth policy. After validation, it returns
+`CallCreateExecutionUnsupported` without popping operands, performing host
+calls, or committing state.
+
+The exported policy domains are:
+
+- `EvmCallFramePolicy` for depth, static-frame, value-transfer, and create
+  admission;
+- `EvmCallPlan` and `EvmCreatePlan` for parsed call/create metadata;
+- `EvmReturnDataRange` for bounded return-data copy validation;
+- `EvmJournal` and `EvmJournalCheckpoint` for explicit LIFO commit/revert
+  policy.
+
+This is intentionally narrower than full call execution. Later releases must
+wire nested execution, gas forwarding/stipends, account creation, value
+transfer, returndata copying, and journaled state writes before the native EVM
+claims call/create execution compatibility.

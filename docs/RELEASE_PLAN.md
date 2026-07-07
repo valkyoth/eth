@@ -1667,7 +1667,7 @@ Exit criteria:
 
 ### v0.43.2 - Native EVM Pre-Berlin State Gas Schedules
 
-Status: release candidate; pentest clean; awaiting final GitHub checks.
+Status: tagged as `v0.43.2`.
 
 Goal: replace the temporary pre-London state-access fail-closed behavior with
 real historical state gas schedules where the current opcode subset is claimed.
@@ -1699,24 +1699,30 @@ Exit criteria:
 
 ### v0.44.0 - Native EVM Calls And Create
 
+Status: implemented; ready for pentest.
+
 Goal: implement call-frame semantics without hidden host behavior.
 
 Deliverables:
 
-- CALL, CALLCODE, DELEGATECALL, STATICCALL, CREATE, and CREATE2 planning;
-- call depth and value-transfer policy;
+- CALL, CALLCODE, DELEGATECALL, STATICCALL, CREATE, and CREATE2 planning with
+  fail-closed interpreter handling;
+- call depth, value-transfer, and static-frame policy;
 - returndata handling;
-- static-call write protection;
-- commit/revert journal model.
+- static-call write protection for CALL value and create attempts;
+- commit/revert journal checkpoint model.
 
 Verification:
 
-- official call/create fixtures for claimed forks;
-- reentrancy and depth-limit tests.
+- opcode-introduction boundary tests for call/create opcodes;
+- stack/memory validation tests proving the interpreter fails closed without
+  popping call/create operands;
+- static-frame, return-data, journal, and depth-limit tests.
 
 Exit criteria:
 
-- Calls and creation cannot commit state outside the explicit journal policy.
+- Calls and creation cannot execute host behavior or commit state outside the
+  explicit journal policy.
 
 ### v0.45.0 - Native EVM Precompiles
 

@@ -51,6 +51,22 @@ pub enum EvmCoreError {
     StateAccessUnavailable,
     /// State writes are not admitted until the journaled call/create release.
     StateWriteUnsupported,
+    /// Call/create execution is recognized but not yet admitted.
+    CallCreateExecutionUnsupported,
+    /// A nested call/create would exceed the EVM call-depth limit.
+    CallDepthLimitReached,
+    /// A static execution frame attempted a state-changing operation.
+    StaticStateChange,
+    /// A return-data range or copy request is outside the admitted bounds.
+    ReturnDataOutOfBounds,
+    /// The journal checkpoint stack cannot hold any checkpoint.
+    JournalCapacityZero,
+    /// The journal checkpoint stack is full.
+    JournalCheckpointOverflow,
+    /// The requested journal checkpoint is not the active checkpoint.
+    JournalCheckpointMismatch,
+    /// A journal commit or revert was requested without an active checkpoint.
+    JournalCheckpointMissing,
     /// A `PUSHn` immediate extends beyond the bytecode input.
     PushImmediateOutOfBounds,
     /// A dynamic jump target is not a valid `JUMPDEST`.
@@ -92,6 +108,14 @@ impl EvmCoreError {
             Self::StateCodeTooLarge => "state_code_too_large",
             Self::StateAccessUnavailable => "state_access_unavailable",
             Self::StateWriteUnsupported => "state_write_unsupported",
+            Self::CallCreateExecutionUnsupported => "call_create_execution_unsupported",
+            Self::CallDepthLimitReached => "call_depth_limit_reached",
+            Self::StaticStateChange => "static_state_change",
+            Self::ReturnDataOutOfBounds => "return_data_out_of_bounds",
+            Self::JournalCapacityZero => "journal_capacity_zero",
+            Self::JournalCheckpointOverflow => "journal_checkpoint_overflow",
+            Self::JournalCheckpointMismatch => "journal_checkpoint_mismatch",
+            Self::JournalCheckpointMissing => "journal_checkpoint_missing",
             Self::PushImmediateOutOfBounds => "push_immediate_out_of_bounds",
             Self::InvalidJumpDestination => "invalid_jump_destination",
             Self::ReturnRangeOutOfBounds => "return_range_out_of_bounds",

@@ -1,6 +1,7 @@
 use crate::{
-    EvmAccessSet, EvmCoreError, EvmFork, EvmGas, EvmGasMeter, EvmGasSchedule, EvmMemory, EvmOpcode,
-    EvmStack, EvmState, EvmStateContext, EvmWord, ProgramCounter,
+    EvmAccessSet, EvmCallFramePolicy, EvmCallKind, EvmCallPlan, EvmCoreError, EvmCreateKind,
+    EvmCreatePlan, EvmFork, EvmGas, EvmGasMeter, EvmGasSchedule, EvmMemory, EvmMemoryRange,
+    EvmOpcode, EvmStack, EvmState, EvmStateContext, EvmWord, ProgramCounter,
     jumpdest::JumpdestMap,
     state_execution::{HostState, NoState, StateExecutionHost},
 };
@@ -181,6 +182,7 @@ impl<'a, const STACK: usize> EvmExecution<'a, STACK> {
     ) -> Result<ExecutionReport, EvmCoreError> {
         let jumpdests = JumpdestMap::try_new(bytecode)?;
         let schedule = EvmGasSchedule::for_fork(limits.fork())?;
+        let frame = EvmCallFramePolicy::root();
         let mut gas_meter = EvmGasMeter::try_new(limits.gas_limit())?;
         let mut steps = 0usize;
         loop {
@@ -201,6 +203,9 @@ impl<'a, const STACK: usize> EvmExecution<'a, STACK> {
             }
             if opcode.is_state_access() {
                 host.execute_state_opcode(self, opcode, schedule, &mut gas_meter)?;
+            } else if opcode.is_call_create() {
+                self.plan_call_create(opcode, frame)?;
+                return Err(EvmCoreError::CallCreateExecutionUnsupported);
             } else {
                 gas_meter.charge(schedule.base_cost(opcode)?)?;
                 match opcode.byte() {
@@ -385,5 +390,81 @@ impl<'a, const STACK: usize> EvmExecution<'a, STACK> {
             ExecutionStatus::Returned { offset, len }
         };
         self.report(status, steps, *gas_meter)
+    }
+
+    fn plan_call_create(
+        &self,
+        opcode: EvmOpcode,
+        frame: EvmCallFramePolicy,
+    ) -> Result<(), EvmCoreError> {
+        match opcode.byte() {
+            0xf0 => {
+                let value = self.stack.peek(2)?;
+                let init_code = self.memory_range(1, 0)?;
+                let _ = EvmCreatePlan::try_new(
+                    EvmCreateKind::Create,
+                    value,
+                    init_code,
+                    EvmWord::ZERO,
+                    frame,
+                )?;
+            }
+            0xf1 | 0xf2 => {
+                let kind = if opcode.byte() == 0xf1 {
+                    EvmCallKind::Call
+                } else {
+                    EvmCallKind::CallCode
+                };
+                let _ = EvmCallPlan::try_new(
+                    kind,
+                    self.stack.peek(6)?,
+                    crate::EvmAddress::from_word(self.stack.peek(5)?),
+                    self.stack.peek(4)?,
+                    self.memory_range(3, 2)?,
+                    self.memory_range(1, 0)?,
+                    frame,
+                )?;
+            }
+            0xf4 | 0xfa => {
+                let kind = if opcode.byte() == 0xf4 {
+                    EvmCallKind::DelegateCall
+                } else {
+                    EvmCallKind::StaticCall
+                };
+                let _ = EvmCallPlan::try_new(
+                    kind,
+                    self.stack.peek(5)?,
+                    crate::EvmAddress::from_word(self.stack.peek(4)?),
+                    EvmWord::ZERO,
+                    self.memory_range(3, 2)?,
+                    self.memory_range(1, 0)?,
+                    frame,
+                )?;
+            }
+            0xf5 => {
+                let value = self.stack.peek(3)?;
+                let init_code = self.memory_range(2, 1)?;
+                let _ = EvmCreatePlan::try_new(
+                    EvmCreateKind::Create2,
+                    value,
+                    init_code,
+                    self.stack.peek(0)?,
+                    frame,
+                )?;
+            }
+            _ => return Err(EvmCoreError::UnsupportedOpcode),
+        }
+        Ok(())
+    }
+
+    fn memory_range(
+        &self,
+        offset_depth: usize,
+        len_depth: usize,
+    ) -> Result<EvmMemoryRange, EvmCoreError> {
+        let offset = self.stack.peek(offset_depth)?.to_usize()?;
+        let len = self.stack.peek(len_depth)?.to_usize()?;
+        self.memory.check_range(offset, len)?;
+        EvmMemoryRange::try_new(offset, len)
     }
 }
