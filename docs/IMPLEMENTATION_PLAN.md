@@ -90,8 +90,9 @@ The first production value is:
   before more stateful execution layers depend on them; `v0.44.0` adds the
   call/create safety boundary with explicit frame, return-data, and journal
   policy; `v0.45.0` adds the fork-aware precompile registry, bounded
-  precompile planning, and dependency-free identity execution before later
-  releases add nested execution, cryptographic precompile backends, and
+  precompile planning, and dependency-free identity execution; `v0.46.0`
+  through `v0.52.0` now version concrete cryptographic precompile execution or
+  backend-admission decisions before later releases add nested execution and
   committed state writes.
 - `eth-valkyoth-rpc`: optional RPC policy over admitted provider transports.
 - `eth-valkyoth-abi`: optional ABI, contract-call, event, error, and common

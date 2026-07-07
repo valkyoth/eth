@@ -147,9 +147,10 @@ graphs.
 | `v0.37.3` | Completed: secp256k1 recovery moved behind explicit backend/API boundaries and direct `sha3` verify test usage removed. |
 | `v0.37.4` | Completed: retained `subtle` as a narrow reviewed exception and added executable quarantine checks for `alloy-rlp` plus dev fixture `serde_json`. |
 | `v0.37.5` | Completed: documented and gated optional parser and sanitization bridges so `serde`, `serde_json`, and `sanitization` cannot become accidental defaults. |
-| `v0.40.0` through `v0.47.0` | Build first-party EVM execution phases; REVM remains reference or compatibility only if admitted. |
-| `v0.54.0` | Admit or reject KZG/blob cryptography backends before blob consensus validation is claimed. |
-| `v0.87.0` | Add Kani proof harnesses as extra assurance for selected critical invariants. |
+| `v0.40.0` through `v0.54.0` | Build first-party EVM execution phases; REVM remains reference or compatibility only if admitted. |
+| `v0.46.0` through `v0.52.0` | Admit or implement cryptographic precompile backends only with conformance vectors, dependency review, fuzzing where applicable, and pentest gates. |
+| `v0.61.0` | Admit or reject KZG/blob cryptography backends before blob consensus validation is claimed. |
+| `v0.94.0` | Add Kani proof harnesses as extra assurance for selected critical invariants. |
 
 The exit criteria for this release are documentation-only: no core Ethereum
 dependency remains accidental or undocumented, and every remaining third-party

@@ -161,15 +161,16 @@ relevant dependency point.
 | Full EIP-712 `encodeType`/`encodeData`/`hashStruct` support was missing from the roadmap. | Added `v0.26.0 - EIP-712 Typed-Data Encoder`. |
 | EIP-712 JSON-RPC typed-data parsing was deferred from the no-JSON typed encoder without a visible patch milestone. | Added `v0.26.1 - EIP-712 JSON Typed-Data Parser Boundary`. |
 | A first-party optional software Keccak backend was deferred without a versioned admission point. | Added `v0.27.0 - Optional Keccak Backend Admission`. |
-| Formal verification evidence was not scheduled. | Added `v0.87.0 - Kani Formal Verification Harness` as extra assurance, not a replacement for fuzzing, conformance tests, pentest, or audit. |
-| ABI encoding, Engine API, SSZ, and DevP2P/RLPx were marked deferred. | Added `v0.63.0` through `v0.85.0` feature tracks so they are versioned before 1.0. |
-| ENS and common ERC/application standards were not scheduled. | Added `v0.67.0` through `v0.70.0` for common token, ENS, permit, and interface helpers. |
-| Node-level sync, txpool, mining/validator boundaries, and observability were not scheduled. | Added `v0.83.0` through `v0.85.0` with explicit library-boundary scope and validation gates. |
+| Formal verification evidence was not scheduled. | Added `v0.94.0 - Kani Formal Verification Harness` as extra assurance, not a replacement for fuzzing, conformance tests, pentest, or audit. |
+| ABI encoding, Engine API, SSZ, and DevP2P/RLPx were marked deferred. | Added `v0.70.0` through `v0.92.0` feature tracks so they are versioned before 1.0. |
+| ENS and common ERC/application standards were not scheduled. | Added `v0.74.0` through `v0.77.0` for common token, ENS, permit, and interface helpers. |
+| Node-level sync, txpool, mining/validator boundaries, and observability were not scheduled. | Added `v0.90.0` through `v0.92.0` with explicit library-boundary scope and validation gates. |
 | REVM dependency admission failed the existing dependency policy. | Added `v0.37.1 - REVM Dependency Recheck` before execution work may continue. |
-| Native audited EVM execution was not explicitly versioned; REVM could look like the long-term core. | Added `v0.40.0` through `v0.47.0` as the first-party EVM engine phase and shifted later versions upward. |
+| Native audited EVM execution was not explicitly versioned; REVM could look like the long-term core. | Added `v0.40.0` through `v0.54.0` as the first-party EVM engine phase and shifted later versions upward. |
 | Default verification previously depended directly on `k256` and used direct `sha3` test wrappers, which conflicted with the long-term first-party-core goal. | Added `v0.37.2` and `v0.37.3` to audit core dependencies, move cryptographic implementation crates behind explicit boundaries/features, and document any accepted cryptographic backend plan. |
 | `subtle`, `alloy-rlp`, dev `serde_json`, optional `serde`/`serde_json`, and optional `sanitization` need explicit long-term dependency classifications before execution grows. | Added `v0.37.4` and `v0.37.5` so constant-time helpers, reference oracles, JSON parser support, and sanitization bridges remain deliberate dependency choices. |
-| Native opcodes alone do not make full Ethereum execution support; genesis, full block validity, trie-root construction, state transition integration, blob/KZG validation, and full execution fixtures were not versioned before RPC/Reth work. | Added `v0.48.0` through `v0.55.0` for full execution state and block-validity work, then shifted later integration tracks upward. |
+| `v0.45.0` deliberately admits cryptographic precompiles as fail-closed descriptors without concrete execution backends. | Added `v0.46.0` through `v0.52.0` for SHA-256, RIPEMD-160, ECRECOVER, ModExp, BN254, BLAKE2F, KZG/BLS backend planning, conformance vectors, fuzzing, dependency review, and pentest gates before state-test claims depend on them. |
+| Native opcodes alone do not make full Ethereum execution support; genesis, full block validity, trie-root construction, state transition integration, blob/KZG validation, and full execution fixtures were not versioned before RPC/Reth work. | Added `v0.55.0` through `v0.62.0` for full execution state and block-validity work, then shifted later integration tracks upward. |
 | The native EVM state-access pass intentionally fails closed for pre-London forks until historical gas/opcode rules are implemented. | Added `v0.43.1 - Native EVM Historical Fork Matrix` and `v0.43.2 - Native EVM Pre-Berlin State Gas Schedules` before calls/create build on state access. |
 
 ## Phase 0: Repository And Release Discipline
@@ -1754,7 +1755,184 @@ Exit criteria:
 - Precompiles are explicit audited modules and do not pull unreviewed crypto
   dependencies into the default graph.
 
-### v0.46.0 - Native EVM Ethereum State Tests
+### v0.46.0 - Native EVM Hash Precompiles
+
+Goal: execute the Frontier SHA-256 and RIPEMD-160 precompiles behind explicit
+first-party or reviewed-backend decisions.
+
+Deliverables:
+
+- SHA-256 precompile execution at address `0x02`;
+- RIPEMD-160 precompile execution at address `0x03`;
+- input padding/output-width behavior matching client semantics;
+- no default dependency expansion without a written backend admission review;
+- conformance KATs for empty input, short input, one-word input, and multi-word
+  input.
+
+Verification:
+
+- official or independently reproduced precompile vectors;
+- `cargo test -p eth-valkyoth-evm-core`;
+- `cargo deny check`;
+- fuzz target for hash-precompile input length and output-buffer behavior.
+
+Exit criteria:
+
+- Hash precompile execution is deterministic, bounded, and covered by vectors
+  before broader state tests can claim Frontier precompile support.
+
+### v0.47.0 - Native EVM ECRECOVER Precompile
+
+Goal: execute the `ecrecover` precompile without weakening the existing
+secp256k1 backend boundary.
+
+Deliverables:
+
+- `ecrecover` input parser for the 128-byte canonical call frame;
+- low-s, y-parity/v normalization, invalid-signature, and zero-output policy;
+- caller-provided or reviewed optional secp256k1 backend integration;
+- address derivation through the Keccak trait boundary;
+- backend sanitization requirements for temporary scalar/signature material.
+
+Verification:
+
+- Ethereum ecrecover vectors, including invalid and malleable signatures;
+- differential vectors against an admitted reference engine;
+- `cargo test -p eth-valkyoth-evm-core -p eth-valkyoth-verify`;
+- dependency and sanitization review for any backend crate.
+
+Exit criteria:
+
+- ECRECOVER cannot silently bypass replay/signature policy or introduce a
+  default signing/recovery dependency.
+
+### v0.48.0 - Native EVM ModExp Precompile
+
+Goal: execute the Byzantium modular exponentiation precompile with bounded
+memory and gas semantics.
+
+Deliverables:
+
+- EIP-198/EIP-2565 input parser for base, exponent, and modulus lengths;
+- exact gas formula by fork;
+- bounded big-integer execution plan with dependency/first-party decision;
+- zero-modulus, empty-base, empty-exponent, and oversized-length handling;
+- output buffer and allocation limits.
+
+Verification:
+
+- official modexp vectors across Byzantium and Berlin pricing;
+- adversarial length/gas overflow tests;
+- fuzz target for the modexp header and length parser;
+- `cargo deny check`.
+
+Exit criteria:
+
+- ModExp cannot allocate or run unboundedly from hostile calldata.
+
+### v0.49.0 - Native EVM BN254 Add And Mul Precompiles
+
+Goal: execute BN254 point addition and scalar multiplication before pairing is
+admitted.
+
+Deliverables:
+
+- BN254 field-element parsing and canonical range checks;
+- point-at-infinity and invalid-point behavior;
+- add and multiplication execution at addresses `0x06` and `0x07`;
+- Byzantium and Istanbul gas schedule coverage;
+- dependency/first-party curve implementation review.
+
+Verification:
+
+- official BN254 add/mul vectors;
+- invalid field, invalid point, and infinity tests;
+- `cargo test -p eth-valkyoth-evm-core`;
+- `cargo deny check`.
+
+Exit criteria:
+
+- BN254 add/mul execution is isolated and vector-backed before pairing support
+  adds more complex batch behavior.
+
+### v0.50.0 - Native EVM BN254 Pairing Precompile
+
+Goal: execute BN254 pairing with explicit batch limits and fork-aware gas.
+
+Deliverables:
+
+- pairing input parser for 192-byte tuple batches;
+- empty-input success behavior;
+- Byzantium and Istanbul gas formulas;
+- batch-size and computation limits relative to gas;
+- dependency/first-party pairing implementation review.
+
+Verification:
+
+- official BN254 pairing vectors;
+- malformed tuple, invalid point, and oversized batch tests;
+- differential vectors against an admitted reference engine;
+- fuzz target for pairing input segmentation.
+
+Exit criteria:
+
+- Pairing execution cannot create an unbounded CPU path independent of gas and
+  release limits.
+
+### v0.51.0 - Native EVM BLAKE2F Precompile
+
+Goal: execute the Istanbul BLAKE2 compression precompile with exact input
+shape and round-count behavior.
+
+Deliverables:
+
+- exact 213-byte input parser;
+- final-block flag validation;
+- round-count gas semantics;
+- first-party or reviewed backend implementation decision;
+- output buffer behavior matching EIP-152.
+
+Verification:
+
+- EIP-152 KATs and invalid-input vectors;
+- fuzz target for input-shape parsing;
+- `cargo test -p eth-valkyoth-evm-core`;
+- dependency review if a backend crate is admitted.
+
+Exit criteria:
+
+- BLAKE2F execution is fully shaped by the EIP-152 input contract and cannot
+  accept alternate encodings.
+
+### v0.52.0 - Native EVM Advanced Precompile Backends
+
+Goal: version the remaining advanced cryptographic precompile work before full
+state-test claims depend on it.
+
+Deliverables:
+
+- KZG point-evaluation execution plan aligned with the blob/KZG release;
+- BLS12-381 EIP-2537 backend admission or first-party implementation plan;
+- shared backend conformance checklist for hash, secp256k1, big-int, BN254,
+  BLAKE2, KZG, and BLS backends;
+- sanitization and zeroization requirements for backend scratch state where
+  secret-bearing or key-adjacent material may be processed;
+- release-blocking vector list for each precompile still not executable.
+
+Verification:
+
+- documented backend conformance commands;
+- `cargo deny check`;
+- release-plan check proving every fail-closed precompile has a later version
+  or explicit exclusion.
+
+Exit criteria:
+
+- No cryptographic precompile remains merely "deferred"; each one is either
+  implemented, assigned to a concrete later release, or explicitly excluded
+  from a claimed fork.
+
+### v0.53.0 - Native EVM Ethereum State Tests
 
 Goal: claim execution behavior only where official Ethereum state tests pass.
 
@@ -1774,7 +1952,7 @@ Exit criteria:
 
 - Native execution claims are backed by pinned official test evidence.
 
-### v0.47.0 - Native EVM Audit Hardening
+### v0.54.0 - Native EVM Audit Hardening
 
 Goal: harden the native engine before broader integration depends on it.
 
@@ -1803,7 +1981,7 @@ It covers the upstream fixture groups currently listed as unsupported:
 `TransactionTests`, `BlockchainTests`, `GenesisTests`, `TrieTests`,
 `DifficultyTests`, and fork-specific EOF/state-transition tests.
 
-### v0.48.0 - Genesis And Chain Configuration Import
+### v0.55.0 - Genesis And Chain Configuration Import
 
 Goal: construct initial state and chain configuration from explicit genesis
 inputs without trusting a node client.
@@ -1825,7 +2003,7 @@ Exit criteria:
 
 - A claimed chain can start from reproducible first-party genesis data.
 
-### v0.49.0 - Transaction Semantic Validity
+### v0.56.0 - Transaction Semantic Validity
 
 Goal: validate transaction semantics before state transition execution.
 
@@ -1848,7 +2026,7 @@ Exit criteria:
 - Decoded and signature-valid transactions are not treated as executable until
   semantic validity passes against explicit state and fork context.
 
-### v0.50.0 - Header And Block Validity
+### v0.57.0 - Header And Block Validity
 
 Goal: validate execution block headers and block-level constraints.
 
@@ -1871,7 +2049,7 @@ Exit criteria:
 - Block headers are no longer only syntactically decoded and hashed; they can be
   validated against parent/fork context for claimed forks.
 
-### v0.51.0 - State Transition Integration
+### v0.58.0 - State Transition Integration
 
 Goal: apply valid transactions through the native EVM and update account state.
 
@@ -1894,7 +2072,7 @@ Exit criteria:
 - The crate can execute claimed transactions against explicit state and produce
   deterministic post-state.
 
-### v0.52.0 - Receipts, Logs, Bloom, And Withdrawals State Application
+### v0.59.0 - Receipts, Logs, Bloom, And Withdrawals State Application
 
 Goal: produce and validate execution outputs that bind state transition to
 block roots.
@@ -1917,7 +2095,7 @@ Exit criteria:
 - Receipts and withdrawals are tied to execution results and block roots, not
   only decoded as standalone data.
 
-### v0.53.0 - Trie Construction And Root Computation
+### v0.60.0 - Trie Construction And Root Computation
 
 Goal: build canonical Merkle Patricia tries, not only verify supplied proofs.
 
@@ -1938,7 +2116,7 @@ Exit criteria:
 
 - Root values can be computed first-party for claimed block/state data.
 
-### v0.54.0 - Blob, KZG, And Data-Availability Boundaries
+### v0.61.0 - Blob, KZG, And Data-Availability Boundaries
 
 Goal: validate blob-transaction execution-layer commitments without hiding
 cryptographic backend assumptions.
@@ -1962,7 +2140,7 @@ Exit criteria:
 - Blob transaction support is no longer only syntactic; every cryptographic
   assumption is explicit.
 
-### v0.55.0 - Full Execution Fixture Admission
+### v0.62.0 - Full Execution Fixture Admission
 
 Goal: claim full execution support only where all relevant official fixture
 groups pass.
@@ -1989,7 +2167,7 @@ Exit criteria:
 
 ## Phase 10: Optional RPC And Signer Boundaries
 
-### v0.56.0 - RPC Dependency Admission
+### v0.63.0 - RPC Dependency Admission
 
 Goal: admit provider/transport crates behind `eth-valkyoth-rpc` and add the
 local node harness used by later live integration tests.
@@ -2018,7 +2196,7 @@ Exit criteria:
 - The project can spin up and destroy a local Ethereum node for integration
   tests without depending on a developer's existing node.
 
-### v0.57.0 - RPC Trust Models
+### v0.64.0 - RPC Trust Models
 
 Goal: implement trusted, quorum, and verified response models.
 
@@ -2036,7 +2214,7 @@ Exit criteria:
 
 - TLS endpoint trust is documented as separate from Ethereum state trust.
 
-### v0.58.0 - RPC Retry And Redaction
+### v0.65.0 - RPC Retry And Redaction
 
 Goal: make network behavior and logs safe by default.
 
@@ -2055,7 +2233,7 @@ Exit criteria:
 
 - RPC errors and logs do not leak sensitive payloads by default.
 
-### v0.59.0 - Signer Interface
+### v0.66.0 - Signer Interface
 
 Goal: add domain-specific signer APIs without local keys by default.
 
@@ -2075,7 +2253,7 @@ Exit criteria:
 
 - Signing APIs make domain separation explicit.
 
-### v0.60.0 - Local Signer Fallback
+### v0.67.0 - Local Signer Fallback
 
 Goal: add optional local signing only after secret-handling review.
 
@@ -2098,7 +2276,7 @@ Exit criteria:
 
 ## Phase 11: Optional Reth And P2P Decisions
 
-### v0.61.0 - Reth Dependency Admission
+### v0.68.0 - Reth Dependency Admission
 
 Goal: integrate selected Reth concepts without leaking node internals.
 
@@ -2118,7 +2296,7 @@ Exit criteria:
 
 - Reth remains an adapter, not a protocol-core foundation.
 
-### v0.62.0 - P2P Threat Model Decision
+### v0.69.0 - P2P Threat Model Decision
 
 Goal: decide whether P2P belongs in this crate family.
 
@@ -2139,7 +2317,7 @@ Exit criteria:
 
 ## Phase 12: Contract Interaction And Application Standards
 
-### v0.63.0 - ABI Type System
+### v0.70.0 - ABI Type System
 
 Goal: model Solidity ABI types without pulling contract interaction into the
 default core graph.
@@ -2162,7 +2340,7 @@ Exit criteria:
 
 - ABI types can be parsed and rendered without encoding values yet.
 
-### v0.64.0 - ABI Encode And Decode
+### v0.71.0 - ABI Encode And Decode
 
 Goal: encode and decode ABI values under explicit size limits.
 
@@ -2183,7 +2361,7 @@ Exit criteria:
 
 - Contract call payloads can be handled without ad hoc downstream encoders.
 
-### v0.65.0 - Contract Event And Error Decoding
+### v0.72.0 - Contract Event And Error Decoding
 
 Goal: decode logs and revert data with ABI-aware domain types.
 
@@ -2204,7 +2382,7 @@ Exit criteria:
 - Contract events and errors can be decoded without implying RPC trust or
   contract semantic validity.
 
-### v0.66.0 - Contract Call Builders
+### v0.73.0 - Contract Call Builders
 
 Goal: provide safe contract call builders over ABI primitives.
 
@@ -2226,7 +2404,7 @@ Exit criteria:
 - Users can build and decode contract calls while networking and signing remain
   explicit separate layers.
 
-### v0.67.0 - Common Token Standards
+### v0.74.0 - Common Token Standards
 
 Goal: add typed helpers for the most common token standards without making
 contract wrappers part of the core protocol.
@@ -2248,7 +2426,7 @@ Exit criteria:
 - Common token interaction helpers are typed convenience APIs over ABI, not
   trusted contract clients.
 
-### v0.68.0 - ENS Namehash And Resolution Primitives
+### v0.75.0 - ENS Namehash And Resolution Primitives
 
 Goal: support ENS primitives and resolver-call construction.
 
@@ -2270,7 +2448,7 @@ Exit criteria:
 - ENS support is available as explicit contract-call construction and decoding,
   not as hidden RPC behavior.
 
-### v0.69.0 - Permit And Typed Authorization Standards
+### v0.76.0 - Permit And Typed Authorization Standards
 
 Goal: support common signature-based contract authorization flows.
 
@@ -2290,7 +2468,7 @@ Exit criteria:
 
 - Permit helpers use the same EIP-712 safety boundary as core signing APIs.
 
-### v0.70.0 - Contract Interface Registry
+### v0.77.0 - Contract Interface Registry
 
 Goal: expose safe helpers for interface identifiers and contract metadata.
 
@@ -2309,7 +2487,7 @@ Exit criteria:
 
 - Contract interface helpers are deterministic local computations only.
 
-### v0.71.0 - ABI And Contract Fuzzing
+### v0.78.0 - ABI And Contract Fuzzing
 
 Goal: fuzz ABI and contract-helper parsers before they are treated as stable.
 
@@ -2330,7 +2508,7 @@ Exit criteria:
 
 ## Phase 13: Consensus, Engine, And Beacon Boundaries
 
-### v0.72.0 - SSZ Codec Boundary
+### v0.79.0 - SSZ Codec Boundary
 
 Goal: admit or implement bounded SSZ encoding and decoding for consensus-layer
 data.
@@ -2352,7 +2530,7 @@ Exit criteria:
 - Consensus data can be decoded without weakening the execution-layer default
   graph.
 
-### v0.73.0 - Beacon Block And State Headers
+### v0.80.0 - Beacon Block And State Headers
 
 Goal: model beacon-chain headers and execution payload references.
 
@@ -2373,7 +2551,7 @@ Exit criteria:
 - Execution and consensus headers can be linked without claiming full consensus
   validation.
 
-### v0.74.0 - Consensus Light Client Updates
+### v0.81.0 - Consensus Light Client Updates
 
 Goal: verify consensus light-client update structures.
 
@@ -2394,7 +2572,7 @@ Exit criteria:
 - Beacon evidence used by execution-layer callers has an explicit verification
   path.
 
-### v0.75.0 - Engine API Types
+### v0.82.0 - Engine API Types
 
 Goal: model Engine API request and response types without implementing a client.
 
@@ -2415,7 +2593,7 @@ Exit criteria:
 - Engine API data can be represented without opening networking or consensus
   validation claims.
 
-### v0.76.0 - Engine API Validation Helpers
+### v0.83.0 - Engine API Validation Helpers
 
 Goal: validate Engine API payload boundaries before optional transport work.
 
@@ -2434,7 +2612,7 @@ Exit criteria:
 
 - Engine API helpers fail closed on malformed or inconsistent payload context.
 
-### v0.77.0 - Beacon API Boundary
+### v0.84.0 - Beacon API Boundary
 
 Goal: model Beacon REST API responses as optional, trust-scoped inputs.
 
@@ -2453,7 +2631,7 @@ Exit criteria:
 
 - Beacon API data is treated as untrusted transport data until verified.
 
-### v0.78.0 - Consensus And Engine Fuzzing
+### v0.85.0 - Consensus And Engine Fuzzing
 
 Goal: fuzz consensus and Engine API parsers before claiming support.
 
@@ -2473,7 +2651,7 @@ Exit criteria:
 
 ## Phase 14: Networking, Node, And Operations Boundaries
 
-### v0.79.0 - DevP2P And Discovery Threat Model
+### v0.86.0 - DevP2P And Discovery Threat Model
 
 Goal: decide and document the exact networking scope before implementation.
 
@@ -2493,7 +2671,7 @@ Exit criteria:
 
 - No P2P code lands before the attack surface is scoped.
 
-### v0.80.0 - RLPx And Discovery Dependency Admission
+### v0.87.0 - RLPx And Discovery Dependency Admission
 
 Goal: admit networking dependencies behind optional crates only.
 
@@ -2513,7 +2691,7 @@ Exit criteria:
 
 - Networking dependencies are isolated from protocol-core users.
 
-### v0.81.0 - Eth Wire Protocol Messages
+### v0.88.0 - Eth Wire Protocol Messages
 
 Goal: encode and decode Ethereum wire protocol messages with strict limits.
 
@@ -2534,7 +2712,7 @@ Exit criteria:
 
 - Wire messages are parser-safe before peer management is attempted.
 
-### v0.82.0 - Snap Protocol Messages
+### v0.89.0 - Snap Protocol Messages
 
 Goal: encode and decode snap-sync protocol messages.
 
@@ -2552,7 +2730,7 @@ Exit criteria:
 
 - Snap data remains untrusted until verified by trie/proof helpers.
 
-### v0.83.0 - Txpool And Mempool Policy
+### v0.90.0 - Txpool And Mempool Policy
 
 Goal: provide transaction pool policy helpers without running an implicit node.
 
@@ -2573,7 +2751,7 @@ Exit criteria:
 - Mempool helpers are deterministic policy tools, not a hidden networking
   service.
 
-### v0.84.0 - Sync Orchestration Boundaries
+### v0.91.0 - Sync Orchestration Boundaries
 
 Goal: model sync workflows as explicit state machines.
 
@@ -2596,7 +2774,7 @@ Exit criteria:
   evidence, and operational diagnostics do not leak sensitive transaction or
   endpoint material.
 
-### v0.85.0 - Mining, Builder, And Validator Boundary Decision
+### v0.92.0 - Mining, Builder, And Validator Boundary Decision
 
 Goal: decide what local block production or validator-adjacent support belongs
 in this crate family.
@@ -2620,7 +2798,7 @@ Exit criteria:
 
 ## Phase 15: Production Hardening
 
-### v0.86.0 - Platform Matrix
+### v0.93.0 - Platform Matrix
 
 Goal: verify supported operating systems and targets.
 
@@ -2638,7 +2816,7 @@ Exit criteria:
 
 - Platform support claims match tested evidence.
 
-### v0.87.0 - Kani Formal Verification Harness
+### v0.94.0 - Kani Formal Verification Harness
 
 Goal: add bounded formal verification evidence for the highest-risk arithmetic,
 parser, and typestate invariants.
@@ -2665,7 +2843,7 @@ Exit criteria:
 - Formal verification covers selected bounded invariants before API stability
   and external audit remediation begin.
 
-### v0.88.0 - Public API Stability Pass
+### v0.95.0 - Public API Stability Pass
 
 Goal: stabilize the public API shape before 1.0.
 
@@ -2684,7 +2862,7 @@ Exit criteria:
 
 - The remaining 1.0 work is hardening, not API invention.
 
-### v0.89.0 - Independent Audit Remediation
+### v0.96.0 - Independent Audit Remediation
 
 Goal: fix findings from external review.
 
@@ -2704,7 +2882,7 @@ Exit criteria:
 
 - No unresolved critical or high findings remain.
 
-### v0.90.0 - Release Evidence Dry Run
+### v0.97.0 - Release Evidence Dry Run
 
 Goal: prove the release-evidence process before 1.0.
 
@@ -2718,7 +2896,7 @@ Deliverables:
 
 Verification:
 
-- release-readiness script for `v0.90.0`.
+- release-readiness script for `v0.97.0`.
 
 Exit criteria:
 
