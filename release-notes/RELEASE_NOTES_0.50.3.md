@@ -1,6 +1,6 @@
 # eth 0.50.3 Release Notes
 
-Status: implementation ready; awaiting pentest before tagging.
+Status: release-ready; pentest passed after remediation and retest.
 
 `0.50.3` adds the validated BN254 pairing tuple streaming domain required by
 the Miller-loop releases. The release still keeps EIP-197 non-empty pairing
@@ -65,8 +65,7 @@ and pentested independently.
   token was `Copy`. The token design was removed. `EvmPrecompilePlan` now
   charges the supplied `EvmGasMeter` inside `execute_bn254_pairing` on every
   call before it reaches pairing validation work.
-- Permanent report will be added at `security/pentest/v0.50.3.md` after the
-  final retest.
+- Permanent report: `security/pentest/v0.50.3.md`.
 
 ## Versioning
 

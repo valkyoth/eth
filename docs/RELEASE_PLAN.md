@@ -1963,7 +1963,7 @@ Exit criteria:
 
 ### v0.50.3 - Native EVM BN254 Pairing Tuple Stream
 
-Status: implementation ready; awaiting pentest before tagging.
+Status: release-ready; pentest passed after remediation and retest.
 
 Goal: add the validated, allocation-free `(G1, G2)` tuple stream that the
 Miller-loop releases will consume.
