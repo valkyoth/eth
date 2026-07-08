@@ -134,3 +134,9 @@ implementations are admitted. ECRECOVER intentionally accepts high-s
 signatures because EIP-2 changed transaction validity but left the recover
 precompile unchanged. ModExp intentionally rejects operands above the release
 cap until larger first-party bigint execution is separately reviewed.
+
+Future interpreter dispatch must preserve the fail-closed boundary: a
+`PrecompileBackendUnavailable` result from a planned precompile is a reverting
+precompile call, never success or a no-op. Dispatch must also charge the
+precompile gas before invoking validation or execution for expensive paths such
+as BN254 pairing subgroup checks.

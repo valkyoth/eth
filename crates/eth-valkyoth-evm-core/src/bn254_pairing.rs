@@ -1,7 +1,7 @@
 use crate::{
     EVM_PRECOMPILE_INPUT_LIMIT, EvmCoreError, EvmPrecompileKind, EvmPrecompilePlan,
     bn254::validate_g1_point, bn254_g2::read_g2_point,
-    bn254_tower::checked_tower_accumulation_shape,
+    bn254_tower::exercise_tower_accumulation_shape,
 };
 
 /// Byte length of one EIP-197 BN254 pairing tuple.
@@ -37,13 +37,17 @@ pub fn parse_bn254_pairing_input(input: &[u8]) -> Result<usize, EvmCoreError> {
 /// Empty input is fully specified by EIP-197 and returns the 32-byte word
 /// encoding one. Non-empty inputs are parsed and then fail closed until the
 /// pairing algebra releases are admitted.
+///
+/// Interpreter integrations must charge the matching precompile gas before
+/// calling this function and must map `PrecompileBackendUnavailable` to a
+/// reverting precompile call, never to success or a no-op.
 pub fn execute_bn254_pairing(input: &[u8], output: &mut [u8]) -> Result<usize, EvmCoreError> {
     let target = output
         .get_mut(..EVM_BN254_PAIRING_OUTPUT_BYTES)
         .ok_or(EvmCoreError::PrecompileOutputTooSmall)?;
     let pairs = parse_bn254_pairing_input(input)?;
     if pairs != 0 {
-        let _ = checked_tower_accumulation_shape(pairs);
+        let _ = exercise_tower_accumulation_shape(pairs);
         return Err(EvmCoreError::PrecompileBackendUnavailable);
     }
     target.fill(0);

@@ -1938,7 +1938,7 @@ Deliverables:
 - Fp6/Fp12 arithmetic split into files below the 500-line cap;
 - Fp6/Fp12 zero, one, add, subtract, multiply, square, and tower non-residue
   relations;
-- bounded internal tower-accumulation shape tied to the already validated
+- bounded internal tower exerciser tied to the already validated
   pairing tuple count while non-empty execution still fails closed;
 - official cross-client invalid-subgroup vector if one is available in the
   admitted Ethereum fixture sources;
@@ -1955,6 +1955,11 @@ Exit criteria:
 
 - The Fp6/Fp12 tower foundation is deterministic, bounded by tuple count when
   reached from pairing execution, and ready for line-function review.
+- The temporary tower exerciser is documented as reachability scaffolding only,
+  not a validation boundary.
+- Future dispatcher integration must treat `PrecompileBackendUnavailable` as a
+  reverting precompile call and must charge the precompile gas before invoking
+  pairing parsing or execution.
 
 ### v0.50.3 - Native EVM BN254 Miller Loop
 
@@ -2065,6 +2070,11 @@ Deliverables:
 - harness mapping tests to supported forks and unsupported-skip reasons;
 - differential comparison against REVM or another independent engine if
   admitted as a reference path;
+- precompile-dispatch integration tests proving unavailable native backends
+  revert rather than succeed or no-op;
+- precompile gas-order integration tests proving gas is deducted before
+  invoking expensive validation or execution paths such as BN254 pairing
+  subgroup checks;
 - report of claimed and unclaimed forks/opcodes.
 
 Verification:

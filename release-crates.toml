@@ -56,7 +56,7 @@ previous_version = "0.14.0"
 version = "0.15.0"
 change = "code"
 publish = true
-reason = "Adds the dependency-free BN254 Fp6/Fp12 tower foundation and bounded internal tower accumulation shape while non-empty pairing algebra remains fail-closed."
+reason = "Adds the dependency-free BN254 Fp6/Fp12 tower foundation and bounded internal tower exerciser while non-empty pairing algebra remains fail-closed."
 
 [crates."eth-valkyoth-evm"]
 previous_version = "0.10.0"

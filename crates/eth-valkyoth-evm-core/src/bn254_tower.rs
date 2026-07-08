@@ -111,7 +111,12 @@ fn mul_fp2_by_nonresidue(value: Fp2) -> Fp2 {
     value.mul(Fp2::NINE_PLUS_I)
 }
 
-pub(crate) fn checked_tower_accumulation_shape(pairs: usize) -> Fp12 {
+/// Exercises the Fp12 tower over the validated pair count before the Miller
+/// loop lands.
+///
+/// This is not a validation boundary and its result is intentionally unused by
+/// the current fail-closed pairing path.
+pub(crate) fn exercise_tower_accumulation_shape(pairs: usize) -> Fp12 {
     let step = Fp12 {
         c0: Fp6::ONE.square().add(Fp6::ZERO),
         c1: Fp6::ONE.sub(Fp6::ZERO),

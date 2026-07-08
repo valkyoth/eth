@@ -1,6 +1,6 @@
 # eth 0.50.2 Release Notes
 
-Status: implementation ready; awaiting pentest before tagging.
+Status: pentest remediation applied; awaiting retest before tagging.
 
 `0.50.2` adds the dependency-free BN254 Fp6/Fp12 tower foundation required by
 the future Miller-loop release. The release keeps EIP-197 non-empty pairing
@@ -10,7 +10,7 @@ pairing tuple count.
 
 This release still does not claim non-empty BN254 pairing algebra. Non-empty
 pairing inputs are parsed, checked for G1 validity and G2 curve/subgroup
-membership, run through the bounded tower-accumulation shape, and then fail
+membership, run through the bounded tower exerciser, and then fail
 closed with `PrecompileBackendUnavailable` until the Miller-loop and
 final-exponentiation releases are admitted.
 
@@ -18,7 +18,7 @@ final-exponentiation releases are admitted.
 
 - Private dependency-free `Fp6` arithmetic over `Fp2[v] / (v^3 - (9 + i))`.
 - Private dependency-free `Fp12` arithmetic over `Fp6[w] / (w^2 - v)`.
-- Bounded internal tower-accumulation shape reached from non-empty pairing
+- Bounded internal tower exerciser reached from non-empty pairing
   execution before the existing fail-closed return.
 - Algebraic tests for `v^3 = 9 + i`, `w^2 = v`, identity/zero behavior,
   squaring, and distributivity.
@@ -34,6 +34,9 @@ final-exponentiation releases are admitted.
 - README, crate version matrix, EVM fork matrix, spec matrix, implementation
   plan, and release plan now document the tower foundation and updated pairing
   schedule.
+- Pentest follow-up renamed the temporary tower reachability helper so it is
+  clear that it performs no validation, and documented the future dispatcher
+  requirement that unavailable precompile backends revert after gas charging.
 - The release gate is available as `scripts/release_0_50_2_gate.sh`.
 
 ## Security Notes
@@ -42,8 +45,11 @@ final-exponentiation releases are admitted.
   added.
 - The tower operations are reached only after the existing input-size,
   tuple-length, G1, G2 field, G2 curve, and G2 subgroup validation boundaries.
-- The tower-accumulation shape is bounded by `pairs = input.len() / 192`, and
+- The tower exerciser is bounded by `pairs = input.len() / 192`, and
   `input.len()` remains capped by `EVM_PRECOMPILE_INPUT_LIMIT`.
+- Future interpreter dispatch must charge precompile gas before invoking BN254
+  pairing parsing/execution and must map `PrecompileBackendUnavailable` to a
+  reverting precompile call, never to success or a no-op.
 - Non-empty pairing algebra, BLAKE2F, KZG, and BLS12-381 precompiles still fail
   closed until their release slices are admitted.
 
@@ -56,8 +62,10 @@ final-exponentiation releases are admitted.
 
 ## Pentest
 
-- Pending. Permanent report will be added at `security/pentest/v0.50.2.md`
-  after the external pentest and retest.
+- Initial pentest found no direct code defects. Remediation documents two
+  future integration requirements and clarifies the temporary tower exerciser.
+- Permanent report will be added at `security/pentest/v0.50.2.md` after the
+  external retest.
 
 ## Versioning
 

@@ -52,7 +52,7 @@ publication when a crate is marked `unchanged`.
 | `eth-valkyoth-verify` | `0.21.0` | `0.21.0` | `unchanged` | No | No package changes for v0.50.2. |
 | `eth-valkyoth-derive` | `0.17.2` | `0.17.2` | `unchanged` | No | No package changes for v0.50.2. |
 | `eth-valkyoth-sanitization` | `0.7.4` | `0.7.4` | `unchanged` | No | No package changes for v0.50.2. |
-| `eth-valkyoth-evm-core` | `0.14.0` | `0.15.0` | `code` | Yes | Adds the dependency-free BN254 Fp6/Fp12 tower foundation and bounded internal tower accumulation shape while non-empty pairing algebra remains fail-closed. |
+| `eth-valkyoth-evm-core` | `0.14.0` | `0.15.0` | `code` | Yes | Adds the dependency-free BN254 Fp6/Fp12 tower foundation and bounded internal tower exerciser while non-empty pairing algebra remains fail-closed. |
 | `eth-valkyoth-evm` | `0.10.0` | `0.10.0` | `unchanged` | No | No package changes for v0.50.2. |
 | `eth-valkyoth-rpc` | `0.7.0` | `0.7.0` | `unchanged` | No | No package changes for v0.50.2. |
 | `eth-valkyoth-signer` | `0.7.3` | `0.7.3` | `unchanged` | No | No package changes for v0.50.2. |
