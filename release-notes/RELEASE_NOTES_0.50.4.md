@@ -1,6 +1,6 @@
 # eth 0.50.4 Release Notes
 
-Status: implementation ready; awaiting pentest before tagging.
+Status: release candidate; pentest remediation and retest complete.
 
 `0.50.4` adds the first-party BN254 line-function foundation required before
 the Miller-loop release. The release introduces deterministic G2 line
@@ -59,9 +59,9 @@ execution remains fail-closed.
 
 ## Pentest
 
-- Initial review received in root `PENTEST.md`; remediation implemented.
-  Permanent report will be added at `security/pentest/v0.50.4.md` after retest
-  passes.
+- Initial review received in root `PENTEST.md`; remediation implemented and
+  retest passed. The permanent release report is recorded at
+  `security/pentest/v0.50.4.md`.
 
 ## Versioning
 
