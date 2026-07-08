@@ -1,6 +1,6 @@
 # eth 0.47.0 Release Notes
 
-Status: implementation ready; awaiting pentest.
+Status: ready for tag after clean pentest and retest.
 
 `0.47.0` adds native ECRECOVER precompile execution to
 `eth-valkyoth-evm-core`. The implementation keeps the core crate free of
@@ -77,8 +77,12 @@ order, while transaction validation continues to enforce low-s elsewhere.
 
 ## Pentest
 
-- Pending. Permanent report will be added as `security/pentest/v0.47.0.md`
-  after the release-scope pentest and retest are complete.
+- PASS. Permanent report: `security/pentest/v0.47.0.md`.
+- The initial review reported two low/informational hardening items: missing
+  ECRECOVER frame fuzz coverage and the future risk of reusing transaction
+  low-s recovery helpers for the precompile backend.
+- The remediation added the fuzz target and documented the high-s backend
+  contract. Retest was clean.
 
 ## Versioning
 
