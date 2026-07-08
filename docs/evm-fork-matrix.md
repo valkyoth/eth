@@ -140,5 +140,7 @@ cap until larger first-party bigint execution is separately reviewed.
 Future interpreter dispatch must preserve the fail-closed boundary: a
 `PrecompileBackendUnavailable` result from a planned precompile is a reverting
 precompile call, never success or a no-op. Dispatch must also charge the
-precompile gas before invoking validation or execution for expensive paths such
-as BN254 pairing subgroup checks.
+precompile gas before invoking validation or execution for expensive paths.
+The dispatcher-facing plan methods for ModExp, BN254 add/mul, and BN254
+pairing require a mutable gas meter and charge before their low-level
+unmetered helpers are reached.

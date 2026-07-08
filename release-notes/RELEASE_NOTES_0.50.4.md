@@ -27,6 +27,9 @@ execution remains fail-closed.
   `eth-valkyoth-evm-core 0.17.0`.
 - The fail-closed BN254 pairing tower exerciser now consumes the line-function
   carrier rather than the prior tuple-shape carrier.
+- Dispatcher-facing `EvmPrecompilePlan` execution for ModExp and BN254 add/mul
+  now requires a mutable gas meter and charges before validation or arithmetic
+  is reachable, matching the pairing hardening pattern.
 - The release gate is available as `scripts/release_0_50_4_gate.sh`.
 
 ## Security Notes
@@ -38,6 +41,12 @@ execution remains fail-closed.
   key operations.
 - Line helpers are internal and do not expose or claim a public pairing result.
 - Non-empty pairing execution still returns `PrecompileBackendUnavailable`.
+- The low-level free functions remain public unmetered primitives for
+  standalone tests and fuzzing. Interpreter dispatch must use the gas-gated
+  `EvmPrecompilePlan` methods instead.
+- Initial pentest finding F-01 was remediated by extending gas-gated plan
+  execution to BN254 add/mul and ModExp. Finding F-02 was addressed with
+  explicit unmetered-helper documentation and release-plan coverage.
 
 ## Verification
 
@@ -45,11 +54,14 @@ execution remains fail-closed.
 - `cargo test -p eth-valkyoth-evm-core bn254_line`
 - `cargo test -p eth-valkyoth-evm-core bn254_pairing`
 - `cargo clippy -p eth-valkyoth-evm-core --all-targets --all-features -- -D warnings`
+- `cargo test -p eth-valkyoth-evm-core bn254`
+- `cargo test -p eth-valkyoth-evm-core modexp`
 
 ## Pentest
 
-- Pending. Permanent report will be added at `security/pentest/v0.50.4.md`
-  after the external pentest and retest.
+- Initial review received in root `PENTEST.md`; remediation implemented.
+  Permanent report will be added at `security/pentest/v0.50.4.md` after retest
+  passes.
 
 ## Versioning
 

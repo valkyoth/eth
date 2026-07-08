@@ -100,7 +100,9 @@ The first production value is:
   validation and a precomputed twist coefficient; `v0.50.2` adds the Fp6/Fp12
   tower foundation; `v0.50.3` adds validated tuple streaming and the
   atomic gas-meter charging for dispatcher-facing pairing execution; `v0.50.4`
-  adds the line-function foundation; `v0.50.5` through `v0.50.6` schedule the
+  adds the line-function foundation and extends dispatcher-facing gas-meter
+  charging to ModExp and BN254 add/mul plan execution; `v0.50.5` through
+  `v0.50.6` schedule the
   Miller loop and final exponentiation before non-empty pairing execution is
   claimed;
   `v0.51.0` and `v0.52.0` cover the remaining cryptographic precompile

@@ -56,7 +56,7 @@ previous_version = "0.16.0"
 version = "0.17.0"
 change = "code"
 publish = true
-reason = "Adds first-party BN254 G2 line-function coefficient helpers and G1-to-Fp12 line evaluation wiring while non-empty pairing execution remains fail-closed."
+reason = "Adds first-party BN254 G2 line-function coefficient helpers, G1-to-Fp12 line evaluation wiring, and gas-gated ModExp/BN254 add/mul plan execution while non-empty pairing execution remains fail-closed."
 
 [crates."eth-valkyoth-evm"]
 previous_version = "0.10.0"
@@ -98,4 +98,4 @@ previous_version = "0.50.3"
 version = "0.50.4"
 change = "code"
 publish = true
-reason = "Updates the optional evm-core dependency to eth-valkyoth-evm-core 0.17.0 and documents the BN254 line-function foundation."
+reason = "Updates the optional evm-core dependency to eth-valkyoth-evm-core 0.17.0 and documents the BN254 line-function and gas-gated precompile-plan foundation."

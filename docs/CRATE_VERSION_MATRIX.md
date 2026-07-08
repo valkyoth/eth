@@ -53,13 +53,13 @@ publication when a crate is marked `unchanged`.
 | `eth-valkyoth-verify` | `0.21.0` | `0.21.0` | `unchanged` | No | No package changes for v0.50.4. |
 | `eth-valkyoth-derive` | `0.17.2` | `0.17.2` | `unchanged` | No | No package changes for v0.50.4. |
 | `eth-valkyoth-sanitization` | `0.7.4` | `0.7.4` | `unchanged` | No | No package changes for v0.50.4. |
-| `eth-valkyoth-evm-core` | `0.16.0` | `0.17.0` | `code` | Yes | Adds first-party BN254 G2 line-function coefficient helpers and G1-to-Fp12 line evaluation wiring while non-empty pairing execution remains fail-closed. |
+| `eth-valkyoth-evm-core` | `0.16.0` | `0.17.0` | `code` | Yes | Adds first-party BN254 G2 line-function coefficient helpers, G1-to-Fp12 line evaluation wiring, and gas-gated ModExp/BN254 add/mul plan execution while non-empty pairing execution remains fail-closed. |
 | `eth-valkyoth-evm` | `0.10.0` | `0.10.0` | `unchanged` | No | No package changes for v0.50.4. |
 | `eth-valkyoth-rpc` | `0.7.0` | `0.7.0` | `unchanged` | No | No package changes for v0.50.4. |
 | `eth-valkyoth-signer` | `0.7.3` | `0.7.3` | `unchanged` | No | No package changes for v0.50.4. |
 | `eth-valkyoth-reth` | `0.7.0` | `0.7.0` | `unchanged` | No | No package changes for v0.50.4. |
 | `eth-valkyoth-testkit` | `0.7.0` | `0.7.0` | `unchanged` | No | No package changes for v0.50.4. |
-| `eth` | `0.50.3` | `0.50.4` | `code` | Yes | Updates the optional `evm-core` dependency to `eth-valkyoth-evm-core 0.17.0` and documents the BN254 line-function foundation. |
+| `eth` | `0.50.3` | `0.50.4` | `code` | Yes | Updates the optional `evm-core` dependency to `eth-valkyoth-evm-core 0.17.0` and documents the BN254 line-function and gas-gated precompile-plan foundation. |
 
 Update this table and `release-crates.toml` in the same commit whenever a crate
 changes release state.

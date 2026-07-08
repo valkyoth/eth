@@ -1,6 +1,6 @@
 use crate::{
-    EVM_BN254_POINT_BYTES, EvmCoreError, EvmFork, EvmGas, EvmPrecompileKind, EvmPrecompilePlan,
-    EvmPrecompileRegistry, execute_bn254_add, execute_bn254_mul,
+    EVM_BN254_POINT_BYTES, EvmCoreError, EvmFork, EvmGas, EvmGasMeter, EvmPrecompileKind,
+    EvmPrecompilePlan, EvmPrecompileRegistry, execute_bn254_add, execute_bn254_mul,
 };
 
 fn registry(fork: EvmFork) -> Result<EvmPrecompileRegistry, EvmCoreError> {
@@ -13,9 +13,14 @@ fn bn254_add_matches_generator_doubling_vector() -> Result<(), EvmCoreError> {
     let input = two_generator_points();
     let plan = EvmPrecompilePlan::try_new(descriptor, &input)?;
     let mut output = [0u8; EVM_BN254_POINT_BYTES];
+    let mut gas_meter = EvmGasMeter::try_new(EvmGas::new(500))?;
 
     assert_eq!(plan.gas_cost(), Some(EvmGas::new(500)));
-    assert_eq!(plan.execute_bn254_add(&input, &mut output)?, 64);
+    assert_eq!(
+        plan.execute_bn254_add(&mut gas_meter, &input, &mut output)?,
+        64
+    );
+    assert_eq!(gas_meter.used(), EvmGas::new(500));
     assert_eq!(
         output,
         point(
@@ -32,9 +37,14 @@ fn bn254_mul_matches_generator_scalar_vector() -> Result<(), EvmCoreError> {
     let input = generator_mul_input(3);
     let plan = EvmPrecompilePlan::try_new(descriptor, &input)?;
     let mut output = [0u8; EVM_BN254_POINT_BYTES];
+    let mut gas_meter = EvmGasMeter::try_new(EvmGas::new(6_000))?;
 
     assert_eq!(plan.gas_cost(), Some(EvmGas::new(6_000)));
-    assert_eq!(plan.execute_bn254_mul(&input, &mut output)?, 64);
+    assert_eq!(
+        plan.execute_bn254_mul(&mut gas_meter, &input, &mut output)?,
+        64
+    );
+    assert_eq!(gas_meter.used(), EvmGas::new(6_000));
     assert_eq!(
         output,
         point(
@@ -158,17 +168,53 @@ fn bn254_plan_checks_kind_and_input_length() -> Result<(), EvmCoreError> {
     let add = registry(EvmFork::BYZANTIUM)?.descriptor(EvmPrecompileKind::Bn254Add)?;
     let plan = EvmPrecompilePlan::try_new(add, &two_generator_points())?;
     let mut output = [0u8; EVM_BN254_POINT_BYTES];
+    let mut gas_meter = EvmGasMeter::try_new(EvmGas::new(40_000))?;
     assert_eq!(
-        plan.execute_bn254_add(&[], &mut output),
+        plan.execute_bn254_add(&mut gas_meter, &[], &mut output),
         Err(EvmCoreError::PrecompileInvalidInputLength)
     );
 
     let mul = registry(EvmFork::BYZANTIUM)?.descriptor(EvmPrecompileKind::Bn254Mul)?;
     let wrong_plan = EvmPrecompilePlan::try_new(mul, &generator_mul_input(2))?;
     assert_eq!(
-        wrong_plan.execute_bn254_add(&generator_mul_input(2), &mut output),
+        wrong_plan.execute_bn254_add(&mut gas_meter, &generator_mul_input(2), &mut output),
         Err(EvmCoreError::PrecompileBackendUnavailable)
     );
+    Ok(())
+}
+
+#[test]
+fn bn254_add_and_mul_plans_charge_every_execution() -> Result<(), EvmCoreError> {
+    let input = two_generator_points();
+    let add = registry(EvmFork::ISTANBUL)?.descriptor(EvmPrecompileKind::Bn254Add)?;
+    let add_plan = EvmPrecompilePlan::try_new(add, &input)?;
+    let mut gas_meter = EvmGasMeter::try_new(EvmGas::new(300))?;
+    let mut output = [0u8; EVM_BN254_POINT_BYTES];
+    assert_eq!(
+        add_plan.execute_bn254_add(&mut gas_meter, &input, &mut output)?,
+        EVM_BN254_POINT_BYTES
+    );
+    assert_eq!(gas_meter.used(), EvmGas::new(150));
+    assert_eq!(
+        add_plan.execute_bn254_add(&mut gas_meter, &input, &mut output)?,
+        EVM_BN254_POINT_BYTES
+    );
+    assert_eq!(gas_meter.used(), EvmGas::new(300));
+
+    let input = generator_mul_input(2);
+    let mul = registry(EvmFork::ISTANBUL)?.descriptor(EvmPrecompileKind::Bn254Mul)?;
+    let mul_plan = EvmPrecompilePlan::try_new(mul, &input)?;
+    let mut gas_meter = EvmGasMeter::try_new(EvmGas::new(12_000))?;
+    assert_eq!(
+        mul_plan.execute_bn254_mul(&mut gas_meter, &input, &mut output)?,
+        EVM_BN254_POINT_BYTES
+    );
+    assert_eq!(gas_meter.used(), EvmGas::new(6_000));
+    assert_eq!(
+        mul_plan.execute_bn254_mul(&mut gas_meter, &input, &mut output)?,
+        EVM_BN254_POINT_BYTES
+    );
+    assert_eq!(gas_meter.used(), EvmGas::new(12_000));
     Ok(())
 }
 

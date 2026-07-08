@@ -1994,7 +1994,8 @@ Exit criteria:
 
 ### v0.50.4 - Native EVM BN254 Line-Function Foundation
 
-Status: implementation ready; awaiting pentest before tagging.
+Status: implementation ready; initial pentest remediated, awaiting retest
+before tagging.
 
 Goal: implement reviewed first-party line-function arithmetic over the admitted
 Fp12 tower and validated tuple stream.
@@ -2004,17 +2005,25 @@ Deliverables:
 - line-function coefficient representation;
 - point doubling and addition line helpers over validated G2 inputs;
 - G1 evaluation wiring without final Miller accumulation claims;
+- dispatcher-facing gas-gated plan execution for ModExp and BN254 add/mul,
+  matching the pairing hardening boundary;
+- explicit documentation that low-level free functions are unmetered helpers for
+  standalone tests and fuzzing, not interpreter-dispatch entry points;
 - focused algebraic and differential tests for line-helper shape.
 
 Verification:
 
 - line-function relation tests over admitted generator fixtures;
+- gas-charge regression tests for BN254 add, BN254 mul, and ModExp plan calls;
 - dependency review for any dev-only reference engine.
 
 Exit criteria:
 
 - Line-function arithmetic is deterministic, bounded, and vector-backed before
   Miller-loop accumulation consumes it.
+- Dispatcher-facing ModExp, BN254 add/mul, and BN254 pairing execution cannot
+  reach validation or arithmetic work without charging the supplied gas meter
+  for that call.
 
 ### v0.50.5 - Native EVM BN254 Miller Loop
 

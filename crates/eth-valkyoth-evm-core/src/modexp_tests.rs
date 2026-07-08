@@ -3,7 +3,7 @@ extern crate std;
 use std::vec::Vec;
 
 use crate::{
-    EVM_MODEXP_MAX_OPERAND_BYTES, EvmCoreError, EvmFork, EvmGas, EvmPrecompileKind,
+    EVM_MODEXP_MAX_OPERAND_BYTES, EvmCoreError, EvmFork, EvmGas, EvmGasMeter, EvmPrecompileKind,
     EvmPrecompilePlan, EvmPrecompileRegistry, execute_modexp, parse_modexp_input,
 };
 
@@ -43,9 +43,14 @@ fn modexp_executes_eip198_fermat_vector() -> Result<(), EvmCoreError> {
     let descriptor = registry(EvmFork::BYZANTIUM)?.descriptor(EvmPrecompileKind::Modexp)?;
     let plan = EvmPrecompilePlan::try_new(descriptor, &input)?;
     let mut output = [0u8; 32];
+    let mut gas_meter = EvmGasMeter::try_new(EvmGas::new(13_056))?;
 
     assert_eq!(plan.gas_cost(), Some(EvmGas::new(13_056)));
-    assert_eq!(plan.execute_modexp(&input, &mut output)?, 32);
+    assert_eq!(
+        plan.execute_modexp(&mut gas_meter, &input, &mut output)?,
+        32
+    );
+    assert_eq!(gas_meter.used(), EvmGas::new(13_056));
     assert_eq!(output[31], 1);
     assert!(output[..31].iter().all(|byte| *byte == 0));
     Ok(())
@@ -142,17 +147,34 @@ fn modexp_plan_rejects_wrong_input_len_or_kind() -> Result<(), EvmCoreError> {
     let input = modexp_input(0, 0, 0);
     let plan = EvmPrecompilePlan::try_new(descriptor, &input)?;
     let mut output = [0u8; 1];
+    let mut gas_meter = EvmGasMeter::try_new(EvmGas::new(1_000))?;
     assert_eq!(
-        plan.execute_modexp(&[], &mut output),
+        plan.execute_modexp(&mut gas_meter, &[], &mut output),
         Err(EvmCoreError::PrecompileInvalidInputLength)
     );
 
     let identity = registry(EvmFork::FRONTIER)?.descriptor(EvmPrecompileKind::Identity)?;
     let wrong_plan = EvmPrecompilePlan::try_new(identity, &input)?;
     assert_eq!(
-        wrong_plan.execute_modexp(&input, &mut output),
+        wrong_plan.execute_modexp(&mut gas_meter, &input, &mut output),
         Err(EvmCoreError::PrecompileBackendUnavailable)
     );
+    Ok(())
+}
+
+#[test]
+fn modexp_plan_charges_every_execution() -> Result<(), EvmCoreError> {
+    let descriptor = registry(EvmFork::BERLIN)?.descriptor(EvmPrecompileKind::Modexp)?;
+    let input = modexp_input(0, 0, 0);
+    let plan = EvmPrecompilePlan::try_new(descriptor, &input)?;
+    let mut gas_meter = EvmGasMeter::try_new(EvmGas::new(400))?;
+    let mut output = [0u8; 0];
+
+    assert_eq!(plan.gas_cost(), Some(EvmGas::new(200)));
+    assert_eq!(plan.execute_modexp(&mut gas_meter, &input, &mut output)?, 0);
+    assert_eq!(gas_meter.used(), EvmGas::new(200));
+    assert_eq!(plan.execute_modexp(&mut gas_meter, &input, &mut output)?, 0);
+    assert_eq!(gas_meter.used(), EvmGas::new(400));
     Ok(())
 }
 

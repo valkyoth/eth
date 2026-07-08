@@ -413,9 +413,9 @@ canonical field and point validation. BN254 pairing validates bounded frames,
 G2 curve membership, and G2 subgroup membership, streams validated tuples into
 the internal tower accumulator, evaluates the admitted line-function carrier,
 executes empty input as one, and fails closed for non-empty algebra until the
-Miller-loop and final-exponentiation releases. Dispatcher-facing BN254 pairing
-plan execution charges the supplied gas meter on every call before validation
-work is reachable. Remaining
+Miller-loop and final-exponentiation releases. Dispatcher-facing ModExp,
+BN254 add/mul, and BN254 pairing plan execution charges the supplied gas meter
+on every call before validation or arithmetic work is reachable. Remaining
 cryptographic precompiles are exposed as bounded plans and return a
 backend-unavailable error until audited backends or first-party implementations
 are admitted.

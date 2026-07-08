@@ -18,6 +18,11 @@ pub(crate) struct Bn254PairingTuple {
 
 /// Validates the EIP-197 BN254 pairing input frame and returns its tuple count.
 ///
+/// This is an unmetered low-level parser for standalone validation and fuzzing.
+/// Interpreter integrations must prefer
+/// [`EvmPrecompilePlan::execute_bn254_pairing`], which charges the supplied gas
+/// meter before tuple validation and subgroup checks are reachable.
+///
 /// This release validates tuple segmentation, G1 points, G2 field elements, G2
 /// curve membership, and G2 subgroup membership. Non-empty pairing execution is
 /// intentionally fail-closed until the dedicated pairing-algebra releases.
@@ -57,7 +62,7 @@ pub(crate) fn for_each_valid_pairing_tuple(
 /// encoding one. Non-empty inputs are parsed and then fail closed until the
 /// pairing algebra releases are admitted.
 ///
-/// This is the low-level execution primitive. Interpreter integrations should
+/// This is the unmetered low-level execution primitive. Interpreter integrations should
 /// prefer [`EvmPrecompilePlan::execute_bn254_pairing`], which charges the
 /// supplied gas meter before validation work is reachable. Integrations must
 /// map `PrecompileBackendUnavailable` to a reverting precompile call, never to
