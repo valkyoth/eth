@@ -72,6 +72,36 @@ fn modexp_uses_berlin_eip2565_gas_floor_and_formula() -> Result<(), EvmCoreError
 }
 
 #[test]
+fn modexp_gas_uses_declared_short_exponent_width() -> Result<(), EvmCoreError> {
+    let mut exponent_three = modexp_input(1, 1, 32);
+    exponent_three.push(3);
+    exponent_three.push(3);
+    exponent_three.extend_from_slice(&[0xff; 32]);
+
+    let byzantium = registry(EvmFork::BYZANTIUM)?.descriptor(EvmPrecompileKind::Modexp)?;
+    assert_eq!(
+        EvmPrecompilePlan::try_new(byzantium, &exponent_three)?.gas_cost(),
+        Some(EvmGas::new(51))
+    );
+
+    let berlin = registry(EvmFork::BERLIN)?.descriptor(EvmPrecompileKind::Modexp)?;
+    assert_eq!(
+        EvmPrecompilePlan::try_new(berlin, &exponent_three)?.gas_cost(),
+        Some(EvmGas::new(200))
+    );
+
+    let mut exponent_zero = modexp_input(1, 1, 32);
+    exponent_zero.push(3);
+    exponent_zero.push(0);
+    exponent_zero.extend_from_slice(&[0xff; 32]);
+    assert_eq!(
+        EvmPrecompilePlan::try_new(byzantium, &exponent_zero)?.gas_cost(),
+        Some(EvmGas::new(51))
+    );
+    Ok(())
+}
+
+#[test]
 fn modexp_zero_modulus_and_zero_modulus_len_are_bounded() -> Result<(), EvmCoreError> {
     let mut empty_modulus = modexp_input(1, 1, 0);
     empty_modulus.extend_from_slice(&[9, 3]);

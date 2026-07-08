@@ -15,6 +15,9 @@ mod hash_precompile;
 mod jumpdest;
 mod memory;
 mod modexp;
+mod modexp_execute;
+#[cfg(feature = "testing")]
+mod modexp_testing;
 mod opcode;
 mod precompile;
 mod precompile_execute;
@@ -46,6 +49,8 @@ pub use modexp::{
     EVM_MODEXP_HEADER_BYTES, EVM_MODEXP_MAX_OPERAND_BYTES, EvmModExpInput, execute_modexp,
     parse_modexp_input,
 };
+#[cfg(feature = "testing")]
+pub use modexp_testing::testing_modexp_gas_cost;
 pub use opcode::{EvmOpcode, OpcodeClass, OpcodeInfo};
 pub use precompile::{
     EVM_PRECOMPILE_INPUT_LIMIT, EvmPrecompileDescriptor, EvmPrecompileGasPolicy,

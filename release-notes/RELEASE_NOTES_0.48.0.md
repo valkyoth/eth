@@ -27,8 +27,8 @@ unbounded CPU or memory use.
 - `fuzz/fuzz_targets/modexp_frame.rs` for ModExp header, length, and bounded
   execution fuzz coverage.
 - Tests for the EIP-198 Fermat example, Berlin EIP-2565 gas, zero modulus,
-  empty modulus length, right-padding, oversized operands, short output, and
-  wrong-plan dispatch.
+  short-exponent gas, empty modulus length, right-padding, oversized operands,
+  short output, and wrong-plan dispatch.
 
 ## Changed
 
@@ -48,7 +48,11 @@ unbounded CPU or memory use.
   above `EVM_MODEXP_MAX_OPERAND_BYTES`.
 - ModExp checks the output buffer before executing the bigint loop.
 - ModExp treats calldata as right-padded, matching EIP-198.
+- ModExp gas calculation now has targeted coverage for short declared exponent
+  widths, including one-byte exponent and zero-exponent cases.
 - Zero modulus returns a zero-filled output of the declared modulus length.
+- `execute_modexp` is documented as public-EVM-calldata arithmetic and not
+  constant-time secret-key arithmetic.
 - Remaining cryptographic precompiles still fail closed with
   `PrecompileBackendUnavailable`.
 

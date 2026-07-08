@@ -1,6 +1,9 @@
 #![no_main]
 
-use eth_valkyoth_evm_core::{EVM_MODEXP_MAX_OPERAND_BYTES, execute_modexp, parse_modexp_input};
+use eth_valkyoth_evm_core::{
+    EVM_MODEXP_MAX_OPERAND_BYTES, EvmFork, execute_modexp, parse_modexp_input,
+    testing_modexp_gas_cost,
+};
 use libfuzzer_sys::fuzz_target;
 
 fuzz_target!(|data: &[u8]| {
@@ -16,4 +19,7 @@ fuzz_target!(|data: &[u8]| {
     if let Ok(len) = result {
         assert!(len <= EVM_MODEXP_MAX_OPERAND_BYTES);
     }
+
+    let _ = testing_modexp_gas_cost(EvmFork::BYZANTIUM, data);
+    let _ = testing_modexp_gas_cost(EvmFork::BERLIN, data);
 });

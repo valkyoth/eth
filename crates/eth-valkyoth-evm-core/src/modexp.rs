@@ -1,8 +1,6 @@
-use crate::{
-    EVM_PRECOMPILE_INPUT_LIMIT, EvmCoreError, EvmFork, EvmGas, EvmPrecompileKind, EvmPrecompilePlan,
-};
+use crate::{EVM_PRECOMPILE_INPUT_LIMIT, EvmCoreError, EvmFork, EvmGas};
 
-/// Canonical ModExp header byte length: base, exponent, and modulus lengths.
+/// ModExp header byte length: base, exponent, and modulus lengths.
 pub const EVM_MODEXP_HEADER_BYTES: usize = 96;
 /// Maximum operand bytes executed by this release's no-alloc ModExp engine.
 pub const EVM_MODEXP_MAX_OPERAND_BYTES: usize = 64;
@@ -44,20 +42,13 @@ impl EvmModExpInput {
     }
 }
 
-impl EvmPrecompilePlan {
-    /// Executes the bounded first-party ModExp precompile into `output`.
-    pub fn execute_modexp(self, input: &[u8], output: &mut [u8]) -> Result<usize, EvmCoreError> {
-        if self.descriptor().kind != EvmPrecompileKind::Modexp {
-            return Err(EvmCoreError::PrecompileBackendUnavailable);
-        }
-        if input.len() != self.input_len() {
-            return Err(EvmCoreError::PrecompileInvalidInputLength);
-        }
-        execute_modexp(input, output)
-    }
-}
-
 /// Parses ModExp input lengths using EIP-198 right-padding semantics.
+///
+/// # Security
+///
+/// This parser is for public EVM precompile calldata. It performs bounded
+/// length validation only and must not be treated as a constant-time parser for
+/// secret-dependent arithmetic inputs.
 pub fn parse_modexp_input(input: &[u8]) -> Result<EvmModExpInput, EvmCoreError> {
     if input.len() > EVM_PRECOMPILE_INPUT_LIMIT {
         return Err(EvmCoreError::PrecompileInputTooLarge);
@@ -74,6 +65,12 @@ pub fn parse_modexp_input(input: &[u8]) -> Result<EvmModExpInput, EvmCoreError> 
 }
 
 /// Executes the bounded first-party ModExp precompile.
+///
+/// # Security
+///
+/// This function implements public EVM precompile arithmetic. It is not
+/// constant-time and must not be reused for secret-dependent private-key or
+/// RSA private-exponent operations.
 pub fn execute_modexp(input: &[u8], output: &mut [u8]) -> Result<usize, EvmCoreError> {
     let parsed = parse_modexp_input(input)?;
     let target = output
@@ -201,8 +198,8 @@ fn adjusted_exponent_len(
     if exponent_len == 0 {
         return Ok(0);
     }
-    let exponent_head = padded_word(input, exponent_offset);
-    let highest = highest_bit_index(&exponent_head);
+    let head_len = exponent_len.min(WORD_BYTES);
+    let highest = highest_bit_index_in_field(input, exponent_offset, head_len);
     if exponent_len <= WORD_BYTES {
         return Ok(highest.map_or(0, u128::from));
     }
@@ -263,14 +260,19 @@ fn gas_u64(value: u128) -> Result<u64, EvmCoreError> {
     u64::try_from(value).map_err(|_| EvmCoreError::PrecompileGasOverflow)
 }
 
-fn highest_bit_index(bytes: &[u8; WORD_BYTES]) -> Option<u8> {
-    for (byte_index, byte) in bytes.iter().enumerate() {
-        if *byte == 0 {
+fn highest_bit_index_in_field(input: &[u8], offset: usize, len: usize) -> Option<u8> {
+    for index in 0..len {
+        let byte = input
+            .get(offset.saturating_add(index))
+            .copied()
+            .unwrap_or(0);
+        if byte == 0 {
             continue;
         }
-        let byte_index = u8::try_from(byte_index).ok()?;
+        let byte_index = u8::try_from(index).ok()?;
         let leading = u8::try_from(byte.leading_zeros()).ok()?;
-        let byte_offset = 31u8.checked_sub(byte_index)?;
+        let width = u8::try_from(len).ok()?;
+        let byte_offset = width.checked_sub(1)?.checked_sub(byte_index)?;
         let bit_offset = 7u8.checked_sub(leading)?;
         return byte_offset.checked_mul(8)?.checked_add(bit_offset);
     }
