@@ -111,6 +111,9 @@ impl G2Point {
     }
 
     fn is_in_subgroup(self) -> bool {
+        // This is intentionally ordinary variable-time arithmetic over public
+        // calldata and the fixed public BN254 group order. Do not reuse it for
+        // secret scalar multiplication.
         ProjectiveG2Point::from_affine(self)
             .mul_scalar(BN254_GROUP_ORDER)
             .is_infinity()

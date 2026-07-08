@@ -1935,6 +1935,8 @@ Deliverables:
 - Fp6/Fp12 arithmetic split into files below the 500-line cap;
 - line-function and Miller-loop implementation;
 - batch accumulation limits tied to gas and input length;
+- official cross-client invalid-subgroup vector if one is available in the
+  admitted Ethereum fixture sources;
 - differential vectors against an admitted reference engine.
 
 Verification:

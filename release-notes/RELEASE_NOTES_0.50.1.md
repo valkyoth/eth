@@ -39,9 +39,13 @@ Miller-loop and final-exponentiation releases are admitted.
   added.
 - The subgroup check uses first-party Fp2 projective scalar multiplication by
   the BN254 group order and accepts only points where `[r]P` is infinity.
+- The subgroup check is variable-time over public calldata and the fixed public
+  BN254 group order; it is not a secret-scalar primitive.
 - Infinity remains accepted as the subgroup identity.
 - Field range, curve membership, input length, input ceiling, output size, and
   fail-closed non-empty execution behavior from `v0.50.0` remain enforced.
+- Future EVM dispatch integration must charge the already planned precompile
+  gas before running pairing frame validation or execution.
 - Non-empty pairing algebra, BLAKE2F, KZG, and BLS12-381 precompiles still fail
   closed until their release slices are admitted.
 
