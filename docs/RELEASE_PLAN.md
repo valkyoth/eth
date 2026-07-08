@@ -1869,24 +1869,95 @@ Exit criteria:
 - BN254 add/mul execution is isolated and vector-backed before pairing support
   adds more complex batch behavior.
 
-### v0.50.0 - Native EVM BN254 Pairing Precompile
+### v0.50.0 - Native EVM BN254 Pairing Frame Boundary
 
-Goal: execute BN254 pairing with explicit batch limits and fork-aware gas.
+Goal: admit the BN254 pairing precompile frame safely before non-empty pairing
+algebra is implemented.
 
 Deliverables:
 
 - pairing input parser for 192-byte tuple batches;
 - empty-input success behavior;
 - Byzantium and Istanbul gas formulas;
-- batch-size and computation limits relative to gas;
-- dependency/first-party pairing implementation review.
+- G1 and G2 field/range/curve validation for pairing frames;
+- non-empty pairing execution fails closed after validation;
+- batch-size limits relative to the release precompile input cap.
+
+Verification:
+
+- official G2 generator curve-membership vector;
+- malformed tuple, invalid point, and oversized batch tests;
+- fuzz target for pairing input segmentation.
+
+Exit criteria:
+
+- Pairing frame validation cannot create an unbounded CPU path independent of
+  gas and release limits.
+- Non-empty pairing algebra remains explicitly fail-closed until subgroup and
+  pairing arithmetic releases land.
+
+### v0.50.1 - Native EVM BN254 Pairing Subgroup Validation
+
+Goal: add reviewed G2 subgroup validation before any non-empty pairing result
+can be trusted.
+
+Deliverables:
+
+- first-party G2 scalar multiplication or equivalent subgroup check;
+- explicit subgroup error mapping at the precompile boundary;
+- official invalid-subgroup vectors;
+- fuzz coverage for validated non-empty tuple frames.
+
+Verification:
+
+- official subgroup and invalid-point vectors;
+- `cargo test -p eth-valkyoth-evm-core`;
+- `cargo clippy -p eth-valkyoth-evm-core --all-targets --all-features -- -D warnings`.
+
+Exit criteria:
+
+- Every non-empty pairing tuple is rejected unless both G1 and G2 inputs are in
+  the admitted groups.
+
+### v0.50.2 - Native EVM BN254 Miller Loop
+
+Goal: implement the first-party Miller loop over validated BN254 pairing tuples.
+
+Deliverables:
+
+- Fp6/Fp12 arithmetic split into files below the 500-line cap;
+- line-function and Miller-loop implementation;
+- batch accumulation limits tied to gas and input length;
+- differential vectors against an admitted reference engine.
+
+Verification:
+
+- official positive and negative pairing vectors without final-exponentiation
+  shortcuts;
+- fuzz target for batch accumulation shape;
+- dependency review for any dev-only reference engine.
+
+Exit criteria:
+
+- Miller-loop accumulation is deterministic, bounded, and vector-backed.
+
+### v0.50.3 - Native EVM BN254 Pairing Final Exponentiation
+
+Goal: complete non-empty EIP-197 BN254 pairing execution.
+
+Deliverables:
+
+- first-party final exponentiation;
+- full `execute_bn254_pairing` non-empty result path;
+- official EIP-197 and execution-spec vectors;
+- benchmark notes relative to Byzantium and Istanbul gas assumptions.
 
 Verification:
 
 - official BN254 pairing vectors;
-- malformed tuple, invalid point, and oversized batch tests;
 - differential vectors against an admitted reference engine;
-- fuzz target for pairing input segmentation.
+- fuzz target for non-empty pairing execution;
+- pentest gate before tagging.
 
 Exit criteria:
 

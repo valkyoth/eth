@@ -7,6 +7,7 @@ extern crate std;
 
 mod bn254;
 mod bn254_field;
+mod bn254_pairing;
 mod call;
 mod ecrecover;
 mod error;
@@ -34,6 +35,10 @@ mod word;
 pub use bn254::{
     EVM_BN254_ADD_INPUT_BYTES, EVM_BN254_MUL_INPUT_BYTES, EVM_BN254_POINT_BYTES, execute_bn254_add,
     execute_bn254_mul,
+};
+pub use bn254_pairing::{
+    EVM_BN254_PAIRING_ITEM_BYTES, EVM_BN254_PAIRING_OUTPUT_BYTES, execute_bn254_pairing,
+    parse_bn254_pairing_input,
 };
 pub use call::{
     EVM_CALL_DEPTH_LIMIT, EvmCallFramePolicy, EvmCallKind, EvmCallPlan, EvmCreateKind,
@@ -99,3 +104,7 @@ mod modexp_tests;
 #[cfg(test)]
 #[path = "bn254_tests.rs"]
 mod bn254_tests;
+
+#[cfg(test)]
+#[path = "bn254_pairing_tests.rs"]
+mod bn254_pairing_tests;

@@ -233,6 +233,10 @@ fn read_point(input: &[u8], offset: usize) -> Result<Point, EvmCoreError> {
     Point::new(x, y)
 }
 
+pub(crate) fn validate_g1_point(input: &[u8], offset: usize) -> Result<(), EvmCoreError> {
+    read_point(input, offset).map(|_| ())
+}
+
 fn write_point(point: Point, output: &mut [u8]) {
     if point.infinity {
         output.fill(0);

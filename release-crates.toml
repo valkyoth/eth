@@ -1,5 +1,5 @@
 [release]
-version = "0.49.0"
+version = "0.50.0"
 policy = "independent"
 
 [crates."eth-valkyoth-codec"]
@@ -7,95 +7,95 @@ previous_version = "0.19.0"
 version = "0.19.0"
 change = "unchanged"
 publish = false
-reason = "No package changes for v0.49.0."
+reason = "No package changes for v0.50.0."
 
 [crates."eth-valkyoth-primitives"]
 previous_version = "0.11.2"
 version = "0.11.2"
 change = "unchanged"
 publish = false
-reason = "No package changes for v0.49.0."
+reason = "No package changes for v0.50.0."
 
 [crates."eth-valkyoth-hash"]
 previous_version = "0.11.2"
 version = "0.11.2"
 change = "unchanged"
 publish = false
-reason = "No package changes for v0.49.0."
+reason = "No package changes for v0.50.0."
 
 [crates."eth-valkyoth-protocol"]
 previous_version = "0.25.2"
 version = "0.25.2"
 change = "unchanged"
 publish = false
-reason = "No package changes for v0.49.0."
+reason = "No package changes for v0.50.0."
 
 [crates."eth-valkyoth-verify"]
 previous_version = "0.21.0"
 version = "0.21.0"
 change = "unchanged"
 publish = false
-reason = "No package changes for v0.49.0."
+reason = "No package changes for v0.50.0."
 
 [crates."eth-valkyoth-derive"]
 previous_version = "0.17.2"
 version = "0.17.2"
 change = "unchanged"
 publish = false
-reason = "No package changes for v0.49.0."
+reason = "No package changes for v0.50.0."
 
 [crates."eth-valkyoth-sanitization"]
 previous_version = "0.7.4"
 version = "0.7.4"
 change = "unchanged"
 publish = false
-reason = "No package changes for v0.49.0."
+reason = "No package changes for v0.50.0."
 
 [crates."eth-valkyoth-evm-core"]
-previous_version = "0.11.0"
-version = "0.12.0"
+previous_version = "0.12.0"
+version = "0.13.0"
 change = "code"
 publish = true
-reason = "Adds dependency-free BN254 add and scalar-multiplication precompile execution with canonical field and point validation."
+reason = "Adds bounded BN254 pairing frame parsing, empty-input execution, G2 curve validation, and fail-closed non-empty pairing behavior."
 
 [crates."eth-valkyoth-evm"]
 previous_version = "0.10.0"
 version = "0.10.0"
 change = "unchanged"
 publish = false
-reason = "No package changes for v0.49.0."
+reason = "No package changes for v0.50.0."
 
 [crates."eth-valkyoth-rpc"]
 previous_version = "0.7.0"
 version = "0.7.0"
 change = "unchanged"
 publish = false
-reason = "No package changes for v0.49.0."
+reason = "No package changes for v0.50.0."
 
 [crates."eth-valkyoth-signer"]
 previous_version = "0.7.3"
 version = "0.7.3"
 change = "unchanged"
 publish = false
-reason = "No package changes for v0.49.0."
+reason = "No package changes for v0.50.0."
 
 [crates."eth-valkyoth-reth"]
 previous_version = "0.7.0"
 version = "0.7.0"
 change = "unchanged"
 publish = false
-reason = "No package changes for v0.49.0."
+reason = "No package changes for v0.50.0."
 
 [crates."eth-valkyoth-testkit"]
 previous_version = "0.7.0"
 version = "0.7.0"
 change = "unchanged"
 publish = false
-reason = "No package changes for v0.49.0."
+reason = "No package changes for v0.50.0."
 
 [crates.eth]
-previous_version = "0.48.0"
-version = "0.49.0"
+previous_version = "0.49.0"
+version = "0.50.0"
 change = "code"
 publish = true
-reason = "Updates the optional evm-core dependency to eth-valkyoth-evm-core 0.12.0 and documents native BN254 add/mul execution."
+reason = "Updates the optional evm-core dependency to eth-valkyoth-evm-core 0.13.0 and documents the BN254 pairing frame boundary."

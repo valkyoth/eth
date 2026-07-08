@@ -17,6 +17,17 @@ impl Fp {
         }
     }
 
+    pub(crate) fn from_u64(value: u64) -> Self {
+        let mut bytes = [0u8; 32];
+        if let Some(target) = bytes.get_mut(24..) {
+            target.copy_from_slice(&value.to_be_bytes());
+        }
+        match Self::from_be_bytes(bytes) {
+            Some(field) => field,
+            None => Self::ZERO,
+        }
+    }
+
     pub(crate) fn to_be_bytes(self) -> [u8; 32] {
         self.0.to_canonical().to_be_bytes()
     }

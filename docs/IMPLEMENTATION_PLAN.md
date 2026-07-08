@@ -95,9 +95,12 @@ The first production value is:
   ECRECOVER execution through explicit caller-provided secp256k1 and Keccak
   boundaries; `v0.48.0` adds bounded first-party ModExp parsing, fork-aware
   gas, execution, and fuzzing; `v0.49.0` adds dependency-free BN254 add/mul
-  execution; `v0.50.0` through `v0.52.0` now version remaining cryptographic
-  precompile execution or backend-admission decisions before later releases add
-  nested execution and committed state writes.
+  execution; `v0.50.0` adds the BN254 pairing frame boundary with empty-input
+  execution and non-empty fail-closed behavior; `v0.50.1` through `v0.50.3`
+  schedule subgroup validation, Miller loop, and final exponentiation before
+  non-empty pairing execution is claimed; `v0.51.0` and `v0.52.0` cover the
+  remaining cryptographic precompile execution or backend-admission decisions
+  before later releases add nested execution and committed state writes.
 - `eth-valkyoth-rpc`: optional RPC policy over admitted provider transports.
 - `eth-valkyoth-abi`: optional ABI, contract-call, event, error, and common
   contract-standard helpers.
