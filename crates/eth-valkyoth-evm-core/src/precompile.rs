@@ -112,6 +112,10 @@ pub enum EvmPrecompileImplementation {
     NativeRipemd160,
     /// The release can execute bounded dependency-free ModExp.
     NativeModexp,
+    /// The release can execute dependency-free BN254 point addition.
+    NativeBn254Add,
+    /// The release can execute dependency-free BN254 scalar multiplication.
+    NativeBn254Mul,
     /// The release admits planning only; execution must fail closed.
     RequiresCryptoBackend,
 }
@@ -324,6 +328,8 @@ const fn descriptor_for_kind(kind: EvmPrecompileKind, fork: EvmFork) -> EvmPreco
         EvmPrecompileKind::Ripemd160 => EvmPrecompileImplementation::NativeRipemd160,
         EvmPrecompileKind::Identity => EvmPrecompileImplementation::NativeIdentity,
         EvmPrecompileKind::Modexp => EvmPrecompileImplementation::NativeModexp,
+        EvmPrecompileKind::Bn254Add => EvmPrecompileImplementation::NativeBn254Add,
+        EvmPrecompileKind::Bn254Mul => EvmPrecompileImplementation::NativeBn254Mul,
         _ => EvmPrecompileImplementation::RequiresCryptoBackend,
     };
     EvmPrecompileDescriptor {

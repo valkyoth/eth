@@ -148,7 +148,7 @@ graphs.
 | `v0.37.4` | Completed: retained `subtle` as a narrow reviewed exception and added executable quarantine checks for `alloy-rlp` plus dev fixture `serde_json`. |
 | `v0.37.5` | Completed: documented and gated optional parser and sanitization bridges so `serde`, `serde_json`, and `sanitization` cannot become accidental defaults. |
 | `v0.40.0` through `v0.54.0` | Build first-party EVM execution phases; REVM remains reference or compatibility only if admitted. |
-| `v0.46.0` through `v0.52.0` | Admit or implement cryptographic precompile backends only with conformance vectors, dependency review, fuzzing where applicable, and pentest gates. `v0.46.0` begins this with first-party dependency-free SHA-256 and RIPEMD-160. `v0.47.0` adds ECRECOVER execution through caller-provided secp256k1 and Keccak traits without adding default crypto dependencies. `v0.48.0` adds bounded first-party ModExp execution without a bigint dependency. |
+| `v0.46.0` through `v0.52.0` | Admit or implement cryptographic precompile backends only with conformance vectors, dependency review, fuzzing where applicable, and pentest gates. `v0.46.0` begins this with first-party dependency-free SHA-256 and RIPEMD-160. `v0.47.0` adds ECRECOVER execution through caller-provided secp256k1 and Keccak traits without adding default crypto dependencies. `v0.48.0` adds bounded first-party ModExp execution without a bigint dependency. `v0.49.0` adds dependency-free first-party BN254 add/mul execution. |
 | `v0.61.0` | Admit or reject KZG/blob cryptography backends before blob consensus validation is claimed. |
 | `v0.94.0` | Add Kani proof harnesses as extra assurance for selected critical invariants. |
 

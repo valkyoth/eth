@@ -30,7 +30,13 @@ fn registry_is_fork_aware() -> Result<(), EvmCoreError> {
         registry(EvmFork::BYZANTIUM)?
             .descriptor(EvmPrecompileKind::Bn254Add)?
             .implementation,
-        EvmPrecompileImplementation::RequiresCryptoBackend
+        EvmPrecompileImplementation::NativeBn254Add
+    );
+    assert_eq!(
+        registry(EvmFork::BYZANTIUM)?
+            .descriptor(EvmPrecompileKind::Bn254Mul)?
+            .implementation,
+        EvmPrecompileImplementation::NativeBn254Mul
     );
     assert_eq!(
         registry(EvmFork::FRONTIER)?
@@ -148,8 +154,8 @@ fn input_policy_rejects_unbounded_or_bad_lengths() -> Result<(), EvmCoreError> {
 #[test]
 fn unsupported_crypto_precompile_plans_do_not_execute_without_backend() -> Result<(), EvmCoreError>
 {
-    let descriptor = registry(EvmFork::BYZANTIUM)?.descriptor(EvmPrecompileKind::Bn254Add)?;
-    let plan = EvmPrecompilePlan::try_new(descriptor, &[0u8; 1])?;
+    let descriptor = registry(EvmFork::BYZANTIUM)?.descriptor(EvmPrecompileKind::Bn254Pairing)?;
+    let plan = EvmPrecompilePlan::try_new(descriptor, &[])?;
     let mut output = [0u8; 32];
     assert_eq!(
         plan.execute_identity(&[0u8; 1], &mut output),

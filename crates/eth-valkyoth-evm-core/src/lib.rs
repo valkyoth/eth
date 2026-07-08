@@ -5,6 +5,8 @@
 #[cfg(feature = "std")]
 extern crate std;
 
+mod bn254;
+mod bn254_field;
 mod call;
 mod ecrecover;
 mod error;
@@ -29,6 +31,10 @@ mod state;
 mod state_execution;
 mod word;
 
+pub use bn254::{
+    EVM_BN254_ADD_INPUT_BYTES, EVM_BN254_MUL_INPUT_BYTES, EVM_BN254_POINT_BYTES, execute_bn254_add,
+    execute_bn254_mul,
+};
 pub use call::{
     EVM_CALL_DEPTH_LIMIT, EvmCallFramePolicy, EvmCallKind, EvmCallPlan, EvmCreateKind,
     EvmCreatePlan, EvmJournal, EvmJournalCheckpoint, EvmMemoryRange, EvmReturnDataRange,
@@ -89,3 +95,7 @@ mod ecrecover_tests;
 #[cfg(test)]
 #[path = "modexp_tests.rs"]
 mod modexp_tests;
+
+#[cfg(test)]
+#[path = "bn254_tests.rs"]
+mod bn254_tests;

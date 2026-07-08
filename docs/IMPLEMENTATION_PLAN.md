@@ -94,8 +94,9 @@ The first production value is:
   dependency-free SHA-256 and RIPEMD-160 precompile execution; `v0.47.0` adds
   ECRECOVER execution through explicit caller-provided secp256k1 and Keccak
   boundaries; `v0.48.0` adds bounded first-party ModExp parsing, fork-aware
-  gas, execution, and fuzzing; `v0.49.0` through `v0.52.0` now version
-  remaining cryptographic precompile execution or backend-admission decisions before later releases add
+  gas, execution, and fuzzing; `v0.49.0` adds dependency-free BN254 add/mul
+  execution; `v0.50.0` through `v0.52.0` now version remaining cryptographic
+  precompile execution or backend-admission decisions before later releases add
   nested execution and committed state writes.
 - `eth-valkyoth-rpc`: optional RPC policy over admitted provider transports.
 - `eth-valkyoth-abi`: optional ABI, contract-call, event, error, and common
