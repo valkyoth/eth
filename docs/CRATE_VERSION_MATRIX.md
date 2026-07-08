@@ -1,6 +1,7 @@
 # Crate Version Matrix
 
-Status: `v0.50.3` adds the validated BN254 pairing tuple stream.
+Status: `v0.50.3` adds the validated BN254 pairing tuple stream and gas-charge
+token gate for dispatcher-facing pairing execution.
 `eth-valkyoth-evm-core` now exposes dependency-free `no_std` stack, memory,
 word, opcode, program-counter, fork, gas, state, error, and bounded
 interpreter domains for basic stack/control-flow bytecode plus explicit host
@@ -12,7 +13,8 @@ policies while execution still fails closed before host calls or commits. The
 precompile domain adds fork-aware descriptors, bounded input/gas planning,
 dependency-free identity, SHA-256, RIPEMD-160, bounded ModExp, BN254 add/mul,
 and BN254 pairing empty-input plus G2 subgroup validation, Fp6/Fp12 tower
-arithmetic, and validated tuple streaming. ECRECOVER executes through explicit
+arithmetic, validated tuple streaming, and a plan-level gas-charge token for
+dispatcher-facing pairing execution. ECRECOVER executes through explicit
 caller-provided secp256k1 and Keccak boundaries while non-empty BN254 pairing
 algebra and remaining cryptographic precompiles fail closed until audited
 backends or first-party implementations are admitted.
@@ -52,13 +54,13 @@ publication when a crate is marked `unchanged`.
 | `eth-valkyoth-verify` | `0.21.0` | `0.21.0` | `unchanged` | No | No package changes for v0.50.3. |
 | `eth-valkyoth-derive` | `0.17.2` | `0.17.2` | `unchanged` | No | No package changes for v0.50.3. |
 | `eth-valkyoth-sanitization` | `0.7.4` | `0.7.4` | `unchanged` | No | No package changes for v0.50.3. |
-| `eth-valkyoth-evm-core` | `0.15.0` | `0.16.0` | `code` | Yes | Adds the validated BN254 pairing tuple streaming domain and feeds the fail-closed tower accumulator from typed G1/G2 tuples without allocation. |
+| `eth-valkyoth-evm-core` | `0.15.0` | `0.16.0` | `code` | Yes | Adds the validated BN254 pairing tuple streaming domain, feeds the fail-closed tower accumulator from typed G1/G2 tuples without allocation, and requires a gas-charge token for plan-level pairing execution. |
 | `eth-valkyoth-evm` | `0.10.0` | `0.10.0` | `unchanged` | No | No package changes for v0.50.3. |
 | `eth-valkyoth-rpc` | `0.7.0` | `0.7.0` | `unchanged` | No | No package changes for v0.50.3. |
 | `eth-valkyoth-signer` | `0.7.3` | `0.7.3` | `unchanged` | No | No package changes for v0.50.3. |
 | `eth-valkyoth-reth` | `0.7.0` | `0.7.0` | `unchanged` | No | No package changes for v0.50.3. |
 | `eth-valkyoth-testkit` | `0.7.0` | `0.7.0` | `unchanged` | No | No package changes for v0.50.3. |
-| `eth` | `0.50.2` | `0.50.3` | `code` | Yes | Updates the optional `evm-core` dependency to `eth-valkyoth-evm-core 0.16.0` and documents the validated BN254 pairing tuple streaming domain. |
+| `eth` | `0.50.2` | `0.50.3` | `code` | Yes | Updates the optional `evm-core` dependency to `eth-valkyoth-evm-core 0.16.0` and documents the validated BN254 pairing tuple stream plus gas-charge token gate. |
 
 Update this table and `release-crates.toml` in the same commit whenever a crate
 changes release state.

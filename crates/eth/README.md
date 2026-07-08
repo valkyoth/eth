@@ -413,7 +413,9 @@ canonical field and point validation. BN254 pairing validates bounded frames,
 G2 curve membership, and G2 subgroup membership, streams validated tuples into
 the internal tower accumulator, executes empty input as one, and fails closed
 for non-empty algebra until the line-function, Miller-loop, and
-final-exponentiation releases. Remaining
+final-exponentiation releases. Dispatcher-facing BN254 pairing plan execution
+requires the non-forgeable gas-charge token returned by
+`EvmPrecompilePlan::charge_gas` before validation work is reachable. Remaining
 cryptographic precompiles are exposed as bounded plans and return a
 backend-unavailable error until audited backends or first-party implementations
 are admitted.

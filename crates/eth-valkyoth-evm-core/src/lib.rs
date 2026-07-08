@@ -25,6 +25,7 @@ mod modexp_execute;
 mod modexp_testing;
 mod opcode;
 mod precompile;
+mod precompile_charge;
 mod precompile_execute;
 mod program_counter;
 mod ripemd160;
@@ -70,6 +71,7 @@ pub use precompile::{
     EvmPrecompileImplementation, EvmPrecompileInputPolicy, EvmPrecompileKind, EvmPrecompilePlan,
     EvmPrecompileRegistry, execute_identity, execute_ripemd160, execute_sha256,
 };
+pub use precompile_charge::EvmPrecompileGasCharge;
 pub use program_counter::ProgramCounter;
 pub use stack::{EVM_STACK_LIMIT, EvmStack};
 pub use state::{EvmAccessSet, EvmAccessStatus, EvmAccount, EvmAddress, EvmState, EvmStateContext};

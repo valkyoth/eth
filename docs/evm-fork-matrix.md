@@ -111,8 +111,9 @@ gas, execution, and fuzzing with an explicit operand cap. `v0.49.0` adds
 first-party BN254 add/mul execution with canonical field and point validation.
 `v0.50.0` adds the BN254 pairing frame boundary with empty-input execution and
 G2 curve validation. `v0.50.1` adds G2 subgroup validation, `v0.50.2` adds the
-Fp6/Fp12 tower foundation, and `v0.50.3` adds the validated tuple stream while
-non-empty pairing algebra remains fail-closed. The registry recognizes the
+Fp6/Fp12 tower foundation, and `v0.50.3` adds the validated tuple stream plus
+the gas-charge token gate while non-empty pairing algebra remains fail-closed.
+The registry recognizes the
 canonical low-address accounts for Frontier precompiles,
 Byzantium modular exponentiation and BN254 precompiles, Istanbul BLAKE2F,
 Cancun KZG point evaluation, and Prague BLS12-381 precompiles.
