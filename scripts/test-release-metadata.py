@@ -32,9 +32,10 @@ def main() -> int:
     assert '["package"]["version"]' in validator
     assert "sed -n" not in validator
     assert "test \"$release_version\" = \"$eth_manifest_version\"" in validator
-    assert 'current_pentest_report="security/pentest/v${release_version}.md"' in validator
-    assert 'test -f "$current_pentest_report"' in validator
-    assert "grep -q '^Status: PASS$' \"$current_pentest_report\"" in validator
+    assert "test ! -f PENTEST.md" in validator
+    assert 'current_pentest_report="security/pentest/v${release_version}.md"' not in validator
+    assert 'test -f "$current_pentest_report"' not in validator
+    assert "grep -q '^Status: PASS$' \"$current_pentest_report\"" not in validator
 
     print("release metadata tests passed")
     return 0

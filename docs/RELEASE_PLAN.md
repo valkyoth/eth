@@ -66,9 +66,12 @@ A version is not tag-ready until:
 - the pentest report has non-blank `Tester:` and `Scope:` fields;
 - the pentest report has a `Date: YYYY-MM-DD` field;
 - `scripts/validate-release-metadata.sh` derives the current version from
-  `release-crates.toml`, checks it matches the `eth` manifest version, and
-  requires the matching `security/pentest/vX.Y.Z.md` report to have
-  `Status: PASS`;
+  `release-crates.toml` and checks it matches the `eth` manifest version
+  without requiring the still-pending current pentest report, so normal CI can
+  pass on implementation and retest commits;
+- `scripts/validate-release-readiness.sh vX.Y.Z` requires the matching
+  `security/pentest/vX.Y.Z.md` report to have `Status: PASS` and is called by
+  release gates before tagging or publishing;
 - `sbom/eth.spdx.json` exists and is non-empty;
 - the tag does not already exist locally;
 - `scripts/validate-release-readiness.sh vX.Y.Z` passes.
@@ -103,7 +106,8 @@ Use this loop for every version:
    `PENTEST.md`.
 4. Findings are reviewed and fixed.
 5. Documentation, tests, and release notes are updated for the fixes.
-6. `PENTEST.md` is removed after findings are handled.
+6. `PENTEST.md` is removed after findings are handled, before the remediation
+   commit is finalized.
 7. Local gates are run again.
 8. GitHub CI and CodeQL default setup are checked after the fix commit.
 9. A permanent report is written at `security/pentest/vX.Y.Z.md` only when the

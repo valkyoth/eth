@@ -2,6 +2,7 @@
 set -eu
 
 scripts/checks.sh
+scripts/validate-release-readiness.sh v0.50.4
 scripts/check_latest_tools.sh
 scripts/check_ethereum_upstream.py
 scripts/check_runtime_dependency_policy.py
