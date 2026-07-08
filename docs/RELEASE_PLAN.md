@@ -1871,6 +1871,8 @@ Exit criteria:
 
 ### v0.50.0 - Native EVM BN254 Pairing Frame Boundary
 
+Status: release candidate; pentest and retest complete.
+
 Goal: admit the BN254 pairing precompile frame safely before non-empty pairing
 algebra is implemented.
 

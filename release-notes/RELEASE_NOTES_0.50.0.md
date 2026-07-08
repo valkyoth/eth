@@ -1,6 +1,6 @@
 # eth 0.50.0 Release Notes
 
-Status: implementation ready; awaiting pentest.
+Status: release candidate; pentest and retest complete.
 
 `0.50.0` adds the bounded BN254 pairing precompile frame boundary to
 `eth-valkyoth-evm-core`. The release implements EIP-197 input segmentation,
@@ -77,8 +77,10 @@ algebra releases are admitted.
 
 ## Pentest
 
-- Pending. Permanent report will be added as `security/pentest/v0.50.0.md`
-  after the release-scope pentest and retest are complete.
+- Permanent report: `security/pentest/v0.50.0.md`.
+- The release-scope review found no exploitable findings. One non-security
+  optimization note for the G2 twist coefficient is tracked in the `v0.50.1`
+  release plan.
 
 ## Versioning
 
