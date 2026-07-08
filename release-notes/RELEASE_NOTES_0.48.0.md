@@ -1,6 +1,6 @@
 # eth 0.48.0 Release Notes
 
-Status: implementation ready; awaiting pentest.
+Status: pentest passed; awaiting tag.
 
 `0.48.0` adds bounded native ModExp precompile execution to
 `eth-valkyoth-evm-core`. The implementation keeps the crate dependency-free and
@@ -51,8 +51,8 @@ unbounded CPU or memory use.
 - ModExp gas calculation now has targeted coverage for short declared exponent
   widths, including one-byte exponent and zero-exponent cases.
 - Zero modulus returns a zero-filled output of the declared modulus length.
-- `execute_modexp` is documented as public-EVM-calldata arithmetic and not
-  constant-time secret-key arithmetic.
+- `parse_modexp_input` and `execute_modexp` are documented as
+  public-EVM-calldata arithmetic and not constant-time secret-key arithmetic.
 - Remaining cryptographic precompiles still fail closed with
   `PrecompileBackendUnavailable`.
 
@@ -77,8 +77,7 @@ unbounded CPU or memory use.
 
 ## Pentest
 
-- Pending. Permanent report will be added as `security/pentest/v0.48.0.md`
-  after the release-scope pentest and retest are complete.
+- PASS. Permanent report: `security/pentest/v0.48.0.md`.
 
 ## Versioning
 

@@ -1817,7 +1817,7 @@ Exit criteria:
 
 ### v0.48.0 - Native EVM ModExp Precompile
 
-Status: implementation ready; awaiting pentest.
+Status: pentest passed; awaiting tag.
 
 Goal: execute the Byzantium modular exponentiation precompile with bounded
 memory and gas semantics.
