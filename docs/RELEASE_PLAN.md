@@ -1928,7 +1928,7 @@ Exit criteria:
 
 ### v0.50.2 - Native EVM BN254 Fp6/Fp12 Tower Foundation
 
-Status: implementation ready; awaiting pentest before tagging.
+Status: release candidate; pentest and retest complete.
 
 Goal: add the first-party Fp6/Fp12 tower arithmetic required by the BN254
 Miller loop without claiming non-empty pairing execution yet.

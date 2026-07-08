@@ -1,6 +1,6 @@
 # eth 0.50.2 Release Notes
 
-Status: pentest remediation applied; awaiting retest before tagging.
+Status: release candidate; pentest and retest complete.
 
 `0.50.2` adds the dependency-free BN254 Fp6/Fp12 tower foundation required by
 the future Miller-loop release. The release keeps EIP-197 non-empty pairing
@@ -64,8 +64,8 @@ final-exponentiation releases are admitted.
 
 - Initial pentest found no direct code defects. Remediation documents two
   future integration requirements and clarifies the temporary tower exerciser.
-- Permanent report will be added at `security/pentest/v0.50.2.md` after the
-  external retest.
+- The external retest was clean.
+- Permanent report: `security/pentest/v0.50.2.md`.
 
 ## Versioning
 
