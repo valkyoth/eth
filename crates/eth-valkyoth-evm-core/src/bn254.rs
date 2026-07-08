@@ -99,7 +99,7 @@ impl Point {
         if point.is_on_curve() {
             Ok(point)
         } else {
-            Err(EvmCoreError::PrecompileInvalidInputLength)
+            Err(EvmCoreError::PrecompilePointNotOnCurve)
         }
     }
 
@@ -227,9 +227,9 @@ impl ProjectivePoint {
 
 fn read_point(input: &[u8], offset: usize) -> Result<Point, EvmCoreError> {
     let x = Fp::from_be_bytes(read_word(input, offset))
-        .ok_or(EvmCoreError::PrecompileInvalidInputLength)?;
+        .ok_or(EvmCoreError::PrecompileFieldElementOutOfRange)?;
     let y = Fp::from_be_bytes(read_word(input, offset.saturating_add(32)))
-        .ok_or(EvmCoreError::PrecompileInvalidInputLength)?;
+        .ok_or(EvmCoreError::PrecompileFieldElementOutOfRange)?;
     Point::new(x, y)
 }
 

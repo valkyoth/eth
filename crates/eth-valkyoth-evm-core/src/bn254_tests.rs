@@ -19,8 +19,8 @@ fn bn254_add_matches_generator_doubling_vector() -> Result<(), EvmCoreError> {
     assert_eq!(
         output,
         point(
-            "152be2524285b61240a31e7fd8a896a8c196b59fb541213f8db2db70b8ffffff",
-            "08513d7bbeb487872badcbfb5e423b3002e8ebec74ebdf58f7aad6356d400000",
+            "030644e72e131a029b85045b68181585d97816a916871ca8d3c208c16d87cfd3",
+            "15ed738c0e0a7c92e7845f96b2ae9c0a68a6a449e3538fc7ff3ebf7a5a18a2c4",
         )
     );
     Ok(())
@@ -38,8 +38,8 @@ fn bn254_mul_matches_generator_scalar_vector() -> Result<(), EvmCoreError> {
     assert_eq!(
         output,
         point(
-            "0769bf9ac56bea3ff40232bcb1b6bd158208f623acfcc3d2416fb356489d89da",
-            "1461ebb13d455deeb17993ed3d919e226e0b1e0559569bc88abb4ee8158de2b5",
+            "0769bf9ac56bea3ff40232bcb1b6bd159315d84715b8e679f2d355961915abf0",
+            "2ab799bee0489429554fdb7c8d086475319e63b40b9c5b57cdf1ff3dd9fe2261",
         )
     );
     Ok(())
@@ -75,8 +75,8 @@ fn bn254_uses_eip196_padding_and_ignores_surplus_bytes() -> Result<(), EvmCoreEr
     assert_eq!(
         output,
         point(
-            "152be2524285b61240a31e7fd8a896a8c196b59fb541213f8db2db70b8ffffff",
-            "08513d7bbeb487872badcbfb5e423b3002e8ebec74ebdf58f7aad6356d400000",
+            "030644e72e131a029b85045b68181585d97816a916871ca8d3c208c16d87cfd3",
+            "15ed738c0e0a7c92e7845f96b2ae9c0a68a6a449e3538fc7ff3ebf7a5a18a2c4",
         )
     );
 
@@ -92,7 +92,7 @@ fn bn254_rejects_invalid_field_and_point_inputs() {
     let mut output = [7u8; EVM_BN254_POINT_BYTES];
     assert_eq!(
         execute_bn254_add(&invalid_field, &mut output),
-        Err(EvmCoreError::PrecompileInvalidInputLength)
+        Err(EvmCoreError::PrecompileFieldElementOutOfRange)
     );
     assert_eq!(output, [7u8; EVM_BN254_POINT_BYTES]);
 
@@ -101,7 +101,7 @@ fn bn254_rejects_invalid_field_and_point_inputs() {
     not_on_curve[63] = 1;
     assert_eq!(
         execute_bn254_add(&not_on_curve, &mut output),
-        Err(EvmCoreError::PrecompileInvalidInputLength)
+        Err(EvmCoreError::PrecompilePointNotOnCurve)
     );
     assert_eq!(output, [7u8; EVM_BN254_POINT_BYTES]);
 }
@@ -124,6 +124,32 @@ fn bn254_mul_accepts_full_width_scalars() -> Result<(), EvmCoreError> {
         scalar.fill(0xff);
     }
     assert_eq!(execute_bn254_mul(&max_scalar, &mut output)?, 64);
+    Ok(())
+}
+
+#[test]
+fn bn254_add_and_mul_agree_for_generator_double() -> Result<(), EvmCoreError> {
+    let mut add_output = [0u8; EVM_BN254_POINT_BYTES];
+    let mut mul_output = [0u8; EVM_BN254_POINT_BYTES];
+    assert_eq!(
+        execute_bn254_add(&two_generator_points(), &mut add_output)?,
+        64
+    );
+    assert_eq!(
+        execute_bn254_mul(&generator_mul_input(2), &mut mul_output)?,
+        64
+    );
+    assert_eq!(add_output, mul_output);
+
+    let generator = point(
+        "0000000000000000000000000000000000000000000000000000000000000001",
+        "0000000000000000000000000000000000000000000000000000000000000002",
+    );
+    assert_eq!(
+        execute_bn254_mul(&generator_mul_input(1), &mut mul_output)?,
+        64
+    );
+    assert_eq!(mul_output, generator);
     Ok(())
 }
 
@@ -202,7 +228,7 @@ fn point(x: &str, y: &str) -> [u8; 64] {
 }
 
 fn field_modulus() -> [u8; 32] {
-    hex32("30644e72e131a029b85045b68181585d2833e84879b9709143e1f593f0000001")
+    hex32("30644e72e131a029b85045b68181585d97816a916871ca8d3c208c16d87cfd47")
 }
 
 fn hex32(hex: &str) -> [u8; 32] {

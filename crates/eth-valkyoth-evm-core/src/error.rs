@@ -77,6 +77,10 @@ pub enum EvmCoreError {
     PrecompileGasOverflow,
     /// The provided precompile output buffer is too small.
     PrecompileOutputTooSmall,
+    /// A precompile field element is outside its canonical field range.
+    PrecompileFieldElementOutOfRange,
+    /// A precompile elliptic-curve point is not on the admitted curve.
+    PrecompilePointNotOnCurve,
     /// The selected precompile needs a cryptographic backend not admitted here.
     PrecompileBackendUnavailable,
     /// A `PUSHn` immediate extends beyond the bytecode input.
@@ -133,6 +137,8 @@ impl EvmCoreError {
             Self::PrecompileInvalidInputLength => "precompile_invalid_input_length",
             Self::PrecompileGasOverflow => "precompile_gas_overflow",
             Self::PrecompileOutputTooSmall => "precompile_output_too_small",
+            Self::PrecompileFieldElementOutOfRange => "precompile_field_element_out_of_range",
+            Self::PrecompilePointNotOnCurve => "precompile_point_not_on_curve",
             Self::PrecompileBackendUnavailable => "precompile_backend_unavailable",
             Self::PushImmediateOutOfBounds => "push_immediate_out_of_bounds",
             Self::InvalidJumpDestination => "invalid_jump_destination",

@@ -22,10 +22,11 @@ costs can be reviewed separately.
 - First-party canonical BN254 field-element parsing and range checks.
 - Point-at-infinity handling for `(0, 0)`.
 - Invalid field and invalid point rejection.
-- Tests for generator doubling, generator scalar multiplication, empty input,
-  full-width scalar acceptance, output-buffer behavior, wrong-plan dispatch,
-  and Byzantium/Istanbul gas.
-- `fuzz/fuzz_targets/bn254_frame.rs` for BN254 add/mul frame fuzz coverage.
+- Tests for independently computed generator doubling, generator scalar
+  multiplication, empty input, full-width scalar acceptance, output-buffer
+  behavior, wrong-plan dispatch, and Byzantium/Istanbul gas.
+- `fuzz/fuzz_targets/bn254_frame.rs` for BN254 add/mul frame fuzz coverage and
+  a `P + P == 2 * P` invariant for valid fuzzed points.
 
 ## Changed
 
@@ -42,7 +43,13 @@ costs can be reviewed separately.
 - No default BN254, bigint, crypto, or allocator dependency is added.
 - Field elements are rejected when they are equal to or greater than the BN254
   field modulus.
+- The field modulus is the BN254 base-field prime used for point coordinates,
+  not the scalar-field order.
+- Field multiplication uses fixed-modulus Montgomery multiplication rather than
+  bit-serial long division.
 - Points are rejected unless they are `(0, 0)` or satisfy `y^2 = x^3 + 3`.
+- Out-of-range field elements and off-curve points return distinct named error
+  variants for diagnostics while preserving precompile reject behavior.
 - Short inputs use EIP-196 virtual zero padding, and surplus bytes are ignored
   by the fixed precompile frame parser.
 - Output buffers are checked before execution writes any result bytes.
