@@ -1,6 +1,6 @@
 # Native EVM Fork Matrix
 
-Status: `v0.50.3`.
+Status: `v0.50.4`.
 
 This document describes the first-party `eth-valkyoth-evm-core` fork model.
 It is a support matrix for the native engine bootstrap, not a full Ethereum
@@ -111,8 +111,9 @@ gas, execution, and fuzzing with an explicit operand cap. `v0.49.0` adds
 first-party BN254 add/mul execution with canonical field and point validation.
 `v0.50.0` adds the BN254 pairing frame boundary with empty-input execution and
 G2 curve validation. `v0.50.1` adds G2 subgroup validation, `v0.50.2` adds the
-Fp6/Fp12 tower foundation, and `v0.50.3` adds the validated tuple stream plus
-the atomic gas-meter charging while non-empty pairing algebra remains fail-closed.
+Fp6/Fp12 tower foundation, `v0.50.3` adds the validated tuple stream plus
+the atomic gas-meter charging, and `v0.50.4` adds line-function helpers while
+non-empty pairing algebra remains fail-closed.
 The registry recognizes the
 canonical low-address accounts for Frontier precompiles,
 Byzantium modular exponentiation and BN254 precompiles, Istanbul BLAKE2F,
@@ -122,7 +123,7 @@ Cancun KZG point evaluation, and Prague BLS12-381 precompiles.
 | --- | ---: | --- | --- |
 | `ecrecover`, SHA-256, RIPEMD-160, identity | `0x01..=0x04` | Frontier | Identity, SHA-256, and RIPEMD-160 execute dependency-free. ECRECOVER executes only with caller-provided secp256k1 and Keccak backends. |
 | Modular exponentiation | `0x05` | Byzantium | Executes through bounded first-party no-alloc bigint code with EIP-198 and EIP-2565 gas formulas and an explicit release operand cap. |
-| BN254 add/mul/pairing | `0x06..=0x08` | Byzantium | Add and scalar multiplication execute dependency-free with canonical field and point validation. Pairing validates bounded frames, G2 curve membership, and G2 subgroup membership, and executes empty input; non-empty pairing algebra fails closed until `v0.50.4` through `v0.50.6`. |
+| BN254 add/mul/pairing | `0x06..=0x08` | Byzantium | Add and scalar multiplication execute dependency-free with canonical field and point validation. Pairing validates bounded frames, G2 curve membership, G2 subgroup membership, tuple streaming, and the line-function foundation, and executes empty input; non-empty pairing algebra fails closed until `v0.50.5` through `v0.50.6`. |
 | BLAKE2F | `0x09` | Istanbul | Exact 213-byte input planning and round-count gas extraction; execution fails closed without a backend. |
 | KZG point evaluation | `0x0a` | Cancun | Exact 192-byte input planning and fixed 50,000 gas; proof verification backend is deferred. |
 | BLS12-381 precompiles | `0x0b..=0x11` | Prague | Address/fork admission only until audited BLS backends and vectors are added. |

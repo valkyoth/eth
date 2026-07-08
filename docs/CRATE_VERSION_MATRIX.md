@@ -1,7 +1,6 @@
 # Crate Version Matrix
 
-Status: `v0.50.3` adds the validated BN254 pairing tuple stream and atomic
-gas-meter charging for dispatcher-facing pairing execution.
+Status: `v0.50.4` adds the BN254 line-function foundation.
 `eth-valkyoth-evm-core` now exposes dependency-free `no_std` stack, memory,
 word, opcode, program-counter, fork, gas, state, error, and bounded
 interpreter domains for basic stack/control-flow bytecode plus explicit host
@@ -13,11 +12,11 @@ policies while execution still fails closed before host calls or commits. The
 precompile domain adds fork-aware descriptors, bounded input/gas planning,
 dependency-free identity, SHA-256, RIPEMD-160, bounded ModExp, BN254 add/mul,
 and BN254 pairing empty-input plus G2 subgroup validation, Fp6/Fp12 tower
-arithmetic, validated tuple streaming, and a plan-level gas-meter charge for
-dispatcher-facing pairing execution. ECRECOVER executes through explicit
-caller-provided secp256k1 and Keccak boundaries while non-empty BN254 pairing
-algebra and remaining cryptographic precompiles fail closed until audited
-backends or first-party implementations are admitted.
+arithmetic, validated tuple streaming, plan-level gas-meter charging, and the
+line-function foundation. ECRECOVER executes through explicit caller-provided
+secp256k1 and Keccak boundaries while non-empty BN254 pairing algebra and
+remaining cryptographic precompiles fail closed until audited backends or
+first-party implementations are admitted.
 
 `eth` uses independent crate versions. The facade crate remains the main user
 entry point, but support crates are published only when their own package
@@ -43,24 +42,24 @@ but must be republished so immutable crates.io package metadata is corrected.
 workspace manifests before release. The script refuses accidental lockstep
 publication when a crate is marked `unchanged`.
 
-## v0.50.3 Tracking Table
+## v0.50.4 Tracking Table
 
 | Crate | Published | Planned | Change | Publish | Reason |
 | --- | --- | --- | --- | --- | --- |
-| `eth-valkyoth-codec` | `0.19.0` | `0.19.0` | `unchanged` | No | No package changes for v0.50.3. |
-| `eth-valkyoth-primitives` | `0.11.2` | `0.11.2` | `unchanged` | No | No package changes for v0.50.3. |
-| `eth-valkyoth-hash` | `0.11.2` | `0.11.2` | `unchanged` | No | No package changes for v0.50.3. |
-| `eth-valkyoth-protocol` | `0.25.2` | `0.25.2` | `unchanged` | No | No package changes for v0.50.3. |
-| `eth-valkyoth-verify` | `0.21.0` | `0.21.0` | `unchanged` | No | No package changes for v0.50.3. |
-| `eth-valkyoth-derive` | `0.17.2` | `0.17.2` | `unchanged` | No | No package changes for v0.50.3. |
-| `eth-valkyoth-sanitization` | `0.7.4` | `0.7.4` | `unchanged` | No | No package changes for v0.50.3. |
-| `eth-valkyoth-evm-core` | `0.15.0` | `0.16.0` | `code` | Yes | Adds the validated BN254 pairing tuple streaming domain, feeds the fail-closed tower accumulator from typed G1/G2 tuples without allocation, and charges the supplied gas meter for every plan-level pairing execution. |
-| `eth-valkyoth-evm` | `0.10.0` | `0.10.0` | `unchanged` | No | No package changes for v0.50.3. |
-| `eth-valkyoth-rpc` | `0.7.0` | `0.7.0` | `unchanged` | No | No package changes for v0.50.3. |
-| `eth-valkyoth-signer` | `0.7.3` | `0.7.3` | `unchanged` | No | No package changes for v0.50.3. |
-| `eth-valkyoth-reth` | `0.7.0` | `0.7.0` | `unchanged` | No | No package changes for v0.50.3. |
-| `eth-valkyoth-testkit` | `0.7.0` | `0.7.0` | `unchanged` | No | No package changes for v0.50.3. |
-| `eth` | `0.50.2` | `0.50.3` | `code` | Yes | Updates the optional `evm-core` dependency to `eth-valkyoth-evm-core 0.16.0` and documents the validated BN254 pairing tuple stream plus atomic gas-meter charging. |
+| `eth-valkyoth-codec` | `0.19.0` | `0.19.0` | `unchanged` | No | No package changes for v0.50.4. |
+| `eth-valkyoth-primitives` | `0.11.2` | `0.11.2` | `unchanged` | No | No package changes for v0.50.4. |
+| `eth-valkyoth-hash` | `0.11.2` | `0.11.2` | `unchanged` | No | No package changes for v0.50.4. |
+| `eth-valkyoth-protocol` | `0.25.2` | `0.25.2` | `unchanged` | No | No package changes for v0.50.4. |
+| `eth-valkyoth-verify` | `0.21.0` | `0.21.0` | `unchanged` | No | No package changes for v0.50.4. |
+| `eth-valkyoth-derive` | `0.17.2` | `0.17.2` | `unchanged` | No | No package changes for v0.50.4. |
+| `eth-valkyoth-sanitization` | `0.7.4` | `0.7.4` | `unchanged` | No | No package changes for v0.50.4. |
+| `eth-valkyoth-evm-core` | `0.16.0` | `0.17.0` | `code` | Yes | Adds first-party BN254 G2 line-function coefficient helpers and G1-to-Fp12 line evaluation wiring while non-empty pairing execution remains fail-closed. |
+| `eth-valkyoth-evm` | `0.10.0` | `0.10.0` | `unchanged` | No | No package changes for v0.50.4. |
+| `eth-valkyoth-rpc` | `0.7.0` | `0.7.0` | `unchanged` | No | No package changes for v0.50.4. |
+| `eth-valkyoth-signer` | `0.7.3` | `0.7.3` | `unchanged` | No | No package changes for v0.50.4. |
+| `eth-valkyoth-reth` | `0.7.0` | `0.7.0` | `unchanged` | No | No package changes for v0.50.4. |
+| `eth-valkyoth-testkit` | `0.7.0` | `0.7.0` | `unchanged` | No | No package changes for v0.50.4. |
+| `eth` | `0.50.3` | `0.50.4` | `code` | Yes | Updates the optional `evm-core` dependency to `eth-valkyoth-evm-core 0.17.0` and documents the BN254 line-function foundation. |
 
 Update this table and `release-crates.toml` in the same commit whenever a crate
 changes release state.

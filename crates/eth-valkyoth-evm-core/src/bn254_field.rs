@@ -37,6 +37,10 @@ impl Fp {
         Self(self.0.sub_mod(rhs.0))
     }
 
+    pub(crate) fn neg(self) -> Self {
+        Self::ZERO.sub(self)
+    }
+
     pub(crate) fn double(self) -> Self {
         self.add(self)
     }

@@ -35,7 +35,7 @@ dependencies.
 
 ## Current Status
 
-Status: `v0.50.3` adds the validated BN254 pairing tuple stream.
+Status: `v0.50.4` adds the BN254 line-function foundation.
 The optional `evm-core` feature now exposes dependency-free no_std word, stack,
 memory, opcode, program-counter, fork, gas schedule, opcode-table, host-state,
 warm/cold access, historical fork identifiers, opcode-introduction metadata,
@@ -178,9 +178,9 @@ Not implemented yet:
 - No block parser yet.
 - Identity, SHA-256, RIPEMD-160, ECRECOVER, bounded ModExp, BN254 add/mul,
   BN254 pairing empty-input execution, G2 subgroup validation, the
-  Fp6/Fp12 tower foundation, and validated tuple streaming are implemented;
-  non-empty pairing algebra and remaining cryptographic precompiles are
-  scheduled for `v0.50.4` through `v0.52.0`.
+  Fp6/Fp12 tower foundation, validated tuple streaming, and the line-function
+  foundation are implemented; non-empty pairing algebra and remaining
+  cryptographic precompiles are scheduled for `v0.50.5` through `v0.52.0`.
 - No ABI/contract helper surface yet; scheduled for `v0.70.0` through
   `v0.78.0`.
 - No consensus/Engine API support yet; scheduled for `v0.79.0` through
@@ -210,14 +210,14 @@ Not implemented yet:
 
 ```toml
 [dependencies]
-eth = "0.50.3"
+eth = "0.50.4"
 ```
 
 For optional sanitization support:
 
 ```toml
 [dependencies]
-eth = { version = "0.50.3", features = ["sanitization"] }
+eth = { version = "0.50.4", features = ["sanitization"] }
 ```
 
 ## Features
@@ -244,7 +244,7 @@ Optional reviewed software Keccak backend:
 
 ```toml
 [dependencies]
-eth = { version = "0.50.3", features = ["keccak-tiny"] }
+eth = { version = "0.50.4", features = ["keccak-tiny"] }
 ```
 
 ```rust
@@ -258,14 +258,14 @@ Optional reviewed secp256k1 recovery adapter:
 
 ```toml
 [dependencies]
-eth = { version = "0.50.3", features = ["secp256k1-k256"] }
+eth = { version = "0.50.4", features = ["secp256k1-k256"] }
 ```
 
 Optional bounded EVM gas-estimation boundary:
 
 ```toml
 [dependencies]
-eth = { version = "0.50.3", features = ["evm"] }
+eth = { version = "0.50.4", features = ["evm"] }
 ```
 
 ```rust
@@ -370,7 +370,7 @@ Optional native EVM core domains:
 
 ```toml
 [dependencies]
-eth = { version = "0.50.3", features = ["evm-core"] }
+eth = { version = "0.50.4", features = ["evm-core"] }
 ```
 
 State access uses explicit host-state traits and caller-provided fixed-capacity
@@ -411,11 +411,11 @@ backends. ModExp uses a first-party no-alloc engine with an explicit release
 operand cap. BN254 add/mul uses first-party fixed-size field arithmetic with
 canonical field and point validation. BN254 pairing validates bounded frames,
 G2 curve membership, and G2 subgroup membership, streams validated tuples into
-the internal tower accumulator, executes empty input as one, and fails closed
-for non-empty algebra until the line-function, Miller-loop, and
-final-exponentiation releases. Dispatcher-facing BN254 pairing plan execution
-charges the supplied gas meter on every call before validation work is
-reachable. Remaining
+the internal tower accumulator, evaluates the admitted line-function carrier,
+executes empty input as one, and fails closed for non-empty algebra until the
+Miller-loop and final-exponentiation releases. Dispatcher-facing BN254 pairing
+plan execution charges the supplied gas meter on every call before validation
+work is reachable. Remaining
 cryptographic precompiles are exposed as bounded plans and return a
 backend-unavailable error until audited backends or first-party implementations
 are admitted.
@@ -1226,7 +1226,7 @@ friendly, and independently testable.
 | `eth-valkyoth-sanitization` | no | Optional bridge to the `sanitization` crate for secret-bearing Ethereum data. |
 | `eth-valkyoth-derive` | no | Optional sanitization and RLP derive macros. |
 | `eth-valkyoth-evm` | no | Explicit no_std EVM execution boundary; no backend admitted yet. |
-| `eth-valkyoth-evm-core` | no | Dependency-free native EVM core domains plus gas-metered basic bounded opcode execution, explicit host-state reads, fail-closed call/create planning, bounded identity/SHA-256/RIPEMD-160/ECRECOVER/ModExp/BN254 add/mul execution, and BN254 pairing frame validation, validated tuple streaming, and empty-input execution. |
+| `eth-valkyoth-evm-core` | no | Dependency-free native EVM core domains plus gas-metered basic bounded opcode execution, explicit host-state reads, fail-closed call/create planning, bounded identity/SHA-256/RIPEMD-160/ECRECOVER/ModExp/BN254 add/mul execution, and BN254 pairing frame validation, validated tuple streaming, line-function foundation, and empty-input execution. |
 | `eth-valkyoth-rpc` | no | Future explicit RPC trust-policy boundary. |
 | `eth-valkyoth-signer` | no | Future signer isolation boundary. |
 | `eth-valkyoth-reth` | no | Future Reth integration boundary. |
@@ -1237,7 +1237,7 @@ friendly, and independently testable.
 The minimum supported Rust version is Rust `1.90.0`. New deployments should use
 the pinned stable Rust `1.96.1` until the toolchain policy is updated.
 
-Compatibility evidence for `0.50.3`:
+Compatibility evidence for `0.50.4`:
 
 | Rust | Local Evidence |
 | --- | --- |
@@ -1254,7 +1254,7 @@ Compatibility evidence for `0.50.3`:
 
 ```bash
 scripts/checks.sh
-scripts/release_0_50_3_gate.sh
+scripts/release_0_50_4_gate.sh
 ```
 
 For dependency-policy checks, install `cargo-deny` and `cargo-audit`, then run:

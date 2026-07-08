@@ -1994,6 +1994,8 @@ Exit criteria:
 
 ### v0.50.4 - Native EVM BN254 Line-Function Foundation
 
+Status: implementation ready; awaiting pentest before tagging.
+
 Goal: implement reviewed first-party line-function arithmetic over the admitted
 Fp12 tower and validated tuple stream.
 

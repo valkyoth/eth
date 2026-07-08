@@ -8,6 +8,7 @@ extern crate std;
 mod bn254;
 mod bn254_field;
 mod bn254_g2;
+mod bn254_line;
 mod bn254_pairing;
 mod bn254_tower;
 mod call;
@@ -114,3 +115,7 @@ mod bn254_pairing_tests;
 #[cfg(test)]
 #[path = "bn254_tower_tests.rs"]
 mod bn254_tower_tests;
+
+#[cfg(test)]
+#[path = "bn254_line_tests.rs"]
+mod bn254_line_tests;

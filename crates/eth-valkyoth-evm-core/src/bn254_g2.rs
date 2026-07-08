@@ -63,6 +63,10 @@ impl Fp2 {
         }
     }
 
+    pub(crate) fn neg(self) -> Self {
+        Self::ZERO.sub(self)
+    }
+
     pub(crate) fn double(self) -> Self {
         self.add(self)
     }
@@ -84,6 +88,14 @@ impl Fp2 {
             c0: self.c0.square().sub(self.c1.square()),
             c1: c0c1.double(),
         }
+    }
+
+    pub(crate) fn invert(self) -> Option<Self> {
+        let denominator = self.c0.square().add(self.c1.square()).invert()?;
+        Some(Self {
+            c0: self.c0.mul(denominator),
+            c1: self.c1.neg().mul(denominator),
+        })
     }
 }
 

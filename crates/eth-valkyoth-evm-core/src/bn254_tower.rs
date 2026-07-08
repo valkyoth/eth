@@ -1,7 +1,7 @@
 use crate::{
     EvmCoreError,
-    bn254_field::Fp,
     bn254_g2::Fp2,
+    bn254_line::evaluate_line_foundation_at_g1,
     bn254_pairing::{Bn254PairingTuple, for_each_valid_pairing_tuple},
 };
 
@@ -138,30 +138,5 @@ pub(crate) fn exercise_tower_accumulation(input: &[u8]) -> Result<(usize, Fp12),
 }
 
 fn tower_step_from_tuple(tuple: Bn254PairingTuple) -> Fp12 {
-    let g1_x = fp2_from_fp(tuple.g1.x);
-    let g1_y = fp2_from_fp(tuple.g1.y);
-    let marker = if tuple.g1.infinity || tuple.g2.infinity {
-        Fp2::ZERO
-    } else {
-        Fp2::ONE
-    };
-    Fp12 {
-        c0: Fp6 {
-            c0: tuple.g2.x.add(g1_x),
-            c1: tuple.g2.y.add(g1_y),
-            c2: marker,
-        },
-        c1: Fp6 {
-            c0: tuple.g2.x.sub(g1_x),
-            c1: tuple.g2.y.sub(g1_y),
-            c2: Fp2::NINE_PLUS_I,
-        },
-    }
-}
-
-fn fp2_from_fp(value: Fp) -> Fp2 {
-    Fp2 {
-        c0: value,
-        c1: Fp::ZERO,
-    }
+    evaluate_line_foundation_at_g1(tuple.g1, tuple.g2)
 }
