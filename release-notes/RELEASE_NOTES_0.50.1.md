@@ -1,6 +1,6 @@
 # eth 0.50.1 Release Notes
 
-Status: implementation ready; awaiting pentest before tagging.
+Status: release candidate; pentest and retest complete.
 
 `0.50.1` adds BN254 pairing G2 subgroup validation to
 `eth-valkyoth-evm-core`. The release keeps the `v0.50.0` bounded EIP-197 frame
@@ -55,11 +55,24 @@ Miller-loop and final-exponentiation releases are admitted.
 - `cargo test -p eth-valkyoth-evm-core bn254_pairing`
 - `cargo clippy -p eth-valkyoth-evm-core --all-targets --all-features -- -D warnings`
 - `cargo clippy --manifest-path fuzz/Cargo.toml --bin bn254_pairing_frame -- -D warnings`
+- `cargo test --workspace --all-features`
+- `cargo clippy --workspace --all-targets --all-features -- -D warnings`
+- `cargo check --manifest-path fuzz/Cargo.toml`
+- `cargo +1.90.0 check -p eth --features evm-core`
+- `cargo +1.96.1 check -p eth --features evm-core`
+- `cargo package -p eth-valkyoth-evm-core --allow-dirty`
+- `cargo package -p eth --allow-dirty --config 'patch.crates-io.eth-valkyoth-evm-core.path="crates/eth-valkyoth-evm-core"'`
+- `cargo deny check`
+- `cargo audit`
+- `scripts/release_crates.py --check`
+- `python3 scripts/test-release-metadata.py`
+- `scripts/release_0_50_1_gate.sh`
 
 ## Pentest
 
-- Pending. Permanent report will be added at `security/pentest/v0.50.1.md`
-  after the external pentest and retest.
+- Permanent report: `security/pentest/v0.50.1.md`.
+- The release-scope review and retest found no exploitable findings. Two
+  informational notes were documented before the final release gate.
 
 ## Versioning
 

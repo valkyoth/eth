@@ -1900,7 +1900,7 @@ Exit criteria:
 
 ### v0.50.1 - Native EVM BN254 Pairing Subgroup Validation
 
-Status: implementation ready; awaiting pentest before tagging.
+Status: release candidate; pentest and retest complete.
 
 Goal: add reviewed G2 subgroup validation before any non-empty pairing result
 can be trusted.
