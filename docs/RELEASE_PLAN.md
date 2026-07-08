@@ -1904,6 +1904,8 @@ can be trusted.
 Deliverables:
 
 - first-party G2 scalar multiplication or equivalent subgroup check;
+- precompute the BN254 twist curve coefficient used by G2 validation so the
+  frame parser does not recompute `3 / (9 + i)` for every tuple;
 - explicit subgroup error mapping at the precompile boundary;
 - official invalid-subgroup vectors;
 - fuzz coverage for validated non-empty tuple frames.
