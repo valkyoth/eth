@@ -81,6 +81,8 @@ pub enum EvmCoreError {
     PrecompileFieldElementOutOfRange,
     /// A precompile elliptic-curve point is not on the admitted curve.
     PrecompilePointNotOnCurve,
+    /// A precompile elliptic-curve point is not in the admitted subgroup.
+    PrecompilePointNotInSubgroup,
     /// The selected precompile needs a cryptographic backend not admitted here.
     PrecompileBackendUnavailable,
     /// A `PUSHn` immediate extends beyond the bytecode input.
@@ -139,6 +141,7 @@ impl EvmCoreError {
             Self::PrecompileOutputTooSmall => "precompile_output_too_small",
             Self::PrecompileFieldElementOutOfRange => "precompile_field_element_out_of_range",
             Self::PrecompilePointNotOnCurve => "precompile_point_not_on_curve",
+            Self::PrecompilePointNotInSubgroup => "precompile_point_not_in_subgroup",
             Self::PrecompileBackendUnavailable => "precompile_backend_unavailable",
             Self::PushImmediateOutOfBounds => "push_immediate_out_of_bounds",
             Self::InvalidJumpDestination => "invalid_jump_destination",

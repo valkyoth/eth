@@ -35,7 +35,7 @@ dependencies.
 
 ## Current Status
 
-Status: `v0.50.0` adds the BN254 pairing frame boundary and empty-input execution.
+Status: `v0.50.1` adds BN254 pairing G2 subgroup validation.
 The optional `evm-core` feature now exposes dependency-free no_std word, stack,
 memory, opcode, program-counter, fork, gas schedule, opcode-table, host-state,
 warm/cold access, historical fork identifiers, opcode-introduction metadata,
@@ -177,9 +177,9 @@ Not implemented yet:
 - No Reth or P2P integration.
 - No block parser yet.
 - Identity, SHA-256, RIPEMD-160, ECRECOVER, bounded ModExp, BN254 add/mul,
-  and BN254 pairing empty-input execution are implemented; non-empty pairing
-  algebra and remaining cryptographic precompiles are scheduled for `v0.50.1`
-  through `v0.52.0`.
+  and BN254 pairing empty-input execution plus G2 subgroup validation are
+  implemented; non-empty pairing algebra and remaining cryptographic
+  precompiles are scheduled for `v0.50.2` through `v0.52.0`.
 - No ABI/contract helper surface yet; scheduled for `v0.70.0` through
   `v0.78.0`.
 - No consensus/Engine API support yet; scheduled for `v0.79.0` through
@@ -209,14 +209,14 @@ Not implemented yet:
 
 ```toml
 [dependencies]
-eth = "0.50.0"
+eth = "0.50.1"
 ```
 
 For optional sanitization support:
 
 ```toml
 [dependencies]
-eth = { version = "0.50.0", features = ["sanitization"] }
+eth = { version = "0.50.1", features = ["sanitization"] }
 ```
 
 ## Features
@@ -243,7 +243,7 @@ Optional reviewed software Keccak backend:
 
 ```toml
 [dependencies]
-eth = { version = "0.50.0", features = ["keccak-tiny"] }
+eth = { version = "0.50.1", features = ["keccak-tiny"] }
 ```
 
 ```rust
@@ -257,14 +257,14 @@ Optional reviewed secp256k1 recovery adapter:
 
 ```toml
 [dependencies]
-eth = { version = "0.50.0", features = ["secp256k1-k256"] }
+eth = { version = "0.50.1", features = ["secp256k1-k256"] }
 ```
 
 Optional bounded EVM gas-estimation boundary:
 
 ```toml
 [dependencies]
-eth = { version = "0.50.0", features = ["evm"] }
+eth = { version = "0.50.1", features = ["evm"] }
 ```
 
 ```rust
@@ -369,7 +369,7 @@ Optional native EVM core domains:
 
 ```toml
 [dependencies]
-eth = { version = "0.50.0", features = ["evm-core"] }
+eth = { version = "0.50.1", features = ["evm-core"] }
 ```
 
 State access uses explicit host-state traits and caller-provided fixed-capacity
@@ -1232,7 +1232,7 @@ friendly, and independently testable.
 The minimum supported Rust version is Rust `1.90.0`. New deployments should use
 the pinned stable Rust `1.96.1` until the toolchain policy is updated.
 
-Compatibility evidence for `0.50.0`:
+Compatibility evidence for `0.50.1`:
 
 | Rust | Local Evidence |
 | --- | --- |
@@ -1249,7 +1249,7 @@ Compatibility evidence for `0.50.0`:
 
 ```bash
 scripts/checks.sh
-scripts/release_0_50_gate.sh
+scripts/release_0_50_1_gate.sh
 ```
 
 For dependency-policy checks, install `cargo-deny` and `cargo-audit`, then run:

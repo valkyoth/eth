@@ -81,6 +81,39 @@ fn bn254_pairing_rejects_invalid_g2_field_and_curve_points() {
     );
 }
 
+#[test]
+fn bn254_pairing_rejects_valid_twist_point_outside_subgroup() {
+    let mut input = generator_pairing_tuple();
+    write_word(
+        &mut input,
+        64,
+        hex32("1d6f09d463630f0967551d6f9d18ae3625a8d2e9cda114ec79ad899fc5f89222"),
+    );
+    write_word(
+        &mut input,
+        96,
+        hex32("08b0e0b7458f5f522a3d0e9e2723eb95f807d3a90d5ba5ce58e1c906ef7ffaef"),
+    );
+    write_word(
+        &mut input,
+        128,
+        hex32("274d387b58982993ed2c1853d39bf822e1d8c7cb029f6ce2fcd46b2d14cb1dac"),
+    );
+    write_word(
+        &mut input,
+        160,
+        hex32("0aedf27dfce57ba51747d526c1e92028be56a45cedbf8f595b2269e5393474fa"),
+    );
+    assert_eq!(
+        parse_bn254_pairing_input(&input),
+        Err(EvmCoreError::PrecompilePointNotInSubgroup)
+    );
+    assert_eq!(
+        EvmCoreError::PrecompilePointNotInSubgroup.code(),
+        "precompile_point_not_in_subgroup"
+    );
+}
+
 fn generator_pairing_tuple() -> [u8; EVM_BN254_PAIRING_ITEM_BYTES] {
     let mut output = [0u8; EVM_BN254_PAIRING_ITEM_BYTES];
     write_word(

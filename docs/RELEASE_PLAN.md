@@ -1900,6 +1900,8 @@ Exit criteria:
 
 ### v0.50.1 - Native EVM BN254 Pairing Subgroup Validation
 
+Status: implementation ready; awaiting pentest before tagging.
+
 Goal: add reviewed G2 subgroup validation before any non-empty pairing result
 can be trusted.
 
@@ -1909,12 +1911,13 @@ Deliverables:
 - precompute the BN254 twist curve coefficient used by G2 validation so the
   frame parser does not recompute `3 / (9 + i)` for every tuple;
 - explicit subgroup error mapping at the precompile boundary;
-- official invalid-subgroup vectors;
+- deterministic valid-twist, invalid-subgroup regression vector;
 - fuzz coverage for validated non-empty tuple frames.
 
 Verification:
 
-- official subgroup and invalid-point vectors;
+- official G2 generator subgroup acceptance vector;
+- deterministic valid-twist, invalid-subgroup rejection vector;
 - `cargo test -p eth-valkyoth-evm-core`;
 - `cargo clippy -p eth-valkyoth-evm-core --all-targets --all-features -- -D warnings`.
 

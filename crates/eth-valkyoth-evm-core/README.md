@@ -9,7 +9,7 @@ Most users should depend on `eth` and enable the optional `evm-core` feature:
 
 ```toml
 [dependencies]
-eth = { version = "0.50.0", features = ["evm-core"] }
+eth = { version = "0.50.1", features = ["evm-core"] }
 ```
 
 This crate executes only the audited bootstrap opcode subset. It exposes

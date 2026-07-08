@@ -8,23 +8,16 @@ impl Fp {
     pub(crate) const ONE: Self = Self(U256::R);
     pub(crate) const THREE: Self = Self(U256::THREE_R);
 
+    pub(crate) const fn from_montgomery_limbs(limbs: [u64; 4]) -> Self {
+        Self(U256(limbs))
+    }
+
     pub(crate) fn from_be_bytes(bytes: [u8; 32]) -> Option<Self> {
         let value = U256::from_be_bytes(bytes);
         if value.cmp(&U256::MODULUS) == Ordering::Less {
             Some(Self(value.to_montgomery()))
         } else {
             None
-        }
-    }
-
-    pub(crate) fn from_u64(value: u64) -> Self {
-        let mut bytes = [0u8; 32];
-        if let Some(target) = bytes.get_mut(24..) {
-            target.copy_from_slice(&value.to_be_bytes());
-        }
-        match Self::from_be_bytes(bytes) {
-            Some(field) => field,
-            None => Self::ZERO,
         }
     }
 
