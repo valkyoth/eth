@@ -1844,7 +1844,7 @@ Exit criteria:
 
 ### v0.49.0 - Native EVM BN254 Add And Mul Precompiles
 
-Status: implementation ready; awaiting pentest.
+Status: release candidate; pentest and retest complete.
 
 Goal: execute BN254 point addition and scalar multiplication before pairing is
 admitted.

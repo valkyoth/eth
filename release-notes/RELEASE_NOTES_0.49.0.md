@@ -1,6 +1,6 @@
 # eth 0.49.0 Release Notes
 
-Status: implementation ready; awaiting pentest.
+Status: release candidate; pentest and retest complete.
 
 `0.49.0` adds dependency-free native BN254 point addition and scalar
 multiplication precompile execution to `eth-valkyoth-evm-core`. The release
@@ -82,8 +82,10 @@ costs can be reviewed separately.
 
 ## Pentest
 
-- Pending. Permanent report will be added as `security/pentest/v0.49.0.md`
-  after the release-scope pentest and retest are complete.
+- Permanent report: `security/pentest/v0.49.0.md`.
+- Initial review found one critical BN254 field-modulus issue, two high-severity
+  correctness/performance gaps, and two low/informational hardening items. All
+  findings were remediated and the retest was clean.
 
 ## Versioning
 
