@@ -1974,10 +1974,10 @@ Deliverables:
 - allocation-free tuple streaming helper that stops at the first invalid tuple;
 - fail-closed pairing path feeds the Fp12 tower accumulator from typed tuple
   data rather than count-only scaffolding;
-- non-forgeable `EvmPrecompileGasCharge` token required by the
-  dispatcher-facing BN254 pairing plan execution method;
+- dispatcher-facing BN254 pairing plan execution method charges the supplied
+  gas meter on every call before validation work is reachable;
 - tests for tuple order, stop-on-invalid behavior, and tower accumulation over
-  validated tuples, plus a mismatched-charge-token regression test.
+  validated tuples, plus repeated plan execution charging on every call.
 
 Verification:
 
@@ -1990,7 +1990,7 @@ Exit criteria:
 - Validated tuple streaming is deterministic, allocation-free, bounded by
   input length, and does not claim Miller-loop or pairing correctness.
 - Dispatcher-style plan execution cannot reach BN254 pairing validation work
-  without a matching gas-charge token.
+  without charging the supplied gas meter for that call.
 
 ### v0.50.4 - Native EVM BN254 Line-Function Foundation
 

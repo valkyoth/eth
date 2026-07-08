@@ -19,10 +19,11 @@ fn bn254_pairing_empty_input_returns_one() -> Result<(), EvmCoreError> {
     let mut output = [0u8; EVM_BN254_PAIRING_OUTPUT_BYTES];
     assert_eq!(plan.gas_cost(), Some(EvmGas::new(100_000)));
     let mut gas_meter = EvmGasMeter::try_new(EvmGas::new(100_000))?;
-    let charged = plan.charge_gas(&mut gas_meter)?;
-    assert_eq!(charged.gas_cost(), EvmGas::new(100_000));
+    assert_eq!(
+        plan.execute_bn254_pairing(&mut gas_meter, &[], &mut output)?,
+        32
+    );
     assert_eq!(gas_meter.used(), EvmGas::new(100_000));
-    assert_eq!(plan.execute_bn254_pairing(charged, &[], &mut output)?, 32);
     assert_eq!(output, word_one());
 
     let istanbul = registry(EvmFork::ISTANBUL)?.descriptor(EvmPrecompileKind::Bn254Pairing)?;
@@ -48,28 +49,31 @@ fn bn254_pairing_parses_official_generator_tuple_but_fails_closed() -> Result<()
 
     let mut output = [7u8; EVM_BN254_PAIRING_OUTPUT_BYTES];
     let mut gas_meter = EvmGasMeter::try_new(EvmGas::new(79_000))?;
-    let charged = plan.charge_gas(&mut gas_meter)?;
     assert_eq!(
-        plan.execute_bn254_pairing(charged, &input, &mut output),
+        plan.execute_bn254_pairing(&mut gas_meter, &input, &mut output),
         Err(EvmCoreError::PrecompileBackendUnavailable)
     );
+    assert_eq!(gas_meter.used(), EvmGas::new(79_000));
     assert_eq!(output, [7u8; EVM_BN254_PAIRING_OUTPUT_BYTES]);
     Ok(())
 }
 
 #[test]
-fn bn254_pairing_plan_requires_matching_gas_charge_token() -> Result<(), EvmCoreError> {
+fn bn254_pairing_plan_charges_every_execution() -> Result<(), EvmCoreError> {
     let pairing = registry(EvmFork::ISTANBUL)?.descriptor(EvmPrecompileKind::Bn254Pairing)?;
-    let identity = registry(EvmFork::ISTANBUL)?.descriptor(EvmPrecompileKind::Identity)?;
-    let pairing_plan = EvmPrecompilePlan::try_new(pairing, &[])?;
-    let identity_plan = EvmPrecompilePlan::try_new(identity, &[])?;
-    let mut gas_meter = EvmGasMeter::try_new(EvmGas::new(45_015))?;
-    let wrong_charge = identity_plan.charge_gas(&mut gas_meter)?;
+    let plan = EvmPrecompilePlan::try_new(pairing, &[])?;
+    let mut gas_meter = EvmGasMeter::try_new(EvmGas::new(90_000))?;
     let mut output = [0u8; EVM_BN254_PAIRING_OUTPUT_BYTES];
     assert_eq!(
-        pairing_plan.execute_bn254_pairing(wrong_charge, &[], &mut output),
-        Err(EvmCoreError::PrecompileBackendUnavailable)
+        plan.execute_bn254_pairing(&mut gas_meter, &[], &mut output)?,
+        EVM_BN254_PAIRING_OUTPUT_BYTES
     );
+    assert_eq!(gas_meter.used(), EvmGas::new(45_000));
+    assert_eq!(
+        plan.execute_bn254_pairing(&mut gas_meter, &[], &mut output)?,
+        EVM_BN254_PAIRING_OUTPUT_BYTES
+    );
+    assert_eq!(gas_meter.used(), EvmGas::new(90_000));
     Ok(())
 }
 

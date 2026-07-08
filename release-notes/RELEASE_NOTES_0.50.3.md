@@ -6,10 +6,9 @@ Status: implementation ready; awaiting pentest before tagging.
 the Miller-loop releases. The release still keeps EIP-197 non-empty pairing
 execution fail-closed, but the fail-closed path now feeds the Fp12 tower
 accumulator from typed, validated `(G1, G2)` tuples instead of from a count-only
-placeholder. The plan-level BN254 pairing execution path also now requires the
-gas-charge token returned by `EvmPrecompilePlan::charge_gas`, so dispatcher-style
-integrations have a type-system boundary between gas payment and pairing
-validation work.
+placeholder. The plan-level BN254 pairing execution path now accepts the gas
+meter directly and charges the plan cost on every call before validation work is
+reachable, so there is no reusable gas-payment token to replay.
 
 This release still does not claim line-function correctness, Miller-loop
 correctness, final exponentiation, or non-empty BN254 pairing results. Those
@@ -20,13 +19,12 @@ and pentested independently.
 
 - Internal `Bn254PairingTuple` domain carrying validated G1 and G2 points.
 - Allocation-free `for_each_valid_pairing_tuple` streaming helper.
-- `EvmPrecompileGasCharge`, a non-forgeable charge token returned by
-  `EvmPrecompilePlan::charge_gas`.
+- Atomic charge-and-execute BN254 pairing plan method.
 - Typed tower accumulation over validated tuple data before the existing
   non-empty fail-closed return.
 - Regression tests proving tuple streaming order, first-invalid-tuple stop
-  behavior, tower accumulation over the validated tuple stream, and rejection
-  of mismatched gas-charge tokens.
+  behavior, tower accumulation over the validated tuple stream, and repeated
+  plan execution charging on every call.
 
 ## Changed
 
@@ -46,9 +44,9 @@ and pentested independently.
   field elements, G2 curve membership, and G2 subgroup membership before a
   tuple reaches the tower accumulator.
 - Streaming stops at the first invalid tuple and does not visit later tuples.
-- BN254 pairing plan execution requires a matching gas-charge token before the
-  parser, G2 subgroup check, or tower exerciser are reachable through the
-  dispatcher-facing method.
+- BN254 pairing plan execution charges the supplied gas meter before the parser,
+  G2 subgroup check, or tower exerciser are reachable through the
+  dispatcher-facing method. It does not expose a reusable payment object.
 - Non-empty pairing execution still returns `PrecompileBackendUnavailable`.
 
 ## Verification
@@ -62,10 +60,13 @@ and pentested independently.
 
 - Initial pentest passed with no Critical/High/Medium findings.
 - A Low future-integration finding requested a type-enforced gas-charge boundary
-  before BN254 pairing validation is reachable from dispatcher-style code. This
-  release now adds `EvmPrecompileGasCharge` and requires it for
-  `EvmPrecompilePlan::execute_bn254_pairing`.
-- Permanent report will be added at `security/pentest/v0.50.3.md` after retest.
+  before BN254 pairing validation is reachable from dispatcher-style code.
+- Retest found that the first token-based remediation was replayable because the
+  token was `Copy`. The token design was removed. `EvmPrecompilePlan` now
+  charges the supplied `EvmGasMeter` inside `execute_bn254_pairing` on every
+  call before it reaches pairing validation work.
+- Permanent report will be added at `security/pentest/v0.50.3.md` after the
+  final retest.
 
 ## Versioning
 
