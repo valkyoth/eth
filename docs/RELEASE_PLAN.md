@@ -1757,7 +1757,7 @@ Exit criteria:
 
 ### v0.46.0 - Native EVM Hash Precompiles
 
-Status: release candidate; pentest clean; awaiting final GitHub checks.
+Status: tagged as `v0.46.0`.
 
 Goal: execute the Frontier SHA-256 and RIPEMD-160 precompiles behind explicit
 first-party or reviewed-backend decisions.
@@ -1787,20 +1787,25 @@ Exit criteria:
 
 ### v0.47.0 - Native EVM ECRECOVER Precompile
 
+Status: implementation ready; awaiting pentest.
+
 Goal: execute the `ecrecover` precompile without weakening the existing
 secp256k1 backend boundary.
 
 Deliverables:
 
 - `ecrecover` input parser for the 128-byte canonical call frame;
-- low-s, y-parity/v normalization, invalid-signature, and zero-output policy;
+- y-parity/v normalization, invalid-signature, and zero-output policy;
+- full `0 < s < secp256k1n` scalar acceptance for the precompile, because
+  EIP-2 applies low-s validation to transactions but leaves ECRECOVER
+  unchanged;
 - caller-provided or reviewed optional secp256k1 backend integration;
 - address derivation through the Keccak trait boundary;
 - backend sanitization requirements for temporary scalar/signature material.
 
 Verification:
 
-- Ethereum ecrecover vectors, including invalid and malleable signatures;
+- Ethereum ecrecover vectors, including invalid and high-s signatures;
 - differential vectors against an admitted reference engine;
 - `cargo test -p eth-valkyoth-evm-core -p eth-valkyoth-verify`;
 - dependency and sanitization review for any backend crate.

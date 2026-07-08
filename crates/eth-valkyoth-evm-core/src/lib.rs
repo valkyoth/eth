@@ -6,6 +6,7 @@
 extern crate std;
 
 mod call;
+mod ecrecover;
 mod error;
 mod execution;
 mod fork;
@@ -26,6 +27,10 @@ mod word;
 pub use call::{
     EVM_CALL_DEPTH_LIMIT, EvmCallFramePolicy, EvmCallKind, EvmCallPlan, EvmCreateKind,
     EvmCreatePlan, EvmJournal, EvmJournalCheckpoint, EvmMemoryRange, EvmReturnDataRange,
+};
+pub use ecrecover::{
+    EVM_ECRECOVER_INPUT_BYTES, EVM_ECRECOVER_PUBLIC_KEY_BYTES, EvmEcRecoverBackend,
+    EvmEcRecoverSignature, EvmPrecompileKeccak256, execute_ecrecover,
 };
 pub use error::EvmCoreError;
 pub use execution::{
@@ -65,3 +70,7 @@ mod call_tests;
 #[cfg(test)]
 #[path = "precompile_tests.rs"]
 mod precompile_tests;
+
+#[cfg(test)]
+#[path = "ecrecover_tests.rs"]
+mod ecrecover_tests;

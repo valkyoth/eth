@@ -1,6 +1,6 @@
 # Native EVM Fork Matrix
 
-Status: `v0.46.0`.
+Status: `v0.47.0`.
 
 This document describes the first-party `eth-valkyoth-evm-core` fork model.
 It is a support matrix for the native engine bootstrap, not a full Ethereum
@@ -104,14 +104,16 @@ claims call/create execution compatibility.
 ## Precompile Registry Boundary
 
 `v0.45.0` adds fork-aware precompile descriptors and bounded precompile plans.
-`v0.46.0` adds dependency-free SHA-256 and RIPEMD-160 execution. The registry
-recognizes the canonical low-address accounts for Frontier precompiles,
-Byzantium modular exponentiation and BN254 precompiles, Istanbul BLAKE2F,
-Cancun KZG point evaluation, and Prague BLS12-381 precompiles.
+`v0.46.0` adds dependency-free SHA-256 and RIPEMD-160 execution. `v0.47.0`
+adds ECRECOVER execution through caller-provided secp256k1 and Keccak backend
+traits. The registry recognizes the canonical low-address accounts for
+Frontier precompiles, Byzantium modular exponentiation and BN254 precompiles,
+Istanbul BLAKE2F, Cancun KZG point evaluation, and Prague BLS12-381
+precompiles.
 
 | Precompile domain | Address range | First admitted native fork | Execution status |
 | --- | ---: | --- | --- |
-| `ecrecover`, SHA-256, RIPEMD-160, identity | `0x01..=0x04` | Frontier | Identity, SHA-256, and RIPEMD-160 execute dependency-free; ecrecover remains a bounded fail-closed plan until `v0.47.0`. |
+| `ecrecover`, SHA-256, RIPEMD-160, identity | `0x01..=0x04` | Frontier | Identity, SHA-256, and RIPEMD-160 execute dependency-free. ECRECOVER executes only with caller-provided secp256k1 and Keccak backends. |
 | Modular exponentiation and BN254 add/mul/pairing | `0x05..=0x08` | Byzantium | Bounded plans only; BN254 gas policy distinguishes Byzantium and Istanbul pricing. |
 | BLAKE2F | `0x09` | Istanbul | Exact 213-byte input planning and round-count gas extraction; execution fails closed without a backend. |
 | KZG point evaluation | `0x0a` | Cancun | Exact 192-byte input planning and fixed 50,000 gas; proof verification backend is deferred. |
@@ -121,4 +123,6 @@ The registry is still intentionally narrower than a full precompile executor.
 Plans enforce the release input ceiling before gas calculation, expose fixed
 output sizes where known, and return `PrecompileBackendUnavailable` for
 remaining cryptographic execution until reviewed backend crates or first-party
-implementations are admitted.
+implementations are admitted. ECRECOVER intentionally accepts high-s
+signatures because EIP-2 changed transaction validity but left the recover
+precompile unchanged.

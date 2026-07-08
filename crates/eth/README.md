@@ -35,17 +35,17 @@ dependencies.
 
 ## Current Status
 
-Status: `v0.46.0` adds native SHA-256 and RIPEMD-160 precompile execution.
+Status: `v0.47.0` adds native ECRECOVER precompile execution through caller-provided backends.
 The optional `evm-core` feature now exposes dependency-free no_std word, stack,
 memory, opcode, program-counter, fork, gas schedule, opcode-table, host-state,
 warm/cold access, historical fork identifiers, opcode-introduction metadata,
 call/create planning domains, return-data ranges, journal checkpoint policy,
 fork-aware precompile descriptors, bounded precompile input/gas policies, and
 bounded interpreter domains for hard-capped basic stack/control-flow bytecode
-plus explicit state reads. Identity, SHA-256, and RIPEMD-160 now execute
-without dependencies; remaining cryptographic precompiles are admitted as
-fail-closed descriptors until reviewed backends or first-party implementations
-are added.
+plus explicit state reads. Identity, SHA-256, and RIPEMD-160 execute without dependencies; ECRECOVER
+executes through explicit caller-provided secp256k1 and Keccak boundaries.
+Remaining cryptographic precompiles are admitted as fail-closed descriptors
+until reviewed backends or first-party implementations are added.
 
 Implemented now:
 
@@ -174,8 +174,9 @@ Not implemented yet:
 - No stateful or production-valid EVM execution adapter.
 - No Reth or P2P integration.
 - No block parser yet.
-- SHA-256 and RIPEMD-160 precompile execution is implemented; remaining
-  cryptographic precompile work is scheduled for `v0.47.0` through `v0.52.0`.
+- Identity, SHA-256, RIPEMD-160, and ECRECOVER precompile execution are
+  implemented; remaining cryptographic precompile work is scheduled for
+  `v0.48.0` through `v0.52.0`.
 - No ABI/contract helper surface yet; scheduled for `v0.70.0` through
   `v0.78.0`.
 - No consensus/Engine API support yet; scheduled for `v0.79.0` through
@@ -205,14 +206,14 @@ Not implemented yet:
 
 ```toml
 [dependencies]
-eth = "0.46.0"
+eth = "0.47.0"
 ```
 
 For optional sanitization support:
 
 ```toml
 [dependencies]
-eth = { version = "0.46.0", features = ["sanitization"] }
+eth = { version = "0.47.0", features = ["sanitization"] }
 ```
 
 ## Features
@@ -239,7 +240,7 @@ Optional reviewed software Keccak backend:
 
 ```toml
 [dependencies]
-eth = { version = "0.46.0", features = ["keccak-tiny"] }
+eth = { version = "0.47.0", features = ["keccak-tiny"] }
 ```
 
 ```rust
@@ -253,14 +254,14 @@ Optional reviewed secp256k1 recovery adapter:
 
 ```toml
 [dependencies]
-eth = { version = "0.46.0", features = ["secp256k1-k256"] }
+eth = { version = "0.47.0", features = ["secp256k1-k256"] }
 ```
 
 Optional bounded EVM gas-estimation boundary:
 
 ```toml
 [dependencies]
-eth = { version = "0.46.0", features = ["evm"] }
+eth = { version = "0.47.0", features = ["evm"] }
 ```
 
 ```rust
@@ -365,7 +366,7 @@ Optional native EVM core domains:
 
 ```toml
 [dependencies]
-eth = { version = "0.46.0", features = ["evm-core"] }
+eth = { version = "0.47.0", features = ["evm-core"] }
 ```
 
 State access uses explicit host-state traits and caller-provided fixed-capacity
@@ -399,10 +400,11 @@ assert_eq!(report.gas_used.get(), 9);
 # Ok::<(), eth::error::EvmCoreError>(())
 ```
 
-Precompiles are explicit and fork-aware. Identity, SHA-256, and RIPEMD-160 can
-execute now without dependencies; remaining cryptographic precompiles are
-exposed as bounded plans and return a backend-unavailable error until audited
-backends or first-party implementations are admitted.
+Precompiles are explicit and fork-aware. Identity, SHA-256, RIPEMD-160, and
+ECRECOVER can execute now; ECRECOVER requires caller-provided secp256k1 and
+Keccak backends. Remaining cryptographic precompiles are exposed as bounded
+plans and return a backend-unavailable error until audited backends or
+first-party implementations are admitted.
 
 ```rust
 use eth::evm_core::{EvmFork, EvmPrecompileKind, EvmPrecompilePlan, EvmPrecompileRegistry};
@@ -1210,7 +1212,7 @@ friendly, and independently testable.
 | `eth-valkyoth-sanitization` | no | Optional bridge to the `sanitization` crate for secret-bearing Ethereum data. |
 | `eth-valkyoth-derive` | no | Optional sanitization and RLP derive macros. |
 | `eth-valkyoth-evm` | no | Explicit no_std EVM execution boundary; no backend admitted yet. |
-| `eth-valkyoth-evm-core` | no | Dependency-free native EVM core domains plus gas-metered basic bounded opcode execution, explicit host-state reads, fail-closed call/create planning, and bounded identity/SHA-256/RIPEMD-160 precompile execution. |
+| `eth-valkyoth-evm-core` | no | Dependency-free native EVM core domains plus gas-metered basic bounded opcode execution, explicit host-state reads, fail-closed call/create planning, and bounded identity/SHA-256/RIPEMD-160/ECRECOVER precompile execution. |
 | `eth-valkyoth-rpc` | no | Future explicit RPC trust-policy boundary. |
 | `eth-valkyoth-signer` | no | Future signer isolation boundary. |
 | `eth-valkyoth-reth` | no | Future Reth integration boundary. |
@@ -1221,7 +1223,7 @@ friendly, and independently testable.
 The minimum supported Rust version is Rust `1.90.0`. New deployments should use
 the pinned stable Rust `1.96.1` until the toolchain policy is updated.
 
-Compatibility evidence for `0.46.0`:
+Compatibility evidence for `0.47.0`:
 
 | Rust | Local Evidence |
 | --- | --- |
@@ -1238,7 +1240,7 @@ Compatibility evidence for `0.46.0`:
 
 ```bash
 scripts/checks.sh
-scripts/release_0_46_gate.sh
+scripts/release_0_47_gate.sh
 ```
 
 For dependency-policy checks, install `cargo-deny` and `cargo-audit`, then run:

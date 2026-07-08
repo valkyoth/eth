@@ -102,6 +102,8 @@ impl EvmPrecompileKind {
 /// Implementation boundary for a precompile descriptor.
 #[derive(Clone, Copy, Debug, Eq, PartialEq)]
 pub enum EvmPrecompileImplementation {
+    /// The release can execute ECRECOVER with caller-provided backends.
+    NativeEcRecover,
     /// The release can execute this precompile without third-party crypto.
     NativeIdentity,
     /// The release can execute SHA-256 dependency-free.
@@ -346,6 +348,7 @@ fn prefix_is_zero(bytes: &[u8; EvmAddress::LEN]) -> bool {
 
 const fn descriptor_for_kind(kind: EvmPrecompileKind, fork: EvmFork) -> EvmPrecompileDescriptor {
     let implementation = match kind {
+        EvmPrecompileKind::EcRecover => EvmPrecompileImplementation::NativeEcRecover,
         EvmPrecompileKind::Sha256 => EvmPrecompileImplementation::NativeSha256,
         EvmPrecompileKind::Ripemd160 => EvmPrecompileImplementation::NativeRipemd160,
         EvmPrecompileKind::Identity => EvmPrecompileImplementation::NativeIdentity,
