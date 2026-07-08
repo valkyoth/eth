@@ -23,8 +23,8 @@ pub fn execute_bn254_add(input: &[u8], output: &mut [u8]) -> Result<usize, EvmCo
     let target = output
         .get_mut(..EVM_BN254_POINT_BYTES)
         .ok_or(EvmCoreError::PrecompileOutputTooSmall)?;
-    let left = read_point(input, 0)?;
-    let right = read_point(input, EVM_BN254_POINT_BYTES)?;
+    let left = read_g1_point(input, 0)?;
+    let right = read_g1_point(input, EVM_BN254_POINT_BYTES)?;
     write_point(left.add(right), target);
     Ok(EVM_BN254_POINT_BYTES)
 }
@@ -43,7 +43,7 @@ pub fn execute_bn254_mul(input: &[u8], output: &mut [u8]) -> Result<usize, EvmCo
     let target = output
         .get_mut(..EVM_BN254_POINT_BYTES)
         .ok_or(EvmCoreError::PrecompileOutputTooSmall)?;
-    let point = read_point(input, 0)?;
+    let point = read_g1_point(input, 0)?;
     let scalar = read_word(input, EVM_BN254_POINT_BYTES);
     write_point(point.mul_scalar(scalar), target);
     Ok(EVM_BN254_POINT_BYTES)
@@ -74,14 +74,14 @@ impl EvmPrecompilePlan {
 }
 
 #[derive(Clone, Copy, Debug, Eq, PartialEq)]
-struct Point {
-    x: Fp,
-    y: Fp,
-    infinity: bool,
+pub(crate) struct G1Point {
+    pub(crate) x: Fp,
+    pub(crate) y: Fp,
+    pub(crate) infinity: bool,
 }
 
-impl Point {
-    const INFINITY: Self = Self {
+impl G1Point {
+    pub(crate) const INFINITY: Self = Self {
         x: Fp::ZERO,
         y: Fp::ZERO,
         infinity: true,
@@ -139,7 +139,7 @@ impl ProjectivePoint {
         z: Fp::ZERO,
     };
 
-    fn from_affine(point: Point) -> Self {
+    fn from_affine(point: G1Point) -> Self {
         if point.infinity {
             Self::INFINITY
         } else {
@@ -176,7 +176,7 @@ impl ProjectivePoint {
         }
     }
 
-    fn add_mixed(self, rhs: Point) -> Self {
+    fn add_mixed(self, rhs: G1Point) -> Self {
         if rhs.infinity {
             return self;
         }
@@ -208,16 +208,16 @@ impl ProjectivePoint {
         }
     }
 
-    fn to_affine(self) -> Point {
+    fn to_affine(self) -> G1Point {
         if self.is_infinity() {
-            return Point::INFINITY;
+            return G1Point::INFINITY;
         }
         let Some(z_inv) = self.z.invert() else {
-            return Point::INFINITY;
+            return G1Point::INFINITY;
         };
         let z2 = z_inv.square();
         let z3 = z2.mul(z_inv);
-        Point {
+        G1Point {
             x: self.x.mul(z2),
             y: self.y.mul(z3),
             infinity: false,
@@ -225,19 +225,15 @@ impl ProjectivePoint {
     }
 }
 
-fn read_point(input: &[u8], offset: usize) -> Result<Point, EvmCoreError> {
+pub(crate) fn read_g1_point(input: &[u8], offset: usize) -> Result<G1Point, EvmCoreError> {
     let x = Fp::from_be_bytes(read_word(input, offset))
         .ok_or(EvmCoreError::PrecompileFieldElementOutOfRange)?;
     let y = Fp::from_be_bytes(read_word(input, offset.saturating_add(32)))
         .ok_or(EvmCoreError::PrecompileFieldElementOutOfRange)?;
-    Point::new(x, y)
+    G1Point::new(x, y)
 }
 
-pub(crate) fn validate_g1_point(input: &[u8], offset: usize) -> Result<(), EvmCoreError> {
-    read_point(input, offset).map(|_| ())
-}
-
-fn write_point(point: Point, output: &mut [u8]) {
+fn write_point(point: G1Point, output: &mut [u8]) {
     if point.infinity {
         output.fill(0);
         return;

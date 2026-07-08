@@ -1,4 +1,9 @@
-use crate::bn254_g2::Fp2;
+use crate::{
+    EvmCoreError,
+    bn254_field::Fp,
+    bn254_g2::Fp2,
+    bn254_pairing::{Bn254PairingTuple, for_each_valid_pairing_tuple},
+};
 
 #[derive(Clone, Copy, Debug, Eq, PartialEq)]
 pub(crate) struct Fp6 {
@@ -111,19 +116,52 @@ fn mul_fp2_by_nonresidue(value: Fp2) -> Fp2 {
     value.mul(Fp2::NINE_PLUS_I)
 }
 
-/// Exercises the Fp12 tower over the validated pair count before the Miller
+/// Exercises the Fp12 tower over validated pairing tuples before the Miller
 /// loop lands.
 ///
 /// This is not a validation boundary and its result is intentionally unused by
 /// the current fail-closed pairing path.
-pub(crate) fn exercise_tower_accumulation_shape(pairs: usize) -> Fp12 {
-    let step = Fp12 {
-        c0: Fp6::ONE.square().add(Fp6::ZERO),
-        c1: Fp6::ONE.sub(Fp6::ZERO),
+pub(crate) fn exercise_tower_accumulation(input: &[u8]) -> Result<(usize, Fp12), EvmCoreError> {
+    let seed = Fp12::ONE;
+    let mut acc = Fp12 {
+        c0: seed.c0.square(),
+        c1: seed.c1,
     };
-    let mut acc = Fp12::ONE;
-    for _ in 0..pairs {
-        acc = acc.square().mul(step).sub(Fp12::ZERO).add(Fp12::ZERO);
+    let pairs = for_each_valid_pairing_tuple(input, |tuple| {
+        acc = acc
+            .square()
+            .mul(tower_step_from_tuple(tuple))
+            .sub(Fp12::ZERO)
+            .add(Fp12::ZERO);
+    })?;
+    Ok((pairs, acc))
+}
+
+fn tower_step_from_tuple(tuple: Bn254PairingTuple) -> Fp12 {
+    let g1_x = fp2_from_fp(tuple.g1.x);
+    let g1_y = fp2_from_fp(tuple.g1.y);
+    let marker = if tuple.g1.infinity || tuple.g2.infinity {
+        Fp2::ZERO
+    } else {
+        Fp2::ONE
+    };
+    Fp12 {
+        c0: Fp6 {
+            c0: tuple.g2.x.add(g1_x),
+            c1: tuple.g2.y.add(g1_y),
+            c2: marker,
+        },
+        c1: Fp6 {
+            c0: tuple.g2.x.sub(g1_x),
+            c1: tuple.g2.y.sub(g1_y),
+            c2: Fp2::NINE_PLUS_I,
+        },
     }
-    acc
+}
+
+fn fp2_from_fp(value: Fp) -> Fp2 {
+    Fp2 {
+        c0: value,
+        c1: Fp::ZERO,
+    }
 }

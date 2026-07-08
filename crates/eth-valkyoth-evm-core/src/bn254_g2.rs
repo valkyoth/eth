@@ -89,13 +89,13 @@ impl Fp2 {
 
 #[derive(Clone, Copy, Debug, Eq, PartialEq)]
 pub(crate) struct G2Point {
-    x: Fp2,
-    y: Fp2,
-    infinity: bool,
+    pub(crate) x: Fp2,
+    pub(crate) y: Fp2,
+    pub(crate) infinity: bool,
 }
 
 impl G2Point {
-    const INFINITY: Self = Self {
+    pub(crate) const INFINITY: Self = Self {
         x: Fp2::ZERO,
         y: Fp2::ZERO,
         infinity: true,

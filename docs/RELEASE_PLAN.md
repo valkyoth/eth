@@ -1961,13 +1961,61 @@ Exit criteria:
   reverting precompile call and must charge the precompile gas before invoking
   pairing parsing or execution.
 
-### v0.50.3 - Native EVM BN254 Miller Loop
+### v0.50.3 - Native EVM BN254 Pairing Tuple Stream
+
+Status: implementation ready; awaiting pentest before tagging.
+
+Goal: add the validated, allocation-free `(G1, G2)` tuple stream that the
+Miller-loop releases will consume.
+
+Deliverables:
+
+- internal `Bn254PairingTuple` domain over already validated G1 and G2 points;
+- allocation-free tuple streaming helper that stops at the first invalid tuple;
+- fail-closed pairing path feeds the Fp12 tower accumulator from typed tuple
+  data rather than count-only scaffolding;
+- tests for tuple order, stop-on-invalid behavior, and tower accumulation over
+  validated tuples.
+
+Verification:
+
+- `cargo test -p eth-valkyoth-evm-core bn254_pairing`;
+- `cargo test -p eth-valkyoth-evm-core bn254_tower`;
+- `cargo clippy -p eth-valkyoth-evm-core --all-targets --all-features -- -D warnings`.
+
+Exit criteria:
+
+- Validated tuple streaming is deterministic, allocation-free, bounded by
+  input length, and does not claim Miller-loop or pairing correctness.
+
+### v0.50.4 - Native EVM BN254 Line-Function Foundation
+
+Goal: implement reviewed first-party line-function arithmetic over the admitted
+Fp12 tower and validated tuple stream.
+
+Deliverables:
+
+- line-function coefficient representation;
+- point doubling and addition line helpers over validated G2 inputs;
+- G1 evaluation wiring without final Miller accumulation claims;
+- focused algebraic and differential tests for line-helper shape.
+
+Verification:
+
+- line-function relation tests over admitted generator fixtures;
+- dependency review for any dev-only reference engine.
+
+Exit criteria:
+
+- Line-function arithmetic is deterministic, bounded, and vector-backed before
+  Miller-loop accumulation consumes it.
+
+### v0.50.5 - Native EVM BN254 Miller Loop
 
 Goal: implement the first-party Miller loop over validated BN254 pairing tuples.
 
 Deliverables:
 
-- line-function implementation over the admitted Fp12 tower;
 - Miller-loop implementation;
 - batch accumulation limits tied to gas and input length;
 - differential vectors against an admitted reference engine.
@@ -1983,7 +2031,7 @@ Exit criteria:
 
 - Miller-loop accumulation is deterministic, bounded, and vector-backed.
 
-### v0.50.4 - Native EVM BN254 Pairing Final Exponentiation
+### v0.50.6 - Native EVM BN254 Pairing Final Exponentiation
 
 Goal: complete non-empty EIP-197 BN254 pairing execution.
 

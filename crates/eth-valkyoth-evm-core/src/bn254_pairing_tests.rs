@@ -1,8 +1,11 @@
 use crate::{
     EVM_BN254_PAIRING_ITEM_BYTES, EVM_BN254_PAIRING_OUTPUT_BYTES, EvmCoreError, EvmFork, EvmGas,
     EvmPrecompileImplementation, EvmPrecompileKind, EvmPrecompilePlan, EvmPrecompileRegistry,
+    bn254_tower::{Fp12, exercise_tower_accumulation},
     execute_bn254_pairing, parse_bn254_pairing_input,
 };
+
+use crate::bn254_pairing::for_each_valid_pairing_tuple;
 
 fn registry(fork: EvmFork) -> Result<EvmPrecompileRegistry, EvmCoreError> {
     EvmPrecompileRegistry::try_new(fork)
@@ -44,6 +47,55 @@ fn bn254_pairing_parses_official_generator_tuple_but_fails_closed() -> Result<()
         Err(EvmCoreError::PrecompileBackendUnavailable)
     );
     assert_eq!(output, [7u8; EVM_BN254_PAIRING_OUTPUT_BYTES]);
+    Ok(())
+}
+
+#[test]
+fn bn254_pairing_streams_validated_tuples_once() -> Result<(), EvmCoreError> {
+    let input = generator_pairing_tuple();
+    let mut seen = 0usize;
+    let pairs = for_each_valid_pairing_tuple(&input, |tuple| {
+        seen = seen.saturating_add(1);
+        assert!(!tuple.g1.infinity);
+        assert!(!tuple.g2.infinity);
+    })?;
+    assert_eq!(pairs, 1);
+    assert_eq!(seen, 1);
+    Ok(())
+}
+
+#[test]
+fn bn254_pairing_stream_stops_at_first_invalid_tuple() {
+    let valid = generator_pairing_tuple();
+    let mut input = [0u8; EVM_BN254_PAIRING_ITEM_BYTES * 2];
+    if let Some(first) = input.get_mut(..EVM_BN254_PAIRING_ITEM_BYTES) {
+        first.copy_from_slice(&valid);
+    }
+    if let Some(second) = input.get_mut(EVM_BN254_PAIRING_ITEM_BYTES..) {
+        second.copy_from_slice(&valid);
+    }
+    write_word(
+        &mut input,
+        EVM_BN254_PAIRING_ITEM_BYTES.saturating_add(64),
+        field_modulus(),
+    );
+
+    let mut seen = 0usize;
+    assert_eq!(
+        for_each_valid_pairing_tuple(&input, |_| {
+            seen = seen.saturating_add(1);
+        }),
+        Err(EvmCoreError::PrecompileFieldElementOutOfRange)
+    );
+    assert_eq!(seen, 1);
+}
+
+#[test]
+fn bn254_pairing_tower_accumulation_uses_validated_tuple_stream() -> Result<(), EvmCoreError> {
+    let input = generator_pairing_tuple();
+    let (pairs, acc) = exercise_tower_accumulation(&input)?;
+    assert_eq!(pairs, 1);
+    assert_ne!(acc, Fp12::ONE);
     Ok(())
 }
 
