@@ -1,6 +1,6 @@
 # Native EVM Fork Matrix
 
-Status: `v0.47.0`.
+Status: `v0.48.0`.
 
 This document describes the first-party `eth-valkyoth-evm-core` fork model.
 It is a support matrix for the native engine bootstrap, not a full Ethereum
@@ -106,15 +106,17 @@ claims call/create execution compatibility.
 `v0.45.0` adds fork-aware precompile descriptors and bounded precompile plans.
 `v0.46.0` adds dependency-free SHA-256 and RIPEMD-160 execution. `v0.47.0`
 adds ECRECOVER execution through caller-provided secp256k1 and Keccak backend
-traits. The registry recognizes the canonical low-address accounts for
-Frontier precompiles, Byzantium modular exponentiation and BN254 precompiles,
-Istanbul BLAKE2F, Cancun KZG point evaluation, and Prague BLS12-381
-precompiles.
+traits. `v0.48.0` adds bounded first-party ModExp parsing, EIP-198/EIP-2565
+gas, execution, and fuzzing with an explicit operand cap. The registry
+recognizes the canonical low-address accounts for Frontier precompiles,
+Byzantium modular exponentiation and BN254 precompiles, Istanbul BLAKE2F,
+Cancun KZG point evaluation, and Prague BLS12-381 precompiles.
 
 | Precompile domain | Address range | First admitted native fork | Execution status |
 | --- | ---: | --- | --- |
 | `ecrecover`, SHA-256, RIPEMD-160, identity | `0x01..=0x04` | Frontier | Identity, SHA-256, and RIPEMD-160 execute dependency-free. ECRECOVER executes only with caller-provided secp256k1 and Keccak backends. |
-| Modular exponentiation and BN254 add/mul/pairing | `0x05..=0x08` | Byzantium | Bounded plans only; BN254 gas policy distinguishes Byzantium and Istanbul pricing. |
+| Modular exponentiation | `0x05` | Byzantium | Executes through bounded first-party no-alloc bigint code with EIP-198 and EIP-2565 gas formulas and an explicit release operand cap. |
+| BN254 add/mul/pairing | `0x06..=0x08` | Byzantium | Bounded plans only; BN254 gas policy distinguishes Byzantium and Istanbul pricing. |
 | BLAKE2F | `0x09` | Istanbul | Exact 213-byte input planning and round-count gas extraction; execution fails closed without a backend. |
 | KZG point evaluation | `0x0a` | Cancun | Exact 192-byte input planning and fixed 50,000 gas; proof verification backend is deferred. |
 | BLS12-381 precompiles | `0x0b..=0x11` | Prague | Address/fork admission only until audited BLS backends and vectors are added. |
@@ -125,4 +127,5 @@ output sizes where known, and return `PrecompileBackendUnavailable` for
 remaining cryptographic execution until reviewed backend crates or first-party
 implementations are admitted. ECRECOVER intentionally accepts high-s
 signatures because EIP-2 changed transaction validity but left the recover
-precompile unchanged.
+precompile unchanged. ModExp intentionally rejects operands above the release
+cap until larger first-party bigint execution is separately reviewed.

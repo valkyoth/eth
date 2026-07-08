@@ -14,8 +14,10 @@ mod gas;
 mod hash_precompile;
 mod jumpdest;
 mod memory;
+mod modexp;
 mod opcode;
 mod precompile;
+mod precompile_execute;
 mod program_counter;
 mod ripemd160;
 mod sha256;
@@ -40,6 +42,10 @@ pub use execution::{
 pub use fork::{EvmFork, OpcodeTable};
 pub use gas::{EVM_DEFAULT_GAS_LIMIT, EVM_MAX_GAS_LIMIT, EvmGas, EvmGasMeter, EvmGasSchedule};
 pub use memory::{EVM_MEMORY_LIMIT_BYTES, EvmMemory};
+pub use modexp::{
+    EVM_MODEXP_HEADER_BYTES, EVM_MODEXP_MAX_OPERAND_BYTES, EvmModExpInput, execute_modexp,
+    parse_modexp_input,
+};
 pub use opcode::{EvmOpcode, OpcodeClass, OpcodeInfo};
 pub use precompile::{
     EVM_PRECOMPILE_INPUT_LIMIT, EvmPrecompileDescriptor, EvmPrecompileGasPolicy,
@@ -74,3 +80,7 @@ mod precompile_tests;
 #[cfg(test)]
 #[path = "ecrecover_tests.rs"]
 mod ecrecover_tests;
+
+#[cfg(test)]
+#[path = "modexp_tests.rs"]
+mod modexp_tests;

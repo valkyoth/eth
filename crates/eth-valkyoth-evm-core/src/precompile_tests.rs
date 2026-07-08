@@ -51,6 +51,12 @@ fn registry_is_fork_aware() -> Result<(), EvmCoreError> {
         EvmPrecompileImplementation::NativeRipemd160
     );
     assert_eq!(
+        registry(EvmFork::BYZANTIUM)?
+            .descriptor(EvmPrecompileKind::Modexp)?
+            .implementation,
+        EvmPrecompileImplementation::NativeModexp
+    );
+    assert_eq!(
         registry(EvmFork::ISTANBUL)?
             .descriptor(EvmPrecompileKind::Blake2F)?
             .address,
@@ -375,12 +381,6 @@ fn hex_nibble(byte: u8) -> u8 {
 
 #[test]
 fn deferred_dynamic_precompile_gas_is_not_zero_cost() -> Result<(), EvmCoreError> {
-    let modexp = registry(EvmFork::BYZANTIUM)?.descriptor(EvmPrecompileKind::Modexp)?;
-    assert_eq!(
-        EvmPrecompilePlan::try_new(modexp, &[0u8; 96])?.gas_cost(),
-        None
-    );
-
     let bls = registry(EvmFork::PRAGUE)?.descriptor(EvmPrecompileKind::Bls12PairingCheck)?;
     assert_eq!(
         EvmPrecompilePlan::try_new(bls, &[0u8; 384])?.gas_cost(),

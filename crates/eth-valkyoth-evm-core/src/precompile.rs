@@ -1,4 +1,4 @@
-use crate::{EvmAddress, EvmCoreError, EvmFork, EvmGas, hash_precompile};
+use crate::{EvmAddress, EvmCoreError, EvmFork, EvmGas, hash_precompile, modexp};
 
 /// Maximum precompile calldata bytes admitted by the native planning boundary.
 pub const EVM_PRECOMPILE_INPUT_LIMIT: usize = 1_048_576;
@@ -110,6 +110,8 @@ pub enum EvmPrecompileImplementation {
     NativeSha256,
     /// The release can execute RIPEMD-160 dependency-free.
     NativeRipemd160,
+    /// The release can execute bounded dependency-free ModExp.
+    NativeModexp,
     /// The release admits planning only; execution must fail closed.
     RequiresCryptoBackend,
 }
@@ -139,6 +141,8 @@ pub enum EvmPrecompileGasPolicy {
     },
     /// BN254 pairing gas, with Byzantium and Istanbul pricing split by fork.
     Bn254Pairing,
+    /// ModExp gas, with Byzantium and Berlin pricing split by fork.
+    Modexp,
     /// Gas is the BLAKE2F round count stored in the first four input bytes.
     Blake2FRounds,
     /// Dynamic gas formula is intentionally not implemented in this release.
@@ -205,39 +209,6 @@ impl EvmPrecompilePlan {
     #[must_use]
     pub const fn gas_cost(self) -> Option<EvmGas> {
         self.gas_cost
-    }
-
-    /// Executes the dependency-free identity precompile into `output`.
-    pub fn execute_identity(self, input: &[u8], output: &mut [u8]) -> Result<usize, EvmCoreError> {
-        if self.descriptor.kind != EvmPrecompileKind::Identity {
-            return Err(EvmCoreError::PrecompileBackendUnavailable);
-        }
-        if input.len() != self.input_len {
-            return Err(EvmCoreError::PrecompileInvalidInputLength);
-        }
-        execute_identity(input, output)
-    }
-
-    /// Executes the dependency-free SHA-256 precompile into `output`.
-    pub fn execute_sha256(self, input: &[u8], output: &mut [u8]) -> Result<usize, EvmCoreError> {
-        if self.descriptor.kind != EvmPrecompileKind::Sha256 {
-            return Err(EvmCoreError::PrecompileBackendUnavailable);
-        }
-        if input.len() != self.input_len {
-            return Err(EvmCoreError::PrecompileInvalidInputLength);
-        }
-        execute_sha256(input, output)
-    }
-
-    /// Executes the dependency-free RIPEMD-160 precompile into `output`.
-    pub fn execute_ripemd160(self, input: &[u8], output: &mut [u8]) -> Result<usize, EvmCoreError> {
-        if self.descriptor.kind != EvmPrecompileKind::Ripemd160 {
-            return Err(EvmCoreError::PrecompileBackendUnavailable);
-        }
-        if input.len() != self.input_len {
-            return Err(EvmCoreError::PrecompileInvalidInputLength);
-        }
-        execute_ripemd160(input, output)
     }
 }
 
@@ -352,6 +323,7 @@ const fn descriptor_for_kind(kind: EvmPrecompileKind, fork: EvmFork) -> EvmPreco
         EvmPrecompileKind::Sha256 => EvmPrecompileImplementation::NativeSha256,
         EvmPrecompileKind::Ripemd160 => EvmPrecompileImplementation::NativeRipemd160,
         EvmPrecompileKind::Identity => EvmPrecompileImplementation::NativeIdentity,
+        EvmPrecompileKind::Modexp => EvmPrecompileImplementation::NativeModexp,
         _ => EvmPrecompileImplementation::RequiresCryptoBackend,
     };
     EvmPrecompileDescriptor {
@@ -392,6 +364,7 @@ const fn gas_policy_for_kind(kind: EvmPrecompileKind, fork: EvmFork) -> EvmPreco
             base: EvmGas::new(15),
             per_word: EvmGas::new(3),
         },
+        EvmPrecompileKind::Modexp => EvmPrecompileGasPolicy::Modexp,
         EvmPrecompileKind::Bn254Add if fork.get() >= EvmFork::ISTANBUL.get() => {
             EvmPrecompileGasPolicy::Fixed(EvmGas::new(150))
         }
@@ -445,6 +418,9 @@ fn gas_cost(
         }
         EvmPrecompileGasPolicy::Bn254Pairing => {
             Ok(Some(bn254_pairing_gas(descriptor.fork, input.len())?))
+        }
+        EvmPrecompileGasPolicy::Modexp => {
+            Ok(Some(modexp::modexp_gas_cost(descriptor.fork, input)?))
         }
         EvmPrecompileGasPolicy::Blake2FRounds => Ok(Some(blake2f_round_gas(input)?)),
         EvmPrecompileGasPolicy::DeferredDynamic => Ok(None),

@@ -1787,7 +1787,7 @@ Exit criteria:
 
 ### v0.47.0 - Native EVM ECRECOVER Precompile
 
-Status: implementation ready; awaiting pentest.
+Status: tagged as `v0.47.0`.
 
 Goal: execute the `ecrecover` precompile without weakening the existing
 secp256k1 backend boundary.
@@ -1817,6 +1817,8 @@ Exit criteria:
 
 ### v0.48.0 - Native EVM ModExp Precompile
 
+Status: implementation ready; awaiting pentest.
+
 Goal: execute the Byzantium modular exponentiation precompile with bounded
 memory and gas semantics.
 
@@ -1824,7 +1826,8 @@ Deliverables:
 
 - EIP-198/EIP-2565 input parser for base, exponent, and modulus lengths;
 - exact gas formula by fork;
-- bounded big-integer execution plan with dependency/first-party decision;
+- bounded first-party no-alloc big-integer execution with an explicit release
+  operand cap;
 - zero-modulus, empty-base, empty-exponent, and oversized-length handling;
 - output buffer and allocation limits.
 
