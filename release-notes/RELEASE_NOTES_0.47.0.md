@@ -25,6 +25,8 @@ order, while transaction validation continues to enforce low-s elsewhere.
 - `execute_ecrecover` and `EvmPrecompilePlan::execute_ecrecover`.
 - Tests for valid backend execution, high-s acceptance, invalid-v handling,
   invalid scalar handling, output-buffer safety, and wrong-plan rejection.
+- `fuzz/fuzz_targets/ecrecover_frame.rs` to exercise the untrusted calldata
+  frame parser with deterministic caller-provided backend stubs.
 
 ## Changed
 
@@ -49,6 +51,8 @@ order, while transaction validation continues to enforce low-s elsewhere.
   zero-length output without mutating the output buffer.
 - ECRECOVER accepts high-s signatures by design because EIP-2 explicitly kept
   the precompile behavior unchanged.
+- The ECRECOVER backend trait documents that precompile implementations must
+  not reuse transaction-sender recovery helpers that reject high-s signatures.
 - Remaining cryptographic precompiles still fail closed with
   `PrecompileBackendUnavailable`.
 
@@ -65,6 +69,8 @@ order, while transaction validation continues to enforce low-s elsewhere.
 - `cargo fmt --all --check`
 - `cargo test -p eth-valkyoth-evm-core`
 - `cargo clippy -p eth-valkyoth-evm-core --all-targets --all-features -- -D warnings`
+- `cargo check --manifest-path fuzz/Cargo.toml --bin ecrecover_frame`
+- `cargo clippy --manifest-path fuzz/Cargo.toml --bin ecrecover_frame -- -D warnings`
 - `cargo check -p eth --features evm-core`
 - `scripts/release_crates.py --check`
 - `python3 scripts/test-release-metadata.py`

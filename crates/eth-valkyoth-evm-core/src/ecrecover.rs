@@ -47,6 +47,11 @@ impl EvmEcRecoverSignature {
 }
 
 /// Caller-provided ECRECOVER secp256k1 backend boundary.
+///
+/// Implementations must follow the EVM precompile rules, not transaction sender
+/// recovery rules: high-s signatures are valid for ECRECOVER. Do not reuse a
+/// transaction-recovery helper that rejects high-s signatures as part of EIP-2
+/// validation.
 pub trait EvmEcRecoverBackend {
     /// Recovers a 64-byte uncompressed public key payload from `digest` and
     /// `signature`. Invalid signatures must return `None`.

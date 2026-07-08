@@ -13,6 +13,7 @@ cargo-fuzz = true
 [dependencies]
 alloy-rlp = "0.3.16"
 eth-valkyoth-codec = { path = "../crates/eth-valkyoth-codec", version = "0.19.0", features = ["testing"] }
+eth-valkyoth-evm-core = { path = "../crates/eth-valkyoth-evm-core", version = "0.10.0" }
 eth-valkyoth-hash = { path = "../crates/eth-valkyoth-hash", version = "0.11.2", features = ["tiny-keccak"] }
 eth-valkyoth-primitives = { path = "../crates/eth-valkyoth-primitives", version = "0.11.2" }
 eth-valkyoth-protocol = { path = "../crates/eth-valkyoth-protocol", version = "0.25.2" }
@@ -141,6 +142,13 @@ bench = false
 [[bin]]
 name = "eip712_json"
 path = "fuzz_targets/eip712_json.rs"
+test = false
+doc = false
+bench = false
+
+[[bin]]
+name = "ecrecover_frame"
+path = "fuzz_targets/ecrecover_frame.rs"
 test = false
 doc = false
 bench = false
