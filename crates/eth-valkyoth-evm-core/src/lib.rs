@@ -9,6 +9,7 @@ mod bn254;
 mod bn254_field;
 mod bn254_g2;
 mod bn254_pairing;
+mod bn254_tower;
 mod call;
 mod ecrecover;
 mod error;
@@ -109,3 +110,7 @@ mod bn254_tests;
 #[cfg(test)]
 #[path = "bn254_pairing_tests.rs"]
 mod bn254_pairing_tests;
+
+#[cfg(test)]
+#[path = "bn254_tower_tests.rs"]
+mod bn254_tower_tests;

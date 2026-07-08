@@ -22,39 +22,52 @@ const BN254_TWIST_B: Fp2 = Fp2 {
 
 #[derive(Clone, Copy, Debug, Eq, PartialEq)]
 pub(crate) struct Fp2 {
-    c0: Fp,
-    c1: Fp,
+    pub(crate) c0: Fp,
+    pub(crate) c1: Fp,
 }
 
 impl Fp2 {
-    const ZERO: Self = Self {
+    pub(crate) const ZERO: Self = Self {
         c0: Fp::ZERO,
         c1: Fp::ZERO,
     };
+    pub(crate) const ONE: Self = Self {
+        c0: Fp::ONE,
+        c1: Fp::ZERO,
+    };
+    pub(crate) const NINE_PLUS_I: Self = Self {
+        c0: Fp::from_montgomery_limbs([
+            0xf606_47ce_410d_7ff7,
+            0x2f3d_6f4d_d31b_d011,
+            0x2943_337e_3940_c6d1,
+            0x1d95_98e8_a7e3_9857,
+        ]),
+        c1: Fp::ONE,
+    };
 
-    fn is_zero(self) -> bool {
+    pub(crate) fn is_zero(self) -> bool {
         self.c0.is_zero() && self.c1.is_zero()
     }
 
-    fn add(self, rhs: Self) -> Self {
+    pub(crate) fn add(self, rhs: Self) -> Self {
         Self {
             c0: self.c0.add(rhs.c0),
             c1: self.c1.add(rhs.c1),
         }
     }
 
-    fn sub(self, rhs: Self) -> Self {
+    pub(crate) fn sub(self, rhs: Self) -> Self {
         Self {
             c0: self.c0.sub(rhs.c0),
             c1: self.c1.sub(rhs.c1),
         }
     }
 
-    fn double(self) -> Self {
+    pub(crate) fn double(self) -> Self {
         self.add(self)
     }
 
-    fn mul(self, rhs: Self) -> Self {
+    pub(crate) fn mul(self, rhs: Self) -> Self {
         let ac = self.c0.mul(rhs.c0);
         let bd = self.c1.mul(rhs.c1);
         let ad = self.c0.mul(rhs.c1);
@@ -65,7 +78,7 @@ impl Fp2 {
         }
     }
 
-    fn square(self) -> Self {
+    pub(crate) fn square(self) -> Self {
         let c0c1 = self.c0.mul(self.c1);
         Self {
             c0: self.c0.square().sub(self.c1.square()),

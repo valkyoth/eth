@@ -1926,23 +1926,51 @@ Exit criteria:
 - Every non-empty pairing tuple is rejected unless both G1 and G2 inputs are in
   the admitted groups.
 
-### v0.50.2 - Native EVM BN254 Miller Loop
+### v0.50.2 - Native EVM BN254 Fp6/Fp12 Tower Foundation
+
+Status: implementation ready; awaiting pentest before tagging.
+
+Goal: add the first-party Fp6/Fp12 tower arithmetic required by the BN254
+Miller loop without claiming non-empty pairing execution yet.
+
+Deliverables:
+
+- Fp6/Fp12 arithmetic split into files below the 500-line cap;
+- Fp6/Fp12 zero, one, add, subtract, multiply, square, and tower non-residue
+  relations;
+- bounded internal tower-accumulation shape tied to the already validated
+  pairing tuple count while non-empty execution still fails closed;
+- official cross-client invalid-subgroup vector if one is available in the
+  admitted Ethereum fixture sources;
+- no default BN254, bigint, allocator, crypto, or pairing backend dependency.
+
+Verification:
+
+- algebraic tower relation tests for `v^3 = 9 + i` and `w^2 = v`;
+- identity, zero, squaring, and distributivity tests;
+- `cargo test -p eth-valkyoth-evm-core bn254_tower`;
+- `cargo clippy -p eth-valkyoth-evm-core --all-targets --all-features -- -D warnings`.
+
+Exit criteria:
+
+- The Fp6/Fp12 tower foundation is deterministic, bounded by tuple count when
+  reached from pairing execution, and ready for line-function review.
+
+### v0.50.3 - Native EVM BN254 Miller Loop
 
 Goal: implement the first-party Miller loop over validated BN254 pairing tuples.
 
 Deliverables:
 
-- Fp6/Fp12 arithmetic split into files below the 500-line cap;
-- line-function and Miller-loop implementation;
+- line-function implementation over the admitted Fp12 tower;
+- Miller-loop implementation;
 - batch accumulation limits tied to gas and input length;
-- official cross-client invalid-subgroup vector if one is available in the
-  admitted Ethereum fixture sources;
 - differential vectors against an admitted reference engine.
 
 Verification:
 
 - official positive and negative pairing vectors without final-exponentiation
-  shortcuts;
+  shortcuts if available;
 - fuzz target for batch accumulation shape;
 - dependency review for any dev-only reference engine.
 
@@ -1950,7 +1978,7 @@ Exit criteria:
 
 - Miller-loop accumulation is deterministic, bounded, and vector-backed.
 
-### v0.50.3 - Native EVM BN254 Pairing Final Exponentiation
+### v0.50.4 - Native EVM BN254 Pairing Final Exponentiation
 
 Goal: complete non-empty EIP-197 BN254 pairing execution.
 

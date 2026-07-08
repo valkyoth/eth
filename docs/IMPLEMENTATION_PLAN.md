@@ -97,11 +97,12 @@ The first production value is:
   gas, execution, and fuzzing; `v0.49.0` adds dependency-free BN254 add/mul
   execution; `v0.50.0` adds the BN254 pairing frame boundary with empty-input
   execution and non-empty fail-closed behavior; `v0.50.1` adds G2 subgroup
-  validation and a precomputed twist coefficient; `v0.50.2` and `v0.50.3`
-  schedule the Miller loop and final exponentiation before non-empty pairing
-  execution is claimed; `v0.51.0` and `v0.52.0` cover the
-  remaining cryptographic precompile execution or backend-admission decisions
-  before later releases add nested execution and committed state writes.
+  validation and a precomputed twist coefficient; `v0.50.2` adds the Fp6/Fp12
+  tower foundation; `v0.50.3` and `v0.50.4` schedule the Miller loop and
+  final exponentiation before non-empty pairing execution is claimed;
+  `v0.51.0` and `v0.52.0` cover the remaining cryptographic precompile
+  execution or backend-admission decisions before later releases add nested
+  execution and committed state writes.
 - `eth-valkyoth-rpc`: optional RPC policy over admitted provider transports.
 - `eth-valkyoth-abi`: optional ABI, contract-call, event, error, and common
   contract-standard helpers.

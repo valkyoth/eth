@@ -18,7 +18,7 @@ from pathlib import Path
 
 ROOT = Path(__file__).resolve().parents[1]
 SPEC_LOCK = ROOT / "spec-lock.toml"
-USER_AGENT = "valkyoth-eth-upstream-check/0.50.1 (https://github.com/valkyoth/eth)"
+USER_AGENT = "valkyoth-eth-upstream-check/0.50.2 (https://github.com/valkyoth/eth)"
 CRATES_IO = "https://crates.io/api/v1/crates"
 WORKSPACE_MSRV = "1.90.0"
 ALLOWED_REPO = re.compile(r"^https://github\.com/ethereum/[A-Za-z0-9_.-]+$")
