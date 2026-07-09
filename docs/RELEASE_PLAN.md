@@ -2158,7 +2158,7 @@ Exit criteria:
 
 ### v0.50.9 - Native EVM BN254 Projective Post-Loop Line Carrier
 
-Status: implementation stop reached; awaiting pentest.
+Status: ready for release after pentest and retest; awaiting GitHub green and tag.
 
 Goal: replace the current affine line-carrier shortcut with a
 projective/reference-aligned line carrier that can safely multiply the Q1 and
@@ -2172,6 +2172,9 @@ Deliverables:
 - regression proving the EIP-197 generator tuple is not accidentally mapped to
   one by the completed accumulator and final exponentiation;
 - inverse-batch regression still maps to one;
+- scalar reconstruction regression for the hard-coded BN254 `6u+2` NAF table;
+- bilinearity regression over a G1 generator double:
+  `e([2]P, Q) == e(P, Q)^2`;
 - non-empty execution still fails closed after computing the complete
   accumulator and final exponentiation.
 

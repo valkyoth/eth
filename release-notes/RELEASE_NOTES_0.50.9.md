@@ -1,6 +1,6 @@
 # Release Notes - eth v0.50.9
 
-Status: implementation complete; awaiting pentest.
+Status: ready for release after pentest, retest, and local release gate.
 
 ## Summary
 
@@ -58,5 +58,8 @@ words remain scheduled for `v0.50.10`.
 
 ## Pentest
 
-Pentest is required before tagging. The final report must be committed at
-`security/pentest/v0.50.9.md` with `Status: PASS`.
+The permanent report is tracked at `security/pentest/v0.50.9.md`. The initial
+review found one Critical correctness issue in the BN254 `6u+2` NAF table and
+a related process gap in self-consistency-only Miller-loop tests. The
+remediation replaced the table from an independent derivation and added scalar
+reconstruction plus bilinearity regressions. Retest passed.
