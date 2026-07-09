@@ -33,6 +33,19 @@ pub fn testing_bn254_miller_pairs(input: &[u8]) -> Result<(usize, bool), EvmCore
     Ok((pairs, acc == Fp12::ONE))
 }
 
+/// Exercises the admitted BN254 post-loop Frobenius point helper for fuzzing.
+#[cfg(feature = "testing")]
+pub fn testing_bn254_post_loop_point_pairs(input: &[u8]) -> Result<(usize, usize), EvmCoreError> {
+    let mut non_infinity = 0usize;
+    let pairs = for_each_valid_pairing_tuple(input, |tuple| {
+        let (q1, minus_q2) = tuple.g2.optimal_ate_post_loop_points();
+        if !tuple.g2.infinity && !q1.infinity && !minus_q2.infinity {
+            non_infinity = non_infinity.saturating_add(1);
+        }
+    })?;
+    Ok((pairs, non_infinity))
+}
+
 pub(crate) fn miller_loop_tuple(tuple: Bn254PairingTuple) -> Fp12 {
     if tuple.g1.infinity || tuple.g2.infinity {
         return Fp12::ONE;

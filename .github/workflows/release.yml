@@ -9,8 +9,8 @@ permissions:
   contents: read
 
 jobs:
-  metadata:
-    name: Validate release metadata
+  readiness:
+    name: Validate pentest readiness
     runs-on: ubuntu-latest
     timeout-minutes: 10
 
@@ -20,5 +20,5 @@ jobs:
         with:
           fetch-depth: 0
 
-      - name: Validate release metadata
-        run: scripts/validate-release-metadata.sh
+      - name: Validate release readiness
+        run: scripts/validate-release-readiness.sh "${GITHUB_REF_NAME}"

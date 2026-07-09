@@ -24,6 +24,8 @@ to `v0.50.10`.
   factor.
 - The fail-closed non-empty Miller path exercises the admitted Q1/-Q2 helper
   without multiplying the post-loop lines into the accumulator.
+- The BN254 pairing fuzz target now directly exercises the post-loop Frobenius
+  point helper on every parsed valid frame.
 
 ## Changed
 
@@ -34,6 +36,10 @@ to `v0.50.10`.
   - `v0.50.10`: public non-empty EIP-197 result admission.
 - Documentation now records the discovered affine line-carrier gap explicitly
   instead of treating post-loop completion as a vague deferred item.
+- The tag-triggered GitHub release workflow again runs
+  `scripts/validate-release-readiness.sh "${GITHUB_REF_NAME}"`, and metadata
+  regression tests now fail if the workflow is downgraded to metadata-only
+  validation.
 
 ## Security Notes
 
@@ -43,12 +49,16 @@ to `v0.50.10`.
   G2 calldata.
 - The implementation deliberately does not admit the post-loop line
   multiplication that failed the generator-tuple regression.
+- Tag pushes are protected by the strong pentest-readiness workflow, not only
+  by the ordinary metadata check.
 
 ## Verification
 
 - `cargo test -p eth-valkyoth-evm-core bn254`
 - `cargo clippy -p eth-valkyoth-evm-core --all-targets --all-features -- -D warnings`
+- `cargo clippy --manifest-path fuzz/Cargo.toml --bin bn254_pairing_frame -- -D warnings`
 - `cargo fmt --all --check`
+- `python3 scripts/test-release-metadata.py`
 
 ## Next
 
