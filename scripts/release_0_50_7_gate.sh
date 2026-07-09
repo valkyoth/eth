@@ -17,6 +17,7 @@ cargo tree -p eth -e features --all-features > target/release_0_50_7_all_feature
 scripts/release_crates.py --check
 cargo test -p eth-valkyoth-evm-core
 cargo test --release -p eth-valkyoth-evm-core miller_loop_wall_time_budget_smoke -- --ignored --nocapture
+cargo test --release -p eth-valkyoth-evm-core bn254_pairing_final_exponentiation_wall_time_budget_smoke -- --ignored --nocapture
 cargo test -p eth-valkyoth-evm
 cargo check -p eth --features evm-core
 cargo check -p eth --features evm

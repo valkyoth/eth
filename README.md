@@ -35,7 +35,8 @@ dependencies.
 
 ## Current Status
 
-Status: `v0.50.6` adds sparse BN254 Miller-loop multiplication evidence.
+Status: `v0.50.7` adds bounded BN254 final-exponentiation evidence while
+keeping non-empty pairing execution fail-closed.
 The optional `evm-core` feature now exposes dependency-free no_std word, stack,
 memory, opcode, program-counter, fork, gas schedule, opcode-table, host-state,
 warm/cold access, historical fork identifiers, opcode-introduction metadata,
@@ -212,7 +213,7 @@ Not implemented yet:
 
 ```toml
 [dependencies]
-eth = "0.50.6"
+eth = "0.50.7"
 ```
 
 For optional sanitization support:
@@ -1239,7 +1240,7 @@ friendly, and independently testable.
 The minimum supported Rust version is Rust `1.90.0`. New deployments should use
 the pinned stable Rust `1.96.1` until the toolchain policy is updated.
 
-Compatibility evidence for `0.50.6`:
+Compatibility evidence for `0.50.7`:
 
 | Rust | Local Evidence |
 | --- | --- |
@@ -1256,7 +1257,7 @@ Compatibility evidence for `0.50.6`:
 
 ```bash
 scripts/checks.sh
-scripts/release_0_50_6_gate.sh
+scripts/release_0_50_7_gate.sh
 ```
 
 For dependency-policy checks, install `cargo-deny` and `cargo-audit`, then run:

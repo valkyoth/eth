@@ -1,6 +1,7 @@
 # Release Notes - eth v0.50.7
 
-Status: implementation ready; awaiting pentest before tagging.
+Status: release candidate accepted after pentest and retest; awaiting GitHub
+CI/CodeQL before tagging.
 
 ## Summary
 
@@ -55,7 +56,10 @@ now tracks that explicitly in `v0.50.8`, with final result admission in
 - `cargo test --release -p eth-valkyoth-evm-core bn254_pairing_final_exponentiation_wall_time_budget_smoke -- --ignored --nocapture`
 - `cargo clippy --manifest-path fuzz/Cargo.toml --bin bn254_pairing_frame -- -D warnings`
 
-## Next
+## Pentest
 
-Run the 0.50.7 pentest against this exact implementation commit before the
-permanent report is written.
+The permanent report is tracked at `security/pentest/v0.50.7.md`. The initial
+review found one Low evidence gap: final exponentiation was live in the
+fail-closed path but not represented in the release-mode benchmark evidence.
+The remediation added an ignored release benchmark and recorded the timing in
+`docs/bn254-pairing-economics.md`. Retest passed.
