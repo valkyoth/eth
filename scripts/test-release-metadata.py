@@ -37,6 +37,10 @@ def main() -> int:
     assert 'current_pentest_report="security/pentest/v${release_version}.md"' not in validator
     assert 'test -f "$current_pentest_report"' not in validator
     assert "grep -q '^Status: PASS$' \"$current_pentest_report\"" not in validator
+    assert 'release_gate="scripts/release_$(printf' in validator
+    assert 'tr . _)_gate.sh"' in validator
+    assert 'test -x "$release_gate"' in validator
+    assert 'grep -q "scripts/validate-release-readiness.sh v${release_version}" "$release_gate"' in validator
     assert "test -f .github/workflows/release.yml" in validator
     assert "workflow_dispatch:" in validator
     assert "Validate release metadata" in validator

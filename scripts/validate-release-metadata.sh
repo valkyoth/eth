@@ -100,7 +100,10 @@ test -f security/pentest/v0.40.0.md
 test -f security/pentest/v0.41.0.md
 release_version="$(python3 -c 'import tomllib; print(tomllib.load(open("release-crates.toml", "rb"))["release"]["version"])')"
 eth_manifest_version="$(python3 -c 'import tomllib; print(tomllib.load(open("crates/eth/Cargo.toml", "rb"))["package"]["version"])')"
+release_gate="scripts/release_$(printf '%s' "$release_version" | tr . _)_gate.sh"
 test "$release_version" = "$eth_manifest_version"
+test -x "$release_gate"
+grep -q "scripts/validate-release-readiness.sh v${release_version}" "$release_gate"
 grep -q 'workflow_dispatch:' .github/workflows/release.yml
 grep -q 'Validate release metadata' .github/workflows/release.yml
 grep -q 'scripts/validate-release-metadata.sh' .github/workflows/release.yml

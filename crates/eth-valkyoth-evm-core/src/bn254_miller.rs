@@ -14,10 +14,9 @@ pub(crate) const BN254_SIX_U_PLUS_2_NAF: &[i8] = &[
 
 /// Exercises first-party Miller-loop accumulation over validated BN254 tuples.
 ///
-/// This is still not a public EIP-197 pairing result. The fail-closed pairing
-/// path consumes this bounded accumulator and then exercises final
-/// exponentiation without admitting non-empty success until the post-loop line
-/// carrier and result-admission releases are reviewed.
+/// The dispatcher-facing pairing path consumes this bounded accumulator, runs
+/// final exponentiation, and maps the result to the canonical EIP-197 zero/one
+/// output word admitted in `v0.50.10`.
 pub(crate) fn exercise_miller_loop_accumulation(
     input: &[u8],
 ) -> Result<(usize, Fp12), EvmCoreError> {
@@ -48,7 +47,7 @@ pub fn testing_bn254_post_loop_point_pairs(input: &[u8]) -> Result<(usize, usize
     Ok((pairs, non_infinity))
 }
 
-/// Exercises the completed fail-closed BN254 accumulator for fuzzing.
+/// Exercises the completed BN254 accumulator used before final result mapping.
 #[cfg(feature = "testing")]
 pub fn testing_bn254_complete_accumulator_pairs(
     input: &[u8],
