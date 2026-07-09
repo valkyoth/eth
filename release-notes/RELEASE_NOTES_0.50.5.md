@@ -1,6 +1,6 @@
 # eth 0.50.5 Release Notes
 
-Status: implementation ready; awaiting pentest before tagging.
+Status: release candidate; pentest remediation and retest complete.
 
 `0.50.5` adds the first-party BN254 Miller-loop accumulator over validated
 EIP-197 pairing tuples. The accumulator consumes the existing G2 subgroup
@@ -62,8 +62,9 @@ pairing results. Non-empty EIP-197 pairing execution remains fail-closed with
 
 ## Pentest
 
-- Pending. Permanent report will be added at `security/pentest/v0.50.5.md`
-  after the external pentest and retest.
+- Initial review received in root `PENTEST.md`; remediation implemented and
+  retest passed. The permanent release report is recorded at
+  `security/pentest/v0.50.5.md`.
 
 ## Versioning
 

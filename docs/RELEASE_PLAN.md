@@ -2032,7 +2032,7 @@ Exit criteria:
 
 ### v0.50.5 - Native EVM BN254 Miller Loop
 
-Status: implementation ready; awaiting pentest before tagging.
+Status: release candidate; pentest remediation and retest complete.
 
 Goal: implement the first-party Miller loop over validated BN254 pairing tuples.
 
