@@ -1,6 +1,7 @@
 use crate::{
     EVM_BN254_POINT_BYTES, EvmCoreError, EvmFork, EvmGas, EvmGasMeter, EvmPrecompileKind,
-    EvmPrecompilePlan, EvmPrecompileRegistry, execute_bn254_add, execute_bn254_mul,
+    EvmPrecompilePlan, EvmPrecompileRegistry,
+    bn254::{execute_bn254_add, execute_bn254_mul},
 };
 
 fn registry(fork: EvmFork) -> Result<EvmPrecompileRegistry, EvmCoreError> {

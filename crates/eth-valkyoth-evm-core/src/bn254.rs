@@ -11,18 +11,7 @@ pub const EVM_BN254_ADD_INPUT_BYTES: usize = 128;
 /// Byte length of the BN254 multiplication precompile input frame.
 pub const EVM_BN254_MUL_INPUT_BYTES: usize = 96;
 
-/// Executes the EIP-196 BN254 point-addition precompile.
-///
-/// This is an unmetered low-level arithmetic primitive. Interpreter
-/// integrations must prefer [`EvmPrecompilePlan::execute_bn254_add`], which
-/// charges the supplied gas meter before validation or arithmetic is reachable.
-///
-/// # Security
-///
-/// This function implements public EVM precompile arithmetic. It is not
-/// constant-time and must not be reused for secret-dependent private-key
-/// operations.
-pub fn execute_bn254_add(input: &[u8], output: &mut [u8]) -> Result<usize, EvmCoreError> {
+pub(crate) fn execute_bn254_add(input: &[u8], output: &mut [u8]) -> Result<usize, EvmCoreError> {
     if input.len() > EVM_PRECOMPILE_INPUT_LIMIT {
         return Err(EvmCoreError::PrecompileInputTooLarge);
     }
@@ -35,18 +24,7 @@ pub fn execute_bn254_add(input: &[u8], output: &mut [u8]) -> Result<usize, EvmCo
     Ok(EVM_BN254_POINT_BYTES)
 }
 
-/// Executes the EIP-196 BN254 scalar-multiplication precompile.
-///
-/// This is an unmetered low-level arithmetic primitive. Interpreter
-/// integrations must prefer [`EvmPrecompilePlan::execute_bn254_mul`], which
-/// charges the supplied gas meter before validation or arithmetic is reachable.
-///
-/// # Security
-///
-/// This function implements public EVM precompile arithmetic. It is not
-/// constant-time and must not be reused for secret-dependent private-key
-/// operations.
-pub fn execute_bn254_mul(input: &[u8], output: &mut [u8]) -> Result<usize, EvmCoreError> {
+pub(crate) fn execute_bn254_mul(input: &[u8], output: &mut [u8]) -> Result<usize, EvmCoreError> {
     if input.len() > EVM_PRECOMPILE_INPUT_LIMIT {
         return Err(EvmCoreError::PrecompileInputTooLarge);
     }

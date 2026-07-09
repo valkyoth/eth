@@ -27,6 +27,13 @@ pairing results. Non-empty EIP-197 pairing execution remains fail-closed with
   `eth-valkyoth-evm-core 0.18.0`.
 - The fail-closed BN254 pairing path now exercises the Miller accumulator
   instead of only the tower/line-function carrier.
+- Raw BN254 add/mul/pairing execution helpers are crate-internal; the public
+  API exposes the gas-metered `EvmPrecompilePlan` methods.
+- A tag-triggered GitHub release workflow now runs
+  `scripts/validate-release-readiness.sh` for pushed `v*` tags.
+- Release documentation now clarifies that every-commit CI rejects local
+  `PENTEST.md` files while tag-time CI enforces the permanent passing pentest
+  report.
 - The release gate is available as `scripts/release_0_50_5_gate.sh`.
 
 ## Security Notes
@@ -40,9 +47,11 @@ pairing results. Non-empty EIP-197 pairing execution remains fail-closed with
   pairing result.
 - Non-empty pairing execution still returns `PrecompileBackendUnavailable`
   until final exponentiation is reviewed and admitted.
-- The low-level free functions remain public unmetered primitives for
-  standalone tests and fuzzing. Interpreter dispatch must use the gas-gated
-  `EvmPrecompilePlan` methods instead.
+- Public precompile execution entry points require an `EvmPrecompilePlan` and a
+  mutable gas meter. Internal unmetered helpers are not exported.
+- `v0.50.6` is reserved for sparse Miller-loop multiplication and gas/CPU
+  benchmark evidence before `v0.50.7` can admit final exponentiation and
+  non-empty pairing results.
 
 ## Verification
 

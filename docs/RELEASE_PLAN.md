@@ -2058,7 +2058,31 @@ Exit criteria:
 - Non-empty EIP-197 pairing execution remains fail-closed until final
   exponentiation is admitted.
 
-### v0.50.6 - Native EVM BN254 Pairing Final Exponentiation
+### v0.50.6 - Native EVM BN254 Sparse Miller Economics
+
+Goal: close the pairing gas-vs-CPU gap before any non-empty pairing result can
+be admitted.
+
+Deliverables:
+
+- sparse line-function multiplication path for the Miller accumulator;
+- benchmark harness for `miller_loop_tuple` and batch accumulation;
+- documented wall-time budget relative to EIP-1108 pair gas;
+- regression test or bench note proving the dense generic `Fp12::mul` path is
+  not used for line-function multiplication.
+
+Verification:
+
+- benchmark evidence on the supported Rust stable toolchain;
+- fuzz target still reaches the sparse accumulation path;
+- pentest gate before tagging.
+
+Exit criteria:
+
+- Non-empty EIP-197 pairing remains fail-closed, and final exponentiation cannot
+  be admitted until sparse multiplication and gas/CPU evidence are reviewed.
+
+### v0.50.7 - Native EVM BN254 Pairing Final Exponentiation
 
 Goal: complete non-empty EIP-197 BN254 pairing execution.
 
@@ -2067,12 +2091,13 @@ Deliverables:
 - first-party final exponentiation;
 - full `execute_bn254_pairing` non-empty result path;
 - official EIP-197 and execution-spec vectors;
-- benchmark notes relative to Byzantium and Istanbul gas assumptions.
+- benchmark notes consuming the `v0.50.6` sparse-Miller budget.
 
 Verification:
 
 - official BN254 pairing vectors;
 - differential vectors against an admitted reference engine;
+- explicit KATs for final-exponentiation edge cases and Frobenius coefficients;
 - fuzz target for non-empty pairing execution;
 - pentest gate before tagging.
 

@@ -23,6 +23,17 @@ default setup is active.
 The verification steps are documented in
 [GitHub Security Settings](docs/github-security-settings.md).
 
+## Release Gate
+
+Every release tag must point at a final pentest-report commit. The matching
+`security/pentest/vX.Y.Z.md` report must have `Status: PASS`, and
+`scripts/validate-release-readiness.sh vX.Y.Z` must pass before the tag is
+pushed. GitHub Actions also runs this readiness check on `v*` tag pushes.
+
+The pentest-report commit must be the direct, linear child of the reviewed
+commit. Do not squash-merge or rewrite the release branch between the reviewed
+implementation commit and the final report commit.
+
 ## Dependency Policy
 
 The dependency policy lives in `deny.toml`. Unknown registries and git sources

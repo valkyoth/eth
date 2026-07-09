@@ -56,18 +56,10 @@ pub(crate) fn for_each_valid_pairing_tuple(
     Ok(pairs)
 }
 
-/// Executes the currently admitted EIP-197 BN254 pairing frame.
-///
-/// Empty input is fully specified by EIP-197 and returns the 32-byte word
-/// encoding one. Non-empty inputs are parsed and then fail closed until the
-/// pairing algebra releases are admitted.
-///
-/// This is the unmetered low-level execution primitive. Interpreter integrations should
-/// prefer [`EvmPrecompilePlan::execute_bn254_pairing`], which charges the
-/// supplied gas meter before validation work is reachable. Integrations must
-/// map `PrecompileBackendUnavailable` to a reverting precompile call, never to
-/// success or a no-op.
-pub fn execute_bn254_pairing(input: &[u8], output: &mut [u8]) -> Result<usize, EvmCoreError> {
+pub(crate) fn execute_bn254_pairing(
+    input: &[u8],
+    output: &mut [u8],
+) -> Result<usize, EvmCoreError> {
     let target = output
         .get_mut(..EVM_BN254_PAIRING_OUTPUT_BYTES)
         .ok_or(EvmCoreError::PrecompileOutputTooSmall)?;

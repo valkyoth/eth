@@ -1,7 +1,8 @@
 #![no_main]
 
 use eth_valkyoth_evm_core::{
-    EVM_BN254_POINT_BYTES, execute_bn254_add, execute_bn254_mul,
+    EVM_BN254_POINT_BYTES, EvmFork, EvmGas, EvmGasMeter, EvmPrecompileKind, EvmPrecompilePlan,
+    EvmPrecompileRegistry,
 };
 use libfuzzer_sys::fuzz_target;
 
@@ -41,3 +42,19 @@ fuzz_target!(|data: &[u8]| {
         }
     }
 });
+
+fn execute_bn254_add(input: &[u8], output: &mut [u8]) -> Result<usize, eth_valkyoth_evm_core::EvmCoreError> {
+    let descriptor = EvmPrecompileRegistry::try_new(EvmFork::ISTANBUL)?
+        .descriptor(EvmPrecompileKind::Bn254Add)?;
+    let plan = EvmPrecompilePlan::try_new(descriptor, input)?;
+    let mut gas_meter = EvmGasMeter::try_new(EvmGas::new(1_000_000))?;
+    plan.execute_bn254_add(&mut gas_meter, input, output)
+}
+
+fn execute_bn254_mul(input: &[u8], output: &mut [u8]) -> Result<usize, eth_valkyoth_evm_core::EvmCoreError> {
+    let descriptor = EvmPrecompileRegistry::try_new(EvmFork::ISTANBUL)?
+        .descriptor(EvmPrecompileKind::Bn254Mul)?;
+    let plan = EvmPrecompilePlan::try_new(descriptor, input)?;
+    let mut gas_meter = EvmGasMeter::try_new(EvmGas::new(1_000_000))?;
+    plan.execute_bn254_mul(&mut gas_meter, input, output)
+}

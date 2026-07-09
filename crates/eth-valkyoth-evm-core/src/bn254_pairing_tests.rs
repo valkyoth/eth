@@ -1,8 +1,8 @@
 use crate::{
     EVM_BN254_PAIRING_ITEM_BYTES, EVM_BN254_PAIRING_OUTPUT_BYTES, EvmCoreError, EvmFork, EvmGas,
     EvmGasMeter, EvmPrecompileImplementation, EvmPrecompileKind, EvmPrecompilePlan,
-    EvmPrecompileRegistry, bn254_miller::exercise_miller_loop_accumulation, bn254_tower::Fp12,
-    execute_bn254_pairing, parse_bn254_pairing_input,
+    EvmPrecompileRegistry, bn254_miller::exercise_miller_loop_accumulation,
+    bn254_pairing::execute_bn254_pairing, bn254_tower::Fp12, parse_bn254_pairing_input,
 };
 
 use crate::bn254_pairing::for_each_valid_pairing_tuple;

@@ -1,7 +1,8 @@
 #![no_main]
 
 use eth_valkyoth_evm_core::{
-    EVM_BN254_PAIRING_OUTPUT_BYTES, execute_bn254_pairing, parse_bn254_pairing_input,
+    EVM_BN254_PAIRING_OUTPUT_BYTES, EvmFork, EvmGas, EvmGasMeter, EvmPrecompileKind,
+    EvmPrecompilePlan, EvmPrecompileRegistry, parse_bn254_pairing_input,
     testing_bn254_miller_pairs,
 };
 use libfuzzer_sys::fuzz_target;
@@ -24,3 +25,14 @@ fuzz_target!(|data: &[u8]| {
         assert_eq!(output.last().copied(), Some(1));
     }
 });
+
+fn execute_bn254_pairing(
+    input: &[u8],
+    output: &mut [u8],
+) -> Result<usize, eth_valkyoth_evm_core::EvmCoreError> {
+    let descriptor = EvmPrecompileRegistry::try_new(EvmFork::ISTANBUL)?
+        .descriptor(EvmPrecompileKind::Bn254Pairing)?;
+    let plan = EvmPrecompilePlan::try_new(descriptor, input)?;
+    let mut gas_meter = EvmGasMeter::try_new(EvmGas::new(10_000_000))?;
+    plan.execute_bn254_pairing(&mut gas_meter, input, output)
+}

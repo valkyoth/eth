@@ -181,7 +181,9 @@ Not implemented yet:
   Fp6/Fp12 tower foundation, validated tuple streaming, line-function
   foundation, and Miller-loop accumulator are implemented; final
   exponentiation, non-empty pairing success, and remaining cryptographic
-  precompiles are scheduled for `v0.50.6` through `v0.52.0`.
+  precompiles are scheduled for `v0.50.6` through `v0.52.0`, with
+  `v0.50.6` reserved for sparse-Miller gas/CPU evidence before final
+  exponentiation in `v0.50.7`.
 - No ABI/contract helper surface yet; scheduled for `v0.70.0` through
   `v0.78.0`.
 - No consensus/Engine API support yet; scheduled for `v0.79.0` through
