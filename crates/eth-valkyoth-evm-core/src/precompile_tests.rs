@@ -65,8 +65,8 @@ fn registry_is_fork_aware() -> Result<(), EvmCoreError> {
     assert_eq!(
         registry(EvmFork::ISTANBUL)?
             .descriptor(EvmPrecompileKind::Blake2F)?
-            .address,
-        EvmPrecompileKind::Blake2F.address()
+            .implementation,
+        EvmPrecompileImplementation::NativeBlake2F
     );
     assert_eq!(
         registry(EvmFork::CANCUN)?

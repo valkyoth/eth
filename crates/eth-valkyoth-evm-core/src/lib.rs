@@ -5,6 +5,7 @@
 #[cfg(feature = "std")]
 extern crate std;
 
+mod blake2f;
 mod bn254;
 mod bn254_field;
 mod bn254_final;
@@ -37,6 +38,7 @@ mod state;
 mod state_execution;
 mod word;
 
+pub use blake2f::{EVM_BLAKE2F_INPUT_BYTES, EVM_BLAKE2F_OUTPUT_BYTES, execute_blake2f};
 pub use bn254::{EVM_BN254_ADD_INPUT_BYTES, EVM_BN254_MUL_INPUT_BYTES, EVM_BN254_POINT_BYTES};
 #[cfg(feature = "testing")]
 pub use bn254_miller::{
@@ -122,6 +124,10 @@ mod bn254_pairing_tests;
 #[cfg(test)]
 #[path = "bn254_pairing_vector_tests.rs"]
 mod bn254_pairing_vector_tests;
+
+#[cfg(test)]
+#[path = "blake2f_tests.rs"]
+mod blake2f_tests;
 
 #[cfg(test)]
 #[path = "bn254_tower_tests.rs"]

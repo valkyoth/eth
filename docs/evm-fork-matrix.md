@@ -116,8 +116,9 @@ the atomic gas-meter charging, `v0.50.4` adds line-function helpers,
 `v0.50.5` adds internal Miller-loop accumulation, `v0.50.6` adds sparse
 line-factor multiplication and benchmark evidence, `v0.50.7` adds bounded
 final exponentiation, `v0.50.8` adds Frobenius Q1/-Q2 point mapping,
-`v0.50.9` adds the projective post-loop line carrier, and `v0.50.10` admits
-non-empty pairing result words with vector-backed canonical zero/one outputs.
+`v0.50.9` adds the projective post-loop line carrier, `v0.50.10` admits
+non-empty pairing result words with vector-backed canonical zero/one outputs,
+and `v0.51.0` adds first-party dependency-free BLAKE2F execution.
 The registry recognizes the
 canonical low-address accounts for Frontier precompiles,
 Byzantium modular exponentiation and BN254 precompiles, Istanbul BLAKE2F,
@@ -128,7 +129,7 @@ Cancun KZG point evaluation, and Prague BLS12-381 precompiles.
 | `ecrecover`, SHA-256, RIPEMD-160, identity | `0x01..=0x04` | Frontier | Identity, SHA-256, and RIPEMD-160 execute dependency-free. ECRECOVER executes only with caller-provided secp256k1 and Keccak backends. |
 | Modular exponentiation | `0x05` | Byzantium | Executes through bounded first-party no-alloc bigint code with EIP-198 and EIP-2565 gas formulas and an explicit release operand cap. |
 | BN254 add/mul/pairing | `0x06..=0x08` | Byzantium | Add and scalar multiplication execute dependency-free with canonical field and point validation. Pairing validates bounded frames, G2 curve membership, G2 subgroup membership, tuple streaming, line-function arithmetic, sparse Miller-loop accumulation, bounded final exponentiation, Frobenius Q1/-Q2 point mapping, and the projective post-loop line carrier, then writes canonical EIP-197 zero/one result words documented in `docs/bn254-pairing-economics.md`. |
-| BLAKE2F | `0x09` | Istanbul | Exact 213-byte input planning and round-count gas extraction; execution fails closed without a backend. |
+| BLAKE2F | `0x09` | Istanbul | Executes EIP-152 exact 213-byte frames with final-flag validation, round-count gas, and 64-byte output. |
 | KZG point evaluation | `0x0a` | Cancun | Exact 192-byte input planning and fixed 50,000 gas; proof verification backend is deferred. |
 | BLS12-381 precompiles | `0x0b..=0x11` | Prague | Address/fork admission only until audited BLS backends and vectors are added. |
 

@@ -106,11 +106,10 @@ The first production value is:
   multiplication and gas/CPU benchmark evidence; `v0.50.7` adds bounded final
   exponentiation behind the fail-closed pairing boundary; `v0.50.8` adds
   Frobenius Q1/-Q2 point mapping; `v0.50.9` completes the projective post-loop
-  line carrier; and `v0.50.10` admits non-empty pairing results before broader
-  cryptographic precompile work continues;
-  `v0.51.0` and `v0.52.0` cover the remaining cryptographic precompile
-  execution or backend-admission decisions before later releases add nested
-  execution and committed state writes.
+  line carrier; `v0.50.10` admits non-empty pairing results; `v0.51.0` adds
+  first-party dependency-free EIP-152 BLAKE2F execution; and `v0.52.0` covers
+  the remaining KZG/BLS cryptographic precompile backend-admission decisions
+  before later releases add nested execution and committed state writes.
 - `eth-valkyoth-rpc`: optional RPC policy over admitted provider transports.
 - `eth-valkyoth-abi`: optional ABI, contract-call, event, error, and common
   contract-standard helpers.

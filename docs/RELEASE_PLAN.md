@@ -2192,7 +2192,7 @@ Exit criteria:
 
 ### v0.50.10 - Native EVM BN254 Pairing Result Admission
 
-Status: implementation stop reached; awaiting pentest.
+Status: tagged as `v0.50.10`.
 
 Goal: admit non-empty EIP-197 pairing success and failure words only after the
 complete accumulator is independently verified.
@@ -2220,6 +2220,8 @@ Exit criteria:
   release limits, and every admitted non-empty result is vector-backed.
 
 ### v0.51.0 - Native EVM BLAKE2F Precompile
+
+Status: implementation stop reached; awaiting pentest.
 
 Goal: execute the Istanbul BLAKE2 compression precompile with exact input
 shape and round-count behavior.

@@ -116,9 +116,10 @@ pub enum EvmPrecompileImplementation {
     NativeBn254Add,
     /// The release can execute dependency-free BN254 scalar multiplication.
     NativeBn254Mul,
-    /// The release can execute the BN254 pairing empty-input frame and validate
-    /// non-empty frames.
+    /// The release can execute dependency-free BN254 pairing frames.
     NativeBn254PairingFrame,
+    /// The release can execute dependency-free BLAKE2F.
+    NativeBlake2F,
     /// The release admits planning only; execution must fail closed.
     RequiresCryptoBackend,
 }
@@ -334,6 +335,7 @@ const fn descriptor_for_kind(kind: EvmPrecompileKind, fork: EvmFork) -> EvmPreco
         EvmPrecompileKind::Bn254Add => EvmPrecompileImplementation::NativeBn254Add,
         EvmPrecompileKind::Bn254Mul => EvmPrecompileImplementation::NativeBn254Mul,
         EvmPrecompileKind::Bn254Pairing => EvmPrecompileImplementation::NativeBn254PairingFrame,
+        EvmPrecompileKind::Blake2F => EvmPrecompileImplementation::NativeBlake2F,
         _ => EvmPrecompileImplementation::RequiresCryptoBackend,
     };
     EvmPrecompileDescriptor {
