@@ -14,7 +14,7 @@ dependency-free identity, SHA-256, RIPEMD-160, bounded ModExp, BN254 add/mul,
 and BN254 pairing plus G2 subgroup validation, Fp6/Fp12 tower
 arithmetic, validated tuple streaming, plan-level gas-meter charging,
 line-function foundation, Miller-loop accumulation with sparse line-factor
-multiplication evidence, bounded final exponentiation, Frobenius point mapping
+multiplication evidence, optimized bounded final exponentiation, Frobenius point mapping
 for the optimal-ate post-loop inputs, the projective post-loop line carrier,
 canonical EIP-197 zero/one result-word admission, and EIP-152 BLAKE2F
 execution with exact input-shape validation, final-flag validation, and
@@ -58,7 +58,7 @@ publication when a crate is marked `unchanged`.
 | `eth-valkyoth-verify` | `0.21.0` | `0.21.0` | `unchanged` | No | No package changes for v0.51.0. |
 | `eth-valkyoth-derive` | `0.17.2` | `0.17.2` | `unchanged` | No | No package changes for v0.51.0. |
 | `eth-valkyoth-sanitization` | `0.7.4` | `0.7.4` | `unchanged` | No | No package changes for v0.51.0. |
-| `eth-valkyoth-evm-core` | `0.23.0` | `0.24.0` | `code` | Yes | Adds first-party dependency-free EIP-152 BLAKE2F execution, EIP vectors, final-flag validation, gas-metered plan execution, and bounded fuzz shape coverage. |
+| `eth-valkyoth-evm-core` | `0.23.0` | `0.24.0` | `code` | Yes | Adds first-party dependency-free EIP-152 BLAKE2F execution, EIP vectors, final-flag validation, gas-metered plan execution, bounded fuzz shape coverage, and optimized BN254 final exponentiation from the pentest remediation. |
 | `eth-valkyoth-evm` | `0.10.0` | `0.10.0` | `unchanged` | No | No package changes for v0.51.0. |
 | `eth-valkyoth-rpc` | `0.7.0` | `0.7.0` | `unchanged` | No | No package changes for v0.51.0. |
 | `eth-valkyoth-signer` | `0.7.3` | `0.7.3` | `unchanged` | No | No package changes for v0.51.0. |

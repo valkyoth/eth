@@ -1,6 +1,9 @@
 use crate::bn254_tower::Fp12;
 
+const BN254_U: [u64; 1] = [0x44e9_92b4_4a69_09f1];
+
 // Public EIP-197 final exponent `(p^12 - 1) / q` for the BN254 target group.
+#[cfg(test)]
 const FINAL_EXPONENT: [u64; 48] = [
     0x8696_4b64_ca86_f120,
     0x40a4_efb7_e545_23a4,
@@ -53,5 +56,50 @@ const FINAL_EXPONENT: [u64; 48] = [
 ];
 
 pub(crate) fn final_exponentiation(value: Fp12) -> Fp12 {
+    let easy = final_exponentiation_easy_part(value);
+    final_exponentiation_hard_part(easy)
+}
+
+#[cfg(test)]
+pub(crate) fn final_exponentiation_reference(value: Fp12) -> Fp12 {
     value.pow_little_endian_limbs(FINAL_EXPONENT)
+}
+
+fn final_exponentiation_easy_part(value: Fp12) -> Fp12 {
+    let Some(inverse) = value.invert() else {
+        return value;
+    };
+    let p6_over_value = value.frobenius_p6().mul(inverse);
+    p6_over_value.mul(p6_over_value.frobenius_p2())
+}
+
+fn final_exponentiation_hard_part(value: Fp12) -> Fp12 {
+    let fp = value.frobenius();
+    let fp2 = value.frobenius_p2();
+    let fp3 = fp2.frobenius();
+
+    let fu = value.pow_little_endian_limbs(BN254_U);
+    let fu2 = fu.pow_little_endian_limbs(BN254_U);
+    let fu3 = fu2.pow_little_endian_limbs(BN254_U);
+
+    let mut y3 = fu.frobenius();
+    let fu2p = fu2.frobenius();
+    let fu3p = fu3.frobenius();
+    let y2 = fu2.frobenius_p2();
+
+    let y0 = fp.mul(fp2).mul(fp3);
+    let y1 = value.conjugate();
+    let y5 = fu2.conjugate();
+    y3 = y3.conjugate();
+    let y4 = fu.mul(fu2p).conjugate();
+    let y6 = fu3.mul(fu3p).conjugate();
+
+    let mut t0 = y6.square();
+    t0 = t0.mul(y4).mul(y5);
+    let mut t1 = y3.mul(y5).mul(t0);
+    t0 = t0.mul(y2);
+    t1 = t1.square().mul(t0).square();
+    t0 = t1.mul(y1);
+    t1 = t1.mul(y0);
+    t0.square().mul(t1)
 }

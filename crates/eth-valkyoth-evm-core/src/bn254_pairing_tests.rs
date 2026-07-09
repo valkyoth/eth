@@ -3,9 +3,12 @@ extern crate std;
 use crate::{
     EVM_BN254_PAIRING_ITEM_BYTES, EVM_BN254_PAIRING_OUTPUT_BYTES, EvmCoreError, EvmFork, EvmGas,
     EvmGasMeter, EvmPrecompileImplementation, EvmPrecompileKind, EvmPrecompilePlan,
-    EvmPrecompileRegistry, bn254_final::final_exponentiation,
-    bn254_miller::exercise_miller_loop_accumulation, bn254_pairing::execute_bn254_pairing,
-    bn254_tower::Fp12, parse_bn254_pairing_input,
+    EvmPrecompileRegistry,
+    bn254_final::{final_exponentiation, final_exponentiation_reference},
+    bn254_miller::exercise_miller_loop_accumulation,
+    bn254_pairing::execute_bn254_pairing,
+    bn254_tower::Fp12,
+    parse_bn254_pairing_input,
 };
 
 use crate::bn254_pairing::for_each_valid_pairing_tuple;
@@ -133,6 +136,10 @@ fn bn254_pairing_final_exponentiation_maps_inverse_batch_to_one() -> Result<(), 
     let input = generator_and_negated_generator_pairing_tuples();
     let (pairs, acc) = exercise_miller_loop_accumulation(&input)?;
     assert_eq!(pairs, 2);
+    assert_eq!(
+        final_exponentiation(acc),
+        final_exponentiation_reference(acc)
+    );
     assert_eq!(final_exponentiation(acc), Fp12::ONE);
     assert_eq!(final_exponentiation(Fp12::ONE), Fp12::ONE);
 

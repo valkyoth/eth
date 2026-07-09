@@ -20,7 +20,7 @@ const BN254_TWIST_B: Fp2 = Fp2 {
     ]),
 };
 
-const XI_TO_P_MINUS_1_OVER_3: Fp2 = Fp2 {
+pub(crate) const XI_TO_P_MINUS_1_OVER_3: Fp2 = Fp2 {
     c0: Fp::from_montgomery_limbs([
         0xb577_3b10_4563_ab30,
         0x347f_91c8_a9aa_6454,
@@ -141,7 +141,6 @@ impl Fp2 {
         }
     }
 
-    #[cfg(test)]
     pub(crate) fn invert(self) -> Option<Self> {
         let denominator = self.c0.square().add(self.c1.square()).invert()?;
         Some(Self {

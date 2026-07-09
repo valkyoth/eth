@@ -52,6 +52,33 @@ fn fp12_multiplication_distributes_over_addition() {
     assert_eq!(x.mul(y.add(z)), x.mul(y).add(x.mul(z)));
 }
 
+#[test]
+fn fp6_and_fp12_inversion_round_trip_to_one() {
+    let x = sample_fp6();
+    assert_eq!(x.invert().map(|x_inv| x.mul(x_inv)), Some(Fp6::ONE));
+
+    let v = fp6(Fp2::ZERO, Fp2::ONE, Fp2::ZERO);
+    let y = fp12(x, v.add(Fp6::ONE));
+    assert_eq!(y.invert().map(|y_inv| y.mul(y_inv)), Some(Fp12::ONE));
+}
+
+#[test]
+fn fp12_frobenius_maps_cycle_back_to_identity() {
+    let v = fp6(Fp2::ZERO, Fp2::ONE, Fp2::ZERO);
+    let x = fp12(sample_fp6(), v.add(Fp6::ONE));
+
+    let mut cycled = x;
+    for _ in 0..12 {
+        cycled = cycled.frobenius();
+    }
+    assert_eq!(cycled, x);
+    assert_eq!(x.frobenius_p2(), x.frobenius().frobenius());
+    assert_eq!(
+        x.frobenius_p6(),
+        x.frobenius_p2().frobenius_p2().frobenius_p2()
+    );
+}
+
 fn sample_fp6() -> Fp6 {
     let two = Fp2::ONE.double();
     let three = Fp2 {

@@ -107,7 +107,8 @@ The first production value is:
   exponentiation behind the fail-closed pairing boundary; `v0.50.8` adds
   Frobenius Q1/-Q2 point mapping; `v0.50.9` completes the projective post-loop
   line carrier; `v0.50.10` admits non-empty pairing results; `v0.51.0` adds
-  first-party dependency-free EIP-152 BLAKE2F execution; and `v0.52.0` covers
+  first-party dependency-free EIP-152 BLAKE2F execution and the optimized
+  BN254 final-exponentiation remediation; and `v0.52.0` covers
   the remaining KZG/BLS cryptographic precompile backend-admission decisions
   before later releases add nested execution and committed state writes.
 - `eth-valkyoth-rpc`: optional RPC policy over admitted provider transports.

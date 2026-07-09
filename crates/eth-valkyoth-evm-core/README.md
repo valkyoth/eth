@@ -83,9 +83,9 @@ release slices are admitted.
   caller-provided secp256k1 and Keccak backend traits. BN254 pairing validates
   bounded frames, G2 subgroup membership, tuple streaming,
   line-function arithmetic, Miller-loop accumulation with sparse line-factor
-  multiplication, bounded final exponentiation, Frobenius Q1/-Q2 point mapping,
-  and the projective post-loop line carrier, then writes canonical EIP-197
-  zero/one output words. BLAKE2F executes EIP-152 exact-length frames with
+  multiplication, optimized bounded final exponentiation, Frobenius Q1/-Q2
+  point mapping, and the projective post-loop line carrier, then writes
+  canonical EIP-197 zero/one output words. BLAKE2F executes EIP-152 exact-length frames with
   final-flag validation and round-count gas.
   Remaining KZG and BLS cryptographic precompiles are bounded plans only and
   fail closed until audited backends or first-party implementations are

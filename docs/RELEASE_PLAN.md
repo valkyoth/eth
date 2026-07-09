@@ -2221,10 +2221,12 @@ Exit criteria:
 
 ### v0.51.0 - Native EVM BLAKE2F Precompile
 
-Status: implementation stop reached; awaiting pentest.
+Status: implementation stop reached; pentest remediation applied; awaiting
+retest.
 
 Goal: execute the Istanbul BLAKE2 compression precompile with exact input
-shape and round-count behavior.
+shape and round-count behavior, and remediate the pre-existing BN254
+final-exponentiation performance issue found during this release's pentest.
 
 Deliverables:
 
@@ -2234,11 +2236,16 @@ Deliverables:
 - round-count gas semantics;
 - first-party or reviewed backend implementation decision;
 - output buffer behavior matching EIP-152.
+- optimized BN254 final exponentiation using Fp6/Fp12 inversion, Frobenius
+  operations, the easy-part reduction, and the BN-parameter hard-part chain.
 
 Verification:
 
 - EIP-152 KATs and invalid-input vectors;
 - fuzz target for input-shape parsing;
+- optimized BN254 final-exponentiation comparison against the previous
+  full-exponent reference on real Miller-loop accumulator output;
+- release-mode BN254 final-exponentiation timing evidence;
 - `cargo test -p eth-valkyoth-evm-core`;
 - dependency review if a backend crate is admitted.
 
@@ -2246,6 +2253,8 @@ Exit criteria:
 
 - BLAKE2F execution is fully shaped by the EIP-152 input contract and cannot
   accept alternate encodings.
+- The BN254 final-exponentiation pentest finding is closed without adding
+  default crypto, bigint, allocator, or backend dependencies.
 
 ### v0.52.0 - Native EVM Advanced Precompile Backends
 

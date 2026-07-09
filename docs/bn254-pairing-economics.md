@@ -1,6 +1,9 @@
 # BN254 Pairing Economics
 
-Status: `v0.50.10` evidence for sparse Miller-loop multiplication, bounded final exponentiation, Frobenius Q1/-Q2 point mapping, the projective post-loop line carrier, and non-empty EIP-197 result admission.
+Status: `v0.51.0` evidence for sparse Miller-loop multiplication, optimized
+bounded final exponentiation, Frobenius Q1/-Q2 point mapping, the projective
+post-loop line carrier, non-empty EIP-197 result admission, and the
+post-admission final-exponentiation performance remediation.
 
 ## Scope
 
@@ -112,6 +115,22 @@ negative vector and `two_point_match_2` positive vector, in addition to the
 existing empty-input, generator-negative, and inverse-batch-positive tests. The
 BN254 pairing fuzz target now asserts that every valid frame that executes
 successfully returns only a canonical zero or one output word.
+
+## v0.51.0 Pentest Remediation Evidence
+
+The v0.51.0 pentest found that the previously admitted final exponentiation was
+correct but still used the full public `(p^12 - 1) / q` exponent directly. The
+remediation keeps the same dependency-free arithmetic boundary, adds Fp6/Fp12
+inversion and Frobenius operations, and uses the standard easy-part reduction
+followed by the BN-parameter hard-part chain. A test-only full-exponent
+reference remains in the crate and is compared against the optimized path on a
+real Miller-loop accumulator.
+
+Local release-mode evidence on 2026-07-09:
+
+```text
+bn254_final_exponentiation iterations=3 total_ns=2071718 average_ns=690572
+```
 
 ## Next Gate
 

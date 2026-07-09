@@ -183,9 +183,9 @@ Not implemented yet:
   BN254 pairing execution, G2 subgroup validation, BLAKE2F execution, the
   Fp6/Fp12 tower foundation, validated tuple streaming, line-function
   foundation, Miller-loop accumulator with sparse line-factor multiplication
-  evidence, bounded final exponentiation, Frobenius Q1/-Q2 point mapping, and
-  the projective post-loop line carrier are implemented; non-empty pairing
-  result admission now returns canonical EIP-197 zero/one words, while
+  evidence, optimized bounded final exponentiation, Frobenius Q1/-Q2 point
+  mapping, and the projective post-loop line carrier are implemented; non-empty
+  pairing result admission now returns canonical EIP-197 zero/one words, while
   BLAKE2F now follows EIP-152 input and output rules. Remaining KZG and BLS
   cryptographic precompiles are scheduled for `v0.52.0`.
 - No ABI/contract helper surface yet; scheduled for `v0.70.0` through
@@ -1235,7 +1235,7 @@ friendly, and independently testable.
 | `eth-valkyoth-sanitization` | no | Optional bridge to the `sanitization` crate for secret-bearing Ethereum data. |
 | `eth-valkyoth-derive` | no | Optional sanitization and RLP derive macros. |
 | `eth-valkyoth-evm` | no | Explicit no_std EVM execution boundary; no backend admitted yet. |
-| `eth-valkyoth-evm-core` | no | Dependency-free native EVM core domains plus gas-metered basic bounded opcode execution, explicit host-state reads, fail-closed call/create planning, bounded identity/SHA-256/RIPEMD-160/ECRECOVER/ModExp/BN254 add/mul execution, BN254 pairing frame validation, validated tuple streaming, line-function foundation, Miller-loop accumulation, bounded final exponentiation, Frobenius Q1/-Q2 point mapping, projective post-loop line carrier, canonical zero/one result output, and EIP-152 BLAKE2F execution. |
+| `eth-valkyoth-evm-core` | no | Dependency-free native EVM core domains plus gas-metered basic bounded opcode execution, explicit host-state reads, fail-closed call/create planning, bounded identity/SHA-256/RIPEMD-160/ECRECOVER/ModExp/BN254 add/mul execution, BN254 pairing frame validation, validated tuple streaming, line-function foundation, Miller-loop accumulation, optimized bounded final exponentiation, Frobenius Q1/-Q2 point mapping, projective post-loop line carrier, canonical zero/one result output, and EIP-152 BLAKE2F execution. |
 | `eth-valkyoth-rpc` | no | Future explicit RPC trust-policy boundary. |
 | `eth-valkyoth-signer` | no | Future signer isolation boundary. |
 | `eth-valkyoth-reth` | no | Future Reth integration boundary. |
