@@ -94,6 +94,12 @@ to one after final exponentiation, while the generator plus negated-generator
 batch still maps to one. The BN254 pairing fuzz target also reaches the
 complete fail-closed accumulator for every parsed valid frame.
 
+The v0.50.9 pentest found and blocked an incorrect hand-entered NAF table for
+the BN254 `6u+2` optimal-ate scalar. The remediation replaces the table with an
+independently derived value and adds two permanent regressions: one reconstructs
+the scalar from the table, and one checks `e([2]P, Q) == e(P, Q)^2` using the
+existing EIP-196 G1-add implementation to build `[2]P`.
+
 ## Next Gate
 
 Before non-empty pairing execution can be admitted, the follow-up optimal-ate

@@ -2,9 +2,10 @@ extern crate std;
 
 use crate::{
     EVM_BN254_PAIRING_ITEM_BYTES, EvmCoreError,
+    bn254::execute_bn254_add,
     bn254_final::final_exponentiation,
     bn254_line::{g2_addition_line, g2_doubling_line},
-    bn254_miller::{exercise_miller_loop_accumulation, miller_loop_tuple},
+    bn254_miller::{BN254_SIX_U_PLUS_2_NAF, exercise_miller_loop_accumulation, miller_loop_tuple},
     bn254_pairing::for_each_valid_pairing_tuple,
     bn254_tower::Fp12,
 };
@@ -67,6 +68,31 @@ fn complete_accumulator_keeps_inverse_batch_neutral() -> Result<(), EvmCoreError
     let (pairs, acc) = exercise_miller_loop_accumulation(&input)?;
     assert_eq!(pairs, 2);
     assert_eq!(final_exponentiation(acc), Fp12::ONE);
+    Ok(())
+}
+
+#[test]
+fn miller_loop_naf_reconstructs_six_u_plus_two() {
+    let scalar = BN254_SIX_U_PLUS_2_NAF
+        .iter()
+        .enumerate()
+        .fold(0i128, |acc, (index, digit)| {
+            acc + i128::from(*digit) * (1i128 << index)
+        });
+    assert_eq!(scalar, 6 * 4_965_661_367_192_848_881i128 + 2);
+}
+
+#[test]
+fn miller_loop_is_bilinear_over_g1_double() -> Result<(), EvmCoreError> {
+    let generator = generator_pairing_tuple();
+    let doubled = doubled_g1_pairing_tuple()?;
+    let (_, generator_acc) = exercise_miller_loop_accumulation(&generator)?;
+    let (_, doubled_acc) = exercise_miller_loop_accumulation(&doubled)?;
+
+    assert_eq!(
+        final_exponentiation(doubled_acc),
+        final_exponentiation(generator_acc).square()
+    );
     Ok(())
 }
 
@@ -147,6 +173,27 @@ fn generator_pairing_tuple() -> [u8; EVM_BN254_PAIRING_ITEM_BYTES] {
     write_g1_generator(&mut output);
     write_g2_generator(&mut output);
     output
+}
+
+fn doubled_g1_pairing_tuple() -> Result<[u8; EVM_BN254_PAIRING_ITEM_BYTES], EvmCoreError> {
+    let mut add_input = [0u8; 128];
+    let generator = generator_pairing_tuple();
+    if let Some(first) = add_input.get_mut(..64) {
+        first.copy_from_slice(&generator[..64]);
+    }
+    if let Some(second) = add_input.get_mut(64..) {
+        second.copy_from_slice(&generator[..64]);
+    }
+
+    let mut doubled = [0u8; 64];
+    assert_eq!(execute_bn254_add(&add_input, &mut doubled)?, 64);
+
+    let mut output = [0u8; EVM_BN254_PAIRING_ITEM_BYTES];
+    if let Some(g1) = output.get_mut(..64) {
+        g1.copy_from_slice(&doubled);
+    }
+    write_g2_generator(&mut output);
+    Ok(output)
 }
 
 fn g1_infinity_tuple() -> [u8; EVM_BN254_PAIRING_ITEM_BYTES] {

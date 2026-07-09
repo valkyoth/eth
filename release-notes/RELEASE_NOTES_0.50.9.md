@@ -22,6 +22,10 @@ words remain scheduled for `v0.50.10`.
   after final exponentiation.
 - Regression proving the generator plus negated-generator batch still maps to
   one after final exponentiation.
+- Regression reconstructing the hard-coded BN254 `6u+2` NAF table back to the
+  exact optimal-ate scalar.
+- Regression proving bilinearity over a G1 generator double:
+  `e([2]P, Q) == e(P, Q)^2`.
 - BN254 pairing fuzz reachability for the complete fail-closed accumulator.
 
 ## Changed
@@ -40,6 +44,9 @@ words remain scheduled for `v0.50.10`.
 - The complete accumulator runs only over already validated G1/G2 pairing
   tuples, including G2 subgroup validation.
 - The release does not claim public non-empty EIP-197 success or failure words.
+- Pentest found an incorrect `6u+2` NAF table before tagging. The table was
+  replaced from an independent derivation, and scalar-reconstruction plus
+  bilinearity regressions now cover that failure class.
 
 ## Verification
 
