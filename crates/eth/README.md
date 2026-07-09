@@ -35,7 +35,7 @@ dependencies.
 
 ## Current Status
 
-Status: `v0.50.5` adds the BN254 Miller-loop accumulator.
+Status: `v0.50.6` adds sparse BN254 Miller-loop multiplication evidence.
 The optional `evm-core` feature now exposes dependency-free no_std word, stack,
 memory, opcode, program-counter, fork, gas schedule, opcode-table, host-state,
 warm/cold access, historical fork identifiers, opcode-introduction metadata,
@@ -179,11 +179,10 @@ Not implemented yet:
 - Identity, SHA-256, RIPEMD-160, ECRECOVER, bounded ModExp, BN254 add/mul,
   BN254 pairing empty-input execution, G2 subgroup validation, the
   Fp6/Fp12 tower foundation, validated tuple streaming, line-function
-  foundation, and Miller-loop accumulator are implemented; final
-  exponentiation, non-empty pairing success, and remaining cryptographic
-  precompiles are scheduled for `v0.50.6` through `v0.52.0`, with
-  `v0.50.6` reserved for sparse-Miller gas/CPU evidence before final
-  exponentiation in `v0.50.7`.
+  foundation, and Miller-loop accumulator with sparse line-factor
+  multiplication evidence are implemented; final exponentiation, non-empty
+  pairing success, and remaining cryptographic precompiles are scheduled for
+  `v0.50.7` through `v0.52.0`.
 - No ABI/contract helper surface yet; scheduled for `v0.70.0` through
   `v0.78.0`.
 - No consensus/Engine API support yet; scheduled for `v0.79.0` through
@@ -213,14 +212,14 @@ Not implemented yet:
 
 ```toml
 [dependencies]
-eth = "0.50.5"
+eth = "0.50.6"
 ```
 
 For optional sanitization support:
 
 ```toml
 [dependencies]
-eth = { version = "0.50.5", features = ["sanitization"] }
+eth = { version = "0.50.6", features = ["sanitization"] }
 ```
 
 ## Features
@@ -247,7 +246,7 @@ Optional reviewed software Keccak backend:
 
 ```toml
 [dependencies]
-eth = { version = "0.50.5", features = ["keccak-tiny"] }
+eth = { version = "0.50.6", features = ["keccak-tiny"] }
 ```
 
 ```rust
@@ -261,14 +260,14 @@ Optional reviewed secp256k1 recovery adapter:
 
 ```toml
 [dependencies]
-eth = { version = "0.50.5", features = ["secp256k1-k256"] }
+eth = { version = "0.50.6", features = ["secp256k1-k256"] }
 ```
 
 Optional bounded EVM gas-estimation boundary:
 
 ```toml
 [dependencies]
-eth = { version = "0.50.5", features = ["evm"] }
+eth = { version = "0.50.6", features = ["evm"] }
 ```
 
 ```rust
@@ -373,7 +372,7 @@ Optional native EVM core domains:
 
 ```toml
 [dependencies]
-eth = { version = "0.50.5", features = ["evm-core"] }
+eth = { version = "0.50.6", features = ["evm-core"] }
 ```
 
 State access uses explicit host-state traits and caller-provided fixed-capacity
@@ -1240,7 +1239,7 @@ friendly, and independently testable.
 The minimum supported Rust version is Rust `1.90.0`. New deployments should use
 the pinned stable Rust `1.96.1` until the toolchain policy is updated.
 
-Compatibility evidence for `0.50.5`:
+Compatibility evidence for `0.50.6`:
 
 | Rust | Local Evidence |
 | --- | --- |
@@ -1257,7 +1256,7 @@ Compatibility evidence for `0.50.5`:
 
 ```bash
 scripts/checks.sh
-scripts/release_0_50_5_gate.sh
+scripts/release_0_50_6_gate.sh
 ```
 
 For dependency-policy checks, install `cargo-deny` and `cargo-audit`, then run:

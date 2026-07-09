@@ -2,8 +2,11 @@ use crate::{
     bn254::G1Point,
     bn254_field::Fp,
     bn254_g2::{Fp2, G2Point},
-    bn254_tower::{Fp6, Fp12},
+    bn254_tower::Fp6,
 };
+
+#[cfg(test)]
+use crate::bn254_tower::Fp12;
 
 #[derive(Clone, Copy, Debug, Eq, PartialEq)]
 pub(crate) struct G2LineCoefficients {
@@ -27,16 +30,21 @@ impl G2LineCoefficients {
         self.x.mul(point.x).add(self.y.mul(point.y)).add(self.c)
     }
 
-    pub(crate) fn evaluate_g1(self, point: G1Point) -> Fp12 {
+    pub(crate) fn evaluate_g1_fp6(self, point: G1Point) -> Fp6 {
         if point.infinity {
-            return Fp12::ONE;
+            return Fp6::ONE;
         }
+        Fp6 {
+            c0: self.c,
+            c1: self.x.mul(fp2_from_fp(point.x)),
+            c2: self.y.mul(fp2_from_fp(point.y)),
+        }
+    }
+
+    #[cfg(test)]
+    pub(crate) fn evaluate_g1(self, point: G1Point) -> Fp12 {
         Fp12 {
-            c0: Fp6 {
-                c0: self.c,
-                c1: self.x.mul(fp2_from_fp(point.x)),
-                c2: self.y.mul(fp2_from_fp(point.y)),
-            },
+            c0: self.evaluate_g1_fp6(point),
             c1: Fp6::ZERO,
         }
     }

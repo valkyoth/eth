@@ -1,5 +1,8 @@
+extern crate std;
+
 use crate::{
     EVM_BN254_PAIRING_ITEM_BYTES, EvmCoreError,
+    bn254_line::{g2_addition_line, g2_doubling_line},
     bn254_miller::{exercise_miller_loop_accumulation, miller_loop_tuple},
     bn254_pairing::for_each_valid_pairing_tuple,
     bn254_tower::Fp12,
@@ -66,6 +69,65 @@ fn miller_loop_tuple_matches_stream_accumulator() -> Result<(), EvmCoreError> {
     let (pairs, stream_acc) = exercise_miller_loop_accumulation(&input)?;
     assert_eq!(seen, pairs);
     assert_eq!(tuple_acc, stream_acc);
+    Ok(())
+}
+
+#[test]
+fn sparse_line_factor_multiplication_matches_dense_carrier() -> Result<(), EvmCoreError> {
+    let input = generator_pairing_tuple();
+    let mut tuple = None;
+    let seen = for_each_valid_pairing_tuple(&input, |item| {
+        tuple = Some(item);
+    })?;
+    assert_eq!(seen, 1);
+
+    if let Some(item) = tuple {
+        let doubled = g2_doubling_line(item.g2);
+        assert_eq!(
+            Fp12::ONE.mul_by_fp6(doubled.line.evaluate_g1_fp6(item.g1)),
+            Fp12::ONE.mul(doubled.line.evaluate_g1(item.g1))
+        );
+
+        let added = g2_addition_line(doubled.next, item.g2);
+        assert_eq!(
+            Fp12::ONE.mul_by_fp6(added.line.evaluate_g1_fp6(item.g1)),
+            Fp12::ONE.mul(added.line.evaluate_g1(item.g1))
+        );
+    }
+    Ok(())
+}
+
+#[test]
+#[ignore = "release evidence benchmark; run explicitly for v0.50.6"]
+fn miller_loop_wall_time_budget_smoke() -> Result<(), EvmCoreError> {
+    let input = generator_pairing_tuple();
+    let mut tuple = None;
+    let seen = for_each_valid_pairing_tuple(&input, |item| {
+        tuple = Some(item);
+    })?;
+    assert_eq!(seen, 1);
+
+    if let Some(item) = tuple {
+        let iterations = 3u32;
+        let start = std::time::Instant::now();
+        let mut acc = Fp12::ONE;
+        for _ in 0..iterations {
+            acc = std::hint::black_box(miller_loop_tuple(std::hint::black_box(item)));
+        }
+        std::hint::black_box(acc);
+        let elapsed = start.elapsed();
+        let average = elapsed
+            .as_nanos()
+            .checked_div(u128::from(iterations))
+            .unwrap_or(0);
+        std::println!(
+            "bn254_miller_loop_tuple iterations={} total_ns={} average_ns={}",
+            iterations,
+            elapsed.as_nanos(),
+            average
+        );
+        assert!(elapsed > std::time::Duration::ZERO);
+    }
     Ok(())
 }
 

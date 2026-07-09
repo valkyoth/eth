@@ -90,6 +90,13 @@ impl Fp12 {
         }
     }
 
+    pub(crate) fn mul_by_fp6(self, rhs: Fp6) -> Self {
+        Self {
+            c0: self.c0.mul(rhs),
+            c1: self.c1.mul(rhs),
+        }
+    }
+
     pub(crate) fn square(self) -> Self {
         self.mul(self)
     }

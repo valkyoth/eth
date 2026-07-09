@@ -40,11 +40,11 @@ pub(crate) fn miller_loop_tuple(tuple: Bn254PairingTuple) -> Fp12 {
     let mut q = tuple.g2;
     for bit in (0..BN254_ATE_LOOP_TOP_BIT).rev() {
         let doubled = g2_doubling_line(q);
-        acc = acc.square().mul(line_factor(doubled.line, tuple.g1));
+        acc = multiply_by_line_factor(acc.square(), doubled.line, tuple.g1);
         q = doubled.next;
         if ate_loop_bit(bit) {
             let added = g2_addition_line(q, tuple.g2);
-            acc = acc.mul(line_factor(added.line, tuple.g1));
+            acc = multiply_by_line_factor(acc, added.line, tuple.g1);
             q = added.next;
         }
     }
@@ -55,10 +55,10 @@ fn ate_loop_bit(bit: u32) -> bool {
     ((BN254_ATE_LOOP_COUNT >> bit) & 1) == 1
 }
 
-fn line_factor(line: G2LineCoefficients, g1: crate::bn254::G1Point) -> Fp12 {
+fn multiply_by_line_factor(acc: Fp12, line: G2LineCoefficients, g1: crate::bn254::G1Point) -> Fp12 {
     if line == G2LineCoefficients::ZERO {
-        Fp12::ONE
+        acc
     } else {
-        line.evaluate_g1(g1)
+        acc.mul_by_fp6(line.evaluate_g1_fp6(g1))
     }
 }
