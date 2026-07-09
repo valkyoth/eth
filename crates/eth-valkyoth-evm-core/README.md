@@ -1,3 +1,28 @@
+<p align="center">
+  <b>dependency-free no_std EVM core domains for eth.</b><br>
+  Explicit domains, bounded decode policy, first-party EVM work, and security-gated release evidence.
+</p>
+
+<div align="center">
+  <a href="https://crates.io/crates/eth">eth crate</a>
+  |
+  <a href="https://docs.rs/eth-valkyoth-evm-core">Docs.rs</a>
+  |
+  <a href="https://github.com/valkyoth/eth/blob/main/docs/RELEASE_PLAN.md">Release Plan</a>
+  |
+  <a href="https://github.com/valkyoth/eth/blob/main/docs/threat-model.md">Threat Model</a>
+  |
+  <a href="https://github.com/valkyoth/eth/blob/main/SECURITY.md">Security</a>
+</div>
+
+<br>
+
+<p align="center">
+  <a href="https://github.com/valkyoth/eth">
+    <img src="https://raw.githubusercontent.com/valkyoth/eth/main/.github/images/eth.webp" alt="eth Rust crate overview">
+  </a>
+</p>
+
 # eth-valkyoth-evm-core
 
 `eth-valkyoth-evm-core` is an internal support crate for

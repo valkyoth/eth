@@ -4,13 +4,15 @@
 </p>
 
 <div align="center">
+  <a href="https://crates.io/crates/eth">Crates.io</a>
+  |
   <a href="https://docs.rs/eth">Docs.rs</a>
   |
-  <a href="docs/RELEASE_PLAN.md">Release Plan</a>
+  <a href="https://github.com/valkyoth/eth/blob/main/docs/RELEASE_PLAN.md">Release Plan</a>
   |
-  <a href="docs/threat-model.md">Threat Model</a>
+  <a href="https://github.com/valkyoth/eth/blob/main/docs/threat-model.md">Threat Model</a>
   |
-  <a href="SECURITY.md">Security</a>
+  <a href="https://github.com/valkyoth/eth/blob/main/SECURITY.md">Security</a>
 </div>
 
 <br>
