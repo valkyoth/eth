@@ -26,6 +26,14 @@ impl Fp6 {
         }
     }
 
+    pub(crate) fn sub(self, rhs: Self) -> Self {
+        Self {
+            c0: self.c0.sub(rhs.c0),
+            c1: self.c1.sub(rhs.c1),
+            c2: self.c2.sub(rhs.c2),
+        }
+    }
+
     pub(crate) fn mul(self, rhs: Self) -> Self {
         let a0b0 = self.c0.mul(rhs.c0);
         let a0b1 = self.c0.mul(rhs.c1);
@@ -53,6 +61,14 @@ impl Fp6 {
             c0: mul_fp2_by_nonresidue(self.c2),
             c1: self.c0,
             c2: self.c1,
+        }
+    }
+
+    pub(crate) fn mul_by_fp2(self, rhs: Fp2) -> Self {
+        Self {
+            c0: self.c0.mul(rhs),
+            c1: self.c1.mul(rhs),
+            c2: self.c2.mul(rhs),
         }
     }
 }
@@ -90,6 +106,7 @@ impl Fp12 {
         }
     }
 
+    #[cfg(test)]
     pub(crate) fn mul_by_fp6(self, rhs: Fp6) -> Self {
         Self {
             c0: self.c0.mul(rhs),

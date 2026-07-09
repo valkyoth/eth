@@ -35,8 +35,8 @@ dependencies.
 
 ## Current Status
 
-Status: `v0.50.8` adds BN254 Frobenius Q1/-Q2 point helpers while keeping
-non-empty pairing execution fail-closed.
+Status: `v0.50.9` adds the BN254 projective post-loop line carrier while
+keeping non-empty pairing execution fail-closed.
 The optional `evm-core` feature now exposes dependency-free no_std word, stack,
 memory, opcode, program-counter, fork, gas schedule, opcode-table, host-state,
 warm/cold access, historical fork identifiers, opcode-introduction metadata,
@@ -181,10 +181,10 @@ Not implemented yet:
   BN254 pairing empty-input execution, G2 subgroup validation, the
   Fp6/Fp12 tower foundation, validated tuple streaming, line-function
   foundation, Miller-loop accumulator with sparse line-factor multiplication
-  evidence, bounded final exponentiation, and Frobenius Q1/-Q2 point mapping
-  are implemented; projective post-loop line-carrier work, non-empty pairing
-  success, and remaining cryptographic precompiles are scheduled for `v0.50.9`
-  through `v0.52.0`.
+  evidence, bounded final exponentiation, Frobenius Q1/-Q2 point mapping, and
+  the projective post-loop line carrier are implemented; non-empty pairing
+  result admission and remaining cryptographic precompiles are scheduled for
+  `v0.50.10` through `v0.52.0`.
 - No ABI/contract helper surface yet; scheduled for `v0.70.0` through
   `v0.78.0`.
 - No consensus/Engine API support yet; scheduled for `v0.79.0` through
@@ -214,14 +214,14 @@ Not implemented yet:
 
 ```toml
 [dependencies]
-eth = "0.50.8"
+eth = "0.50.9"
 ```
 
 For optional sanitization support:
 
 ```toml
 [dependencies]
-eth = { version = "0.50.8", features = ["sanitization"] }
+eth = { version = "0.50.9", features = ["sanitization"] }
 ```
 
 ## Features
@@ -248,7 +248,7 @@ Optional reviewed software Keccak backend:
 
 ```toml
 [dependencies]
-eth = { version = "0.50.8", features = ["keccak-tiny"] }
+eth = { version = "0.50.9", features = ["keccak-tiny"] }
 ```
 
 ```rust
@@ -262,14 +262,14 @@ Optional reviewed secp256k1 recovery adapter:
 
 ```toml
 [dependencies]
-eth = { version = "0.50.8", features = ["secp256k1-k256"] }
+eth = { version = "0.50.9", features = ["secp256k1-k256"] }
 ```
 
 Optional bounded EVM gas-estimation boundary:
 
 ```toml
 [dependencies]
-eth = { version = "0.50.8", features = ["evm"] }
+eth = { version = "0.50.9", features = ["evm"] }
 ```
 
 ```rust
@@ -374,7 +374,7 @@ Optional native EVM core domains:
 
 ```toml
 [dependencies]
-eth = { version = "0.50.8", features = ["evm-core"] }
+eth = { version = "0.50.9", features = ["evm-core"] }
 ```
 
 State access uses explicit host-state traits and caller-provided fixed-capacity
@@ -1241,7 +1241,7 @@ friendly, and independently testable.
 The minimum supported Rust version is Rust `1.90.0`. New deployments should use
 the pinned stable Rust `1.96.1` until the toolchain policy is updated.
 
-Compatibility evidence for `0.50.8`:
+Compatibility evidence for `0.50.9`:
 
 | Rust | Local Evidence |
 | --- | --- |
@@ -1258,7 +1258,7 @@ Compatibility evidence for `0.50.8`:
 
 ```bash
 scripts/checks.sh
-scripts/release_0_50_8_gate.sh
+scripts/release_0_50_9_gate.sh
 ```
 
 For dependency-policy checks, install `cargo-deny` and `cargo-audit`, then run:

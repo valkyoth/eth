@@ -9,7 +9,7 @@ Most users should depend on `eth` and enable the optional `evm-core` feature:
 
 ```toml
 [dependencies]
-eth = { version = "0.50.8", features = ["evm-core"] }
+eth = { version = "0.50.9", features = ["evm-core"] }
 ```
 
 This crate executes only the audited bootstrap opcode subset. It exposes
@@ -58,9 +58,9 @@ release slices are admitted.
   caller-provided secp256k1 and Keccak backend traits. Non-empty BN254 pairing
   validates bounded frames, G2 subgroup membership, tuple streaming,
   line-function arithmetic, Miller-loop accumulation with sparse line-factor
-  multiplication, bounded final exponentiation, and Frobenius Q1/-Q2 point
-  mapping, then fails closed until the projective post-loop line-carrier and
-  result-admission releases are reviewed.
+  multiplication, bounded final exponentiation, Frobenius Q1/-Q2 point mapping,
+  and the projective post-loop line carrier, then fails closed until the
+  result-admission release is reviewed.
   Remaining cryptographic precompiles are bounded plans only and fail closed
   until audited backends or first-party implementations are admitted.
 - Unsupported opcodes and unsupported forks are rejected with named errors.

@@ -2158,7 +2158,7 @@ Exit criteria:
 
 ### v0.50.9 - Native EVM BN254 Projective Post-Loop Line Carrier
 
-Status: planned next.
+Status: implementation stop reached; awaiting pentest.
 
 Goal: replace the current affine line-carrier shortcut with a
 projective/reference-aligned line carrier that can safely multiply the Q1 and
@@ -2189,7 +2189,7 @@ Exit criteria:
 
 ### v0.50.10 - Native EVM BN254 Pairing Result Admission
 
-Status: planned.
+Status: planned next after v0.50.9 pentest and tag.
 
 Goal: admit non-empty EIP-197 pairing success and failure words only after the
 complete accumulator is independently verified.

@@ -39,7 +39,10 @@ mod word;
 
 pub use bn254::{EVM_BN254_ADD_INPUT_BYTES, EVM_BN254_MUL_INPUT_BYTES, EVM_BN254_POINT_BYTES};
 #[cfg(feature = "testing")]
-pub use bn254_miller::{testing_bn254_miller_pairs, testing_bn254_post_loop_point_pairs};
+pub use bn254_miller::{
+    testing_bn254_complete_accumulator_pairs, testing_bn254_miller_pairs,
+    testing_bn254_post_loop_point_pairs,
+};
 pub use bn254_pairing::{
     EVM_BN254_PAIRING_ITEM_BYTES, EVM_BN254_PAIRING_OUTPUT_BYTES, parse_bn254_pairing_input,
 };

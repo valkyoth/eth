@@ -2,6 +2,7 @@ extern crate std;
 
 use crate::{
     EVM_BN254_PAIRING_ITEM_BYTES, EvmCoreError,
+    bn254_final::final_exponentiation,
     bn254_line::{g2_addition_line, g2_doubling_line},
     bn254_miller::{exercise_miller_loop_accumulation, miller_loop_tuple},
     bn254_pairing::for_each_valid_pairing_tuple,
@@ -24,6 +25,7 @@ fn miller_loop_generator_tuple_is_deterministic() -> Result<(), EvmCoreError> {
     assert_eq!(pairs, 1);
     assert_eq!(first, second);
     assert_ne!(first, Fp12::ONE);
+    assert_ne!(final_exponentiation(first), Fp12::ONE);
     Ok(())
 }
 
@@ -56,6 +58,15 @@ fn miller_loop_treats_infinity_tuple_as_neutral() -> Result<(), EvmCoreError> {
     let (pairs, acc) = exercise_miller_loop_accumulation(&input)?;
     assert_eq!(pairs, 1);
     assert_eq!(acc, Fp12::ONE);
+    Ok(())
+}
+
+#[test]
+fn complete_accumulator_keeps_inverse_batch_neutral() -> Result<(), EvmCoreError> {
+    let input = generator_and_negated_generator_pairing_tuples();
+    let (pairs, acc) = exercise_miller_loop_accumulation(&input)?;
+    assert_eq!(pairs, 2);
+    assert_eq!(final_exponentiation(acc), Fp12::ONE);
     Ok(())
 }
 
@@ -147,6 +158,23 @@ fn g1_infinity_tuple() -> [u8; EVM_BN254_PAIRING_ITEM_BYTES] {
 fn g2_infinity_tuple() -> [u8; EVM_BN254_PAIRING_ITEM_BYTES] {
     let mut output = [0u8; EVM_BN254_PAIRING_ITEM_BYTES];
     write_g1_generator(&mut output);
+    output
+}
+
+fn generator_and_negated_generator_pairing_tuples() -> [u8; EVM_BN254_PAIRING_ITEM_BYTES * 2] {
+    let generator = generator_pairing_tuple();
+    let mut output = [0u8; EVM_BN254_PAIRING_ITEM_BYTES * 2];
+    if let Some(first) = output.get_mut(..EVM_BN254_PAIRING_ITEM_BYTES) {
+        first.copy_from_slice(&generator);
+    }
+    if let Some(second) = output.get_mut(EVM_BN254_PAIRING_ITEM_BYTES..) {
+        second.copy_from_slice(&generator);
+    }
+    write_word(
+        &mut output,
+        EVM_BN254_PAIRING_ITEM_BYTES + 32,
+        hex32("30644e72e131a029b85045b68181585d97816a916871ca8d3c208c16d87cfd45"),
+    );
     output
 }
 

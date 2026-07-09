@@ -1,5 +1,5 @@
 [release]
-version = "0.50.8"
+version = "0.50.9"
 policy = "independent"
 
 [crates."eth-valkyoth-codec"]
@@ -7,95 +7,95 @@ previous_version = "0.19.0"
 version = "0.19.0"
 change = "unchanged"
 publish = false
-reason = "No package changes for v0.50.8."
+reason = "No package changes for v0.50.9."
 
 [crates."eth-valkyoth-primitives"]
 previous_version = "0.11.2"
 version = "0.11.2"
 change = "unchanged"
 publish = false
-reason = "No package changes for v0.50.8."
+reason = "No package changes for v0.50.9."
 
 [crates."eth-valkyoth-hash"]
 previous_version = "0.11.2"
 version = "0.11.2"
 change = "unchanged"
 publish = false
-reason = "No package changes for v0.50.8."
+reason = "No package changes for v0.50.9."
 
 [crates."eth-valkyoth-protocol"]
 previous_version = "0.25.2"
 version = "0.25.2"
 change = "unchanged"
 publish = false
-reason = "No package changes for v0.50.8."
+reason = "No package changes for v0.50.9."
 
 [crates."eth-valkyoth-verify"]
 previous_version = "0.21.0"
 version = "0.21.0"
 change = "unchanged"
 publish = false
-reason = "No package changes for v0.50.8."
+reason = "No package changes for v0.50.9."
 
 [crates."eth-valkyoth-derive"]
 previous_version = "0.17.2"
 version = "0.17.2"
 change = "unchanged"
 publish = false
-reason = "No package changes for v0.50.8."
+reason = "No package changes for v0.50.9."
 
 [crates."eth-valkyoth-sanitization"]
 previous_version = "0.7.4"
 version = "0.7.4"
 change = "unchanged"
 publish = false
-reason = "No package changes for v0.50.8."
+reason = "No package changes for v0.50.9."
 
 [crates."eth-valkyoth-evm-core"]
-previous_version = "0.20.0"
-version = "0.21.0"
+previous_version = "0.21.0"
+version = "0.22.0"
 change = "code"
 publish = true
-reason = "Adds first-party BN254 G2 Frobenius helpers and KATs for the optimal-ate post-loop Q1/-Q2 point foundation while keeping non-empty pairing fail-closed."
+reason = "Adds the projective/reference-aligned BN254 optimal-ate line carrier, post-loop Q1/-Q2 line multiplication, complete-accumulator regressions, and fuzz reachability while keeping non-empty pairing fail-closed."
 
 [crates."eth-valkyoth-evm"]
 previous_version = "0.10.0"
 version = "0.10.0"
 change = "unchanged"
 publish = false
-reason = "No package changes for v0.50.8."
+reason = "No package changes for v0.50.9."
 
 [crates."eth-valkyoth-rpc"]
 previous_version = "0.7.0"
 version = "0.7.0"
 change = "unchanged"
 publish = false
-reason = "No package changes for v0.50.8."
+reason = "No package changes for v0.50.9."
 
 [crates."eth-valkyoth-signer"]
 previous_version = "0.7.3"
 version = "0.7.3"
 change = "unchanged"
 publish = false
-reason = "No package changes for v0.50.8."
+reason = "No package changes for v0.50.9."
 
 [crates."eth-valkyoth-reth"]
 previous_version = "0.7.0"
 version = "0.7.0"
 change = "unchanged"
 publish = false
-reason = "No package changes for v0.50.8."
+reason = "No package changes for v0.50.9."
 
 [crates."eth-valkyoth-testkit"]
 previous_version = "0.7.0"
 version = "0.7.0"
 change = "unchanged"
 publish = false
-reason = "No package changes for v0.50.8."
+reason = "No package changes for v0.50.9."
 
 [crates.eth]
-previous_version = "0.50.7"
-version = "0.50.8"
+previous_version = "0.50.8"
+version = "0.50.9"
 change = "code"
 publish = true
-reason = "Updates the optional evm-core dependency to eth-valkyoth-evm-core 0.21.0 and documents the BN254 Frobenius post-loop point foundation."
+reason = "Updates the optional evm-core dependency to eth-valkyoth-evm-core 0.22.0 and documents the BN254 projective post-loop line-carrier foundation."

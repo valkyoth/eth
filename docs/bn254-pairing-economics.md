@@ -1,17 +1,17 @@
 # BN254 Pairing Economics
 
-Status: `v0.50.8` evidence for sparse Miller-loop multiplication, bounded final exponentiation, and Frobenius Q1/-Q2 point mapping.
+Status: `v0.50.9` evidence for sparse Miller-loop multiplication, bounded final exponentiation, Frobenius Q1/-Q2 point mapping, and the projective post-loop line carrier.
 
 ## Scope
 
 This document tracks the gas-vs-CPU evidence for the first-party BN254
 pairing implementation in `eth-valkyoth-evm-core`.
 
-`v0.50.8` still does not admit non-empty EIP-197 pairing success. Non-empty
+`v0.50.9` still does not admit non-empty EIP-197 pairing success. Non-empty
 inputs validate and exercise the internal Miller accumulator, bounded final
-exponentiation, and the Frobenius Q1/-Q2 point helper, then fail closed with
-`PrecompileBackendUnavailable` until the projective post-loop line carrier and
-final result admission are reviewed in later releases.
+exponentiation, Frobenius Q1/-Q2 point helper, and projective post-loop line
+carrier, then fail closed with `PrecompileBackendUnavailable` until final
+result admission is reviewed in a later release.
 
 ## Sparse Line-Factor Rule
 
@@ -81,15 +81,26 @@ That is an invalid result for a single generator tuple, so the post-loop points
 are admitted and KAT-backed, but the line multiplication remains disabled until
 the v0.50.9 projective/reference-aligned line-carrier release.
 
+## v0.50.9 Evidence
+
+The v0.50.9 release replaces the fail-closed accumulator's affine post-loop
+shortcut with a projective line carrier following the reviewed optimal-ate
+shape. The completed accumulator now multiplies the Q1 and -Q2 post-loop line
+terms before final exponentiation, but still returns
+`PrecompileBackendUnavailable` for public non-empty EIP-197 pairing execution.
+
+Regression coverage proves that a single EIP-197 generator tuple no longer maps
+to one after final exponentiation, while the generator plus negated-generator
+batch still maps to one. The BN254 pairing fuzz target also reaches the
+complete fail-closed accumulator for every parsed valid frame.
+
 ## Next Gate
 
 Before non-empty pairing execution can be admitted, the follow-up optimal-ate
 and result-admission releases must add:
 
-- projective/reference-aligned optimal-ate post-loop line carrier;
-- regression proving a single EIP-197 generator tuple is not mapped to one;
 - official EIP-197 positive and negative vectors;
 - independent differential vectors from an admitted reference source;
-- Frobenius and complete-accumulator edge-case KATs;
+- complete result-admission KATs;
 - updated release-mode benchmark evidence for complete pairing execution;
 - a pentest report covering both correctness and gas-vs-CPU behavior.

@@ -3,7 +3,8 @@
 use eth_valkyoth_evm_core::{
     EVM_BN254_PAIRING_OUTPUT_BYTES, EvmFork, EvmGas, EvmGasMeter, EvmPrecompileKind,
     EvmPrecompilePlan, EvmPrecompileRegistry, parse_bn254_pairing_input,
-    testing_bn254_miller_pairs, testing_bn254_post_loop_point_pairs,
+    testing_bn254_complete_accumulator_pairs, testing_bn254_miller_pairs,
+    testing_bn254_post_loop_point_pairs,
 };
 use libfuzzer_sys::fuzz_target;
 
@@ -21,6 +22,11 @@ fuzz_target!(|data: &[u8]| {
             assert!(non_infinity <= pairs);
         } else {
             panic!("parsed input must be valid for post-loop point mapping");
+        }
+        if let Ok((complete_pairs, _)) = testing_bn254_complete_accumulator_pairs(data) {
+            assert_eq!(complete_pairs, pairs);
+        } else {
+            panic!("parsed input must reach the complete fail-closed accumulator");
         }
     }
 

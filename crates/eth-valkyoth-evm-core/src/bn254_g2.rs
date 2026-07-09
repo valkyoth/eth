@@ -141,6 +141,7 @@ impl Fp2 {
         }
     }
 
+    #[cfg(test)]
     pub(crate) fn invert(self) -> Option<Self> {
         let denominator = self.c0.square().add(self.c1.square()).invert()?;
         Some(Self {
