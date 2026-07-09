@@ -1978,6 +1978,8 @@ Deliverables:
 - allocation-free tuple streaming helper that stops at the first invalid tuple;
 - fail-closed pairing path feeds the Fp12 tower accumulator from typed tuple
   data rather than count-only scaffolding;
+- note: `v0.50.5` consumes the same typed tuple stream through the internal
+  Miller-loop accumulator;
 - dispatcher-facing BN254 pairing plan execution method charges the supplied
   gas meter on every call before validation work is reachable;
 - tests for tuple order, stop-on-invalid behavior, and tower accumulation over
@@ -2030,24 +2032,31 @@ Exit criteria:
 
 ### v0.50.5 - Native EVM BN254 Miller Loop
 
+Status: implementation ready; awaiting pentest before tagging.
+
 Goal: implement the first-party Miller loop over validated BN254 pairing tuples.
 
 Deliverables:
 
 - Miller-loop implementation;
 - batch accumulation limits tied to gas and input length;
-- differential vectors against an admitted reference engine.
+- deterministic generator, infinity, tuple-stream, and batch accumulation
+  vectors;
+- fuzz coverage for valid pairing frames reaching the accumulator.
 
 Verification:
 
-- official positive and negative pairing vectors without final-exponentiation
-  shortcuts if available;
+- official positive and negative pairing vectors remain reserved for the final
+  exponentiation release where complete pairing outputs can be checked;
 - fuzz target for batch accumulation shape;
-- dependency review for any dev-only reference engine.
+- dependency review confirms no dev-only reference engine is admitted in this
+  slice.
 
 Exit criteria:
 
 - Miller-loop accumulation is deterministic, bounded, and vector-backed.
+- Non-empty EIP-197 pairing execution remains fail-closed until final
+  exponentiation is admitted.
 
 ### v0.50.6 - Native EVM BN254 Pairing Final Exponentiation
 

@@ -9,6 +9,7 @@ mod bn254;
 mod bn254_field;
 mod bn254_g2;
 mod bn254_line;
+mod bn254_miller;
 mod bn254_pairing;
 mod bn254_tower;
 mod call;
@@ -39,6 +40,8 @@ pub use bn254::{
     EVM_BN254_ADD_INPUT_BYTES, EVM_BN254_MUL_INPUT_BYTES, EVM_BN254_POINT_BYTES, execute_bn254_add,
     execute_bn254_mul,
 };
+#[cfg(feature = "testing")]
+pub use bn254_miller::testing_bn254_miller_pairs;
 pub use bn254_pairing::{
     EVM_BN254_PAIRING_ITEM_BYTES, EVM_BN254_PAIRING_OUTPUT_BYTES, execute_bn254_pairing,
     parse_bn254_pairing_input,
@@ -119,3 +122,7 @@ mod bn254_tower_tests;
 #[cfg(test)]
 #[path = "bn254_line_tests.rs"]
 mod bn254_line_tests;
+
+#[cfg(test)]
+#[path = "bn254_miller_tests.rs"]
+mod bn254_miller_tests;

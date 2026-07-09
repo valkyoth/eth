@@ -19,6 +19,7 @@ impl G2LineCoefficients {
         c: Fp2::ZERO,
     };
 
+    #[cfg(test)]
     pub(crate) fn evaluate_g2(self, point: G2Point) -> Fp2 {
         if point.infinity {
             return Fp2::ZERO;
@@ -47,6 +48,7 @@ pub(crate) struct G2LineStep {
     pub(crate) line: G2LineCoefficients,
 }
 
+#[cfg(test)]
 pub(crate) fn evaluate_line_foundation_at_g1(g1: G1Point, g2: G2Point) -> Fp12 {
     let doubled = g2_doubling_line(g2);
     let added = g2_addition_line(g2, doubled.next);
@@ -150,6 +152,7 @@ fn fp2_from_fp(value: Fp) -> Fp2 {
     }
 }
 
+#[cfg(test)]
 fn fp12_from_fp2(value: Fp2) -> Fp12 {
     Fp12 {
         c0: Fp6 {

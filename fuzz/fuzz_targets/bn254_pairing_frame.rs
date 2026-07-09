@@ -2,6 +2,7 @@
 
 use eth_valkyoth_evm_core::{
     EVM_BN254_PAIRING_OUTPUT_BYTES, execute_bn254_pairing, parse_bn254_pairing_input,
+    testing_bn254_miller_pairs,
 };
 use libfuzzer_sys::fuzz_target;
 
@@ -9,6 +10,11 @@ fuzz_target!(|data: &[u8]| {
     let parsed = parse_bn254_pairing_input(data);
     if let Ok(pairs) = parsed {
         assert_eq!(pairs.saturating_mul(192), data.len());
+        if let Ok((miller_pairs, _)) = testing_bn254_miller_pairs(data) {
+            assert_eq!(miller_pairs, pairs);
+        } else {
+            panic!("parsed input must be valid for Miller accumulation");
+        }
     }
 
     let mut output = [0u8; EVM_BN254_PAIRING_OUTPUT_BYTES];

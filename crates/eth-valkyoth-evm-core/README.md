@@ -9,7 +9,7 @@ Most users should depend on `eth` and enable the optional `evm-core` feature:
 
 ```toml
 [dependencies]
-eth = { version = "0.50.4", features = ["evm-core"] }
+eth = { version = "0.50.5", features = ["evm-core"] }
 ```
 
 This crate executes only the audited bootstrap opcode subset. It exposes
@@ -56,10 +56,11 @@ release slices are admitted.
   bounded ModExp, BN254 add/mul, BN254 pairing empty-input frames, and
   ECRECOVER can execute without default crypto dependencies; ECRECOVER requires
   caller-provided secp256k1 and Keccak backend traits. Non-empty BN254 pairing
-  validates bounded frames and fails closed until the subgroup and pairing
-  algebra releases. Remaining cryptographic precompiles are bounded plans only
-  and fail closed until audited backends or first-party implementations are
-  admitted.
+  validates bounded frames, G2 subgroup membership, tuple streaming,
+  line-function arithmetic, and Miller-loop accumulation, then fails closed
+  until final exponentiation is admitted. Remaining cryptographic precompiles
+  are bounded plans only and fail closed until audited backends or first-party
+  implementations are admitted.
 - Unsupported opcodes and unsupported forks are rejected with named errors.
 - No nested call/create execution, log, remaining cryptographic precompile,
   refund, or committed storage-write semantics are claimed yet.

@@ -2,7 +2,7 @@ use crate::{
     EVM_PRECOMPILE_INPUT_LIMIT, EvmCoreError, EvmGasMeter, EvmPrecompileKind, EvmPrecompilePlan,
     bn254::{G1Point, read_g1_point},
     bn254_g2::{G2Point, read_g2_point},
-    bn254_tower::exercise_tower_accumulation,
+    bn254_miller::exercise_miller_loop_accumulation,
 };
 
 /// Byte length of one EIP-197 BN254 pairing tuple.
@@ -71,7 +71,7 @@ pub fn execute_bn254_pairing(input: &[u8], output: &mut [u8]) -> Result<usize, E
     let target = output
         .get_mut(..EVM_BN254_PAIRING_OUTPUT_BYTES)
         .ok_or(EvmCoreError::PrecompileOutputTooSmall)?;
-    let (pairs, _) = exercise_tower_accumulation(input)?;
+    let (pairs, _) = exercise_miller_loop_accumulation(input)?;
     if pairs != 0 {
         return Err(EvmCoreError::PrecompileBackendUnavailable);
     }

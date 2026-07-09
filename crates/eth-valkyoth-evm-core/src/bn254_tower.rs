@@ -1,9 +1,4 @@
-use crate::{
-    EvmCoreError,
-    bn254_g2::Fp2,
-    bn254_line::evaluate_line_foundation_at_g1,
-    bn254_pairing::{Bn254PairingTuple, for_each_valid_pairing_tuple},
-};
+use crate::bn254_g2::Fp2;
 
 #[derive(Clone, Copy, Debug, Eq, PartialEq)]
 pub(crate) struct Fp6 {
@@ -31,14 +26,6 @@ impl Fp6 {
         }
     }
 
-    pub(crate) fn sub(self, rhs: Self) -> Self {
-        Self {
-            c0: self.c0.sub(rhs.c0),
-            c1: self.c1.sub(rhs.c1),
-            c2: self.c2.sub(rhs.c2),
-        }
-    }
-
     pub(crate) fn mul(self, rhs: Self) -> Self {
         let a0b0 = self.c0.mul(rhs.c0);
         let a0b1 = self.c0.mul(rhs.c1);
@@ -56,6 +43,7 @@ impl Fp6 {
         }
     }
 
+    #[cfg(test)]
     pub(crate) fn square(self) -> Self {
         self.mul(self)
     }
@@ -76,6 +64,7 @@ pub(crate) struct Fp12 {
 }
 
 impl Fp12 {
+    #[cfg(test)]
     pub(crate) const ZERO: Self = Self {
         c0: Fp6::ZERO,
         c1: Fp6::ZERO,
@@ -84,17 +73,11 @@ impl Fp12 {
         c0: Fp6::ONE,
         c1: Fp6::ZERO,
     };
+    #[cfg(test)]
     pub(crate) fn add(self, rhs: Self) -> Self {
         Self {
             c0: self.c0.add(rhs.c0),
             c1: self.c1.add(rhs.c1),
-        }
-    }
-
-    pub(crate) fn sub(self, rhs: Self) -> Self {
-        Self {
-            c0: self.c0.sub(rhs.c0),
-            c1: self.c1.sub(rhs.c1),
         }
     }
 
@@ -114,29 +97,4 @@ impl Fp12 {
 
 fn mul_fp2_by_nonresidue(value: Fp2) -> Fp2 {
     value.mul(Fp2::NINE_PLUS_I)
-}
-
-/// Exercises the Fp12 tower over validated pairing tuples before the Miller
-/// loop lands.
-///
-/// This is not a validation boundary and its result is intentionally unused by
-/// the current fail-closed pairing path.
-pub(crate) fn exercise_tower_accumulation(input: &[u8]) -> Result<(usize, Fp12), EvmCoreError> {
-    let seed = Fp12::ONE;
-    let mut acc = Fp12 {
-        c0: seed.c0.square(),
-        c1: seed.c1,
-    };
-    let pairs = for_each_valid_pairing_tuple(input, |tuple| {
-        acc = acc
-            .square()
-            .mul(tower_step_from_tuple(tuple))
-            .sub(Fp12::ZERO)
-            .add(Fp12::ZERO);
-    })?;
-    Ok((pairs, acc))
-}
-
-fn tower_step_from_tuple(tuple: Bn254PairingTuple) -> Fp12 {
-    evaluate_line_foundation_at_g1(tuple.g1, tuple.g2)
 }

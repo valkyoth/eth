@@ -1,8 +1,7 @@
 use crate::{
     EVM_BN254_PAIRING_ITEM_BYTES, EVM_BN254_PAIRING_OUTPUT_BYTES, EvmCoreError, EvmFork, EvmGas,
     EvmGasMeter, EvmPrecompileImplementation, EvmPrecompileKind, EvmPrecompilePlan,
-    EvmPrecompileRegistry,
-    bn254_tower::{Fp12, exercise_tower_accumulation},
+    EvmPrecompileRegistry, bn254_miller::exercise_miller_loop_accumulation, bn254_tower::Fp12,
     execute_bn254_pairing, parse_bn254_pairing_input,
 };
 
@@ -118,9 +117,9 @@ fn bn254_pairing_stream_stops_at_first_invalid_tuple() {
 }
 
 #[test]
-fn bn254_pairing_tower_accumulation_uses_validated_tuple_stream() -> Result<(), EvmCoreError> {
+fn bn254_pairing_miller_accumulation_uses_validated_tuple_stream() -> Result<(), EvmCoreError> {
     let input = generator_pairing_tuple();
-    let (pairs, acc) = exercise_tower_accumulation(&input)?;
+    let (pairs, acc) = exercise_miller_loop_accumulation(&input)?;
     assert_eq!(pairs, 1);
     assert_ne!(acc, Fp12::ONE);
     Ok(())
