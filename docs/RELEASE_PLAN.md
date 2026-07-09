@@ -2060,7 +2060,7 @@ Exit criteria:
 
 ### v0.50.6 - Native EVM BN254 Sparse Miller Economics
 
-Status: implementation ready; awaiting pentest before tagging.
+Status: release candidate; pentest clean.
 
 Goal: close the pairing gas-vs-CPU gap before any non-empty pairing result can
 be admitted.

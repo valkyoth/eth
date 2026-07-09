@@ -1,6 +1,6 @@
 # eth 0.50.6 Release Notes
 
-Status: implementation ready; awaiting pentest before tagging.
+Status: release candidate; pentest clean.
 
 `0.50.6` adds sparse BN254 Miller-loop line-factor multiplication evidence.
 The Miller loop now multiplies line factors through the dedicated
@@ -50,8 +50,9 @@ pairing results. Non-empty EIP-197 pairing execution remains fail-closed with
 
 ## Pentest
 
-- Pending. Permanent report will be added at `security/pentest/v0.50.6.md`
-  after the external pentest and retest.
+- Initial review received in root `PENTEST.md`; no blocking findings were
+  reported. The permanent release report is recorded at
+  `security/pentest/v0.50.6.md`.
 
 ## Versioning
 
