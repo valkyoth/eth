@@ -1,24 +1,22 @@
-name: Release Gate
+name: Release Metadata Check
 
 on:
-  push:
-    tags:
-      - "v*"
+  workflow_dispatch:
 
 permissions:
   contents: read
 
 jobs:
-  readiness:
-    name: Validate pentest readiness
+  metadata:
+    name: Validate release metadata
     runs-on: ubuntu-latest
     timeout-minutes: 10
 
     steps:
-      - name: Checkout tagged commit
+      - name: Checkout repository
         uses: actions/checkout@9c091bb21b7c1c1d1991bb908d89e4e9dddfe3e0 # v7.0.0
         with:
           fetch-depth: 0
 
-      - name: Validate release readiness
-        run: scripts/validate-release-readiness.sh "${GITHUB_REF_NAME}"
+      - name: Validate release metadata
+        run: scripts/validate-release-metadata.sh

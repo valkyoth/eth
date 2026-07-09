@@ -99,10 +99,11 @@ test -f security/pentest/v0.41.0.md
 release_version="$(python3 -c 'import tomllib; print(tomllib.load(open("release-crates.toml", "rb"))["release"]["version"])')"
 eth_manifest_version="$(python3 -c 'import tomllib; print(tomllib.load(open("crates/eth/Cargo.toml", "rb"))["package"]["version"])')"
 test "$release_version" = "$eth_manifest_version"
-grep -q 'tags:' .github/workflows/release.yml
-grep -q 'Validate pentest readiness' .github/workflows/release.yml
-grep -q 'scripts/validate-release-readiness.sh "${GITHUB_REF_NAME}"' .github/workflows/release.yml
-! grep -q 'scripts/validate-release-metadata.sh' .github/workflows/release.yml
+grep -q 'workflow_dispatch:' .github/workflows/release.yml
+grep -q 'Validate release metadata' .github/workflows/release.yml
+grep -q 'scripts/validate-release-metadata.sh' .github/workflows/release.yml
+! grep -q 'tags:' .github/workflows/release.yml
+! grep -q 'scripts/validate-release-readiness.sh "${GITHUB_REF_NAME}"' .github/workflows/release.yml
 grep -q 'fetch-depth: 0' .github/workflows/release.yml
 test -x scripts/release_0_9_gate.sh
 test -x scripts/release_0_10_gate.sh

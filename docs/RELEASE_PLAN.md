@@ -70,12 +70,15 @@ A version is not tag-ready until:
   without requiring the still-pending current pentest report, so normal CI can
   pass on implementation and retest commits;
 - `scripts/validate-release-readiness.sh vX.Y.Z` requires the matching
-  `security/pentest/vX.Y.Z.md` report to have `Status: PASS` and is run
-  manually before tagging or publishing;
+  `security/pentest/vX.Y.Z.md` report to have `Status: PASS` and is run by the
+  local release gate before tagging or publishing;
 - `sbom/eth.spdx.json` exists and is non-empty;
 - the tag does not already exist locally;
 - `scripts/validate-release-readiness.sh vX.Y.Z` passes before the tag is
-  created.
+  created;
+- GitHub's release workflow is metadata-only and manually dispatched. Do not
+  rely on a tag-push workflow for readiness: after a tag is pushed, the
+  readiness script intentionally fails closed because the tag already exists.
 
 `scripts/check_latest_tools.sh` is an advisory networked current-version check.
 Run it before updating pinned tools and before release when network access is
@@ -115,8 +118,8 @@ Use this loop for every version:
    exact implementation commit has passed with `Status: PASS`.
 10. Commit only the permanent report as the release report commit.
 11. GitHub CI and CodeQL default setup are checked on the release report commit.
-12. `scripts/validate-release-readiness.sh vX.Y.Z` passes before the tag is
-    created.
+12. `scripts/validate-release-readiness.sh vX.Y.Z` passes locally through the
+    versioned release gate before the tag is created.
 13. Tagging and pushing tags happen only when explicitly requested.
 
 Root `PENTEST.md` is temporary scratch input. It must not be committed.
@@ -2088,7 +2091,7 @@ Exit criteria:
 
 ### v0.50.7 - Native EVM BN254 Pairing Final Exponentiation Foundation
 
-Status: implementation in progress.
+Status: released.
 
 Goal: add bounded first-party final exponentiation without claiming non-empty
 EIP-197 pairing success before the full optimal-ate accumulator is complete.
@@ -2121,7 +2124,7 @@ Exit criteria:
 
 ### v0.50.8 - Native EVM BN254 Frobenius Post-Loop Point Foundation
 
-Status: implementation in progress.
+Status: released.
 
 Goal: admit the G2 Frobenius point mapping required by Ethereum's BN254
 optimal-ate post-loop terms without wiring an incorrect line-carrier into
@@ -2155,6 +2158,8 @@ Exit criteria:
 
 ### v0.50.9 - Native EVM BN254 Projective Post-Loop Line Carrier
 
+Status: planned next.
+
 Goal: replace the current affine line-carrier shortcut with a
 projective/reference-aligned line carrier that can safely multiply the Q1 and
 -Q2 post-loop lines into the accumulator.
@@ -2183,6 +2188,8 @@ Exit criteria:
   non-empty success remains disabled until the result-admission release.
 
 ### v0.50.10 - Native EVM BN254 Pairing Result Admission
+
+Status: planned.
 
 Goal: admit non-empty EIP-197 pairing success and failure words only after the
 complete accumulator is independently verified.

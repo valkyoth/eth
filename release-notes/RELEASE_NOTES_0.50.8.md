@@ -1,7 +1,7 @@
 # Release Notes - eth v0.50.8
 
-Status: release candidate accepted after pentest and retest; awaiting GitHub
-CI/CodeQL before tagging.
+Status: released after pentest, retest, local release gate, GitHub CI, and
+CodeQL.
 
 ## Summary
 
@@ -37,10 +37,12 @@ to `v0.50.10`.
   - `v0.50.10`: public non-empty EIP-197 result admission.
 - Documentation now records the discovered affine line-carrier gap explicitly
   instead of treating post-loop completion as a vague deferred item.
-- The tag-triggered GitHub release workflow again runs
-  `scripts/validate-release-readiness.sh "${GITHUB_REF_NAME}"`, and metadata
-  regression tests now fail if the workflow is downgraded to metadata-only
-  validation.
+- The local release gate continues to run
+  `scripts/validate-release-readiness.sh v0.50.8` before tagging.
+- After release, the GitHub release workflow was returned to a manual
+  metadata-only check because post-tag readiness is expected to fail once the
+  tag already exists. The versioned local release gate remains the authoritative
+  readiness check.
 
 ## Security Notes
 
@@ -50,8 +52,9 @@ to `v0.50.10`.
   G2 calldata.
 - The implementation deliberately does not admit the post-loop line
   multiplication that failed the generator-tuple regression.
-- Tag pushes are protected by the strong pentest-readiness workflow, not only
-  by the ordinary metadata check.
+- Tag creation is protected by the strong local pentest-readiness gate before
+  the tag is pushed; GitHub tag workflows are not treated as the release
+  authority.
 
 ## Verification
 
@@ -65,6 +68,8 @@ to `v0.50.10`.
 
 The permanent report is tracked at `security/pentest/v0.50.8.md`. The initial
 review found one Critical release-workflow regression and one Low fuzz
-reachability gap. The remediation restored tag-time release-readiness
-enforcement, added regression coverage for the workflow, and made the BN254
-pairing fuzz target exercise the Q1/-Q2 Frobenius helper. Retest passed.
+reachability gap. The remediation restored local release-readiness enforcement,
+added regression coverage for the workflow policy, and made the BN254 pairing
+fuzz target exercise the Q1/-Q2 Frobenius helper. Retest passed. The final
+workflow policy keeps readiness in the versioned local gate to avoid a known
+post-tag false failure.

@@ -28,7 +28,10 @@ The verification steps are documented in
 Every release tag must point at a final pentest-report commit. The matching
 `security/pentest/vX.Y.Z.md` report must have `Status: PASS`, and
 `scripts/validate-release-readiness.sh vX.Y.Z` must pass before the tag is
-pushed. GitHub Actions also runs this readiness check on `v*` tag pushes.
+pushed. Tag-time readiness is enforced by the local release gate scripts before
+tag creation; the GitHub release workflow is metadata-only and manual so a
+pushed tag is not blocked by a post-tag check that necessarily sees the tag
+already exists.
 
 The pentest-report commit must be the direct, linear child of the reviewed
 commit. Do not squash-merge or rewrite the release branch between the reviewed
