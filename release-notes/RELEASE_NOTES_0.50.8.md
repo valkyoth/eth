@@ -1,6 +1,7 @@
 # Release Notes - eth v0.50.8
 
-Status: implementation ready; awaiting pentest before tagging.
+Status: release candidate accepted after pentest and retest; awaiting GitHub
+CI/CodeQL before tagging.
 
 ## Summary
 
@@ -60,7 +61,10 @@ to `v0.50.10`.
 - `cargo fmt --all --check`
 - `python3 scripts/test-release-metadata.py`
 
-## Next
+## Pentest
 
-Run the 0.50.8 pentest against this exact implementation commit before the
-permanent report is written.
+The permanent report is tracked at `security/pentest/v0.50.8.md`. The initial
+review found one Critical release-workflow regression and one Low fuzz
+reachability gap. The remediation restored tag-time release-readiness
+enforcement, added regression coverage for the workflow, and made the BN254
+pairing fuzz target exercise the Q1/-Q2 Frobenius helper. Retest passed.
