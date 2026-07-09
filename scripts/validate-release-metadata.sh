@@ -98,7 +98,7 @@ release_version="$(python3 -c 'import tomllib; print(tomllib.load(open("release-
 eth_manifest_version="$(python3 -c 'import tomllib; print(tomllib.load(open("crates/eth/Cargo.toml", "rb"))["package"]["version"])')"
 test "$release_version" = "$eth_manifest_version"
 grep -q 'tags:' .github/workflows/release.yml
-grep -q 'scripts/validate-release-readiness.sh "${GITHUB_REF_NAME}"' .github/workflows/release.yml
+grep -q 'scripts/validate-release-metadata.sh' .github/workflows/release.yml
 grep -q 'fetch-depth: 0' .github/workflows/release.yml
 test -x scripts/release_0_9_gate.sh
 test -x scripts/release_0_10_gate.sh

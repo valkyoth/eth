@@ -70,11 +70,12 @@ A version is not tag-ready until:
   without requiring the still-pending current pentest report, so normal CI can
   pass on implementation and retest commits;
 - `scripts/validate-release-readiness.sh vX.Y.Z` requires the matching
-  `security/pentest/vX.Y.Z.md` report to have `Status: PASS` and is called by
-  release gates before tagging or publishing;
+  `security/pentest/vX.Y.Z.md` report to have `Status: PASS` and is run
+  manually before tagging or publishing;
 - `sbom/eth.spdx.json` exists and is non-empty;
 - the tag does not already exist locally;
-- `scripts/validate-release-readiness.sh vX.Y.Z` passes.
+- `scripts/validate-release-readiness.sh vX.Y.Z` passes before the tag is
+  created.
 
 `scripts/check_latest_tools.sh` is an advisory networked current-version check.
 Run it before updating pinned tools and before release when network access is
@@ -114,7 +115,8 @@ Use this loop for every version:
    exact implementation commit has passed with `Status: PASS`.
 10. Commit only the permanent report as the release report commit.
 11. GitHub CI and CodeQL default setup are checked on the release report commit.
-12. `scripts/validate-release-readiness.sh vX.Y.Z` passes.
+12. `scripts/validate-release-readiness.sh vX.Y.Z` passes before the tag is
+    created.
 13. Tagging and pushing tags happen only when explicitly requested.
 
 Root `PENTEST.md` is temporary scratch input. It must not be committed.

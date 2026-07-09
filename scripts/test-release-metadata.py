@@ -38,7 +38,7 @@ def main() -> int:
     assert 'test -f "$current_pentest_report"' not in validator
     assert "grep -q '^Status: PASS$' \"$current_pentest_report\"" not in validator
     assert "test -f .github/workflows/release.yml" in validator
-    assert 'scripts/validate-release-readiness.sh "${GITHUB_REF_NAME}"' in validator
+    assert "scripts/validate-release-metadata.sh" in validator
     assert "fetch-depth: 0" in validator
 
     release_workflow = RELEASE_WORKFLOW.read_text(encoding="utf-8")
@@ -46,7 +46,8 @@ def main() -> int:
     assert '"v*"' in release_workflow
     assert "actions/checkout@9c091bb21b7c1c1d1991bb908d89e4e9dddfe3e0" in release_workflow
     assert "fetch-depth: 0" in release_workflow
-    assert 'scripts/validate-release-readiness.sh "${GITHUB_REF_NAME}"' in release_workflow
+    assert "scripts/validate-release-metadata.sh" in release_workflow
+    assert 'scripts/validate-release-readiness.sh "${GITHUB_REF_NAME}"' not in release_workflow
 
     print("release metadata tests passed")
     return 0
