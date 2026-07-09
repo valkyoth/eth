@@ -33,8 +33,14 @@ fuzz_target!(|data: &[u8]| {
     let mut output = [0u8; EVM_BN254_PAIRING_OUTPUT_BYTES];
     if let Ok(len) = execute_bn254_pairing(data, &mut output) {
         assert_eq!(len, EVM_BN254_PAIRING_OUTPUT_BYTES);
-        assert_eq!(data.len(), 0);
-        assert_eq!(output.last().copied(), Some(1));
+        let one = output.last().copied() == Some(1);
+        let zero = output.iter().all(|byte| *byte == 0);
+        assert!(one || zero);
+        if let Some((_, prefix)) = output.split_last()
+            && one
+        {
+            assert!(prefix.iter().all(|byte| *byte == 0));
+        }
     }
 });
 

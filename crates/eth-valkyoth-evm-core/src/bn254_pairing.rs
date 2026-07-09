@@ -66,13 +66,14 @@ pub(crate) fn execute_bn254_pairing(
         .get_mut(..EVM_BN254_PAIRING_OUTPUT_BYTES)
         .ok_or(EvmCoreError::PrecompileOutputTooSmall)?;
     let (pairs, miller) = exercise_miller_loop_accumulation(input)?;
-    if pairs != 0 {
-        core::hint::black_box(final_exponentiation(miller));
-        return Err(EvmCoreError::PrecompileBackendUnavailable);
-    }
+    let result = if pairs == 0 || final_exponentiation(miller) == crate::bn254_tower::Fp12::ONE {
+        1
+    } else {
+        0
+    };
     target.fill(0);
     if let Some(last) = target.last_mut() {
-        *last = 1;
+        *last = result;
     }
     Ok(EVM_BN254_PAIRING_OUTPUT_BYTES)
 }

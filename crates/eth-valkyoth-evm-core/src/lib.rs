@@ -120,6 +120,10 @@ mod bn254_g2_tests;
 mod bn254_pairing_tests;
 
 #[cfg(test)]
+#[path = "bn254_pairing_vector_tests.rs"]
+mod bn254_pairing_vector_tests;
+
+#[cfg(test)]
 #[path = "bn254_tower_tests.rs"]
 mod bn254_tower_tests;
 

@@ -1,17 +1,16 @@
 # BN254 Pairing Economics
 
-Status: `v0.50.9` evidence for sparse Miller-loop multiplication, bounded final exponentiation, Frobenius Q1/-Q2 point mapping, and the projective post-loop line carrier.
+Status: `v0.50.10` evidence for sparse Miller-loop multiplication, bounded final exponentiation, Frobenius Q1/-Q2 point mapping, the projective post-loop line carrier, and non-empty EIP-197 result admission.
 
 ## Scope
 
 This document tracks the gas-vs-CPU evidence for the first-party BN254
 pairing implementation in `eth-valkyoth-evm-core`.
 
-`v0.50.9` still does not admit non-empty EIP-197 pairing success. Non-empty
-inputs validate and exercise the internal Miller accumulator, bounded final
-exponentiation, Frobenius Q1/-Q2 point helper, and projective post-loop line
-carrier, then fail closed with `PrecompileBackendUnavailable` until final
-result admission is reviewed in a later release.
+`v0.50.10` admits non-empty EIP-197 pairing result words. Inputs validate and
+exercise the internal Miller accumulator, bounded final exponentiation,
+Frobenius Q1/-Q2 point helper, and projective post-loop line carrier, then
+return the canonical 32-byte big-endian zero or one word.
 
 ## Sparse Line-Factor Rule
 
@@ -100,13 +99,26 @@ independently derived value and adds two permanent regressions: one reconstructs
 the scalar from the table, and one checks `e([2]P, Q) == e(P, Q)^2` using the
 existing EIP-196 G1-add implementation to build `[2]P`.
 
+## v0.50.10 Evidence
+
+The v0.50.10 release admits public non-empty EIP-197 result words. The
+`execute_bn254_pairing` path keeps the existing validation, subgroup, gas, and
+bounded input policies, then maps `final_exponentiation(accumulator) == 1` to
+the canonical one word and all other valid accumulators to the canonical zero
+word.
+
+Regression coverage includes the go-ethereum `bn256Pairing.json` `one_point`
+negative vector and `two_point_match_2` positive vector, in addition to the
+existing empty-input, generator-negative, and inverse-batch-positive tests. The
+BN254 pairing fuzz target now asserts that every valid frame that executes
+successfully returns only a canonical zero or one output word.
+
 ## Next Gate
 
-Before non-empty pairing execution can be admitted, the follow-up optimal-ate
-and result-admission releases must add:
+Future BN254 pairing maintenance should add broader fixture coverage before
+state-test claims depend on pairing-heavy execution paths:
 
-- official EIP-197 positive and negative vectors;
-- independent differential vectors from an admitted reference source;
-- complete result-admission KATs;
+- more go-ethereum and execution-spec precompile vectors as they are pinned;
+- broader differential vectors from an admitted reference source;
 - updated release-mode benchmark evidence for complete pairing execution;
-- a pentest report covering both correctness and gas-vs-CPU behavior.
+- pentest coverage for any pairing arithmetic changes.

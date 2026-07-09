@@ -1,6 +1,6 @@
 # Crate Version Matrix
 
-Status: `v0.50.9` adds the first-party BN254 projective post-loop line carrier behind the fail-closed pairing boundary.
+Status: `v0.50.10` admits first-party BN254 pairing result words after vector-backed result checks.
 `eth-valkyoth-evm-core` now exposes dependency-free `no_std` stack, memory,
 word, opcode, program-counter, fork, gas, state, error, and bounded
 interpreter domains for basic stack/control-flow bytecode plus explicit host
@@ -11,15 +11,15 @@ adds explicit frame-depth, static-write, return-data, and journal checkpoint
 policies while execution still fails closed before host calls or commits. The
 precompile domain adds fork-aware descriptors, bounded input/gas planning,
 dependency-free identity, SHA-256, RIPEMD-160, bounded ModExp, BN254 add/mul,
-and BN254 pairing empty-input plus G2 subgroup validation, Fp6/Fp12 tower
+and BN254 pairing plus G2 subgroup validation, Fp6/Fp12 tower
 arithmetic, validated tuple streaming, plan-level gas-meter charging,
 line-function foundation, Miller-loop accumulation with sparse line-factor
 multiplication evidence, bounded final exponentiation, Frobenius point mapping
-for the optimal-ate post-loop inputs, and the projective post-loop line carrier.
+for the optimal-ate post-loop inputs, the projective post-loop line carrier,
+and canonical EIP-197 zero/one result-word admission.
 ECRECOVER executes through explicit caller-provided secp256k1 and Keccak
-boundaries while non-empty BN254 result admission and remaining cryptographic
-precompiles fail closed until audited backends or first-party implementations
-are admitted.
+boundaries while remaining cryptographic precompiles fail closed until audited
+backends or first-party implementations are admitted.
 
 `eth` uses independent crate versions. The facade crate remains the main user
 entry point, but support crates are published only when their own package
@@ -45,24 +45,24 @@ but must be republished so immutable crates.io package metadata is corrected.
 workspace manifests before release. The script refuses accidental lockstep
 publication when a crate is marked `unchanged`.
 
-## v0.50.9 Tracking Table
+## v0.50.10 Tracking Table
 
 | Crate | Published | Planned | Change | Publish | Reason |
 | --- | --- | --- | --- | --- | --- |
-| `eth-valkyoth-codec` | `0.19.0` | `0.19.0` | `unchanged` | No | No package changes for v0.50.9. |
-| `eth-valkyoth-primitives` | `0.11.2` | `0.11.2` | `unchanged` | No | No package changes for v0.50.9. |
-| `eth-valkyoth-hash` | `0.11.2` | `0.11.2` | `unchanged` | No | No package changes for v0.50.9. |
-| `eth-valkyoth-protocol` | `0.25.2` | `0.25.2` | `unchanged` | No | No package changes for v0.50.9. |
-| `eth-valkyoth-verify` | `0.21.0` | `0.21.0` | `unchanged` | No | No package changes for v0.50.9. |
-| `eth-valkyoth-derive` | `0.17.2` | `0.17.2` | `unchanged` | No | No package changes for v0.50.9. |
-| `eth-valkyoth-sanitization` | `0.7.4` | `0.7.4` | `unchanged` | No | No package changes for v0.50.9. |
-| `eth-valkyoth-evm-core` | `0.21.0` | `0.22.0` | `code` | Yes | Adds the projective/reference-aligned BN254 optimal-ate line carrier, post-loop Q1/-Q2 line multiplication, complete-accumulator regressions, and fuzz reachability while keeping non-empty pairing fail-closed. |
-| `eth-valkyoth-evm` | `0.10.0` | `0.10.0` | `unchanged` | No | No package changes for v0.50.9. |
-| `eth-valkyoth-rpc` | `0.7.0` | `0.7.0` | `unchanged` | No | No package changes for v0.50.9. |
-| `eth-valkyoth-signer` | `0.7.3` | `0.7.3` | `unchanged` | No | No package changes for v0.50.9. |
-| `eth-valkyoth-reth` | `0.7.0` | `0.7.0` | `unchanged` | No | No package changes for v0.50.9. |
-| `eth-valkyoth-testkit` | `0.7.0` | `0.7.0` | `unchanged` | No | No package changes for v0.50.9. |
-| `eth` | `0.50.8` | `0.50.9` | `code` | Yes | Updates the optional `evm-core` dependency to `eth-valkyoth-evm-core 0.22.0` and documents the BN254 projective post-loop line-carrier foundation. |
+| `eth-valkyoth-codec` | `0.19.0` | `0.19.0` | `unchanged` | No | No package changes for v0.50.10. |
+| `eth-valkyoth-primitives` | `0.11.2` | `0.11.2` | `unchanged` | No | No package changes for v0.50.10. |
+| `eth-valkyoth-hash` | `0.11.2` | `0.11.2` | `unchanged` | No | No package changes for v0.50.10. |
+| `eth-valkyoth-protocol` | `0.25.2` | `0.25.2` | `unchanged` | No | No package changes for v0.50.10. |
+| `eth-valkyoth-verify` | `0.21.0` | `0.21.0` | `unchanged` | No | No package changes for v0.50.10. |
+| `eth-valkyoth-derive` | `0.17.2` | `0.17.2` | `unchanged` | No | No package changes for v0.50.10. |
+| `eth-valkyoth-sanitization` | `0.7.4` | `0.7.4` | `unchanged` | No | No package changes for v0.50.10. |
+| `eth-valkyoth-evm-core` | `0.22.0` | `0.23.0` | `code` | Yes | Admits non-empty EIP-197 BN254 pairing result words, adds go-ethereum positive and negative vectors, updates fuzz output canonicality, and keeps bounded gas and validation policy unchanged. |
+| `eth-valkyoth-evm` | `0.10.0` | `0.10.0` | `unchanged` | No | No package changes for v0.50.10. |
+| `eth-valkyoth-rpc` | `0.7.0` | `0.7.0` | `unchanged` | No | No package changes for v0.50.10. |
+| `eth-valkyoth-signer` | `0.7.3` | `0.7.3` | `unchanged` | No | No package changes for v0.50.10. |
+| `eth-valkyoth-reth` | `0.7.0` | `0.7.0` | `unchanged` | No | No package changes for v0.50.10. |
+| `eth-valkyoth-testkit` | `0.7.0` | `0.7.0` | `unchanged` | No | No package changes for v0.50.10. |
+| `eth` | `0.50.9` | `0.50.10` | `code` | Yes | Updates the optional `evm-core` dependency to `eth-valkyoth-evm-core 0.23.0` and documents non-empty BN254 pairing result admission. |
 
 Update this table and `release-crates.toml` in the same commit whenever a crate
 changes release state.

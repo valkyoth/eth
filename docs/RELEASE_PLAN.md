@@ -2192,7 +2192,7 @@ Exit criteria:
 
 ### v0.50.10 - Native EVM BN254 Pairing Result Admission
 
-Status: planned next after v0.50.9 pentest and tag.
+Status: implementation stop reached; awaiting pentest.
 
 Goal: admit non-empty EIP-197 pairing success and failure words only after the
 complete accumulator is independently verified.
@@ -2201,7 +2201,7 @@ Deliverables:
 
 - full `execute_bn254_pairing` non-empty result path;
 - official EIP-197 positive and negative vectors;
-- execution-spec or cross-client vectors when available;
+- go-ethereum precompile positive and negative vectors;
 - benchmark notes consuming the `v0.50.6` sparse-Miller budget and the
   `v0.50.7` through `v0.50.9` algebra costs;
 - fuzz target asserting valid non-empty frames return only canonical `0` or

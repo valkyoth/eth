@@ -37,7 +37,7 @@ fn bn254_pairing_empty_input_returns_one() -> Result<(), EvmCoreError> {
 }
 
 #[test]
-fn bn254_pairing_parses_generator_tuple_but_fails_closed() -> Result<(), EvmCoreError> {
+fn bn254_pairing_generator_tuple_returns_zero() -> Result<(), EvmCoreError> {
     let input = generator_pairing_tuple();
     assert_eq!(parse_bn254_pairing_input(&input)?, 1);
 
@@ -52,11 +52,11 @@ fn bn254_pairing_parses_generator_tuple_but_fails_closed() -> Result<(), EvmCore
     let mut output = [7u8; EVM_BN254_PAIRING_OUTPUT_BYTES];
     let mut gas_meter = EvmGasMeter::try_new(EvmGas::new(79_000))?;
     assert_eq!(
-        plan.execute_bn254_pairing(&mut gas_meter, &input, &mut output),
-        Err(EvmCoreError::PrecompileBackendUnavailable)
+        plan.execute_bn254_pairing(&mut gas_meter, &input, &mut output)?,
+        EVM_BN254_PAIRING_OUTPUT_BYTES
     );
     assert_eq!(gas_meter.used(), EvmGas::new(79_000));
-    assert_eq!(output, [7u8; EVM_BN254_PAIRING_OUTPUT_BYTES]);
+    assert_eq!(output, word_zero());
     Ok(())
 }
 
@@ -135,6 +135,13 @@ fn bn254_pairing_final_exponentiation_maps_inverse_batch_to_one() -> Result<(), 
     assert_eq!(pairs, 2);
     assert_eq!(final_exponentiation(acc), Fp12::ONE);
     assert_eq!(final_exponentiation(Fp12::ONE), Fp12::ONE);
+
+    let mut output = [0u8; EVM_BN254_PAIRING_OUTPUT_BYTES];
+    assert_eq!(
+        execute_bn254_pairing(&input, &mut output)?,
+        EVM_BN254_PAIRING_OUTPUT_BYTES
+    );
+    assert_eq!(output, word_one());
     Ok(())
 }
 
@@ -285,6 +292,10 @@ fn word_one() -> [u8; 32] {
         *last = 1;
     }
     output
+}
+
+fn word_zero() -> [u8; 32] {
+    [0u8; 32]
 }
 
 fn field_modulus() -> [u8; 32] {
