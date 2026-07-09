@@ -109,6 +109,10 @@ mod modexp_tests;
 mod bn254_tests;
 
 #[cfg(test)]
+#[path = "bn254_g2_tests.rs"]
+mod bn254_g2_tests;
+
+#[cfg(test)]
 #[path = "bn254_pairing_tests.rs"]
 mod bn254_pairing_tests;
 

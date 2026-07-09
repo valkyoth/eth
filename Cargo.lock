@@ -142,7 +142,7 @@ checksum = "877a4ace8713b0bcf2a4e7eec82529c029f1d0619886d18145fea96c3ffe5c0f"
 
 [[package]]
 name = "eth"
-version = "0.50.7"
+version = "0.50.8"
 dependencies = [
  "eth-valkyoth-codec",
  "eth-valkyoth-evm",
@@ -189,7 +189,7 @@ dependencies = [
 
 [[package]]
 name = "eth-valkyoth-evm-core"
-version = "0.20.0"
+version = "0.21.0"
 
 [[package]]
 name = "eth-valkyoth-hash"

@@ -20,6 +20,43 @@ const BN254_TWIST_B: Fp2 = Fp2 {
     ]),
 };
 
+const XI_TO_P_MINUS_1_OVER_3: Fp2 = Fp2 {
+    c0: Fp::from_montgomery_limbs([
+        0xb577_3b10_4563_ab30,
+        0x347f_91c8_a9aa_6454,
+        0x7a00_7127_242e_0991,
+        0x1956_bcd8_1182_14ec,
+    ]),
+    c1: Fp::from_montgomery_limbs([
+        0x6e84_9f1e_a0aa_4757,
+        0xaa1c_7b6d_89f8_9141,
+        0xb6e7_13cd_fae0_ca3a,
+        0x2669_4fbb_4e82_ebc3,
+    ]),
+};
+
+const XI_TO_P_MINUS_1_OVER_2: Fp2 = Fp2 {
+    c0: Fp::from_montgomery_limbs([
+        0xe4bb_dd0c_2936_b629,
+        0xbb30_f162_e133_bacb,
+        0x31a9_d1b6_f964_5366,
+        0x2535_70be_a500_f8dd,
+    ]),
+    c1: Fp::from_montgomery_limbs([
+        0xa1d7_7ce4_5ffe_77c7,
+        0x07af_fd11_7826_d1db,
+        0x6d16_bd27_bb7e_dc6b,
+        0x2c87_2002_85de_fecc,
+    ]),
+};
+
+const XI_TO_P_SQUARED_MINUS_1_OVER_3: Fp = Fp::from_montgomery_limbs([
+    0x3350_c88e_13e8_0b9c,
+    0x7dce_557c_db5e_56b9,
+    0x6001_b4b8_b615_564a,
+    0x2682_e617_0202_17e0,
+]);
+
 #[derive(Clone, Copy, Debug, Eq, PartialEq)]
 pub(crate) struct Fp2 {
     pub(crate) c0: Fp,
@@ -67,6 +104,13 @@ impl Fp2 {
         Self::ZERO.sub(self)
     }
 
+    pub(crate) fn conjugate(self) -> Self {
+        Self {
+            c0: self.c0,
+            c1: self.c1.neg(),
+        }
+    }
+
     pub(crate) fn double(self) -> Self {
         self.add(self)
     }
@@ -79,6 +123,13 @@ impl Fp2 {
         Self {
             c0: ac.sub(bd),
             c1: ad.add(bc),
+        }
+    }
+
+    pub(crate) fn mul_by_fp(self, rhs: Fp) -> Self {
+        Self {
+            c0: self.c0.mul(rhs),
+            c1: self.c1.mul(rhs),
         }
     }
 
@@ -142,6 +193,32 @@ impl G2Point {
         ProjectiveG2Point::from_affine(self)
             .mul_scalar(BN254_GROUP_ORDER)
             .is_infinity()
+    }
+
+    pub(crate) fn frobenius(self) -> Self {
+        if self.infinity {
+            return self;
+        }
+        Self {
+            x: self.x.conjugate().mul(XI_TO_P_MINUS_1_OVER_3),
+            y: self.y.conjugate().mul(XI_TO_P_MINUS_1_OVER_2),
+            infinity: false,
+        }
+    }
+
+    pub(crate) fn frobenius_p2_negated(self) -> Self {
+        if self.infinity {
+            return self;
+        }
+        Self {
+            x: self.x.mul_by_fp(XI_TO_P_SQUARED_MINUS_1_OVER_3),
+            y: self.y,
+            infinity: false,
+        }
+    }
+
+    pub(crate) fn optimal_ate_post_loop_points(self) -> (Self, Self) {
+        (self.frobenius(), self.frobenius_p2_negated())
     }
 }
 

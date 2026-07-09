@@ -1,17 +1,17 @@
 # BN254 Pairing Economics
 
-Status: `v0.50.7` evidence for sparse Miller-loop multiplication plus bounded final exponentiation.
+Status: `v0.50.8` evidence for sparse Miller-loop multiplication, bounded final exponentiation, and Frobenius Q1/-Q2 point mapping.
 
 ## Scope
 
 This document tracks the gas-vs-CPU evidence for the first-party BN254
 pairing implementation in `eth-valkyoth-evm-core`.
 
-`v0.50.7` still does not admit non-empty EIP-197 pairing success. Non-empty
-inputs validate and exercise the internal Miller accumulator plus bounded final
-exponentiation, then fail closed with `PrecompileBackendUnavailable` until the
-optimal-ate post-loop Frobenius/addition line terms and final result admission
-are reviewed in later releases.
+`v0.50.8` still does not admit non-empty EIP-197 pairing success. Non-empty
+inputs validate and exercise the internal Miller accumulator, bounded final
+exponentiation, and the Frobenius Q1/-Q2 point helper, then fail closed with
+`PrecompileBackendUnavailable` until the projective post-loop line carrier and
+final result admission are reviewed in later releases.
 
 ## Sparse Line-Factor Rule
 
@@ -71,12 +71,23 @@ Record the local release-mode output here during release finalization:
 bn254_final_exponentiation iterations=3 total_ns=27737043 average_ns=9245681
 ```
 
+## v0.50.8 Evidence
+
+The v0.50.8 release adds the Q1/-Q2 Frobenius point foundation required by the
+optimal-ate post-loop terms. During implementation, the project tested the
+post-loop points against the current affine line carrier and found that this
+combination maps the EIP-197 generator tuple to one after final exponentiation.
+That is an invalid result for a single generator tuple, so the post-loop points
+are admitted and KAT-backed, but the line multiplication remains disabled until
+the v0.50.9 projective/reference-aligned line-carrier release.
+
 ## Next Gate
 
 Before non-empty pairing execution can be admitted, the follow-up optimal-ate
 and result-admission releases must add:
 
-- optimal-ate post-loop Frobenius/addition line terms;
+- projective/reference-aligned optimal-ate post-loop line carrier;
+- regression proving a single EIP-197 generator tuple is not mapped to one;
 - official EIP-197 positive and negative vectors;
 - independent differential vectors from an admitted reference source;
 - Frobenius and complete-accumulator edge-case KATs;

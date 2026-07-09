@@ -35,8 +35,8 @@ dependencies.
 
 ## Current Status
 
-Status: `v0.50.7` adds bounded BN254 final-exponentiation evidence while
-keeping non-empty pairing execution fail-closed.
+Status: `v0.50.8` adds BN254 Frobenius Q1/-Q2 point helpers while keeping
+non-empty pairing execution fail-closed.
 The optional `evm-core` feature now exposes dependency-free no_std word, stack,
 memory, opcode, program-counter, fork, gas schedule, opcode-table, host-state,
 warm/cold access, historical fork identifiers, opcode-introduction metadata,
@@ -181,9 +181,10 @@ Not implemented yet:
   BN254 pairing empty-input execution, G2 subgroup validation, the
   Fp6/Fp12 tower foundation, validated tuple streaming, line-function
   foundation, Miller-loop accumulator with sparse line-factor multiplication
-  evidence, and bounded final exponentiation are implemented; optimal-ate
-  post-loop terms, non-empty pairing success, and remaining cryptographic
-  precompiles are scheduled for `v0.50.8` through `v0.52.0`.
+  evidence, bounded final exponentiation, and Frobenius Q1/-Q2 point mapping
+  are implemented; projective post-loop line-carrier work, non-empty pairing
+  success, and remaining cryptographic precompiles are scheduled for `v0.50.9`
+  through `v0.52.0`.
 - No ABI/contract helper surface yet; scheduled for `v0.70.0` through
   `v0.78.0`.
 - No consensus/Engine API support yet; scheduled for `v0.79.0` through
@@ -213,14 +214,14 @@ Not implemented yet:
 
 ```toml
 [dependencies]
-eth = "0.50.7"
+eth = "0.50.8"
 ```
 
 For optional sanitization support:
 
 ```toml
 [dependencies]
-eth = { version = "0.50.7", features = ["sanitization"] }
+eth = { version = "0.50.8", features = ["sanitization"] }
 ```
 
 ## Features
@@ -247,7 +248,7 @@ Optional reviewed software Keccak backend:
 
 ```toml
 [dependencies]
-eth = { version = "0.50.7", features = ["keccak-tiny"] }
+eth = { version = "0.50.8", features = ["keccak-tiny"] }
 ```
 
 ```rust
@@ -261,14 +262,14 @@ Optional reviewed secp256k1 recovery adapter:
 
 ```toml
 [dependencies]
-eth = { version = "0.50.7", features = ["secp256k1-k256"] }
+eth = { version = "0.50.8", features = ["secp256k1-k256"] }
 ```
 
 Optional bounded EVM gas-estimation boundary:
 
 ```toml
 [dependencies]
-eth = { version = "0.50.7", features = ["evm"] }
+eth = { version = "0.50.8", features = ["evm"] }
 ```
 
 ```rust
@@ -373,7 +374,7 @@ Optional native EVM core domains:
 
 ```toml
 [dependencies]
-eth = { version = "0.50.7", features = ["evm-core"] }
+eth = { version = "0.50.8", features = ["evm-core"] }
 ```
 
 State access uses explicit host-state traits and caller-provided fixed-capacity
@@ -1229,7 +1230,7 @@ friendly, and independently testable.
 | `eth-valkyoth-sanitization` | no | Optional bridge to the `sanitization` crate for secret-bearing Ethereum data. |
 | `eth-valkyoth-derive` | no | Optional sanitization and RLP derive macros. |
 | `eth-valkyoth-evm` | no | Explicit no_std EVM execution boundary; no backend admitted yet. |
-| `eth-valkyoth-evm-core` | no | Dependency-free native EVM core domains plus gas-metered basic bounded opcode execution, explicit host-state reads, fail-closed call/create planning, bounded identity/SHA-256/RIPEMD-160/ECRECOVER/ModExp/BN254 add/mul execution, and BN254 pairing frame validation, validated tuple streaming, line-function foundation, Miller-loop accumulation, and empty-input execution. |
+| `eth-valkyoth-evm-core` | no | Dependency-free native EVM core domains plus gas-metered basic bounded opcode execution, explicit host-state reads, fail-closed call/create planning, bounded identity/SHA-256/RIPEMD-160/ECRECOVER/ModExp/BN254 add/mul execution, and BN254 pairing frame validation, validated tuple streaming, line-function foundation, Miller-loop accumulation, bounded final exponentiation, Frobenius Q1/-Q2 point mapping, and empty-input execution. |
 | `eth-valkyoth-rpc` | no | Future explicit RPC trust-policy boundary. |
 | `eth-valkyoth-signer` | no | Future signer isolation boundary. |
 | `eth-valkyoth-reth` | no | Future Reth integration boundary. |
@@ -1240,7 +1241,7 @@ friendly, and independently testable.
 The minimum supported Rust version is Rust `1.90.0`. New deployments should use
 the pinned stable Rust `1.96.1` until the toolchain policy is updated.
 
-Compatibility evidence for `0.50.7`:
+Compatibility evidence for `0.50.8`:
 
 | Rust | Local Evidence |
 | --- | --- |
@@ -1257,7 +1258,7 @@ Compatibility evidence for `0.50.7`:
 
 ```bash
 scripts/checks.sh
-scripts/release_0_50_7_gate.sh
+scripts/release_0_50_8_gate.sh
 ```
 
 For dependency-policy checks, install `cargo-deny` and `cargo-audit`, then run:

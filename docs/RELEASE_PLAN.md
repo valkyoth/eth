@@ -2119,26 +2119,62 @@ Exit criteria:
 - Non-empty EIP-197 pairing execution remains fail-closed until the optimal-ate
   post-loop line terms and final result admission are reviewed.
 
-### v0.50.8 - Native EVM BN254 Optimal-Ate Post-Loop Lines
+### v0.50.8 - Native EVM BN254 Frobenius Post-Loop Point Foundation
 
-Goal: complete the Miller accumulator shape required by Ethereum's BN254
-optimal-ate pairing before any non-empty result is admitted.
+Status: implementation in progress.
+
+Goal: admit the G2 Frobenius point mapping required by Ethereum's BN254
+optimal-ate post-loop terms without wiring an incorrect line-carrier into
+public execution.
 
 Deliverables:
 
-- G2 Frobenius map helpers required for the post-loop `Q1` and `Q2` terms;
+- G2 Frobenius map helpers required for the post-loop `Q1` and `-Q2` terms;
+- KATs for Frobenius coefficients and point mapping, computed independently
+  from the BN254 field modulus and twist factor;
+- fail-closed non-empty execution exercises the admitted post-loop point helper
+  without multiplying the post-loop lines into the accumulator yet;
+- documentation of the discovered line-carrier gap: applying the post-loop
+  points through the current affine line carrier maps the EIP-197 generator
+  tuple to one after final exponentiation, so a projective/reference-aligned
+  line carrier is required before result admission.
+
+Verification:
+
+- official EIP-197 point-encoding semantics;
+- Geth/cloudflare BN256 optimal-ate post-loop shape reviewed for Q1/-Q2 point
+  construction;
+- focused BN254 G2, Miller, and pairing tests;
+- pentest gate before tagging.
+
+Exit criteria:
+
+- The Q1/-Q2 point foundation is vector-backed and bounded, but public
+  non-empty success remains disabled until the line-carrier and
+  result-admission releases.
+
+### v0.50.9 - Native EVM BN254 Projective Post-Loop Line Carrier
+
+Goal: replace the current affine line-carrier shortcut with a
+projective/reference-aligned line carrier that can safely multiply the Q1 and
+-Q2 post-loop lines into the accumulator.
+
+Deliverables:
+
+- projective G2 line-function carrier matching the reviewed optimal-ate
+  algorithm shape;
 - post-loop line additions after the ate loop;
-- KATs for Frobenius coefficients and point mapping;
 - regression proving the EIP-197 generator tuple is not accidentally mapped to
-  one by an incomplete accumulator;
+  one by the completed accumulator and final exponentiation;
+- inverse-batch regression still maps to one;
 - non-empty execution still fails closed after computing the complete
   accumulator and final exponentiation.
 
 Verification:
 
-- official EIP-197 positive and negative input semantics;
 - differential vectors against a reviewed reference engine;
 - fuzz target for non-empty complete accumulator execution;
+- release-mode gas/CPU evidence for the complete accumulator;
 - pentest gate before tagging.
 
 Exit criteria:
@@ -2146,7 +2182,7 @@ Exit criteria:
 - The complete optimal-ate accumulator is vector-backed and bounded, but public
   non-empty success remains disabled until the result-admission release.
 
-### v0.50.9 - Native EVM BN254 Pairing Result Admission
+### v0.50.10 - Native EVM BN254 Pairing Result Admission
 
 Goal: admit non-empty EIP-197 pairing success and failure words only after the
 complete accumulator is independently verified.
@@ -2157,7 +2193,7 @@ Deliverables:
 - official EIP-197 positive and negative vectors;
 - execution-spec or cross-client vectors when available;
 - benchmark notes consuming the `v0.50.6` sparse-Miller budget and the
-  `v0.50.7`/`v0.50.8` algebra costs;
+  `v0.50.7` through `v0.50.9` algebra costs;
 - fuzz target asserting valid non-empty frames return only canonical `0` or
   `1` output words.
 

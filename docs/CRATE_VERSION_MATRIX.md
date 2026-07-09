@@ -1,6 +1,6 @@
 # Crate Version Matrix
 
-Status: `v0.50.7` adds bounded BN254 final exponentiation behind the fail-closed pairing boundary.
+Status: `v0.50.8` adds first-party BN254 Frobenius Q1/-Q2 point helpers behind the fail-closed pairing boundary.
 `eth-valkyoth-evm-core` now exposes dependency-free `no_std` stack, memory,
 word, opcode, program-counter, fork, gas, state, error, and bounded
 interpreter domains for basic stack/control-flow bytecode plus explicit host
@@ -13,11 +13,12 @@ precompile domain adds fork-aware descriptors, bounded input/gas planning,
 dependency-free identity, SHA-256, RIPEMD-160, bounded ModExp, BN254 add/mul,
 and BN254 pairing empty-input plus G2 subgroup validation, Fp6/Fp12 tower
 arithmetic, validated tuple streaming, plan-level gas-meter charging,
-line-function foundation, and Miller-loop accumulation with sparse line-factor
-multiplication evidence. ECRECOVER executes through explicit caller-provided
-secp256k1 and Keccak boundaries while non-empty BN254 pairing algebra and
-remaining cryptographic precompiles fail closed until audited backends or
-first-party implementations are admitted.
+line-function foundation, Miller-loop accumulation with sparse line-factor
+multiplication evidence, bounded final exponentiation, and Frobenius point
+mapping for the optimal-ate post-loop inputs. ECRECOVER executes through
+explicit caller-provided secp256k1 and Keccak boundaries while non-empty BN254
+pairing algebra and remaining cryptographic precompiles fail closed until
+audited backends or first-party implementations are admitted.
 
 `eth` uses independent crate versions. The facade crate remains the main user
 entry point, but support crates are published only when their own package
@@ -43,24 +44,24 @@ but must be republished so immutable crates.io package metadata is corrected.
 workspace manifests before release. The script refuses accidental lockstep
 publication when a crate is marked `unchanged`.
 
-## v0.50.7 Tracking Table
+## v0.50.8 Tracking Table
 
 | Crate | Published | Planned | Change | Publish | Reason |
 | --- | --- | --- | --- | --- | --- |
-| `eth-valkyoth-codec` | `0.19.0` | `0.19.0` | `unchanged` | No | No package changes for v0.50.7. |
-| `eth-valkyoth-primitives` | `0.11.2` | `0.11.2` | `unchanged` | No | No package changes for v0.50.7. |
-| `eth-valkyoth-hash` | `0.11.2` | `0.11.2` | `unchanged` | No | No package changes for v0.50.7. |
-| `eth-valkyoth-protocol` | `0.25.2` | `0.25.2` | `unchanged` | No | No package changes for v0.50.7. |
-| `eth-valkyoth-verify` | `0.21.0` | `0.21.0` | `unchanged` | No | No package changes for v0.50.7. |
-| `eth-valkyoth-derive` | `0.17.2` | `0.17.2` | `unchanged` | No | No package changes for v0.50.7. |
-| `eth-valkyoth-sanitization` | `0.7.4` | `0.7.4` | `unchanged` | No | No package changes for v0.50.7. |
-| `eth-valkyoth-evm-core` | `0.19.0` | `0.20.0` | `code` | Yes | Adds bounded first-party BN254 final exponentiation behind the fail-closed non-empty pairing boundary. |
-| `eth-valkyoth-evm` | `0.10.0` | `0.10.0` | `unchanged` | No | No package changes for v0.50.7. |
-| `eth-valkyoth-rpc` | `0.7.0` | `0.7.0` | `unchanged` | No | No package changes for v0.50.7. |
-| `eth-valkyoth-signer` | `0.7.3` | `0.7.3` | `unchanged` | No | No package changes for v0.50.7. |
-| `eth-valkyoth-reth` | `0.7.0` | `0.7.0` | `unchanged` | No | No package changes for v0.50.7. |
-| `eth-valkyoth-testkit` | `0.7.0` | `0.7.0` | `unchanged` | No | No package changes for v0.50.7. |
-| `eth` | `0.50.6` | `0.50.7` | `code` | Yes | Updates the optional `evm-core` dependency to `eth-valkyoth-evm-core 0.20.0` and documents the BN254 final-exponentiation foundation. |
+| `eth-valkyoth-codec` | `0.19.0` | `0.19.0` | `unchanged` | No | No package changes for v0.50.8. |
+| `eth-valkyoth-primitives` | `0.11.2` | `0.11.2` | `unchanged` | No | No package changes for v0.50.8. |
+| `eth-valkyoth-hash` | `0.11.2` | `0.11.2` | `unchanged` | No | No package changes for v0.50.8. |
+| `eth-valkyoth-protocol` | `0.25.2` | `0.25.2` | `unchanged` | No | No package changes for v0.50.8. |
+| `eth-valkyoth-verify` | `0.21.0` | `0.21.0` | `unchanged` | No | No package changes for v0.50.8. |
+| `eth-valkyoth-derive` | `0.17.2` | `0.17.2` | `unchanged` | No | No package changes for v0.50.8. |
+| `eth-valkyoth-sanitization` | `0.7.4` | `0.7.4` | `unchanged` | No | No package changes for v0.50.8. |
+| `eth-valkyoth-evm-core` | `0.20.0` | `0.21.0` | `code` | Yes | Adds first-party BN254 G2 Frobenius helpers and KATs for the optimal-ate post-loop Q1/-Q2 point foundation while keeping non-empty pairing fail-closed. |
+| `eth-valkyoth-evm` | `0.10.0` | `0.10.0` | `unchanged` | No | No package changes for v0.50.8. |
+| `eth-valkyoth-rpc` | `0.7.0` | `0.7.0` | `unchanged` | No | No package changes for v0.50.8. |
+| `eth-valkyoth-signer` | `0.7.3` | `0.7.3` | `unchanged` | No | No package changes for v0.50.8. |
+| `eth-valkyoth-reth` | `0.7.0` | `0.7.0` | `unchanged` | No | No package changes for v0.50.8. |
+| `eth-valkyoth-testkit` | `0.7.0` | `0.7.0` | `unchanged` | No | No package changes for v0.50.8. |
+| `eth` | `0.50.7` | `0.50.8` | `code` | Yes | Updates the optional `evm-core` dependency to `eth-valkyoth-evm-core 0.21.0` and documents the BN254 Frobenius post-loop point foundation. |
 
 Update this table and `release-crates.toml` in the same commit whenever a crate
 changes release state.

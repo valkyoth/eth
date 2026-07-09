@@ -12,9 +12,10 @@ const BN254_ATE_LOOP_TOP_BIT: u32 = 64;
 
 /// Exercises first-party Miller-loop accumulation over validated BN254 tuples.
 ///
-/// This is still not a complete EIP-197 pairing result: the final
-/// exponentiation is intentionally left to the next release. The result is used
-/// only to keep the fail-closed pairing path executing the admitted algebra.
+/// This is still not a public EIP-197 pairing result. The fail-closed pairing
+/// path consumes this bounded accumulator and then exercises final
+/// exponentiation without admitting non-empty success until the post-loop line
+/// carrier and result-admission releases are reviewed.
 pub(crate) fn exercise_miller_loop_accumulation(
     input: &[u8],
 ) -> Result<(usize, Fp12), EvmCoreError> {
@@ -48,6 +49,7 @@ pub(crate) fn miller_loop_tuple(tuple: Bn254PairingTuple) -> Fp12 {
             q = added.next;
         }
     }
+    core::hint::black_box(tuple.g2.optimal_ate_post_loop_points());
     acc
 }
 

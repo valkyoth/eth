@@ -104,9 +104,10 @@ The first production value is:
   charging to ModExp and BN254 add/mul plan execution; `v0.50.5` adds the
   internal Miller-loop accumulator; `v0.50.6` adds sparse Miller-loop
   multiplication and gas/CPU benchmark evidence; `v0.50.7` adds bounded final
-  exponentiation behind the fail-closed pairing boundary; `v0.50.8` and
-  `v0.50.9` complete the optimal-ate post-loop terms and admit non-empty
-  pairing results before broader cryptographic precompile work continues;
+  exponentiation behind the fail-closed pairing boundary; `v0.50.8` adds
+  Frobenius Q1/-Q2 point mapping; `v0.50.9` completes the projective post-loop
+  line carrier; and `v0.50.10` admits non-empty pairing results before broader
+  cryptographic precompile work continues;
   `v0.51.0` and `v0.52.0` cover the remaining cryptographic precompile
   execution or backend-admission decisions before later releases add nested
   execution and committed state writes.
