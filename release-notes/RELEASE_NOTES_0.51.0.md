@@ -1,6 +1,6 @@
 # Release Notes - eth v0.51.0
 
-Status: implementation complete; pentest remediation applied; awaiting retest.
+Status: release candidate; pentest remediation and retest complete.
 
 ## Summary
 
@@ -68,11 +68,13 @@ full-exponent reference check.
 - `cargo test --release -p eth-valkyoth-evm-core bn254_pairing_final_exponentiation_wall_time_budget_smoke -- --ignored --nocapture`
 - `cargo fmt --all --check`
 - `scripts/validate-release-metadata.sh`
+- `python3 scripts/test-release-metadata.py`
 - `scripts/release_crates.py --check`
+- `scripts/checks.sh`
 
 ## Pentest
 
 Initial pentest reported no issues in the new BLAKE2F implementation and one
 Medium pre-existing BN254 final-exponentiation performance issue. The BN254
-finding is remediated in this release candidate and awaiting retest before the
-final report is committed at `security/pentest/v0.51.0.md` with `Status: PASS`.
+finding was remediated and retest passed. The final report is committed at
+`security/pentest/v0.51.0.md` with `Status: PASS`.

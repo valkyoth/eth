@@ -2221,8 +2221,7 @@ Exit criteria:
 
 ### v0.51.0 - Native EVM BLAKE2F Precompile
 
-Status: implementation stop reached; pentest remediation applied; awaiting
-retest.
+Status: release candidate; pentest remediation and retest complete.
 
 Goal: execute the Istanbul BLAKE2 compression precompile with exact input
 shape and round-count behavior, and remediate the pre-existing BN254

@@ -1,6 +1,6 @@
 # Crate Version Matrix
 
-Status: `v0.51.0` adds first-party dependency-free EIP-152 BLAKE2F precompile execution.
+Status: `v0.51.0` adds first-party dependency-free EIP-152 BLAKE2F precompile execution and optimized BN254 final-exponentiation remediation.
 `eth-valkyoth-evm-core` now exposes dependency-free `no_std` stack, memory,
 word, opcode, program-counter, fork, gas, state, error, and bounded
 interpreter domains for basic stack/control-flow bytecode plus explicit host
@@ -64,7 +64,7 @@ publication when a crate is marked `unchanged`.
 | `eth-valkyoth-signer` | `0.7.3` | `0.7.3` | `unchanged` | No | No package changes for v0.51.0. |
 | `eth-valkyoth-reth` | `0.7.0` | `0.7.0` | `unchanged` | No | No package changes for v0.51.0. |
 | `eth-valkyoth-testkit` | `0.7.0` | `0.7.0` | `unchanged` | No | No package changes for v0.51.0. |
-| `eth` | `0.50.10` | `0.51.0` | `code` | Yes | Updates the optional `evm-core` dependency to `eth-valkyoth-evm-core 0.24.0` and documents native BLAKE2F execution. |
+| `eth` | `0.50.10` | `0.51.0` | `code` | Yes | Updates the optional `evm-core` dependency to `eth-valkyoth-evm-core 0.24.0` and documents native BLAKE2F execution plus optimized BN254 final exponentiation. |
 
 Update this table and `release-crates.toml` in the same commit whenever a crate
 changes release state.
