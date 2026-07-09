@@ -179,10 +179,10 @@ Not implemented yet:
 - Identity, SHA-256, RIPEMD-160, ECRECOVER, bounded ModExp, BN254 add/mul,
   BN254 pairing empty-input execution, G2 subgroup validation, the
   Fp6/Fp12 tower foundation, validated tuple streaming, line-function
-  foundation, and Miller-loop accumulator with sparse line-factor
-  multiplication evidence are implemented; final exponentiation, non-empty
-  pairing success, and remaining cryptographic precompiles are scheduled for
-  `v0.50.7` through `v0.52.0`.
+  foundation, Miller-loop accumulator with sparse line-factor multiplication
+  evidence, and bounded final exponentiation are implemented; optimal-ate
+  post-loop terms, non-empty pairing success, and remaining cryptographic
+  precompiles are scheduled for `v0.50.8` through `v0.52.0`.
 - No ABI/contract helper surface yet; scheduled for `v0.70.0` through
   `v0.78.0`.
 - No consensus/Engine API support yet; scheduled for `v0.79.0` through
@@ -219,7 +219,7 @@ For optional sanitization support:
 
 ```toml
 [dependencies]
-eth = { version = "0.50.6", features = ["sanitization"] }
+eth = { version = "0.50.7", features = ["sanitization"] }
 ```
 
 ## Features
@@ -246,7 +246,7 @@ Optional reviewed software Keccak backend:
 
 ```toml
 [dependencies]
-eth = { version = "0.50.6", features = ["keccak-tiny"] }
+eth = { version = "0.50.7", features = ["keccak-tiny"] }
 ```
 
 ```rust
@@ -260,14 +260,14 @@ Optional reviewed secp256k1 recovery adapter:
 
 ```toml
 [dependencies]
-eth = { version = "0.50.6", features = ["secp256k1-k256"] }
+eth = { version = "0.50.7", features = ["secp256k1-k256"] }
 ```
 
 Optional bounded EVM gas-estimation boundary:
 
 ```toml
 [dependencies]
-eth = { version = "0.50.6", features = ["evm"] }
+eth = { version = "0.50.7", features = ["evm"] }
 ```
 
 ```rust
@@ -372,7 +372,7 @@ Optional native EVM core domains:
 
 ```toml
 [dependencies]
-eth = { version = "0.50.6", features = ["evm-core"] }
+eth = { version = "0.50.7", features = ["evm-core"] }
 ```
 
 State access uses explicit host-state traits and caller-provided fixed-capacity

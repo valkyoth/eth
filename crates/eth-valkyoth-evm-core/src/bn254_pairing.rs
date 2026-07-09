@@ -1,6 +1,7 @@
 use crate::{
     EVM_PRECOMPILE_INPUT_LIMIT, EvmCoreError, EvmGasMeter, EvmPrecompileKind, EvmPrecompilePlan,
     bn254::{G1Point, read_g1_point},
+    bn254_final::final_exponentiation,
     bn254_g2::{G2Point, read_g2_point},
     bn254_miller::exercise_miller_loop_accumulation,
 };
@@ -23,9 +24,10 @@ pub(crate) struct Bn254PairingTuple {
 /// [`EvmPrecompilePlan::execute_bn254_pairing`], which charges the supplied gas
 /// meter before tuple validation and subgroup checks are reachable.
 ///
-/// This release validates tuple segmentation, G1 points, G2 field elements, G2
-/// curve membership, and G2 subgroup membership. Non-empty pairing execution is
-/// intentionally fail-closed until the dedicated pairing-algebra releases.
+/// This parser validates tuple segmentation, G1 points, G2 field elements, G2
+/// curve membership, and G2 subgroup membership. It does not execute the
+/// pairing; callers that need the EIP-197 result must execute a charged
+/// [`EvmPrecompilePlan`].
 pub fn parse_bn254_pairing_input(input: &[u8]) -> Result<usize, EvmCoreError> {
     let mut pairs = 0usize;
     for_each_valid_pairing_tuple(input, |_| {
@@ -63,8 +65,9 @@ pub(crate) fn execute_bn254_pairing(
     let target = output
         .get_mut(..EVM_BN254_PAIRING_OUTPUT_BYTES)
         .ok_or(EvmCoreError::PrecompileOutputTooSmall)?;
-    let (pairs, _) = exercise_miller_loop_accumulation(input)?;
+    let (pairs, miller) = exercise_miller_loop_accumulation(input)?;
     if pairs != 0 {
+        core::hint::black_box(final_exponentiation(miller));
         return Err(EvmCoreError::PrecompileBackendUnavailable);
     }
     target.fill(0);

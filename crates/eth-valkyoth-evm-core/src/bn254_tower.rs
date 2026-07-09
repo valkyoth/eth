@@ -100,6 +100,22 @@ impl Fp12 {
     pub(crate) fn square(self) -> Self {
         self.mul(self)
     }
+
+    pub(crate) fn pow_little_endian_limbs<const N: usize>(self, exponent: [u64; N]) -> Self {
+        let mut result = Self::ONE;
+        let mut base = self;
+        for limb in exponent {
+            let mut bits = limb;
+            for _ in 0..64 {
+                if bits & 1 == 1 {
+                    result = result.mul(base);
+                }
+                base = base.square();
+                bits >>= 1;
+            }
+        }
+        result
+    }
 }
 
 fn mul_fp2_by_nonresidue(value: Fp2) -> Fp2 {

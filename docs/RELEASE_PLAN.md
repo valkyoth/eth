@@ -2086,29 +2086,92 @@ Exit criteria:
 - Non-empty EIP-197 pairing remains fail-closed, and final exponentiation cannot
   be admitted until sparse multiplication and gas/CPU evidence are reviewed.
 
-### v0.50.7 - Native EVM BN254 Pairing Final Exponentiation
+### v0.50.7 - Native EVM BN254 Pairing Final Exponentiation Foundation
 
-Goal: complete non-empty EIP-197 BN254 pairing execution.
+Status: implementation in progress.
+
+Goal: add bounded first-party final exponentiation without claiming non-empty
+EIP-197 pairing success before the full optimal-ate accumulator is complete.
 
 Deliverables:
 
-- first-party final exponentiation;
+- first-party final exponentiation over the existing Fp12 tower;
+- fixed-size exponent schedule for `(p^12 - 1) / q`;
+- fail-closed pairing path exercises final exponentiation after validated
+  non-empty Miller accumulation without writing an output result;
+- tests proving empty input still returns one and non-empty input remains
+  `PrecompileBackendUnavailable`;
+- roadmap split for the missing optimal-ate post-loop Frobenius/addition terms.
+
+Verification:
+
+- final-exponentiation edge KAT for `Fp12::ONE`;
+- inverse-batch regression proving the exponentiation path maps an admitted
+  inverse Miller accumulator to one;
+- fuzz target still reaches validated non-empty frames and observes
+  fail-closed execution;
+- pentest gate before tagging.
+
+Exit criteria:
+
+- Final exponentiation is bounded by a fixed exponent and cannot create an
+  unbounded CPU path independent of gas and release limits.
+- Non-empty EIP-197 pairing execution remains fail-closed until the optimal-ate
+  post-loop line terms and final result admission are reviewed.
+
+### v0.50.8 - Native EVM BN254 Optimal-Ate Post-Loop Lines
+
+Goal: complete the Miller accumulator shape required by Ethereum's BN254
+optimal-ate pairing before any non-empty result is admitted.
+
+Deliverables:
+
+- G2 Frobenius map helpers required for the post-loop `Q1` and `Q2` terms;
+- post-loop line additions after the ate loop;
+- KATs for Frobenius coefficients and point mapping;
+- regression proving the EIP-197 generator tuple is not accidentally mapped to
+  one by an incomplete accumulator;
+- non-empty execution still fails closed after computing the complete
+  accumulator and final exponentiation.
+
+Verification:
+
+- official EIP-197 positive and negative input semantics;
+- differential vectors against a reviewed reference engine;
+- fuzz target for non-empty complete accumulator execution;
+- pentest gate before tagging.
+
+Exit criteria:
+
+- The complete optimal-ate accumulator is vector-backed and bounded, but public
+  non-empty success remains disabled until the result-admission release.
+
+### v0.50.9 - Native EVM BN254 Pairing Result Admission
+
+Goal: admit non-empty EIP-197 pairing success and failure words only after the
+complete accumulator is independently verified.
+
+Deliverables:
+
 - full `execute_bn254_pairing` non-empty result path;
-- official EIP-197 and execution-spec vectors;
-- benchmark notes consuming the `v0.50.6` sparse-Miller budget.
+- official EIP-197 positive and negative vectors;
+- execution-spec or cross-client vectors when available;
+- benchmark notes consuming the `v0.50.6` sparse-Miller budget and the
+  `v0.50.7`/`v0.50.8` algebra costs;
+- fuzz target asserting valid non-empty frames return only canonical `0` or
+  `1` output words.
 
 Verification:
 
 - official BN254 pairing vectors;
 - differential vectors against an admitted reference engine;
-- explicit KATs for final-exponentiation edge cases and Frobenius coefficients;
-- fuzz target for non-empty pairing execution;
+- complete precompile gas-vs-CPU release evidence;
 - pentest gate before tagging.
 
 Exit criteria:
 
 - Pairing execution cannot create an unbounded CPU path independent of gas and
-  release limits.
+  release limits, and every admitted non-empty result is vector-backed.
 
 ### v0.51.0 - Native EVM BLAKE2F Precompile
 

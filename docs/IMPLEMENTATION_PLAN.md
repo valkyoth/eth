@@ -103,8 +103,10 @@ The first production value is:
   adds the line-function foundation and extends dispatcher-facing gas-meter
   charging to ModExp and BN254 add/mul plan execution; `v0.50.5` adds the
   internal Miller-loop accumulator; `v0.50.6` adds sparse Miller-loop
-  multiplication and gas/CPU benchmark evidence; `v0.50.7` schedules final
-  exponentiation before non-empty pairing execution is claimed;
+  multiplication and gas/CPU benchmark evidence; `v0.50.7` adds bounded final
+  exponentiation behind the fail-closed pairing boundary; `v0.50.8` and
+  `v0.50.9` complete the optimal-ate post-loop terms and admit non-empty
+  pairing results before broader cryptographic precompile work continues;
   `v0.51.0` and `v0.52.0` cover the remaining cryptographic precompile
   execution or backend-admission decisions before later releases add nested
   execution and committed state writes.

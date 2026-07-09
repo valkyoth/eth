@@ -7,6 +7,7 @@ extern crate std;
 
 mod bn254;
 mod bn254_field;
+mod bn254_final;
 mod bn254_g2;
 mod bn254_line;
 mod bn254_miller;

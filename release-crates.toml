@@ -1,5 +1,5 @@
 [release]
-version = "0.50.6"
+version = "0.50.7"
 policy = "independent"
 
 [crates."eth-valkyoth-codec"]
@@ -7,95 +7,95 @@ previous_version = "0.19.0"
 version = "0.19.0"
 change = "unchanged"
 publish = false
-reason = "No package changes for v0.50.6."
+reason = "No package changes for v0.50.7."
 
 [crates."eth-valkyoth-primitives"]
 previous_version = "0.11.2"
 version = "0.11.2"
 change = "unchanged"
 publish = false
-reason = "No package changes for v0.50.6."
+reason = "No package changes for v0.50.7."
 
 [crates."eth-valkyoth-hash"]
 previous_version = "0.11.2"
 version = "0.11.2"
 change = "unchanged"
 publish = false
-reason = "No package changes for v0.50.6."
+reason = "No package changes for v0.50.7."
 
 [crates."eth-valkyoth-protocol"]
 previous_version = "0.25.2"
 version = "0.25.2"
 change = "unchanged"
 publish = false
-reason = "No package changes for v0.50.6."
+reason = "No package changes for v0.50.7."
 
 [crates."eth-valkyoth-verify"]
 previous_version = "0.21.0"
 version = "0.21.0"
 change = "unchanged"
 publish = false
-reason = "No package changes for v0.50.6."
+reason = "No package changes for v0.50.7."
 
 [crates."eth-valkyoth-derive"]
 previous_version = "0.17.2"
 version = "0.17.2"
 change = "unchanged"
 publish = false
-reason = "No package changes for v0.50.6."
+reason = "No package changes for v0.50.7."
 
 [crates."eth-valkyoth-sanitization"]
 previous_version = "0.7.4"
 version = "0.7.4"
 change = "unchanged"
 publish = false
-reason = "No package changes for v0.50.6."
+reason = "No package changes for v0.50.7."
 
 [crates."eth-valkyoth-evm-core"]
-previous_version = "0.18.0"
-version = "0.19.0"
+previous_version = "0.19.0"
+version = "0.20.0"
 change = "code"
 publish = true
-reason = "Adds sparse BN254 Miller-loop line-factor multiplication and release-mode gas/CPU benchmark evidence while non-empty pairing execution remains fail-closed."
+reason = "Adds bounded first-party BN254 final exponentiation behind the fail-closed non-empty pairing boundary."
 
 [crates."eth-valkyoth-evm"]
 previous_version = "0.10.0"
 version = "0.10.0"
 change = "unchanged"
 publish = false
-reason = "No package changes for v0.50.6."
+reason = "No package changes for v0.50.7."
 
 [crates."eth-valkyoth-rpc"]
 previous_version = "0.7.0"
 version = "0.7.0"
 change = "unchanged"
 publish = false
-reason = "No package changes for v0.50.6."
+reason = "No package changes for v0.50.7."
 
 [crates."eth-valkyoth-signer"]
 previous_version = "0.7.3"
 version = "0.7.3"
 change = "unchanged"
 publish = false
-reason = "No package changes for v0.50.6."
+reason = "No package changes for v0.50.7."
 
 [crates."eth-valkyoth-reth"]
 previous_version = "0.7.0"
 version = "0.7.0"
 change = "unchanged"
 publish = false
-reason = "No package changes for v0.50.6."
+reason = "No package changes for v0.50.7."
 
 [crates."eth-valkyoth-testkit"]
 previous_version = "0.7.0"
 version = "0.7.0"
 change = "unchanged"
 publish = false
-reason = "No package changes for v0.50.6."
+reason = "No package changes for v0.50.7."
 
 [crates.eth]
-previous_version = "0.50.5"
-version = "0.50.6"
+previous_version = "0.50.6"
+version = "0.50.7"
 change = "code"
 publish = true
-reason = "Updates the optional evm-core dependency to eth-valkyoth-evm-core 0.19.0 and documents the sparse BN254 Miller-loop economics gate."
+reason = "Updates the optional evm-core dependency to eth-valkyoth-evm-core 0.20.0 and documents the BN254 final-exponentiation foundation."

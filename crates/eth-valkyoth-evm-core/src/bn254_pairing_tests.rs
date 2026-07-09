@@ -1,8 +1,9 @@
 use crate::{
     EVM_BN254_PAIRING_ITEM_BYTES, EVM_BN254_PAIRING_OUTPUT_BYTES, EvmCoreError, EvmFork, EvmGas,
     EvmGasMeter, EvmPrecompileImplementation, EvmPrecompileKind, EvmPrecompilePlan,
-    EvmPrecompileRegistry, bn254_miller::exercise_miller_loop_accumulation,
-    bn254_pairing::execute_bn254_pairing, bn254_tower::Fp12, parse_bn254_pairing_input,
+    EvmPrecompileRegistry, bn254_final::final_exponentiation,
+    bn254_miller::exercise_miller_loop_accumulation, bn254_pairing::execute_bn254_pairing,
+    bn254_tower::Fp12, parse_bn254_pairing_input,
 };
 
 use crate::bn254_pairing::for_each_valid_pairing_tuple;
@@ -34,7 +35,7 @@ fn bn254_pairing_empty_input_returns_one() -> Result<(), EvmCoreError> {
 }
 
 #[test]
-fn bn254_pairing_parses_official_generator_tuple_but_fails_closed() -> Result<(), EvmCoreError> {
+fn bn254_pairing_parses_generator_tuple_but_fails_closed() -> Result<(), EvmCoreError> {
     let input = generator_pairing_tuple();
     assert_eq!(parse_bn254_pairing_input(&input)?, 1);
 
@@ -122,6 +123,16 @@ fn bn254_pairing_miller_accumulation_uses_validated_tuple_stream() -> Result<(),
     let (pairs, acc) = exercise_miller_loop_accumulation(&input)?;
     assert_eq!(pairs, 1);
     assert_ne!(acc, Fp12::ONE);
+    Ok(())
+}
+
+#[test]
+fn bn254_pairing_final_exponentiation_maps_inverse_batch_to_one() -> Result<(), EvmCoreError> {
+    let input = generator_and_negated_generator_pairing_tuples();
+    let (pairs, acc) = exercise_miller_loop_accumulation(&input)?;
+    assert_eq!(pairs, 2);
+    assert_eq!(final_exponentiation(acc), Fp12::ONE);
+    assert_eq!(final_exponentiation(Fp12::ONE), Fp12::ONE);
     Ok(())
 }
 
@@ -223,6 +234,23 @@ fn generator_pairing_tuple() -> [u8; EVM_BN254_PAIRING_ITEM_BYTES] {
         &mut output,
         160,
         hex32("12c85ea5db8c6deb4aab71808dcb408fe3d1e7690c43d37b4ce6cc0166fa7daa"),
+    );
+    output
+}
+
+fn generator_and_negated_generator_pairing_tuples() -> [u8; EVM_BN254_PAIRING_ITEM_BYTES * 2] {
+    let generator = generator_pairing_tuple();
+    let mut output = [0u8; EVM_BN254_PAIRING_ITEM_BYTES * 2];
+    if let Some(first) = output.get_mut(..EVM_BN254_PAIRING_ITEM_BYTES) {
+        first.copy_from_slice(&generator);
+    }
+    if let Some(second) = output.get_mut(EVM_BN254_PAIRING_ITEM_BYTES..) {
+        second.copy_from_slice(&generator);
+    }
+    write_word(
+        &mut output,
+        EVM_BN254_PAIRING_ITEM_BYTES.saturating_add(32),
+        hex32("30644e72e131a029b85045b68181585d97816a916871ca8d3c208c16d87cfd45"),
     );
     output
 }
