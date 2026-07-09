@@ -25,6 +25,8 @@ now tracks that explicitly in `v0.50.8`, with final result admission in
   `PrecompileBackendUnavailable` without writing output.
 - Pairing tests now cover final exponentiation of `Fp12::ONE` and an admitted
   inverse-batch Miller accumulator that maps to one.
+- The BN254 economics harness now has an ignored release-mode benchmark for the
+  final-exponentiation path that v0.50.7 executes before failing closed.
 
 ## Changed
 
@@ -36,6 +38,8 @@ now tracks that explicitly in `v0.50.8`, with final result admission in
     differential vectors.
 - Documentation now says final exponentiation is implemented, but non-empty
   pairing success is not claimed yet.
+- `docs/bn254-pairing-economics.md` records v0.50.7 final-exponentiation timing
+  evidence alongside the existing v0.50.6 Miller-loop timing.
 
 ## Security Notes
 
@@ -48,6 +52,7 @@ now tracks that explicitly in `v0.50.8`, with final result admission in
 
 - `cargo test -p eth-valkyoth-evm-core bn254_pairing`
 - `cargo test -p eth-valkyoth-evm-core bn254_miller`
+- `cargo test --release -p eth-valkyoth-evm-core bn254_pairing_final_exponentiation_wall_time_budget_smoke -- --ignored --nocapture`
 - `cargo clippy --manifest-path fuzz/Cargo.toml --bin bn254_pairing_frame -- -D warnings`
 
 ## Next

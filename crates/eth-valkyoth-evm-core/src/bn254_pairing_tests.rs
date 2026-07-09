@@ -1,3 +1,5 @@
+extern crate std;
+
 use crate::{
     EVM_BN254_PAIRING_ITEM_BYTES, EVM_BN254_PAIRING_OUTPUT_BYTES, EvmCoreError, EvmFork, EvmGas,
     EvmGasMeter, EvmPrecompileImplementation, EvmPrecompileKind, EvmPrecompilePlan,
@@ -133,6 +135,28 @@ fn bn254_pairing_final_exponentiation_maps_inverse_batch_to_one() -> Result<(), 
     assert_eq!(pairs, 2);
     assert_eq!(final_exponentiation(acc), Fp12::ONE);
     assert_eq!(final_exponentiation(Fp12::ONE), Fp12::ONE);
+    Ok(())
+}
+
+#[test]
+#[ignore = "release evidence benchmark; run explicitly for v0.50.7"]
+fn bn254_pairing_final_exponentiation_wall_time_budget_smoke() -> Result<(), EvmCoreError> {
+    let input = generator_pairing_tuple();
+    let (_, acc) = exercise_miller_loop_accumulation(&input)?;
+    let iterations = 3u128;
+    let start = std::time::Instant::now();
+
+    for _ in 0..iterations {
+        std::hint::black_box(final_exponentiation(acc));
+    }
+
+    let total_ns = start.elapsed().as_nanos();
+    std::println!(
+        "bn254_final_exponentiation iterations={} total_ns={} average_ns={}",
+        iterations,
+        total_ns,
+        total_ns / iterations
+    );
     Ok(())
 }
 
