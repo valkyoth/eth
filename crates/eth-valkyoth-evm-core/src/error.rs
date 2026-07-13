@@ -73,6 +73,8 @@ pub enum EvmCoreError {
     PrecompileInputTooLarge,
     /// The precompile input length violates the fork-scoped precompile policy.
     PrecompileInvalidInputLength,
+    /// The execution input no longer has the gas cost recorded by its plan.
+    PrecompilePlanInputMismatch,
     /// Precompile gas arithmetic overflowed.
     PrecompileGasOverflow,
     /// The provided precompile output buffer is too small.
@@ -137,6 +139,7 @@ impl EvmCoreError {
             Self::PrecompileNotAvailableInFork => "precompile_not_available_in_fork",
             Self::PrecompileInputTooLarge => "precompile_input_too_large",
             Self::PrecompileInvalidInputLength => "precompile_invalid_input_length",
+            Self::PrecompilePlanInputMismatch => "precompile_plan_input_mismatch",
             Self::PrecompileGasOverflow => "precompile_gas_overflow",
             Self::PrecompileOutputTooSmall => "precompile_output_too_small",
             Self::PrecompileFieldElementOutOfRange => "precompile_field_element_out_of_range",

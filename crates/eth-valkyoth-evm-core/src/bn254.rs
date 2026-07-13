@@ -51,12 +51,7 @@ impl EvmPrecompilePlan {
         if self.descriptor().kind != EvmPrecompileKind::Bn254Add {
             return Err(EvmCoreError::PrecompileBackendUnavailable);
         }
-        if input.len() != self.input_len() {
-            return Err(EvmCoreError::PrecompileInvalidInputLength);
-        }
-        let gas_cost = self
-            .gas_cost()
-            .ok_or(EvmCoreError::PrecompileBackendUnavailable)?;
+        let gas_cost = self.checked_execution_cost(input)?;
         gas_meter.charge(gas_cost)?;
         execute_bn254_add(input, output)
     }
@@ -74,12 +69,7 @@ impl EvmPrecompilePlan {
         if self.descriptor().kind != EvmPrecompileKind::Bn254Mul {
             return Err(EvmCoreError::PrecompileBackendUnavailable);
         }
-        if input.len() != self.input_len() {
-            return Err(EvmCoreError::PrecompileInvalidInputLength);
-        }
-        let gas_cost = self
-            .gas_cost()
-            .ok_or(EvmCoreError::PrecompileBackendUnavailable)?;
+        let gas_cost = self.checked_execution_cost(input)?;
         gas_meter.charge(gas_cost)?;
         execute_bn254_mul(input, output)
     }

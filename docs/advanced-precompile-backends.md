@@ -45,6 +45,8 @@ items before its descriptor changes from a fail-closed state:
   forbidden empty inputs before arithmetic execution.
 - Enforce all required on-curve and subgroup checks, including infinity rules.
 - Charge or reserve gas before expensive validation or arithmetic is reached.
+- Recompute content-dependent gas from the actual execution input and reject
+  plans whose recorded cost no longer matches those bytes.
 - Use checked arithmetic for frame counts, gas, offsets, and output lengths.
 - Keep runtime and memory bounded by the public input and release limits.
 - Include official positive and negative vectors plus an independent oracle.

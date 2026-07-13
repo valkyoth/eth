@@ -109,12 +109,7 @@ impl EvmPrecompilePlan {
         if self.descriptor().kind != EvmPrecompileKind::EcRecover {
             return Err(EvmCoreError::PrecompileBackendUnavailable);
         }
-        if input.len() != self.input_len() {
-            return Err(EvmCoreError::PrecompileInvalidInputLength);
-        }
-        let gas_cost = self
-            .gas_cost()
-            .ok_or(EvmCoreError::PrecompileBackendUnavailable)?;
+        let gas_cost = self.checked_execution_cost(input)?;
         gas_meter.charge(gas_cost)?;
         execute_ecrecover(input, output, backend, hasher)
     }

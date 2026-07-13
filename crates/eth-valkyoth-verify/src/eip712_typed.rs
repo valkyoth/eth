@@ -8,19 +8,24 @@ use crate::eip712_signing_digest;
 #[cfg(feature = "json")]
 #[path = "eip712_json.rs"]
 mod eip712_json;
+#[path = "eip712_type_graph.rs"]
+mod type_graph;
 #[path = "eip712_typed_helpers.rs"]
 mod typed_helpers;
 #[cfg(feature = "json")]
 pub use eip712_json::{Eip712JsonError, Eip712JsonLimits, eip712_json_typed_data_signing_digest};
 
+use type_graph::{collect_reachable_types, next_dependency};
 use typed_helpers::{
-    SliceWriter, encode_domain_type, encode_value_word, find_struct, find_value, next_dependency,
+    SliceWriter, encode_domain_type, encode_value_word, find_struct, find_value,
     update_domain_fields, write_struct_type,
 };
 
 const WORD_BYTES: usize = 32;
 const ADDRESS_PADDING_BYTES: usize = 12;
 const MAX_TYPE_DEPTH: usize = 32;
+/// Maximum number of EIP-712 struct types admitted by the bounded encoder.
+pub const EIP712_MAX_TYPES: usize = 64;
 
 /// One EIP-712 struct type definition.
 #[derive(Clone, Copy, Debug, Eq, PartialEq)]
@@ -42,7 +47,10 @@ pub struct Eip712Field<'a> {
 }
 
 /// One named EIP-712 value inside a struct instance.
-#[derive(Clone, Copy, Debug, Eq, PartialEq)]
+///
+/// Debug formatting is redacted and the value is intentionally not `Copy` or
+/// `Clone` because unpublished signing preimages can be secret-bearing.
+#[derive(Eq, PartialEq)]
 pub struct Eip712Value<'a> {
     /// Field name.
     pub name: &'a str,
@@ -51,7 +59,9 @@ pub struct Eip712Value<'a> {
 }
 
 /// Borrowed EIP-712 value representation.
-#[derive(Clone, Copy, Debug, Eq, PartialEq)]
+///
+/// Debug formatting reveals only the variant and never the contained value.
+#[derive(Eq, PartialEq)]
 pub enum Eip712ValueKind<'a> {
     /// Boolean value.
     Bool(bool),
@@ -73,6 +83,30 @@ pub enum Eip712ValueKind<'a> {
     Struct(&'a [Eip712Value<'a>]),
     /// Array element values.
     Array(&'a [Eip712ValueKind<'a>]),
+}
+
+impl fmt::Debug for Eip712Value<'_> {
+    fn fmt(&self, formatter: &mut fmt::Formatter<'_>) -> fmt::Result {
+        formatter.write_str("Eip712Value(<redacted>)")
+    }
+}
+
+impl fmt::Debug for Eip712ValueKind<'_> {
+    fn fmt(&self, formatter: &mut fmt::Formatter<'_>) -> fmt::Result {
+        let variant = match self {
+            Self::Bool(_) => "Bool",
+            Self::Address(_) => "Address",
+            Self::Uint64(_) => "Uint64",
+            Self::Uint256(_) => "Uint256",
+            Self::Int256(_) => "Int256",
+            Self::FixedBytes(_) => "FixedBytes",
+            Self::Bytes(_) => "Bytes",
+            Self::String(_) => "String",
+            Self::Struct(_) => "Struct",
+            Self::Array(_) => "Array",
+        };
+        write!(formatter, "Eip712ValueKind::{variant}(<redacted>)")
+    }
 }
 
 /// EIP-712 domain data admitted by the first-party encoder.
@@ -124,6 +158,8 @@ pub enum Eip712EncodeError {
     TypeMismatch,
     /// Type graph or value graph exceeded the recursion limit.
     RecursionLimit,
+    /// The schema exceeds the bounded type-count limit.
+    SchemaTooLarge,
 }
 
 impl fmt::Display for Eip712EncodeError {
@@ -135,6 +171,7 @@ impl fmt::Display for Eip712EncodeError {
             Self::InvalidType => "EIP-712 type string is invalid or unsupported",
             Self::TypeMismatch => "EIP-712 value does not match its declared type",
             Self::RecursionLimit => "EIP-712 recursion limit was exceeded",
+            Self::SchemaTooLarge => "EIP-712 schema exceeds the type-count limit",
         })
     }
 }
@@ -143,6 +180,9 @@ impl fmt::Display for Eip712EncodeError {
 impl std::error::Error for Eip712EncodeError {}
 
 /// Encodes `encodeType(primaryType)` into `output`.
+///
+/// Schemas larger than [`EIP712_MAX_TYPES`] are rejected before dependency
+/// traversal. Each reachable type is visited once before lexical emission.
 pub fn encode_eip712_type(
     types: &[Eip712StructType<'_>],
     primary_type: &str,
@@ -150,10 +190,11 @@ pub fn encode_eip712_type(
 ) -> Result<usize, Eip712EncodeError> {
     let mut writer = SliceWriter::new(output);
     let primary = find_struct(types, primary_type)?;
+    let reachable = collect_reachable_types(types, primary_type)?;
     write_struct_type(primary, &mut writer)?;
     let mut previous = None::<&str>;
     loop {
-        let next = next_dependency(types, primary_type, previous)?;
+        let next = next_dependency(types, primary_type, previous, &reachable)?;
         let Some(dependency) = next else {
             break;
         };
@@ -190,6 +231,9 @@ pub fn encode_eip712_data<H>(
 where
     H: Default + Keccak256,
 {
+    if types.len() > EIP712_MAX_TYPES {
+        return Err(Eip712EncodeError::SchemaTooLarge);
+    }
     let ty = find_struct(types, primary_type)?;
     let len = ty
         .fields

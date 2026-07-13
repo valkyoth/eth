@@ -16,6 +16,10 @@ All notable changes to `eth` are documented here.
   order, requiring gas meters for every public precompile executor, removing
   raw unmetered execution exports, and enforcing semantic committed-SBOM drift
   checks in CI and release readiness.
+- Remediated the follow-up v0.52.0 review by ignoring unused false-`JUMPI` and
+  zero-length memory offsets, rebinding every precompile plan to actual-input
+  gas, bounding EIP-712 dependency traversal to 64 types with one visit per
+  reachable type, and redacting non-copyable EIP-712 signing values.
 - Started `0.37.2` with `docs/core-independence-audit.md`, classifying
   default, optional, dev-only, reference-only, and compile-time dependencies
   that can influence core Ethereum behavior.

@@ -8,7 +8,7 @@ use super::{
 pub(super) fn encode_value_word<H>(
     types: &[Eip712StructType<'_>],
     type_name: &str,
-    value: Eip712ValueKind<'_>,
+    value: &Eip712ValueKind<'_>,
     out: &mut [u8; WORD_BYTES],
     type_scratch: &mut [u8],
     depth: usize,
@@ -29,12 +29,12 @@ where
             return Err(Eip712EncodeError::TypeMismatch);
         }
         let mut hasher = H::default();
-        for item in values {
+        for item in *values {
             let mut word = [0_u8; WORD_BYTES];
             encode_value_word::<H>(
                 types,
                 array.base,
-                *item,
+                item,
                 &mut word,
                 type_scratch,
                 depth.saturating_add(1),
@@ -47,7 +47,7 @@ where
     match (type_name, value) {
         ("bool", Eip712ValueKind::Bool(value)) => {
             let last = out.last_mut().ok_or(Eip712EncodeError::OutputTooShort)?;
-            *last = u8::from(value);
+            *last = u8::from(*value);
         }
         ("address", Eip712ValueKind::Address(value)) => {
             let bytes = value.to_bytes();
@@ -79,7 +79,7 @@ where
     }
     if let Some(chain_id) = domain.chain_id {
         let mut word = [0_u8; WORD_BYTES];
-        let _ = encode_uint(256, Eip712ValueKind::Uint64(chain_id.get()), &mut word);
+        let _ = encode_uint(256, &Eip712ValueKind::Uint64(chain_id.get()), &mut word);
         hasher.update(&word);
     }
     if let Some(contract) = domain.verifying_contract {
@@ -87,7 +87,7 @@ where
         let _ = encode_value_word::<H>(
             &[],
             "address",
-            Eip712ValueKind::Address(contract),
+            &Eip712ValueKind::Address(contract),
             &mut word,
             &mut [],
             0,
@@ -159,32 +159,6 @@ pub(super) fn write_struct_type(
     writer.write_str(")")
 }
 
-pub(super) fn next_dependency<'a>(
-    types: &'a [Eip712StructType<'a>],
-    primary_type: &str,
-    previous: Option<&str>,
-) -> Result<Option<Eip712StructType<'a>>, Eip712EncodeError> {
-    let mut best = None::<Eip712StructType<'a>>;
-    for ty in types {
-        reject_reserved_struct_name(ty.name)?;
-        if ty.name == primary_type {
-            continue;
-        }
-        if let Some(previous) = previous
-            && ty.name <= previous
-        {
-            continue;
-        }
-        if !struct_references_type(types, primary_type, ty.name, 0)? {
-            continue;
-        }
-        if best.is_none_or(|candidate| ty.name < candidate.name) {
-            best = Some(*ty);
-        }
-    }
-    Ok(best)
-}
-
 pub(super) fn find_struct<'a>(
     types: &'a [Eip712StructType<'a>],
     name: &str,
@@ -200,11 +174,11 @@ pub(super) fn find_struct<'a>(
 pub(super) fn find_value<'a>(
     values: &'a [Eip712Value<'a>],
     name: &str,
-) -> Result<Eip712ValueKind<'a>, Eip712EncodeError> {
+) -> Result<&'a Eip712ValueKind<'a>, Eip712EncodeError> {
     values
         .iter()
         .find(|value| value.name == name)
-        .map(|value| value.value)
+        .map(|value| &value.value)
         .ok_or(Eip712EncodeError::MissingValue)
 }
 
@@ -260,32 +234,7 @@ fn write_domain_field(
     Ok(())
 }
 
-fn struct_references_type(
-    types: &[Eip712StructType<'_>],
-    from: &str,
-    target: &str,
-    depth: usize,
-) -> Result<bool, Eip712EncodeError> {
-    if depth >= MAX_TYPE_DEPTH {
-        return Err(Eip712EncodeError::RecursionLimit);
-    }
-    let ty = find_struct(types, from)?;
-    for field in ty.fields {
-        let base = base_type(field.type_name)?;
-        if base == target {
-            return Ok(true);
-        }
-        if find_struct(types, base).is_ok()
-            && base != from
-            && struct_references_type(types, base, target, depth.saturating_add(1))?
-        {
-            return Ok(true);
-        }
-    }
-    Ok(false)
-}
-
-fn reject_reserved_struct_name(name: &str) -> Result<(), Eip712EncodeError> {
+pub(super) fn reject_reserved_struct_name(name: &str) -> Result<(), Eip712EncodeError> {
     if is_reserved_atomic_type(name) {
         return Err(Eip712EncodeError::InvalidType);
     }
@@ -301,7 +250,7 @@ fn is_reserved_atomic_type(name: &str) -> bool {
 
 pub(super) fn encode_numeric_or_fixed_bytes(
     type_name: &str,
-    value: Eip712ValueKind<'_>,
+    value: &Eip712ValueKind<'_>,
     out: &mut [u8; WORD_BYTES],
 ) -> Result<(), Eip712EncodeError> {
     if let Some(width) = unsigned_width(type_name)? {
@@ -327,12 +276,12 @@ pub(super) fn encode_numeric_or_fixed_bytes(
 
 fn encode_uint(
     width: usize,
-    value: Eip712ValueKind<'_>,
+    value: &Eip712ValueKind<'_>,
     out: &mut [u8; WORD_BYTES],
 ) -> Result<(), Eip712EncodeError> {
     match value {
         Eip712ValueKind::Uint64(value) => {
-            if width < 64 && value >= (1_u64 << width) {
+            if width < 64 && *value >= (1_u64 << width) {
                 return Err(Eip712EncodeError::TypeMismatch);
             }
             out.get_mut(24..)
@@ -341,7 +290,7 @@ fn encode_uint(
         }
         Eip712ValueKind::Uint256(bytes) => {
             reject_high_bytes(width, bytes)?;
-            *out = bytes;
+            *out = *bytes;
         }
         _ => return Err(Eip712EncodeError::TypeMismatch),
     }
@@ -350,18 +299,18 @@ fn encode_uint(
 
 fn encode_int(
     width: usize,
-    value: Eip712ValueKind<'_>,
+    value: &Eip712ValueKind<'_>,
     out: &mut [u8; WORD_BYTES],
 ) -> Result<(), Eip712EncodeError> {
     let Eip712ValueKind::Int256(bytes) = value else {
         return Err(Eip712EncodeError::TypeMismatch);
     };
     reject_non_sign_extended(width, bytes)?;
-    *out = bytes;
+    *out = *bytes;
     Ok(())
 }
 
-fn reject_high_bytes(width: usize, bytes: [u8; 32]) -> Result<(), Eip712EncodeError> {
+fn reject_high_bytes(width: usize, bytes: &[u8; 32]) -> Result<(), Eip712EncodeError> {
     let used = width / 8;
     let high = WORD_BYTES
         .checked_sub(used)
@@ -377,7 +326,7 @@ fn reject_high_bytes(width: usize, bytes: [u8; 32]) -> Result<(), Eip712EncodeEr
     Ok(())
 }
 
-fn reject_non_sign_extended(width: usize, bytes: [u8; 32]) -> Result<(), Eip712EncodeError> {
+fn reject_non_sign_extended(width: usize, bytes: &[u8; 32]) -> Result<(), Eip712EncodeError> {
     let used = width / 8;
     let high = WORD_BYTES
         .checked_sub(used)
@@ -418,7 +367,7 @@ pub(super) fn parse_array_type(
     Ok(Some(ArrayType { base, len }))
 }
 
-fn base_type(type_name: &str) -> Result<&str, Eip712EncodeError> {
+pub(super) fn base_type(type_name: &str) -> Result<&str, Eip712EncodeError> {
     let mut base = type_name;
     while let Some(array) = parse_array_type(base)? {
         base = array.base;

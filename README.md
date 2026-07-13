@@ -426,6 +426,8 @@ final-flag validation, and round-count gas.
 Dispatcher-facing identity, hash, ECRECOVER, ModExp, BN254 add/mul, BN254
 pairing, and BLAKE2F execution is available only through plans that charge the
 supplied gas meter on every call before output mutation or expensive work.
+Execution recomputes gas from the actual input and rejects any same-length
+input whose content-dependent cost no longer matches the plan.
 KZG and BLS cryptographic precompiles expose exact fork, frame, output, and gas
 plans and return a backend-unavailable error until their first-party arithmetic
 releases are admitted. BLS MSM and pairing plans reject empty and partial item
@@ -704,6 +706,12 @@ assert_eq!(authorization_hash.to_b256(), B256::from([0x55_u8; 32]));
 EIP-712 signing paths can build the structured-data digest from reviewed
 borrowed type descriptors and values without adding a concrete Keccak backend
 to the default graph:
+
+The encoder admits at most `EIP712_MAX_TYPES` (64) struct types, visits each
+reachable dependency once before canonical lexical emission, and rejects
+larger schemas. `Eip712Value` and `Eip712ValueKind` are intentionally not
+`Copy` or `Clone`; their `Debug` output identifies only the value kind and
+redacts all signing payload contents.
 
 ```rust
 use eth::hash::Keccak256;

@@ -33,6 +33,13 @@ In `v0.26.1`, `eth-valkyoth-verify` adds an optional `json` feature for
 JSON-RPC typed-data payloads. The feature is disabled by default, requires
 `std`, and keeps concrete Keccak backends caller-provided.
 
+The `v0.52.0` security hardening applies a shared 64-type ceiling to the
+borrowed and JSON paths. Reachability is collected with a fixed-capacity
+visited set, so shared dependency DAGs are not recursively rediscovered for
+each candidate type. Canonical dependencies are still emitted in lexical
+order after the bounded traversal. Signing value types no longer implement
+`Copy` or `Clone`, and their manual `Debug` output always redacts payloads.
+
 The JSON boundary:
 
 - rejects duplicate JSON object keys before any type map is accepted, using an

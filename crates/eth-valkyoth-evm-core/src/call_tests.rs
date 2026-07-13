@@ -344,7 +344,7 @@ fn call_create_opcodes_reject_before_introduction() -> Result<(), EvmCoreError> 
 }
 
 #[test]
-fn call_create_memory_ranges_are_checked_before_fail_closed() -> Result<(), EvmCoreError> {
+fn call_create_zero_length_ranges_ignore_offsets_before_fail_closed() -> Result<(), EvmCoreError> {
     let mut memory = [0u8; 4];
     let mut execution = EvmExecution::<16>::try_new(&mut memory)?;
     let code = [
@@ -353,7 +353,7 @@ fn call_create_memory_ranges_are_checked_before_fail_closed() -> Result<(), EvmC
 
     assert_eq!(
         execution.run(&code, limits(EvmFork::FRONTIER)?),
-        Err(EvmCoreError::MemoryOffsetOutOfBounds)
+        Err(EvmCoreError::CallCreateExecutionUnsupported)
     );
     assert_eq!(execution.stack().len(), 7);
     assert_eq!(execution.stack().peek(0)?, EvmWord::ZERO);
@@ -363,5 +363,21 @@ fn call_create_memory_ranges_are_checked_before_fail_closed() -> Result<(), EvmC
     assert_eq!(execution.stack().peek(4)?, EvmWord::ZERO);
     assert_eq!(execution.stack().peek(5)?, EvmWord::ZERO);
     assert_eq!(execution.stack().peek(6)?, EvmWord::ZERO);
+    Ok(())
+}
+
+#[test]
+fn call_create_nonempty_ranges_are_checked_before_fail_closed() -> Result<(), EvmCoreError> {
+    let mut memory = [0_u8; 4];
+    let mut execution = EvmExecution::<16>::try_new(&mut memory)?;
+    let code = [
+        0x60, 0x00, 0x60, 0x00, 0x60, 0x01, 0x60, 0x05, 0x60, 0x00, 0x60, 0x00, 0x60, 0x00, 0xf1,
+    ];
+
+    assert_eq!(
+        execution.run(&code, limits(EvmFork::FRONTIER)?),
+        Err(EvmCoreError::MemoryOffsetOutOfBounds)
+    );
+    assert_eq!(execution.stack().len(), 7);
     Ok(())
 }

@@ -121,4 +121,7 @@ EIP-712 helpers require the caller to provide both `chainId` and
 before sender recovery. The typed-data encoder now computes domain separators
 and message hashes from borrowed descriptors. JSON-RPC typed-data parsing is
 available only through the opt-in `json` feature and does not affect default
-`no_std` builds.
+`no_std` builds. Both paths enforce the 64-type `EIP712_MAX_TYPES` ceiling;
+dependency discovery visits reachable types once before canonical ordering.
+Borrowed signing values are neither `Copy` nor `Clone`, and their manual
+`Debug` implementations redact all payload contents.

@@ -88,6 +88,10 @@ pub use word::EvmWord;
 mod tests;
 
 #[cfg(test)]
+#[path = "execution_semantics_tests.rs"]
+mod execution_semantics_tests;
+
+#[cfg(test)]
 #[path = "state_tests.rs"]
 mod state_tests;
 

@@ -14,10 +14,7 @@ impl EvmPrecompilePlan {
         if self.descriptor().kind != EvmPrecompileKind::Identity {
             return Err(EvmCoreError::PrecompileBackendUnavailable);
         }
-        if input.len() != self.input_len() {
-            return Err(EvmCoreError::PrecompileInvalidInputLength);
-        }
-        charge_plan(self, gas_meter)?;
+        charge_plan(self, gas_meter, input)?;
         execute_identity(input, output)
     }
 
@@ -31,10 +28,7 @@ impl EvmPrecompilePlan {
         if self.descriptor().kind != EvmPrecompileKind::Sha256 {
             return Err(EvmCoreError::PrecompileBackendUnavailable);
         }
-        if input.len() != self.input_len() {
-            return Err(EvmCoreError::PrecompileInvalidInputLength);
-        }
-        charge_plan(self, gas_meter)?;
+        charge_plan(self, gas_meter, input)?;
         execute_sha256(input, output)
     }
 
@@ -48,17 +42,16 @@ impl EvmPrecompilePlan {
         if self.descriptor().kind != EvmPrecompileKind::Ripemd160 {
             return Err(EvmCoreError::PrecompileBackendUnavailable);
         }
-        if input.len() != self.input_len() {
-            return Err(EvmCoreError::PrecompileInvalidInputLength);
-        }
-        charge_plan(self, gas_meter)?;
+        charge_plan(self, gas_meter, input)?;
         execute_ripemd160(input, output)
     }
 }
 
-fn charge_plan(plan: EvmPrecompilePlan, gas_meter: &mut EvmGasMeter) -> Result<(), EvmCoreError> {
-    let gas_cost = plan
-        .gas_cost()
-        .ok_or(EvmCoreError::PrecompileBackendUnavailable)?;
+fn charge_plan(
+    plan: EvmPrecompilePlan,
+    gas_meter: &mut EvmGasMeter,
+    input: &[u8],
+) -> Result<(), EvmCoreError> {
+    let gas_cost = plan.checked_execution_cost(input)?;
     gas_meter.charge(gas_cost)
 }

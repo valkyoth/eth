@@ -178,6 +178,28 @@ fn modexp_plan_charges_every_execution() -> Result<(), EvmCoreError> {
     Ok(())
 }
 
+#[test]
+fn modexp_plan_rejects_same_length_input_with_changed_operand_cost() -> Result<(), EvmCoreError> {
+    let descriptor = registry(EvmFork::BYZANTIUM)?.descriptor(EvmPrecompileKind::Modexp)?;
+    let mut planned_input = modexp_input(1, 32, 32);
+    planned_input.extend_from_slice(&[0_u8; 65]);
+    let plan = EvmPrecompilePlan::try_new(descriptor, &planned_input)?;
+    let mut execution_input = planned_input.clone();
+    if let Some(exponent) = execution_input.get_mut(97) {
+        *exponent = u8::MAX;
+    }
+    let mut gas_meter = EvmGasMeter::try_new(EvmGas::new(100_000))?;
+    let mut output = [0xa5_u8; 32];
+
+    assert_eq!(
+        plan.execute_modexp(&mut gas_meter, &execution_input, &mut output),
+        Err(EvmCoreError::PrecompilePlanInputMismatch)
+    );
+    assert_eq!(gas_meter.used(), EvmGas::new(0));
+    assert!(output.iter().all(|byte| *byte == 0xa5));
+    Ok(())
+}
+
 fn modexp_input(base_len: usize, exponent_len: usize, modulus_len: usize) -> Vec<u8> {
     let mut input = Vec::from([0u8; 96]);
     write_len(&mut input, 0, base_len);

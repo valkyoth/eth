@@ -47,12 +47,7 @@ impl EvmPrecompilePlan {
         if self.descriptor().kind != EvmPrecompileKind::Blake2F {
             return Err(EvmCoreError::PrecompileBackendUnavailable);
         }
-        if input.len() != self.input_len() {
-            return Err(EvmCoreError::PrecompileInvalidInputLength);
-        }
-        let cost = self
-            .gas_cost()
-            .ok_or(EvmCoreError::PrecompileBackendUnavailable)?;
+        let cost = self.checked_execution_cost(input)?;
         gas.charge(cost)?;
         execute_blake2f(input, output)
     }

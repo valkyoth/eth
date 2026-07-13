@@ -76,7 +76,8 @@ exact EIP-4844/EIP-2537 input, output, and gas plans.
   is admitted.
 - Call/create opcodes are recognized, stack/memory/policy validated, and then
   rejected with `CallCreateExecutionUnsupported`; no hidden host calls or
-  state commits occur.
+  state commits occur. Zero-length ranges canonicalize their irrelevant offset
+  to zero without host-width conversion or memory expansion.
 - Precompile descriptors are fork-aware. Identity, SHA-256, RIPEMD-160,
   bounded ModExp, BN254 add/mul, BN254 pairing frames, BLAKE2F, and
   ECRECOVER can execute without default crypto dependencies; ECRECOVER requires
@@ -91,6 +92,11 @@ exact EIP-4844/EIP-2537 input, output, and gas plans.
   until their first-party implementations are admitted. EIP-2537 fixed frames,
   non-empty MSM/pairing lists, output lengths, discount gas, and pairing gas
   are enforced at planning time.
+- Every executable precompile recomputes gas from the actual input immediately
+  before charging. A same-length input with a different content-dependent
+  BLAKE2F or ModExp cost is rejected before arithmetic or output mutation.
+- A false `JUMPI` does not convert or validate the unused destination word;
+  true branches retain canonical `JUMPDEST` validation.
 - Unsupported opcodes and unsupported forks are rejected with named errors.
 - No nested call/create execution, log, remaining cryptographic precompile,
   refund, or committed storage-write semantics are claimed yet.

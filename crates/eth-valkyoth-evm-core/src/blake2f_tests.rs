@@ -50,6 +50,27 @@ fn blake2f_matches_eip152_final_block_vector() -> Result<(), EvmCoreError> {
 }
 
 #[test]
+fn blake2f_plan_rejects_same_length_input_with_changed_round_cost() -> Result<(), EvmCoreError> {
+    let descriptor = registry(EvmFork::ISTANBUL)?.descriptor(EvmPrecompileKind::Blake2F)?;
+    let planned_input = [0_u8; EVM_BLAKE2F_INPUT_BYTES];
+    let plan = EvmPrecompilePlan::try_new(descriptor, &planned_input)?;
+    let mut execution_input = planned_input;
+    if let Some(rounds) = execution_input.get_mut(3) {
+        *rounds = 1;
+    }
+    let mut gas = EvmGasMeter::try_new(EvmGas::new(1))?;
+    let mut output = [0xa5_u8; EVM_BLAKE2F_OUTPUT_BYTES];
+
+    assert_eq!(
+        plan.execute_blake2f(&mut gas, &execution_input, &mut output),
+        Err(EvmCoreError::PrecompilePlanInputMismatch)
+    );
+    assert_eq!(gas.used(), EvmGas::new(0));
+    assert!(output.iter().all(|byte| *byte == 0xa5));
+    Ok(())
+}
+
+#[test]
 fn blake2f_matches_eip152_non_final_and_one_round_vectors() -> Result<(), EvmCoreError> {
     let cases = [
         (

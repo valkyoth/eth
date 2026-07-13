@@ -17,14 +17,18 @@ pub(super) fn encode_json_numeric_or_bytes(
     if type_name.starts_with("uint") {
         encode_numeric_or_fixed_bytes(
             type_name,
-            Eip712ValueKind::Uint256(parse_u256(value)?),
+            &Eip712ValueKind::Uint256(parse_u256(value)?),
             out,
         )?;
     } else if type_name.starts_with("int") {
-        encode_numeric_or_fixed_bytes(type_name, Eip712ValueKind::Int256(parse_i256(value)?), out)?;
+        encode_numeric_or_fixed_bytes(
+            type_name,
+            &Eip712ValueKind::Int256(parse_i256(value)?),
+            out,
+        )?;
     } else if type_name.starts_with("bytes") {
         let bytes = parse_hex(value.as_str()?, WORD_BYTES)?;
-        encode_numeric_or_fixed_bytes(type_name, Eip712ValueKind::FixedBytes(&bytes), out)?;
+        encode_numeric_or_fixed_bytes(type_name, &Eip712ValueKind::FixedBytes(&bytes), out)?;
     } else {
         return Err(Eip712JsonError::Encode(Eip712EncodeError::InvalidType));
     }

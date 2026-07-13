@@ -357,12 +357,13 @@ impl<'a, const STACK: usize> EvmExecution<'a, STACK> {
     }
 
     fn jumpi(&mut self, jumpdests: &JumpdestMap) -> Result<(), EvmCoreError> {
-        let target = self.stack.pop()?.to_usize()?;
+        let destination = self.stack.pop()?;
         let condition = self.stack.pop()?;
         if condition.is_zero() {
             self.pc = self.pc.advance(1)?;
             return Ok(());
         }
+        let target = destination.to_usize()?;
         if !jumpdests.contains(target) {
             return Err(EvmCoreError::InvalidJumpDestination);
         }
@@ -377,14 +378,18 @@ impl<'a, const STACK: usize> EvmExecution<'a, STACK> {
         schedule: EvmGasSchedule,
         gas_meter: &mut EvmGasMeter,
     ) -> Result<ExecutionReport, EvmCoreError> {
-        let offset = self.stack.peek(0)?.to_usize()?;
         let len = self.stack.peek(1)?.to_usize()?;
+        let offset = if len == 0 {
+            0
+        } else {
+            self.stack.peek(0)?.to_usize()?
+        };
         self.memory
             .check_range(offset, len)
             .map_err(|_| EvmCoreError::ReturnRangeOutOfBounds)?;
         gas_meter.charge_memory_range(schedule, offset, len)?;
-        let offset = self.stack.pop()?.to_usize()?;
-        let len = self.stack.pop()?.to_usize()?;
+        let _ = self.stack.pop()?;
+        let _ = self.stack.pop()?;
         let status = if revert {
             ExecutionStatus::Reverted { offset, len }
         } else {
@@ -466,8 +471,12 @@ impl<'a, const STACK: usize> EvmExecution<'a, STACK> {
         offset_depth: usize,
         len_depth: usize,
     ) -> Result<EvmMemoryRange, EvmCoreError> {
-        let offset = self.stack.peek(offset_depth)?.to_usize()?;
         let len = self.stack.peek(len_depth)?.to_usize()?;
+        let offset = if len == 0 {
+            0
+        } else {
+            self.stack.peek(offset_depth)?.to_usize()?
+        };
         self.memory.check_range(offset, len)?;
         EvmMemoryRange::try_new(offset, len)
     }

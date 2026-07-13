@@ -1,5 +1,6 @@
 extern crate std;
 use std::boxed::Box;
+use std::format;
 use std::string::String;
 use std::vec::Vec;
 
@@ -183,6 +184,87 @@ fn rejects_array_dimensionality_over_recursion_limit() {
         eip712_hash_struct::<RealKeccak>(&types, "Deep", &values, &mut scratch),
         Err(Eip712EncodeError::RecursionLimit)
     );
+}
+
+#[test]
+fn shared_dependency_dag_is_visited_once_and_encoded_canonically() -> Result<(), Eip712EncodeError>
+{
+    const LAYERS: usize = 32;
+    let mut names = Vec::with_capacity(LAYERS);
+    for index in 0..LAYERS {
+        let name: &'static str = Box::leak(format!("Shared{index:02}").into_boxed_str());
+        names.push(name);
+    }
+    let mut types = Vec::with_capacity(LAYERS);
+    for index in 0..LAYERS {
+        let name = *names.get(index).ok_or(Eip712EncodeError::InvalidType)?;
+        let fields: &'static [Eip712Field<'static>] = if let Some(next) = names.get(index + 1) {
+            Box::leak(Box::new([
+                Eip712Field {
+                    name: "left",
+                    type_name: next,
+                },
+                Eip712Field {
+                    name: "right",
+                    type_name: next,
+                },
+            ]))
+        } else {
+            &[]
+        };
+        types.push(Eip712StructType { name, fields });
+    }
+    let primary = names
+        .first()
+        .copied()
+        .ok_or(Eip712EncodeError::InvalidType)?;
+    let mut output = [0_u8; 4096];
+
+    let len = encode_eip712_type(&types, primary, &mut output)?;
+    let encoded = core::str::from_utf8(output.get(..len).ok_or(Eip712EncodeError::OutputTooShort)?)
+        .map_err(|_| Eip712EncodeError::InvalidType)?;
+
+    for name in names.iter().skip(1) {
+        let definition = format!("{name}(");
+        assert_eq!(encoded.matches(&definition).count(), 1);
+    }
+    Ok(())
+}
+
+#[test]
+fn borrowed_encoder_rejects_schemas_over_the_fixed_type_limit() {
+    let mut types = Vec::with_capacity(EIP712_MAX_TYPES + 1);
+    for index in 0..=EIP712_MAX_TYPES {
+        let name: &'static str = Box::leak(format!("Type{index:02}").into_boxed_str());
+        types.push(Eip712StructType { name, fields: &[] });
+    }
+    let mut output = [0_u8; 128];
+
+    assert_eq!(
+        encode_eip712_type(&types, "Type00", &mut output),
+        Err(Eip712EncodeError::SchemaTooLarge)
+    );
+    let mut type_scratch = [0_u8; 128];
+    assert_eq!(
+        encode_eip712_data::<RealKeccak>(&types, "Type00", &[], &mut output, &mut type_scratch,),
+        Err(Eip712EncodeError::SchemaTooLarge)
+    );
+}
+
+#[test]
+fn signing_value_debug_output_redacts_contents() {
+    const SECRET: &str = "unpublished-signing-payload";
+    let value = Eip712Value {
+        name: "credential",
+        value: Eip712ValueKind::String(SECRET),
+    };
+    let rendered_value = format!("{value:?}");
+    let rendered_kind = format!("{:?}", value.value);
+
+    assert_eq!(rendered_value, "Eip712Value(<redacted>)");
+    assert_eq!(rendered_kind, "Eip712ValueKind::String(<redacted>)");
+    assert!(!rendered_value.contains(SECRET));
+    assert!(!rendered_kind.contains(SECRET));
 }
 
 fn mail_types<'a>() -> &'a [Eip712StructType<'a>] {

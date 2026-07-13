@@ -29,6 +29,12 @@ path.
 - Semantic SPDX drift comparison with tested `--write` and `--check` modes.
 - `advanced_precompile_plan` fuzz target for all KZG/BLS planning paths.
 - Advanced-precompile backend admission and conformance policy.
+- Consensus regressions for false `JUMPI` destinations and zero-length
+  `RETURN`, `REVERT`, and call/create memory ranges.
+- Same-length BLAKE2F and ModExp plan-substitution regressions.
+- A bounded 32-layer shared EIP-712 dependency-DAG regression and a hard
+  64-type schema ceiling.
+- Redacted `Debug` implementations for borrowed EIP-712 signing values.
 - Concrete first-party BLS releases `v0.52.1..=v0.52.9` and KZG releases
   `v0.61.0..=v0.61.5`.
 
@@ -48,10 +54,19 @@ path.
   project-owned scalar and low-s validation boundary.
 - All public precompile execution is now available only through charged
   `EvmPrecompilePlan` methods; raw unmetered executors are crate-private.
+- Every precompile plan recomputes gas from the actual execution input and
+  rejects a changed content-dependent cost before charging or execution.
 - Identity, SHA-256, RIPEMD-160, ECRECOVER, and BLAKE2F plan execution accepts
   the gas meter before input and output arguments, matching the other charged
   plan APIs.
 - `SUB`, `LT`, and `GT` now apply stack-top `mu_s[0]` as the left operand.
+- False `JUMPI` no longer converts or validates its unused destination, and
+  zero-length memory ranges canonicalize their semantically irrelevant offset
+  to zero without host-width conversion or memory expansion.
+- EIP-712 dependency discovery now visits each reachable type once before
+  bounded lexical emission instead of recursively rediscovering shared DAGs.
+- `Eip712Value` and `Eip712ValueKind` no longer implement `Copy`, `Clone`, or
+  revealing derived `Debug`.
 - CI and release readiness reject a committed SBOM that differs from a freshly
   generated dependency inventory.
 
@@ -68,9 +83,18 @@ path.
   stored official-spec fixture before any later release makes the charge live.
 - Precompile gas is charged before output mutation, hashing, recovery, or
   arithmetic; out-of-gas failures leave outputs and backends untouched.
+- Content-dependent BLAKE2F and ModExp costs are rebound to the exact execution
+  bytes, preventing a cheap plan from authorizing more expensive same-length
+  work.
 - Non-commutative opcode tests lock the consensus-sensitive operand order.
+- Conditional jump and zero-length memory tests lock Yellow Paper operand-use
+  semantics for host-width edge cases.
+- EIP-712 signing values redact their payloads from formatting, and both the
+  borrowed and JSON paths inherit the fixed type-count ceiling.
 - The v0.52.0 pentest's High operand-order, Medium unmetered-execution, and
   Medium stale-SBOM findings were remediated before retest.
+- The follow-up v0.52.0 review's four High consensus/gas/complexity findings
+  and one Medium signing-value disclosure finding were remediated for retest.
 - Public precompile values are not treated as secret material; any future reuse
   for secret-bearing key operations requires a separate sanitization contract.
 

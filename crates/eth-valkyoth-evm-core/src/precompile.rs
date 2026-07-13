@@ -187,6 +187,9 @@ pub struct EvmPrecompileDescriptor {
 }
 
 /// Validated plan for one precompile call.
+///
+/// Execution methods recompute gas from their actual input and reject a
+/// content-dependent cost that differs from this plan.
 #[derive(Clone, Copy, Debug, Eq, PartialEq)]
 pub struct EvmPrecompilePlan {
     descriptor: EvmPrecompileDescriptor,
@@ -225,6 +228,20 @@ impl EvmPrecompilePlan {
     #[must_use]
     pub const fn gas_cost(self) -> Option<EvmGas> {
         self.gas_cost
+    }
+
+    /// Revalidates that execution input has the cost recorded by this plan.
+    pub(crate) fn checked_execution_cost(self, input: &[u8]) -> Result<EvmGas, EvmCoreError> {
+        if input.len() != self.input_len {
+            return Err(EvmCoreError::PrecompileInvalidInputLength);
+        }
+        validate_input_policy(self.descriptor.input_policy, input.len())?;
+        let actual = precompile_gas::gas_cost(self.descriptor, input)?
+            .ok_or(EvmCoreError::PrecompileBackendUnavailable)?;
+        if self.gas_cost != Some(actual) {
+            return Err(EvmCoreError::PrecompilePlanInputMismatch);
+        }
+        Ok(actual)
     }
 }
 
