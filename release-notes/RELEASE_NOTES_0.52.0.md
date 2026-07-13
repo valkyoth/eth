@@ -22,6 +22,8 @@ path.
 - Exact KZG/BLS frame and fixed output metadata for addresses `0x0a..=0x11`.
 - Boundary tests for fixed frames, empty/partial variable frames, output sizes,
   fixed gas, MSM discount boundaries, and pairing tuple gas.
+- An independent EIP-2537 fixture oracle covering every G1/G2 MSM discount,
+  every corresponding gas result, and the 129-item capped-discount boundary.
 - `advanced_precompile_plan` fuzz target for all KZG/BLS planning paths.
 - Advanced-precompile backend admission and conformance policy.
 - Concrete first-party BLS releases `v0.52.1..=v0.52.9` and KZG releases
@@ -51,6 +53,8 @@ path.
 - The 1 MiB global precompile input limit remains in force.
 - First-party execution cannot be admitted until official vectors,
   differential evidence, fuzzing, dependency review, and pentest pass.
+- Every transcribed EIP-2537 discount entry is checked against a separately
+  stored official-spec fixture before any later release makes the charge live.
 - Public precompile values are not treated as secret material; any future reuse
   for secret-bearing key operations requires a separate sanitization contract.
 

@@ -80,3 +80,7 @@ fn discount_for(items: u64, discounts: &[u16; 128]) -> u64 {
     let discount = discounts.get(index).copied().unwrap_or(capped);
     u64::from(discount)
 }
+
+#[cfg(test)]
+#[path = "bls12_gas_tests.rs"]
+mod tests;
