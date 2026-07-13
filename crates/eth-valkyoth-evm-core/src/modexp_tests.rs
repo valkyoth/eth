@@ -4,7 +4,7 @@ use std::vec::Vec;
 
 use crate::{
     EVM_MODEXP_MAX_OPERAND_BYTES, EvmCoreError, EvmFork, EvmGas, EvmGasMeter, EvmPrecompileKind,
-    EvmPrecompilePlan, EvmPrecompileRegistry, execute_modexp, parse_modexp_input,
+    EvmPrecompilePlan, EvmPrecompileRegistry, modexp::execute_modexp, parse_modexp_input,
 };
 
 fn registry(fork: EvmFork) -> Result<EvmPrecompileRegistry, EvmCoreError> {

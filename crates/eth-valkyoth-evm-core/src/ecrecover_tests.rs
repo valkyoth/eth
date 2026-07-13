@@ -1,7 +1,8 @@
 use crate::{
     EVM_ECRECOVER_INPUT_BYTES, EVM_ECRECOVER_PUBLIC_KEY_BYTES, EvmAddress, EvmCoreError,
-    EvmEcRecoverBackend, EvmEcRecoverSignature, EvmFork, EvmGas, EvmPrecompileKeccak256,
-    EvmPrecompileKind, EvmPrecompilePlan, EvmPrecompileRegistry, execute_ecrecover,
+    EvmEcRecoverBackend, EvmEcRecoverSignature, EvmFork, EvmGas, EvmGasMeter,
+    EvmPrecompileKeccak256, EvmPrecompileKind, EvmPrecompilePlan, EvmPrecompileRegistry,
+    ecrecover::execute_ecrecover,
 };
 
 const DIGEST_OFFSET: usize = 0;
@@ -36,14 +37,33 @@ fn ecrecover_executes_with_caller_provided_backends() -> Result<(), EvmCoreError
 
     let descriptor = registry(EvmFork::FRONTIER)?.descriptor(EvmPrecompileKind::EcRecover)?;
     let plan = EvmPrecompilePlan::try_new(descriptor, &frame_with_extra)?;
+    let mut gas = EvmGasMeter::try_new(EvmGas::new(6_000))?;
     assert_eq!(plan.gas_cost(), Some(EvmGas::new(3_000)));
     assert_eq!(
-        plan.execute_ecrecover(&frame_with_extra, &mut output, &mut backend, &mut hasher)?,
+        plan.execute_ecrecover(
+            &mut gas,
+            &frame_with_extra,
+            &mut output,
+            &mut backend,
+            &mut hasher,
+        )?,
         32
     );
+    assert_eq!(gas.used(), EvmGas::new(3_000));
+    assert_eq!(
+        plan.execute_ecrecover(
+            &mut gas,
+            &frame_with_extra,
+            &mut output,
+            &mut backend,
+            &mut hasher,
+        )?,
+        32
+    );
+    assert_eq!(gas.used(), EvmGas::new(6_000));
     assert_eq!(output, address_word(address));
-    assert_eq!(backend.calls, 1);
-    assert_eq!(hasher.calls, 1);
+    assert_eq!(backend.calls, 2);
+    assert_eq!(hasher.calls, 2);
     Ok(())
 }
 
@@ -128,8 +148,10 @@ fn ecrecover_plan_rejects_wrong_input_len_or_kind() -> Result<(), EvmCoreError> 
     let frame = ecrecover_frame(filled_word(1), 27, filled_word(2), filled_word(3));
     let plan = EvmPrecompilePlan::try_new(descriptor, &frame)?;
     let mut output = [0u8; 32];
+    let mut gas = EvmGasMeter::try_new(EvmGas::new(3_000))?;
     assert_eq!(
         plan.execute_ecrecover(
+            &mut gas,
             frame.get(..127).unwrap_or(&[]),
             &mut output,
             RejectingEcRecoverBackend { calls: 0 },
@@ -142,6 +164,7 @@ fn ecrecover_plan_rejects_wrong_input_len_or_kind() -> Result<(), EvmCoreError> 
     let wrong_plan = EvmPrecompilePlan::try_new(identity, &frame)?;
     assert_eq!(
         wrong_plan.execute_ecrecover(
+            &mut gas,
             &frame,
             &mut output,
             RejectingEcRecoverBackend { calls: 0 },
@@ -149,6 +172,30 @@ fn ecrecover_plan_rejects_wrong_input_len_or_kind() -> Result<(), EvmCoreError> 
         ),
         Err(EvmCoreError::PrecompileBackendUnavailable)
     );
+    Ok(())
+}
+
+#[test]
+fn ecrecover_plan_charges_before_backend_or_output_work() -> Result<(), EvmCoreError> {
+    let digest = filled_word(1);
+    let r = filled_word(2);
+    let s = filled_word(3);
+    let frame = ecrecover_frame(digest, 27, r, s);
+    let descriptor = registry(EvmFork::FRONTIER)?.descriptor(EvmPrecompileKind::EcRecover)?;
+    let plan = EvmPrecompilePlan::try_new(descriptor, &frame)?;
+    let mut gas = EvmGasMeter::try_new(EvmGas::new(2_999))?;
+    let mut output = [6u8; 32];
+    let mut backend = RejectingEcRecoverBackend { calls: 0 };
+    let mut hasher = RejectingKeccak { calls: 0 };
+
+    assert_eq!(
+        plan.execute_ecrecover(&mut gas, &frame, &mut output, &mut backend, &mut hasher,),
+        Err(EvmCoreError::OutOfGas)
+    );
+    assert_eq!(gas.used(), EvmGas::new(0));
+    assert_eq!(output, [6u8; 32]);
+    assert_eq!(backend.calls, 0);
+    assert_eq!(hasher.calls, 0);
     Ok(())
 }
 

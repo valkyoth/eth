@@ -14,7 +14,7 @@ scripts/check_latest_tools.sh
 scripts/release_0_1_gate.sh
 cargo deny check
 cargo audit
-scripts/generate-sbom.sh
+scripts/generate-sbom.sh --check
 ```
 
 GitHub Actions run CI. GitHub CodeQL default setup should be enabled in the

@@ -3,8 +3,20 @@ set -eu
 
 tmp="$(mktemp -d)"
 trap 'rm -rf "$tmp"' EXIT
+mkdir -p "$tmp/bin"
+cat >"$tmp/bin/cargo" <<'EOF'
+#!/usr/bin/env sh
+set -eu
+test "${1:-}" = "sbom"
+printf '{"spdxVersion":"SPDX-2.3"}\n'
+EOF
+chmod +x "$tmp/bin/cargo"
+PATH="$tmp/bin:$PATH"
+export PATH
 
 source_script="$(pwd)/scripts/validate-release-readiness.sh"
+generate_sbom_script="$(pwd)/scripts/generate-sbom.sh"
+compare_sbom_script="$(pwd)/scripts/compare_sbom.py"
 
 make_fixture() {
     name="$1"
@@ -12,6 +24,8 @@ make_fixture() {
 
     mkdir -p "$repo/scripts" "$repo/release-notes" "$repo/security/pentest" "$repo/sbom"
     cp "$source_script" "$repo/scripts/validate-release-readiness.sh"
+    cp "$generate_sbom_script" "$repo/scripts/generate-sbom.sh"
+    cp "$compare_sbom_script" "$repo/scripts/compare_sbom.py"
 
     (
         cd "$repo"

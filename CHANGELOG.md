@@ -12,6 +12,10 @@ All notable changes to `eth` are documented here.
   first-party BLS/KZG release sequence.
 - Refreshed optional `k256` to `0.14.0`, optional `sanitization` to `1.2.4`,
   `trybuild` to `1.0.118`, and CI `cargo-deny` to `0.20.2`.
+- Remediated the v0.52.0 pentest by correcting `SUB`/`LT`/`GT` stack operand
+  order, requiring gas meters for every public precompile executor, removing
+  raw unmetered execution exports, and enforcing semantic committed-SBOM drift
+  checks in CI and release readiness.
 - Started `0.37.2` with `docs/core-independence-audit.md`, classifying
   default, optional, dev-only, reference-only, and compile-time dependencies
   that can influence core Ethereum behavior.

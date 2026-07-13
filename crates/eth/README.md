@@ -423,23 +423,28 @@ the internal Miller-loop accumulator, executes empty input as one, and returns
 canonical EIP-197 zero/one output words for non-empty valid frames. BLAKE2F
 executes the EIP-152 compression function with exact 213-byte input parsing,
 final-flag validation, and round-count gas.
-Dispatcher-facing ModExp,
-BN254 add/mul, BN254 pairing, and BLAKE2F plan execution charges the supplied
-gas meter on every call before validation or arithmetic work is reachable.
+Dispatcher-facing identity, hash, ECRECOVER, ModExp, BN254 add/mul, BN254
+pairing, and BLAKE2F execution is available only through plans that charge the
+supplied gas meter on every call before output mutation or expensive work.
 KZG and BLS cryptographic precompiles expose exact fork, frame, output, and gas
 plans and return a backend-unavailable error until their first-party arithmetic
 releases are admitted. BLS MSM and pairing plans reject empty and partial item
 lists and apply the official EIP-2537 gas schedule.
 
 ```rust
-use eth::evm_core::{EvmFork, EvmPrecompileKind, EvmPrecompilePlan, EvmPrecompileRegistry};
+use eth::evm_core::{
+    EvmFork, EvmGas, EvmGasMeter, EvmPrecompileKind, EvmPrecompilePlan,
+    EvmPrecompileRegistry,
+};
 
 let registry = EvmPrecompileRegistry::try_new(EvmFork::CANCUN)?;
 let descriptor = registry.descriptor(EvmPrecompileKind::Identity)?;
 let plan = EvmPrecompilePlan::try_new(descriptor, b"eth")?;
 let mut output = [0_u8; 3];
+let mut gas = EvmGasMeter::try_new(EvmGas::new(18))?;
 
-assert_eq!(plan.execute_identity(b"eth", &mut output)?, 3);
+assert_eq!(plan.execute_identity(&mut gas, b"eth", &mut output)?, 3);
+assert_eq!(gas.used(), EvmGas::new(18));
 assert_eq!(&output, b"eth");
 # Ok::<(), eth::error::EvmCoreError>(())
 ```

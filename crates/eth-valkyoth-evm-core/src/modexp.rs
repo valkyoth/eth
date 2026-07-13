@@ -71,7 +71,7 @@ pub fn parse_modexp_input(input: &[u8]) -> Result<EvmModExpInput, EvmCoreError> 
 /// This function implements public EVM precompile arithmetic. It is not
 /// constant-time and must not be reused for secret-dependent private-key or
 /// RSA private-exponent operations.
-pub fn execute_modexp(input: &[u8], output: &mut [u8]) -> Result<usize, EvmCoreError> {
+pub(crate) fn execute_modexp(input: &[u8], output: &mut [u8]) -> Result<usize, EvmCoreError> {
     let parsed = parse_modexp_input(input)?;
     let target = output
         .get_mut(..parsed.modulus_len)

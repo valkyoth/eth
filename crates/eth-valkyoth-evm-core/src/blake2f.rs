@@ -40,9 +40,9 @@ impl EvmPrecompilePlan {
     /// Executes the dependency-free EIP-152 BLAKE2F precompile into `output`.
     pub fn execute_blake2f(
         self,
+        gas: &mut EvmGasMeter,
         input: &[u8],
         output: &mut [u8],
-        gas: &mut EvmGasMeter,
     ) -> Result<usize, EvmCoreError> {
         if self.descriptor().kind != EvmPrecompileKind::Blake2F {
             return Err(EvmCoreError::PrecompileBackendUnavailable);
@@ -59,7 +59,7 @@ impl EvmPrecompilePlan {
 }
 
 /// Executes the dependency-free EIP-152 BLAKE2F precompile.
-pub fn execute_blake2f(input: &[u8], output: &mut [u8]) -> Result<usize, EvmCoreError> {
+pub(crate) fn execute_blake2f(input: &[u8], output: &mut [u8]) -> Result<usize, EvmCoreError> {
     let parsed = Blake2FInput::parse(input)?;
     let target = output
         .get_mut(..EVM_BLAKE2F_OUTPUT_BYTES)

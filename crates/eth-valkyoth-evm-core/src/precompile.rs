@@ -272,8 +272,7 @@ impl EvmPrecompileRegistry {
     }
 }
 
-/// Executes the dependency-free identity precompile.
-pub fn execute_identity(input: &[u8], output: &mut [u8]) -> Result<usize, EvmCoreError> {
+pub(crate) fn execute_identity(input: &[u8], output: &mut [u8]) -> Result<usize, EvmCoreError> {
     if input.len() > EVM_PRECOMPILE_INPUT_LIMIT {
         return Err(EvmCoreError::PrecompileInputTooLarge);
     }
@@ -284,13 +283,11 @@ pub fn execute_identity(input: &[u8], output: &mut [u8]) -> Result<usize, EvmCor
     Ok(input.len())
 }
 
-/// Executes the dependency-free SHA-256 precompile.
-pub fn execute_sha256(input: &[u8], output: &mut [u8]) -> Result<usize, EvmCoreError> {
+pub(crate) fn execute_sha256(input: &[u8], output: &mut [u8]) -> Result<usize, EvmCoreError> {
     hash_precompile::execute_sha256(input, output)
 }
 
-/// Executes the dependency-free RIPEMD-160 precompile.
-pub fn execute_ripemd160(input: &[u8], output: &mut [u8]) -> Result<usize, EvmCoreError> {
+pub(crate) fn execute_ripemd160(input: &[u8], output: &mut [u8]) -> Result<usize, EvmCoreError> {
     hash_precompile::execute_ripemd160(input, output)
 }
 

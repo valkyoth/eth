@@ -41,7 +41,7 @@ mod state;
 mod state_execution;
 mod word;
 
-pub use blake2f::{EVM_BLAKE2F_INPUT_BYTES, EVM_BLAKE2F_OUTPUT_BYTES, execute_blake2f};
+pub use blake2f::{EVM_BLAKE2F_INPUT_BYTES, EVM_BLAKE2F_OUTPUT_BYTES};
 pub use bn254::{EVM_BN254_ADD_INPUT_BYTES, EVM_BN254_MUL_INPUT_BYTES, EVM_BN254_POINT_BYTES};
 #[cfg(feature = "testing")]
 pub use bn254_miller::{
@@ -57,7 +57,7 @@ pub use call::{
 };
 pub use ecrecover::{
     EVM_ECRECOVER_INPUT_BYTES, EVM_ECRECOVER_PUBLIC_KEY_BYTES, EvmEcRecoverBackend,
-    EvmEcRecoverSignature, EvmPrecompileKeccak256, execute_ecrecover,
+    EvmEcRecoverSignature, EvmPrecompileKeccak256,
 };
 pub use error::EvmCoreError;
 pub use execution::{
@@ -68,8 +68,7 @@ pub use fork::{EvmFork, OpcodeTable};
 pub use gas::{EVM_DEFAULT_GAS_LIMIT, EVM_MAX_GAS_LIMIT, EvmGas, EvmGasMeter, EvmGasSchedule};
 pub use memory::{EVM_MEMORY_LIMIT_BYTES, EvmMemory};
 pub use modexp::{
-    EVM_MODEXP_HEADER_BYTES, EVM_MODEXP_MAX_OPERAND_BYTES, EvmModExpInput, execute_modexp,
-    parse_modexp_input,
+    EVM_MODEXP_HEADER_BYTES, EVM_MODEXP_MAX_OPERAND_BYTES, EvmModExpInput, parse_modexp_input,
 };
 #[cfg(feature = "testing")]
 pub use modexp_testing::testing_modexp_gas_cost;
@@ -77,7 +76,7 @@ pub use opcode::{EvmOpcode, OpcodeClass, OpcodeInfo};
 pub use precompile::{
     EVM_PRECOMPILE_INPUT_LIMIT, EvmPrecompileDescriptor, EvmPrecompileGasPolicy,
     EvmPrecompileImplementation, EvmPrecompileInputPolicy, EvmPrecompileKind, EvmPrecompilePlan,
-    EvmPrecompileRegistry, execute_identity, execute_ripemd160, execute_sha256,
+    EvmPrecompileRegistry,
 };
 pub use program_counter::ProgramCounter;
 pub use stack::{EVM_STACK_LIMIT, EvmStack};
@@ -103,6 +102,10 @@ mod call_tests;
 #[cfg(test)]
 #[path = "precompile_tests.rs"]
 mod precompile_tests;
+
+#[cfg(test)]
+#[path = "precompile_gas_tests.rs"]
+mod precompile_gas_tests;
 
 #[cfg(test)]
 #[path = "ecrecover_tests.rs"]

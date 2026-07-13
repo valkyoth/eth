@@ -1,6 +1,8 @@
 use core::cmp::Ordering;
 
-use crate::{EVM_PRECOMPILE_INPUT_LIMIT, EvmCoreError, EvmPrecompileKind, EvmPrecompilePlan};
+use crate::{
+    EVM_PRECOMPILE_INPUT_LIMIT, EvmCoreError, EvmGasMeter, EvmPrecompileKind, EvmPrecompilePlan,
+};
 
 /// Canonical byte length of the ECRECOVER input frame.
 pub const EVM_ECRECOVER_INPUT_BYTES: usize = 128;
@@ -94,6 +96,7 @@ impl EvmPrecompilePlan {
     /// Executes ECRECOVER with caller-provided secp256k1 and Keccak backends.
     pub fn execute_ecrecover<B, H>(
         self,
+        gas_meter: &mut EvmGasMeter,
         input: &[u8],
         output: &mut [u8],
         backend: B,
@@ -109,12 +112,16 @@ impl EvmPrecompilePlan {
         if input.len() != self.input_len() {
             return Err(EvmCoreError::PrecompileInvalidInputLength);
         }
+        let gas_cost = self
+            .gas_cost()
+            .ok_or(EvmCoreError::PrecompileBackendUnavailable)?;
+        gas_meter.charge(gas_cost)?;
         execute_ecrecover(input, output, backend, hasher)
     }
 }
 
 /// Executes the ECRECOVER precompile.
-pub fn execute_ecrecover<B, H>(
+pub(crate) fn execute_ecrecover<B, H>(
     input: &[u8],
     output: &mut [u8],
     mut backend: B,

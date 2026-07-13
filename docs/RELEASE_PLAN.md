@@ -58,7 +58,8 @@ A version is not tag-ready until:
 - `scripts/checks.sh` passes;
 - `cargo deny check` passes;
 - `cargo audit` passes;
-- `scripts/generate-sbom.sh` succeeds;
+- `scripts/generate-sbom.sh --check` confirms the committed SPDX inventory
+  matches the current dependency graph;
 - release notes exist at `release-notes/RELEASE_NOTES_X.Y.Z.md`;
 - a pentest report exists at `security/pentest/vX.Y.Z.md`;
 - the pentest report names the exact full 40-character `Reviewed-Commit:`;
@@ -72,7 +73,8 @@ A version is not tag-ready until:
 - `scripts/validate-release-readiness.sh vX.Y.Z` requires the matching
   `security/pentest/vX.Y.Z.md` report to have `Status: PASS` and is run by the
   local release gate before tagging or publishing;
-- `sbom/eth.spdx.json` exists and is non-empty;
+- `sbom/eth.spdx.json` exists, is non-empty, and passes semantic drift
+  comparison against a freshly generated document;
 - the tag does not already exist locally;
 - `scripts/validate-release-readiness.sh vX.Y.Z` passes before the tag is
   created;
@@ -3355,7 +3357,7 @@ Verification:
 - `scripts/checks.sh`
 - `cargo deny check`
 - `cargo audit`
-- `scripts/generate-sbom.sh`
+- `scripts/generate-sbom.sh --check`
 - `scripts/validate-release-readiness.sh v1.0.0`
 
 Exit criteria:

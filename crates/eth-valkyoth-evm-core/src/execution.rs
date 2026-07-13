@@ -272,8 +272,8 @@ impl<'a, const STACK: usize> EvmExecution<'a, STACK> {
     }
 
     fn binary_word(&mut self, op: fn(EvmWord, EvmWord) -> EvmWord) -> Result<(), EvmCoreError> {
-        let rhs = self.stack.pop()?;
         let lhs = self.stack.pop()?;
+        let rhs = self.stack.pop()?;
         self.stack.push(op(lhs, rhs))
     }
 
@@ -283,8 +283,8 @@ impl<'a, const STACK: usize> EvmExecution<'a, STACK> {
     }
 
     fn compare_word(&mut self, expected: Ordering) -> Result<(), EvmCoreError> {
-        let rhs = self.stack.pop()?;
         let lhs = self.stack.pop()?;
+        let rhs = self.stack.pop()?;
         self.stack
             .push(EvmWord::from_bool(lhs.cmp(&rhs) == expected))
     }

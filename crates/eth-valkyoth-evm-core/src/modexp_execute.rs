@@ -1,4 +1,6 @@
-use crate::{EvmCoreError, EvmGasMeter, EvmPrecompileKind, EvmPrecompilePlan, execute_modexp};
+use crate::{
+    EvmCoreError, EvmGasMeter, EvmPrecompileKind, EvmPrecompilePlan, modexp::execute_modexp,
+};
 
 impl EvmPrecompilePlan {
     /// Executes the bounded first-party ModExp precompile into `output`.

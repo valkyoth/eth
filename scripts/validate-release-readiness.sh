@@ -33,6 +33,7 @@ if [ ! -s sbom/eth.spdx.json ]; then
     echo "missing or empty SBOM: sbom/eth.spdx.json" >&2
     exit 1
 fi
+scripts/generate-sbom.sh --check
 
 if [ ! -f "$pentest_report" ]; then
     echo "missing pentest report: ${pentest_report}" >&2

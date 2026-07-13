@@ -44,5 +44,5 @@ jobs:
       - name: Check RustSec advisories
         run: cargo audit
 
-      - name: Generate SBOM
-        run: scripts/generate-sbom.sh
+      - name: Verify committed SBOM
+        run: scripts/generate-sbom.sh --check

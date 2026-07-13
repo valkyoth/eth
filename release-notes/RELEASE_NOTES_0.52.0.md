@@ -24,6 +24,9 @@ path.
   fixed gas, MSM discount boundaries, and pairing tuple gas.
 - An independent EIP-2537 fixture oracle covering every G1/G2 MSM discount,
   every corresponding gas result, and the 129-item capped-discount boundary.
+- Explicit bytecode regressions for Yellow Paper stack-top operand ordering on
+  `SUB`, `LT`, and `GT`.
+- Semantic SPDX drift comparison with tested `--write` and `--check` modes.
 - `advanced_precompile_plan` fuzz target for all KZG/BLS planning paths.
 - Advanced-precompile backend admission and conformance policy.
 - Concrete first-party BLS releases `v0.52.1..=v0.52.9` and KZG releases
@@ -43,6 +46,14 @@ path.
   so every source remains below 500 lines.
 - Optional `k256` recovery uses the stable `0.14.0` API while retaining the
   project-owned scalar and low-s validation boundary.
+- All public precompile execution is now available only through charged
+  `EvmPrecompilePlan` methods; raw unmetered executors are crate-private.
+- Identity, SHA-256, RIPEMD-160, ECRECOVER, and BLAKE2F plan execution accepts
+  the gas meter before input and output arguments, matching the other charged
+  plan APIs.
+- `SUB`, `LT`, and `GT` now apply stack-top `mu_s[0]` as the left operand.
+- CI and release readiness reject a committed SBOM that differs from a freshly
+  generated dependency inventory.
 
 ## Security Notes
 
@@ -55,6 +66,11 @@ path.
   differential evidence, fuzzing, dependency review, and pentest pass.
 - Every transcribed EIP-2537 discount entry is checked against a separately
   stored official-spec fixture before any later release makes the charge live.
+- Precompile gas is charged before output mutation, hashing, recovery, or
+  arithmetic; out-of-gas failures leave outputs and backends untouched.
+- Non-commutative opcode tests lock the consensus-sensitive operand order.
+- The v0.52.0 pentest's High operand-order, Medium unmetered-execution, and
+  Medium stale-SBOM findings were remediated before retest.
 - Public precompile values are not treated as secret material; any future reuse
   for secret-bearing key operations requires a separate sanitization contract.
 
@@ -66,6 +82,7 @@ path.
 - `cargo clippy --manifest-path fuzz/Cargo.toml --bin advanced_precompile_plan -- -D warnings`
 - `cargo fmt --all --check`
 - `scripts/validate-release-metadata.sh`
+- `scripts/generate-sbom.sh --check`
 - `python3 scripts/test-release-metadata.py`
 - `scripts/release_crates.py --check`
 - `scripts/checks.sh`

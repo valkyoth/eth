@@ -49,6 +49,11 @@ def main() -> int:
     assert "validate-release-readiness.sh" in validator
     assert "fetch-depth: 0" in validator
 
+    readiness = (ROOT / "scripts" / "validate-release-readiness.sh").read_text(
+        encoding="utf-8"
+    )
+    assert "scripts/generate-sbom.sh --check" in readiness
+
     release_workflow = RELEASE_WORKFLOW.read_text(encoding="utf-8")
     assert "workflow_dispatch:" in release_workflow
     assert "tags:" not in release_workflow

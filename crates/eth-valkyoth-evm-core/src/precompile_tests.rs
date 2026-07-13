@@ -1,7 +1,7 @@
 use crate::{
-    EVM_PRECOMPILE_INPUT_LIMIT, EvmAddress, EvmCoreError, EvmFork, EvmGas,
+    EVM_PRECOMPILE_INPUT_LIMIT, EvmAddress, EvmCoreError, EvmFork, EvmGas, EvmGasMeter,
     EvmPrecompileImplementation, EvmPrecompileKind, EvmPrecompilePlan, EvmPrecompileRegistry,
-    execute_identity, execute_ripemd160, execute_sha256,
+    precompile::{execute_identity, execute_ripemd160, execute_sha256},
 };
 
 fn registry(fork: EvmFork) -> Result<EvmPrecompileRegistry, EvmCoreError> {
@@ -113,8 +113,13 @@ fn identity_plan_computes_word_gas_and_executes() -> Result<(), EvmCoreError> {
     let descriptor = registry(EvmFork::FRONTIER)?.descriptor(EvmPrecompileKind::Identity)?;
     let plan = EvmPrecompilePlan::try_new(descriptor, &[1u8; 33])?;
     let mut output = [0u8; 33];
+    let mut gas = EvmGasMeter::try_new(EvmGas::new(21))?;
     assert_eq!(plan.gas_cost(), Some(EvmGas::new(21)));
-    assert_eq!(plan.execute_identity(&[1u8; 33], &mut output)?, 33);
+    assert_eq!(
+        plan.execute_identity(&mut gas, &[1u8; 33], &mut output)?,
+        33
+    );
+    assert_eq!(gas.used(), EvmGas::new(21));
     assert_eq!(output, [1u8; 33]);
     Ok(())
 }
@@ -157,8 +162,9 @@ fn unsupported_crypto_precompile_plans_do_not_execute_without_backend() -> Resul
     let descriptor = registry(EvmFork::BYZANTIUM)?.descriptor(EvmPrecompileKind::Bn254Pairing)?;
     let plan = EvmPrecompilePlan::try_new(descriptor, &[])?;
     let mut output = [0u8; 32];
+    let mut gas = EvmGasMeter::try_new(EvmGas::new(1))?;
     assert_eq!(
-        plan.execute_identity(&[0u8; 1], &mut output),
+        plan.execute_identity(&mut gas, &[0u8; 1], &mut output),
         Err(EvmCoreError::PrecompileBackendUnavailable)
     );
     Ok(())
@@ -169,8 +175,12 @@ fn sha256_precompile_matches_known_vectors() -> Result<(), EvmCoreError> {
     let descriptor = registry(EvmFork::FRONTIER)?.descriptor(EvmPrecompileKind::Sha256)?;
     let plan = EvmPrecompilePlan::try_new(descriptor, b"")?;
     let mut output = [0u8; 32];
+    let mut gas = EvmGasMeter::try_new(EvmGas::new(120))?;
     assert_eq!(plan.gas_cost(), Some(EvmGas::new(60)));
-    assert_eq!(plan.execute_sha256(b"", &mut output)?, 32);
+    assert_eq!(plan.execute_sha256(&mut gas, b"", &mut output)?, 32);
+    assert_eq!(gas.used(), EvmGas::new(60));
+    assert_eq!(plan.execute_sha256(&mut gas, b"", &mut output)?, 32);
+    assert_eq!(gas.used(), EvmGas::new(120));
     assert_eq!(
         output,
         hex_word("e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855")
@@ -189,8 +199,12 @@ fn ripemd160_precompile_matches_known_vectors() -> Result<(), EvmCoreError> {
     let descriptor = registry(EvmFork::FRONTIER)?.descriptor(EvmPrecompileKind::Ripemd160)?;
     let plan = EvmPrecompilePlan::try_new(descriptor, b"")?;
     let mut output = [0u8; 32];
+    let mut gas = EvmGasMeter::try_new(EvmGas::new(1_200))?;
     assert_eq!(plan.gas_cost(), Some(EvmGas::new(600)));
-    assert_eq!(plan.execute_ripemd160(b"", &mut output)?, 32);
+    assert_eq!(plan.execute_ripemd160(&mut gas, b"", &mut output)?, 32);
+    assert_eq!(gas.used(), EvmGas::new(600));
+    assert_eq!(plan.execute_ripemd160(&mut gas, b"", &mut output)?, 32);
+    assert_eq!(gas.used(), EvmGas::new(1_200));
     assert_eq!(
         output,
         hex_word("0000000000000000000000009c1185a5c5e9fc54612808977ee8f548b2258d31")
@@ -239,17 +253,20 @@ fn hash_plan_rejects_wrong_input_len_or_kind() -> Result<(), EvmCoreError> {
     let sha = registry(EvmFork::FRONTIER)?.descriptor(EvmPrecompileKind::Sha256)?;
     let plan = EvmPrecompilePlan::try_new(sha, b"abc")?;
     let mut output = [0u8; 32];
+    let mut gas = EvmGasMeter::try_new(EvmGas::new(1_000))?;
     assert_eq!(
-        plan.execute_sha256(b"abcd", &mut output),
+        plan.execute_sha256(&mut gas, b"abcd", &mut output),
         Err(EvmCoreError::PrecompileInvalidInputLength)
     );
+    assert_eq!(gas.used(), EvmGas::new(0));
 
     let ripemd = registry(EvmFork::FRONTIER)?.descriptor(EvmPrecompileKind::Ripemd160)?;
     let wrong_plan = EvmPrecompilePlan::try_new(ripemd, b"abc")?;
     assert_eq!(
-        wrong_plan.execute_sha256(b"abc", &mut output),
+        wrong_plan.execute_sha256(&mut gas, b"abc", &mut output),
         Err(EvmCoreError::PrecompileBackendUnavailable)
     );
+    assert_eq!(gas.used(), EvmGas::new(0));
     Ok(())
 }
 

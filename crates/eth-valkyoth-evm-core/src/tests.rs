@@ -298,6 +298,28 @@ fn execution_runs_arithmetic_bitwise_and_comparison_subset() -> Result<(), EvmCo
 }
 
 #[test]
+fn execution_uses_stack_top_as_left_operand() -> Result<(), EvmCoreError> {
+    const SUB: &[u8] = &[0x60, 0x03, 0x60, 0x02, 0x03, 0x00];
+    const LT: &[u8] = &[0x60, 0x03, 0x60, 0x02, 0x10, 0x00];
+    const GT: &[u8] = &[0x60, 0x03, 0x60, 0x02, 0x11, 0x00];
+
+    assert_execution_word(SUB, EvmWord::from_be_bytes([0xff; EvmWord::LEN]))?;
+    assert_execution_word(LT, EvmWord::from_bool(true))?;
+    assert_execution_word(GT, EvmWord::from_bool(false))
+}
+
+fn assert_execution_word(bytecode: &[u8], expected: EvmWord) -> Result<(), EvmCoreError> {
+    let mut memory = [0u8; 0];
+    let mut execution = EvmExecution::<2>::try_new(&mut memory)?;
+    let report = execution.run(bytecode, execution_limits()?)?;
+
+    assert_eq!(report.status, ExecutionStatus::Stopped);
+    assert_eq!(execution.stack().len(), 1);
+    assert_eq!(execution.stack().peek(0)?, expected);
+    Ok(())
+}
+
+#[test]
 fn execution_validates_dynamic_jumpdest() -> Result<(), EvmCoreError> {
     let mut memory = [0u8; 0];
     let mut execution = EvmExecution::<16>::try_new(&mut memory)?;

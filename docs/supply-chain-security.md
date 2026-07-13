@@ -7,7 +7,7 @@ class of problem.
 
 - `cargo deny check` for license, source, advisory, and duplicate policy.
 - `cargo audit` for RustSec advisories.
-- `scripts/generate-sbom.sh` for SBOM evidence.
+- `scripts/generate-sbom.sh --check` for exact committed SBOM evidence.
 - Dependabot for Cargo and GitHub Actions updates.
 - Manual current-version review before dependency edits.
 
@@ -24,6 +24,13 @@ Before adding a third-party crate:
 
 Core crates must not gain network, signer, filesystem, clock, TLS, Reth, or P2P
 dependencies.
+
+Use `scripts/generate-sbom.sh --write` only when intentionally refreshing
+`sbom/eth.spdx.json`. CI and release readiness use `--check`, which generates a
+fresh document and compares all stable SPDX content. The comparator ignores
+only cargo-sbom's per-run timestamp, random document namespace, and collection
+ordering; package versions, licenses, checksums, references, and relationships
+must match.
 
 `docs/core-independence-audit.md` is the release-level inventory for
 dependencies that can affect Ethereum hashing, signatures, RLP, trie/proof

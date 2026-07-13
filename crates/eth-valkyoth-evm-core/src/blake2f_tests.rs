@@ -3,7 +3,7 @@ extern crate std;
 use crate::{
     EVM_BLAKE2F_INPUT_BYTES, EVM_BLAKE2F_OUTPUT_BYTES, EvmCoreError, EvmFork, EvmGas, EvmGasMeter,
     EvmPrecompileImplementation, EvmPrecompileKind, EvmPrecompilePlan, EvmPrecompileRegistry,
-    execute_blake2f,
+    blake2f::execute_blake2f,
 };
 use std::vec::Vec;
 
@@ -41,7 +41,7 @@ fn blake2f_matches_eip152_final_block_vector() -> Result<(), EvmCoreError> {
     let mut gas = EvmGasMeter::try_new(EvmGas::new(12))?;
     let mut output = [0u8; EVM_BLAKE2F_OUTPUT_BYTES];
     assert_eq!(
-        plan.execute_blake2f(&input, &mut output, &mut gas)?,
+        plan.execute_blake2f(&mut gas, &input, &mut output)?,
         EVM_BLAKE2F_OUTPUT_BYTES
     );
     assert_eq!(gas.used(), EvmGas::new(12));
@@ -102,7 +102,7 @@ fn blake2f_rejects_invalid_lengths_and_final_flag() -> Result<(), EvmCoreError> 
     let mut gas = EvmGasMeter::try_new(EvmGas::new(12))?;
     let mut output = [7u8; EVM_BLAKE2F_OUTPUT_BYTES];
     assert_eq!(
-        plan.execute_blake2f(&invalid_flag, &mut output, &mut gas),
+        plan.execute_blake2f(&mut gas, &invalid_flag, &mut output),
         Err(EvmCoreError::PrecompileInvalidInputLength)
     );
     assert_eq!(gas.used(), EvmGas::new(12));
@@ -126,9 +126,9 @@ fn blake2f_checks_output_and_plan_binding() -> Result<(), EvmCoreError> {
     let mut gas = EvmGasMeter::try_new(EvmGas::new(12))?;
     assert_eq!(
         plan.execute_blake2f(
+            &mut gas,
             input.get(..SHORT_BLAKE2F_INPUT_BYTES).unwrap_or(&[]),
             &mut output,
-            &mut gas
         ),
         Err(EvmCoreError::PrecompileInvalidInputLength)
     );
@@ -136,7 +136,7 @@ fn blake2f_checks_output_and_plan_binding() -> Result<(), EvmCoreError> {
     let identity = registry(EvmFork::FRONTIER)?.descriptor(EvmPrecompileKind::Identity)?;
     let wrong_plan = EvmPrecompilePlan::try_new(identity, b"abc")?;
     assert_eq!(
-        wrong_plan.execute_blake2f(b"abc", &mut output, &mut gas),
+        wrong_plan.execute_blake2f(&mut gas, b"abc", &mut output),
         Err(EvmCoreError::PrecompileBackendUnavailable)
     );
     Ok(())
