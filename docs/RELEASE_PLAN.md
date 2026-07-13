@@ -2289,53 +2289,321 @@ Exit criteria:
 
 ### v0.52.1 - BLS12-381 Canonical Field And Point Encodings
 
+Status: planned.
+
 Goal: add bounded first-party Fp, Fr, Fp2, G1, and G2 wire domains for EIP-2537.
 
-Deliverables include canonical 64-byte Fp decoding, 32-byte scalar decoding,
-infinity handling, exact frame parsing, and malformed-field fuzz coverage.
+Deliverables:
+
+- dependency-free fixed-width Fp and scalar representations with no allocator
+  requirement;
+- canonical 64-byte big-endian Fp decoding that checks all top padding bytes
+  and rejects values greater than or equal to the field modulus;
+- Fp2 decoding in the exact EIP-2537 `c0 || c1` coefficient order;
+- 32-byte big-endian MSM scalar decoding that accepts the full 256-bit input
+  domain instead of incorrectly requiring values below the subgroup order;
+- exact 128-byte G1 and 256-byte G2 point parsing, including the all-zero
+  infinity encodings and rejection of alternate infinity encodings;
+- frame parsers for every `0x0b..=0x11` input that reuse the release's existing
+  length and item-count policies;
+- malformed-field, padding, infinity, and frame-boundary fuzz coverage.
+
+Verification:
+
+- official EIP-2537 field, point, infinity, and scalar encoding rules;
+- boundary tests for `0`, `p - 1`, `p`, non-zero top padding, `q`, and scalars
+  greater than `q`;
+- round-trip tests for every admitted wire domain;
+- `cargo test -p eth-valkyoth-evm-core`;
+- strict core and fuzz clippy gates;
+- pentest and retest before tagging.
+
+Exit criteria:
+
+- Every BLS input byte is either decoded into one canonical bounded domain or
+  rejected before arithmetic, without allocation or alternate encodings.
+- Arithmetic precompiles remain fail closed until their assigned releases.
 
 ### v0.52.2 - BLS12-381 G1 Arithmetic And Addition
+
+Status: planned.
 
 Goal: implement dependency-free G1 field arithmetic and the `0x0b` addition
 precompile with official positive, infinity, invalid-field, and invalid-curve
 vectors.
 
+Deliverables:
+
+- fixed-width Fp add, subtract, multiply, square, inversion, and square-root
+  operations with checked domain conversion;
+- complete G1 affine/projective conversion, negation, doubling, and addition
+  formulas covering infinity, equal points, and inverse points;
+- curve-membership validation separated from subgroup validation;
+- charged `0x0b` execution over exactly two G1 points with canonical 128-byte
+  output and no subgroup rejection, as required by EIP-2537;
+- output-unchanged and no-arithmetic evidence for wrong-kind, wrong-length,
+  malformed-point, and out-of-gas failures.
+
+Verification:
+
+- official EIP-2537 G1 addition vectors and generator constants;
+- identity, inverse, doubling, commutativity, and associativity property tests;
+- differential tests against an independently reviewed BLS12-381 reference
+  used only as a development oracle;
+- fuzz coverage for G1 decoding and charged addition execution;
+- release-mode fixed-gas CPU evidence;
+- pentest and retest before tagging.
+
+Exit criteria:
+
+- Address `0x0b` produces only canonical EIP-2537 G1 results after exact gas
+  charging, and does not reject valid on-curve points solely for subgroup
+  membership.
+
 ### v0.52.3 - BLS12-381 Fp2, G2, And Addition
+
+Status: planned.
 
 Goal: implement dependency-free Fp2/G2 arithmetic and the `0x0d` addition
 precompile, then establish the extension-tower foundation required by pairing.
 
+Deliverables:
+
+- Fp2 add, subtract, multiply, square, conjugate, inverse, and square-root
+  operations using the EIP-2537 non-residue and coefficient order;
+- complete G2 affine/projective conversion, negation, doubling, and addition;
+- G2 curve-membership validation that remains separate from subgroup checks;
+- charged `0x0d` execution over exactly two G2 points with canonical 256-byte
+  output and no subgroup rejection;
+- explicit extension-tower conventions reused by later pairing releases.
+
+Verification:
+
+- official EIP-2537 G2 addition vectors and generator constants;
+- Fp2 field identities plus G2 identity, inverse, doubling, commutativity, and
+  associativity properties;
+- independent differential vectors for field and point arithmetic;
+- malformed-coordinate, infinity, wrong-length, out-of-gas, and output-buffer
+  tests;
+- fuzz and pentest gates before tagging.
+
+Exit criteria:
+
+- Address `0x0d` is executable with canonical EIP-2537 behavior, while valid
+  on-curve non-subgroup points remain accepted by addition as required.
+- The Fp2/G2 conventions needed by pairing are documented and vector-backed.
+
 ### v0.52.4 - BLS12-381 Subgroup Validation
+
+Status: planned.
 
 Goal: admit bounded first-party G1/G2 subgroup checks for MSM and pairing
 inputs without incorrectly adding subgroup rejection to the addition APIs.
 
+Deliverables:
+
+- straightforward subgroup-order multiplication checks retained as a test
+  oracle;
+- reviewed bounded optimized G1 and G2 subgroup checks suitable for public
+  precompile input;
+- distinct validated-point domain tokens that cannot be constructed by mere
+  curve-membership parsing;
+- mandatory subgroup validation in MSM and pairing preparation paths;
+- tests proving `0x0b` and `0x0d` addition still do not apply subgroup checks;
+- fail-before-arithmetic behavior after the plan's gas charge for invalid
+  subgroup inputs.
+
+Verification:
+
+- known on-curve points both inside and outside the prime-order subgroups;
+- optimized checks compared with subgroup-order multiplication over generated
+  and fixture points;
+- differential checks against an independent implementation;
+- fuzz coverage for curve-valid non-subgroup inputs;
+- fixed-iteration and CPU-bound evidence;
+- pentest and retest before tagging.
+
+Exit criteria:
+
+- No MSM or pairing path can consume an unvalidated subgroup point, and no
+  addition path rejects a point for a subgroup rule that EIP-2537 omits.
+
 ### v0.52.5 - BLS12-381 Multiscalar Multiplication
+
+Status: planned.
 
 Goal: implement `0x0c` and `0x0e` with bounded Pippenger-style execution,
 official discount gas, item limits, vectors, differential tests, and CPU/gas
 evidence.
 
+Deliverables:
+
+- complete 256-bit scalar multiplication, including scalars not reduced in the
+  wire format and the required arithmetic reduction behavior;
+- bounded no-allocator G1 and G2 MSM execution with reviewed window and bucket
+  limits;
+- charged `0x0c` and `0x0e` execution for non-empty complete item lists;
+- mandatory point curve/subgroup validation before MSM arithmetic;
+- reuse of the independently checked 128-entry discount tables and capped
+  `k > 128` pricing;
+- deterministic scratch-space ceilings and explicit maximum item counts.
+
+Verification:
+
+- official EIP-2537 MSM vectors and required group properties;
+- naive repeated-multiplication oracle for small item counts;
+- independent differential tests for G1 and G2 results;
+- gas tests for every discount entry plus `k = 129` and maximum input limits;
+- fuzzing for item segmentation, scalars, subgroup rejection, and output
+  invariants;
+- release-mode CPU/gas evidence across representative and worst-case counts;
+- pentest and retest before tagging.
+
+Exit criteria:
+
+- Addresses `0x0c` and `0x0e` return canonical subgroup points for every
+  admitted non-empty frame, with execution cost and scratch use bounded by the
+  same input count used for gas planning.
+
 ### v0.52.6 - BLS12-381 Map-To-Curve
+
+Status: planned.
 
 Goal: implement the EIP-2537 Fp-to-G1 and Fp2-to-G2 mappings at `0x10` and
 `0x11` from the pinned mapping specification and official vectors.
 
+Deliverables:
+
+- pinned simplified-SWU and isogeny-map parameter source with checksum and
+  provenance;
+- first-party Fp-to-G1 and Fp2-to-G2 mapping algorithms with fixed iteration
+  bounds and explicit sign/square-root conventions;
+- canonical input-field validation before mapping;
+- charged `0x10` and `0x11` execution with canonical point output;
+- post-map curve and subgroup assertions used as internal fault detection;
+- no byte-string hash-to-curve claim: these APIs map already-decoded field
+  elements exactly as scoped by EIP-2537.
+
+Verification:
+
+- official EIP-2537 mapping vectors and pinned mapping-spec vectors;
+- independent differential vectors for both maps;
+- property tests proving every output is on-curve and in the correct subgroup;
+- malformed-field, out-of-gas, output-buffer, and fuzz coverage;
+- release-mode CPU/gas evidence;
+- pentest and retest before tagging.
+
+Exit criteria:
+
+- Addresses `0x10` and `0x11` are executable and vector-backed, with no
+  ambiguity between field-to-curve mapping and a higher-level hash-to-curve
+  protocol.
+
 ### v0.52.7 - BLS12-381 Pairing Foundation
+
+Status: planned.
 
 Goal: add the first-party Fp6/Fp12 tower, line functions, Miller loop, and
 bounded final-exponentiation foundation while pairing remains fail closed.
 
+Deliverables:
+
+- Fp6/Fp12 tower arithmetic using one documented coefficient and twist
+  convention;
+- independently derived Frobenius coefficients with checked fixture copies;
+- sparse line multiplication and the fixed negative BLS parameter Miller loop;
+- bounded easy/hard final-exponentiation chain;
+- tuple streaming that does not allocate or reparse validated G1/G2 points;
+- fail-closed `0x0f` execution after exercising the complete internal
+  accumulator, without admitting a public boolean result.
+
+Verification:
+
+- extension-field identity, inversion, Frobenius-cycle, and exponentiation
+  tests;
+- line-function, Miller-loop, and final-exponentiation vectors from an
+  independent reference;
+- bilinearity and inverse-pair properties over validated subgroup points;
+- fuzz coverage for bounded tuple accumulation;
+- release-mode pairing CPU/gas measurements;
+- pentest and retest before tagging.
+
+Exit criteria:
+
+- Pairing arithmetic is complete, deterministic, fixed-bound, and
+  independently vector-backed, but non-empty `0x0f` still returns backend
+  unavailable until result admission is separately reviewed.
+
 ### v0.52.8 - BLS12-381 Pairing Execution
+
+Status: planned.
 
 Goal: admit non-empty `0x0f` pairing execution with canonical zero/one output,
 subgroup enforcement, official vectors, differential checks, and gas/CPU
 evidence.
 
+Deliverables:
+
+- charged non-empty pairing execution over complete 384-byte tuples;
+- mandatory G1/G2 curve and subgroup validation for every tuple;
+- canonical 32-byte false/true output words and no alternate success values;
+- explicit precompile-error outcome contract so the future CALL dispatcher can
+  burn all supplied call gas as required by EIP-2537;
+- output-unchanged behavior on charge failure and malformed input;
+- bounded batch accumulation reusing the `v0.52.7` arithmetic exactly once per
+  tuple.
+
+Verification:
+
+- official positive, negative, infinity, malformed, and non-subgroup vectors;
+- independent differential checks for single and multi-pair equations;
+- canonical-output and repeated-charge tests;
+- fuzzing that permits only a 32-byte zero/one result on success;
+- worst-case tuple-count CPU/gas and stack-use evidence;
+- pentest and retest before tagging.
+
+Exit criteria:
+
+- Address `0x0f` returns a consensus-compatible canonical result for every
+  admitted frame, and exposes enough error classification for dispatcher-level
+  all-gas burning without repeating cryptographic work.
+
 ### v0.52.9 - Prague Advanced-Precompile Admission
+
+Status: planned.
 
 Goal: run the complete official EIP-2537 fixture set, fuzz and pentest every
 advanced precompile path, and admit only the Prague claims backed by evidence.
+
+Deliverables:
+
+- complete `0x0b..=0x11` registry-to-execution dispatch coverage for Prague;
+- generated conformance matrix covering frame shape, field/point validation,
+  subgroup policy, gas, output, and error behavior for all seven precompiles;
+- explicit integration policy for EIP-2537 all-supplied-gas burning on errors;
+- official fixture lock and drift checker;
+- cross-client differential report and performance evidence;
+- fuzz corpus promotion for every security-relevant failure class;
+- final dependency-independence, memory, stack, panic, and unsafe-code audit;
+- independent pentest report covering the entire BLS sequence.
+
+Verification:
+
+- complete pinned EIP-2537 vectors and property suite;
+- all advanced-precompile fuzz targets and seed materialization checks;
+- differential comparison against at least two independent client/reference
+  implementations where practical;
+- `scripts/checks.sh`, `cargo deny check`, `cargo audit`, and current SBOM;
+- release-mode CPU/gas report for every operation;
+- pentest, remediation, and clean retest before tagging.
+
+Exit criteria:
+
+- The support matrix claims only library-level Prague precompile behavior that
+  is backed by official vectors, differential evidence, bounded resource use,
+  and a clean pentest.
+- Any remaining CALL-dispatch or state-transition integration is assigned to a
+  named later release rather than implied by this admission.
 
 ### v0.53.0 - Native EVM Ethereum State Tests
 
@@ -2552,28 +2820,198 @@ Exit criteria:
 
 ### v0.61.1 - Trusted Setup Provenance And Loading
 
+Status: planned.
+
 Goal: pin, fingerprint, parse, and fail closed around the canonical KZG trusted
 setup without runtime network downloads or ambient file assumptions.
 
+Deliverables:
+
+- canonical trusted-setup source, revision, license, byte length, and
+  cryptographic digest recorded in the source lock and supply-chain policy;
+- explicit decision between a reviewed embedded setup and caller-supplied
+  bytes bound to the same pinned digest;
+- bounded no-allocator parser with caller-provided storage/scratch where the
+  setup cannot be represented statically;
+- exact point-count, line/byte-format, compressed-point, curve, subgroup, and
+  duplicate/ordering checks required by the selected canonical format;
+- typed setup identifier carried by every later commitment or verification
+  context so proofs cannot silently use a different ceremony;
+- no runtime download, environment lookup, current-directory lookup, or
+  implicit user-home fallback.
+
+Verification:
+
+- reproducible fetch/sync command against the pinned official source;
+- checksum test over the exact admitted bytes;
+- truncated, extended, reordered, malformed-point, wrong-subgroup, and
+  wrong-digest negative fixtures;
+- tests proving default builds perform no filesystem or network access;
+- `cargo deny check`, SBOM review, and source-license review;
+- fuzz and pentest gates before tagging.
+
+Exit criteria:
+
+- A KZG verification context can only be constructed from the one documented
+  trusted setup (or an explicitly versioned replacement), and setup mismatch
+  fails before proof arithmetic.
+
 ### v0.61.2 - KZG Field And Polynomial Foundation
+
+Status: planned.
 
 Goal: implement bounded first-party BLS scalar-field and polynomial operations
 needed by EIP-4844 proof verification.
 
+Deliverables:
+
+- canonical 32-byte BLS scalar-field element decoding for blob values,
+  challenges, and claimed evaluations;
+- fixed-width scalar-field arithmetic reusing reviewed BLS constants without
+  conflating EIP-2537's unrestricted MSM scalar wire domain;
+- explicit 4,096-field-element blob view with exact length and per-element
+  canonicality checks;
+- bounded polynomial evaluation, roots-of-unity domain, and barycentric/FFT
+  operations required by the pinned Ethereum KZG specification;
+- caller-provided or fixed scratch storage with documented memory ceilings and
+  no hidden allocator requirement;
+- transcript/challenge hashing boundary with exact domain bytes and no generic
+  hash substitution.
+
+Verification:
+
+- official scalar-field, blob, roots-of-unity, polynomial, and challenge
+  vectors from the pinned consensus KZG specification;
+- field algebra and polynomial identity properties;
+- differential checks against an independent KZG reference implementation;
+- malformed blob, non-canonical element, transcript-domain, and scratch-limit
+  fuzz coverage;
+- release-mode memory, stack, and CPU measurements;
+- pentest and retest before tagging.
+
+Exit criteria:
+
+- Every blob polynomial operation is deterministic and bounded over exactly
+  the Ethereum evaluation domain, with no ambiguity between field decoding,
+  unrestricted MSM scalars, and transcript challenges.
+- Commitment/proof success remains unavailable until `v0.61.3`.
+
 ### v0.61.3 - KZG Commitment And Proof Verification
+
+Status: planned.
 
 Goal: implement first-party commitment/proof parsing and verification against
 the pinned setup with official and independent vectors.
 
+Deliverables:
+
+- canonical 48-byte compressed G1 commitment and proof parsing with infinity,
+  curve, and subgroup policy matching the pinned KZG specification;
+- first-party `verify_kzg_proof`, `verify_blob_kzg_proof`, and bounded batch
+  verification primitives;
+- exact Fiat-Shamir challenge derivation and setup-identity binding;
+- reuse of reviewed BLS MSM/pairing foundations without exposing EIP-2537 wire
+  formats as KZG commitment formats;
+- typed verified-proof results that cannot be constructed without a successful
+  cryptographic equation;
+- deterministic batch-verification challenge generation with no ambient RNG
+  or caller-controlled coefficient bypass.
+
+Verification:
+
+- official Ethereum KZG valid/invalid proof and blob-proof vectors;
+- independent differential checks against the canonical C KZG implementation
+  or another admitted reference used only as an oracle;
+- single-proof versus batch-proof equivalence tests;
+- wrong setup, commitment, proof, point, value, blob, subgroup, and transcript
+  negative tests;
+- proof-parser and verification fuzz targets with bounded scratch variants;
+- release-mode CPU evidence and pentest/retest gates.
+
+Exit criteria:
+
+- Proof acceptance requires canonical encodings, the pinned setup, the exact
+  Ethereum transcript, and a successful first-party pairing equation.
+- No public API can turn unverified commitment/proof bytes into a verified
+  result token.
+
 ### v0.61.4 - KZG Point-Evaluation Precompile Execution
+
+Status: planned.
 
 Goal: admit address `0x0a` execution with versioned-hash binding, canonical
 field checks, exact output constants, gas-first execution, and fuzz coverage.
 
+Deliverables:
+
+- exact 192-byte frame parser for versioned hash, evaluation point, claimed
+  value, commitment, and proof;
+- commitment-to-versioned-hash calculation and equality check using the
+  EIP-4844 version byte;
+- canonical scalar-field validation for the point and claimed value;
+- charged 50,000-gas execution that verifies the KZG proof only after the gas
+  meter succeeds;
+- exact 64-byte output containing the field-elements-per-blob constant and BLS
+  scalar modulus in the specified order;
+- output-unchanged and backend-not-reached tests for out-of-gas and malformed
+  frames;
+- explicit precompile error classification for future CALL gas-burning logic.
+
+Verification:
+
+- official EIP-4844 point-evaluation vectors and invalid-frame cases;
+- independent cross-client/reference differential results;
+- wrong version, wrong hash, non-canonical field, malformed compressed point,
+  invalid proof, short output, and repeated-charge tests;
+- fuzz target for all 192-byte subdomains plus arbitrary-length rejection;
+- release-mode fixed-gas CPU evidence;
+- pentest and retest before tagging.
+
+Exit criteria:
+
+- Address `0x0a` returns only the exact EIP-4844 output after a canonical frame,
+  matching versioned hash, successful proof, and mandatory gas charge.
+
 ### v0.61.5 - Blob/KZG Execution Integration
+
+Status: planned.
 
 Goal: integrate KZG verification with blob transaction, fee, count, fork, and
 block data-availability validation and run the complete claimed fixture set.
+
+Deliverables:
+
+- fork-aware non-empty blob-versioned-hash validation, `0x01` version-byte
+  enforcement, and per-transaction/per-block count ceilings;
+- blob sidecar model binding each blob, commitment, proof, and transaction
+  versioned hash by count and order;
+- single and batch blob-proof verification against the pinned setup;
+- blob gas used, excess blob gas, base fee, fee-cap, and block-limit validation;
+- Cancun-and-later activation rules for blob transactions and the `0x0a`
+  precompile;
+- block/data-availability validation result types that distinguish missing
+  sidecars, malformed data, invalid proofs, and semantic fee/count failures;
+- fixture and support matrices that do not imply consensus-layer networking,
+  custody, or data retrieval inside this crate.
+
+Verification:
+
+- official EIP-4844 execution and consensus KZG fixture sets at pinned
+  revisions;
+- valid and adversarial blob transaction/block integration tests;
+- wrong count/order/version/hash/proof/setup/fork and blob-gas boundary tests;
+- differential validation against at least one independent client and the
+  canonical KZG reference;
+- batch-size CPU/memory/DoS evidence and fuzz corpus;
+- `scripts/checks.sh`, dependency/security gates, pentest, and clean retest.
+
+Exit criteria:
+
+- Claimed blob transactions and blocks are cryptographically and semantically
+  validated first-party against explicit fork context and the pinned setup,
+  rather than being treated as syntactically decoded data.
+- Any consensus-network data-availability behavior remains explicitly outside
+  the claim or assigned to a named later release.
 
 ### v0.62.0 - Full Execution Fixture Admission
 
