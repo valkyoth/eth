@@ -1,6 +1,6 @@
 use crate::{
-    EvmAccessSet, EvmAccessStatus, EvmAddress, EvmCoreError, EvmExecution, EvmGasMeter,
-    EvmGasSchedule, EvmOpcode, EvmState, EvmStateContext, EvmWord,
+    EVM_MAX_BYTECODE_LEN, EvmAccessSet, EvmAccessStatus, EvmAddress, EvmCoreError, EvmExecution,
+    EvmGasMeter, EvmGasSchedule, EvmOpcode, EvmState, EvmStateContext, EvmWord,
 };
 
 pub(crate) trait StateExecutionHost {
@@ -131,9 +131,22 @@ fn extcodecopy<const STACK: usize, const ADDRESSES: usize, const STORAGE: usize,
     host: &mut HostState<'_, ADDRESSES, STORAGE, S>,
 ) -> Result<(), EvmCoreError> {
     let address = EvmAddress::from_word(execution.stack().peek(0)?);
-    let memory_offset = execution.stack().peek(1)?.to_usize()?;
-    let code_offset = execution.stack().peek(2)?.to_usize()?;
     let len = execution.stack().peek(3)?.to_usize()?;
+    let memory_offset = if len == 0 {
+        0
+    } else {
+        execution.stack().peek(1)?.to_usize()?
+    };
+    let code_offset = if len == 0 {
+        None
+    } else {
+        execution
+            .stack()
+            .peek(2)?
+            .to_usize()
+            .ok()
+            .filter(|offset| *offset < EVM_MAX_BYTECODE_LEN)
+    };
     execution.memory().check_range(memory_offset, len)?;
     charge_account_access(address, EvmOpcode::EXTCODECOPY, schedule, gas_meter, host)?;
     gas_meter.charge(schedule.copy_cost(len)?)?;
@@ -141,9 +154,12 @@ fn extcodecopy<const STACK: usize, const ADDRESSES: usize, const STORAGE: usize,
     let output = execution
         .memory_mut()
         .checked_range_mut(memory_offset, len)?;
-    host.state
-        .copy_code(address, code_offset, output)
-        .map_err(|_| EvmCoreError::StateCodeReadFailed)?;
+    output.fill(0);
+    if let Some(code_offset) = code_offset {
+        host.state
+            .copy_code(address, code_offset, output)
+            .map_err(|_| EvmCoreError::StateCodeReadFailed)?;
+    }
     for _ in 0..4 {
         let _ = execution.stack_mut().pop()?;
     }

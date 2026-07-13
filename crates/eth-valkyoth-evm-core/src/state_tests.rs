@@ -1,3 +1,7 @@
+extern crate std;
+
+use std::vec::Vec;
+
 use crate::{
     EVM_DEFAULT_GAS_LIMIT, EVM_DEFAULT_STEP_LIMIT, EvmAccessSet, EvmAccount, EvmAddress,
     EvmCoreError, EvmExecution, EvmFork, EvmGas, EvmState, EvmStateContext, EvmWord,
@@ -135,6 +139,79 @@ fn state_access_copies_external_code_into_bounded_memory() -> Result<(), EvmCore
 }
 
 #[test]
+fn extcodecopy_ignores_full_width_offsets_for_zero_length() -> Result<(), EvmCoreError> {
+    let mut code = Vec::from([0x60, 0x00]);
+    push_max_word(&mut code);
+    push_max_word(&mut code);
+    code.extend_from_slice(&[0x60, 0x02, 0x3c, 0x00]);
+    let mut memory = [];
+    let mut execution = EvmExecution::<8>::try_new(&mut memory)?;
+    let mut state = FixtureState::new();
+    let mut accesses = EvmAccessSet::<4, 4>::try_new()?;
+
+    let report = execution.run_with_state(
+        &code,
+        execution_limits()?,
+        EvmStateContext::new(FixtureState::SELF_ADDRESS),
+        &mut state,
+        &mut accesses,
+    )?;
+
+    assert_eq!(report.status, ExecutionStatus::Stopped);
+    assert_eq!(report.gas_used, EvmGas::new(2_612));
+    assert_eq!(state.code_reads, 0);
+    assert!(execution.stack().is_empty());
+    Ok(())
+}
+
+#[test]
+fn extcodecopy_zero_pads_full_width_code_offset() -> Result<(), EvmCoreError> {
+    let mut code = Vec::from([0x60, 0x01]);
+    push_max_word(&mut code);
+    code.extend_from_slice(&[0x60, 0x00, 0x60, 0x02, 0x3c, 0x00]);
+    let mut memory = [0xa5_u8; 1];
+    let mut execution = EvmExecution::<8>::try_new(&mut memory)?;
+    let mut state = FixtureState::new();
+    let mut accesses = EvmAccessSet::<4, 4>::try_new()?;
+
+    let report = execution.run_with_state(
+        &code,
+        execution_limits()?,
+        EvmStateContext::new(FixtureState::SELF_ADDRESS),
+        &mut state,
+        &mut accesses,
+    )?;
+
+    assert_eq!(report.status, ExecutionStatus::Stopped);
+    assert_eq!(report.gas_used, EvmGas::new(2_618));
+    assert_eq!(execution.memory().as_slice(), [0]);
+    assert_eq!(state.code_reads, 0);
+    Ok(())
+}
+
+#[test]
+fn extcodecopy_zero_pads_partial_copy_past_code_end() -> Result<(), EvmCoreError> {
+    let code = [0x60, 0x03, 0x60, 0x03, 0x60, 0x00, 0x60, 0x02, 0x3c, 0x00];
+    let mut memory = [0xa5_u8; 3];
+    let mut execution = EvmExecution::<8>::try_new(&mut memory)?;
+    let mut state = FixtureState::new();
+    let mut accesses = EvmAccessSet::<4, 4>::try_new()?;
+
+    let report = execution.run_with_state(
+        &code,
+        execution_limits()?,
+        EvmStateContext::new(FixtureState::SELF_ADDRESS),
+        &mut state,
+        &mut accesses,
+    )?;
+
+    assert_eq!(report.status, ExecutionStatus::Stopped);
+    assert_eq!(execution.memory().as_slice(), [14, 0, 0]);
+    assert_eq!(state.code_reads, 1);
+    Ok(())
+}
+
+#[test]
 fn state_write_shell_fails_without_popping_stack() -> Result<(), EvmCoreError> {
     let mut memory = [0u8; 0];
     let mut execution = EvmExecution::<16>::try_new(&mut memory)?;
@@ -245,4 +322,11 @@ const fn address_bytes(value: u8) -> [u8; EvmAddress::LEN] {
     let mut bytes = [0u8; EvmAddress::LEN];
     bytes[EvmAddress::LEN - 1] = value;
     bytes
+}
+
+fn push_max_word(code: &mut Vec<u8>) {
+    code.push(0x7f);
+    for _ in 0..EvmWord::LEN {
+        code.push(u8::MAX);
+    }
 }

@@ -31,6 +31,8 @@ path.
 - Advanced-precompile backend admission and conformance policy.
 - Consensus regressions for false `JUMPI` destinations and zero-length
   `RETURN`, `REVERT`, and call/create memory ranges.
+- `EXTCODECOPY` regressions for zero-length full-width offsets, full-width code
+  offsets, and partial copies beyond the code boundary.
 - Same-length BLAKE2F and ModExp plan-substitution regressions.
 - A bounded 32-layer shared EIP-712 dependency-DAG regression and a hard
   64-type schema ceiling.
@@ -63,6 +65,9 @@ path.
 - False `JUMPI` no longer converts or validates its unused destination, and
   zero-length memory ranges canonicalize their semantically irrelevant offset
   to zero without host-width conversion or memory expansion.
+- `EXTCODECOPY` decodes length first, ignores offsets for empty copies, and
+  zero-fills code offsets outside the release code-size domain without calling
+  the state host.
 - EIP-712 dependency discovery now visits each reachable type once before
   bounded lexical emission instead of recursively rediscovering shared DAGs.
 - `Eip712Value` and `Eip712ValueKind` no longer implement `Copy`, `Clone`, or
@@ -95,6 +100,8 @@ path.
   Medium stale-SBOM findings were remediated before retest.
 - The follow-up v0.52.0 review's four High consensus/gas/complexity findings
   and one Medium signing-value disclosure finding were remediated for retest.
+- The subsequent retest's remaining High `EXTCODECOPY` host-width finding was
+  remediated across empty and out-of-code copy semantics.
 - Public precompile values are not treated as secret material; any future reuse
   for secret-bearing key operations requires a separate sanitization contract.
 

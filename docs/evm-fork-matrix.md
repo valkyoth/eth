@@ -51,6 +51,11 @@ that boundary.
 opcode exists at the selected fork. The interpreter and gas schedule still fail
 closed for unimplemented dispatcher arms.
 
+For the admitted Frontier state subset, `EXTCODECOPY` follows EVM copy
+semantics for host-width edges: zero-length copies ignore both offsets, and
+code offsets outside the bounded code domain produce zero bytes without a host
+read. Non-empty memory destinations remain range-checked.
+
 ## Historical State Gas
 
 `v0.43.2` claims historical gas only for the currently executable state-read

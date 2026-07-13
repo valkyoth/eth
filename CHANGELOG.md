@@ -20,6 +20,9 @@ All notable changes to `eth` are documented here.
   zero-length memory offsets, rebinding every precompile plan to actual-input
   gas, bounding EIP-712 dependency traversal to 64 types with one visit per
   reachable type, and redacting non-copyable EIP-712 signing values.
+- Closed the remaining v0.52.0 retest finding by making `EXTCODECOPY` ignore
+  offsets for empty copies and zero-fill code offsets outside the bounded code
+  domain without host-width conversion or host invocation.
 - Started `0.37.2` with `docs/core-independence-audit.md`, classifying
   default, optional, dev-only, reference-only, and compile-time dependencies
   that can influence core Ethereum behavior.

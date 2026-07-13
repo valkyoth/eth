@@ -97,6 +97,8 @@ exact EIP-4844/EIP-2537 input, output, and gas plans.
   BLAKE2F or ModExp cost is rejected before arithmetic or output mutation.
 - A false `JUMPI` does not convert or validate the unused destination word;
   true branches retain canonical `JUMPDEST` validation.
+- `EXTCODECOPY` ignores both offsets for zero-length copies and zero-fills any
+  code offset outside the release code-size domain without invoking the host.
 - Unsupported opcodes and unsupported forks are rejected with named errors.
 - No nested call/create execution, log, remaining cryptographic precompile,
   refund, or committed storage-write semantics are claimed yet.

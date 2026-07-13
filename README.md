@@ -428,6 +428,8 @@ pairing, and BLAKE2F execution is available only through plans that charge the
 supplied gas meter on every call before output mutation or expensive work.
 Execution recomputes gas from the actual input and rejects any same-length
 input whose content-dependent cost no longer matches the plan.
+`EXTCODECOPY` treats empty-copy offsets as irrelevant and zero-fills code
+offsets beyond the bounded EVM code domain without passing them to the host.
 KZG and BLS cryptographic precompiles expose exact fork, frame, output, and gas
 plans and return a backend-unavailable error until their first-party arithmetic
 releases are admitted. BLS MSM and pairing plans reject empty and partial item
