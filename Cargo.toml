@@ -58,7 +58,7 @@ eth-valkyoth-sanitization = { path = "crates/eth-valkyoth-sanitization", version
 eth-valkyoth-signer = { path = "crates/eth-valkyoth-signer", version = "0.7.3" }
 eth-valkyoth-testkit = { path = "crates/eth-valkyoth-testkit", version = "0.7.0" }
 eth-valkyoth-verify = { path = "crates/eth-valkyoth-verify", version = "0.21.0" }
-k256 = { version = "0.13.4", default-features = false, features = ["ecdsa"] }
+k256 = { version = "0.14.0", default-features = false, features = ["ecdsa"] }
 proc-macro2 = "1.0.106"
 quote = "1.0.46"
 sanitization = { version = "1.2.2", default-features = false }
