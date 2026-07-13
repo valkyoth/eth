@@ -2272,6 +2272,9 @@ Deliverables:
   BLAKE2, KZG, and BLS backends;
 - sanitization and zeroization requirements for backend scratch state where
   secret-bearing or key-adjacent material may be processed;
+- a `0.22.0` minor release for `eth-valkyoth-verify` because EIP-712 schema
+  bounds, signing-value trait removals, redacted formatting, and the new public
+  error variant change its public compatibility surface;
 - release-blocking vector list for each precompile still not executable.
 
 Verification:
@@ -2286,6 +2289,9 @@ Exit criteria:
 - No cryptographic precompile remains merely "deferred"; each one is either
   implemented, assigned to a concrete later release, or explicitly excluded
   from a claimed fork.
+- Every changed support-crate public API has a semver-compatible independent
+  crate version and matching workspace, fuzz, publish-plan, lockfile, and
+  crate-matrix metadata.
 
 ### v0.52.1 - BLS12-381 Canonical Field And Point Encodings
 

@@ -59,7 +59,7 @@ publication when a crate is marked `unchanged`.
 | `eth-valkyoth-primitives` | `0.11.2` | `0.11.2` | `unchanged` | No | No package changes for v0.52.0. |
 | `eth-valkyoth-hash` | `0.11.2` | `0.11.2` | `unchanged` | No | No package changes for v0.52.0. |
 | `eth-valkyoth-protocol` | `0.25.2` | `0.25.2` | `unchanged` | No | No package changes for v0.52.0. |
-| `eth-valkyoth-verify` | `0.21.0` | `0.21.1` | `dependency` | Yes | Updates the optional `k256` adapter to `0.14.0` while preserving explicit high-s rejection. |
+| `eth-valkyoth-verify` | `0.21.0` | `0.22.0` | `code` | Yes | Updates the optional `k256` adapter, bounds EIP-712 schemas, redacts signing values, and versions public API compatibility changes correctly. |
 | `eth-valkyoth-derive` | `0.17.2` | `0.17.3` | `dependency` | Yes | Refreshes the compile-test dependency to `trybuild 1.0.118`. |
 | `eth-valkyoth-sanitization` | `0.7.4` | `0.7.5` | `dependency` | Yes | Updates `sanitization` to `1.2.4` and the optional derive dependency to `0.17.3`. |
 | `eth-valkyoth-evm-core` | `0.24.0` | `0.25.0` | `code` | Yes | Adds exact KZG/BLS frame policies, output lengths, checked EIP-2537 fixed/MSM/pairing gas, boundary tests, and advanced-precompile fuzz coverage. |
@@ -68,7 +68,7 @@ publication when a crate is marked `unchanged`.
 | `eth-valkyoth-signer` | `0.7.3` | `0.7.3` | `unchanged` | No | No package changes for v0.52.0. |
 | `eth-valkyoth-reth` | `0.7.0` | `0.7.0` | `unchanged` | No | No package changes for v0.52.0. |
 | `eth-valkyoth-testkit` | `0.7.0` | `0.7.0` | `unchanged` | No | No package changes for v0.52.0. |
-| `eth` | `0.51.0` | `0.52.0` | `code` | Yes | Updates `evm-core` to `0.25.0`, `verify` to `0.21.1`, optional sanitization to `0.7.5`, and documents the advanced-precompile admission plan. |
+| `eth` | `0.51.0` | `0.52.0` | `code` | Yes | Updates `evm-core` to `0.25.0`, `verify` to `0.22.0`, optional sanitization to `0.7.5`, and documents the advanced-precompile admission plan. |
 
 Update this table and `release-crates.toml` in the same commit whenever a crate
 changes release state.

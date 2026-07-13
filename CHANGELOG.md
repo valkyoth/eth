@@ -23,6 +23,8 @@ All notable changes to `eth` are documented here.
 - Closed the remaining v0.52.0 retest finding by making `EXTCODECOPY` ignore
   offsets for empty copies and zero-fill code offsets outside the bounded code
   domain without host-width conversion or host invocation.
+- Corrected the v0.52.0 verify-crate release from `0.21.1` to `0.22.0` so its
+  EIP-712 public API changes cannot enter downstream `^0.21` builds.
 - Started `0.37.2` with `docs/core-independence-audit.md`, classifying
   default, optional, dev-only, reference-only, and compile-time dependencies
   that can influence core Ethereum behavior.

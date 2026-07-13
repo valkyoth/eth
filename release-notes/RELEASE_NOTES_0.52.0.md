@@ -43,7 +43,8 @@ path.
 ## Changed
 
 - `eth-valkyoth-evm-core` is bumped from `0.24.0` to `0.25.0`.
-- `eth-valkyoth-verify` is patch-bumped to `0.21.1` for `k256 0.14.0`.
+- `eth-valkyoth-verify` is minor-bumped from `0.21.0` to `0.22.0` for the
+  `k256 0.14.0` update and its public EIP-712 compatibility changes.
 - `eth-valkyoth-derive` is patch-bumped to `0.17.3` for `trybuild 1.0.118`.
 - `eth-valkyoth-sanitization` is patch-bumped to `0.7.5` for `sanitization
   1.2.4` and the derive dependency update.
@@ -102,6 +103,8 @@ path.
   and one Medium signing-value disclosure finding were remediated for retest.
 - The subsequent retest's remaining High `EXTCODECOPY` host-width finding was
   remediated across empty and out-of-code copy semantics.
+- The final Low release-compatibility finding was remediated by publishing the
+  changed `eth-valkyoth-verify` API as `0.22.0` instead of a compatible patch.
 - Public precompile values are not treated as secret material; any future reuse
   for secret-bearing key operations requires a separate sanitization contract.
 
