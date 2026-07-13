@@ -292,9 +292,7 @@ mod tests {
 
     fn sign_digest(digest: B256) -> Result<EthereumSignature, VerifyError> {
         let key = signing_key()?;
-        let (signature, recovery_id) = key
-            .sign_prehash_recoverable(&<[u8; 32]>::from(digest))
-            .map_err(|_| VerifyError::InvalidSignature)?;
+        let (signature, recovery_id) = key.sign_prehash_recoverable(&<[u8; 32]>::from(digest));
         let bytes = signature.to_bytes();
         let r = bytes
             .get(..32)

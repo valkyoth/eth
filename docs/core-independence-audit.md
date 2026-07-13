@@ -1,7 +1,7 @@
 # Core Dependency Independence Audit
 
-Status: updated by `v0.37.4` constant-time and reference dependency policy
-work.
+Status: updated by `v0.52.0` dependency freshness review after the `v0.37.4`
+constant-time and reference dependency policy work.
 
 This audit records every third-party dependency that can influence core
 Ethereum behavior before execution work continues. The long-term project goal
@@ -21,10 +21,10 @@ cargo tree -e features --workspace
 The same pass checked current crates.io metadata with `cargo info` for
 `k256`, `sha3`, `tiny-keccak`, `subtle`, `alloy-rlp`, `serde`, `serde_json`,
 `sanitization`, `proc-macro2`, `quote`, `syn`, and `trybuild`. The notable
-version findings are that `k256 0.13.4` remains the selected stable line while
-the newer `0.14.0-rc.15` is a release candidate. `v0.37.3` removes direct
-`sha3` use from `eth-valkyoth-verify` tests in favor of the project hash
-boundary with the optional `tiny-keccak` test backend.
+version findings were refreshed on 2026-07-13: `k256 0.14.0`, `sanitization
+1.2.4`, and `trybuild 1.0.118` are the selected current stable releases.
+`v0.37.3` removed direct `sha3` use from `eth-valkyoth-verify` tests in favor
+of the project hash boundary with the optional `tiny-keccak` test backend.
 
 ## Classifications
 
@@ -62,8 +62,8 @@ feature.
 | Crate | Feature path | Classification | Follow-up |
 | --- | --- | --- | --- |
 | `tiny-keccak 2.0.2` | `eth/keccak-tiny -> eth-valkyoth-hash/tiny-keccak` | Optional backend | Keep outside default. Backend admission remains documented in `docs/keccak-boundary.md`; future native Keccak work belongs to the hashing track. |
-| `k256 0.13.4` | `eth/secp256k1-k256 -> eth-valkyoth-verify/secp256k1-k256` | Optional backend | Keep outside default. Backend admission remains documented in `docs/dependency-admission-k256.md` and `docs/signature-backend-boundary.md`. |
-| `sanitization 1.2.2` | `eth/sanitization -> eth-valkyoth-sanitization` | Optional backend | `v0.37.5` documents and gates the optional sanitization bridge path. |
+| `k256 0.14.0` | `eth/secp256k1-k256 -> eth-valkyoth-verify/secp256k1-k256` | Optional backend | Keep outside default. Backend admission remains documented in `docs/dependency-admission-k256.md` and `docs/signature-backend-boundary.md`. |
+| `sanitization 1.2.4` | `eth/sanitization -> eth-valkyoth-sanitization` | Optional backend | `v0.37.5` documents and gates the optional sanitization bridge path. |
 | `serde 1.0.228` | `eth/eip712-json -> eth-valkyoth-verify/json` | Optional backend | `v0.37.5` documents and gates the optional JSON parser boundary. |
 | `serde_json 1.0.150` | `eth/eip712-json -> eth-valkyoth-verify/json` | Optional backend | `v0.37.5` documents and gates the optional JSON parser boundary plus existing duplicate-key and limit checks. |
 
@@ -76,7 +76,7 @@ release that changes their feature path must include a cargo-tree check.
 | --- | --- | --- | --- |
 | `alloy-rlp 0.3.16` | `eth-valkyoth-codec` dev-dependency and `fuzz/` dependency | Reference-only | `v0.37.4` documents and gates the quarantine rule for third-party reference oracles. |
 | `serde_json 1.0.150` | `eth-valkyoth-codec` dev-dependency | Reference-only | `v0.37.4` documents and gates the dev-only fixture parser rule. |
-| `trybuild 1.0.117` | `eth-valkyoth-derive` dev-dependency | Compile-time only | No runtime core impact; keep dev-only. |
+| `trybuild 1.0.118` | `eth-valkyoth-derive` dev-dependency | Compile-time only | No runtime core impact; keep dev-only. |
 
 Reference-only crates must never be re-exported by runtime crates or used as
 the implementation source of consensus behavior. Their job is to catch
@@ -148,8 +148,8 @@ graphs.
 | `v0.37.4` | Completed: retained `subtle` as a narrow reviewed exception and added executable quarantine checks for `alloy-rlp` plus dev fixture `serde_json`. |
 | `v0.37.5` | Completed: documented and gated optional parser and sanitization bridges so `serde`, `serde_json`, and `sanitization` cannot become accidental defaults. |
 | `v0.40.0` through `v0.54.0` | Build first-party EVM execution phases; REVM remains reference or compatibility only if admitted. |
-| `v0.46.0` through `v0.52.0` | Admit or implement cryptographic precompile backends only with conformance vectors, dependency review, fuzzing where applicable, and pentest gates. `v0.46.0` begins this with first-party dependency-free SHA-256 and RIPEMD-160. `v0.47.0` adds ECRECOVER execution through caller-provided secp256k1 and Keccak traits without adding default crypto dependencies. `v0.48.0` adds bounded first-party ModExp execution without a bigint dependency. `v0.49.0` adds dependency-free first-party BN254 add/mul execution. `v0.50.0` adds the dependency-free BN254 pairing frame boundary with empty-input execution, `v0.50.1` adds G2 subgroup validation, `v0.50.2` adds the Fp6/Fp12 tower foundation, `v0.50.3` adds validated tuple streaming plus atomic gas-meter charging, `v0.50.4` adds the line-function foundation while extending dispatcher-facing gas-meter charging to ModExp and BN254 add/mul plan execution, `v0.50.5` adds internal Miller-loop accumulation, `v0.50.6` adds sparse Miller-loop multiplication and gas/CPU benchmark evidence, `v0.50.7` adds bounded final exponentiation, `v0.50.8` adds Frobenius Q1/-Q2 point mapping, `v0.50.9` adds the projective post-loop line carrier, `v0.50.10` admits non-empty EIP-197 BN254 pairing result words with go-ethereum vectors, and `v0.51.0` adds first-party dependency-free EIP-152 BLAKE2F execution plus the optimized BN254 final-exponentiation remediation. |
-| `v0.61.0` | Admit or reject KZG/blob cryptography backends before blob consensus validation is claimed. |
+| `v0.46.0` through `v0.52.9` | Admit or implement cryptographic precompiles only with conformance vectors, dependency review, fuzzing, and pentest gates. Releases through `v0.51.0` complete native SHA-256, RIPEMD-160, ModExp, BN254, and BLAKE2F plus caller-boundary ECRECOVER. `v0.52.0` fixes exact KZG/BLS planning and admission policy; `v0.52.1` through `v0.52.9` build first-party BLS12-381 execution. |
+| `v0.61.0` through `v0.61.5` | Build first-party trusted-setup handling, KZG arithmetic/proof verification, point-evaluation execution, and blob integration before blob consensus validation is claimed. |
 | `v0.94.0` | Add Kani proof harnesses as extra assurance for selected critical invariants. |
 
 The exit criteria for this release are documentation-only: no core Ethereum

@@ -119,7 +119,9 @@ final exponentiation, `v0.50.8` adds Frobenius Q1/-Q2 point mapping,
 `v0.50.9` adds the projective post-loop line carrier, `v0.50.10` admits
 non-empty pairing result words with vector-backed canonical zero/one outputs,
 and `v0.51.0` adds first-party dependency-free BLAKE2F execution plus the
-optimized BN254 final-exponentiation remediation.
+optimized BN254 final-exponentiation remediation. `v0.52.0` adds exact
+EIP-2537 frame, output, fixed-gas, MSM-discount, and pairing-gas planning while
+BLS arithmetic remains fail closed.
 The registry recognizes the
 canonical low-address accounts for Frontier precompiles,
 Byzantium modular exponentiation and BN254 precompiles, Istanbul BLAKE2F,
@@ -131,8 +133,8 @@ Cancun KZG point evaluation, and Prague BLS12-381 precompiles.
 | Modular exponentiation | `0x05` | Byzantium | Executes through bounded first-party no-alloc bigint code with EIP-198 and EIP-2565 gas formulas and an explicit release operand cap. |
 | BN254 add/mul/pairing | `0x06..=0x08` | Byzantium | Add and scalar multiplication execute dependency-free with canonical field and point validation. Pairing validates bounded frames, G2 curve membership, G2 subgroup membership, tuple streaming, line-function arithmetic, sparse Miller-loop accumulation, optimized bounded final exponentiation, Frobenius Q1/-Q2 point mapping, and the projective post-loop line carrier, then writes canonical EIP-197 zero/one result words documented in `docs/bn254-pairing-economics.md`. |
 | BLAKE2F | `0x09` | Istanbul | Executes EIP-152 exact 213-byte frames with final-flag validation, round-count gas, and 64-byte output. |
-| KZG point evaluation | `0x0a` | Cancun | Exact 192-byte input planning and fixed 50,000 gas; proof verification backend is deferred. |
-| BLS12-381 precompiles | `0x0b..=0x11` | Prague | Address/fork admission only until audited BLS backends and vectors are added. |
+| KZG point evaluation | `0x0a` | Cancun | Exact 192-byte input, 64-byte output, and fixed 50,000-gas planning; first-party verification is assigned through `v0.61.5`. |
+| BLS12-381 precompiles | `0x0b..=0x11` | Prague | Exact/non-empty frame policies, fixed output lengths, and official EIP-2537 gas planning; first-party execution is assigned through `v0.52.9`. |
 
 The registry is still intentionally narrower than a full precompile executor.
 Plans enforce the release input ceiling before gas calculation, expose fixed

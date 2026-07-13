@@ -1,14 +1,14 @@
-use crate::{EvmAddress, EvmCoreError, EvmFork, EvmGas, hash_precompile, modexp};
+use crate::{
+    EvmAddress, EvmCoreError, EvmFork, EvmGas, advanced_precompile, hash_precompile, precompile_gas,
+};
 
 /// Maximum precompile calldata bytes admitted by the native planning boundary.
 pub const EVM_PRECOMPILE_INPUT_LIMIT: usize = 1_048_576;
-const WORD_BYTES: usize = 32;
-const PAIRING_ITEM_BYTES: usize = 192;
+pub(crate) const WORD_BYTES: usize = 32;
+pub(crate) const PAIRING_ITEM_BYTES: usize = 192;
 const BLAKE2F_INPUT_BYTES: usize = 213;
 const BLAKE2F_OUTPUT_BYTES: usize = 64;
 const BN254_POINT_OUTPUT_BYTES: usize = 64;
-const KZG_POINT_EVALUATION_INPUT_BYTES: usize = 192;
-const KZG_POINT_EVALUATION_OUTPUT_BYTES: usize = 64;
 
 /// Precompile identity known to the native EVM core.
 #[derive(Clone, Copy, Debug, Eq, PartialEq)]
@@ -133,6 +133,8 @@ pub enum EvmPrecompileInputPolicy {
     Exact(usize),
     /// The input length must be a multiple of this byte length.
     MultipleOf(usize),
+    /// The input must contain at least one complete item of this byte length.
+    NonEmptyMultipleOf(usize),
 }
 
 /// Gas policy used by a precompile descriptor.
@@ -153,6 +155,12 @@ pub enum EvmPrecompileGasPolicy {
     Modexp,
     /// Gas is the BLAKE2F round count stored in the first four input bytes.
     Blake2FRounds,
+    /// EIP-2537 BLS12-381 G1 multiscalar-multiplication gas.
+    Bls12G1Msm,
+    /// EIP-2537 BLS12-381 G2 multiscalar-multiplication gas.
+    Bls12G2Msm,
+    /// EIP-2537 BLS12-381 pairing-check gas.
+    Bls12Pairing,
     /// Dynamic gas formula is intentionally not implemented in this release.
     DeferredDynamic,
 }
@@ -193,7 +201,7 @@ impl EvmPrecompilePlan {
         input: &[u8],
     ) -> Result<Self, EvmCoreError> {
         validate_input_policy(descriptor.input_policy, input.len())?;
-        let gas_cost = gas_cost(descriptor, input)?;
+        let gas_cost = precompile_gas::gas_cost(descriptor, input)?;
         Ok(Self {
             descriptor,
             input_len: input.len(),
@@ -354,9 +362,14 @@ const fn input_policy(kind: EvmPrecompileKind) -> EvmPrecompileInputPolicy {
     match kind {
         EvmPrecompileKind::Bn254Pairing => EvmPrecompileInputPolicy::MultipleOf(PAIRING_ITEM_BYTES),
         EvmPrecompileKind::Blake2F => EvmPrecompileInputPolicy::Exact(BLAKE2F_INPUT_BYTES),
-        EvmPrecompileKind::KzgPointEvaluation => {
-            EvmPrecompileInputPolicy::Exact(KZG_POINT_EVALUATION_INPUT_BYTES)
-        }
+        EvmPrecompileKind::KzgPointEvaluation => advanced_precompile::input_policy(kind),
+        EvmPrecompileKind::Bls12G1Add
+        | EvmPrecompileKind::Bls12G1Msm
+        | EvmPrecompileKind::Bls12G2Add
+        | EvmPrecompileKind::Bls12G2Msm
+        | EvmPrecompileKind::Bls12PairingCheck
+        | EvmPrecompileKind::Bls12MapFpToG1
+        | EvmPrecompileKind::Bls12MapFp2ToG2 => advanced_precompile::input_policy(kind),
         _ => EvmPrecompileInputPolicy::BoundedAny,
     }
 }
@@ -387,8 +400,14 @@ const fn gas_policy_for_kind(kind: EvmPrecompileKind, fork: EvmFork) -> EvmPreco
         EvmPrecompileKind::Bn254Mul => EvmPrecompileGasPolicy::Fixed(EvmGas::new(40_000)),
         EvmPrecompileKind::Bn254Pairing => EvmPrecompileGasPolicy::Bn254Pairing,
         EvmPrecompileKind::Blake2F => EvmPrecompileGasPolicy::Blake2FRounds,
-        EvmPrecompileKind::KzgPointEvaluation => EvmPrecompileGasPolicy::Fixed(EvmGas::new(50_000)),
-        _ => EvmPrecompileGasPolicy::DeferredDynamic,
+        EvmPrecompileKind::KzgPointEvaluation
+        | EvmPrecompileKind::Bls12G1Add
+        | EvmPrecompileKind::Bls12G1Msm
+        | EvmPrecompileKind::Bls12G2Add
+        | EvmPrecompileKind::Bls12G2Msm
+        | EvmPrecompileKind::Bls12PairingCheck
+        | EvmPrecompileKind::Bls12MapFpToG1
+        | EvmPrecompileKind::Bls12MapFp2ToG2 => advanced_precompile::gas_policy(kind),
     }
 }
 
@@ -400,7 +419,14 @@ const fn output_len(kind: EvmPrecompileKind) -> Option<usize> {
         | EvmPrecompileKind::Bn254Pairing => Some(WORD_BYTES),
         EvmPrecompileKind::Bn254Add | EvmPrecompileKind::Bn254Mul => Some(BN254_POINT_OUTPUT_BYTES),
         EvmPrecompileKind::Blake2F => Some(BLAKE2F_OUTPUT_BYTES),
-        EvmPrecompileKind::KzgPointEvaluation => Some(KZG_POINT_EVALUATION_OUTPUT_BYTES),
+        EvmPrecompileKind::KzgPointEvaluation
+        | EvmPrecompileKind::Bls12G1Add
+        | EvmPrecompileKind::Bls12G1Msm
+        | EvmPrecompileKind::Bls12G2Add
+        | EvmPrecompileKind::Bls12G2Msm
+        | EvmPrecompileKind::Bls12PairingCheck
+        | EvmPrecompileKind::Bls12MapFpToG1
+        | EvmPrecompileKind::Bls12MapFp2ToG2 => Some(advanced_precompile::output_len(kind)),
         _ => None,
     }
 }
@@ -415,73 +441,11 @@ fn validate_input_policy(policy: EvmPrecompileInputPolicy, len: usize) -> Result
         EvmPrecompileInputPolicy::MultipleOf(chunk) if chunk != 0 && len.is_multiple_of(chunk) => {
             Ok(())
         }
+        EvmPrecompileInputPolicy::NonEmptyMultipleOf(chunk)
+            if chunk != 0 && len != 0 && len.is_multiple_of(chunk) =>
+        {
+            Ok(())
+        }
         _ => Err(EvmCoreError::PrecompileInvalidInputLength),
     }
-}
-
-fn gas_cost(
-    descriptor: EvmPrecompileDescriptor,
-    input: &[u8],
-) -> Result<Option<EvmGas>, EvmCoreError> {
-    match descriptor.gas_policy {
-        EvmPrecompileGasPolicy::Fixed(gas) => Ok(Some(gas)),
-        EvmPrecompileGasPolicy::Words { base, per_word } => {
-            Ok(Some(word_gas(base, per_word, input.len())?))
-        }
-        EvmPrecompileGasPolicy::Bn254Pairing => {
-            Ok(Some(bn254_pairing_gas(descriptor.fork, input.len())?))
-        }
-        EvmPrecompileGasPolicy::Modexp => {
-            Ok(Some(modexp::modexp_gas_cost(descriptor.fork, input)?))
-        }
-        EvmPrecompileGasPolicy::Blake2FRounds => Ok(Some(blake2f_round_gas(input)?)),
-        EvmPrecompileGasPolicy::DeferredDynamic => Ok(None),
-    }
-}
-
-fn word_gas(base: EvmGas, per_word: EvmGas, len: usize) -> Result<EvmGas, EvmCoreError> {
-    let words = words_for_len(len)?;
-    let variable = words
-        .checked_mul(per_word.get())
-        .ok_or(EvmCoreError::PrecompileGasOverflow)?;
-    base.checked_add(EvmGas::new(variable))
-        .map_err(|_| EvmCoreError::PrecompileGasOverflow)
-}
-
-fn bn254_pairing_gas(fork: EvmFork, len: usize) -> Result<EvmGas, EvmCoreError> {
-    let pairs =
-        u64::try_from(len / PAIRING_ITEM_BYTES).map_err(|_| EvmCoreError::PrecompileGasOverflow)?;
-    let (base, per_pair) = if fork.get() >= EvmFork::ISTANBUL.get() {
-        (45_000u64, 34_000u64)
-    } else {
-        (100_000u64, 80_000u64)
-    };
-    let variable = pairs
-        .checked_mul(per_pair)
-        .ok_or(EvmCoreError::PrecompileGasOverflow)?;
-    let total = base
-        .checked_add(variable)
-        .ok_or(EvmCoreError::PrecompileGasOverflow)?;
-    Ok(EvmGas::new(total))
-}
-
-fn blake2f_round_gas(input: &[u8]) -> Result<EvmGas, EvmCoreError> {
-    let rounds = input
-        .get(..4)
-        .and_then(|prefix| <[u8; 4]>::try_from(prefix).ok())
-        .ok_or(EvmCoreError::PrecompileInvalidInputLength)?;
-    Ok(EvmGas::new(u64::from(u32::from_be_bytes(rounds))))
-}
-
-fn words_for_len(len: usize) -> Result<u64, EvmCoreError> {
-    if len == 0 {
-        return Ok(0);
-    }
-    let rounded = len
-        .checked_add(WORD_BYTES - 1)
-        .ok_or(EvmCoreError::PrecompileGasOverflow)?;
-    let words = rounded
-        .checked_div(WORD_BYTES)
-        .ok_or(EvmCoreError::PrecompileGasOverflow)?;
-    u64::try_from(words).map_err(|_| EvmCoreError::PrecompileGasOverflow)
 }

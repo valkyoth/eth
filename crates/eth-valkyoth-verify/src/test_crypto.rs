@@ -19,7 +19,7 @@ impl RecoverableSecp256k1 for TestSecp256k1Backend {
         let secp256k1_signature =
             k256::ecdsa::Signature::from_scalars(signature.r(), signature.s())
                 .map_err(|_| VerifyError::InvalidSignature)?;
-        if secp256k1_signature.normalize_s().is_some() {
+        if secp256k1_signature.normalize_s() != secp256k1_signature {
             return Err(VerifyError::InvalidSignature);
         }
         let recovery_id = k256::ecdsa::RecoveryId::try_from(signature.y_parity().get())
@@ -31,7 +31,7 @@ impl RecoverableSecp256k1 for TestSecp256k1Backend {
             recovery_id,
         )
         .map_err(|_| VerifyError::InvalidSignature)?;
-        let encoded = verifying_key.to_encoded_point(false);
+        let encoded = verifying_key.to_sec1_point(false);
         encoded
             .as_bytes()
             .get(1..)

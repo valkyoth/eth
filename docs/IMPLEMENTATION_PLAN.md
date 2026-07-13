@@ -108,9 +108,11 @@ The first production value is:
   Frobenius Q1/-Q2 point mapping; `v0.50.9` completes the projective post-loop
   line carrier; `v0.50.10` admits non-empty pairing results; `v0.51.0` adds
   first-party dependency-free EIP-152 BLAKE2F execution and the optimized
-  BN254 final-exponentiation remediation; and `v0.52.0` covers
-  the remaining KZG/BLS cryptographic precompile backend-admission decisions
-  before later releases add nested execution and committed state writes.
+  BN254 final-exponentiation remediation; `v0.52.0` fixes the remaining
+  KZG/BLS frame, output, gas, conformance, and backend-admission contracts;
+  `v0.52.1` through `v0.52.9` build first-party BLS12-381 execution; and
+  `v0.61.0` through `v0.61.5` build first-party KZG/blob verification before
+  later releases claim complete affected-fork execution.
 - `eth-valkyoth-rpc`: optional RPC policy over admitted provider transports.
 - `eth-valkyoth-abi`: optional ABI, contract-call, event, error, and common
   contract-standard helpers.

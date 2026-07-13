@@ -2263,7 +2263,9 @@ state-test claims depend on it.
 Deliverables:
 
 - KZG point-evaluation execution plan aligned with the blob/KZG release;
-- BLS12-381 EIP-2537 backend admission or first-party implementation plan;
+- first-party BLS12-381 EIP-2537 implementation plan;
+- exact KZG/BLS input-shape, output-length, and gas-planning metadata while
+  arithmetic remains fail closed;
 - shared backend conformance checklist for hash, secp256k1, big-int, BN254,
   BLAKE2, KZG, and BLS backends;
 - sanitization and zeroization requirements for backend scratch state where
@@ -2282,6 +2284,56 @@ Exit criteria:
 - No cryptographic precompile remains merely "deferred"; each one is either
   implemented, assigned to a concrete later release, or explicitly excluded
   from a claimed fork.
+
+### v0.52.1 - BLS12-381 Canonical Field And Point Encodings
+
+Goal: add bounded first-party Fp, Fr, Fp2, G1, and G2 wire domains for EIP-2537.
+
+Deliverables include canonical 64-byte Fp decoding, 32-byte scalar decoding,
+infinity handling, exact frame parsing, and malformed-field fuzz coverage.
+
+### v0.52.2 - BLS12-381 G1 Arithmetic And Addition
+
+Goal: implement dependency-free G1 field arithmetic and the `0x0b` addition
+precompile with official positive, infinity, invalid-field, and invalid-curve
+vectors.
+
+### v0.52.3 - BLS12-381 Fp2, G2, And Addition
+
+Goal: implement dependency-free Fp2/G2 arithmetic and the `0x0d` addition
+precompile, then establish the extension-tower foundation required by pairing.
+
+### v0.52.4 - BLS12-381 Subgroup Validation
+
+Goal: admit bounded first-party G1/G2 subgroup checks for MSM and pairing
+inputs without incorrectly adding subgroup rejection to the addition APIs.
+
+### v0.52.5 - BLS12-381 Multiscalar Multiplication
+
+Goal: implement `0x0c` and `0x0e` with bounded Pippenger-style execution,
+official discount gas, item limits, vectors, differential tests, and CPU/gas
+evidence.
+
+### v0.52.6 - BLS12-381 Map-To-Curve
+
+Goal: implement the EIP-2537 Fp-to-G1 and Fp2-to-G2 mappings at `0x10` and
+`0x11` from the pinned mapping specification and official vectors.
+
+### v0.52.7 - BLS12-381 Pairing Foundation
+
+Goal: add the first-party Fp6/Fp12 tower, line functions, Miller loop, and
+bounded final-exponentiation foundation while pairing remains fail closed.
+
+### v0.52.8 - BLS12-381 Pairing Execution
+
+Goal: admit non-empty `0x0f` pairing execution with canonical zero/one output,
+subgroup enforcement, official vectors, differential checks, and gas/CPU
+evidence.
+
+### v0.52.9 - Prague Advanced-Precompile Admission
+
+Goal: run the complete official EIP-2537 fixture set, fuzz and pentest every
+advanced precompile path, and admit only the Prague claims backed by evidence.
 
 ### v0.53.0 - Native EVM Ethereum State Tests
 
@@ -2495,6 +2547,31 @@ Exit criteria:
 
 - Blob transaction support is no longer only syntactic; every cryptographic
   assumption is explicit.
+
+### v0.61.1 - Trusted Setup Provenance And Loading
+
+Goal: pin, fingerprint, parse, and fail closed around the canonical KZG trusted
+setup without runtime network downloads or ambient file assumptions.
+
+### v0.61.2 - KZG Field And Polynomial Foundation
+
+Goal: implement bounded first-party BLS scalar-field and polynomial operations
+needed by EIP-4844 proof verification.
+
+### v0.61.3 - KZG Commitment And Proof Verification
+
+Goal: implement first-party commitment/proof parsing and verification against
+the pinned setup with official and independent vectors.
+
+### v0.61.4 - KZG Point-Evaluation Precompile Execution
+
+Goal: admit address `0x0a` execution with versioned-hash binding, canonical
+field checks, exact output constants, gas-first execution, and fuzz coverage.
+
+### v0.61.5 - Blob/KZG Execution Integration
+
+Goal: integrate KZG verification with blob transaction, fee, count, fork, and
+block data-availability validation and run the complete claimed fixture set.
 
 ### v0.62.0 - Full Execution Fixture Admission
 

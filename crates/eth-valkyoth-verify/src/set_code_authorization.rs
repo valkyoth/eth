@@ -210,9 +210,8 @@ mod tests {
             set_code_authorization_signing_hash(authorization, &mut scratch, RealKeccak::default())
                 .map_err(SetCodeAuthorizationValidationError::SigningHash)?;
         let key = signing_key()?;
-        let (signature, recovery_id) = key
-            .sign_prehash_recoverable(&<[u8; 32]>::from(signing_hash.to_b256()))
-            .map_err(|_| SetCodeAuthorizationValidationError::InvalidSignature)?;
+        let (signature, recovery_id) =
+            key.sign_prehash_recoverable(&<[u8; 32]>::from(signing_hash.to_b256()));
         let bytes = signature.to_bytes();
         let r = bytes
             .get(..32)
@@ -234,7 +233,7 @@ mod tests {
 
     fn expected_authority() -> Result<Address, SetCodeAuthorizationValidationError> {
         let key = signing_key()?;
-        let encoded = key.verifying_key().to_encoded_point(false);
+        let encoded = key.verifying_key().to_sec1_point(false);
         let public_key = encoded
             .as_bytes()
             .get(1..)

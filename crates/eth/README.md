@@ -37,8 +37,8 @@ dependencies.
 
 ## Current Status
 
-Status: `v0.51.0` adds first-party dependency-free EIP-152 BLAKE2F precompile
-execution after the BN254 pairing result-admission release.
+Status: `v0.52.0` adds exact EIP-2537 BLS12-381 frame, output, and gas planning
+while keeping all unimplemented advanced cryptographic execution fail closed.
 The optional `evm-core` feature now exposes dependency-free no_std word, stack,
 memory, opcode, program-counter, fork, gas schedule, opcode-table, host-state,
 warm/cold access, historical fork identifiers, opcode-introduction metadata,
@@ -48,9 +48,9 @@ bounded interpreter domains for hard-capped basic stack/control-flow bytecode
 plus explicit state reads. Identity, SHA-256, RIPEMD-160, bounded ModExp,
 BN254 add/mul, BN254 pairing frames, and BLAKE2F execute without
 dependencies; ECRECOVER executes through explicit caller-provided secp256k1
-and Keccak boundaries. Remaining KZG and BLS cryptographic precompiles are
-admitted as fail-closed descriptors until reviewed backends or first-party
-implementations are added.
+and Keccak boundaries. KZG and BLS cryptographic precompiles remain fail-closed
+execution descriptors, but their complete first-party implementation passes
+are now assigned to `v0.52.1..=v0.52.9` and `v0.61.0..=v0.61.5`.
 
 Implemented now:
 
@@ -183,11 +183,12 @@ Not implemented yet:
   BN254 pairing execution, G2 subgroup validation, BLAKE2F execution, the
   Fp6/Fp12 tower foundation, validated tuple streaming, line-function
   foundation, Miller-loop accumulator with sparse line-factor multiplication
-  evidence, bounded final exponentiation, Frobenius Q1/-Q2 point mapping, and
-  the projective post-loop line carrier are implemented; non-empty pairing
-  result admission now returns canonical EIP-197 zero/one words, while
-  BLAKE2F now follows EIP-152 input and output rules. Remaining KZG and BLS
-  cryptographic precompiles are scheduled for `v0.52.0`.
+  evidence, optimized bounded final exponentiation, Frobenius Q1/-Q2 point
+  mapping, and the projective post-loop line carrier are implemented; non-empty
+  pairing result admission now returns canonical EIP-197 zero/one words, while
+  BLAKE2F now follows EIP-152 input and output rules. `v0.52.0` adds exact KZG
+  and BLS planning contracts; first-party BLS execution is scheduled through
+  `v0.52.9`, and first-party KZG execution through `v0.61.5`.
 - No ABI/contract helper surface yet; scheduled for `v0.70.0` through
   `v0.78.0`.
 - No consensus/Engine API support yet; scheduled for `v0.79.0` through
@@ -217,14 +218,14 @@ Not implemented yet:
 
 ```toml
 [dependencies]
-eth = "0.51.0"
+eth = "0.52.0"
 ```
 
 For optional sanitization support:
 
 ```toml
 [dependencies]
-eth = { version = "0.51.0", features = ["sanitization"] }
+eth = { version = "0.52.0", features = ["sanitization"] }
 ```
 
 ## Features
@@ -251,7 +252,7 @@ Optional reviewed software Keccak backend:
 
 ```toml
 [dependencies]
-eth = { version = "0.51.0", features = ["keccak-tiny"] }
+eth = { version = "0.52.0", features = ["keccak-tiny"] }
 ```
 
 ```rust
@@ -265,14 +266,14 @@ Optional reviewed secp256k1 recovery adapter:
 
 ```toml
 [dependencies]
-eth = { version = "0.51.0", features = ["secp256k1-k256"] }
+eth = { version = "0.52.0", features = ["secp256k1-k256"] }
 ```
 
 Optional bounded EVM gas-estimation boundary:
 
 ```toml
 [dependencies]
-eth = { version = "0.51.0", features = ["evm"] }
+eth = { version = "0.52.0", features = ["evm"] }
 ```
 
 ```rust
@@ -377,7 +378,7 @@ Optional native EVM core domains:
 
 ```toml
 [dependencies]
-eth = { version = "0.51.0", features = ["evm-core"] }
+eth = { version = "0.52.0", features = ["evm-core"] }
 ```
 
 State access uses explicit host-state traits and caller-provided fixed-capacity
@@ -425,9 +426,10 @@ final-flag validation, and round-count gas.
 Dispatcher-facing ModExp,
 BN254 add/mul, BN254 pairing, and BLAKE2F plan execution charges the supplied
 gas meter on every call before validation or arithmetic work is reachable.
-Remaining KZG and BLS cryptographic precompiles are exposed as bounded plans and return a
-backend-unavailable error until audited backends or first-party implementations
-are admitted.
+KZG and BLS cryptographic precompiles expose exact fork, frame, output, and gas
+plans and return a backend-unavailable error until their first-party arithmetic
+releases are admitted. BLS MSM and pairing plans reject empty and partial item
+lists and apply the official EIP-2537 gas schedule.
 
 ```rust
 use eth::evm_core::{EvmFork, EvmPrecompileKind, EvmPrecompilePlan, EvmPrecompileRegistry};
@@ -1235,7 +1237,7 @@ friendly, and independently testable.
 | `eth-valkyoth-sanitization` | no | Optional bridge to the `sanitization` crate for secret-bearing Ethereum data. |
 | `eth-valkyoth-derive` | no | Optional sanitization and RLP derive macros. |
 | `eth-valkyoth-evm` | no | Explicit no_std EVM execution boundary; no backend admitted yet. |
-| `eth-valkyoth-evm-core` | no | Dependency-free native EVM core domains plus gas-metered basic bounded opcode execution, explicit host-state reads, fail-closed call/create planning, bounded identity/SHA-256/RIPEMD-160/ECRECOVER/ModExp/BN254 add/mul execution, BN254 pairing frame validation, validated tuple streaming, line-function foundation, Miller-loop accumulation, bounded final exponentiation, Frobenius Q1/-Q2 point mapping, projective post-loop line carrier, canonical zero/one result output, and EIP-152 BLAKE2F execution. |
+| `eth-valkyoth-evm-core` | no | Dependency-free native EVM core domains plus gas-metered basic bounded opcode execution, explicit host-state reads, fail-closed call/create planning, native precompile execution through BLAKE2F, and exact fail-closed KZG/BLS frame, output, and gas planning. |
 | `eth-valkyoth-rpc` | no | Future explicit RPC trust-policy boundary. |
 | `eth-valkyoth-signer` | no | Future signer isolation boundary. |
 | `eth-valkyoth-reth` | no | Future Reth integration boundary. |
@@ -1246,7 +1248,7 @@ friendly, and independently testable.
 The minimum supported Rust version is Rust `1.90.0`. New deployments should use
 the pinned stable Rust `1.96.1` until the toolchain policy is updated.
 
-Compatibility evidence for `0.51.0`:
+Compatibility evidence for `0.52.0`:
 
 | Rust | Local Evidence |
 | --- | --- |
@@ -1263,7 +1265,7 @@ Compatibility evidence for `0.51.0`:
 
 ```bash
 scripts/checks.sh
-scripts/release_0_51_0_gate.sh
+scripts/release_0_52_0_gate.sh
 ```
 
 For dependency-policy checks, install `cargo-deny` and `cargo-audit`, then run:
@@ -1277,6 +1279,7 @@ cargo audit
 
 - [Implementation Plan](docs/IMPLEMENTATION_PLAN.md)
 - [Release Plan](docs/RELEASE_PLAN.md)
+- [Advanced Precompile Backends](docs/advanced-precompile-backends.md)
 - [Block Headers](docs/block-headers.md)
 - [Receipts](docs/receipts.md)
 - [Withdrawals](docs/withdrawals.md)

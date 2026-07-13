@@ -61,7 +61,7 @@ fn signing_key() -> Result<SigningKey, TransactionSignatureValidationError> {
 
 fn expected_sender() -> Result<Address, TransactionSignatureValidationError> {
     let key = signing_key()?;
-    let encoded = key.verifying_key().to_encoded_point(false);
+    let encoded = key.verifying_key().to_sec1_point(false);
     let public_key = encoded
         .as_bytes()
         .get(1..)
@@ -79,9 +79,8 @@ fn sign_hash(
     signing_hash: TransactionSigningHash,
 ) -> Result<([u8; 32], [u8; 32], SignatureYParity), TransactionSignatureValidationError> {
     let key = signing_key()?;
-    let (signature, recovery_id) = key
-        .sign_prehash_recoverable(&<[u8; 32]>::from(signing_hash.to_b256()))
-        .map_err(|_| TransactionSignatureValidationError::InvalidSignature)?;
+    let (signature, recovery_id) =
+        key.sign_prehash_recoverable(&<[u8; 32]>::from(signing_hash.to_b256()));
     let bytes = signature.to_bytes();
     let r = bytes
         .get(..32)

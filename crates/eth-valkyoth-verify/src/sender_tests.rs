@@ -71,9 +71,8 @@ fn signing_key() -> Result<SigningKey, VerifyError> {
 
 fn signature_fixture() -> Result<EthereumSignature, VerifyError> {
     let key = signing_key()?;
-    let (signature, recovery_id) = key
-        .sign_prehash_recoverable(&<[u8; SIGNING_DIGEST_BYTES]>::from(signing_digest()))
-        .map_err(|_| VerifyError::InvalidSignature)?;
+    let (signature, recovery_id) =
+        key.sign_prehash_recoverable(&<[u8; SIGNING_DIGEST_BYTES]>::from(signing_digest()));
     let bytes = signature.to_bytes();
     let r = bytes
         .get(..SIGNING_DIGEST_BYTES)
@@ -88,7 +87,7 @@ fn signature_fixture() -> Result<EthereumSignature, VerifyError> {
 
 fn expected_address() -> Result<Address, VerifyError> {
     let key = signing_key()?;
-    let encoded = key.verifying_key().to_encoded_point(false);
+    let encoded = key.verifying_key().to_sec1_point(false);
     let source = encoded
         .as_bytes()
         .get(1..)

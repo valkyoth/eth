@@ -34,7 +34,7 @@ Most users should depend on `eth` and enable the optional `evm-core` feature:
 
 ```toml
 [dependencies]
-eth = { version = "0.51.0", features = ["evm-core"] }
+eth = { version = "0.52.0", features = ["evm-core"] }
 ```
 
 This crate executes only the audited bootstrap opcode subset. It exposes
@@ -53,9 +53,9 @@ run with a fixed-size no-alloc bitset.
 The Frontier identity, SHA-256, RIPEMD-160, bounded Byzantium ModExp,
 BN254 add/mul, BN254 pairing frames, and Istanbul BLAKE2F execute through
 first-party dependency-free implementations. ECRECOVER executes through
-explicit caller-provided secp256k1 and Keccak backend traits; KZG and BLS
-cryptographic precompiles remain fail-closed descriptors until their audited
-release slices are admitted.
+explicit caller-provided secp256k1 and Keccak backend traits. KZG and BLS
+cryptographic execution remains fail closed, while their descriptors now carry
+exact EIP-4844/EIP-2537 input, output, and gas plans.
 
 ## Security posture
 
@@ -87,9 +87,10 @@ release slices are admitted.
   point mapping, and the projective post-loop line carrier, then writes
   canonical EIP-197 zero/one output words. BLAKE2F executes EIP-152 exact-length frames with
   final-flag validation and round-count gas.
-  Remaining KZG and BLS cryptographic precompiles are bounded plans only and
-  fail closed until audited backends or first-party implementations are
-  admitted.
+  KZG and BLS cryptographic precompiles are bounded plans only and fail closed
+  until their first-party implementations are admitted. EIP-2537 fixed frames,
+  non-empty MSM/pairing lists, output lengths, discount gas, and pairing gas
+  are enforced at planning time.
 - Unsupported opcodes and unsupported forks are rejected with named errors.
 - No nested call/create execution, log, remaining cryptographic precompile,
   refund, or committed storage-write semantics are claimed yet.

@@ -156,7 +156,7 @@ impl EthereumSignature {
     fn secp256k1_signature(self) -> Result<Secp256k1Signature, VerifyError> {
         let signature = Secp256k1Signature::from_scalars(self.r, self.s)
             .map_err(|_| VerifyError::InvalidSignature)?;
-        if signature.normalize_s().is_some() {
+        if signature.normalize_s() != signature {
             return Err(VerifyError::InvalidSignature);
         }
         Ok(signature)
@@ -251,7 +251,7 @@ where
 fn public_key_payload_from_verifying_key(
     verifying_key: Secp256k1VerifyingKey,
 ) -> Result<[u8; ETHEREUM_PUBLIC_KEY_BYTES], VerifyError> {
-    let encoded = verifying_key.to_encoded_point(false);
+    let encoded = verifying_key.to_sec1_point(false);
     let public_key = encoded
         .as_bytes()
         .get(1..)

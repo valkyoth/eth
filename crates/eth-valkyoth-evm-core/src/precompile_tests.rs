@@ -386,11 +386,94 @@ fn hex_nibble(byte: u8) -> u8 {
 }
 
 #[test]
-fn deferred_dynamic_precompile_gas_is_not_zero_cost() -> Result<(), EvmCoreError> {
-    let bls = registry(EvmFork::PRAGUE)?.descriptor(EvmPrecompileKind::Bls12PairingCheck)?;
+fn advanced_precompile_shapes_match_eip_frames() -> Result<(), EvmCoreError> {
+    const CASES: &[(EvmPrecompileKind, usize, usize, u64)] = &[
+        (EvmPrecompileKind::KzgPointEvaluation, 192, 64, 50_000),
+        (EvmPrecompileKind::Bls12G1Add, 256, 128, 375),
+        (EvmPrecompileKind::Bls12G1Msm, 160, 128, 12_000),
+        (EvmPrecompileKind::Bls12G2Add, 512, 256, 600),
+        (EvmPrecompileKind::Bls12G2Msm, 288, 256, 22_500),
+        (EvmPrecompileKind::Bls12PairingCheck, 384, 32, 70_300),
+        (EvmPrecompileKind::Bls12MapFpToG1, 64, 128, 5_500),
+        (EvmPrecompileKind::Bls12MapFp2ToG2, 128, 256, 23_800),
+    ];
+    static INPUT: [u8; 512] = [0; 512];
+
+    for &(kind, input_len, output_len, gas) in CASES {
+        let fork = kind.introduced_in();
+        let descriptor = registry(fork)?.descriptor(kind)?;
+        let input = INPUT
+            .get(..input_len)
+            .ok_or(EvmCoreError::PrecompileInvalidInputLength)?;
+        let plan = EvmPrecompilePlan::try_new(descriptor, input)?;
+        assert_eq!(descriptor.output_len, Some(output_len));
+        assert_eq!(plan.gas_cost(), Some(EvmGas::new(gas)));
+        assert_eq!(
+            descriptor.implementation,
+            EvmPrecompileImplementation::RequiresCryptoBackend
+        );
+    }
+    Ok(())
+}
+
+#[test]
+fn bls_variable_frames_reject_empty_and_partial_items() -> Result<(), EvmCoreError> {
+    const CASES: &[(EvmPrecompileKind, usize)] = &[
+        (EvmPrecompileKind::Bls12G1Msm, 160),
+        (EvmPrecompileKind::Bls12G2Msm, 288),
+        (EvmPrecompileKind::Bls12PairingCheck, 384),
+    ];
+    static INPUT: [u8; 384] = [0; 384];
+
+    for &(kind, item_len) in CASES {
+        let descriptor = registry(EvmFork::PRAGUE)?.descriptor(kind)?;
+        assert_eq!(
+            EvmPrecompilePlan::try_new(descriptor, &[]),
+            Err(EvmCoreError::PrecompileInvalidInputLength)
+        );
+        let partial = INPUT
+            .get(..item_len - 1)
+            .ok_or(EvmCoreError::PrecompileInvalidInputLength)?;
+        assert_eq!(
+            EvmPrecompilePlan::try_new(descriptor, partial),
+            Err(EvmCoreError::PrecompileInvalidInputLength)
+        );
+    }
+    Ok(())
+}
+
+#[test]
+fn bls_msm_discount_tables_and_cap_match_eip_2537() -> Result<(), EvmCoreError> {
+    static INPUT: [u8; 129 * 384] = [0; 129 * 384];
+    const CASES: &[(EvmPrecompileKind, usize, usize, u64)] = &[
+        (EvmPrecompileKind::Bls12G1Msm, 160, 2, 22_776),
+        (EvmPrecompileKind::Bls12G1Msm, 160, 128, 797_184),
+        (EvmPrecompileKind::Bls12G1Msm, 160, 129, 803_412),
+        (EvmPrecompileKind::Bls12G2Msm, 288, 2, 45_000),
+        (EvmPrecompileKind::Bls12G2Msm, 288, 128, 1_509_120),
+        (EvmPrecompileKind::Bls12G2Msm, 288, 129, 1_520_910),
+    ];
+
+    for &(kind, item_len, items, expected) in CASES {
+        let descriptor = registry(EvmFork::PRAGUE)?.descriptor(kind)?;
+        let input = INPUT
+            .get(..item_len * items)
+            .ok_or(EvmCoreError::PrecompileInvalidInputLength)?;
+        assert_eq!(
+            EvmPrecompilePlan::try_new(descriptor, input)?.gas_cost(),
+            Some(EvmGas::new(expected))
+        );
+    }
+    Ok(())
+}
+
+#[test]
+fn bls_pairing_gas_scales_per_complete_tuple() -> Result<(), EvmCoreError> {
+    static INPUT: [u8; 768] = [0; 768];
+    let descriptor = registry(EvmFork::PRAGUE)?.descriptor(EvmPrecompileKind::Bls12PairingCheck)?;
     assert_eq!(
-        EvmPrecompilePlan::try_new(bls, &[0u8; 384])?.gas_cost(),
-        None
+        EvmPrecompilePlan::try_new(descriptor, &INPUT)?.gas_cost(),
+        Some(EvmGas::new(102_900))
     );
     Ok(())
 }

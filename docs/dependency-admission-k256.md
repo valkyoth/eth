@@ -1,6 +1,7 @@
 # k256 Dependency Admission
 
-Status: admitted as an explicit optional backend for `v0.37.3`
+Status: admitted as an explicit optional backend for `v0.37.3`; refreshed to
+stable `k256 0.14.0` in `v0.52.0`.
 
 `eth-valkyoth-verify` admits `k256` for secp256k1 ECDSA public-key recovery
 only behind the explicit `secp256k1-k256` feature. The default protocol-core
@@ -11,12 +12,12 @@ select a concrete curve implementation.
 
 | Crate | Version | Decision |
 | --- | --- | --- |
-| `k256` | `0.13.4` | Selected stable release. |
-| `k256` | `0.14.0-rc.15` | Not selected because it is a release candidate. |
+| `k256` | `0.14.0` | Selected current stable release. |
+| `k256` | `0.13.4` | Previous admitted stable release. |
 | `secp256k1` | `0.32.0-beta.2` | Not selected because it is beta and uses `CC0-1.0`; only reviewed dependencies with scoped cargo-deny exceptions may use that license. |
 
-The selected version was checked with `cargo info k256@0.13.4` on 2026-07-01.
-It declares `rust-version = 1.65`, below this workspace's Rust `1.90.0` MSRV.
+The selected version was checked with `cargo info k256@0.14.0` on 2026-07-13.
+It declares `rust-version = 1.85`, below this workspace's Rust `1.90.0` MSRV.
 Recovery tests now use the project `eth-valkyoth-hash` Keccak boundary with the
 optional `tiny-keccak` test backend instead of a direct `sha3` dev-dependency.
 
@@ -25,13 +26,18 @@ optional `tiny-keccak` test backend instead of a direct `sha3` dev-dependency.
 `eth-valkyoth-verify` uses:
 
 ```toml
-k256 = { version = "0.13.4", default-features = false, features = ["ecdsa"], optional = true }
+k256 = { version = "0.14.0", default-features = false, features = ["ecdsa"], optional = true }
 ```
 
 Default features are disabled so `std`, PKCS#8, Schnorr, and precomputed-table
 features are not admitted by accident. The `ecdsa` feature is required for
 `Signature`, `RecoveryId`, `SigningKey` test fixtures, and
 `VerifyingKey::recover_from_prehash`.
+
+The `v0.52.0` migration preserves fail-closed high-s rejection by comparing a
+signature with `normalize_s()` and uses the renamed `to_sec1_point` API.
+Recoverable signing is used only for tests and follows the new infallible API
+for already validated signing keys.
 
 ## Security Rules
 

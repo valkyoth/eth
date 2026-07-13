@@ -5,7 +5,9 @@
 #[cfg(feature = "std")]
 extern crate std;
 
+mod advanced_precompile;
 mod blake2f;
+mod bls12_gas;
 mod bn254;
 mod bn254_field;
 mod bn254_final;
@@ -30,6 +32,7 @@ mod modexp_testing;
 mod opcode;
 mod precompile;
 mod precompile_execute;
+mod precompile_gas;
 mod program_counter;
 mod ripemd160;
 mod sha256;
