@@ -1,6 +1,6 @@
 # Release Notes - eth v0.52.0
 
-Status: implementation complete; awaiting pentest.
+Status: release candidate; pentest remediation and retest complete.
 
 ## Summary
 
@@ -123,5 +123,6 @@ path.
 
 ## Pentest
 
-The release must not be tagged until its independent pentest, remediation,
-retest, and committed `security/pentest/v0.52.0.md` report are complete.
+The independent pentest findings were remediated and the final retest passed.
+The committed report is `security/pentest/v0.52.0.md` with `Status: PASS`.
+Tagging must wait for GitHub CI and CodeQL on the final report-only commit.

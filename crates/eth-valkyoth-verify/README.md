@@ -31,7 +31,7 @@ Most users should depend on the facade crate instead:
 
 ```toml
 [dependencies]
-eth = "0.37"
+eth = "0.52.0"
 ```
 
 Crates.io: <https://crates.io/crates/eth>
@@ -39,6 +39,12 @@ Crates.io: <https://crates.io/crates/eth>
 This package is published separately so the `eth` workspace can keep small,
 auditable crate boundaries. Treat it as a lower-level building block unless the
 `eth` documentation explicitly says otherwise.
+
+The `0.22.0` support-crate release, shipped with `eth` `0.52.0`, applies a
+64-type ceiling to both EIP-712 schema paths, traverses shared dependency DAGs
+once, redacts signing-value formatting, and removes `Copy` and `Clone` from
+borrowed signing values. These are intentional public compatibility changes;
+use `0.22` rather than a `0.21` compatibility requirement.
 
 The `0.20.0` support-crate release, shipped with `eth` `0.33.0`, adds account
 and storage MPT inclusion proof verification. The new

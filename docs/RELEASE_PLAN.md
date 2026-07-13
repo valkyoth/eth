@@ -2259,6 +2259,8 @@ Exit criteria:
 
 ### v0.52.0 - Native EVM Advanced Precompile Backends
 
+Status: release candidate; pentest remediation and retest complete.
+
 Goal: version the remaining advanced cryptographic precompile work before full
 state-test claims depend on it.
 
