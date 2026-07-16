@@ -14,6 +14,7 @@ Tags use:
 ```text
 v0.N.0      milestone release
 v0.N.P      patch/fix release for milestone N
+v1.0.0-rc.N exact 1.0-versioned production candidate
 v1.0.0      first serious production-ready Ethereum crate
 ```
 
@@ -60,8 +61,9 @@ these explicit sections:
   in that version;
 - `Verification`: release-specific tests, vectors, differential checks,
   interoperability checks, or operational evidence;
-- `Exit criteria`: the observable definition of done, ending with
-  `vX.Y.Z implementation stop reached. Run pentest for this exact commit.`
+- `Exit criteria`: the observable definition of done, ending with the exact
+  release version and `implementation stop reached. Run pentest for this exact
+  commit.`
 
 Release-specific verification is additive to the repository-wide release
 gates and pentest handoff below. It never replaces `scripts/checks.sh`,
@@ -156,6 +158,14 @@ hash itself. The release-readiness gate requires the tag candidate commit to
 have the reviewed commit as its first parent and to change only the permanent
 report file.
 
+Prerelease candidates use the same workflow and a semver-prerelease report
+path such as `security/pentest/v1.0.0-rc.1.md`. Release tooling must parse
+prerelease versions structurally rather than assuming three numeric
+components. A final `v1.0.0` same-commit promotion may reuse the exact approved
+RC pentest evidence only when the tag target, package archives, checksums,
+SBOM, and provenance are unchanged; otherwise a new RC and complete review
+cycle are required.
+
 ## Crate Versioning And Publish Order
 
 Workspace crates use independent versions from `v0.4.0` development onward.
@@ -220,12 +230,20 @@ relevant dependency point.
 | EVM tracing, state overrides, call traces, state diffs, and debug/trace models were missing. | Added `v0.89.0..=v0.91.0` for inspector hooks, trace models, deterministic simulation, and RPC trace interoperability. |
 | Witnesses, stateless execution, commitment-scheme agility, Verkle/binary trees, and state/history evolution were not versioned. | Added `v0.165.0..=v0.174.0` for proof-format abstraction, witnesses, stateless execution, future commitments, state-expiry policy, zk-proof boundaries, and fork-maintenance automation. |
 | SDK compatibility and documentation drift were not release-blocking. | Added `v0.66.0`, `v0.180.0`, and `v0.181.0` for feature truthfulness, generated dependency snippets, semver/feature/serde compatibility gates, and task-oriented documentation. |
-| Consensus types, Engine boundaries, and a light client did not amount to a full beacon node. | Added `v0.189.0..=v0.231.0` for consensus-client architecture, complete beacon transition, production fork choice, beacon storage, operation pools, consensus networking, synchronization, Engine coordination, PeerDAS, beacon-node orchestration, and server APIs. |
-| No complete validator client, slashing-protection subsystem, or validator key-management service was planned. | Added `v0.232.0..=v0.241.0` for duty scheduling, block proposals, attestations, sync committees, validator lifecycle operations, doppelganger protection, transactional slashing protection, EIP-3076, validator signers, and the Keymanager API. |
-| Builder relay integration and safe local-builder fallback were only a boundary decision. | Added `v0.242.0` and `v0.243.0` for Builder API workflows, relay multiplexing, bid/reveal validation, local fallback, withholding defenses, and a future protocol-native PBS boundary. |
-| A Lighthouse/Prysm-class claim lacked full operational APIs, deterministic simulation, Hive interoperability, multi-execution-client tests, and a long-running validator testnet. | Added `v0.244.0..=v0.249.0` for operations, database tooling, simulation, Hive/multi-client interoperability, and slash-free long-running testnet evidence. |
-| Existing formal verification and audits did not cover full consensus transition, fork choice, slashing protection, validator duties, consensus networking, data availability, or builders. | Added `v0.250.0..=v0.257.0` for performance, Kani/formal evidence, four independent audit tracks, and consolidated remediation. |
-| The final API freeze and production release candidate occurred before full consensus-client abstractions existed. | Reclassified `v0.182.0..=v0.188.0` as foundation-level stabilization and added the actual complete API freeze, release rehearsal, and production candidate at `v0.258.0..=v0.260.0`. |
+| Consensus types, Engine boundaries, and a light client did not amount to a full beacon node. | Added `v0.189.0..=v0.234.0` for consensus architecture, complete transition and fork choice, storage, networking, sync, Engine coordination, PeerDAS, historical deposits/genesis, beacon orchestration, block production, and server/validator APIs. |
+| PeerDAS state, storage, networking, and sync consumers were scheduled before the cell/KZG/reconstruction core. | Moved the first-party PeerDAS core to `v0.193.0`; all DA consumers now follow it, and `v0.265.0` audits the implementation and acceleration boundaries. |
+| Historical deposit-contract tracking, deposit trees, eth1 voting, and genesis construction were missing. | Added `v0.228.0` and `v0.229.0` before beacon-node orchestration. |
+| Block-production ownership was split ambiguously between beacon and validator clients. | Added beacon-owned, embeddable unsigned production at `v0.233.0`; `v0.234.0` exposes it, and `v0.241.0` limits the validator client to independent checks, slashing authorization, signing, and publication. |
+| Live validator duties preceded slashing protection and the signer. | Reordered `v0.235.0..=v0.244.0` so the slashing kernel, transactional database, EIP-3076, key foundation, and signer all precede duty scheduling and every signature-producing duty. |
+| Validator key generation and deposit artifacts lacked EIP-2333/EIP-2334 and withdrawal-key separation. | Added `v0.238.0` for key derivation, strict key roles, offline withdrawal credentials, and deposit-data generation/verification. |
+| Keymanager, remote signing, and HSM/hardware custody were conflated. | Split operator Keymanager control, outbound remote signing/slashing authority, and signer-to-HSM/KMS custody into `v0.245.0..=v0.247.0`; added threshold/DVT coordination at `v0.248.0`. |
+| Builder relay integration and safe local-builder fallback were only a boundary decision. | Added `v0.249.0` and `v0.250.0` for Builder API workflows, relay multiplexing, bid/reveal validation, local fallback, withholding defenses, and protocol-native PBS evolution. |
+| Optional network slashing detection, distributed signing, validator analytics, and connectivity diagnostics were absent. | Added `v0.248.0`, `v0.251.0`, `v0.252.0`, and `v0.253.0` with explicit trust and resource boundaries. |
+| Production beacon-node and validator-client executables, packaging, data directories, signals, exit codes, upgrades, and rollback were not explicit. | Added separate binary and packaging milestones at `v0.254.0` and `v0.255.0`. |
+| A Lighthouse/Prysm-class claim lacked deterministic simulation, mandatory Hive suites, broad client matrices, and quantitative long-testnet/performance gates. | Added `v0.257.0..=v0.262.0`, including the numeric acceptance contract at `v0.258.0`. |
+| Later SSZ, BLS, PeerDAS, erasure-coding, and acceleration implementations were not covered by an implementation-level core audit. | Added `v0.265.0` and expanded the integration audits at `v0.266.0..=v0.269.0`. |
+| The final unchanged-candidate claim ignored manifest, lockfile, SBOM, and checksum changes required by a `1.0.0` version promotion. | Added `v0.273.0`, `v0.274.0`, and an explicit `v1.0.0-rc.1` exact-candidate flow; the stable tag must point to the unchanged approved RC commit. |
+| The final API freeze and production release candidate occurred before full consensus-client abstractions existed. | Reclassified `v0.182.0..=v0.188.0` as foundation stabilization and moved complete remediation, freeze, rehearsal, promotion, and candidate admission to `v0.270.0..=v0.274.0` plus `v1.0.0-rc.1`. |
 
 ## Phase 0: Repository And Release Discipline
 
@@ -2693,7 +2711,7 @@ Exit criteria:
 The releases below replace the earlier narrow integration roadmap. They assign
 every gap identified by the July 2026 completeness reviews to a version instead
 of leaving work as an unversioned deferral. The roadmap may extend beyond
-`v0.260.0` when new official Ethereum work or a newly discovered completeness
+`v0.274.0` when new official Ethereum work or a newly discovered completeness
 gap requires another small pass. Reaching a high `0.x` version is preferable
 to compressing security-sensitive work into oversized releases.
 
@@ -4504,23 +4522,37 @@ Exit criteria:
 
 ## Phase 15: Consensus Engine And Light Client
 
-### v0.141.0 - SSZ Core
+### v0.141.0 - SSZ Foundational Codec And Merkleization
 
 Status: planned.
 
-Goal: deliver the SSZ Core release with this required outcome: Consensus objects can be encoded and proven without external SSZ core logic.
+Goal: establish the immutable SSZ wire and Merkle foundation required by
+light-client and protocol-type work without claiming the later mutable,
+cached, full-client surface.
 
 Deliverables:
 
-- First-party SSZ type rules, bounded encode/decode, generalized indices, Merkleization, proofs, and hash-tree roots.
+- First-party basic and composite SSZ type rules;
+- bounded canonical encode/decode;
+- offset validation;
+- generalized indices;
+- baseline Merkleization, branches, and hash-tree roots;
+- explicit exclusions for incremental mutation, cached trees, and
+  multiproofs assigned to `v0.191.0`.
 
 Verification:
 
-- Official consensus-spec vectors, malformed-offset fuzzing, root differentials.
+- Official consensus-spec vectors;
+- malformed-offset fuzzing;
+- baseline root differentials;
+- cross-check that later full-client APIs cannot be inferred from this
+  foundational release.
 
 Exit criteria:
 
-- Consensus objects can be encoded and proven without external SSZ core logic.
+- Immutable consensus objects can be encoded, decoded, rooted, and proven
+  without external SSZ core logic, while mutable production operations remain
+  explicitly assigned to `v0.191.0`.
 - `v0.141.0 implementation stop reached. Run pentest for this exact
   commit.`
 
@@ -4564,43 +4596,63 @@ Exit criteria:
 - `v0.143.0 implementation stop reached. Run pentest for this exact
   commit.`
 
-### v0.144.0 - Engine Client Server And Service
+### v0.144.0 - Engine Transport And Protocol Boundary
 
 Status: planned.
 
-Goal: deliver the Engine Client Server And Service release with this required outcome: Engine integration supports both embedding directions with explicit trust and lifecycle policy.
+Goal: define and test the reusable Engine API protocol and authenticated
+transport boundary without claiming beacon-node coordination policy.
 
 Deliverables:
 
-- Runtime-neutral Engine client/server traits, authenticated transport adapter, payload lifecycle, idempotency, cancellation, and error mapping.
+- Runtime-neutral Engine client/server traits;
+- authenticated transport adapter;
+- request/response sequencing primitives;
+- idempotency, cancellation, timeout, and error mapping;
+- explicit statement that beacon fork-choice and payload orchestration belong
+  to the Beacon Engine Coordinator at `v0.226.0`.
 
 Verification:
 
-- Execution/consensus client sequence tests and JWT/redaction review.
+- Protocol sequence tests;
+- JWT and redaction review;
+- transport conformance tests independent of beacon-node policy.
 
 Exit criteria:
 
-- Engine integration supports both embedding directions with explicit trust and lifecycle policy.
+- Engine messages can travel through an authenticated, runtime-neutral
+  boundary in either embedding direction without assigning beacon-node
+  coordination ownership to this layer.
 - `v0.144.0 implementation stop reached. Run pentest for this exact
   commit.`
 
-### v0.145.0 - Beacon API
+### v0.145.0 - Beacon API Provider Client
 
 Status: planned.
 
-Goal: deliver the Beacon API release with this required outcome: Consensus data can be acquired through a production typed provider boundary.
+Goal: provide a typed outbound Beacon API client/provider boundary without
+claiming the later beacon-node server implementation.
 
 Deliverables:
 
-- Typed Beacon REST methods, events, pagination, version negotiation, finality data, blobs/data columns, and bounded transport policy.
+- Typed outbound Beacon REST methods;
+- event-stream client handling;
+- pagination and version negotiation;
+- finality, blob, and data-column responses;
+- bounded transport policy;
+- explicit server-side ownership assigned to `v0.232.0`.
 
 Verification:
 
-- Beacon API fixtures and local consensus-client integration.
+- Beacon API client fixtures;
+- local independent consensus-client integration;
+- compile and documentation checks separating provider and server roles.
 
 Exit criteria:
 
-- Consensus data can be acquired through a production typed provider boundary.
+- Consensus data can be acquired through a production typed provider
+  boundary, while serving the Beacon API remains a distinct beacon-node
+  responsibility.
 - `v0.145.0 implementation stop reached. Run pentest for this exact
   commit.`
 
@@ -4744,23 +4796,35 @@ Exit criteria:
 - `v0.152.0 implementation stop reached. Run pentest for this exact
   commit.`
 
-### v0.153.0 - PeerDAS And Consensus Hardening
+### v0.153.0 - PeerDAS Threat Model And Admission Plan
 
 Status: planned.
 
-Goal: deliver the PeerDAS And Consensus Hardening release with this required outcome: Current consensus and data-availability claims are bounded and reviewed.
+Goal: define PeerDAS trust, cryptographic, custody, sampling, networking, and
+resource requirements before implementation begins.
 
 Deliverables:
 
-- Data availability sampling/data-column boundaries, custody policy, fork-current consensus updates, fuzzing, load tests, and pentest.
+- PeerDAS threat model;
+- data-column and sampling boundaries;
+- custody policy;
+- cryptographic and trusted-setup requirements;
+- CPU, memory, bandwidth, and retention ceilings;
+- versioned implementation assignments beginning at `v0.193.0`;
+- fail-closed rules that prevent this planning release from implying an
+  executable PeerDAS implementation.
 
 Verification:
 
-- Official PeerDAS/current-fork fixtures and adversarial availability tests.
+- Review against pinned PeerDAS/current-fork specifications;
+- abuse-case and dependency review;
+- traceability check proving every admitted requirement has a later release.
 
 Exit criteria:
 
-- Current consensus and data-availability claims are bounded and reviewed.
+- PeerDAS implementation cannot begin with ambiguous trust, cryptographic,
+  custody, networking, or resource boundaries, and no consumer can claim
+  support before the `v0.193.0` core exists.
 - `v0.153.0 implementation stop reached. Run pentest for this exact
   commit.`
 
@@ -5533,19 +5597,34 @@ Exit criteria:
 
 Status: planned.
 
-Goal: deliver the Complete SSZ Client Surface release with this required outcome: Beacon state and network objects can use first-party SSZ without missing production container or proof operations.
+Goal: extend the immutable `v0.141.0` SSZ foundation into the complete mutable,
+cached, proof-capable surface required by production beacon state and
+networking.
 
 Deliverables:
 
-- Complete containers, lists, vectors, bitlists, bitvectors, incremental hash-tree roots, generalized indices, branches, multiproofs, cached trees, and bounded mutation APIs.
+- Complete production containers, lists, vectors, bitlists, and bitvectors;
+- incremental hash-tree roots;
+- mutable generalized-index operations;
+- branches and multiproofs;
+- cached trees and cache-invalidation rules;
+- bounded transactional mutation APIs;
+- compatibility with the canonical encoding and baseline roots from
+  `v0.141.0`.
 
 Verification:
 
-- Official SSZ vectors, incremental/full-root differential tests, malformed-offset and proof fuzzing.
+- Official SSZ vectors;
+- incremental-versus-full-root differential tests;
+- cache invalidation and mutation rollback tests;
+- malformed-offset and proof fuzzing;
+- compatibility tests against `v0.141.0` encodings and roots.
 
 Exit criteria:
 
-- Beacon state and network objects can use first-party SSZ without missing production container or proof operations.
+- Beacon state and network objects can use first-party SSZ without missing
+  production mutation, caching, container, or proof operations, and without
+  redefining the foundational codec.
 - `v0.191.0 implementation stop reached. Run pentest for this exact
   commit.`
 
@@ -5569,7 +5648,42 @@ Exit criteria:
 - `v0.192.0 implementation stop reached. Run pentest for this exact
   commit.`
 
-### v0.193.0 - Committees Shuffling Domains And Signing Roots
+### v0.193.0 - PeerDAS Cell And Reconstruction Core
+
+Status: planned.
+
+Goal: implement the first-party cryptographic and erasure-coding core before
+any state-transition, storage, networking, synchronization, or validator path
+consumes PeerDAS data.
+
+Deliverables:
+
+- Blob-to-cell conversion;
+- cell KZG proof creation and verification;
+- data-column construction;
+- erasure coding and bounded reconstruction;
+- batch verification;
+- bounded reusable workspaces;
+- explicit acceleration/backend boundaries;
+- canonical failure and partial-output behavior.
+
+Verification:
+
+- Official EIP-7594 and pinned current-fork vectors;
+- independent differential checks;
+- malformed proof, cell, and reconstruction fuzzing;
+- corruption and insufficient-column tests;
+- CPU, memory, and workspace ceilings;
+- default-graph and backend-admission checks.
+
+Exit criteria:
+
+- Data columns can be created, verified, and reconstructed first party before
+  any downstream milestone treats PeerDAS evidence as actionable.
+- `v0.193.0 implementation stop reached. Run pentest for this exact
+  commit.`
+
+### v0.194.0 - Committees Shuffling Domains And Signing Roots
 
 Status: planned.
 
@@ -5586,12 +5700,12 @@ Verification:
 Exit criteria:
 
 - Every duty and signature domain is derived from pinned consensus rules.
-- `v0.193.0 implementation stop reached. Run pentest for this exact
+- `v0.194.0 implementation stop reached. Run pentest for this exact
   commit.`
 
 ## Phase 20: Complete Beacon State Transition
 
-### v0.194.0 - Beacon Transition Shell And Per-Slot Processing
+### v0.195.0 - Beacon Transition Shell And Per-Slot Processing
 
 Status: planned.
 
@@ -5608,10 +5722,10 @@ Verification:
 Exit criteria:
 
 - Per-slot processing is complete and failed transitions cannot partially mutate caller-visible state.
-- `v0.194.0 implementation stop reached. Run pentest for this exact
+- `v0.195.0 implementation stop reached. Run pentest for this exact
   commit.`
 
-### v0.195.0 - Epoch Registry And Balance Processing
+### v0.196.0 - Epoch Registry And Balance Processing
 
 Status: planned.
 
@@ -5628,10 +5742,10 @@ Verification:
 Exit criteria:
 
 - Epoch-wide validator and balance bookkeeping matches the specification.
-- `v0.195.0 implementation stop reached. Run pentest for this exact
+- `v0.196.0 implementation stop reached. Run pentest for this exact
   commit.`
 
-### v0.196.0 - Activation Exit Churn Withdrawal And Consolidation
+### v0.197.0 - Activation Exit Churn Withdrawal And Consolidation
 
 Status: planned.
 
@@ -5648,10 +5762,10 @@ Verification:
 Exit criteria:
 
 - The full validator lifecycle is state-transition complete.
-- `v0.196.0 implementation stop reached. Run pentest for this exact
+- `v0.197.0 implementation stop reached. Run pentest for this exact
   commit.`
 
-### v0.197.0 - Rewards Penalties Participation And Inactivity
+### v0.198.0 - Rewards Penalties Participation And Inactivity
 
 Status: planned.
 
@@ -5668,10 +5782,10 @@ Verification:
 Exit criteria:
 
 - Balance outcomes match official vectors across normal and non-finalizing periods.
-- `v0.197.0 implementation stop reached. Run pentest for this exact
+- `v0.198.0 implementation stop reached. Run pentest for this exact
   commit.`
 
-### v0.198.0 - Deposits Slashings And Credential Operations
+### v0.199.0 - Deposits Slashings And Credential Operations
 
 Status: planned.
 
@@ -5688,10 +5802,10 @@ Verification:
 Exit criteria:
 
 - Every consensus operation that changes validator state is implemented and checked.
-- `v0.198.0 implementation stop reached. Run pentest for this exact
+- `v0.199.0 implementation stop reached. Run pentest for this exact
   commit.`
 
-### v0.199.0 - Attestations Sync Committees And Block Operations
+### v0.200.0 - Attestations Sync Committees And Block Operations
 
 Status: planned.
 
@@ -5708,10 +5822,10 @@ Verification:
 Exit criteria:
 
 - Beacon blocks can process all stable-fork consensus operations.
-- `v0.199.0 implementation stop reached. Run pentest for this exact
+- `v0.200.0 implementation stop reached. Run pentest for this exact
   commit.`
 
-### v0.200.0 - Execution Payload And Request Processing
+### v0.201.0 - Execution Payload And Request Processing
 
 Status: planned.
 
@@ -5728,10 +5842,10 @@ Verification:
 Exit criteria:
 
 - Consensus transition is correctly bound to execution validity and current request types.
-- `v0.200.0 implementation stop reached. Run pentest for this exact
+- `v0.201.0 implementation stop reached. Run pentest for this exact
   commit.`
 
-### v0.201.0 - Data Availability State Transition
+### v0.202.0 - Data Availability State Transition
 
 Status: planned.
 
@@ -5748,10 +5862,10 @@ Verification:
 Exit criteria:
 
 - Consensus transition does not accept data-dependent blocks without the required availability evidence.
-- `v0.201.0 implementation stop reached. Run pentest for this exact
+- `v0.202.0 implementation stop reached. Run pentest for this exact
   commit.`
 
-### v0.202.0 - Explicit Consensus Fork Upgrades
+### v0.203.0 - Explicit Consensus Fork Upgrades
 
 Status: planned.
 
@@ -5768,10 +5882,10 @@ Verification:
 Exit criteria:
 
 - Every supported fork transition is explicit, tested, and free of implicit optional-field reinterpretation.
-- `v0.202.0 implementation stop reached. Run pentest for this exact
+- `v0.203.0 implementation stop reached. Run pentest for this exact
   commit.`
 
-### v0.203.0 - Complete State-Transition Vector Gate
+### v0.204.0 - Complete State-Transition Vector Gate
 
 Status: planned.
 
@@ -5788,12 +5902,12 @@ Verification:
 Exit criteria:
 
 - The complete beacon state transition is fixture-backed for every claimed stable fork.
-- `v0.203.0 implementation stop reached. Run pentest for this exact
+- `v0.204.0 implementation stop reached. Run pentest for this exact
   commit.`
 
 ## Phase 21: Production Consensus Fork Choice And Beacon Chain
 
-### v0.204.0 - Transactional Fork-Choice Store
+### v0.205.0 - Transactional Fork-Choice Store
 
 Status: planned.
 
@@ -5810,10 +5924,10 @@ Verification:
 Exit criteria:
 
 - Fork-choice updates are transactional as required by the specification.
-- `v0.204.0 implementation stop reached. Run pentest for this exact
+- `v0.205.0 implementation stop reached. Run pentest for this exact
   commit.`
 
-### v0.205.0 - LMD-GHOST And Latest Messages
+### v0.206.0 - LMD-GHOST And Latest Messages
 
 Status: planned.
 
@@ -5830,10 +5944,10 @@ Verification:
 Exit criteria:
 
 - Head computation matches LMD-GHOST under competing branches and votes.
-- `v0.205.0 implementation stop reached. Run pentest for this exact
+- `v0.206.0 implementation stop reached. Run pentest for this exact
   commit.`
 
-### v0.206.0 - Casper FFG Proposer Boost And Reorg Policy
+### v0.207.0 - Casper FFG Proposer Boost And Reorg Policy
 
 Status: planned.
 
@@ -5850,10 +5964,10 @@ Verification:
 Exit criteria:
 
 - Finality and proposer policies match pinned stable-fork rules.
-- `v0.206.0 implementation stop reached. Run pentest for this exact
+- `v0.207.0 implementation stop reached. Run pentest for this exact
   commit.`
 
-### v0.207.0 - Optimistic Execution And Invalidation
+### v0.208.0 - Optimistic Execution And Invalidation
 
 Status: planned.
 
@@ -5870,10 +5984,10 @@ Verification:
 Exit criteria:
 
 - Execution-invalid ancestry cannot remain canonical or authorize validator duties.
-- `v0.207.0 implementation stop reached. Run pentest for this exact
+- `v0.208.0 implementation stop reached. Run pentest for this exact
   commit.`
 
-### v0.208.0 - Fork-Choice Persistence And Recovery
+### v0.209.0 - Fork-Choice Persistence And Recovery
 
 Status: planned.
 
@@ -5890,10 +6004,10 @@ Verification:
 Exit criteria:
 
 - Restarted fork choice returns the same safe/finalized/head state or fails closed.
-- `v0.208.0 implementation stop reached. Run pentest for this exact
+- `v0.209.0 implementation stop reached. Run pentest for this exact
   commit.`
 
-### v0.209.0 - Beacon Operation Pools
+### v0.210.0 - Beacon Operation Pools
 
 Status: planned.
 
@@ -5910,10 +6024,10 @@ Verification:
 Exit criteria:
 
 - Block production has complete, bounded, reorg-aware operation sources.
-- `v0.209.0 implementation stop reached. Run pentest for this exact
+- `v0.210.0 implementation stop reached. Run pentest for this exact
   commit.`
 
-### v0.210.0 - Hot And Finalized Beacon Storage
+### v0.211.0 - Hot And Finalized Beacon Storage
 
 Status: planned.
 
@@ -5930,10 +6044,10 @@ Verification:
 Exit criteria:
 
 - Beacon blocks and states survive restart and finalization atomically.
-- `v0.210.0 implementation stop reached. Run pentest for this exact
+- `v0.211.0 implementation stop reached. Run pentest for this exact
   commit.`
 
-### v0.211.0 - State Snapshots And Reconstruction
+### v0.212.0 - State Snapshots And Reconstruction
 
 Status: planned.
 
@@ -5950,10 +6064,10 @@ Verification:
 Exit criteria:
 
 - Required historical states can be reconstructed within documented resource bounds.
-- `v0.211.0 implementation stop reached. Run pentest for this exact
+- `v0.212.0 implementation stop reached. Run pentest for this exact
   commit.`
 
-### v0.212.0 - Sidecar Custody Pruning And Retention
+### v0.213.0 - Sidecar Custody Pruning And Retention
 
 Status: planned.
 
@@ -5970,10 +6084,10 @@ Verification:
 Exit criteria:
 
 - Data availability obligations persist correctly across restarts and pruning.
-- `v0.212.0 implementation stop reached. Run pentest for this exact
+- `v0.213.0 implementation stop reached. Run pentest for this exact
   commit.`
 
-### v0.213.0 - Beacon Database Migration And Repair
+### v0.214.0 - Beacon Database Migration And Repair
 
 Status: planned.
 
@@ -5990,7 +6104,7 @@ Verification:
 Exit criteria:
 
 - Beacon storage upgrades and repairs are reproducible and fail closed.
-- `v0.213.0 implementation stop reached. Run pentest for this exact
+- `v0.214.0 implementation stop reached. Run pentest for this exact
   commit.`
 
 ## Phase 22: Consensus Networking And Synchronization
@@ -5999,7 +6113,7 @@ Consensus networking is separate from execution-layer DevP2P/RLPx. It uses the
 transport and protocols required by the pinned consensus P2P specification and
 must remain behind explicit optional features.
 
-### v0.214.0 - Consensus Networking Threat And Dependency Gate
+### v0.215.0 - Consensus Networking Threat And Dependency Gate
 
 Status: planned.
 
@@ -6016,10 +6130,10 @@ Verification:
 Exit criteria:
 
 - No live consensus networking lands before its dependencies and abuse controls are approved.
-- `v0.214.0 implementation stop reached. Run pentest for this exact
+- `v0.215.0 implementation stop reached. Run pentest for this exact
   commit.`
 
-### v0.215.0 - Discv5 ENR And Secure Transport
+### v0.216.0 - Discv5 ENR And Secure Transport
 
 Status: planned.
 
@@ -6036,10 +6150,10 @@ Verification:
 Exit criteria:
 
 - Consensus peers can be discovered and authenticated with current fork/custody metadata.
-- `v0.215.0 implementation stop reached. Run pentest for this exact
+- `v0.216.0 implementation stop reached. Run pentest for this exact
   commit.`
 
-### v0.216.0 - GossipSub Topics And Subnet Management
+### v0.217.0 - GossipSub Topics And Subnet Management
 
 Status: planned.
 
@@ -6056,10 +6170,10 @@ Verification:
 Exit criteria:
 
 - The node joins and leaves every required gossip domain at the correct time.
-- `v0.216.0 implementation stop reached. Run pentest for this exact
+- `v0.217.0 implementation stop reached. Run pentest for this exact
   commit.`
 
-### v0.217.0 - Staged Gossip Validation And Seen Caches
+### v0.218.0 - Staged Gossip Validation And Seen Caches
 
 Status: planned.
 
@@ -6076,10 +6190,10 @@ Verification:
 Exit criteria:
 
 - Gossip reaches pools or fork choice only after all required validation stages pass.
-- `v0.217.0 implementation stop reached. Run pentest for this exact
+- `v0.218.0 implementation stop reached. Run pentest for this exact
   commit.`
 
-### v0.218.0 - Consensus Req Resp Protocols
+### v0.219.0 - Consensus Req Resp Protocols
 
 Status: planned.
 
@@ -6096,10 +6210,10 @@ Verification:
 Exit criteria:
 
 - Required sync and serving protocols are complete and bounded.
-- `v0.218.0 implementation stop reached. Run pentest for this exact
+- `v0.219.0 implementation stop reached. Run pentest for this exact
   commit.`
 
-### v0.219.0 - Consensus Peer Scoring And Backpressure
+### v0.220.0 - Consensus Peer Scoring And Backpressure
 
 Status: planned.
 
@@ -6116,10 +6230,10 @@ Verification:
 Exit criteria:
 
 - Malicious or slow peers cannot create unbounded work or dominate peer selection.
-- `v0.219.0 implementation stop reached. Run pentest for this exact
+- `v0.220.0 implementation stop reached. Run pentest for this exact
   commit.`
 
-### v0.220.0 - Checkpoint And Weak-Subjectivity Sync
+### v0.221.0 - Checkpoint And Weak-Subjectivity Sync
 
 Status: planned.
 
@@ -6136,10 +6250,10 @@ Verification:
 Exit criteria:
 
 - Checkpoint sync either reaches the required anchor or terminates as a critical safety failure.
-- `v0.220.0 implementation stop reached. Run pentest for this exact
+- `v0.221.0 implementation stop reached. Run pentest for this exact
   commit.`
 
-### v0.221.0 - Head And Range Sync
+### v0.222.0 - Head And Range Sync
 
 Status: planned.
 
@@ -6156,10 +6270,10 @@ Verification:
 Exit criteria:
 
 - A node reaches current head under bounded resources and adversarial peers.
-- `v0.221.0 implementation stop reached. Run pentest for this exact
+- `v0.222.0 implementation stop reached. Run pentest for this exact
   commit.`
 
-### v0.222.0 - Finalized Backfill And State Reconstruction
+### v0.223.0 - Finalized Backfill And State Reconstruction
 
 Status: planned.
 
@@ -6176,10 +6290,10 @@ Verification:
 Exit criteria:
 
 - Historical data and states are reconstructed without weakening checkpoint trust.
-- `v0.222.0 implementation stop reached. Run pentest for this exact
+- `v0.223.0 implementation stop reached. Run pentest for this exact
   commit.`
 
-### v0.223.0 - Optimistic Sync And Execution Recovery
+### v0.224.0 - Optimistic Sync And Execution Recovery
 
 Status: planned.
 
@@ -6196,10 +6310,10 @@ Verification:
 Exit criteria:
 
 - Optimistic progress cannot authorize duties and recovers correctly when execution rejects payloads.
-- `v0.223.0 implementation stop reached. Run pentest for this exact
+- `v0.224.0 implementation stop reached. Run pentest for this exact
   commit.`
 
-### v0.224.0 - PeerDAS Sync Custody And Backfill
+### v0.225.0 - PeerDAS Sync Custody And Backfill
 
 Status: planned.
 
@@ -6216,32 +6330,45 @@ Verification:
 Exit criteria:
 
 - Node and attached-validator custody obligations are met before availability-dependent acceptance or duties.
-- `v0.224.0 implementation stop reached. Run pentest for this exact
+- `v0.225.0 implementation stop reached. Run pentest for this exact
   commit.`
 
 ## Phase 23: Engine Coordination Data Availability And Beacon Service
 
-### v0.225.0 - Authenticated Engine Client
+### v0.226.0 - Beacon Engine Coordinator
 
 Status: planned.
 
-Goal: deliver the Authenticated Engine Client release with this required outcome: The beacon node can coordinate all claimed forks with an execution client through a complete authenticated API.
+Goal: build on the `v0.144.0` authenticated protocol/transport boundary and
+own beacon-node fork-choice, payload-building, and execution-status
+coordination policy.
 
 Deliverables:
 
-- JWT handling/redaction, capability negotiation, all supported `newPayload`, `forkchoiceUpdated`, `getPayload`, payload attributes, versions, timeouts, and status state machine.
+- Reuse the authenticated Engine transport from `v0.144.0`;
+- capability negotiation;
+- all supported `newPayload`, `forkchoiceUpdated`, and `getPayload` versions;
+- payload-attribute construction;
+- beacon fork-choice to Engine sequencing;
+- timeout, retry, cancellation, and execution-status state machines;
+- explicit evidence passed to block import and production services.
 
 Verification:
 
-- execution-apis fixtures, two execution-client integrations, authentication/failure tests.
+- Execution-apis fixtures;
+- at least two independent execution-client integrations;
+- authentication, timeout, invalid-payload, and sequencing tests;
+- checks proving transport concerns remain in `v0.144.0`.
 
 Exit criteria:
 
-- The beacon node can coordinate all claimed forks with an execution client through a complete authenticated API.
-- `v0.225.0 implementation stop reached. Run pentest for this exact
+- The beacon node can coordinate every claimed fork with an execution client
+  through the previously admitted authenticated boundary without duplicating
+  transport or JWT ownership.
+- `v0.226.0 implementation stop reached. Run pentest for this exact
   commit.`
 
-### v0.226.0 - Multi-Execution-Client Failover
+### v0.227.0 - Multi-Execution-Client Failover
 
 Status: planned.
 
@@ -6258,30 +6385,73 @@ Verification:
 Exit criteria:
 
 - Execution failover is explicit and cannot silently mix incompatible payload state.
-- `v0.226.0 implementation stop reached. Run pentest for this exact
-  commit.`
-
-### v0.227.0 - PeerDAS Cell And Reconstruction Core
-
-Status: planned.
-
-Goal: deliver the PeerDAS Cell And Reconstruction Core release with this required outcome: Data columns can be created, verified, and reconstructed first party.
-
-Deliverables:
-
-- Blob-to-cell conversion, cell KZG proofs, data-column construction, erasure recovery, batch verification, and bounded workspaces.
-
-Verification:
-
-- Official EIP-7594/Fulu vectors, independent differential checks, malformed proof fuzzing.
-
-Exit criteria:
-
-- Data columns can be created, verified, and reconstructed first party.
 - `v0.227.0 implementation stop reached. Run pentest for this exact
   commit.`
 
-### v0.228.0 - Availability Tracking And Block Admission
+### v0.228.0 - Deposit Contract Tracking And Deposit Tree
+
+Status: planned.
+
+Goal: maintain a reorg-safe execution-layer deposit view and canonical deposit
+tree for historical beacon operation.
+
+Deliverables:
+
+- Deposit-contract log acquisition through the reviewed provider boundary;
+- deposit event validation and deduplication;
+- incremental deposit tree and cache maintenance;
+- execution-layer block/hash checkpoints;
+- reorg rollback and replay;
+- finalized deposit snapshots;
+- bounded historical backfill and corruption recovery.
+
+Verification:
+
+- Official deposit-contract and deposit-tree vectors;
+- execution reorg, duplicate log, missing range, and restart simulations;
+- differential roots against independent consensus clients;
+- bounded backfill and cache-pressure tests.
+
+Exit criteria:
+
+- The beacon service can derive a canonical, restart-safe deposit tree from
+  execution history without trusting unordered or reorged logs.
+- `v0.228.0 implementation stop reached. Run pentest for this exact
+  commit.`
+
+### v0.229.0 - Genesis Construction Eth1 Voting And Genesis Sync
+
+Status: planned.
+
+Goal: support historical `eth1_data` behavior and construct a beacon genesis
+state from verified deposits for public, private, and test networks.
+
+Deliverables:
+
+- Historical `eth1_data` voting and deposit inclusion;
+- deposit-count and deposit-root selection;
+- genesis-validator activation rules;
+- genesis-state construction from the verified deposit tree;
+- minimum-genesis-time and validator-count policy;
+- genesis synchronization mode;
+- chain/genesis identity persistence and mismatch refusal.
+
+Verification:
+
+- Official phase0 genesis and deposit-processing vectors;
+- historical eth1-voting fixtures;
+- private/test-network genesis workflows;
+- execution reorgs before and after genesis;
+- cross-client genesis-root comparison.
+
+Exit criteria:
+
+- A beacon node can follow historical deposit voting or build and synchronize
+  a new network genesis without external consensus core logic.
+- `v0.229.0 implementation stop reached. Run pentest for this exact
+  commit.`
+
+### v0.230.0 - Availability Tracking And Block Admission
 
 Status: planned.
 
@@ -6298,10 +6468,10 @@ Verification:
 Exit criteria:
 
 - A block becomes fully available only from sufficient verified evidence under the active fork rules.
-- `v0.228.0 implementation stop reached. Run pentest for this exact
+- `v0.230.0 implementation stop reached. Run pentest for this exact
   commit.`
 
-### v0.229.0 - Beacon Node Orchestration
+### v0.231.0 - Beacon Node Orchestration
 
 Status: planned.
 
@@ -6318,10 +6488,10 @@ Verification:
 Exit criteria:
 
 - The focused crates operate as one coherent beacon node with explicit terminal states.
-- `v0.229.0 implementation stop reached. Run pentest for this exact
+- `v0.231.0 implementation stop reached. Run pentest for this exact
   commit.`
 
-### v0.230.0 - Beacon Node REST And Event APIs
+### v0.232.0 - Beacon Node REST And Event APIs
 
 Status: planned.
 
@@ -6338,138 +6508,79 @@ Verification:
 Exit criteria:
 
 - External tooling can operate the beacon node through complete versioned server APIs.
-- `v0.230.0 implementation stop reached. Run pentest for this exact
-  commit.`
-
-### v0.231.0 - Validator API And Production Boundary
-
-Status: planned.
-
-Goal: deliver the Validator API And Production Boundary release with this required outcome: A validator client can obtain and publish every duty through a complete safety-aware API.
-
-Deliverables:
-
-- Duties, attestation data, aggregates, block production/publication, sync contributions, proposer preparation, fee recipient, liveness, subscriptions, and optimistic/sync safety status.
-
-Verification:
-
-- Official Beacon Validator API compatibility and unsafe-node refusal tests.
-
-Exit criteria:
-
-- A validator client can obtain and publish every duty through a complete safety-aware API.
-- `v0.231.0 implementation stop reached. Run pentest for this exact
-  commit.`
-
-## Phase 24: Complete Validator Client
-
-Validator work must follow the pinned honest-validator specification. An
-optimistic or otherwise unsafe beacon node must never authorize proposal,
-attestation, or sync-committee signatures.
-
-### v0.232.0 - Validator Duty Scheduler And Safety State
-
-Status: planned.
-
-Goal: deliver the Validator Duty Scheduler And Safety State release with this required outcome: No duty reaches signing unless timing, chain, quorum, and safety preconditions hold.
-
-Deliverables:
-
-- Drift-aware slot clock, duty lookahead/cache, reorg refresh, multi-beacon-node quorum/failover, doppelganger detection, and optimistic/unsafe refusal.
-
-Verification:
-
-- Clock skew, reorg, conflicting-node, startup, and doppelganger simulations.
-
-Exit criteria:
-
-- No duty reaches signing unless timing, chain, quorum, and safety preconditions hold.
 - `v0.232.0 implementation stop reached. Run pentest for this exact
   commit.`
 
-### v0.233.0 - Proposer Duties And Local Block Production
+### v0.233.0 - Beacon Block Production Service
 
 Status: planned.
 
-Goal: deliver the Proposer Duties And Local Block Production release with this required outcome: The validator can safely produce and publish complete local blocks for claimed forks.
+Goal: give the beacon node sole default ownership of unsigned block
+construction while keeping the service embeddable behind an explicit trait.
 
 Deliverables:
 
-- RANDAO, proposer preparation, execution payload requests, operation packing, sidecars/data columns, fee recipient, gas limit, graffiti, publication deadlines, and reorg-safe parent selection.
+- Reorg-safe parent and head selection;
+- operation-pool selection and packing;
+- RANDAO input handling without receiving private keys;
+- Engine payload request and payload-status coordination;
+- local execution-payload fallback;
+- blob sidecar and data-column construction;
+- deposit, withdrawal, request, slashing, attestation, and sync operation
+  inclusion;
+- fork-aware fee recipient, gas limit, graffiti, and deadline policy;
+- unsigned block and blinded-block production APIs.
 
 Verification:
 
-- Official proposer behavior, local execution-client integration, deadline/failure tests.
+- Official block-production and operation-ordering vectors;
+- local execution-client and PeerDAS integration;
+- reorg, timeout, invalid-payload, pool-conflict, and deadline tests;
+- checks proving no validator secret or signature enters this service.
 
 Exit criteria:
 
-- The validator can safely produce and publish complete local blocks for claimed forks.
+- The beacon node can produce a complete unsigned local or blinded block for
+  every claimed fork, while signing authorization remains outside the service.
 - `v0.233.0 implementation stop reached. Run pentest for this exact
   commit.`
 
-### v0.234.0 - Attester And Aggregator Duties
+### v0.234.0 - Validator API And Production Boundary
 
 Status: planned.
 
-Goal: deliver the Attester And Aggregator Duties release with this required outcome: Attestation and aggregation duties are complete and slash-safe.
+Goal: expose complete safety-aware validator APIs while preserving beacon-node
+ownership of block construction and validator-client ownership of independent
+checks, slashing authorization, signing, and publication.
 
 Deliverables:
 
-- Committee assignments, attestation construction, timing, selection proofs, aggregation, publication, duplicate prevention, and fork-aware signing domains.
+- Duties, attestation data, aggregates, unsigned block and blinded-block
+  requests, signed publication, sync contributions, proposer preparation, fee
+  recipient, liveness, subscriptions, and optimistic/sync safety status;
+- API evidence binding responses to head, fork, genesis, slot, and execution
+  status;
+- explicit separation from the `v0.233.0` production service.
 
 Verification:
 
-- Official validator vectors, timing/reorg/duplicate simulations.
+- Official Beacon Validator API compatibility;
+- unsafe/optimistic-node refusal tests;
+- stale-head and mismatched-context tests;
+- ownership tests proving the validator client cannot request operation
+  packing or direct Engine coordination.
 
 Exit criteria:
 
-- Attestation and aggregation duties are complete and slash-safe.
+- A validator client can obtain unsigned duty material and publish signed
+  results through a complete safety-aware API without becoming the block
+  production service.
 - `v0.234.0 implementation stop reached. Run pentest for this exact
   commit.`
 
-### v0.235.0 - Sync Committee Duties
+## Phase 24: Slashing Protection And Validator Key Foundation
 
-Status: planned.
-
-Goal: deliver the Sync Committee Duties release with this required outcome: Sync-committee participation is complete and refuses unsafe chain views.
-
-Deliverables:
-
-- Membership tracking, messages, selection proofs, contributions, aggregation/publication, subnet subscriptions, and optimistic-node refusal.
-
-Verification:
-
-- Official sync-committee vectors and timing/fork-boundary tests.
-
-Exit criteria:
-
-- Sync-committee participation is complete and refuses unsafe chain views.
-- `v0.235.0 implementation stop reached. Run pentest for this exact
-  commit.`
-
-### v0.236.0 - Validator Lifecycle Requests And Operations
-
-Status: planned.
-
-Goal: deliver the Validator Lifecycle Requests And Operations release with this required outcome: Operators can manage validator lifecycle without bypassing signer or slashing policy.
-
-Deliverables:
-
-- Voluntary exits, BLS-to-execution changes, consolidation/lifecycle requests, deposit tooling boundary, fee/graffiti config, key enable/disable, and audit records.
-
-Verification:
-
-- Official operation vectors, authorization/policy tests, local testnet workflows.
-
-Exit criteria:
-
-- Operators can manage validator lifecycle without bypassing signer or slashing policy.
-- `v0.236.0 implementation stop reached. Run pentest for this exact
-  commit.`
-
-## Phase 25: Slashing Protection And Validator Key Custody
-
-### v0.237.0 - Slashing Protection Model And Invariants
+### v0.235.0 - Slashing Protection Model And Invariants
 
 Status: planned.
 
@@ -6486,10 +6597,10 @@ Verification:
 Exit criteria:
 
 - Slashability decisions are a small first-party security kernel with explicit invariants.
-- `v0.237.0 implementation stop reached. Run pentest for this exact
+- `v0.235.0 implementation stop reached. Run pentest for this exact
   commit.`
 
-### v0.238.0 - Transactional Slashing Database
+### v0.236.0 - Transactional Slashing Database
 
 Status: planned.
 
@@ -6506,10 +6617,10 @@ Verification:
 Exit criteria:
 
 - A signature cannot escape before its slashing record is durably committed.
-- `v0.238.0 implementation stop reached. Run pentest for this exact
+- `v0.236.0 implementation stop reached. Run pentest for this exact
   commit.`
 
-### v0.239.0 - EIP-3076 Interchange And Safety Recovery
+### v0.237.0 - EIP-3076 Interchange And Safety Recovery
 
 Status: planned.
 
@@ -6526,52 +6637,327 @@ Verification:
 Exit criteria:
 
 - Validator histories move between clients without permitting previously slashable signatures.
+- `v0.237.0 implementation stop reached. Run pentest for this exact
+  commit.`
+
+### v0.238.0 - Validator Key Foundation And Deposit Data
+
+Status: planned.
+
+Goal: generate validator identities and deposit artifacts with strict
+separation between signing keys and withdrawal authority.
+
+Deliverables:
+
+- EIP-2333 BLS key generation and child derivation;
+- EIP-2334 validator derivation paths;
+- cryptographically secure entropy requirements and deterministic test seams;
+- validator signing-key and withdrawal-key role types;
+- withdrawal credentials for BLS and execution-address modes;
+- offline withdrawal-key workflow;
+- deposit message, deposit-data root, signature, and JSON artifact generation;
+- independent deposit-data verification before export;
+- explicit refusal to load withdrawal secrets into normal validator runtime.
+
+Verification:
+
+- Official EIP-2333 and EIP-2334 vectors;
+- deposit CLI and launchpad-compatible fixture checks where officially
+  applicable;
+- wrong-path, weak-entropy, credential-substitution, and role-confusion tests;
+- memory-sanitization and offline-workflow review.
+
+Exit criteria:
+
+- Validator signing keys, withdrawal authority, derivation paths, and deposit
+  artifacts are first-party, verifiable, and cannot be silently substituted
+  across roles.
+- `v0.238.0 implementation stop reached. Run pentest for this exact
+  commit.`
+
+### v0.239.0 - Validator Signer And Local Keystores
+
+Status: planned.
+
+Goal: isolate local signing behind final domain and slashing authorization,
+using the key roles and derivation rules established at `v0.238.0`.
+
+Deliverables:
+
+- Consensus-domain signing packages;
+- EIP-2335 keystore import/export and password policy;
+- locked and sanitized key memory;
+- final fork, genesis, domain, signing-root, and duty-context validation;
+- mandatory transactional slashing check before signature release;
+- signing audit log, refusal policy, and local key lifecycle;
+- hard rejection of withdrawal keys in validator-signing slots.
+
+Verification:
+
+- Official and independent signing/keystore vectors;
+- memory-sanitization review;
+- wrong-domain, wrong-genesis, withdrawal-key, slashing-DB failure, and
+  audit-redaction tests.
+
+Exit criteria:
+
+- Local validator signing is isolated, domain-safe, coupled to durable
+  slashing protection, and incapable of consuming withdrawal authority.
 - `v0.239.0 implementation stop reached. Run pentest for this exact
   commit.`
 
-### v0.240.0 - Validator Signer And Local Keystores
+## Phase 25: Complete Validator Client Duties
+
+### v0.240.0 - Validator Duty Scheduler And Safety State
 
 Status: planned.
 
-Goal: deliver the Validator Signer And Local Keystores release with this required outcome: Local validator signing is isolated, domain-safe, and coupled to slashing protection.
+Goal: deliver the Validator Duty Scheduler And Safety State release with this required outcome: No duty reaches signing unless timing, chain, quorum, and safety preconditions hold.
 
 Deliverables:
 
-- Consensus-domain signing packages, EIP-2335-style keystore handling as officially applicable, locked/sanitized keys, signing audit log, refusal policy, and key lifecycle.
+- Drift-aware slot clock, duty lookahead/cache, reorg refresh, multi-beacon-node quorum/failover, doppelganger detection, and optimistic/unsafe refusal.
 
 Verification:
 
-- Official/independent vectors, memory-sanitization review, wrong-domain and audit-redaction tests.
+- Clock skew, reorg, conflicting-node, startup, and doppelganger simulations.
 
 Exit criteria:
 
-- Local validator signing is isolated, domain-safe, and coupled to slashing protection.
+- No duty reaches signing unless timing, chain, quorum, and safety preconditions hold.
 - `v0.240.0 implementation stop reached. Run pentest for this exact
   commit.`
 
-### v0.241.0 - Keymanager Remote HSM And Hardware Signing
+### v0.241.0 - Proposer Duties Signing And Publication
 
 Status: planned.
 
-Goal: deliver the Keymanager Remote HSM And Hardware Signing release with this required outcome: Key custody backends are interchangeable without bypassing slashing or domain policy.
+Goal: let the validator client request, independently validate, authorize,
+sign, and publish proposer duties without owning block construction.
 
 Deliverables:
 
-- Official Keymanager REST server/client, remote signer protocol boundary, HSM/hardware capabilities, import/delete/list/status, authentication, TLS, rate limits, and slashing coupling.
+- RANDAO reveal signing;
+- proposer preparation and configuration submission;
+- unsigned local/blinded block requests from `v0.233.0`;
+- independent slot, parent, fork, fee-recipient, gas-limit, execution-status,
+  and data-availability context checks;
+- transactional slashing authorization;
+- block and sidecar signature production;
+- publication deadlines, retries, and duplicate prevention.
 
 Verification:
 
-- Keymanager API conformance, remote/HSM mocks, failure/cancellation and key-isolation tests.
+- Official proposer behavior;
+- malicious or stale beacon-node response tests;
+- slashing-database failure and duplicate proposal tests;
+- local and blinded publication deadline/failure tests.
 
 Exit criteria:
 
-- Key custody backends are interchangeable without bypassing slashing or domain policy.
+- The validator client can safely sign and publish complete proposer duties
+  for claimed forks while parent selection, operation packing, Engine calls,
+  and DA construction remain beacon-node responsibilities.
 - `v0.241.0 implementation stop reached. Run pentest for this exact
   commit.`
 
-## Phase 26: Builder And MEV Integration
+### v0.242.0 - Attester And Aggregator Duties
 
-### v0.242.0 - Builder API And Blinded Proposals
+Status: planned.
+
+Goal: deliver the Attester And Aggregator Duties release with this required outcome: Attestation and aggregation duties are complete and slash-safe.
+
+Deliverables:
+
+- Committee assignments, attestation construction, timing, selection proofs,
+  aggregation, publication, duplicate prevention, fork-aware signing domains,
+  and mandatory transactional slashing authorization before every attestation
+  signature.
+
+Verification:
+
+- Official validator vectors, timing/reorg/duplicate simulations.
+
+Exit criteria:
+
+- Attestation and aggregation duties are complete and slash-safe through the
+  already admitted `v0.235.0` and `v0.236.0` kernel and database.
+- `v0.242.0 implementation stop reached. Run pentest for this exact
+  commit.`
+
+### v0.243.0 - Sync Committee Duties
+
+Status: planned.
+
+Goal: deliver the Sync Committee Duties release with this required outcome: Sync-committee participation is complete and refuses unsafe chain views.
+
+Deliverables:
+
+- Membership tracking, messages, selection proofs, contributions,
+  aggregation/publication, subnet subscriptions, optimistic-node refusal, and
+  durable duplicate-signing records before signature release.
+
+Verification:
+
+- Official sync-committee vectors and timing/fork-boundary tests.
+
+Exit criteria:
+
+- Sync-committee participation is complete and refuses unsafe chain views.
+- `v0.243.0 implementation stop reached. Run pentest for this exact
+  commit.`
+
+### v0.244.0 - Validator Lifecycle Requests And Operations
+
+Status: planned.
+
+Goal: deliver the Validator Lifecycle Requests And Operations release with this required outcome: Operators can manage validator lifecycle without bypassing signer or slashing policy.
+
+Deliverables:
+
+- Voluntary exits, BLS-to-execution changes, consolidation/lifecycle requests,
+  deposit-data import from `v0.238.0`, fee/graffiti config, key enable/disable,
+  authorization checks, and audit records.
+
+Verification:
+
+- Official operation vectors, authorization/policy tests, local testnet workflows.
+
+Exit criteria:
+
+- Operators can manage validator lifecycle without bypassing signer or slashing policy.
+- `v0.244.0 implementation stop reached. Run pentest for this exact
+  commit.`
+
+## Phase 26: External And Distributed Validator Key Custody
+
+### v0.245.0 - Keymanager Operator API
+
+Status: planned.
+
+Goal: implement the operator-to-validator-client Keymanager trust direction
+without conflating it with outbound remote signing or custody backends.
+
+Deliverables:
+
+- Official Keymanager REST server;
+- optional typed administrative client;
+- import, delete, list, status, and remote-key registration methods;
+- authentication, TLS, rate limits, audit logs, and secret redaction;
+- transactional import/delete semantics;
+- slashing-history preconditions and stopped/active validator policy.
+
+Verification:
+
+- Official Keymanager API conformance;
+- unauthorized, concurrent mutation, partial import, and active-key deletion
+  tests;
+- audit-redaction and rate-limit tests.
+
+Exit criteria:
+
+- Operators can manage validator-client key registrations through the official
+  API without obtaining signing authority or bypassing slashing policy.
+- `v0.245.0 implementation stop reached. Run pentest for this exact
+  commit.`
+
+### v0.246.0 - Remote Signer Protocol And Slashing Authority
+
+Status: planned.
+
+Goal: define the validator-client-to-signing-service trust direction and make
+the authoritative slashing database location explicit for every deployment.
+
+Deliverables:
+
+- Runtime-neutral remote signer request/response protocol;
+- complete signing context including chain, genesis, fork, domain, duty, and
+  signing root;
+- mutually authenticated transport, timeout, cancellation, and replay policy;
+- deployment modes with either signer-authoritative or coordinated
+  slashing protection;
+- prohibition of multiple independent authoritative slashing databases;
+- idempotency and audit evidence for repeated requests;
+- fail-closed behavior when slashing authority cannot be proven.
+
+Verification:
+
+- Remote signer conformance mocks;
+- replay, split-brain, stale-context, timeout, and partial-response tests;
+- multiple-validator-client simulations against one signer;
+- proof that no signature escapes before the authoritative record commits.
+
+Exit criteria:
+
+- Remote signing cannot create ambiguous slashing authority, duplicate
+  authorization, or a path around final signer-domain validation.
+- `v0.246.0 implementation stop reached. Run pentest for this exact
+  commit.`
+
+### v0.247.0 - HSM KMS And Hardware Custody Adapters
+
+Status: planned.
+
+Goal: define the signer-to-custody-backend trust direction for non-exporting
+validator keys.
+
+Deliverables:
+
+- Capability-based HSM, KMS, and hardware signer traits;
+- non-exporting key handles and attested key identity;
+- backend health, timeout, cancellation, retry, and concurrency policy;
+- final signing-context validation before backend invocation;
+- backend-specific secret and scratch sanitization requirements;
+- optional adapters only behind reviewed features.
+
+Verification:
+
+- HSM/KMS/hardware mocks and admitted-device integration tests;
+- wrong-key-handle, stale-session, timeout, retry, and failover tests;
+- feature/dependency audit;
+- key-isolation and sanitization review.
+
+Exit criteria:
+
+- A custody backend can hold validator keys without becoming slashing policy,
+  domain policy, or validator-client control logic.
+- `v0.247.0 implementation stop reached. Run pentest for this exact
+  commit.`
+
+### v0.248.0 - Threshold DVT And Distributed Slashing Coordination
+
+Status: planned.
+
+Goal: support threshold and distributed validator signing without weakening
+single-signature slashing invariants.
+
+Deliverables:
+
+- Threshold/DVT signer adapter boundary;
+- participant identity, quorum, transcript, and timeout policy;
+- distributed slashing-intent coordination;
+- one authoritative decision per duty across validator clients and shares;
+- partial-signature replay and equivocation evidence;
+- fail-closed partition and membership-change handling.
+
+Verification:
+
+- Threshold signer simulations;
+- conflicting coordinator, partition, duplicate-share, stale-membership, and
+  quorum-loss tests;
+- property tests proving no aggregate can escape without one durable
+  non-slashable authorization.
+
+Exit criteria:
+
+- Distributed signing preserves the same domain, duty, and record-before-
+  release guarantees as the local signer.
+- `v0.248.0 implementation stop reached. Run pentest for this exact
+  commit.`
+
+## Phase 27: Builder And MEV Integration
+
+### v0.249.0 - Builder API And Blinded Proposals
 
 Status: planned.
 
@@ -6588,10 +6974,10 @@ Verification:
 Exit criteria:
 
 - A validator can use one reviewed relay without trusting its bid or reveal blindly.
-- `v0.242.0 implementation stop reached. Run pentest for this exact
+- `v0.249.0 implementation stop reached. Run pentest for this exact
   commit.`
 
-### v0.243.0 - Relay Multiplexing Local Fallback And PBS Evolution
+### v0.250.0 - Relay Multiplexing Local Fallback And PBS Evolution
 
 Status: planned.
 
@@ -6608,32 +6994,174 @@ Verification:
 Exit criteria:
 
 - External builders cannot prevent a safe local proposal when a viable local payload exists.
-- `v0.243.0 implementation stop reached. Run pentest for this exact
+- `v0.250.0 implementation stop reached. Run pentest for this exact
   commit.`
 
-## Phase 27: Consensus Client Operations And Interoperability
+## Phase 28: Consensus Safety Operations And Executables
 
-### v0.244.0 - Consensus Operations Surface
+### v0.251.0 - Optional Slasher Service
 
 Status: planned.
 
-Goal: deliver the Consensus Operations Surface release with this required outcome: Beacon and validator services can be operated and monitored without hidden state.
+Goal: detect slashable network messages and feed verified evidence into
+operation pools without placing detection on the validator signing path.
 
 Deliverables:
 
-- Config-file and CLI schemas, structured logs/tracing, Prometheus metrics, health/readiness, task diagnostics, authentication/TLS/rate limits, safe shutdown, and service supervision.
+- Optional proposer- and attester-slashing detector;
+- bounded historical message indexes;
+- double-proposal, double-vote, and surround-vote evidence construction;
+- gossip and imported-block observation;
+- duplicate suppression and evidence persistence;
+- operation-pool submission and operator reporting;
+- explicit separation from local signing slashing protection.
 
 Verification:
 
-- Config compatibility, redaction, overload, shutdown/restart, and observability tests.
+- Official slashable-message cases;
+- long-history, duplicate, reorg, restart, and adversarial-flood tests;
+- evidence round trips through block-operation pools;
+- resource-ceiling benchmarks.
 
 Exit criteria:
 
-- Beacon and validator services can be operated and monitored without hidden state.
-- `v0.244.0 implementation stop reached. Run pentest for this exact
+- The node can optionally detect and publish valid slashing evidence without
+  making network observation a prerequisite for safe local signing.
+- `v0.251.0 implementation stop reached. Run pentest for this exact
   commit.`
 
-### v0.245.0 - Database Inspection Migration And Recovery Tools
+### v0.252.0 - Consensus Connectivity And NAT Diagnostics
+
+Status: planned.
+
+Goal: make peer reachability, NAT behavior, subnet participation, and eclipse
+risk diagnosable without weakening network policy.
+
+Deliverables:
+
+- NAT and externally observed address diagnostics;
+- UPnP/NAT-PMP or successor adapters only behind explicit reviewed features;
+- inbound/outbound reachability checks;
+- ENR and listening-address consistency checks;
+- subnet and custody-connectivity diagnostics;
+- peer diversity and eclipse-risk reports;
+- operator-safe remediation guidance without automatic unsafe exposure.
+
+Verification:
+
+- Public/private/NATed network simulations;
+- malformed discovery response and address-spoofing tests;
+- feature/dependency review;
+- diagnostics redaction and bounded-probe tests.
+
+Exit criteria:
+
+- Operators can distinguish local configuration, NAT, subnet, custody, and
+  hostile-peer failures without disabling security controls.
+- `v0.252.0 implementation stop reached. Run pentest for this exact
+  commit.`
+
+### v0.253.0 - Consensus Operations Monitoring And Analytics
+
+Status: planned.
+
+Goal: operate and monitor beacon and validator services with stable schemas,
+including validator performance and safety analytics.
+
+Deliverables:
+
+- Versioned shared config and CLI schemas;
+- structured logs and tracing;
+- Prometheus metrics;
+- health, readiness, and task diagnostics;
+- authentication, TLS, and rate limits;
+- safe shutdown and service supervision;
+- validator inclusion distance, effectiveness, missed-duty, balance, reward,
+  sync participation, proposal, and slashing-risk analytics;
+- privacy/redaction policy for validator identifiers and endpoints.
+
+Verification:
+
+- Config compatibility;
+- redaction and cardinality tests;
+- overload, shutdown, restart, and observability tests;
+- analytics differentials against beacon-state outcomes.
+
+Exit criteria:
+
+- Beacon and validator services can be operated, monitored, and performance-
+  analyzed without hidden state, secret leakage, or unbounded metric labels.
+- `v0.253.0 implementation stop reached. Run pentest for this exact
+  commit.`
+
+### v0.254.0 - Beacon Node Executable And Packaging
+
+Status: planned.
+
+Goal: ship an explicit production beacon-node executable rather than only
+orchestration crates.
+
+Deliverables:
+
+- `eth-beacon-node` binary;
+- stable CLI/config schema and validation;
+- documented data-directory layout and permissions;
+- genesis, checkpoint, execution endpoint, network, pruning, and API startup
+  workflows;
+- signal handling, graceful shutdown, crash recovery, and stable exit codes;
+- container image and system-service packaging;
+- binary version, build, SBOM, and provenance reporting;
+- upgrade and rollback commands.
+
+Verification:
+
+- Fresh-start, checkpoint-sync, restart, signal, crash, config-migration, and
+  data-directory permission tests;
+- container and system-service smoke tests on supported operating systems;
+- binary upgrade and rollback drills.
+
+Exit criteria:
+
+- Operators can install, configure, run, stop, upgrade, roll back, and diagnose
+  a production beacon-node binary through stable documented interfaces.
+- `v0.254.0 implementation stop reached. Run pentest for this exact
+  commit.`
+
+### v0.255.0 - Validator Client Executable And Packaging
+
+Status: planned.
+
+Goal: ship an explicit production validator-client executable with signer and
+slashing safety enabled by construction.
+
+Deliverables:
+
+- `eth-validator-client` binary;
+- stable CLI/config schema and validator data-directory layout;
+- local, remote, HSM/KMS, and threshold signer selection;
+- mandatory slashing-database configuration and chain/genesis binding;
+- beacon-node quorum/failover configuration;
+- signal handling, graceful duty drain, stable exit codes, and restart policy;
+- container image and system-service packaging;
+- key import/migration separated from routine startup;
+- upgrade and rollback commands.
+
+Verification:
+
+- Startup refusal without valid slashing and signer configuration;
+- signal, restart, failover, doppelganger, config-migration, and permission
+  tests;
+- container and system-service smoke tests;
+- binary upgrade and rollback drills with no slashable signatures.
+
+Exit criteria:
+
+- Operators can run a production validator-client binary that cannot silently
+  bypass signer, chain, slashing, or duty-safety policy.
+- `v0.255.0 implementation stop reached. Run pentest for this exact
+  commit.`
+
+### v0.256.0 - Database Inspection Migration And Recovery Tools
 
 Status: planned.
 
@@ -6650,10 +7178,10 @@ Verification:
 Exit criteria:
 
 - Operators can diagnose and recover storage without ad hoc database mutation.
-- `v0.245.0 implementation stop reached. Run pentest for this exact
+- `v0.256.0 implementation stop reached. Run pentest for this exact
   commit.`
 
-### v0.246.0 - Deterministic Consensus Simulator
+### v0.257.0 - Deterministic Consensus Simulator
 
 Status: planned.
 
@@ -6670,10 +7198,54 @@ Verification:
 Exit criteria:
 
 - Consensus and validator regressions can be reproduced without an external testnet.
-- `v0.246.0 implementation stop reached. Run pentest for this exact
+- `v0.257.0 implementation stop reached. Run pentest for this exact
   commit.`
 
-### v0.247.0 - Hive And Multi-Consensus-Client Interoperability
+## Phase 29: Full Consensus Assurance And Final 1.0 Admission
+
+### v0.258.0 - Production Acceptance Matrix And Quantitative Budgets
+
+Status: planned.
+
+Goal: replace subjective production gates with a versioned, numeric acceptance
+contract before interoperability, longevity, and performance claims run.
+
+Deliverables:
+
+- A committed production-acceptance policy naming required official Hive
+  suites with no "`or equivalent`" substitution;
+- a named matrix of at least three independent consensus clients and three
+  independent execution clients, unless an explicit reviewed ecosystem
+  availability exception is recorded;
+- a long-testnet floor of at least 30 continuous days, 4 beacon nodes, and
+  4,096 active validators;
+- zero locally generated slashable signatures and zero client-attributable
+  missed proposals;
+- no more than 0.1 percent client-attributable missed attestation or sync
+  duties over the measured stable period;
+- required restart, database recovery, execution disagreement, reorg,
+  clock-skew, network partition, DA loss, and builder-withholding scenarios;
+- numeric mainnet-scale CPU, RAM, stack, disk-growth, disk-I/O, bandwidth,
+  API-latency, duty-latency, and startup/recovery budgets on a reproducible
+  reference hardware profile;
+- an exception process requiring written security review and a replacement
+  gate, never silent threshold reduction.
+
+Verification:
+
+- Machine-readable acceptance-policy schema and validator;
+- scenario coverage audit;
+- hardware-profile reproducibility check;
+- dry-run reports that fail on every deliberately violated threshold.
+
+Exit criteria:
+
+- Every remaining interoperability, longevity, performance, and release gate
+  has a numeric pass/fail condition and an identified evidence artifact.
+- `v0.258.0 implementation stop reached. Run pentest for this exact
+  commit.`
+
+### v0.259.0 - Hive And Multi-Consensus-Client Interoperability
 
 Status: planned.
 
@@ -6681,19 +7253,24 @@ Goal: deliver the Hive And Multi-Consensus-Client Interoperability release with 
 
 Deliverables:
 
-- Ethereum Hive integration or equivalent official suites, consensus P2P/API/state-transition scenarios, and compatibility with multiple independent beacon clients.
+- Run every required Ethereum Hive consensus suite named by `v0.258.0`;
+- consensus P2P, API, state-transition, sync, builder, and validator scenarios;
+- compatibility with the full named independent consensus-client matrix;
+- explicit issue ownership and waiver prohibition for unexplained failures.
 
 Verification:
 
-- Published Hive/interop reports with zero unexplained failures in claimed scope.
+- Published Hive and interop reports;
+- zero unexplained failures in claimed scope;
+- no substitution of private or self-authored tests for a required Hive suite.
 
 Exit criteria:
 
 - The beacon node interoperates with the broader consensus-client ecosystem.
-- `v0.247.0 implementation stop reached. Run pentest for this exact
+- `v0.259.0 implementation stop reached. Run pentest for this exact
   commit.`
 
-### v0.248.0 - Multi-Execution-Client Interoperability
+### v0.260.0 - Multi-Execution-Client Interoperability
 
 Status: planned.
 
@@ -6701,19 +7278,23 @@ Goal: deliver the Multi-Execution-Client Interoperability release with this requ
 
 Deliverables:
 
-- Full Engine workflows against at least two independent execution clients, payload invalidation, failover, reorg, blobs/data columns, and restart recovery.
+- Full Engine workflows against the complete execution-client matrix fixed at
+  `v0.258.0`, including payload invalidation, failover, disagreement, reorg,
+  blobs/data columns, and restart recovery.
 
 Verification:
 
-- Long-running mixed-client scenarios and disagreement/failure reports.
+- Long-running mixed-client scenarios;
+- required restart, partition, reorg, disagreement, and latency cases;
+- published failure and recovery reports.
 
 Exit criteria:
 
 - Beacon correctness is not coupled to one execution-client implementation.
-- `v0.248.0 implementation stop reached. Run pentest for this exact
+- `v0.260.0 implementation stop reached. Run pentest for this exact
   commit.`
 
-### v0.249.0 - Long-Running Validator Testnet
+### v0.261.0 - Long-Running Validator Testnet
 
 Status: planned.
 
@@ -6721,21 +7302,26 @@ Goal: deliver the Long-Running Validator Testnet release with this required outc
 
 Deliverables:
 
-- Sustained multi-node testnet with proposals, attestations, sync duties, reorgs, inactivity, restarts, key movement, builders, DA faults, and zero locally generated slashable signatures.
+- At least the `v0.258.0` minimum 30-day, 4-node, 4,096-validator sustained
+  testnet with proposals, attestations, sync duties, reorgs, inactivity,
+  restarts, key movement, builders, DA faults, and execution-client diversity.
 
 Verification:
 
-- Published duration/load/fault report, slashing DB audit, finality/participation evidence.
+- Published duration, validator-count, client-matrix, load, and fault report;
+- slashing database audit;
+- finality and participation evidence;
+- zero locally generated slashable signatures;
+- zero client-attributable missed proposals;
+- at most 0.1 percent client-attributable missed attestation or sync duties.
 
 Exit criteria:
 
 - The complete beacon-node and validator stack demonstrates stable operation under realistic faults.
-- `v0.249.0 implementation stop reached. Run pentest for this exact
+- `v0.261.0 implementation stop reached. Run pentest for this exact
   commit.`
 
-## Phase 28: Full Consensus Assurance And Final 1.0 Admission
-
-### v0.250.0 - Consensus Client Performance Gate
+### v0.262.0 - Consensus Client Performance Gate
 
 Status: planned.
 
@@ -6743,19 +7329,24 @@ Goal: deliver the Consensus Client Performance Gate release with this required o
 
 Deliverables:
 
-- Benchmarks and budgets for SSZ roots, BLS batches, transition/epoch processing, fork choice, pools, storage, networking, sync, DA, validator duties, slashing DB, and APIs.
+- Enforce the numeric `v0.258.0` budgets for SSZ roots, BLS batches,
+  transition/epoch processing, fork choice, pools, storage, networking, sync,
+  DA, validator duties, slashing DB, APIs, startup, and recovery.
 
 Verification:
 
-- Reproducible hardware profile, load tests, regression thresholds.
+- Reproducible reference hardware profile;
+- mainnet-scale load tests;
+- threshold validator;
+- regression alarms that fail the release.
 
 Exit criteria:
 
 - Mainnet-scale consensus workloads meet documented CPU, memory, disk, network, and timing budgets.
-- `v0.250.0 implementation stop reached. Run pentest for this exact
+- `v0.262.0 implementation stop reached. Run pentest for this exact
   commit.`
 
-### v0.251.0 - Kani State Transition And Fork-Choice Proofs
+### v0.263.0 - Kani State Transition And Fork-Choice Proofs
 
 Status: planned.
 
@@ -6772,10 +7363,10 @@ Verification:
 Exit criteria:
 
 - Selected consensus-state and fork-choice safety invariants have machine-checked evidence.
-- `v0.251.0 implementation stop reached. Run pentest for this exact
+- `v0.263.0 implementation stop reached. Run pentest for this exact
   commit.`
 
-### v0.252.0 - Kani Slashing And Duty-Safety Proofs
+### v0.264.0 - Kani Slashing And Duty-Safety Proofs
 
 Status: planned.
 
@@ -6792,10 +7383,44 @@ Verification:
 Exit criteria:
 
 - Selected validator and slashing invariants have machine-checked evidence.
-- `v0.252.0 implementation stop reached. Run pentest for this exact
+- `v0.264.0 implementation stop reached. Run pentest for this exact
   commit.`
 
-### v0.253.0 - State Transition And Fork-Choice Audit
+### v0.265.0 - SSZ BLS PeerDAS And Acceleration Audit
+
+Status: planned.
+
+Goal: independently audit the cryptographic and authenticated-data
+implementations introduced after the earlier core audit.
+
+Deliverables:
+
+- Independent audit of SSZ encoding/decoding;
+- tree mutation, cached roots, generalized indices, branches, and multiproofs;
+- BLS key generation, signing, aggregation, aggregate verification, randomized
+  batch verification, subgroup handling, and timing behavior;
+- cell KZG proof creation and verification;
+- erasure coding and reconstruction;
+- trusted-setup handling;
+- every optional acceleration and cryptographic backend boundary;
+- side-channel, fault, partial-output, and resource-exhaustion review.
+
+Verification:
+
+- Published report and complete finding register;
+- implementation-level vector and differential reruns;
+- timing and resource retests;
+- clean independent remediation retest.
+
+Exit criteria:
+
+- No unresolved critical or high finding remains in first-party SSZ, BLS,
+  PeerDAS cryptography, erasure coding, trusted setup, or acceleration
+  boundaries.
+- `v0.265.0 implementation stop reached. Run pentest for this exact
+  commit.`
+
+### v0.266.0 - State Transition And Fork-Choice Audit
 
 Status: planned.
 
@@ -6803,7 +7428,10 @@ Goal: deliver the State Transition And Fork-Choice Audit release with this requi
 
 Deliverables:
 
-- Independent audit of SSZ use, BLS integration, fork upgrades, per-slot/epoch transition, fork choice, optimistic execution, operation pools, and persistence.
+- Independent audit of fork upgrades, per-slot/epoch transition, deposit and
+  genesis services, fork choice, optimistic execution, operation pools,
+  Engine evidence consumption, and persistence, using the implementation audit
+  from `v0.265.0` as a prerequisite.
 
 Verification:
 
@@ -6812,10 +7440,10 @@ Verification:
 Exit criteria:
 
 - No unresolved critical/high transition or fork-choice finding remains.
-- `v0.253.0 implementation stop reached. Run pentest for this exact
+- `v0.266.0 implementation stop reached. Run pentest for this exact
   commit.`
 
-### v0.254.0 - Consensus Network Sync And DA Audit
+### v0.267.0 - Consensus Network Sync And DA Audit
 
 Status: planned.
 
@@ -6823,7 +7451,11 @@ Goal: deliver the Consensus Network Sync And DA Audit release with this required
 
 Deliverables:
 
-- Independent audit of discv5/libp2p/GossipSub, validation, scoring, ReqResp, sync, weak subjectivity, PeerDAS, custody, availability, and DoS controls.
+- Independent audit of discv5/libp2p/GossipSub, NAT/connectivity adapters,
+  validation, scoring, ReqResp, sync, weak subjectivity, PeerDAS consumers,
+  custody, availability, slasher ingestion, and DoS controls;
+- integration review proving every PeerDAS consumer validates through the
+  `v0.193.0` core audited at `v0.265.0`.
 
 Verification:
 
@@ -6832,10 +7464,10 @@ Verification:
 Exit criteria:
 
 - No unresolved critical/high network, sync, or data-availability finding remains.
-- `v0.254.0 implementation stop reached. Run pentest for this exact
+- `v0.267.0 implementation stop reached. Run pentest for this exact
   commit.`
 
-### v0.255.0 - Validator Slashing Keymanager And Builder Audit
+### v0.268.0 - Validator Slashing Keymanager And Builder Audit
 
 Status: planned.
 
@@ -6843,7 +7475,10 @@ Goal: deliver the Validator Slashing Keymanager And Builder Audit release with t
 
 Deliverables:
 
-- Independent audit of duties, timing, doppelganger detection, slashing DB, EIP-3076, keystores, remote/HSM signing, Keymanager API, relays, and fallback.
+- Independent audit of duties, timing, doppelganger detection, key generation,
+  withdrawal-key separation, deposit data, slashing DB, EIP-3076, keystores,
+  Keymanager API, remote signer slashing authority, HSM/KMS/hardware adapters,
+  threshold/DVT coordination, relays, and local fallback.
 
 Verification:
 
@@ -6852,10 +7487,10 @@ Verification:
 Exit criteria:
 
 - No unresolved critical/high signing, slashing, key-custody, or builder finding remains.
-- `v0.255.0 implementation stop reached. Run pentest for this exact
+- `v0.268.0 implementation stop reached. Run pentest for this exact
   commit.`
 
-### v0.256.0 - Beacon Storage API And Operations Audit
+### v0.269.0 - Beacon Storage API And Operations Audit
 
 Status: planned.
 
@@ -6863,7 +7498,10 @@ Goal: deliver the Beacon Storage API And Operations Audit release with this requ
 
 Deliverables:
 
-- Independent audit of hot/cold storage, snapshots, migrations, repair, Beacon/Validator APIs, configuration, authentication, metrics, and supervision.
+- Independent audit of hot/cold storage, snapshots, migrations, repair,
+  Beacon/Validator APIs, configuration, authentication, metrics, validator
+  analytics, supervision, executable startup/shutdown, data directories,
+  containers/system services, and binary upgrade/rollback behavior.
 
 Verification:
 
@@ -6872,10 +7510,10 @@ Verification:
 Exit criteria:
 
 - No unresolved critical/high storage, API, or operational finding remains.
-- `v0.256.0 implementation stop reached. Run pentest for this exact
+- `v0.269.0 implementation stop reached. Run pentest for this exact
   commit.`
 
-### v0.257.0 - Complete Consensus Remediation
+### v0.270.0 - Complete Consensus Remediation
 
 Status: planned.
 
@@ -6892,10 +7530,10 @@ Verification:
 Exit criteria:
 
 - The entire beacon-node and validator finding register is closed or explicitly accepted.
-- `v0.257.0 implementation stop reached. Run pentest for this exact
+- `v0.270.0 implementation stop reached. Run pentest for this exact
   commit.`
 
-### v0.258.0 - Complete Public API Freeze
+### v0.271.0 - Complete Public API Freeze
 
 Status: planned.
 
@@ -6912,10 +7550,10 @@ Verification:
 Exit criteria:
 
 - No foundational API invention remains before 1.0.
-- `v0.258.0 implementation stop reached. Run pentest for this exact
+- `v0.271.0 implementation stop reached. Run pentest for this exact
   commit.`
 
-### v0.259.0 - Complete Release Evidence Dry Run
+### v0.272.0 - Complete Release Evidence Dry Run
 
 Status: planned.
 
@@ -6923,37 +7561,121 @@ Goal: deliver the Complete Release Evidence Dry Run release with this required o
 
 Deliverables:
 
-- Rehearse ordered crate publication, signed manifests/checksums, SBOM/provenance, reproducible packages, platform images, database migrations, config migration, and rollback procedures.
+- Rehearse ordered crate publication, signed manifests/checksums,
+  SBOM/provenance, reproducible packages, platform images, database migrations,
+  config migration, binary rollback, and the exact `v1.0.0-rc.1` same-commit
+  promotion procedure.
 
 Verification:
 
-- Full dry run from a clean environment and unchanged-candidate verification.
+- Full dry run from a clean environment;
+- deliberately failed version-promotion and changed-candidate tests;
+- proof that final tagging can occur without rebuilding or changing the
+  candidate commit.
 
 Exit criteria:
 
 - The exact 1.0 release mechanics and operator upgrade path have been exercised.
-- `v0.259.0 implementation stop reached. Run pentest for this exact
+- `v0.272.0 implementation stop reached. Run pentest for this exact
   commit.`
 
-### v0.260.0 - Production Ethereum SDK Beacon And Validator Candidate
+### v0.273.0 - Version-Only 1.0 Promotion Rehearsal
 
 Status: planned.
 
-Goal: deliver the Production Ethereum SDK Beacon And Validator Candidate release with this required outcome: The only remaining action is publishing the unchanged `v1.0.0` candidate.
+Goal: prove that changing workspace package versions to `1.0.0` is an
+isolated, reviewable promotion step whose outputs are fully regenerated and
+revalidated.
 
 Deliverables:
 
-- Freeze the exact candidate, run every official conformance, Hive, live-node, long-testnet, audit, formal, compatibility, platform, and release gate, and publish final migration/support matrices.
+- Rehearse the exact manifest, workspace dependency, lockfile, crate-version
+  matrix, release-plan metadata, release notes, SBOM, checksum, and provenance
+  changes required for `1.0.0`;
+- require a version-only promotion commit with no implementation changes;
+- regenerate every package and compare source contents apart from expected
+  version metadata;
+- document rollback and repeated-RC handling.
 
 Verification:
 
-- Exact-candidate pentest and retest, green CI, reproducible packages, no post-review code changes.
+- Clean-tree promotion rehearsal;
+- package-content semantic diff;
+- full release-integrity gate on the promoted rehearsal;
+- proof that any non-version change rejects the promotion.
 
 Exit criteria:
 
-- The only remaining action is publishing the unchanged `v1.0.0` candidate.
-- `v0.260.0 implementation stop reached. Run pentest for this exact
+- The project can produce a `1.0.0`-versioned candidate commit through a
+  constrained, audited process rather than pretending a `0.x` artifact is
+  byte-identical after version changes.
+- `v0.273.0 implementation stop reached. Run pentest for this exact
   commit.`
+
+### v0.274.0 - Production Candidate Admission Gate
+
+Status: planned.
+
+Goal: freeze the final `0.x` implementation and authorize one version-only
+promotion commit to the exact `v1.0.0-rc.1` candidate.
+
+Deliverables:
+
+- Freeze all implementation;
+- run every official conformance, required Hive, live-node, quantitative
+  long-testnet, audit, formal, compatibility, platform, packaging, and release
+  gate;
+- publish final migration and support matrices;
+- authorize only the constrained `v0.273.0` version-promotion operation;
+- invalidate admission if any implementation or non-version metadata changes.
+
+Verification:
+
+- Exact implementation-candidate pentest and retest;
+- green CI and CodeQL;
+- reproducible packages;
+- quantitative acceptance-policy pass;
+- no post-review implementation changes.
+
+Exit criteria:
+
+- The only permitted next change is the audited version-only promotion commit
+  that will be tagged `v1.0.0-rc.1`.
+- `v0.274.0 implementation stop reached. Run pentest for this exact
+  commit.`
+
+## v1.0.0-rc.1 - Exact Production Candidate
+
+Status: planned release candidate.
+
+Goal: create the actual `1.0.0`-versioned artifact once, test that exact commit,
+and use it unchanged for the final stable tag.
+
+Deliverables:
+
+- Apply only the version-promotion changes rehearsed at `v0.273.0`;
+- set publishable workspace manifests to their approved `1.0.0` versions;
+- regenerate lockfiles, crate-version matrices, SBOM, checksums, provenance,
+  package archives, and release metadata;
+- tag the exact promoted commit as `v1.0.0-rc.1`;
+- publish no stable crate until final admission.
+
+Verification:
+
+- Full release gate on the promoted commit;
+- exact-candidate pentest and clean retest;
+- green CI and CodeQL on the promoted commit;
+- reproducible package and checksum verification;
+- semantic package diff proving only approved version metadata differs from
+  `v0.274.0`;
+- repeat as `v1.0.0-rc.N` from a newly reviewed commit if any change is needed.
+
+Exit criteria:
+
+- The exact commit is approved for the final `v1.0.0` tag with no further
+  source, manifest, lockfile, documentation, SBOM, or packaging changes.
+- `v1.0.0-rc.1 implementation stop reached. Run final candidate pentest for
+  this exact commit.`
 
 ## v1.0.0 - Complete Production Ethereum Toolkit
 
@@ -6988,7 +7710,11 @@ Verification:
   platform, performance, Hive, long-running validator, and live-node gates
   assigned above;
 - `scripts/validate-release-readiness.sh v1.0.0`
-- pentest and clean retest of the exact candidate.
+- verify that `v1.0.0` points to the exact already approved
+  `v1.0.0-rc.N` commit;
+- do not rebuild, regenerate, or modify candidate artifacts;
+- verify published crate checksums against the approved candidate;
+- pentest and clean retest evidence for the exact candidate commit.
 
 Exit criteria:
 
@@ -6996,5 +7722,5 @@ Exit criteria:
 - no unexplained conformance skip for any claimed feature or fork;
 - every public capability is implemented, tested, documented, and represented
   accurately in the support matrix;
-- `v1.0.0 implementation stop reached. Run final pentest for this exact
-  commit.`
+- the final `v1.0.0` tag points to the unchanged approved
+  `v1.0.0-rc.N` commit.
