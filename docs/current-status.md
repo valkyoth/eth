@@ -1,7 +1,7 @@
 # Current Status
 
-Release snapshot: `v0.52.1` implementation complete; independent pentest and
-retest still required before tagging.
+Release snapshot: `v0.52.1` release candidate; pentest remediation and clean
+retest complete. Awaiting final GitHub checks before tagging.
 
 This document summarizes what the workspace can do now. The
 [Specification Matrix](SPEC_MATRIX.md) is the source of truth for exact

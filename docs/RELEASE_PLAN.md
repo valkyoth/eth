@@ -2371,7 +2371,7 @@ Exit criteria:
 
 ### v0.52.1 - BLS12-381 Canonical Field And Point Encodings
 
-Status: implementation complete; awaiting independent pentest and retest.
+Status: release candidate; pentest remediation and clean retest complete.
 
 Goal: add bounded first-party Fp, Fr, Fp2, G1, and G2 wire domains for EIP-2537.
 

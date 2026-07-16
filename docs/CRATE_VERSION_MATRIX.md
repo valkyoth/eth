@@ -62,7 +62,7 @@ publication when a crate is marked `unchanged`.
 | `eth-valkyoth-primitives` | `0.11.2` | `0.11.2` | `unchanged` | No | No package changes for v0.52.1. |
 | `eth-valkyoth-hash` | `0.11.2` | `0.11.2` | `unchanged` | No | No package changes for v0.52.1. |
 | `eth-valkyoth-protocol` | `0.25.2` | `0.25.2` | `unchanged` | No | No package changes for v0.52.1. |
-| `eth-valkyoth-verify` | `0.22.0` | `0.23.0` | `code` | Yes | Hardens EIP-712 identifiers, collection and cumulative traversal limits, recursive schema/type-hash complexity, and partial encode-data output handling. |
+| `eth-valkyoth-verify` | `0.22.0` | `0.23.0` | `code` | Yes | Hardens EIP-712 identifiers, fully unwrapped member types, collection, traversal, and dynamic-byte limits, recursive schema/type-hash complexity, and partial encode-data output handling. |
 | `eth-valkyoth-derive` | `0.17.3` | `0.17.3` | `unchanged` | No | No package changes for v0.52.1. |
 | `eth-valkyoth-sanitization` | `0.7.5` | `0.7.5` | `unchanged` | No | No package changes for v0.52.1. |
 | `eth-valkyoth-evm-core` | `0.25.0` | `0.26.0` | `code` | Yes | Adds canonical EIP-2537 wire parsing and hardens EVM memory initialization, one-shot reuse, and failed/reverted access accounting. |

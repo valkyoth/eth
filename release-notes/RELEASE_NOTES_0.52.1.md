@@ -1,6 +1,6 @@
 # Release Notes - eth v0.52.1
 
-Status: implementation complete; awaiting independent pentest and retest.
+Status: release candidate; pentest remediation and clean retest complete.
 
 ## Summary
 
@@ -118,5 +118,9 @@ the following `v0.52.2..=v0.52.9` releases.
 
 ## Pentest
 
-Tagging is blocked until the independent pentest findings are remediated, the
-retest passes, and `security/pentest/v0.52.1.md` records `Status: PASS`.
+The independent pentest found two Medium EIP-712 issues. Both were remediated:
+empty arrays can no longer bypass member-type validation, and cumulative
+dynamic-value hashing is bounded by default and configurable by callers. The
+clean retest accepted the remediation candidate.
+
+The permanent report is `security/pentest/v0.52.1.md` with `Status: PASS`.
