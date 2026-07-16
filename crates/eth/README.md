@@ -588,9 +588,11 @@ to the default graph:
 
 The encoder admits at most `EIP712_MAX_TYPES` (64) struct types, 64 fields per
 struct, 64 named values per struct, and 256 elements at each borrowed array
-dimension. It rejects malformed, duplicate, and atomic-looking custom type
-names before hashing, validates each schema once per public operation, and
-caches type hashes across recursive struct and array hashing.
+dimension. A complete borrowed or JSON operation admits at most 4,096
+recursive value visits, including repeated traversal through shared borrowed
+slices. It rejects malformed, duplicate, and atomic-looking custom type names
+before hashing, validates each schema once per public operation, and caches
+type hashes across recursive struct and array hashing.
 
 ```rust
 use eth::hash::Keccak256;

@@ -52,6 +52,8 @@ hashing:
   bounded duplicate checks run;
 - borrowed arrays admit at most 256 elements at every dimension before
   element hashing starts;
+- borrowed and JSON operations admit at most 4,096 recursive value visits,
+  including repeated visits through shared borrowed slices;
 - borrowed and JSON recursive hashing validate the schema once at the public
   boundary and reuse a fixed 64-entry type-hash cache;
 - the optional JSON path applies the same identifier validation before graph

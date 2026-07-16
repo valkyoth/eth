@@ -82,6 +82,9 @@ the following `v0.52.2..=v0.52.9` releases.
   checks begin.
 - Borrowed arrays reject more than 256 elements at every dimension before
   element hashing starts.
+- Borrowed and JSON operations reject the 4,097th recursive value visit,
+  preventing compact shared borrowed slices from multiplying work beyond the
+  fixed operation budget.
 - Borrowed and JSON recursive hashing validate the schema once at the public
   boundary and reuse a fixed 64-entry type-hash cache instead of rebuilding
   schema and type-hash state for every nested struct value.

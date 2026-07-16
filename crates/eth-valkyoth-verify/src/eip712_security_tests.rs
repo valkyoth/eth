@@ -4,6 +4,8 @@ use core::sync::atomic::{AtomicUsize, Ordering};
 
 use eth_valkyoth_hash::Keccak256;
 use eth_valkyoth_primitives::B256;
+use std::boxed::Box;
+use std::vec;
 use std::vec::Vec;
 
 use super::*;
@@ -165,7 +167,7 @@ fn borrowed_schema_bounds_fields_and_values_before_duplicate_scans() {
 
 #[test]
 fn borrowed_arrays_are_bounded_and_reuse_cached_type_hashes() -> Result<(), Eip712EncodeError> {
-    ARRAY_HASH_FINALIZATIONS.store(0, Ordering::SeqCst);
+    CACHE_HASH_FINALIZATIONS.store(0, Ordering::SeqCst);
     let oversized_items = (0..=EIP712_MAX_ARRAY_ITEMS)
         .map(|_| Eip712ValueKind::Uint64(1))
         .collect::<Vec<_>>();
@@ -193,9 +195,9 @@ fn borrowed_arrays_are_bounded_and_reuse_cached_type_hashes() -> Result<(), Eip7
         ),
         Err(Eip712EncodeError::ResourceLimit)
     );
-    assert_eq!(ARRAY_HASH_FINALIZATIONS.load(Ordering::SeqCst), 0);
+    assert_eq!(CACHE_HASH_FINALIZATIONS.load(Ordering::SeqCst), 0);
 
-    ARRAY_HASH_FINALIZATIONS.store(0, Ordering::SeqCst);
+    CACHE_HASH_FINALIZATIONS.store(0, Ordering::SeqCst);
     let items = (0..EIP712_MAX_ARRAY_ITEMS)
         .map(|_| Eip712ValueKind::Struct(&[]))
         .collect::<Vec<_>>();
@@ -224,10 +226,48 @@ fn borrowed_arrays_are_bounded_and_reuse_cached_type_hashes() -> Result<(), Eip7
     let item_struct_hashes = EIP712_MAX_ARRAY_ITEMS;
     let array_and_root_hashes = 2;
     assert_eq!(
-        ARRAY_HASH_FINALIZATIONS.load(Ordering::SeqCst),
+        CACHE_HASH_FINALIZATIONS.load(Ordering::SeqCst),
         type_hashes + item_struct_hashes + array_and_root_hashes
     );
     Ok(())
+}
+
+#[test]
+fn shared_nested_arrays_cannot_amplify_past_the_value_node_budget() {
+    const WIDTH: usize = 16;
+    const SHARED_LEVELS: usize = 4;
+
+    BUDGET_HASH_FINALIZATIONS.store(0, Ordering::SeqCst);
+    let leaf = Box::leak(vec![Eip712ValueKind::Uint64(1)].into_boxed_slice());
+    let mut shared: &'static [Eip712ValueKind<'static>] = leaf;
+    for _ in 0..SHARED_LEVELS {
+        let mut level = Vec::with_capacity(WIDTH);
+        for _ in 0..WIDTH {
+            level.push(Eip712ValueKind::Array(shared));
+        }
+        shared = Box::leak(level.into_boxed_slice());
+    }
+    let types = [Eip712StructType {
+        name: "Nested",
+        fields: &[Eip712Field {
+            name: "items",
+            type_name: "uint256[][][][][]",
+        }],
+    }];
+    let values = [Eip712Value {
+        name: "items",
+        value: Eip712ValueKind::Array(shared),
+    }];
+    let mut scratch = [0u8; 128];
+
+    assert_eq!(
+        eip712_hash_struct::<BudgetCountingKeccak>(&types, "Nested", &values, &mut scratch),
+        Err(Eip712EncodeError::ResourceLimit)
+    );
+    assert!(
+        BUDGET_HASH_FINALIZATIONS.load(Ordering::SeqCst) <= EIP712_MAX_VALUE_NODES,
+        "hash work exceeded the cumulative value-node ceiling"
+    );
 }
 
 #[test]
@@ -259,7 +299,8 @@ fn failed_data_encoding_clears_partially_written_output() {
     assert_eq!(output, [0u8; 64]);
 }
 
-static ARRAY_HASH_FINALIZATIONS: AtomicUsize = AtomicUsize::new(0);
+static CACHE_HASH_FINALIZATIONS: AtomicUsize = AtomicUsize::new(0);
+static BUDGET_HASH_FINALIZATIONS: AtomicUsize = AtomicUsize::new(0);
 
 #[derive(Default)]
 struct CountingKeccak;
@@ -268,7 +309,19 @@ impl Keccak256 for CountingKeccak {
     fn update(&mut self, _input: &[u8]) {}
 
     fn finalize(self) -> B256 {
-        ARRAY_HASH_FINALIZATIONS.fetch_add(1, Ordering::SeqCst);
+        CACHE_HASH_FINALIZATIONS.fetch_add(1, Ordering::SeqCst);
+        B256::from_bytes([0u8; 32])
+    }
+}
+
+#[derive(Default)]
+struct BudgetCountingKeccak;
+
+impl Keccak256 for BudgetCountingKeccak {
+    fn update(&mut self, _input: &[u8]) {}
+
+    fn finalize(self) -> B256 {
+        BUDGET_HASH_FINALIZATIONS.fetch_add(1, Ordering::SeqCst);
         B256::from_bytes([0u8; 32])
     }
 }

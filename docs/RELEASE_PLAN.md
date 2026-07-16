@@ -2321,8 +2321,9 @@ Deliverables:
 - pentest remediation that validates EIP-712 identifiers, rejects duplicate
   borrowed type/field/value names and atomic-looking custom struct names,
   bounds borrowed fields, values, and arrays before expensive traversal,
-  validates schemas once, caches type hashes across recursive borrowed and
-  JSON hashing, and clears partial encode-data output.
+  caps each complete operation at 4,096 recursive value visits, validates
+  schemas once, caches type hashes across recursive borrowed and JSON hashing,
+  and clears partial encode-data output.
 
 Verification:
 

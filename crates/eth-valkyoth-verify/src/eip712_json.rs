@@ -175,6 +175,7 @@ fn encode_json_word<H>(
 where
     H: Default + Keccak256,
 {
+    schema.charge_value_node()?;
     if let Some(array) = parse_array_type(type_name)? {
         check_depth(depth, limits)?;
         let values = value.as_array()?;

@@ -39,6 +39,8 @@ pub const EIP712_MAX_FIELDS_PER_TYPE: usize = 64;
 pub const EIP712_MAX_VALUES_PER_STRUCT: usize = 64;
 /// Maximum elements admitted at any borrowed EIP-712 array dimension.
 pub const EIP712_MAX_ARRAY_ITEMS: usize = 256;
+/// Maximum recursive EIP-712 value visits admitted in one operation.
+pub const EIP712_MAX_VALUE_NODES: usize = 4096;
 
 /// One EIP-712 struct type definition.
 #[derive(Clone, Copy, Debug, Eq, PartialEq)]
@@ -173,7 +175,7 @@ pub enum Eip712EncodeError {
     RecursionLimit,
     /// The schema exceeds the bounded type-count limit.
     SchemaTooLarge,
-    /// A field, value, or array collection exceeds the release hard limit.
+    /// A collection or cumulative value traversal exceeds a release limit.
     ResourceLimit,
     /// Multiple struct definitions use the same name.
     DuplicateType,
@@ -256,9 +258,10 @@ where
 /// Encodes EIP-712 member data for one struct instance.
 ///
 /// Schema and value names are validated once before encoding. Every borrowed
-/// array dimension is capped at [`EIP712_MAX_ARRAY_ITEMS`]. If a field fails
-/// after encoding starts, the selected output region is cleared before the
-/// error is returned.
+/// array dimension is capped at [`EIP712_MAX_ARRAY_ITEMS`], and the complete
+/// operation is capped at [`EIP712_MAX_VALUE_NODES`] recursive value visits.
+/// If a field fails after encoding starts, the selected output region is
+/// cleared before the error is returned.
 pub fn encode_eip712_data<H>(
     types: &[Eip712StructType<'_>],
     primary_type: &str,
@@ -307,7 +310,9 @@ where
 ///
 /// Schema validation runs once at this public boundary, and type hashes are
 /// cached in a fixed-size context throughout recursive struct and array
-/// hashing.
+/// hashing. The complete operation admits at most
+/// [`EIP712_MAX_VALUE_NODES`] recursive value visits, including repeated
+/// visits through shared borrowed slices.
 pub fn eip712_hash_struct<H>(
     types: &[Eip712StructType<'_>],
     primary_type: &str,

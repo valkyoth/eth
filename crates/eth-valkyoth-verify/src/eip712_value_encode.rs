@@ -18,6 +18,7 @@ pub(super) fn encode_value_word<H>(
 where
     H: Default + Keccak256,
 {
+    schema.charge_value_node()?;
     if let Some(array) = parse_array_type(type_name)? {
         if depth >= MAX_TYPE_DEPTH {
             return Err(Eip712EncodeError::RecursionLimit);

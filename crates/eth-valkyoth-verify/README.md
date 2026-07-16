@@ -137,10 +137,12 @@ available only through the opt-in `json` feature and does not affect default
 Borrowed schemas additionally cap each struct at
 `EIP712_MAX_FIELDS_PER_TYPE` (64) fields and
 `EIP712_MAX_VALUES_PER_STRUCT` (64) named values. Every borrowed array
-dimension is capped at `EIP712_MAX_ARRAY_ITEMS` (256). Unsupported
-atomic-looking spellings are reserved from the custom struct namespace.
-Schema validation runs once per public operation, dependency discovery visits
-reachable types once before canonical ordering, and recursive hashing reuses a
-fixed 64-entry type-hash cache.
+dimension is capped at `EIP712_MAX_ARRAY_ITEMS` (256), and every borrowed or
+JSON operation is capped at `EIP712_MAX_VALUE_NODES` (4096) recursive value
+visits, including repeated traversal through shared borrowed slices.
+Unsupported atomic-looking spellings are reserved from the custom struct
+namespace. Schema validation runs once per public operation, dependency
+discovery visits reachable types once before canonical ordering, and recursive
+hashing reuses a fixed 64-entry type-hash cache.
 Borrowed signing values are neither `Copy` nor `Clone`, and their manual
 `Debug` implementations redact all payload contents.

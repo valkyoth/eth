@@ -97,7 +97,8 @@ remain assigned to `v0.52.2..=v0.52.9`.
 The release also zero-initializes EVM memory, makes execution contexts one-shot
 until destructive reset, restores warm/cold tracking after failed stateful
 runs or `REVERT`, and hardens EIP-712 identifier, reserved-name, uniqueness,
-resource-limit, array-bound, cached type-hash, and partial-output handling.
+resource-limit, per-array and cumulative traversal bounds, cached type-hash,
+and partial-output handling.
 
 The release uses Rust `1.97.0` for the full gate and checks every supported Rust
 toolchain from `1.90.0` through `1.96.1` with

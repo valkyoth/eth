@@ -30,7 +30,7 @@ pub use eip712::{
     recover_eip712_sender_with_backend, require_eip712_domain,
 };
 pub use eip712_typed::{
-    EIP712_MAX_ARRAY_ITEMS, EIP712_MAX_FIELDS_PER_TYPE, EIP712_MAX_TYPES,
+    EIP712_MAX_ARRAY_ITEMS, EIP712_MAX_FIELDS_PER_TYPE, EIP712_MAX_TYPES, EIP712_MAX_VALUE_NODES,
     EIP712_MAX_VALUES_PER_STRUCT, Eip712DomainData, Eip712EncodeError, Eip712Field,
     Eip712StructType, Eip712Value, Eip712ValueKind, eip712_domain_separator, eip712_hash_struct,
     eip712_type_hash, eip712_typed_data_signing_digest, encode_eip712_data, encode_eip712_type,
