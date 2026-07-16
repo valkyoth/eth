@@ -35,7 +35,7 @@ previous_version = "0.22.0"
 version = "0.23.0"
 change = "code"
 publish = true
-reason = "Hardens EIP-712 identifiers, reserved names, duplicate and resource limits, and partial encode-data output handling."
+reason = "Hardens EIP-712 identifiers, collection limits, recursive hashing complexity, and partial encode-data output handling."
 
 [crates."eth-valkyoth-derive"]
 previous_version = "0.17.3"

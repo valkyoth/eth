@@ -50,6 +50,10 @@ hashing:
 - borrowed values reject duplicate names at every nested struct level;
 - borrowed structs admit at most 64 fields and 64 named values before the
   bounded duplicate checks run;
+- borrowed arrays admit at most 256 elements at every dimension before
+  element hashing starts;
+- borrowed and JSON recursive hashing validate the schema once at the public
+  boundary and reuse a fixed 64-entry type-hash cache;
 - the optional JSON path applies the same identifier validation before graph
   traversal;
 - failed `encode_eip712_data` calls clear the selected output region if any

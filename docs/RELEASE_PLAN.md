@@ -2320,8 +2320,9 @@ Deliverables:
   tracking on every failed or reverted stateful run;
 - pentest remediation that validates EIP-712 identifiers, rejects duplicate
   borrowed type/field/value names and atomic-looking custom struct names,
-  bounds borrowed fields and values before duplicate scans, and clears partial
-  encode-data output.
+  bounds borrowed fields, values, and arrays before expensive traversal,
+  validates schemas once, caches type hashes across recursive borrowed and
+  JSON hashing, and clears partial encode-data output.
 
 Verification:
 

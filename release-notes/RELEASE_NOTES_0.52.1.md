@@ -80,6 +80,11 @@ the following `v0.52.2..=v0.52.9` releases.
 - Borrowed schemas and values reject duplicate names before hashing and cap
   each struct at 64 fields and 64 named values before quadratic duplicate
   checks begin.
+- Borrowed arrays reject more than 256 elements at every dimension before
+  element hashing starts.
+- Borrowed and JSON recursive hashing validate the schema once at the public
+  boundary and reuse a fixed 64-entry type-hash cache instead of rebuilding
+  schema and type-hash state for every nested struct value.
 - `encode_eip712_data` clears its selected output region if a later field
   fails, so partial signing material is not left in pooled buffers.
 

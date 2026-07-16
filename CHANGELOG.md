@@ -8,8 +8,8 @@ All notable changes to `eth` are documented here.
   execution contexts one-shot until destructive reset, rolling back warm/cold
   access tracking on failed or reverted stateful runs, validating EIP-712
   identifiers and uniqueness, reserving atomic-looking type names, bounding
-  borrowed field/value collections, and clearing partial typed-data output on
-  failure.
+  borrowed field/value/array collections, validating schemas once, caching
+  recursive type hashes, and clearing partial typed-data output on failure.
 - Reworked the facade README opening around a direct crate purpose, early
   install and transaction-envelope example, compact capability status table,
   and a dedicated detailed current-status document.

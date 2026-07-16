@@ -15,10 +15,11 @@ use scalar::{
     check_depth, check_len, encode_json_numeric_or_bytes, parse_address, parse_b256, parse_chain_id,
 };
 
+use super::eip712_schema::ValidatedSchema;
 use super::typed_helpers::{find_struct, parse_array_type, validate_identifier};
 use super::{
     ADDRESS_PADDING_BYTES, Eip712DomainData, Eip712EncodeError, Eip712Field, Eip712StructType,
-    MAX_TYPE_DEPTH, WORD_BYTES, eip712_domain_separator, eip712_type_hash,
+    MAX_TYPE_DEPTH, WORD_BYTES, eip712_domain_separator,
 };
 use crate::eip712_signing_digest;
 
@@ -118,9 +119,10 @@ where
     let primary_type = root.get("primaryType")?.as_str()?;
     let domain = parse_domain(root.get("domain")?, limits)?;
     let message = root.get("message")?;
+    let mut schema = ValidatedSchema::try_new(&types)?;
     let domain_separator = eip712_domain_separator::<H>(domain, type_scratch)?;
     let message_hash =
-        hash_json_struct::<H>(&types, primary_type, message, type_scratch, limits, 0)?;
+        hash_json_struct::<H>(&mut schema, primary_type, message, type_scratch, limits, 0)?;
     Ok(eip712_signing_digest(
         domain_separator,
         message_hash,
@@ -129,7 +131,7 @@ where
 }
 
 fn hash_json_struct<H>(
-    types: &[Eip712StructType<'_>],
+    schema: &mut ValidatedSchema<'_>,
     primary_type: &str,
     value: &Json,
     type_scratch: &mut [u8],
@@ -141,14 +143,14 @@ where
 {
     check_depth(depth, limits)?;
     let object = value.as_object()?;
-    let ty = find_struct(types, primary_type)?;
-    let type_hash = eip712_type_hash::<H>(types, primary_type, type_scratch)?;
+    let ty = find_struct(schema.types(), primary_type)?;
+    let type_hash = schema.type_hash::<H>(primary_type, type_scratch)?;
     let mut hasher = H::default();
     hasher.update(&type_hash.to_bytes());
     for field in ty.fields {
         let mut word = [0_u8; WORD_BYTES];
         encode_json_word::<H>(
-            types,
+            schema,
             field.type_name,
             object.get(field.name)?,
             &mut word,
@@ -162,7 +164,7 @@ where
 }
 
 fn encode_json_word<H>(
-    types: &[Eip712StructType<'_>],
+    schema: &mut ValidatedSchema<'_>,
     type_name: &str,
     value: &Json,
     out: &mut [u8; WORD_BYTES],
@@ -186,7 +188,7 @@ where
         for item in values {
             let mut word = [0_u8; WORD_BYTES];
             encode_json_word::<H>(
-                types,
+                schema,
                 array.base,
                 item,
                 &mut word,
@@ -219,9 +221,9 @@ where
             check_len(text.len(), limits.max_string_bytes)?;
             *out = hash_one(H::default(), text.as_bytes()).to_bytes();
         }
-        name if find_struct(types, name).is_ok() => {
+        name if schema.contains_struct(name) => {
             *out =
-                hash_json_struct::<H>(types, name, value, type_scratch, limits, depth)?.to_bytes();
+                hash_json_struct::<H>(schema, name, value, type_scratch, limits, depth)?.to_bytes();
         }
         name => encode_json_numeric_or_bytes(name, value, out, limits)?,
     }
