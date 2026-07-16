@@ -37,8 +37,9 @@ dependencies.
 
 ## Current Status
 
-Status: `v0.52.0` adds exact EIP-2537 BLS12-381 frame, output, and gas planning
-while keeping all unimplemented advanced cryptographic execution fail closed.
+Status: `v0.52.1` adds canonical dependency-free EIP-2537 BLS12-381 field,
+scalar, point-coordinate, and precompile-frame parsing while keeping arithmetic
+and curve/subgroup validation fail closed.
 The optional `evm-core` feature now exposes dependency-free no_std word, stack,
 memory, opcode, program-counter, fork, gas schedule, opcode-table, host-state,
 warm/cold access, historical fork identifiers, opcode-introduction metadata,
@@ -49,8 +50,9 @@ plus explicit state reads. Identity, SHA-256, RIPEMD-160, bounded ModExp,
 BN254 add/mul, BN254 pairing frames, and BLAKE2F execute without
 dependencies; ECRECOVER executes through explicit caller-provided secp256k1
 and Keccak boundaries. KZG and BLS cryptographic precompiles remain fail-closed
-execution descriptors, but their complete first-party implementation passes
-are now assigned to `v0.52.1..=v0.52.9` and `v0.61.0..=v0.61.5`.
+execution descriptors. Canonical BLS wire parsing is complete; curve,
+subgroup, arithmetic, mapping, MSM, and pairing execution remain assigned to
+`v0.52.2..=v0.52.9`, with KZG work assigned to `v0.61.0..=v0.61.5`.
 
 Implemented now:
 
@@ -186,9 +188,11 @@ Not implemented yet:
   evidence, optimized bounded final exponentiation, Frobenius Q1/-Q2 point
   mapping, and the projective post-loop line carrier are implemented; non-empty
   pairing result admission now returns canonical EIP-197 zero/one words, while
-  BLAKE2F now follows EIP-152 input and output rules. `v0.52.0` adds exact KZG
-  and BLS planning contracts; first-party BLS execution is scheduled through
-  `v0.52.9`, and first-party KZG execution through `v0.61.5`.
+  BLAKE2F now follows EIP-152 input and output rules. `v0.52.1` adds canonical
+  dependency-free BLS12-381 Fp, Fr, Fp2, unrestricted MSM scalar, G1/G2
+  coordinate, infinity, and precompile-frame parsing. These point values are
+  wire-valid only until the curve and subgroup releases land in
+  `v0.52.2..=v0.52.9`; KZG execution remains scheduled through `v0.61.5`.
 - No ABI/contract helper surface yet; scheduled for `v0.70.0` through
   `v0.78.0`.
 - No consensus/Engine API support yet; scheduled for `v0.79.0` through
@@ -218,14 +222,14 @@ Not implemented yet:
 
 ```toml
 [dependencies]
-eth = "0.52.0"
+eth = "0.52.1"
 ```
 
 For optional sanitization support:
 
 ```toml
 [dependencies]
-eth = { version = "0.52.0", features = ["sanitization"] }
+eth = { version = "0.52.1", features = ["sanitization"] }
 ```
 
 ## Features
@@ -252,7 +256,7 @@ Optional reviewed software Keccak backend:
 
 ```toml
 [dependencies]
-eth = { version = "0.52.0", features = ["keccak-tiny"] }
+eth = { version = "0.52.1", features = ["keccak-tiny"] }
 ```
 
 ```rust
@@ -266,14 +270,14 @@ Optional reviewed secp256k1 recovery adapter:
 
 ```toml
 [dependencies]
-eth = { version = "0.52.0", features = ["secp256k1-k256"] }
+eth = { version = "0.52.1", features = ["secp256k1-k256"] }
 ```
 
 Optional bounded EVM gas-estimation boundary:
 
 ```toml
 [dependencies]
-eth = { version = "0.52.0", features = ["evm"] }
+eth = { version = "0.52.1", features = ["evm"] }
 ```
 
 ```rust
@@ -378,7 +382,7 @@ Optional native EVM core domains:
 
 ```toml
 [dependencies]
-eth = { version = "0.52.0", features = ["evm-core"] }
+eth = { version = "0.52.1", features = ["evm-core"] }
 ```
 
 State access uses explicit host-state traits and caller-provided fixed-capacity
@@ -387,6 +391,21 @@ state-read pricing for the currently executable subset; Berlin and later use
 warm/cold access accounting. See
 [`docs/evm-fork-matrix.md`](docs/evm-fork-matrix.md) for the current native EVM
 fork and opcode support matrix.
+
+EIP-2537 wire parsers validate exact frame lengths, zero padding, field bounds,
+coefficient order, and the unique all-zero infinity encoding without allocating.
+Returned G1/G2 values are canonical wire coordinates, not yet proof of curve or
+subgroup membership. See
+[`docs/bls12-381-wire-encodings.md`](docs/bls12-381-wire-encodings.md).
+
+```rust
+use eth::evm_core::{EVM_BLS12381_G1_POINT_BYTES, EvmBls12381G1Point};
+
+let encoded = [0_u8; EVM_BLS12381_G1_POINT_BYTES];
+let point = EvmBls12381G1Point::try_from_be_bytes(&encoded)?;
+assert!(point.is_infinity());
+# Ok::<(), eth::error::EvmCoreError>(())
+```
 
 ```rust
 use eth::evm_core::{
@@ -1252,7 +1271,7 @@ friendly, and independently testable.
 | `eth-valkyoth-sanitization` | no | Optional bridge to the `sanitization` crate for secret-bearing Ethereum data. |
 | `eth-valkyoth-derive` | no | Optional sanitization and RLP derive macros. |
 | `eth-valkyoth-evm` | no | Explicit no_std EVM execution boundary; no backend admitted yet. |
-| `eth-valkyoth-evm-core` | no | Dependency-free native EVM core domains plus gas-metered basic bounded opcode execution, explicit host-state reads, fail-closed call/create planning, native precompile execution through BLAKE2F, and exact fail-closed KZG/BLS frame, output, and gas planning. |
+| `eth-valkyoth-evm-core` | no | Dependency-free native EVM core domains plus gas-metered basic bounded opcode execution, explicit host-state reads, fail-closed call/create planning, native precompile execution through BLAKE2F, and canonical EIP-2537 BLS wire/frame parsing while arithmetic remains fail closed. |
 | `eth-valkyoth-rpc` | no | Future explicit RPC trust-policy boundary. |
 | `eth-valkyoth-signer` | no | Future signer isolation boundary. |
 | `eth-valkyoth-reth` | no | Future Reth integration boundary. |
@@ -1263,7 +1282,7 @@ friendly, and independently testable.
 The minimum supported Rust version is Rust `1.90.0`. New deployments should use
 the pinned stable Rust `1.96.1` until the toolchain policy is updated.
 
-Compatibility evidence for `0.52.0`:
+Compatibility evidence for `0.52.1`:
 
 | Rust | Local Evidence |
 | --- | --- |
@@ -1280,7 +1299,7 @@ Compatibility evidence for `0.52.0`:
 
 ```bash
 scripts/checks.sh
-scripts/release_0_52_0_gate.sh
+scripts/release_0_52_1_gate.sh
 ```
 
 For dependency-policy checks, install `cargo-deny` and `cargo-audit`, then run:

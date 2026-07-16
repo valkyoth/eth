@@ -1,5 +1,5 @@
 [release]
-version = "0.52.0"
+version = "0.52.1"
 policy = "independent"
 
 [crates."eth-valkyoth-codec"]
@@ -7,95 +7,95 @@ previous_version = "0.19.0"
 version = "0.19.0"
 change = "unchanged"
 publish = false
-reason = "No package changes for v0.52.0."
+reason = "No package changes for v0.52.1."
 
 [crates."eth-valkyoth-primitives"]
 previous_version = "0.11.2"
 version = "0.11.2"
 change = "unchanged"
 publish = false
-reason = "No package changes for v0.52.0."
+reason = "No package changes for v0.52.1."
 
 [crates."eth-valkyoth-hash"]
 previous_version = "0.11.2"
 version = "0.11.2"
 change = "unchanged"
 publish = false
-reason = "No package changes for v0.52.0."
+reason = "No package changes for v0.52.1."
 
 [crates."eth-valkyoth-protocol"]
 previous_version = "0.25.2"
 version = "0.25.2"
 change = "unchanged"
 publish = false
-reason = "No package changes for v0.52.0."
+reason = "No package changes for v0.52.1."
 
 [crates."eth-valkyoth-verify"]
-previous_version = "0.21.0"
+previous_version = "0.22.0"
 version = "0.22.0"
-change = "code"
-publish = true
-reason = "Updates the optional k256 adapter to 0.14.0, bounds EIP-712 schemas, redacts signing values, and versions public API compatibility changes correctly."
+change = "unchanged"
+publish = false
+reason = "No package changes for v0.52.1."
 
 [crates."eth-valkyoth-derive"]
-previous_version = "0.17.2"
+previous_version = "0.17.3"
 version = "0.17.3"
-change = "dependency"
-publish = true
-reason = "Refreshes the compile-test dependency to trybuild 1.0.118."
+change = "unchanged"
+publish = false
+reason = "No package changes for v0.52.1."
 
 [crates."eth-valkyoth-sanitization"]
-previous_version = "0.7.4"
+previous_version = "0.7.5"
 version = "0.7.5"
-change = "dependency"
-publish = true
-reason = "Updates sanitization to 1.2.4 and the optional derive dependency to eth-valkyoth-derive 0.17.3."
+change = "unchanged"
+publish = false
+reason = "No package changes for v0.52.1."
 
 [crates."eth-valkyoth-evm-core"]
-previous_version = "0.24.0"
-version = "0.25.0"
+previous_version = "0.25.0"
+version = "0.26.0"
 change = "code"
 publish = true
-reason = "Adds exact EIP-2537 BLS12-381 frame policies, output lengths, checked gas planning, discount-table boundaries, and advanced-precompile fuzz coverage."
+reason = "Adds canonical dependency-free EIP-2537 Fp, Fr, Fp2, scalar, G1, G2, and precompile frame parsing with boundary tests and fuzz coverage."
 
 [crates."eth-valkyoth-evm"]
 previous_version = "0.10.0"
 version = "0.10.0"
 change = "unchanged"
 publish = false
-reason = "No package changes for v0.52.0."
+reason = "No package changes for v0.52.1."
 
 [crates."eth-valkyoth-rpc"]
 previous_version = "0.7.0"
 version = "0.7.0"
 change = "unchanged"
 publish = false
-reason = "No package changes for v0.52.0."
+reason = "No package changes for v0.52.1."
 
 [crates."eth-valkyoth-signer"]
 previous_version = "0.7.3"
 version = "0.7.3"
 change = "unchanged"
 publish = false
-reason = "No package changes for v0.52.0."
+reason = "No package changes for v0.52.1."
 
 [crates."eth-valkyoth-reth"]
 previous_version = "0.7.0"
 version = "0.7.0"
 change = "unchanged"
 publish = false
-reason = "No package changes for v0.52.0."
+reason = "No package changes for v0.52.1."
 
 [crates."eth-valkyoth-testkit"]
 previous_version = "0.7.0"
 version = "0.7.0"
 change = "unchanged"
 publish = false
-reason = "No package changes for v0.52.0."
+reason = "No package changes for v0.52.1."
 
 [crates.eth]
-previous_version = "0.51.0"
-version = "0.52.0"
+previous_version = "0.52.0"
+version = "0.52.1"
 change = "code"
 publish = true
-reason = "Updates evm-core to 0.25.0, verify to 0.22.0, optional sanitization to 0.7.5, and documents the advanced-precompile admission plan."
+reason = "Updates evm-core to 0.26.0 and exposes the canonical EIP-2537 BLS12-381 wire and frame domains through the optional evm-core feature."

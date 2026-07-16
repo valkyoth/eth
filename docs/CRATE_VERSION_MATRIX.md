@@ -1,8 +1,9 @@
 # Crate Version Matrix
 
-Status: `v0.52.0` adds exact EIP-4844 KZG and EIP-2537 BLS12-381
-frame, output-length, and gas planning while keeping unimplemented advanced
-cryptographic execution fail closed.
+Status: `v0.52.1` adds canonical dependency-free EIP-2537 BLS12-381 Fp, Fr,
+Fp2, unrestricted MSM scalar, G1/G2 coordinate, infinity, and complete
+precompile-frame parsing while keeping arithmetic and curve/subgroup validation
+fail closed.
 `eth-valkyoth-evm-core` now exposes dependency-free `no_std` stack, memory,
 word, opcode, program-counter, fork, gas, state, error, and bounded
 interpreter domains for basic stack/control-flow bytecode plus explicit host
@@ -20,9 +21,11 @@ multiplication evidence, optimized bounded final exponentiation, Frobenius point
 for the optimal-ate post-loop inputs, the projective post-loop line carrier,
 canonical EIP-197 zero/one result-word admission, and EIP-152 BLAKE2F
 execution with exact input-shape validation, final-flag validation, and
-round-count gas. Advanced-precompile planning now also enforces exact or
-non-empty item frames, official BLS MSM discount gas, pairing gas, and fixed
-output lengths.
+round-count gas. Advanced-precompile planning also enforces exact or non-empty
+item frames, official BLS MSM discount gas, pairing gas, and fixed output
+lengths. The wire domain rejects non-zero Fp padding, values at or above the
+field modulus, partial frames, and alternate infinity representations before
+arithmetic.
 ECRECOVER executes through explicit caller-provided secp256k1 and Keccak
 boundaries while KZG and BLS cryptographic precompiles fail closed until
 audited backends or first-party implementations are admitted.
@@ -51,24 +54,24 @@ but must be republished so immutable crates.io package metadata is corrected.
 workspace manifests before release. The script refuses accidental lockstep
 publication when a crate is marked `unchanged`.
 
-## v0.52.0 Tracking Table
+## v0.52.1 Tracking Table
 
 | Crate | Published | Planned | Change | Publish | Reason |
 | --- | --- | --- | --- | --- | --- |
-| `eth-valkyoth-codec` | `0.19.0` | `0.19.0` | `unchanged` | No | No package changes for v0.52.0. |
-| `eth-valkyoth-primitives` | `0.11.2` | `0.11.2` | `unchanged` | No | No package changes for v0.52.0. |
-| `eth-valkyoth-hash` | `0.11.2` | `0.11.2` | `unchanged` | No | No package changes for v0.52.0. |
-| `eth-valkyoth-protocol` | `0.25.2` | `0.25.2` | `unchanged` | No | No package changes for v0.52.0. |
-| `eth-valkyoth-verify` | `0.21.0` | `0.22.0` | `code` | Yes | Updates the optional `k256` adapter, bounds EIP-712 schemas, redacts signing values, and versions public API compatibility changes correctly. |
-| `eth-valkyoth-derive` | `0.17.2` | `0.17.3` | `dependency` | Yes | Refreshes the compile-test dependency to `trybuild 1.0.118`. |
-| `eth-valkyoth-sanitization` | `0.7.4` | `0.7.5` | `dependency` | Yes | Updates `sanitization` to `1.2.4` and the optional derive dependency to `0.17.3`. |
-| `eth-valkyoth-evm-core` | `0.24.0` | `0.25.0` | `code` | Yes | Adds exact KZG/BLS frame policies, output lengths, checked EIP-2537 fixed/MSM/pairing gas, boundary tests, and advanced-precompile fuzz coverage. |
-| `eth-valkyoth-evm` | `0.10.0` | `0.10.0` | `unchanged` | No | No package changes for v0.52.0. |
-| `eth-valkyoth-rpc` | `0.7.0` | `0.7.0` | `unchanged` | No | No package changes for v0.52.0. |
-| `eth-valkyoth-signer` | `0.7.3` | `0.7.3` | `unchanged` | No | No package changes for v0.52.0. |
-| `eth-valkyoth-reth` | `0.7.0` | `0.7.0` | `unchanged` | No | No package changes for v0.52.0. |
-| `eth-valkyoth-testkit` | `0.7.0` | `0.7.0` | `unchanged` | No | No package changes for v0.52.0. |
-| `eth` | `0.51.0` | `0.52.0` | `code` | Yes | Updates `evm-core` to `0.25.0`, `verify` to `0.22.0`, optional sanitization to `0.7.5`, and documents the advanced-precompile admission plan. |
+| `eth-valkyoth-codec` | `0.19.0` | `0.19.0` | `unchanged` | No | No package changes for v0.52.1. |
+| `eth-valkyoth-primitives` | `0.11.2` | `0.11.2` | `unchanged` | No | No package changes for v0.52.1. |
+| `eth-valkyoth-hash` | `0.11.2` | `0.11.2` | `unchanged` | No | No package changes for v0.52.1. |
+| `eth-valkyoth-protocol` | `0.25.2` | `0.25.2` | `unchanged` | No | No package changes for v0.52.1. |
+| `eth-valkyoth-verify` | `0.22.0` | `0.22.0` | `unchanged` | No | No package changes for v0.52.1. |
+| `eth-valkyoth-derive` | `0.17.3` | `0.17.3` | `unchanged` | No | No package changes for v0.52.1. |
+| `eth-valkyoth-sanitization` | `0.7.5` | `0.7.5` | `unchanged` | No | No package changes for v0.52.1. |
+| `eth-valkyoth-evm-core` | `0.25.0` | `0.26.0` | `code` | Yes | Adds canonical dependency-free EIP-2537 Fp, Fr, Fp2, scalar, G1, G2, and precompile-frame parsing with boundary tests and fuzz coverage. |
+| `eth-valkyoth-evm` | `0.10.0` | `0.10.0` | `unchanged` | No | No package changes for v0.52.1. |
+| `eth-valkyoth-rpc` | `0.7.0` | `0.7.0` | `unchanged` | No | No package changes for v0.52.1. |
+| `eth-valkyoth-signer` | `0.7.3` | `0.7.3` | `unchanged` | No | No package changes for v0.52.1. |
+| `eth-valkyoth-reth` | `0.7.0` | `0.7.0` | `unchanged` | No | No package changes for v0.52.1. |
+| `eth-valkyoth-testkit` | `0.7.0` | `0.7.0` | `unchanged` | No | No package changes for v0.52.1. |
+| `eth` | `0.52.0` | `0.52.1` | `code` | Yes | Updates `evm-core` to `0.26.0` and exposes canonical EIP-2537 BLS12-381 wire and frame domains through the optional `evm-core` feature. |
 
 Update this table and `release-crates.toml` in the same commit whenever a crate
 changes release state.

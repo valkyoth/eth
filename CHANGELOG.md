@@ -4,6 +4,14 @@ All notable changes to `eth` are documented here.
 
 ## Unreleased
 
+- Started `0.52.1` with dependency-free canonical EIP-2537 Fp, Fr, Fp2,
+  unrestricted MSM scalar, G1/G2 coordinate, infinity, and complete
+  `0x0b..=0x11` precompile-frame parsing.
+- Added exact field-modulus, padding, coefficient-order, frame-boundary,
+  round-trip, iterator, and malformed-late-item tests plus the
+  `bls12381_wire` fuzz target and committed seed corpus.
+- Kept curve membership, subgroup checks, mapping, arithmetic, MSM, pairing,
+  and all BLS precompile execution fail closed for the assigned later releases.
 - Started `0.52.0` with exact EIP-4844 KZG and EIP-2537 BLS12-381 frame,
   output-length, and gas planning while advanced cryptographic execution stays
   fail closed.

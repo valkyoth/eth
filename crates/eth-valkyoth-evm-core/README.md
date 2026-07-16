@@ -34,7 +34,7 @@ Most users should depend on `eth` and enable the optional `evm-core` feature:
 
 ```toml
 [dependencies]
-eth = { version = "0.52.0", features = ["evm-core"] }
+eth = { version = "0.52.1", features = ["evm-core"] }
 ```
 
 This crate executes only the audited bootstrap opcode subset. It exposes
@@ -55,7 +55,23 @@ BN254 add/mul, BN254 pairing frames, and Istanbul BLAKE2F execute through
 first-party dependency-free implementations. ECRECOVER executes through
 explicit caller-provided secp256k1 and Keccak backend traits. KZG and BLS
 cryptographic execution remains fail closed, while their descriptors now carry
-exact EIP-4844/EIP-2537 input, output, and gas plans.
+exact EIP-4844/EIP-2537 input, output, and gas plans. Canonical EIP-2537 Fp,
+Fr, Fp2, unrestricted MSM scalar, G1/G2 coordinate, infinity, and complete
+precompile-frame parsing is available without allocation. Parsed point values
+are wire-valid only; curve and subgroup validation remains fail closed until
+the assigned arithmetic releases.
+
+```rust
+use eth::evm_core::{EVM_BLS12381_G1_POINT_BYTES, EvmBls12381G1Point};
+
+let encoded = [0_u8; EVM_BLS12381_G1_POINT_BYTES];
+let point = EvmBls12381G1Point::try_from_be_bytes(&encoded)?;
+assert!(point.is_infinity());
+# Ok::<(), eth::error::EvmCoreError>(())
+```
+
+The complete wire contract is documented in
+[`docs/bls12-381-wire-encodings.md`](https://github.com/valkyoth/eth/blob/main/docs/bls12-381-wire-encodings.md).
 
 ## Security posture
 

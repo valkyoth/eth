@@ -445,7 +445,10 @@ const fn output_len(kind: EvmPrecompileKind) -> Option<usize> {
     }
 }
 
-fn validate_input_policy(policy: EvmPrecompileInputPolicy, len: usize) -> Result<(), EvmCoreError> {
+pub(crate) fn validate_input_policy(
+    policy: EvmPrecompileInputPolicy,
+    len: usize,
+) -> Result<(), EvmCoreError> {
     if len > EVM_PRECOMPILE_INPUT_LIMIT {
         return Err(EvmCoreError::PrecompileInputTooLarge);
     }

@@ -7,7 +7,9 @@ extern crate std;
 
 mod advanced_precompile;
 mod blake2f;
+mod bls12_frame;
 mod bls12_gas;
+mod bls12_wire;
 mod bn254;
 mod bn254_field;
 mod bn254_final;
@@ -42,6 +44,21 @@ mod state_execution;
 mod word;
 
 pub use blake2f::{EVM_BLAKE2F_INPUT_BYTES, EVM_BLAKE2F_OUTPUT_BYTES};
+pub use bls12_frame::{
+    EVM_BLS12381_G1_MSM_ITEM_BYTES, EVM_BLS12381_G2_MSM_ITEM_BYTES,
+    EVM_BLS12381_PAIRING_ITEM_BYTES, EvmBls12381G1AddInput, EvmBls12381G1MsmInput,
+    EvmBls12381G1MsmItem, EvmBls12381G1MsmItems, EvmBls12381G2AddInput, EvmBls12381G2MsmInput,
+    EvmBls12381G2MsmItem, EvmBls12381G2MsmItems, EvmBls12381PairingInput, EvmBls12381PairingItem,
+    EvmBls12381PairingItems, parse_bls12381_g1_add, parse_bls12381_g1_msm, parse_bls12381_g2_add,
+    parse_bls12381_g2_msm, parse_bls12381_map_fp_to_g1, parse_bls12381_map_fp2_to_g2,
+    parse_bls12381_pairing,
+};
+pub use bls12_wire::{
+    EVM_BLS12381_FP_BYTES, EVM_BLS12381_FP2_BYTES, EVM_BLS12381_FR_BYTES,
+    EVM_BLS12381_G1_POINT_BYTES, EVM_BLS12381_G2_POINT_BYTES, EVM_BLS12381_SCALAR_BYTES,
+    EvmBls12381Fp, EvmBls12381Fp2, EvmBls12381Fr, EvmBls12381G1Point, EvmBls12381G2Point,
+    EvmBls12381Scalar,
+};
 pub use bn254::{EVM_BN254_ADD_INPUT_BYTES, EVM_BN254_MUL_INPUT_BYTES, EVM_BN254_POINT_BYTES};
 #[cfg(feature = "testing")]
 pub use bn254_miller::{
@@ -138,6 +155,10 @@ mod bn254_pairing_vector_tests;
 #[cfg(test)]
 #[path = "blake2f_tests.rs"]
 mod blake2f_tests;
+
+#[cfg(test)]
+#[path = "bls12_wire_tests.rs"]
+mod bls12_wire_tests;
 
 #[cfg(test)]
 #[path = "bn254_tower_tests.rs"]
