@@ -56,8 +56,8 @@ subgroup, arithmetic, mapping, MSM, and pairing execution remain assigned to
 
 Implemented now:
 
-- Rust workspace pinned to stable `1.96.1`.
-- MSRV policy for Rust `1.90.0` through `1.96.1`.
+- Rust workspace pinned to stable `1.97.0`.
+- MSRV policy for Rust `1.90.0` through `1.97.0`.
 - `no_std` facade and focused first-party crates.
 - Explicit primitive domains for chain, block, gas, nonce, timestamp, address,
   hash, wei, and transaction type values.
@@ -206,7 +206,7 @@ Not implemented yet:
 | --- | --- |
 | License | `MIT OR Apache-2.0` |
 | MSRV | Rust `1.90.0` |
-| Pinned toolchain | Rust `1.96.1` |
+| Pinned toolchain | Rust `1.97.0` |
 | Default target | `no_std` |
 | Default runtime dependencies | protocol-core support crates plus reviewed `subtle` exception |
 | Optional hardening dependencies | `sanitization` and proc-macro tooling behind opt-in crates/features |
@@ -1280,20 +1280,14 @@ friendly, and independently testable.
 ## Rust Version Support
 
 The minimum supported Rust version is Rust `1.90.0`. New deployments should use
-the pinned stable Rust `1.96.1` until the toolchain policy is updated.
+the pinned stable Rust `1.97.0` until the toolchain policy is updated.
 
 Compatibility evidence for `0.52.1`:
 
 | Rust | Local Evidence |
 | --- | --- |
-| `1.90.0` | `cargo check --workspace --all-features` |
-| `1.91.0` | `cargo check --workspace --all-features` |
-| `1.92.0` | `cargo check --workspace --all-features` |
-| `1.93.0` | `cargo check --workspace --all-features` |
-| `1.94.0` | `cargo check --workspace --all-features` |
-| `1.95.0` | `cargo check --workspace --all-features` |
-| `1.96.0` | `cargo check --workspace --all-features` |
-| `1.96.1` | full release gate |
+| `1.90.0`-`1.96.1` | `cargo check --workspace --all-features` on every supported toolchain |
+| `1.97.0` | Full release gate |
 
 ## Checks
 

@@ -176,6 +176,7 @@ test -x scripts/release_0_50_10_gate.sh
 test -x scripts/release_0_51_0_gate.sh
 test -x scripts/release_0_52_0_gate.sh
 test -x scripts/release_0_52_1_gate.sh
+grep -q "rustc 1\\\\.97\\\\.0" scripts/release_0_52_1_gate.sh
 test -x scripts/test-workspace-dependency-policy.py
 test -f docs/spec-source-policy.md
 test -f docs/reference-store.md
@@ -211,6 +212,6 @@ if grep -q 'spec_required = true' spec-lock.toml; then
 fi
 grep -q 'license = "MIT OR Apache-2.0"' Cargo.toml
 grep -q 'repository = "https://github.com/valkyoth/eth"' Cargo.toml
-grep -q 'channel = "1.96.1"' rust-toolchain.toml
+grep -q 'channel = "1.97.0"' rust-toolchain.toml
 grep -q 'rust-version = "1.90"' Cargo.toml
 grep -q 'valkyoth-eth-upstream-check/0.52.1' scripts/check_ethereum_upstream.py

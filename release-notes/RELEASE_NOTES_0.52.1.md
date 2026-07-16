@@ -40,6 +40,9 @@ the following `v0.52.2..=v0.52.9` releases.
   the optional `evm-core` feature.
 - Existing advanced-precompile policies now share the public BLS wire-size
   constants instead of duplicating frame literals.
+- The pinned stable toolchain and full release gate now use Rust `1.97.0`;
+  Rust `1.90.0` through `1.96.1` retain individual all-feature compatibility
+  checks.
 
 ## Security Notes
 
@@ -68,6 +71,9 @@ the following `v0.52.2..=v0.52.9` releases.
 - `scripts/materialize_fuzz_seeds.py --check`
 - `scripts/release_crates.py --check`
 - `scripts/checks.sh`
+- `cargo +<toolchain> check --workspace --all-features` for every Rust release
+  from `1.90.0` through `1.96.1`
+- Full release gate on pinned Rust `1.97.0`
 
 ## Pentest
 

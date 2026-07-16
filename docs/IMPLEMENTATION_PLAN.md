@@ -39,8 +39,8 @@ The first production value is:
 
 ## Non-Negotiable Engineering Rules
 
-- Rust stable `1.96.1`, edition 2024, workspace resolver `3`.
-- MSRV is Rust `1.90.0`; compatibility must be checked through `1.96.1`.
+- Rust stable `1.97.0`, edition 2024, workspace resolver `3`.
+- MSRV is Rust `1.90.0`; compatibility must be checked through `1.97.0`.
 - Latest crate and tool versions are checked before dependency or tooling edits.
 - Official Ethereum sources are checked before consensus-sensitive
   implementation work; exact revisions are pinned in `spec-lock.toml`.
@@ -304,7 +304,8 @@ Release gate:
   parser, and typestate invariants;
 - no unresolved critical or high dependency/advisory/audit findings;
 - official conformance suites pass for every claimed feature;
-- all supported Rust versions from `1.90.0` through `1.96.1` are checked.
+- Rust `1.90.0` through `1.96.1` pass all-feature workspace checks;
+- the full release gate passes on pinned stable Rust `1.97.0`.
 
 Kani is extra assurance. It does not replace fuzzing, official Ethereum
 conformance tests, pentest, cargo-audit/cargo-deny, or independent security

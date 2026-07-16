@@ -1,6 +1,7 @@
 #!/usr/bin/env sh
 set -eu
 
+rustc --version | grep -q '^rustc 1\.97\.0 '
 scripts/checks.sh
 scripts/validate-release-readiness.sh v0.52.1
 scripts/check_latest_tools.sh

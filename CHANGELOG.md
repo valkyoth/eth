@@ -4,6 +4,9 @@ All notable changes to `eth` are documented here.
 
 ## Unreleased
 
+- Updated the pinned stable toolchain and full release gate to Rust `1.97.0`,
+  while retaining all-feature compatibility checks for Rust `1.90.0` through
+  `1.96.1`.
 - Started `0.52.1` with dependency-free canonical EIP-2537 Fp, Fr, Fp2,
   unrestricted MSM scalar, G1/G2 coordinate, infinity, and complete
   `0x0b..=0x11` precompile-frame parsing.
