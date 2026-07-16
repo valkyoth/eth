@@ -14,10 +14,19 @@ Use these as primary sources:
 - EIPs: `https://github.com/ethereum/EIPs`
 - Execution APIs: `https://github.com/ethereum/execution-apis`
 - Consensus specs: `https://github.com/ethereum/consensus-specs`
+- Beacon APIs: `https://github.com/ethereum/beacon-APIs`
+- Keymanager APIs: `https://github.com/ethereum/keymanager-APIs`
+- Builder specs: `https://github.com/ethereum/builder-specs`
+- Hive interoperability: `https://github.com/ethereum/hive`
 
 Use consensus specs only when the milestone touches SSZ, beacon-chain concepts,
 Engine API context, post-merge consensus boundaries, or consensus-layer proof
-material.
+material. Full beacon-node and validator milestones must additionally check the
+fork-choice, honest-validator, weak-subjectivity, optimistic-sync, networking,
+data-availability, and fork-upgrade documents for every claimed stable fork.
+Beacon, Keymanager, and Builder API claims must pin their respective official
+repositories. EIP-3076 remains the mandatory slashing-protection interchange
+source.
 
 ## Required Workflow
 
@@ -31,6 +40,10 @@ Before implementing or changing consensus-sensitive behavior:
 5. Add or update tests that use those pinned materials.
 6. Update `docs/SPEC_MATRIX.md` with the claimed status and evidence.
 7. State in release notes which spec and fixture revisions were used.
+
+Do not add future sources to the active `spec-lock.toml` merely because they
+appear in the roadmap. Add and pin each source at the first release that
+implements or tests behavior governed by it.
 
 If the official sources disagree, are ambiguous, or have no fixture for the
 behavior, stop and document the ambiguity before implementing. Do not silently

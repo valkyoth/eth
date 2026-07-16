@@ -8,8 +8,10 @@ Crate name: `eth`
 handling, owned SDK models, first-party historical and current execution,
 typed providers and transaction workflows, wallet and account-abstraction
 support, contract tooling, persistent canonical-chain storage, consensus and
-Engine integration, a complete light client, networking and sync, stateless
-execution, and explicit optional ecosystem adapters.
+Engine integration, a complete light client, a production beacon node and
+validator client, execution and consensus networking/sync, transactional
+slashing protection, builder integration, stateless execution, and explicit
+optional ecosystem adapters.
 
 ## Core Position
 
@@ -20,9 +22,9 @@ explicit boundaries around Ethereum operations. Core Ethereum behavior should
 be first-party where practical. Third-party crates are acceptable only as
 reviewed optional backends, reference implementations, compatibility adapters,
 or explicitly justified cryptographic backends with conformance evidence and a
-boundary. The 1.0 roadmap includes optional contract, consensus, Engine API,
-networking, sync, and node-adjacent tracks, but the default facade remains
-conservative and explicit.
+boundary. The 1.0 roadmap includes optional contract, execution-client,
+consensus-client, validator, Engine API, networking, sync, builder, and node
+tracks, but the default facade remains conservative and explicit.
 
 The first production value is:
 
@@ -40,7 +42,8 @@ The first production value is:
   helpers that do not imply contract trust;
 - persistent storage, canonical-chain import, pruning/archive policy, and
   supervised client-runtime boundaries;
-- consensus, Engine, light-client, networking, txpool, sync, witness, and
+- consensus, Engine, light-client, full beacon-node, validator, slashing,
+  builder, execution/consensus networking, txpool, sync, witness, and
   stateless-execution support with explicit trust and resource policies;
 - conformance evidence against pinned upstream specification revisions.
 
@@ -127,8 +130,44 @@ The first production value is:
   middleware, subscription, and transaction-lifecycle orchestration.
 - `eth-valkyoth-abi`: optional ABI, contract-call, event, error, and common
   contract-standard helpers.
-- `eth-valkyoth-consensus`: optional SSZ, beacon, and light-client boundaries.
-- `eth-valkyoth-engine`: optional Engine API type and validation boundary.
+- `eth-valkyoth-ssz`: complete no_std SSZ, Merkleization, generalized-index,
+  proof, and incremental-root support.
+- `eth-valkyoth-bls`: no_std BLS signing, verification, aggregation, and batch
+  boundary with explicit reviewed backend admission where required.
+- `eth-valkyoth-consensus-types`: fork-typed beacon state, block, operation,
+  sidecar, duty, and API domains.
+- `eth-valkyoth-consensus-config`: network presets, chain/genesis
+  configurations, fork schedules, digests, domains, and generated fork modules.
+- `eth-valkyoth-consensus-transition`: complete per-slot, per-epoch, operation,
+  execution, data-availability, and fork-upgrade state transition.
+- `eth-valkyoth-fork-choice`: transactional LMD-GHOST/Casper FFG, optimistic
+  execution, persistence, recovery, and head/finality service.
+- `eth-valkyoth-consensus`: optional facade over consensus primitives,
+  transition, fork choice, light client, and client services.
+- `eth-valkyoth-engine`: Engine API type, validation, server, and service
+  boundary.
+- `eth-valkyoth-engine-client`: authenticated multi-execution-client
+  coordination, health, failover, and invalidation propagation.
+- `eth-valkyoth-beacon-store`: hot/finalized blocks, states, sidecars,
+  snapshots, reconstruction, pruning, migration, and repair.
+- `eth-valkyoth-consensus-network`: optional discv5, ENR, libp2p, GossipSub,
+  subnet, ReqResp, validation, scoring, and backpressure service.
+- `eth-valkyoth-beacon-sync`: checkpoint, weak-subjectivity, head/range,
+  backfill, optimistic, and PeerDAS synchronization.
+- `eth-valkyoth-data-availability`: cells, data columns, custody,
+  availability evidence, reconstruction, retention, and admission.
+- `eth-valkyoth-beacon-node`: optional orchestration of transition, fork
+  choice, storage, networking, sync, Engine, data availability, and APIs.
+- `eth-valkyoth-validator`: duty scheduling, block production, attestations,
+  aggregation, sync committees, lifecycle operations, and safety policy.
+- `eth-valkyoth-slashing-protection`: transactional slashability kernel,
+  durable record-before-release store, and EIP-3076 interchange.
+- `eth-valkyoth-validator-signer`: consensus signing packages and
+  local/remote/HSM signer orchestration coupled to slashing protection.
+- `eth-valkyoth-keymanager`: official Keymanager REST API and validator-key
+  lifecycle service.
+- `eth-valkyoth-builder`: Builder API, relay multiplexing, blinded blocks,
+  reveal validation, safe local fallback, and future PBS boundary.
 - `eth-valkyoth-p2p`: optional DevP2P/RLPx, discovery, eth, and snap message
   boundary.
 - `eth-valkyoth-txpool`: optional transaction-pool policy helpers.
@@ -169,6 +208,11 @@ Execution and fork-aware maintenance must include an advisory upstream checker.
 The checker tracks latest REVM, official Ethereum hardfork/spec sources, and
 execution fixture revisions so new fork rules or execution changes become a
 planned maintenance release instead of an accidental drift.
+
+Full consensus-client maintenance must also track consensus-spec stable and
+experimental forks, Beacon API, Keymanager API, Builder API, EIP-3076, and Hive
+interoperability. New consensus work becomes a named release only after the
+relevant source is pinned, implemented, tested, and pentested.
 
 ## Phase 1: Repository Foundation
 
@@ -347,14 +391,15 @@ Release gate:
 - committed blocks and state/index roots remain atomically consistent;
 - runtime tasks have explicit shutdown, restart, metrics, and resource policy.
 
-## Phase 11: Consensus Engine Networking And Sync
+## Phase 11: Consensus Primitives Light Client And Execution Networking
 
 Complete SSZ, forked beacon models, all admitted Engine API versions, Engine
 client/server services, Beacon API, weak-subjectivity bootstrap, BLS sync
 committee verification, rotation, persistence, finality scoring, execution
-proof binding, checkpoint recovery, PeerDAS, Discovery/RLPx, eth/snap, peers,
-request scheduling, txpool, sync, Portal/history acquisition, and
-builder/validator boundaries.
+proof binding, checkpoint recovery, PeerDAS primitives, plus execution-layer
+Discovery/RLPx, eth/snap, peers, request scheduling, txpool, sync, and
+Portal/history acquisition. These are foundations, not a complete beacon node
+or validator client.
 
 Release gate:
 
@@ -375,19 +420,50 @@ Release gate:
 - historical and successor commitment eras coexist under explicit fork rules;
 - no unfinished commitment or ZK backend can be mistaken for consensus-valid.
 
-## Phase 13: 1.0 Production Readiness
+## Phase 13: Full Beacon Node And Validator Client
+
+Extend consensus primitives into complete fork-typed state transition,
+transactional LMD-GHOST/Casper FFG fork choice, hot/finalized beacon storage,
+operation pools, separate consensus libp2p/discv5/GossipSub/ReqResp networking,
+checkpoint/head/backfill/optimistic/PeerDAS sync, authenticated multi-engine
+coordination, availability tracking, beacon and validator API servers, and
+coherent beacon-node orchestration.
+
+Build the complete validator duty engine with proposer, attester, aggregator,
+sync-committee, lifecycle, doppelganger, quorum, and optimistic-node refusal
+policy. Add transactional record-before-release slashing protection, EIP-3076,
+local/remote/HSM signers, Keymanager API, builder relay multiplexing, safe local
+fallback, deterministic simulation, Hive interoperability, multi-execution
+client testing, and a long-running slash-free validator testnet.
+
+Release gate:
+
+- all official stable-fork state-transition, fork-choice, networking, sync,
+  honest-validator, PeerDAS, Beacon API, Keymanager, and Builder API suites
+  pass with no unexplained skips;
+- weak-subjectivity mismatches fail fatally and optimistic nodes cannot perform
+  validator duties;
+- invalid fork-choice handlers and failed state transitions leave stores
+  unchanged;
+- slashing records are durable before signatures are released;
+- Hive/multi-client and long-running validator evidence is published.
+
+## Phase 14: 1.0 Production Readiness
 
 Complete platform and performance matrices, Kani proofs, Miri/sanitizer gates,
 semver/feature compatibility checks, task-oriented documentation, independent
-core/execution/SDK/network audits, remediation, SBOM, provenance, signed
-release manifest, supported-fork matrix, and migration guidance.
+core/execution/SDK/network/consensus/validator audits, remediation, SBOM,
+provenance, signed release manifest, supported-fork matrix, and migration
+guidance.
 
 Release gate:
 
 - bounded Kani formal verification harnesses pass for selected arithmetic,
-  parser, and typestate invariants;
+  parser, typestate, state-transition, fork-choice, slashing, and duty-safety
+  invariants;
 - no unresolved critical or high dependency/advisory/audit findings;
 - official conformance suites pass for every claimed feature;
+- Hive, multi-execution-client, and long-running validator gates pass;
 - Rust `1.90.0` through the newest supported compatibility release pass
   all-feature workspace checks;
 - the full release gate passes on pinned stable Rust `1.97.0`.

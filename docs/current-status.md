@@ -71,10 +71,14 @@ Legend:
 | Signers, wallets, and account abstraction | 🔴 Planned | Assigned to `v0.109.0..=v0.119.0` |
 | ABI, contracts, and application standards | 🔴 Planned | Assigned to `v0.120.0..=v0.129.0` |
 | Storage, canonical chain, and runtime | 🔴 Planned | Assigned to `v0.130.0..=v0.140.0` |
-| Consensus, Engine API, and light client | 🔴 Planned | Assigned to `v0.141.0..=v0.153.0` |
+| Consensus primitives, Engine API, and light client | 🔴 Planned | Assigned to `v0.141.0..=v0.153.0` |
 | DevP2P, RLPx, txpool, and sync | 🔴 Planned | Assigned to `v0.154.0..=v0.164.0` |
 | Witnesses, stateless execution, and commitment evolution | 🔴 Planned | Assigned to `v0.165.0..=v0.174.0` |
-| Production assurance and compatibility | 🔴 Planned | Assigned to `v0.175.0..=v0.188.0` |
+| Foundation assurance and compatibility | 🔴 Planned | Assigned to `v0.175.0..=v0.188.0` |
+| Full beacon node, consensus networking, and sync | 🔴 Planned | Assigned to `v0.189.0..=v0.231.0` |
+| Validator client, slashing protection, and key management | 🔴 Planned | Assigned to `v0.232.0..=v0.241.0` |
+| Builder integration and consensus operations | 🔴 Planned | Assigned to `v0.242.0..=v0.249.0` |
+| Complete consensus assurance and 1.0 admission | 🔴 Planned | Assigned to `v0.250.0..=v0.260.0` |
 | Reth and ecosystem integration | 🔴 Planned | Optional conversion/reference adapters are assigned to `v0.67.0`; no external implementation becomes the first-party core |
 
 ## Security And Release Baseline

@@ -195,6 +195,12 @@ relevant dependency point.
 | EVM tracing, state overrides, call traces, state diffs, and debug/trace models were missing. | Added `v0.89.0..=v0.91.0` for inspector hooks, trace models, deterministic simulation, and RPC trace interoperability. |
 | Witnesses, stateless execution, commitment-scheme agility, Verkle/binary trees, and state/history evolution were not versioned. | Added `v0.165.0..=v0.174.0` for proof-format abstraction, witnesses, stateless execution, future commitments, state-expiry policy, zk-proof boundaries, and fork-maintenance automation. |
 | SDK compatibility and documentation drift were not release-blocking. | Added `v0.66.0`, `v0.180.0`, and `v0.181.0` for feature truthfulness, generated dependency snippets, semver/feature/serde compatibility gates, and task-oriented documentation. |
+| Consensus types, Engine boundaries, and a light client did not amount to a full beacon node. | Added `v0.189.0..=v0.231.0` for consensus-client architecture, complete beacon transition, production fork choice, beacon storage, operation pools, consensus networking, synchronization, Engine coordination, PeerDAS, beacon-node orchestration, and server APIs. |
+| No complete validator client, slashing-protection subsystem, or validator key-management service was planned. | Added `v0.232.0..=v0.241.0` for duty scheduling, block proposals, attestations, sync committees, validator lifecycle operations, doppelganger protection, transactional slashing protection, EIP-3076, validator signers, and the Keymanager API. |
+| Builder relay integration and safe local-builder fallback were only a boundary decision. | Added `v0.242.0` and `v0.243.0` for Builder API workflows, relay multiplexing, bid/reveal validation, local fallback, withholding defenses, and a future protocol-native PBS boundary. |
+| A Lighthouse/Prysm-class claim lacked full operational APIs, deterministic simulation, Hive interoperability, multi-execution-client tests, and a long-running validator testnet. | Added `v0.244.0..=v0.249.0` for operations, database tooling, simulation, Hive/multi-client interoperability, and slash-free long-running testnet evidence. |
+| Existing formal verification and audits did not cover full consensus transition, fork choice, slashing protection, validator duties, consensus networking, data availability, or builders. | Added `v0.250.0..=v0.257.0` for performance, Kani/formal evidence, four independent audit tracks, and consolidated remediation. |
+| The final API freeze and production release candidate occurred before full consensus-client abstractions existed. | Reclassified `v0.182.0..=v0.188.0` as foundation-level stabilization and added the actual complete API freeze, release rehearsal, and production candidate at `v0.258.0..=v0.260.0`. |
 
 ## Phase 0: Repository And Release Discipline
 
@@ -2642,9 +2648,9 @@ Exit criteria:
 ## Roadmap Expansion From The 2026 Gap Analysis
 
 The releases below replace the earlier narrow integration roadmap. They assign
-every gap identified by the July 2026 completeness review to a version instead
+every gap identified by the July 2026 completeness reviews to a version instead
 of leaving work as an unversioned deferral. The roadmap may extend beyond
-`v0.188.0` when new official Ethereum work or a newly discovered completeness
+`v0.260.0` when new official Ethereum work or a newly discovered completeness
 gap requires another small pass. Reaching a high `0.x` version is preferable
 to compressing security-sensitive work into oversized releases.
 
@@ -2674,6 +2680,11 @@ come from pinned official sources, not memory:
 - <https://github.com/ethereum/execution-specs>
 - <https://github.com/ethereum/consensus-specs>
 - <https://github.com/ethereum/execution-apis>
+- <https://ethereum.github.io/beacon-APIs/>
+- <https://ethereum.github.io/keymanager-APIs/>
+- <https://ethereum.github.io/builder-specs/>
+- <https://github.com/ethereum/hive>
+- <https://eips.ethereum.org/EIPS/eip-3076>
 - <https://eips.ethereum.org/EIPS/eip-3540>
 
 ## Phase 9: Owned SDK And Shared Domain Foundation
@@ -2843,7 +2854,7 @@ come from pinned official sources, not memory:
 | `v0.173.0` | ZK Execution Proof Boundary | Versioned proof/public-input types, verifier trait, fork/circuit binding, recursion/batch policy, and explicit trust/error evidence. | Mock and admitted verifier conformance, malformed proof corpus. | ZK proof systems can integrate without becoming an implicit consensus dependency. |
 | `v0.174.0` | Future Fork Automation | Monitor official specs/EIPs/fixtures, generate drift reports and candidate manifests, and require a named maintenance release for every adopted change. | Scheduled checker tests and simulated upstream fork changes. | New hard forks cannot silently outrun the support matrix. |
 
-## Phase 18: Production Assurance And 1.0 Admission
+## Phase 18: Foundation Assurance Before Full Consensus Client
 
 | Version | Release | Deliverables | Verification | Exit criterion |
 | --- | --- | --- | --- | --- |
@@ -2854,13 +2865,160 @@ come from pinned official sources, not memory:
 | `v0.179.0` | Miri Sanitizers And Undefined-Behavior Gate | Miri for applicable crates/tests, address/thread/memory sanitizers where supported, stack-use analysis, and unsafe-dependency review. | Reproducible tool reports and zero unexplained failures. | Dynamic memory/UB evidence complements the first-party unsafe-code ban. |
 | `v0.180.0` | Compatibility And Semver Gate | cargo-semver-checks, feature powerset, minimal/default/all-feature graphs, README dependency versions, serde/text snapshots, and MSRV/stable checks. | Automated compatibility report for every published crate. | Accidental breaking or stale publication metadata blocks release. |
 | `v0.181.0` | Task-Oriented Documentation | Complete guides for decoding, verification, execution, providers, wallets, contracts, storage, light clients, sync, stateless operation, and migration. | Doctests, link checks, fresh-user task exercises. | Public functionality is discoverable without reading internal source. |
-| `v0.182.0` | API Stability Candidate | Final pre-1.0 naming, ownership, error, feature, deprecation, compatibility, and migration policy. | Public API review and semver baseline. | Remaining work is hardening and remediation, not foundational API invention. |
+| `v0.182.0` | Core SDK API Stability Baseline | Stabilize naming, ownership, errors, features, deprecation, compatibility, and migration policy for the core, SDK, execution, provider, wallet, contract, storage, light-client, and networking foundations. | Public API review and semver baseline for admitted foundation crates. | Later consensus-client work builds on deliberate foundation contracts without pretending the complete 1.0 API is frozen. |
 | `v0.183.0` | Core Cryptography And Codec Audit | Independent review of primitives, hashing, signatures, BLS/KZG, RLP/SSZ/ABI, proofs, and sanitization boundaries. | Published scope/report, remediation register, clean retest. | No unresolved critical/high core finding remains. |
-| `v0.184.0` | Execution Storage And Consensus Audit | Independent review of EVM, state transition, tries, storage, fork choice, Engine, light client, and stateless paths. | Published scope/report, remediation register, clean retest. | No unresolved critical/high execution or consensus finding remains. |
+| `v0.184.0` | Execution Storage And Light-Client Audit | Independent review of EVM, execution state transition, tries, storage, execution fork choice, Engine boundaries, light-client paths, and stateless execution. | Published scope/report, remediation register, clean retest. | No unresolved critical/high finding remains in the execution/client foundation or light-client scope. |
 | `v0.185.0` | Provider Wallet And Contract Audit | Independent review of transports, trust layers, transaction lifecycle, signers, keystores, account abstraction, ABI, and codegen. | Published scope/report, remediation register, clean retest. | No unresolved critical/high SDK or key-management finding remains. |
-| `v0.186.0` | Networking Sync And Runtime Audit | Independent review of RLPx/discovery, peer management, txpool, sync, runtime supervision, pruning, and operational DoS controls. | Published scope/report, remediation register, clean retest. | No unresolved critical/high network or runtime finding remains. |
-| `v0.187.0` | Consolidated Remediation Release | Resolve all residual audit, conformance, compatibility, documentation, and performance findings; record accepted low risks. | Full gate, all retests, zero unexplained skips, updated SBOM/provenance. | The complete pre-1.0 finding register is closed or explicitly accepted. |
-| `v0.188.0` | Production Release Candidate | Freeze APIs/features, run full platform/conformance/interoperability matrix, rehearse publication order, produce signed manifest/SBOM/provenance/migration guide. | Exact-candidate pentest, reproducible packages, crates.io dry run, green CI. | The only remaining action is publishing the unchanged `v1.0.0` candidate. |
+| `v0.186.0` | Execution Networking Sync And Runtime Audit | Independent review of RLPx/discovery, execution peer management, txpool, execution sync, runtime supervision, pruning, and operational DoS controls. | Published scope/report, remediation register, clean retest. | No unresolved critical/high finding remains in the execution-network or runtime foundation. |
+| `v0.187.0` | Foundation Remediation Release | Resolve residual foundation audit, conformance, compatibility, documentation, and performance findings; record accepted low risks. | Full gate, all foundation retests, zero unexplained skips, updated SBOM/provenance. | The SDK, execution, storage, light-client, and execution-network foundation is ready to host the full consensus client. |
+| `v0.188.0` | Full-Stack Foundation Integration Baseline | Exercise all foundation layers together, lock component interoperability contracts, rehearse publication order, and publish the pre-consensus-client evidence set. | Exact-candidate pentest, reproducible packages, local execution-node matrix, green CI. | Full beacon-node and validator work starts from a reviewed integrated foundation rather than an assumed 1.0 candidate. |
+
+## Phase 19: Full Consensus Client Foundation
+
+This phase extends the consensus types and light-client work into a production
+beacon-node foundation. The beacon node coordinates with, but does not replace,
+an execution client through the authenticated Engine API. Stable fork support
+must follow pinned official consensus releases; experimental Gloas, Heze, or
+successor work remains generated, modular, and feature-gated until officially
+admitted.
+
+Consensus-client source review date: 2026-07-16:
+
+- <https://github.com/ethereum/consensus-specs>
+- <https://ethereum.github.io/consensus-specs/phase0/beacon-chain/>
+- <https://ethereum.github.io/consensus-specs/phase0/fork-choice/>
+- <https://ethereum.github.io/consensus-specs/phase0/p2p-interface/>
+- <https://ethereum.github.io/consensus-specs/phase0/weak-subjectivity/>
+- <https://ethereum.github.io/consensus-specs/sync/optimistic/>
+- <https://ethereum.github.io/consensus-specs/fulu/validator/>
+
+| Version | Release | Deliverables | Verification | Exit criterion |
+| --- | --- | --- | --- | --- |
+| `v0.189.0` | Consensus Client Architecture And Threat Model | Define beacon-node, validator, signer, slashing, builder, Engine, storage, network, sync, and data-availability trust boundaries; allocate focused crates and resource ceilings. | Architecture review, dependency classification, abuse-case register, crate-cycle check. | No consensus-client implementation begins with ambiguous ownership, trust, or persistence boundaries. |
+| `v0.190.0` | Consensus Configuration And Fork Registry | Network presets, chain configurations, genesis data, fork schedules, fork digests, domain constants, typed stable-fork variants, and generated experimental-fork modules. | Official preset/config fixtures, fork-digest vectors, source-lock drift tests. | Consensus behavior is source-generated and fork-modular rather than spread through optional-field conditionals. |
+| `v0.191.0` | Complete SSZ Client Surface | Complete containers, lists, vectors, bitlists, bitvectors, incremental hash-tree roots, generalized indices, branches, multiproofs, cached trees, and bounded mutation APIs. | Official SSZ vectors, incremental/full-root differential tests, malformed-offset and proof fuzzing. | Beacon state and network objects can use first-party SSZ without missing production container or proof operations. |
+| `v0.192.0` | BLS Signing Aggregation And Batch Verification | First-party BLS signing, verification, aggregation, aggregate verification, randomized batch verification, proof of possession where required, secret/public key domains, and optional acceleration only behind audited adapters. | Official BLS vectors, independent differential tests, subgroup/fault/batch fuzzing, timing review. | Consensus and validator paths have a complete first-party BLS surface, not verification-only light-client hooks. |
+| `v0.193.0` | Committees Shuffling Domains And Signing Roots | Validator shuffling, proposer/committee selection, subnet assignments, fork-aware domains, signing roots, RANDAO, aggregator selection, and cached epoch context. | Official shuffling/committee vectors, property tests, cross-fork domain checks. | Every duty and signature domain is derived from pinned consensus rules. |
+
+## Phase 20: Complete Beacon State Transition
+
+| Version | Release | Deliverables | Verification | Exit criterion |
+| --- | --- | --- | --- | --- |
+| `v0.194.0` | Beacon Transition Shell And Per-Slot Processing | Mutable/transactional BeaconState, slot processing, historical roots/summaries, state/block roots, cache policy, and rollback-safe transition errors. | Official slot-transition vectors, output-unchanged failure tests, state-root differential checks. | Per-slot processing is complete and failed transitions cannot partially mutate caller-visible state. |
+| `v0.195.0` | Epoch Registry And Balance Processing | Registry updates, effective balances, justification/finalization inputs, slashings vectors, inactivity scores, participation rotation, and epoch caches. | Official epoch-component vectors and large-validator-set resource tests. | Epoch-wide validator and balance bookkeeping matches the specification. |
+| `v0.196.0` | Activation Exit Churn Withdrawal And Consolidation | Eligibility, activation queue, exits, churn limits, withdrawals, credential changes, consolidation requests, and fork-specific lifecycle rules. | Official lifecycle vectors, queue/churn properties, historical/current fork tests. | The full validator lifecycle is state-transition complete. |
+| `v0.197.0` | Rewards Penalties Participation And Inactivity | Base rewards, attestation deltas, proposer rewards, sync rewards, inactivity leaks, participation flags, and fork-specific accounting. | Official reward/penalty vectors, arithmetic proofs/properties, inactivity simulations. | Balance outcomes match official vectors across normal and non-finalizing periods. |
+| `v0.198.0` | Deposits Slashings And Credential Operations | Deposit processing and proofs, proposer/attester slashings, voluntary exits, BLS-to-execution changes, pending requests, and duplicate/conflict policy. | Official operation vectors, malformed proof/signature tests, slashing edge cases. | Every consensus operation that changes validator state is implemented and checked. |
+| `v0.199.0` | Attestations Sync Committees And Block Operations | Attestation validation/processing, indexed attestations, sync aggregates, block header/body operations, operation ordering, and bounded block-operation limits. | Official operation/block vectors and malformed aggregate fuzzing. | Beacon blocks can process all stable-fork consensus operations. |
+| `v0.200.0` | Execution Payload And Request Processing | Merge transition rules, execution payload/header processing, withdrawals, deposit receipts, execution requests, consolidations, payload status binding, and Engine evidence. | Official Bellatrix-through-current vectors and invalid execution-status cases. | Consensus transition is correctly bound to execution validity and current request types. |
+| `v0.201.0` | Data Availability State Transition | Blob/data-column commitments, custody requirements, availability status, block acceptance dependencies, retention metadata, and stable-fork DA rules. | Official Deneb/Fulu/current vectors, missing/invalid sidecar tests, custody calculations. | Consensus transition does not accept data-dependent blocks without the required availability evidence. |
+| `v0.202.0` | Explicit Consensus Fork Upgrades | State upgrade functions between every supported stable fork, migration invariants, typed pre/post states, and experimental-fork admission policy. | Official fork-upgrade vectors and round-trip migration audits. | Every supported fork transition is explicit, tested, and free of implicit optional-field reinterpretation. |
+| `v0.203.0` | Complete State-Transition Vector Gate | Run all official operation, epoch, transition, fork-upgrade, sanity, finality, random, and current stable-fork suites with generated coverage reports. | Zero unexplained skips for claimed forks and cross-client state-root samples. | The complete beacon state transition is fixture-backed for every claimed stable fork. |
+
+## Phase 21: Production Consensus Fork Choice And Beacon Chain
+
+| Version | Release | Deliverables | Verification | Exit criterion |
+| --- | --- | --- | --- | --- |
+| `v0.204.0` | Transactional Fork-Choice Store | Store contract, atomic handlers, tick/block/attestation/slashing inputs, checkpoint states, latest messages, invalid-input rollback, and bounded caches. | Official handler tests, mutation-failure injection, property tests proving invalid calls preserve store state. | Fork-choice updates are transactional as required by the specification. |
+| `v0.205.0` | LMD-GHOST And Latest Messages | Ancestry, latest-message tracking, vote weights, filtered trees, head selection, equivocation handling, and efficient incremental updates. | Official fork-choice vectors, randomized tree differential tests, scale benchmarks. | Head computation matches LMD-GHOST under competing branches and votes. |
+| `v0.206.0` | Casper FFG Proposer Boost And Reorg Policy | Justified/finalized and unrealized checkpoints, proposer boost, proposer reorgs, weak-head/strong-parent rules, and configurable safety policy. | Official vectors, reorg-threshold properties, delayed-attestation simulations. | Finality and proposer policies match pinned stable-fork rules. |
+| `v0.207.0` | Optimistic Execution And Invalidation | Optimistic statuses, `latestValidHash`, invalid subtree removal, weight removal, poisoning defenses, Engine failure states, and validator-safety signals. | Official optimistic-sync cases, execution invalidation/reorg simulations, multi-engine fault injection. | Execution-invalid ancestry cannot remain canonical or authorize validator duties. |
+| `v0.208.0` | Fork-Choice Persistence And Recovery | Durable fork-choice snapshots/logs, atomic import coupling, restart reconstruction, checkpoint recovery, corruption detection, and deterministic replay. | Crash/restart/torn-write simulations and replay equivalence tests. | Restarted fork choice returns the same safe/finalized/head state or fails closed. |
+| `v0.209.0` | Beacon Operation Pools | Attestation aggregation, sync contributions, slashings, exits, credential changes, execution/consolidation requests, duplicate suppression, expiry, and block packing. | Pool property/fuzz tests, reorg handling, bounded-memory and packing tests. | Block production has complete, bounded, reorg-aware operation sources. |
+| `v0.210.0` | Hot And Finalized Beacon Storage | Hot blocks/states/sidecars, finalized/cold storage, canonical indexes, finalized migration, root/slot lookup, and atomic fork-choice coupling. | Long-chain/reorg/finality/crash simulations and corruption fixtures. | Beacon blocks and states survive restart and finalization atomically. |
+| `v0.211.0` | State Snapshots And Reconstruction | Incremental snapshots, state diffs, epoch-boundary checkpoints, historical-root/summary access, replay reconstruction, and cache eviction. | Random-state reconstruction, snapshot corruption, memory/disk benchmark tests. | Required historical states can be reconstructed within documented resource bounds. |
+| `v0.212.0` | Sidecar Custody Pruning And Retention | Blob/data-column storage, custody-group history, backfill markers, hot/cold retention, pruning, archive policy, and availability provenance. | Fulu retention/custody simulations, prune/reorg/restart tests. | Data availability obligations persist correctly across restarts and pruning. |
+| `v0.213.0` | Beacon Database Migration And Repair | Versioned schemas, online/offline migrations, checkpoint/genesis imports, consistency scanning, repair plans, backup/restore, and operator-safe tooling contracts. | Multi-version migration fixtures, corruption recovery drills, checksum verification. | Beacon storage upgrades and repairs are reproducible and fail closed. |
+
+## Phase 22: Consensus Networking And Synchronization
+
+Consensus networking is separate from execution-layer DevP2P/RLPx. It uses the
+transport and protocols required by the pinned consensus P2P specification and
+must remain behind explicit optional features.
+
+| Version | Release | Deliverables | Verification | Exit criterion |
+| --- | --- | --- | --- | --- |
+| `v0.214.0` | Consensus Networking Threat And Dependency Gate | libp2p/discv5/crypto/runtime dependency review, identity/key separation, protocol limits, eclipse/amplification model, and network resource budgets. | Dependency audit, threat-model review, transport prototype load tests. | No live consensus networking lands before its dependencies and abuse controls are approved. |
+| `v0.215.0` | Discv5 ENR And Secure Transport | Discovery v5, ENR fork/custody fields, identity persistence, secure multiplexed transport, fork compatibility, and address policy. | Official/reference vectors, cross-client discovery/handshake tests, packet fuzzing. | Consensus peers can be discovered and authenticated with current fork/custody metadata. |
+| `v0.216.0` | GossipSub Topics And Subnet Management | Fork-digest topics, beacon blocks, aggregate/attestation subnets, sync committees, data columns, operation topics, subscription rotation, and mesh policy. | Cross-client topic/subnet tests, fork-boundary simulations, bounded subscription tests. | The node joins and leaves every required gossip domain at the correct time. |
+| `v0.217.0` | Staged Gossip Validation And Seen Caches | Decode/signature/state/fork-choice validation stages, dependency deferral, duplicate suppression, seen caches, invalid-message penalties, and no partial promotion. | Official gossip validation functions, malformed/future/dependency fuzzing, cache pressure tests. | Gossip reaches pools or fork choice only after all required validation stages pass. |
+| `v0.218.0` | Consensus Req Resp Protocols | Status, metadata, blocks, blobs, data columns, light-client data, states/checkpoints where admitted, chunk framing, context bytes, error responses, and cancellation. | Cross-client protocol matrix, malformed chunk fuzzing, unavailable-data cases. | Required sync and serving protocols are complete and bounded. |
+| `v0.219.0` | Consensus Peer Scoring And Backpressure | Peer reputation, topic scores, custody-response scoring, bans, diversity, request budgets, rate limits, fair queues, clock disparity, and eclipse defenses. | Byzantine peer/flood/partition simulations, resource-ceiling benchmarks. | Malicious or slow peers cannot create unbounded work or dominate peer selection. |
+| `v0.220.0` | Checkpoint And Weak-Subjectivity Sync | Trusted checkpoint/state acquisition, checkpoint-root enforcement, stale-checkpoint checks, fatal mismatch policy, bootstrap persistence, and provider quorum. | Official weak-subjectivity cases, malicious source tests, restart recovery. | Checkpoint sync either reaches the required anchor or terminates as a critical safety failure. |
+| `v0.221.0` | Head And Range Sync | Peer selection, finalized/head range download, block/sidecar validation pipeline, target updates, progress persistence, and failover. | Multi-peer local networks, missing/reordered/invalid range tests, restart tests. | A node reaches current head under bounded resources and adversarial peers. |
+| `v0.222.0` | Finalized Backfill And State Reconstruction | Historical block/sidecar backfill, state reconstruction, checkpoint gaps, archive/history provider use, and consistency proofs. | Long-range backfill, pruned-provider, corruption, and interruption tests. | Historical data and states are reconstructed without weakening checkpoint trust. |
+| `v0.223.0` | Optimistic Sync And Execution Recovery | Optimistic import policy, execution validation queues, `latestValidHash` invalidation, poisoned-fork recovery, reorgs, and validator-duty safety flags. | Official optimistic-sync scenarios and multi-execution-client fault injection. | Optimistic progress cannot authorize duties and recovers correctly when execution rejects payloads. |
+| `v0.224.0` | PeerDAS Sync Custody And Backfill | Custody-group calculation/history, data-column sampling, column sync/backfill, serving obligations, malicious proof handling, supernode policy, and progress persistence. | Official Fulu/current DA fixtures, custody changes, unavailable-column and restart tests. | Node and attached-validator custody obligations are met before availability-dependent acceptance or duties. |
+
+## Phase 23: Engine Coordination Data Availability And Beacon Service
+
+| Version | Release | Deliverables | Verification | Exit criterion |
+| --- | --- | --- | --- | --- |
+| `v0.225.0` | Authenticated Engine Client | JWT handling/redaction, capability negotiation, all supported `newPayload`, `forkchoiceUpdated`, `getPayload`, payload attributes, versions, timeouts, and status state machine. | execution-apis fixtures, two execution-client integrations, authentication/failure tests. | The beacon node can coordinate all claimed forks with an execution client through a complete authenticated API. |
+| `v0.226.0` | Multi-Execution-Client Failover | Multiple endpoints, health/latency metrics, method/version capabilities, failover policy, disagreement evidence, circuit breaking, retry bounds, and recovery. | Independent execution-client outage/disagreement/latency simulations. | Execution failover is explicit and cannot silently mix incompatible payload state. |
+| `v0.227.0` | PeerDAS Cell And Reconstruction Core | Blob-to-cell conversion, cell KZG proofs, data-column construction, erasure recovery, batch verification, and bounded workspaces. | Official EIP-7594/Fulu vectors, independent differential checks, malformed proof fuzzing. | Data columns can be created, verified, and reconstructed first party. |
+| `v0.228.0` | Availability Tracking And Block Admission | Per-block availability states, custody/sample evidence, gossip/ReqResp integration, acceptance gates, retention, invalidation, and recovery. | Partition, missing-column, malicious-proof, reorg, and restart simulations. | A block becomes fully available only from sufficient verified evidence under the active fork rules. |
+| `v0.229.0` | Beacon Node Orchestration | Slot clock, import pipeline, transition/fork-choice/storage/network/Engine/DA coordination, operation pools, bounded task supervision, shutdown, and restart. | Deterministic in-process scenarios, fault injection at every subsystem boundary. | The focused crates operate as one coherent beacon node with explicit terminal states. |
+| `v0.230.0` | Beacon Node REST And Event APIs | Versioned JSON/SSZ Beacon API server, events, node identity/peers, config/spec, blocks/states, pools, light-client, debug, authentication, TLS, and rate limits. | Official Beacon API conformance, client compatibility, malformed/request-flood tests. | External tooling can operate the beacon node through complete versioned server APIs. |
+| `v0.231.0` | Validator API And Production Boundary | Duties, attestation data, aggregates, block production/publication, sync contributions, proposer preparation, fee recipient, liveness, subscriptions, and optimistic/sync safety status. | Official Beacon Validator API compatibility and unsafe-node refusal tests. | A validator client can obtain and publish every duty through a complete safety-aware API. |
+
+## Phase 24: Complete Validator Client
+
+Validator work must follow the pinned honest-validator specification. An
+optimistic or otherwise unsafe beacon node must never authorize proposal,
+attestation, or sync-committee signatures.
+
+| Version | Release | Deliverables | Verification | Exit criterion |
+| --- | --- | --- | --- | --- |
+| `v0.232.0` | Validator Duty Scheduler And Safety State | Drift-aware slot clock, duty lookahead/cache, reorg refresh, multi-beacon-node quorum/failover, doppelganger detection, and optimistic/unsafe refusal. | Clock skew, reorg, conflicting-node, startup, and doppelganger simulations. | No duty reaches signing unless timing, chain, quorum, and safety preconditions hold. |
+| `v0.233.0` | Proposer Duties And Local Block Production | RANDAO, proposer preparation, execution payload requests, operation packing, sidecars/data columns, fee recipient, gas limit, graffiti, publication deadlines, and reorg-safe parent selection. | Official proposer behavior, local execution-client integration, deadline/failure tests. | The validator can safely produce and publish complete local blocks for claimed forks. |
+| `v0.234.0` | Attester And Aggregator Duties | Committee assignments, attestation construction, timing, selection proofs, aggregation, publication, duplicate prevention, and fork-aware signing domains. | Official validator vectors, timing/reorg/duplicate simulations. | Attestation and aggregation duties are complete and slash-safe. |
+| `v0.235.0` | Sync Committee Duties | Membership tracking, messages, selection proofs, contributions, aggregation/publication, subnet subscriptions, and optimistic-node refusal. | Official sync-committee vectors and timing/fork-boundary tests. | Sync-committee participation is complete and refuses unsafe chain views. |
+| `v0.236.0` | Validator Lifecycle Requests And Operations | Voluntary exits, BLS-to-execution changes, consolidation/lifecycle requests, deposit tooling boundary, fee/graffiti config, key enable/disable, and audit records. | Official operation vectors, authorization/policy tests, local testnet workflows. | Operators can manage validator lifecycle without bypassing signer or slashing policy. |
+
+## Phase 25: Slashing Protection And Validator Key Custody
+
+| Version | Release | Deliverables | Verification | Exit criterion |
+| --- | --- | --- | --- | --- |
+| `v0.237.0` | Slashing Protection Model And Invariants | Double-proposal, double-vote, surround-vote, repeat-signing, low-watermark, chain/genesis isolation, and fail-closed decision types. | Exhaustive bounded properties, official slashing cases, Kani candidate proofs. | Slashability decisions are a small first-party security kernel with explicit invariants. |
+| `v0.238.0` | Transactional Slashing Database | Record-before-signature-release transactions, durable writes, multiprocess locking, concurrency serialization, database-error refusal, backups, and recovery. | Process-kill, concurrent signer, lock loss, torn-write, and restore tests. | A signature cannot escape before its slashing record is durably committed. |
+| `v0.239.0` | EIP-3076 Interchange And Safety Recovery | Version-5 import/export, conservative missing-root handling, merge/low-watermark rules, stopped-client requirement, chain binding, validation, and migration reports. | EIP-3076 schema/examples, cross-client interchange, gap/rollback attack tests. | Validator histories move between clients without permitting previously slashable signatures. |
+| `v0.240.0` | Validator Signer And Local Keystores | Consensus-domain signing packages, EIP-2335-style keystore handling as officially applicable, locked/sanitized keys, signing audit log, refusal policy, and key lifecycle. | Official/independent vectors, memory-sanitization review, wrong-domain and audit-redaction tests. | Local validator signing is isolated, domain-safe, and coupled to slashing protection. |
+| `v0.241.0` | Keymanager Remote HSM And Hardware Signing | Official Keymanager REST server/client, remote signer protocol boundary, HSM/hardware capabilities, import/delete/list/status, authentication, TLS, rate limits, and slashing coupling. | Keymanager API conformance, remote/HSM mocks, failure/cancellation and key-isolation tests. | Key custody backends are interchangeable without bypassing slashing or domain policy. |
+
+## Phase 26: Builder And MEV Integration
+
+| Version | Release | Deliverables | Verification | Exit criterion |
+| --- | --- | --- | --- | --- |
+| `v0.242.0` | Builder API And Blinded Proposals | Validator registration, bid requests, signature/value/header validation, blinded block construction, payload reveal, fork-versioned Builder API, and deadline policy. | Official Builder API conformance, malformed bid/reveal tests, local relay integration. | A validator can use one reviewed relay without trusting its bid or reveal blindly. |
+| `v0.243.0` | Relay Multiplexing Local Fallback And PBS Evolution | Multiple relays, bid comparison/minimums, deadline-aware circuit breakers, withholding/invalid-reveal defenses, local-builder fallback, audit evidence, and protocol-native PBS/ePBS adapter boundary. | Relay outage/equivocation/withholding simulations and guaranteed local fallback tests. | External builders cannot prevent a safe local proposal when a viable local payload exists. |
+
+## Phase 27: Consensus Client Operations And Interoperability
+
+| Version | Release | Deliverables | Verification | Exit criterion |
+| --- | --- | --- | --- | --- |
+| `v0.244.0` | Consensus Operations Surface | Config-file and CLI schemas, structured logs/tracing, Prometheus metrics, health/readiness, task diagnostics, authentication/TLS/rate limits, safe shutdown, and service supervision. | Config compatibility, redaction, overload, shutdown/restart, and observability tests. | Beacon and validator services can be operated and monitored without hidden state. |
+| `v0.245.0` | Database Inspection Migration And Recovery Tools | Read-only inspection, consistency checks, migration commands, checkpoint/state import, backup/restore, pruning controls, repair plans, and dangerous-operation confirmations. | Corrupt/mixed-version database drills and operator workflow tests. | Operators can diagnose and recover storage without ad hoc database mutation. |
+| `v0.246.0` | Deterministic Consensus Simulator | In-process beacon nodes, validators, execution engines, networks, clocks, partitions, latency, equivocation, invalid payloads, DA loss, builder failures, and reproducible seeds. | Scenario snapshots, determinism checks, mutation testing, regression corpus. | Consensus and validator regressions can be reproduced without an external testnet. |
+| `v0.247.0` | Hive And Multi-Consensus-Client Interoperability | Ethereum Hive integration or equivalent official suites, consensus P2P/API/state-transition scenarios, and compatibility with multiple independent beacon clients. | Published Hive/interop reports with zero unexplained failures in claimed scope. | The beacon node interoperates with the broader consensus-client ecosystem. |
+| `v0.248.0` | Multi-Execution-Client Interoperability | Full Engine workflows against at least two independent execution clients, payload invalidation, failover, reorg, blobs/data columns, and restart recovery. | Long-running mixed-client scenarios and disagreement/failure reports. | Beacon correctness is not coupled to one execution-client implementation. |
+| `v0.249.0` | Long-Running Validator Testnet | Sustained multi-node testnet with proposals, attestations, sync duties, reorgs, inactivity, restarts, key movement, builders, DA faults, and zero locally generated slashable signatures. | Published duration/load/fault report, slashing DB audit, finality/participation evidence. | The complete beacon-node and validator stack demonstrates stable operation under realistic faults. |
+
+## Phase 28: Full Consensus Assurance And Final 1.0 Admission
+
+| Version | Release | Deliverables | Verification | Exit criterion |
+| --- | --- | --- | --- | --- |
+| `v0.250.0` | Consensus Client Performance Gate | Benchmarks and budgets for SSZ roots, BLS batches, transition/epoch processing, fork choice, pools, storage, networking, sync, DA, validator duties, slashing DB, and APIs. | Reproducible hardware profile, load tests, regression thresholds. | Mainnet-scale consensus workloads meet documented CPU, memory, disk, network, and timing budgets. |
+| `v0.251.0` | Kani State Transition And Fork-Choice Proofs | Bounded proofs for transition rollback, balance/churn arithmetic, checkpoint monotonicity, latest-message handling, invalidation, and transactional fork-choice handlers. | Pinned Kani runs with documented assumptions and bounds. | Selected consensus-state and fork-choice safety invariants have machine-checked evidence. |
+| `v0.252.0` | Kani Slashing And Duty-Safety Proofs | Bounded proofs for double proposal/vote, surround vote, record-before-release state machines, optimistic-node refusal, duty uniqueness, and signer-domain binding. | Pinned Kani runs and cross-checks against property suites. | Selected validator and slashing invariants have machine-checked evidence. |
+| `v0.253.0` | State Transition And Fork-Choice Audit | Independent audit of SSZ use, BLS integration, fork upgrades, per-slot/epoch transition, fork choice, optimistic execution, operation pools, and persistence. | Published report, remediation register, clean retest. | No unresolved critical/high transition or fork-choice finding remains. |
+| `v0.254.0` | Consensus Network Sync And DA Audit | Independent audit of discv5/libp2p/GossipSub, validation, scoring, ReqResp, sync, weak subjectivity, PeerDAS, custody, availability, and DoS controls. | Published report, adversarial retest, clean pentest. | No unresolved critical/high network, sync, or data-availability finding remains. |
+| `v0.255.0` | Validator Slashing Keymanager And Builder Audit | Independent audit of duties, timing, doppelganger detection, slashing DB, EIP-3076, keystores, remote/HSM signing, Keymanager API, relays, and fallback. | Published report, slashing-safety retest, clean pentest. | No unresolved critical/high signing, slashing, key-custody, or builder finding remains. |
+| `v0.256.0` | Beacon Storage API And Operations Audit | Independent audit of hot/cold storage, snapshots, migrations, repair, Beacon/Validator APIs, configuration, authentication, metrics, and supervision. | Published report, recovery/authorization retest, clean pentest. | No unresolved critical/high storage, API, or operational finding remains. |
+| `v0.257.0` | Complete Consensus Remediation | Resolve all consensus-client findings, rerun official vectors, Hive, long-running testnet, performance, formal, and platform gates, and document accepted low risks. | All audit retests clean, zero unexplained conformance failures, updated SBOM/provenance. | The entire beacon-node and validator finding register is closed or explicitly accepted. |
+| `v0.258.0` | Complete Public API Freeze | Freeze all core, SDK, execution, provider, wallet, contract, storage, beacon, validator, network, slashing, builder, and operational APIs/features with migration/deprecation policy. | Whole-workspace semver and feature review, generated docs/README compatibility checks. | No foundational API invention remains before 1.0. |
+| `v0.259.0` | Complete Release Evidence Dry Run | Rehearse ordered crate publication, signed manifests/checksums, SBOM/provenance, reproducible packages, platform images, database migrations, config migration, and rollback procedures. | Full dry run from a clean environment and unchanged-candidate verification. | The exact 1.0 release mechanics and operator upgrade path have been exercised. |
+| `v0.260.0` | Production Ethereum SDK Beacon And Validator Candidate | Freeze the exact candidate, run every official conformance, Hive, live-node, long-testnet, audit, formal, compatibility, platform, and release gate, and publish final migration/support matrices. | Exact-candidate pentest and retest, green CI, reproducible packages, no post-review code changes. | The only remaining action is publishing the unchanged `v1.0.0` candidate. |
 
 ## v1.0.0 - Complete Production Ethereum Toolkit
 
@@ -2871,10 +3029,15 @@ the support matrix.
 Deliverables:
 
 - complete owned SDK, first-party execution, provider, wallet, contract,
-  storage, canonical-chain, consensus-light-client, networking, sync, and
-  stateless-support surfaces described above;
+  storage, canonical-chain, full beacon-node, validator-client,
+  consensus-light-client, execution and consensus networking, sync,
+  slashing-protection, builder, and stateless-support surfaces described above;
 - historical and current fork support backed by pinned official conformance
   evidence;
+- a production beacon node that coordinates with independent execution clients
+  through the Engine API, plus a validator client that refuses unsafe duties;
+- transactional slashing protection, EIP-3076 interchange, Keymanager API,
+  local/remote/HSM signer boundaries, and safe builder fallback;
 - explicit unsupported/future-fork behavior with no silent fallback;
 - stable API, feature, MSRV, platform, and migration policy;
 - signed release manifest, checksums, SBOM, provenance, audit references, and
@@ -2887,7 +3050,8 @@ Verification:
 - `cargo audit`
 - `scripts/generate-sbom.sh --check`
 - all official conformance, interoperability, fuzz, Kani, Miri, sanitizer,
-  platform, performance, and live-node gates assigned above;
+  platform, performance, Hive, long-running validator, and live-node gates
+  assigned above;
 - `scripts/validate-release-readiness.sh v1.0.0`
 - pentest and clean retest of the exact candidate.
 
