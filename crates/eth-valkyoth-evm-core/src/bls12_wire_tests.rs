@@ -202,12 +202,30 @@ fn variable_frames_reject_empty_partial_and_late_malformed_items() {
         Err(EvmCoreError::PrecompileInvalidInputLength)
     );
 
-    let mut late_bad = Vec::from([0u8; EVM_BLS12381_G1_MSM_ITEM_BYTES * 2]);
-    if let Some(byte) = late_bad.get_mut(EVM_BLS12381_G1_MSM_ITEM_BYTES) {
+    let mut late_bad_g1 = Vec::from([0u8; EVM_BLS12381_G1_MSM_ITEM_BYTES * 2]);
+    if let Some(byte) = late_bad_g1.get_mut(EVM_BLS12381_G1_MSM_ITEM_BYTES) {
         *byte = 1;
     }
     assert_eq!(
-        parse_bls12381_g1_msm(&late_bad),
+        parse_bls12381_g1_msm(&late_bad_g1),
+        Err(EvmCoreError::PrecompileFieldElementOutOfRange)
+    );
+
+    let mut late_bad_g2 = Vec::from([0u8; EVM_BLS12381_G2_MSM_ITEM_BYTES * 2]);
+    if let Some(byte) = late_bad_g2.get_mut(EVM_BLS12381_G2_MSM_ITEM_BYTES) {
+        *byte = 1;
+    }
+    assert_eq!(
+        parse_bls12381_g2_msm(&late_bad_g2),
+        Err(EvmCoreError::PrecompileFieldElementOutOfRange)
+    );
+
+    let mut late_bad_pairing = Vec::from([0u8; EVM_BLS12381_PAIRING_ITEM_BYTES * 2]);
+    if let Some(byte) = late_bad_pairing.get_mut(EVM_BLS12381_PAIRING_ITEM_BYTES) {
+        *byte = 1;
+    }
+    assert_eq!(
+        parse_bls12381_pairing(&late_bad_pairing),
         Err(EvmCoreError::PrecompileFieldElementOutOfRange)
     );
 }
