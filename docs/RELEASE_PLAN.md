@@ -243,6 +243,12 @@ relevant dependency point.
 | A Lighthouse/Prysm-class claim lacked deterministic simulation, mandatory Hive suites, broad client matrices, and quantitative long-testnet/performance gates. | Added `v0.257.0..=v0.262.0`, including the numeric acceptance contract at `v0.258.0`. |
 | Later SSZ, BLS, PeerDAS, erasure-coding, and acceleration implementations were not covered by an implementation-level core audit. | Added `v0.265.0` and expanded the integration audits at `v0.266.0..=v0.269.0`. |
 | The final unchanged-candidate claim ignored manifest, lockfile, SBOM, and checksum changes required by a `1.0.0` version promotion. | Added `v0.273.0`, `v0.274.0`, and an explicit `v1.0.0-rc.1` exact-candidate flow; the stable tag must point to the unchanged approved RC commit. |
+| Builder and relay ownership remained ambiguous after local block production moved into the beacon node. | `v0.233.0` now exposes only a fail-closed blinded-production hook before builder admission; `v0.249.0` and `v0.250.0` place relay communication in the beacon node while the validator client submits preferences and independently validates and signs blinded blocks. |
+| Proposer planning incorrectly implied separate sidecar signatures. | `v0.241.0` now requires one beacon-block proposer signature and constructs sidecars carrying the corresponding signed block header, matching pinned Deneb/Fulu honest-validator rules. |
+| RC prose did not yet define package-version/tag mismatch handling, prerelease paths, repeated candidates, gate naming, or exact archive publication. | `v0.272.0..=v0.274.0` and `v1.0.0-rc.1` now require distinct package and candidate identifiers, prerelease-aware tooling/tests, RC-specific gates, exact approved archive upload, and repeated `rc.N` handling. |
+| The RC could be read as forcing every independently versioned support crate to `1.0.0`. | `v0.271.0` classifies each public package's stability promise; only `eth` and deliberately approved products are promoted, while support crates keep independent versions and exact reviewed dependency bindings where needed. |
+| Companion status/spec documents retained obsolete consensus ranges. | The planning pass updates `docs/current-status.md` and `docs/SPEC_MATRIX.md` through `v0.274.0` and `v1.0.0-rc.N`. |
+| Quantitative gates used undefined "client-attributable" failure labels. | `v0.258.0` now requires a machine-enforced attribution taxonomy, predeclared fault windows, conservative ambiguous-event handling, independent approval, and fallback-specific responsibility rules. |
 | The final API freeze and production release candidate occurred before full consensus-client abstractions existed. | Reclassified `v0.182.0..=v0.188.0` as foundation stabilization and moved complete remediation, freeze, rehearsal, promotion, and candidate admission to `v0.270.0..=v0.274.0` plus `v1.0.0-rc.1`. |
 
 ## Phase 0: Repository And Release Discipline
@@ -6529,19 +6535,24 @@ Deliverables:
 - deposit, withdrawal, request, slashing, attestation, and sync operation
   inclusion;
 - fork-aware fee recipient, gas limit, graffiti, and deadline policy;
-- unsigned block and blinded-block production APIs.
+- unsigned local-block production API;
+- blinded-block request and response types plus a fail-closed provider hook;
+- no live Builder API or relay communication before `v0.249.0`.
 
 Verification:
 
 - Official block-production and operation-ordering vectors;
 - local execution-client and PeerDAS integration;
 - reorg, timeout, invalid-payload, pool-conflict, and deadline tests;
-- checks proving no validator secret or signature enters this service.
+- checks proving no validator secret or signature enters this service;
+- tests proving the blinded hook cannot contact a relay or fabricate a bid
+  before a backend is admitted at `v0.249.0`.
 
 Exit criteria:
 
-- The beacon node can produce a complete unsigned local or blinded block for
-  every claimed fork, while signing authorization remains outside the service.
+- The beacon node can produce a complete unsigned local block for every
+  claimed fork and exposes only a fail-closed blinded-production hook until
+  `v0.249.0`, while signing authorization remains outside the service.
 - `v0.233.0 implementation stop reached. Run pentest for this exact
   commit.`
 
@@ -6743,7 +6754,10 @@ Deliverables:
 - independent slot, parent, fork, fee-recipient, gas-limit, execution-status,
   and data-availability context checks;
 - transactional slashing authorization;
-- block and sidecar signature production;
+- beacon-block proposer signature production;
+- construction and publication of blob or data-column sidecars carrying the
+  corresponding `SignedBeaconBlockHeader` derived from that block signature,
+  without a separate sidecar-signing operation;
 - publication deadlines, retries, and duplicate prevention.
 
 Verification:
@@ -6751,7 +6765,9 @@ Verification:
 - Official proposer behavior;
 - malicious or stale beacon-node response tests;
 - slashing-database failure and duplicate proposal tests;
-- local and blinded publication deadline/failure tests.
+- local and blinded publication deadline/failure tests;
+- pinned Deneb and Fulu honest-validator vectors proving sidecars reuse the
+  signed beacon-block header.
 
 Exit criteria:
 
@@ -6961,19 +6977,37 @@ Exit criteria:
 
 Status: planned.
 
-Goal: deliver the Builder API And Blinded Proposals release with this required outcome: A validator can use one reviewed relay without trusting its bid or reveal blindly.
+Goal: admit one reviewed Builder API backend owned by the beacon-node block
+production service without giving the validator client direct relay access.
 
 Deliverables:
 
-- Validator registration, bid requests, signature/value/header validation, blinded block construction, payload reveal, fork-versioned Builder API, and deadline policy.
+- Beacon-node-owned relay client integrated behind the `v0.233.0` production
+  hook;
+- validator registration and preference submission from validator client to
+  beacon node;
+- beacon-node bid requests, relay authentication, signature/value/header
+  validation, blinded block construction, payload reveal, fork-versioned
+  Builder API, and deadline policy;
+- validator-client independent validation of slot, parent, proposer, fork,
+  execution header, value policy, and signing context before signing;
+- signed blinded-block publication through the beacon node;
+- no direct validator-client bid or payload-reveal request path by default.
 
 Verification:
 
-- Official Builder API conformance, malformed bid/reveal tests, local relay integration.
+- Official Builder API conformance;
+- malformed bid/reveal and stale-parent tests;
+- local relay integration;
+- process-boundary tests proving relay credentials and communication remain in
+  the beacon node;
+- malicious beacon-node response tests at the validator client.
 
 Exit criteria:
 
-- A validator can use one reviewed relay without trusting its bid or reveal blindly.
+- A validator can use one reviewed relay through the beacon node without
+  trusting the bid, reveal, or unsigned blinded block blindly and without the
+  validator client directly contacting the relay.
 - `v0.249.0 implementation stop reached. Run pentest for this exact
   commit.`
 
@@ -6985,15 +7019,29 @@ Goal: deliver the Relay Multiplexing Local Fallback And PBS Evolution release wi
 
 Deliverables:
 
-- Multiple relays, bid comparison/minimums, deadline-aware circuit breakers, withholding/invalid-reveal defenses, local-builder fallback, audit evidence, and protocol-native PBS/ePBS adapter boundary.
+- Beacon-node-owned multiple-relay communication;
+- validator-client relay preferences and minimum-value policy submitted to the
+  beacon node;
+- bid comparison/minimums;
+- deadline-aware circuit breakers;
+- withholding and invalid-reveal defenses;
+- beacon-node local-builder fallback;
+- validator-client independent blinded-block validation and signing;
+- audit evidence and protocol-native PBS/ePBS adapter boundary;
+- no default direct validator-client relay communication.
 
 Verification:
 
-- Relay outage/equivocation/withholding simulations and guaranteed local fallback tests.
+- Relay outage/equivocation/withholding simulations;
+- guaranteed beacon-node local fallback tests;
+- validator refusal of malformed, stale, or policy-violating blinded blocks;
+- process-boundary tests for relay credentials and traffic.
 
 Exit criteria:
 
-- External builders cannot prevent a safe local proposal when a viable local payload exists.
+- External builders cannot prevent a safe local proposal when a viable local
+  payload exists, and relay interaction remains a beacon-node production
+  responsibility.
 - `v0.250.0 implementation stop reached. Run pentest for this exact
   commit.`
 
@@ -7223,6 +7271,22 @@ Deliverables:
   missed proposals;
 - no more than 0.1 percent client-attributable missed attestation or sync
   duties over the measured stable period;
+- a deterministic event-attribution taxonomy covering `eth` beacon node,
+  `eth` validator client, execution client, builder/relay, host/network,
+  external clock source, planned fault injection, and unresolved/ambiguous
+  causes;
+- predeclared fault-injection windows, expected effects, recovery deadlines,
+  and whether the window counts toward the continuous stable-period floor;
+- rules that attribute an external execution-client or relay failure to the
+  external component only when `eth` detects, contains, and recovers according
+  to policy; failure to trigger required local fallback remains
+  client-attributable;
+- rules that distinguish independently observed host/network or clock-source
+  outages from internal timeout, scheduling, skew-detection, or recovery
+  failures;
+- conservative treatment of ambiguous failures as client-attributable until a
+  maintainer and an independent release reviewer approve a different
+  classification from immutable evidence;
 - required restart, database recovery, execution disagreement, reorg,
   clock-skew, network partition, DA loss, and builder-withholding scenarios;
 - numeric mainnet-scale CPU, RAM, stack, disk-growth, disk-I/O, bandwidth,
@@ -7234,9 +7298,14 @@ Deliverables:
 Verification:
 
 - Machine-readable acceptance-policy schema and validator;
+- machine-readable event ledger, attribution records, evidence links, reviewer
+  identities, and immutable classification history;
 - scenario coverage audit;
 - hardware-profile reproducibility check;
-- dry-run reports that fail on every deliberately violated threshold.
+- dry-run reports that fail on every deliberately violated threshold;
+- adversarial reclassification tests proving planned faults, external
+  failures, fallback failures, and ambiguous causes cannot be relabeled to
+  bypass a gate.
 
 Exit criteria:
 
@@ -7541,15 +7610,32 @@ Goal: deliver the Complete Public API Freeze release with this required outcome:
 
 Deliverables:
 
-- Freeze all core, SDK, execution, provider, wallet, contract, storage, beacon, validator, network, slashing, builder, and operational APIs/features with migration/deprecation policy.
+- Freeze all core, SDK, execution, provider, wallet, contract, storage, beacon,
+  validator, network, slashing, builder, and operational APIs/features with
+  migration/deprecation policy;
+- classify every publishable crate as a `1.0` public product, independently
+  versioned support crate, optional backend/adapter, or internal unpublished
+  crate;
+- promote only `eth` and crates whose individual public APIs have completed a
+  documented `1.0` stability review;
+- preserve independent versions for all other support crates;
+- require exact reviewed dependency pins or an equally strict compatibility
+  contract when a `1.0` public product exposes an independently versioned
+  support crate in its public API;
+- publish a crate-by-crate stability and support matrix.
 
 Verification:
 
-- Whole-workspace semver and feature review, generated docs/README compatibility checks.
+- Whole-workspace semver and feature review;
+- public-dependency and re-export audit;
+- generated docs/README compatibility checks;
+- tests proving the promotion plan does not force unchanged support crates to
+  `1.0.0`.
 
 Exit criteria:
 
-- No foundational API invention remains before 1.0.
+- No foundational API invention remains before 1.0, and every crate's
+  independent stability promise is explicit.
 - `v0.271.0 implementation stop reached. Run pentest for this exact
   commit.`
 
@@ -7564,12 +7650,21 @@ Deliverables:
 - Rehearse ordered crate publication, signed manifests/checksums,
   SBOM/provenance, reproducible packages, platform images, database migrations,
   config migration, binary rollback, and the exact `v1.0.0-rc.1` same-commit
-  promotion procedure.
+  promotion procedure;
+- rehearse prerelease report and release-note paths, RC-specific gate naming,
+  candidate-tag/package-version separation, and repeated `rc.N` attempts;
+- rehearse creation and preservation of the exact approved `.crate` archives
+  for later stable publication.
 
 Verification:
 
 - Full dry run from a clean environment;
 - deliberately failed version-promotion and changed-candidate tests;
+- parser and path tests for `v1.0.0-rc.1`, `v1.0.0-rc.2`, and malformed
+  prerelease identifiers;
+- tests proving `release_1_0_rc_N_gate.sh` or its reviewed generic equivalent
+  selects the correct report, notes, candidate tag, and package version;
+- exact archive checksum and offline re-verification tests;
 - proof that final tagging can occur without rebuilding or changing the
   candidate commit.
 
@@ -7592,15 +7687,38 @@ Deliverables:
 - Rehearse the exact manifest, workspace dependency, lockfile, crate-version
   matrix, release-plan metadata, release notes, SBOM, checksum, and provenance
   changes required for `1.0.0`;
+- keep `release.version = "1.0.0"` distinct from a candidate tag identifier
+  such as `candidate_tag = "v1.0.0-rc.1"`;
+- update `scripts/release_crates.py`, readiness validation, metadata
+  validation, and release-gate selection to parse SemVer package versions and
+  RC tag identifiers structurally;
+- support prerelease pentest paths such as
+  `security/pentest/v1.0.0-rc.1.md` and release-note paths such as
+  `release-notes/RELEASE_NOTES_1.0.0-rc.1.md`;
+- define RC-specific gate names and repeated `rc.N` candidate handling;
+- implement an audited `scripts/publish_approved_archives.py` or equivalent
+  standard-library-only uploader that submits the exact previously approved
+  `.crate` archives to crates.io in dependency order without repackaging;
+- accept publishing credentials only through a documented non-file secret
+  boundary and never write or log them;
+- verify archive package name/version, checksum, manifest, SBOM/provenance
+  binding, candidate commit, and crates.io response before advancing;
 - require a version-only promotion commit with no implementation changes;
 - regenerate every package and compare source contents apart from expected
   version metadata;
+- apply `1.0.0` only to crates approved as `1.0` products at `v0.271.0`;
+- retain independent versions for all remaining support crates and update only
+  dependency constraints that the promotion actually requires;
 - document rollback and repeated-RC handling.
 
 Verification:
 
 - Clean-tree promotion rehearsal;
 - package-content semantic diff;
+- release-tool unit and integration tests for package/tag mismatch, prerelease
+  paths, RC gate selection, repeated candidates, independent crate versions,
+  and exact archive upload dry runs;
+- credential-redaction and interrupted-upload recovery tests;
 - full release-integrity gate on the promoted rehearsal;
 - proof that any non-version change rejects the promotion.
 
@@ -7608,7 +7726,8 @@ Exit criteria:
 
 - The project can produce a `1.0.0`-versioned candidate commit through a
   constrained, audited process rather than pretending a `0.x` artifact is
-  byte-identical after version changes.
+  byte-identical after version changes, while preserving independently
+  versioned support crates.
 - `v0.273.0 implementation stop reached. Run pentest for this exact
   commit.`
 
@@ -7626,6 +7745,8 @@ Deliverables:
   long-testnet, audit, formal, compatibility, platform, packaging, and release
   gate;
 - publish final migration and support matrices;
+- publish the crate-by-crate `1.0` promotion decision and exact archive
+  checksum manifest;
 - authorize only the constrained `v0.273.0` version-promotion operation;
 - invalidate admission if any implementation or non-version metadata changes.
 
@@ -7634,6 +7755,8 @@ Verification:
 - Exact implementation-candidate pentest and retest;
 - green CI and CodeQL;
 - reproducible packages;
+- RC-specific readiness, report-path, release-note-path, gate-selection, and
+  exact-archive publication dry runs;
 - quantitative acceptance-policy pass;
 - no post-review implementation changes.
 
@@ -7654,9 +7777,17 @@ and use it unchanged for the final stable tag.
 Deliverables:
 
 - Apply only the version-promotion changes rehearsed at `v0.273.0`;
-- set publishable workspace manifests to their approved `1.0.0` versions;
+- set `eth` and only the deliberately stabilized public products to their
+  approved `1.0.0` versions;
+- preserve every other support crate's independently reviewed version;
+- record package version `1.0.0` separately from candidate tag identifier
+  `v1.0.0-rc.1`;
 - regenerate lockfiles, crate-version matrices, SBOM, checksums, provenance,
   package archives, and release metadata;
+- write RC-specific release notes and pentest evidence paths;
+- run the RC-specific release gate;
+- preserve the approved `.crate` archives in the release evidence store with
+  checksums bound to the candidate commit;
 - tag the exact promoted commit as `v1.0.0-rc.1`;
 - publish no stable crate until final admission.
 
@@ -7666,6 +7797,8 @@ Verification:
 - exact-candidate pentest and clean retest;
 - green CI and CodeQL on the promoted commit;
 - reproducible package and checksum verification;
+- exact archive offline verification and uploader dry run;
+- independent support-crate version-policy verification;
 - semantic package diff proving only approved version metadata differs from
   `v0.274.0`;
 - repeat as `v1.0.0-rc.N` from a newly reviewed commit if any change is needed.
@@ -7698,7 +7831,10 @@ Deliverables:
 - explicit unsupported/future-fork behavior with no silent fallback;
 - stable API, feature, MSRV, platform, and migration policy;
 - signed release manifest, checksums, SBOM, provenance, audit references, and
-  dependency/feature compatibility matrix.
+  dependency/feature compatibility matrix;
+- `eth` and every deliberately stabilized product at `1.0.0`, with support
+  crates retaining their independently approved versions and compatibility
+  bindings.
 
 Verification:
 
@@ -7712,8 +7848,10 @@ Verification:
 - `scripts/validate-release-readiness.sh v1.0.0`
 - verify that `v1.0.0` points to the exact already approved
   `v1.0.0-rc.N` commit;
+- publish the exact approved `.crate` archives through the audited archive
+  uploader without invoking a repackaging path;
 - do not rebuild, regenerate, or modify candidate artifacts;
-- verify published crate checksums against the approved candidate;
+- verify crates.io checksums against the approved candidate archive manifest;
 - pentest and clean retest evidence for the exact candidate commit.
 
 Exit criteria:

@@ -75,10 +75,11 @@ Legend:
 | DevP2P, RLPx, txpool, and sync | 🔴 Planned | Assigned to `v0.154.0..=v0.164.0` |
 | Witnesses, stateless execution, and commitment evolution | 🔴 Planned | Assigned to `v0.165.0..=v0.174.0` |
 | Foundation assurance and compatibility | 🔴 Planned | Assigned to `v0.175.0..=v0.188.0` |
-| Full beacon node, consensus networking, and sync | 🔴 Planned | Assigned to `v0.189.0..=v0.231.0` |
-| Validator client, slashing protection, and key management | 🔴 Planned | Assigned to `v0.232.0..=v0.241.0` |
-| Builder integration and consensus operations | 🔴 Planned | Assigned to `v0.242.0..=v0.249.0` |
-| Complete consensus assurance and 1.0 admission | 🔴 Planned | Assigned to `v0.250.0..=v0.260.0` |
+| Full beacon node, consensus networking, sync, deposits, and production APIs | 🔴 Planned | Assigned to `v0.189.0..=v0.234.0` |
+| Slashing protection, validator keys, duties, and external custody | 🔴 Planned | Assigned to `v0.235.0..=v0.248.0` |
+| Builder and relay integration | 🔴 Planned | Assigned to `v0.249.0..=v0.250.0`; relay communication is beacon-node owned |
+| Consensus safety services, operations, and production executables | 🔴 Planned | Assigned to `v0.251.0..=v0.257.0` |
+| Quantitative assurance, audits, remediation, and 1.0 admission | 🔴 Planned | Assigned to `v0.258.0..=v0.274.0` plus exact candidate `v1.0.0-rc.N` |
 | Reth and ecosystem integration | 🔴 Planned | Optional conversion/reference adapters are assigned to `v0.67.0`; no external implementation becomes the first-party core |
 
 ## Security And Release Baseline
