@@ -10,6 +10,7 @@ test -f .github/workflows/release.yml
 test -x scripts/validate-release-readiness.sh
 test -x scripts/test-release-readiness.sh
 test -x scripts/check_latest_tools.sh
+test -x scripts/test-check-latest-tools.sh
 test -x scripts/check_ethereum_upstream.py
 test -x scripts/test-ethereum-upstream.py
 test -x scripts/release_crates.py
@@ -107,6 +108,7 @@ release_gate="scripts/release_$(printf '%s' "$release_version" | tr . _)_gate.sh
 test "$release_version" = "$eth_manifest_version"
 test -x "$release_gate"
 grep -q "scripts/validate-release-readiness.sh v${release_version}" "$release_gate"
+grep -q 'scripts/check_latest_tools.sh' "$release_gate"
 grep -q 'workflow_dispatch:' .github/workflows/release.yml
 grep -q 'Validate release metadata' .github/workflows/release.yml
 grep -q 'scripts/validate-release-metadata.sh' .github/workflows/release.yml
@@ -176,7 +178,7 @@ test -x scripts/release_0_50_10_gate.sh
 test -x scripts/release_0_51_0_gate.sh
 test -x scripts/release_0_52_0_gate.sh
 test -x scripts/release_0_52_1_gate.sh
-grep -q "rustc 1\\\\.97\\\\.0" scripts/release_0_52_1_gate.sh
+grep -q "rustc 1\\\\.97\\\\.1" scripts/release_0_52_1_gate.sh
 test -x scripts/test-workspace-dependency-policy.py
 test -f docs/spec-source-policy.md
 test -f docs/reference-store.md
@@ -213,6 +215,6 @@ if grep -q 'spec_required = true' spec-lock.toml; then
 fi
 grep -q 'license = "MIT OR Apache-2.0"' Cargo.toml
 grep -q 'repository = "https://github.com/valkyoth/eth"' Cargo.toml
-grep -q 'channel = "1.97.0"' rust-toolchain.toml
+grep -q 'channel = "1.97.1"' rust-toolchain.toml
 grep -q 'rust-version = "1.90"' Cargo.toml
 grep -q 'valkyoth-eth-upstream-check/0.52.1' scripts/check_ethereum_upstream.py

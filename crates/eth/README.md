@@ -1137,14 +1137,14 @@ friendly, and independently testable.
 ## Rust Version Support
 
 The minimum supported Rust version is Rust `1.90.0`. New deployments should use
-the pinned stable Rust `1.97.0` until the toolchain policy is updated.
+the pinned stable Rust `1.97.1` until the toolchain policy is updated.
 
 Compatibility evidence for `0.52.1`:
 
 | Rust | Local Evidence |
 | --- | --- |
-| `1.90.0`-`1.96.1` | `cargo check --workspace --all-features` on every supported toolchain |
-| `1.97.0` | Full release gate |
+| `1.90.0`-`1.97.0` | `cargo check --workspace --all-features` on every supported toolchain |
+| `1.97.1` | Full release gate |
 
 ## Checks
 

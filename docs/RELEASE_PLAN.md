@@ -109,9 +109,11 @@ A version is not tag-ready until:
   rely on a tag-push workflow for readiness: after a tag is pushed, the
   readiness script intentionally fails closed because the tag already exists.
 
-`scripts/check_latest_tools.sh` is an advisory networked current-version check.
-Run it before updating pinned tools and before release when network access is
-available, but do not make tag readiness depend on live upstream state.
+`scripts/check_latest_tools.sh` is a mandatory networked release check. Every
+version-specific release gate must run it before tagging so stale stable Rust,
+cargo tools, or GitHub Action pins fail closed. Normal commit CI may omit the
+live query to avoid making every development commit depend on upstream
+availability; the release gate may not omit it.
 
 Ethereum upstream monitoring is also a maintenance requirement. When the EVM
 or fork-aware protocol surface is active, the planned automation must check the
@@ -203,6 +205,7 @@ relevant dependency point.
 | End-to-end decoded transaction signature validation was implied by typestates but not scheduled. | Added `v0.23.0 - Full Transaction Signature Validation`. |
 | Set-code typed transactions were listed as missing without a version. | Added `v0.24.0 - Set-Code Transaction Decode`. |
 | EIP-7702 set-code signing, authorization signatures, empty-list rejection, and fork/account-state validation were deferred by the syntactic decoder. | Added `v0.24.1 - Set-Code Signing And Authorization Validation` and `v0.24.2 - Set-Code Transaction Validity Gate`. |
+| EIP-7702 validity gates did not explicitly schedule consensus state application and delegated-code execution. | Expanded `v0.74.0 - State Transition And Journaling` to require ordered authorization processing, persistent delegation writes, authority nonce/refund accounting, one-hop delegated-code resolution, and official EIP-7702 state-transition evidence. |
 | Public RLP derives had only an evaluation/prototype milestone. | Added `v0.25.0 - Public RLP Derives`. |
 | Full EIP-712 `encodeType`/`encodeData`/`hashStruct` support was missing from the roadmap. | Added `v0.26.0 - EIP-712 Typed-Data Encoder`. |
 | EIP-712 JSON-RPC typed-data parsing was deferred from the no-JSON typed encoder without a visible patch milestone. | Added `v0.26.1 - EIP-712 JSON Typed-Data Parser Boundary`. |
@@ -266,8 +269,8 @@ Goal: initialize the serious Rust workspace and policy baseline.
 
 Deliverables:
 
-- Rust stable `1.97.0` pinned.
-- Rust `1.90.0` through `1.97.0` compatibility policy.
+- Rust stable `1.97.1` pinned.
+- Rust `1.90.0` through `1.97.1` compatibility policy.
 - Focused no_std workspace crates.
 - CI, dependency policy, security policy, release notes.
 - Implementation, release, scope, threat-model, modularity, toolchain,
@@ -3200,14 +3203,31 @@ Goal: deliver the State Transition And Journaling release with this required out
 Deliverables:
 
 - Execute ordered transactions, commit/revert journaled state, apply rewards/system operations, and emit deterministic outcomes.
+- Implement complete EIP-7702 state application: process authorization tuples
+  before transaction execution after sender-nonce increment, warm recovered
+  authorities, apply skip-instead-of-reject tuple rules, account refunds,
+  delegation writes or clearing, and authority nonce increments in list order.
+- Keep valid EIP-7702 authorization effects outside the transaction-execution
+  revert checkpoint, including when the subsequent call fails or reverts.
+- Resolve exactly one EIP-7702 delegation hop for transaction destinations and
+  `CALL`, `CALLCODE`, `DELEGATECALL`, and `STATICCALL`, with fork-correct warm/
+  cold charging, precompile-target behavior, and direct code-inspection rules.
 
 Verification:
 
 - State-transition fixtures, nested revert tests, crash-free bounded execution.
+- Official EIP-7702 transaction/state fixtures covering duplicate authorities,
+  invalid tuple skips, delegation clearing, refunds, persistent effects after
+  execution failure, delegated transaction origins/destinations, one-hop loop
+  handling, code-reading behavior, and precompile delegation targets.
+- Differential state-root, receipt, gas, refund, access-set, code, and nonce
+  comparisons against independent clients.
 
 Exit criteria:
 
 - A complete block transition can be computed first party.
+- EIP-7702 transactions apply and execute delegation semantics completely
+  rather than stopping at decode, signature, or context-validity proof.
 - `v0.74.0 implementation stop reached. Run pentest for this exact
   commit.`
 

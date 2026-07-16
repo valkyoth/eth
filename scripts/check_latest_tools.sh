@@ -2,6 +2,41 @@
 set -eu
 
 ci_file=".github/workflows/ci.yml"
+rust_toolchain_file="${RUST_TOOLCHAIN_FILE:-rust-toolchain.toml}"
+rust_stable_manifest_url="${RUST_STABLE_MANIFEST_URL:-https://static.rust-lang.org/dist/channel-rust-stable.toml}"
+
+pinned_rust_version() {
+    sed -n 's/^channel = "\([0-9][0-9.]*\)"$/\1/p' "$rust_toolchain_file" |
+        head -n 1
+}
+
+latest_stable_rust_version() {
+    curl -fsSL "$rust_stable_manifest_url" |
+        sed -n '/^\[pkg\.rust\]$/,/^\[/ {
+            s/^version = "\([0-9][0-9.]*\) .*/\1/p
+        }' |
+        head -n 1
+}
+
+check_latest_rust() {
+    pinned="$(pinned_rust_version)"
+    latest="$(latest_stable_rust_version)"
+
+    if [ -z "$pinned" ]; then
+        echo "missing pinned Rust version in ${rust_toolchain_file}" >&2
+        exit 1
+    fi
+
+    if [ -z "$latest" ]; then
+        echo "could not determine latest stable Rust version" >&2
+        exit 1
+    fi
+
+    if [ "$pinned" != "$latest" ]; then
+        echo "Rust is not latest stable: pinned ${pinned}, latest ${latest}" >&2
+        exit 1
+    fi
+}
 
 ci_tool_version() {
     tool="$1"
@@ -103,6 +138,12 @@ check_checkout_action() {
         exit 1
     fi
 }
+
+check_latest_rust
+
+if [ "${CHECK_LATEST_TOOLS_RUST_ONLY:-0}" = "1" ]; then
+    exit 0
+fi
 
 check_cargo_tool cargo-deny
 check_cargo_tool cargo-audit

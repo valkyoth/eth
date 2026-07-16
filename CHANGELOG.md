@@ -4,6 +4,9 @@ All notable changes to `eth` are documented here.
 
 ## Unreleased
 
+- Updated the pinned stable toolchain and full release gate to Rust `1.97.1`,
+  extended compatibility checks through Rust `1.97.0`, and made the networked
+  release tooling fail when the pin is not the latest official stable Rust.
 - Remediated the v0.52.1 pentest by zero-initializing EVM memory, making
   execution contexts one-shot until destructive reset, rolling back warm/cold
   access tracking on failed or reverted stateful runs, validating EIP-712

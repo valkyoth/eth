@@ -93,7 +93,7 @@ Legend:
 | --- | --- |
 | License | `MIT OR Apache-2.0` |
 | MSRV | Rust `1.90.0` |
-| Pinned stable | Rust `1.97.0` |
+| Pinned stable | Rust `1.97.1` |
 | Default target | `no_std` |
 | Unsafe code | Forbidden in first-party crates |
 | Default networking/signing | None |
@@ -116,6 +116,6 @@ fully unwrapped member-type validation, per-array and cumulative traversal
 bounds, configurable cumulative dynamic-byte hashing limits, cached type-hash,
 and partial-output handling.
 
-The release uses Rust `1.97.0` for the full gate and checks every supported Rust
-toolchain from `1.90.0` through `1.96.1` with
+The current workspace uses Rust `1.97.1` for the full gate and checks every
+supported Rust toolchain from `1.90.0` through `1.97.0` with
 `cargo check --workspace --all-features`.
