@@ -8,6 +8,9 @@ use crate::{
 };
 use core::cmp::Ordering;
 
+#[path = "execution_lifecycle.rs"]
+mod lifecycle;
+
 /// Default maximum instruction count for local deterministic execution tests.
 pub const EVM_DEFAULT_STEP_LIMIT: usize = 100_000;
 /// Hard maximum instruction count accepted by the bootstrap interpreter.
@@ -115,50 +118,27 @@ pub struct EvmExecution<'a, const STACK: usize> {
     stack: EvmStack<STACK>,
     memory: EvmMemory<'a>,
     pc: ProgramCounter,
+    started: bool,
 }
 
 impl<'a, const STACK: usize> EvmExecution<'a, STACK> {
-    /// Creates a fresh execution context over a caller-provided memory view.
-    pub fn try_new(memory: &'a mut [u8]) -> Result<Self, EvmCoreError> {
-        Ok(Self {
-            stack: EvmStack::try_new()?,
-            memory: EvmMemory::try_new(memory)?,
-            pc: ProgramCounter::new(0),
-        })
-    }
-
-    /// Returns the execution stack.
-    #[must_use]
-    pub const fn stack(&self) -> &EvmStack<STACK> {
-        &self.stack
-    }
-
-    /// Mutably returns the execution stack.
-    pub fn stack_mut(&mut self) -> &mut EvmStack<STACK> {
-        &mut self.stack
-    }
-
-    /// Returns the execution memory view.
-    #[must_use]
-    pub const fn memory(&self) -> &EvmMemory<'a> {
-        &self.memory
-    }
-
-    /// Mutably returns the execution memory view inside this crate.
-    pub(crate) fn memory_mut(&mut self) -> &mut EvmMemory<'a> {
-        &mut self.memory
-    }
-
-    /// Executes bytecode until it halts or fails closed.
+    /// Executes bytecode once until it halts or fails closed.
+    ///
+    /// A second invocation is rejected until [`Self::reset`] destructively
+    /// clears the execution state.
     pub fn run(
         &mut self,
         bytecode: &[u8],
         limits: ExecutionLimits,
     ) -> Result<ExecutionReport, EvmCoreError> {
+        self.begin_run()?;
         self.run_inner(bytecode, limits, &mut NoState)
     }
 
-    /// Executes bytecode with an explicit host state snapshot.
+    /// Executes bytecode once with an explicit host state snapshot.
+    ///
+    /// Failed runs restore the caller's warm/cold access set. The execution
+    /// object still requires [`Self::reset`] before another invocation.
     pub fn run_with_state<const ADDRESSES: usize, const STORAGE: usize, S: EvmState>(
         &mut self,
         bytecode: &[u8],
@@ -167,12 +147,18 @@ impl<'a, const STACK: usize> EvmExecution<'a, STACK> {
         state: &mut S,
         accesses: &mut EvmAccessSet<ADDRESSES, STORAGE>,
     ) -> Result<ExecutionReport, EvmCoreError> {
+        self.begin_run()?;
+        let access_checkpoint = accesses.checkpoint();
         let mut host = HostState {
             context,
             state,
             accesses,
         };
-        self.run_inner(bytecode, limits, &mut host)
+        let result = self.run_inner(bytecode, limits, &mut host);
+        if result.is_err() {
+            host.accesses.restore(access_checkpoint);
+        }
+        result
     }
 
     fn run_inner<H: StateExecutionHost>(

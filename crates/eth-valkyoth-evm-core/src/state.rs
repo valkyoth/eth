@@ -133,6 +133,12 @@ struct StorageSlotAccess {
     key: EvmWord,
 }
 
+#[derive(Clone, Copy)]
+pub(crate) struct EvmAccessCheckpoint {
+    address_len: usize,
+    storage_len: usize,
+}
+
 /// Fixed-capacity warm access tracker.
 ///
 /// Membership checks are linear scans over caller-chosen fixed-capacity
@@ -176,6 +182,37 @@ impl<const ADDRESSES: usize, const STORAGE: usize> EvmAccessSet<ADDRESSES, STORA
     #[must_use]
     pub const fn storage_len(self) -> usize {
         self.storage_len
+    }
+
+    pub(crate) const fn checkpoint(&self) -> EvmAccessCheckpoint {
+        EvmAccessCheckpoint {
+            address_len: self.address_len,
+            storage_len: self.storage_len,
+        }
+    }
+
+    pub(crate) fn restore(&mut self, checkpoint: EvmAccessCheckpoint) {
+        for address in self
+            .addresses
+            .iter_mut()
+            .skip(checkpoint.address_len)
+            .take(self.address_len.saturating_sub(checkpoint.address_len))
+        {
+            *address = EvmAddress::ZERO;
+        }
+        for slot in self
+            .storage
+            .iter_mut()
+            .skip(checkpoint.storage_len)
+            .take(self.storage_len.saturating_sub(checkpoint.storage_len))
+        {
+            *slot = StorageSlotAccess {
+                address: EvmAddress::ZERO,
+                key: EvmWord::ZERO,
+            };
+        }
+        self.address_len = checkpoint.address_len;
+        self.storage_len = checkpoint.storage_len;
     }
 
     /// Marks an address warm and returns its previous access status.

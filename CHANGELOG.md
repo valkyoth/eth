@@ -4,6 +4,10 @@ All notable changes to `eth` are documented here.
 
 ## Unreleased
 
+- Remediated the v0.52.1 pentest by zero-initializing EVM memory, making
+  execution contexts one-shot until destructive reset, rolling back warm/cold
+  access tracking on failed stateful runs, validating EIP-712 identifiers and
+  uniqueness, and clearing partial typed-data output on failure.
 - Reworked the facade README opening around a direct crate purpose, early
   install and transaction-envelope example, compact capability status table,
   and a dedicated detailed current-status document.

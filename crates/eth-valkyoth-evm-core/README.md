@@ -80,8 +80,13 @@ The complete wire contract is documented in
 - Unsafe code is forbidden.
 - Stack, memory, bytecode, execution-step, and gas limits are explicit
   constants.
+- Caller-provided EVM memory is zero-initialized on construction. Execution
+  contexts are one-shot until an explicit destructive `reset`, preventing
+  stack, memory, or program-counter reuse across requests.
 - State access is available only through explicit host-state traits and
   caller-provided fixed-capacity warm/cold access sets.
+- Failed stateful runs restore the caller's warm/cold access tracker so an
+  out-of-gas retry cannot inherit discounted access costs.
 - Warm/cold access sets are linear-scan, allocation-free structures; choose
   capacities that are bounded relative to the gas limit and deployment policy.
 - Frontier through Istanbul use explicit flat historical state-read pricing for

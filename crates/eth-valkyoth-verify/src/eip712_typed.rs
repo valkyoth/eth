@@ -15,10 +15,10 @@ mod typed_helpers;
 #[cfg(feature = "json")]
 pub use eip712_json::{Eip712JsonError, Eip712JsonLimits, eip712_json_typed_data_signing_digest};
 
-use type_graph::{collect_reachable_types, next_dependency};
+use type_graph::{collect_reachable_types, next_dependency, validate_schema};
 use typed_helpers::{
     SliceWriter, encode_domain_type, encode_value_word, find_struct, find_value,
-    update_domain_fields, write_struct_type,
+    update_domain_fields, validate_values, write_struct_type,
 };
 
 const WORD_BYTES: usize = 32;
@@ -160,6 +160,12 @@ pub enum Eip712EncodeError {
     RecursionLimit,
     /// The schema exceeds the bounded type-count limit.
     SchemaTooLarge,
+    /// Multiple struct definitions use the same name.
+    DuplicateType,
+    /// Multiple fields in one struct use the same name.
+    DuplicateField,
+    /// Multiple supplied values use the same name.
+    DuplicateValue,
 }
 
 impl fmt::Display for Eip712EncodeError {
@@ -172,6 +178,9 @@ impl fmt::Display for Eip712EncodeError {
             Self::TypeMismatch => "EIP-712 value does not match its declared type",
             Self::RecursionLimit => "EIP-712 recursion limit was exceeded",
             Self::SchemaTooLarge => "EIP-712 schema exceeds the type-count limit",
+            Self::DuplicateType => "EIP-712 schema contains a duplicate struct type",
+            Self::DuplicateField => "EIP-712 struct contains a duplicate field name",
+            Self::DuplicateValue => "EIP-712 struct contains a duplicate value name",
         })
     }
 }
@@ -182,12 +191,15 @@ impl std::error::Error for Eip712EncodeError {}
 /// Encodes `encodeType(primaryType)` into `output`.
 ///
 /// Schemas larger than [`EIP712_MAX_TYPES`] are rejected before dependency
-/// traversal. Each reachable type is visited once before lexical emission.
+/// traversal. Struct and field identifiers must follow EIP-712 identifier
+/// syntax, and duplicate type or field names are rejected before output
+/// mutation. Each reachable type is visited once before lexical emission.
 pub fn encode_eip712_type(
     types: &[Eip712StructType<'_>],
     primary_type: &str,
     output: &mut [u8],
 ) -> Result<usize, Eip712EncodeError> {
+    validate_schema(types)?;
     let mut writer = SliceWriter::new(output);
     let primary = find_struct(types, primary_type)?;
     let reachable = collect_reachable_types(types, primary_type)?;
@@ -221,6 +233,10 @@ where
 }
 
 /// Encodes EIP-712 member data for one struct instance.
+///
+/// Schema and value names are validated before encoding. If a field fails
+/// after encoding starts, the selected output region is cleared before the
+/// error is returned.
 pub fn encode_eip712_data<H>(
     types: &[Eip712StructType<'_>],
     primary_type: &str,
@@ -231,9 +247,8 @@ pub fn encode_eip712_data<H>(
 where
     H: Default + Keccak256,
 {
-    if types.len() > EIP712_MAX_TYPES {
-        return Err(Eip712EncodeError::SchemaTooLarge);
-    }
+    validate_schema(types)?;
+    validate_values(values)?;
     let ty = find_struct(types, primary_type)?;
     let len = ty
         .fields
@@ -244,10 +259,17 @@ where
         .get_mut(..len)
         .ok_or(Eip712EncodeError::OutputTooShort)?;
     for (field, slot) in ty.fields.iter().zip(target.chunks_exact_mut(WORD_BYTES)) {
-        let value = find_value(values, field.name)?;
-        let mut word = [0_u8; WORD_BYTES];
-        encode_value_word::<H>(types, field.type_name, value, &mut word, type_scratch, 0)?;
-        slot.copy_from_slice(&word);
+        let result = (|| {
+            let value = find_value(values, field.name)?;
+            let mut word = [0_u8; WORD_BYTES];
+            encode_value_word::<H>(types, field.type_name, value, &mut word, type_scratch, 0)?;
+            slot.copy_from_slice(&word);
+            Ok(())
+        })();
+        if let Err(error) = result {
+            target.fill(0);
+            return Err(error);
+        }
     }
     Ok(len)
 }
@@ -262,6 +284,7 @@ pub fn eip712_hash_struct<H>(
 where
     H: Default + Keccak256,
 {
+    validate_schema(types)?;
     hash_struct_inner::<H>(types, primary_type, values, type_scratch, 0)
 }
 
@@ -317,6 +340,7 @@ where
     if depth >= MAX_TYPE_DEPTH {
         return Err(Eip712EncodeError::RecursionLimit);
     }
+    validate_values(values)?;
     let ty = find_struct(types, primary_type)?;
     let type_hash = eip712_type_hash::<H>(types, primary_type, type_scratch)?;
     let mut hasher = H::default();
@@ -340,3 +364,7 @@ where
 #[cfg(test)]
 #[path = "eip712_typed_tests.rs"]
 mod tests;
+
+#[cfg(test)]
+#[path = "eip712_security_tests.rs"]
+mod security_tests;

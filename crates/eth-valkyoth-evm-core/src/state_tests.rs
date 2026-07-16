@@ -229,7 +229,8 @@ fn state_write_shell_fails_without_popping_stack() -> Result<(), EvmCoreError> {
         ),
         Err(EvmCoreError::StateWriteUnsupported)
     );
-    assert_eq!(accesses.storage_len(), 1);
+    assert_eq!(accesses.address_len(), 0);
+    assert_eq!(accesses.storage_len(), 0);
     assert_eq!(execution.stack().len(), 2);
     Ok(())
 }

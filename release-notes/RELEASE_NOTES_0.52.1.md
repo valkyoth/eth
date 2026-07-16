@@ -37,9 +37,12 @@ the following `v0.52.2..=v0.52.9` releases.
 ## Changed
 
 - `eth-valkyoth-evm-core` is minor-bumped from `0.25.0` to `0.26.0` for the new
-  public wire and frame APIs.
+  public wire/frame APIs and tightened execution lifecycle contract.
+- `eth-valkyoth-verify` is minor-bumped from `0.22.0` to `0.23.0` for
+  fail-closed EIP-712 identifier, uniqueness, and partial-output behavior.
 - `eth` is bumped from `0.52.0` to `0.52.1` and exposes the new domains through
-  the optional `evm-core` feature.
+  the optional `evm-core` feature while consuming the hardened verification
+  boundary.
 - Existing advanced-precompile policies now share the public BLS wire-size
   constants instead of duplicating frame literals.
 - The pinned stable toolchain and full release gate now use Rust `1.97.0`;
@@ -65,12 +68,22 @@ the following `v0.52.2..=v0.52.9` releases.
   unavailable.
 - Public precompile bytes are not treated as secret material. Secret-bearing
   reuse requires a separate constant-time and sanitization contract.
+- Caller-provided EVM memory is zeroed on construction. An `EvmExecution` can
+  run only once until explicit destructive reset clears its stack, memory, and
+  program counter.
+- Failed stateful execution restores the caller-provided warm/cold access set,
+  preventing out-of-gas retries from inheriting warm pricing.
+- Borrowed and JSON EIP-712 schemas reject invalid struct/field identifiers.
+  Borrowed schemas and values also reject duplicate names before hashing.
+- `encode_eip712_data` clears its selected output region if a later field
+  fails, so partial signing material is not left in pooled buffers.
 
 ## Verification
 
 - Official EIP-2537 encoding rules checked on 2026-07-16.
 - `cargo test -p eth-valkyoth-evm-core bls12_wire_tests --all-features`
 - `cargo test -p eth-valkyoth-evm-core --all-features`
+- `cargo test -p eth-valkyoth-verify --all-features`
 - `cargo clippy -p eth-valkyoth-evm-core --all-targets --all-features -- -D warnings`
 - `cargo clippy --manifest-path fuzz/Cargo.toml --bin bls12381_wire -- -D warnings`
 - `scripts/materialize_fuzz_seeds.py --check`

@@ -27,6 +27,8 @@ pub enum EvmCoreError {
     ExecutionStepLimitTooLarge,
     /// Execution reached the configured step limit before halting.
     ExecutionStepLimitReached,
+    /// Execution was invoked again without an explicit destructive reset.
+    ExecutionAlreadyStarted,
     /// The execution gas limit is zero.
     ExecutionGasLimitZero,
     /// The execution gas limit exceeds the release hard limit.
@@ -116,6 +118,7 @@ impl EvmCoreError {
             Self::ExecutionStepLimitZero => "execution_step_limit_zero",
             Self::ExecutionStepLimitTooLarge => "execution_step_limit_too_large",
             Self::ExecutionStepLimitReached => "execution_step_limit_reached",
+            Self::ExecutionAlreadyStarted => "execution_already_started",
             Self::ExecutionGasLimitZero => "execution_gas_limit_zero",
             Self::ExecutionGasLimitTooLarge => "execution_gas_limit_too_large",
             Self::OutOfGas => "out_of_gas",

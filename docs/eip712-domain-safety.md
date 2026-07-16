@@ -40,6 +40,17 @@ each candidate type. Canonical dependencies are still emitted in lexical
 order after the bounded traversal. Signing value types no longer implement
 `Copy` or `Clone`, and their manual `Debug` output always redacts payloads.
 
+The `v0.52.1` pentest hardening makes the signing schema fail closed before
+hashing:
+
+- struct and field names must use EIP-712 identifier syntax;
+- borrowed schemas reject duplicate struct and field names;
+- borrowed values reject duplicate names at every nested struct level;
+- the optional JSON path applies the same identifier validation before graph
+  traversal;
+- failed `encode_eip712_data` calls clear the selected output region if any
+  later field fails after earlier words were written.
+
 The JSON boundary:
 
 - rejects duplicate JSON object keys before any type map is accepted, using an

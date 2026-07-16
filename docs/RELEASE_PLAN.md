@@ -2315,6 +2315,11 @@ Deliverables:
 - frame parsers for every `0x0b..=0x11` input that reuse the release's existing
   length and item-count policies;
 - malformed-field, padding, infinity, and frame-boundary fuzz coverage.
+- pentest remediation that zero-initializes caller-provided EVM memory, makes
+  execution one-shot until destructive reset, and restores warm/cold access
+  tracking on every failed stateful run;
+- pentest remediation that validates EIP-712 identifiers, rejects duplicate
+  borrowed type/field/value names, and clears partial encode-data output.
 
 Verification:
 
@@ -2323,6 +2328,7 @@ Verification:
   greater than `q`;
 - round-trip tests for every admitted wire domain;
 - `cargo test -p eth-valkyoth-evm-core`;
+- `cargo test -p eth-valkyoth-verify --all-features`;
 - strict core and fuzz clippy gates;
 - pentest and retest before tagging.
 
@@ -2331,6 +2337,10 @@ Exit criteria:
 - Every BLS input byte is either decoded into one canonical bounded domain or
   rejected before arithmetic, without allocation or alternate encodings.
 - Arithmetic precompiles remain fail closed until their assigned releases.
+- EVM execution cannot expose recycled caller memory or silently inherit
+  stack, memory, program-counter, or discounted warm-access state.
+- EIP-712 signing rejects ambiguous or delimiter-injected schemas before
+  hashing and leaves no partial member encoding after failure.
 
 ### v0.52.2 - BLS12-381 G1 Arithmetic And Addition
 

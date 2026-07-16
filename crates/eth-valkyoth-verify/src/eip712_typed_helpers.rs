@@ -175,11 +175,26 @@ pub(super) fn find_value<'a>(
     values: &'a [Eip712Value<'a>],
     name: &str,
 ) -> Result<&'a Eip712ValueKind<'a>, Eip712EncodeError> {
-    values
-        .iter()
-        .find(|value| value.name == name)
-        .map(|value| &value.value)
-        .ok_or(Eip712EncodeError::MissingValue)
+    let mut matches = values.iter().filter(|value| value.name == name);
+    let value = matches.next().ok_or(Eip712EncodeError::MissingValue)?;
+    if matches.next().is_some() {
+        return Err(Eip712EncodeError::DuplicateValue);
+    }
+    Ok(&value.value)
+}
+
+pub(super) fn validate_values(values: &[Eip712Value<'_>]) -> Result<(), Eip712EncodeError> {
+    for (index, value) in values.iter().enumerate() {
+        validate_identifier(value.name)?;
+        if values
+            .iter()
+            .take(index)
+            .any(|previous| previous.name == value.name)
+        {
+            return Err(Eip712EncodeError::DuplicateValue);
+        }
+    }
+    Ok(())
 }
 
 #[derive(Clone, Copy)]
@@ -236,6 +251,17 @@ fn write_domain_field(
 
 pub(super) fn reject_reserved_struct_name(name: &str) -> Result<(), Eip712EncodeError> {
     if is_reserved_atomic_type(name) {
+        return Err(Eip712EncodeError::InvalidType);
+    }
+    Ok(())
+}
+
+pub(super) fn validate_identifier(name: &str) -> Result<(), Eip712EncodeError> {
+    let mut bytes = name.bytes();
+    let first = bytes.next().ok_or(Eip712EncodeError::InvalidType)?;
+    if !(first.is_ascii_alphabetic() || matches!(first, b'_' | b'$'))
+        || !bytes.all(|byte| byte.is_ascii_alphanumeric() || matches!(byte, b'_' | b'$'))
+    {
         return Err(Eip712EncodeError::InvalidType);
     }
     Ok(())

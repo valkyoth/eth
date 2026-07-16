@@ -36,6 +36,32 @@ fn rejects_duplicate_type_key() {
 }
 
 #[test]
+fn rejects_invalid_struct_and_field_identifiers() {
+    assert_json_error(
+        r#"{
+            "types": {"Bad,Type": []},
+            "primaryType": "Bad,Type",
+            "domain": {},
+            "message": {}
+        }"#,
+        Eip712JsonLimits::DEFAULT,
+        Eip712JsonError::Encode(Eip712EncodeError::InvalidType),
+    );
+    assert_json_error(
+        r#"{
+            "types": {
+                "Payment": [{"name": "amount,address recipient", "type": "uint256"}]
+            },
+            "primaryType": "Payment",
+            "domain": {},
+            "message": {"amount,address recipient": 1}
+        }"#,
+        Eip712JsonLimits::DEFAULT,
+        Eip712JsonError::Encode(Eip712EncodeError::InvalidType),
+    );
+}
+
+#[test]
 fn rejects_missing_primary_type() {
     let mut scratch = [0_u8; 512];
     let json = r#"{"types": {}, "domain": {}, "message": {}}"#;

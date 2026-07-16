@@ -32,10 +32,10 @@ reason = "No package changes for v0.52.1."
 
 [crates."eth-valkyoth-verify"]
 previous_version = "0.22.0"
-version = "0.22.0"
-change = "unchanged"
-publish = false
-reason = "No package changes for v0.52.1."
+version = "0.23.0"
+change = "code"
+publish = true
+reason = "Rejects malformed and duplicate EIP-712 schema/value identifiers and clears partial encode-data output on failure."
 
 [crates."eth-valkyoth-derive"]
 previous_version = "0.17.3"
@@ -56,7 +56,7 @@ previous_version = "0.25.0"
 version = "0.26.0"
 change = "code"
 publish = true
-reason = "Adds canonical dependency-free EIP-2537 Fp, Fr, Fp2, scalar, G1, G2, and precompile frame parsing with boundary tests and fuzz coverage."
+reason = "Adds canonical EIP-2537 wire parsing and hardens EVM memory initialization, one-shot execution reuse, and failed-run access accounting."
 
 [crates."eth-valkyoth-evm"]
 previous_version = "0.10.0"
@@ -98,4 +98,4 @@ previous_version = "0.52.0"
 version = "0.52.1"
 change = "code"
 publish = true
-reason = "Updates evm-core to 0.26.0 and exposes the canonical EIP-2537 BLS12-381 wire and frame domains through the optional evm-core feature."
+reason = "Updates evm-core to 0.26.0 and verify to 0.23.0 for canonical BLS wire domains plus EVM and EIP-712 pentest remediation."

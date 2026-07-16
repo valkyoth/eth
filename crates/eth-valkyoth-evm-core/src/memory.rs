@@ -18,9 +18,10 @@ impl<'a> EvmMemory<'a> {
         Ok(())
     }
 
-    /// Creates a bounded borrowed memory view.
+    /// Creates a bounded, zero-initialized borrowed EVM memory view.
     pub fn try_new(bytes: &'a mut [u8]) -> Result<Self, EvmCoreError> {
         Self::validate_len(bytes.len())?;
+        bytes.fill(0);
         Ok(Self { bytes })
     }
 

@@ -109,6 +109,10 @@ mod tests;
 mod execution_semantics_tests;
 
 #[cfg(test)]
+#[path = "execution_security_tests.rs"]
+mod execution_security_tests;
+
+#[cfg(test)]
 #[path = "state_tests.rs"]
 mod state_tests;
 

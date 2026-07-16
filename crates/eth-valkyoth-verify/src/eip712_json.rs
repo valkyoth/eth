@@ -15,7 +15,7 @@ use scalar::{
     check_depth, check_len, encode_json_numeric_or_bytes, parse_address, parse_b256, parse_chain_id,
 };
 
-use super::typed_helpers::{find_struct, parse_array_type};
+use super::typed_helpers::{find_struct, parse_array_type, validate_identifier};
 use super::{
     ADDRESS_PADDING_BYTES, Eip712DomainData, Eip712EncodeError, Eip712Field, Eip712StructType,
     MAX_TYPE_DEPTH, WORD_BYTES, eip712_domain_separator, eip712_type_hash,
@@ -248,6 +248,7 @@ fn parse_types(types: &Json, limits: Eip712JsonLimits) -> Result<Vec<OwnedType>,
         }
         check_len(owned.len().saturating_add(1), limits.max_types)?;
         check_len(name.len(), limits.max_string_bytes)?;
+        validate_identifier(name)?;
         let field_values = fields.as_array()?;
         check_len(field_values.len(), limits.max_fields_per_type)?;
         let mut parsed_fields = Vec::<OwnedField>::new();
@@ -257,6 +258,7 @@ fn parse_types(types: &Json, limits: Eip712JsonLimits) -> Result<Vec<OwnedType>,
             let field_type = field.get("type")?.as_str()?;
             check_len(field_name.len(), limits.max_string_bytes)?;
             check_len(field_type.len(), limits.max_string_bytes)?;
+            validate_identifier(field_name)?;
             if parsed_fields.iter().any(|field| field.name == field_name) {
                 return Err(Eip712JsonError::Shape);
             }

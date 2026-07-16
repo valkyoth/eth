@@ -1,5 +1,35 @@
-use super::typed_helpers::{base_type, reject_reserved_struct_name};
+use super::typed_helpers::{base_type, reject_reserved_struct_name, validate_identifier};
 use super::{EIP712_MAX_TYPES, Eip712EncodeError, Eip712StructType};
+
+pub(super) fn validate_schema(types: &[Eip712StructType<'_>]) -> Result<(), Eip712EncodeError> {
+    if types.len() > EIP712_MAX_TYPES {
+        return Err(Eip712EncodeError::SchemaTooLarge);
+    }
+    for (type_index, ty) in types.iter().enumerate() {
+        reject_reserved_struct_name(ty.name)?;
+        validate_identifier(ty.name)?;
+        if types
+            .iter()
+            .take(type_index)
+            .any(|previous| previous.name == ty.name)
+        {
+            return Err(Eip712EncodeError::DuplicateType);
+        }
+        for (field_index, field) in ty.fields.iter().enumerate() {
+            validate_identifier(field.name)?;
+            validate_identifier(base_type(field.type_name)?)?;
+            if ty
+                .fields
+                .iter()
+                .take(field_index)
+                .any(|previous| previous.name == field.name)
+            {
+                return Err(Eip712EncodeError::DuplicateField);
+            }
+        }
+    }
+    Ok(())
+}
 
 pub(super) fn collect_reachable_types(
     types: &[Eip712StructType<'_>],
