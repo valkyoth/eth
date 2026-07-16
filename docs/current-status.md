@@ -65,12 +65,17 @@ Legend:
 
 | Capability | Status | Current scope |
 | --- | --- | --- |
-| JSON-RPC transport | 🔴 Planned | Trust-model types exist, but no production transport/client is implemented |
-| Signer and key storage | 🔴 Planned | No local key store or signing service is enabled |
-| ABI and contract helpers | 🔴 Planned | Assigned to `v0.70.0..=v0.78.0` |
-| Consensus and Engine API | 🔴 Planned | Assigned to `v0.79.0..=v0.85.0` |
-| DevP2P, RLPx, discovery, and sync | 🔴 Planned | Assigned to `v0.86.0..=v0.92.0` |
-| Reth integration | 🔴 Planned | Boundary crate only; no runtime integration is admitted |
+| Owned SDK models and interoperability | 🔴 Planned | Assigned to `v0.53.0..=v0.68.0` |
+| Complete execution and tracing | 🔴 Planned | Assigned to `v0.69.0..=v0.91.0` |
+| Typed providers and transaction lifecycle | 🔴 Planned | Assigned to `v0.92.0..=v0.108.0` |
+| Signers, wallets, and account abstraction | 🔴 Planned | Assigned to `v0.109.0..=v0.119.0` |
+| ABI, contracts, and application standards | 🔴 Planned | Assigned to `v0.120.0..=v0.129.0` |
+| Storage, canonical chain, and runtime | 🔴 Planned | Assigned to `v0.130.0..=v0.140.0` |
+| Consensus, Engine API, and light client | 🔴 Planned | Assigned to `v0.141.0..=v0.153.0` |
+| DevP2P, RLPx, txpool, and sync | 🔴 Planned | Assigned to `v0.154.0..=v0.164.0` |
+| Witnesses, stateless execution, and commitment evolution | 🔴 Planned | Assigned to `v0.165.0..=v0.174.0` |
+| Production assurance and compatibility | 🔴 Planned | Assigned to `v0.175.0..=v0.188.0` |
+| Reth and ecosystem integration | 🔴 Planned | Optional conversion/reference adapters are assigned to `v0.67.0`; no external implementation becomes the first-party core |
 
 ## Security And Release Baseline
 

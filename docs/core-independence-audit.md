@@ -147,10 +147,10 @@ graphs.
 | `v0.37.3` | Completed: secp256k1 recovery moved behind explicit backend/API boundaries and direct `sha3` verify test usage removed. |
 | `v0.37.4` | Completed: retained `subtle` as a narrow reviewed exception and added executable quarantine checks for `alloy-rlp` plus dev fixture `serde_json`. |
 | `v0.37.5` | Completed: documented and gated optional parser and sanitization bridges so `serde`, `serde_json`, and `sanitization` cannot become accidental defaults. |
-| `v0.40.0` through `v0.54.0` | Build first-party EVM execution phases; REVM remains reference or compatibility only if admitted. |
+| `v0.40.0..=v0.52.9` and `v0.69.0..=v0.91.0` | Build the first-party EVM, advanced precompiles, complete state transition, conformance, tracing, and simulation; REVM remains reference or compatibility only if admitted. |
 | `v0.46.0` through `v0.52.9` | Admit or implement cryptographic precompiles only with conformance vectors, dependency review, fuzzing, and pentest gates. Releases through `v0.51.0` complete native SHA-256, RIPEMD-160, ModExp, BN254, and BLAKE2F plus caller-boundary ECRECOVER. `v0.52.0` fixes exact KZG/BLS planning and admission policy; `v0.52.1` through `v0.52.9` build first-party BLS12-381 execution. |
-| `v0.61.0` through `v0.61.5` | Build first-party trusted-setup handling, KZG arithmetic/proof verification, point-evaluation execution, and blob integration before blob consensus validation is claimed. |
-| `v0.94.0` | Add Kani proof harnesses as extra assurance for selected critical invariants. |
+| `v0.77.0..=v0.81.0` | Build first-party trusted-setup handling, KZG arithmetic/proof verification, point-evaluation execution, and blob integration before blob consensus validation is claimed. |
+| `v0.177.0..=v0.178.0` | Add Kani proof harnesses as extra assurance for selected critical invariants in core and execution paths. |
 
 The exit criteria for this release are documentation-only: no core Ethereum
 dependency remains accidental or undocumented, and every remaining third-party

@@ -4,11 +4,12 @@ Status: planning document
 
 Crate name: `eth`
 
-1.0 target: a serious production-ready Ethereum toolkit for bounded decoding,
-fork-aware validation, cryptographic verification, first-party execution-layer
-state transition and block validation, contract ABI helpers, consensus and
-Engine API boundaries, explicit RPC trust policy, optional signer isolation,
-optional networking/sync boundaries, and optional Reth integration.
+1.0 target: a complete security-oriented Ethereum toolkit with bounded wire
+handling, owned SDK models, first-party historical and current execution,
+typed providers and transaction workflows, wallet and account-abstraction
+support, contract tooling, persistent canonical-chain storage, consensus and
+Engine integration, a complete light client, networking and sync, stateless
+execution, and explicit optional ecosystem adapters.
 
 ## Core Position
 
@@ -28,13 +29,19 @@ The first production value is:
 - bounded canonical decoding of untrusted Ethereum data;
 - explicit chain and fork context;
 - stable protocol types and validation states;
+- owned, interoperable application models and task-oriented workflows;
 - first-party execution-layer state transition, trie-root construction, and
   block-validity support for every claimed fork;
-- signer and key isolation;
+- signer, wallet, key-custody, multisig, and account-abstraction isolation;
 - RPC trust models that do not imply state correctness;
-- contract ABI and common standard helpers that do not imply contract trust;
-- optional consensus, Engine, networking, and sync boundaries with explicit
-  trust and resource policies;
+- typed provider transports, simulation, broadcast, confirmation, replacement,
+  and reorg-aware transaction lifecycle support;
+- contract ABI, artifacts, bindings, deployment, events, and common standard
+  helpers that do not imply contract trust;
+- persistent storage, canonical-chain import, pruning/archive policy, and
+  supervised client-runtime boundaries;
+- consensus, Engine, light-client, networking, txpool, sync, witness, and
+  stateless-execution support with explicit trust and resource policies;
 - conformance evidence against pinned upstream specification revisions.
 
 ## Non-Negotiable Engineering Rules
@@ -111,9 +118,13 @@ The first production value is:
   BN254 final-exponentiation remediation; `v0.52.0` fixes the remaining
   KZG/BLS frame, output, gas, conformance, and backend-admission contracts;
   `v0.52.1` through `v0.52.9` build first-party BLS12-381 execution; and
-  `v0.61.0` through `v0.61.5` build first-party KZG/blob verification before
+  `v0.77.0` through `v0.81.0` build first-party KZG/blob verification before
   later releases claim complete affected-fork execution.
-- `eth-valkyoth-rpc`: optional RPC policy over admitted provider transports.
+- `eth-valkyoth-sdk`: optional owned models, prelude, builders, and high-level
+  workflows over the focused core crates.
+- `eth-valkyoth-rpc`: typed RPC methods and explicit response trust policy.
+- `eth-valkyoth-provider`: optional runtime-neutral provider, transport,
+  middleware, subscription, and transaction-lifecycle orchestration.
 - `eth-valkyoth-abi`: optional ABI, contract-call, event, error, and common
   contract-standard helpers.
 - `eth-valkyoth-consensus`: optional SSZ, beacon, and light-client boundaries.
@@ -122,12 +133,22 @@ The first production value is:
   boundary.
 - `eth-valkyoth-txpool`: optional transaction-pool policy helpers.
 - `eth-valkyoth-sync`: optional sync orchestration state machines.
+- `eth-valkyoth-storage`: database traits, schemas, state/chain stores,
+  migrations, snapshots, pruning, and archive policies.
+- `eth-valkyoth-chain`: canonical import, reorg, fork-choice/head state,
+  orphan, payload, and invalidation orchestration.
+- `eth-valkyoth-runtime`: optional supervised operational tasks without
+  selecting a runtime for core crates.
+- `eth-valkyoth-witness`: proof-format abstraction, witness construction,
+  stateless execution, and commitment-scheme evolution.
 - `eth-valkyoth-sanitization`: optional bridge to the `sanitization` crate for
   secret-bearing Ethereum data.
 - `eth-valkyoth-derive`: optional derive macros for explicit sanitization users
   and, after review, public RLP derives that preserve bounded decode and
   primitive-domain invariants.
 - `eth-valkyoth-signer`: optional signer isolation and domain-specific signing APIs.
+- `eth-valkyoth-wallet`: optional local, HD, keystore, remote, hardware,
+  multisig, account-abstraction, and delegated-account workflows.
 - `eth-valkyoth-reth`: optional Reth adapter boundary.
 - `eth-valkyoth-testkit`: fixtures, adversarial inputs, conformance helpers, and
   regression utilities.
@@ -264,39 +285,102 @@ Release gate:
   implementation when available;
 - gas estimation is bounded by execution count, gas cap, and timeout policy.
 
-## Phase 7: Optional RPC And Signer Boundaries
+## Phase 7: Owned SDK And Shared Domains
 
-Admit RPC transports and signer backends only behind features. Implement
-endpoint allowlists, no implicit public endpoint fallback, no automatic
-transaction rebroadcast, redacted logs, trusted/quorum/verified response
-models, and external-signer-first APIs.
-
-Release gate:
-
-- malicious RPC fixtures pass;
-- secrets, bearer tokens, calldata, and raw signed transactions are redacted by
-  default;
-- local signer remains non-default.
-
-## Phase 8: Optional Reth, Contract, Consensus, Networking, And Node Tracks
-
-Add Reth, ABI/contract helpers, consensus/Engine boundaries, P2P, txpool, and
-sync only after threat-model expansion and dependency review. Keep every
-network, node, signer, and consensus adapter outside the default graph unless a
-future major version explicitly changes that policy.
+Build general integer/byte/hash domains, owned transaction/block/state models,
+lossless representation conversions, bounded allocation conveniences,
+structured errors, payload-bound typestates, a fork-rule model that separates
+identity from activation and parameters, and one shared protocol/execution
+domain vocabulary. Add a curated facade prelude and optional ecosystem
+adapters only after the first-party models are authoritative.
 
 Release gate:
 
-- separate fuzz corpus and load tests;
-- reviewed dependency expansion;
-- no Reth, P2P, consensus, Engine, txpool, sync, RPC, or signer dependency in
-  the default graph.
+- owned/borrowed/validated/RPC/execution conversion matrices pass;
+- no validation evidence is detached from its payload;
+- fork behavior does not depend on enum ordering;
+- features and README dependency snippets are generated and checked.
 
-## Phase 9: 1.0 Production Readiness
+## Phase 8: Complete First-Party Execution
 
-Complete independent security review, conformance matrix, SBOM, provenance,
-signed release manifest, release notes, supported fork matrix, and migration
-guidance.
+Finish semantic transaction/header/block validity, genesis import, complete
+state transition and journaling, receipts/logs/withdrawals, trie construction,
+first-party KZG/blob verification, EOF, current-fork ingestion, official
+execution fixture coverage, differential evidence, tracing, and deterministic
+simulation. Historical and current forks remain equally explicit.
+
+Release gate:
+
+- every claimed fork passes its official fixtures with no unexplained skip;
+- state roots and execution outcomes match independent clients;
+- unsupported future behavior fails closed;
+- performance and resource ceilings are documented and enforced.
+
+## Phase 9: Providers Transactions Signers And Contracts
+
+Build typed runtime-neutral RPC transports, HTTP/WS/IPC/EIP-1193 adapters,
+batching, cancellation, subscriptions, backpressure, middleware, quorum and
+proof-backed trust models, and the complete transaction lifecycle. Add local,
+HD, keystore, remote, hardware, multisig, Safe, ERC-4337, session-key, and
+EIP-7702 wallet workflows. Complete ABI, artifact, codegen, deployment, event,
+error, multicall, standard-contract, ENS, and permit tooling.
+
+Release gate:
+
+- malicious provider, disconnect, reorg, replacement, and key-domain fixtures
+  pass;
+- secret-bearing features remain opt-in and sanitized;
+- generated contract and wallet APIs preserve validation and chain context;
+- end-to-end workflows pass against self-managed local nodes.
+
+## Phase 10: Storage Canonical Chain And Runtime
+
+Add transactional database traits, chain/state schemas, crash consistency,
+migrations, snapshots, pruning/archive/history-expiry modes, canonical import
+and reorg, head/fork-choice/orphan tracking, payload invalidation, and bounded
+operational supervision.
+
+Release gate:
+
+- process-kill, torn-write, migration, snapshot, prune, and deep-reorg tests
+  pass;
+- committed blocks and state/index roots remain atomically consistent;
+- runtime tasks have explicit shutdown, restart, metrics, and resource policy.
+
+## Phase 11: Consensus Engine Networking And Sync
+
+Complete SSZ, forked beacon models, all admitted Engine API versions, Engine
+client/server services, Beacon API, weak-subjectivity bootstrap, BLS sync
+committee verification, rotation, persistence, finality scoring, execution
+proof binding, checkpoint recovery, PeerDAS, Discovery/RLPx, eth/snap, peers,
+request scheduling, txpool, sync, Portal/history acquisition, and
+builder/validator boundaries.
+
+Release gate:
+
+- official consensus, Engine, light-client, and wire fixtures pass;
+- Byzantine peer/provider and restart/recovery simulations pass;
+- all live networking remains outside the default graph.
+
+## Phase 12: Statelessness And Commitment Evolution
+
+Introduce commitment-neutral proof types, execution witnesses, MPT witness
+construction, stateless execution, the officially selected successor
+commitment backend, state/history evolution, an explicit ZK proof boundary,
+and automated official-fork drift detection.
+
+Release gate:
+
+- stateful and stateless outcomes match;
+- historical and successor commitment eras coexist under explicit fork rules;
+- no unfinished commitment or ZK backend can be mistaken for consensus-valid.
+
+## Phase 13: 1.0 Production Readiness
+
+Complete platform and performance matrices, Kani proofs, Miri/sanitizer gates,
+semver/feature compatibility checks, task-oriented documentation, independent
+core/execution/SDK/network audits, remediation, SBOM, provenance, signed
+release manifest, supported-fork matrix, and migration guidance.
 
 Release gate:
 
@@ -304,7 +388,8 @@ Release gate:
   parser, and typestate invariants;
 - no unresolved critical or high dependency/advisory/audit findings;
 - official conformance suites pass for every claimed feature;
-- Rust `1.90.0` through `1.96.1` pass all-feature workspace checks;
+- Rust `1.90.0` through the newest supported compatibility release pass
+  all-feature workspace checks;
 - the full release gate passes on pinned stable Rust `1.97.0`.
 
 Kani is extra assurance. It does not replace fuzzing, official Ethereum

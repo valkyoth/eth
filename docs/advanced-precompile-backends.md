@@ -24,7 +24,7 @@ and pentest.
 
 | Domain | Current planning contract | First-party execution releases |
 | --- | --- | --- |
-| EIP-4844 KZG point evaluation | Exact 192-byte input, 64-byte output, fixed 50,000 gas | `v0.61.0` through `v0.61.5` |
+| EIP-4844 KZG point evaluation | Exact 192-byte input, 64-byte output, fixed 50,000 gas | `v0.77.0..=v0.81.0` |
 | EIP-2537 G1 add | Exact 256-byte input, 128-byte output, fixed 375 gas | `v0.52.1` and `v0.52.2` |
 | EIP-2537 G1 MSM | Non-empty `160 * k` input, 128-byte output, official discount gas | `v0.52.1`, `v0.52.4`, and `v0.52.5` |
 | EIP-2537 G2 add | Exact 512-byte input, 256-byte output, fixed 600 gas | `v0.52.1` and `v0.52.3` |
