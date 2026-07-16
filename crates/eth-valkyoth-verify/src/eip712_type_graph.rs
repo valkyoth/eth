@@ -1,4 +1,6 @@
-use super::typed_helpers::{base_type, reject_reserved_struct_name, validate_identifier};
+use super::typed_helpers::{
+    base_type, is_supported_atomic_type, reject_reserved_struct_name, validate_identifier,
+};
 use super::{EIP712_MAX_FIELDS_PER_TYPE, EIP712_MAX_TYPES, Eip712EncodeError, Eip712StructType};
 
 pub(super) fn validate_schema(types: &[Eip712StructType<'_>]) -> Result<(), Eip712EncodeError> {
@@ -20,7 +22,13 @@ pub(super) fn validate_schema(types: &[Eip712StructType<'_>]) -> Result<(), Eip7
         }
         for (field_index, field) in ty.fields.iter().enumerate() {
             validate_identifier(field.name)?;
-            validate_identifier(base_type(field.type_name)?)?;
+            let base = base_type(field.type_name)?;
+            validate_identifier(base)?;
+            if !types.iter().any(|candidate| candidate.name == base)
+                && !is_supported_atomic_type(base)?
+            {
+                return Err(Eip712EncodeError::InvalidType);
+            }
             if ty
                 .fields
                 .iter()

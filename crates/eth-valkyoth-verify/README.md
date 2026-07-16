@@ -43,8 +43,10 @@ auditable crate boundaries. Treat it as a lower-level building block unless the
 The `0.23.0` support-crate release, shipped with `eth` `0.52.1`, rejects
 malformed EIP-712 struct and field identifiers, duplicate borrowed type,
 field, and value names, and clears partial encode-data output on failure.
-These are signing-boundary security contract changes; use `0.23` rather than a
-`0.22` compatibility requirement.
+It also validates fully unwrapped array member types before hashing and adds
+default plus caller-configurable cumulative dynamic-byte work limits across
+domain and message hashing. These are signing-boundary security contract
+changes; use `0.23` rather than a `0.22` compatibility requirement.
 
 The previous `0.22.0` support-crate release, shipped with `eth` `0.52.0`, applies a
 64-type ceiling to both EIP-712 schema paths, traverses shared dependency DAGs
@@ -140,8 +142,12 @@ Borrowed schemas additionally cap each struct at
 dimension is capped at `EIP712_MAX_ARRAY_ITEMS` (256), and every borrowed or
 JSON operation is capped at `EIP712_MAX_VALUE_NODES` (4096) recursive value
 visits, including repeated traversal through shared borrowed slices.
-Unsupported atomic-looking spellings are reserved from the custom struct
-namespace. Schema validation runs once per public operation, dependency
+Borrowed operations also cap cumulative dynamic `bytes`, string, domain-name,
+and domain-version hashing at `EIP712_MAX_DYNAMIC_VALUE_BYTES` (1 MiB) by
+default. `Eip712Limits` and the `*_with_limits` entry points allow a stricter
+deployment policy. Unsupported atomic-looking spellings and undefined array
+base types are rejected during schema validation even when the supplied array
+is empty. Schema validation runs once per public operation, dependency
 discovery visits reachable types once before canonical ordering, and recursive
 hashing reuses a fixed 64-entry type-hash cache.
 Borrowed signing values are neither `Copy` nor `Clone`, and their manual

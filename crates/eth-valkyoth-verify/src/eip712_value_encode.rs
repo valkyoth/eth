@@ -61,8 +61,12 @@ where
                 .ok_or(Eip712EncodeError::OutputTooShort)?
                 .copy_from_slice(&bytes);
         }
-        ("bytes", Eip712ValueKind::Bytes(value)) => *out = hash_one(H::default(), value).to_bytes(),
+        ("bytes", Eip712ValueKind::Bytes(value)) => {
+            schema.charge_dynamic_bytes(value.len())?;
+            *out = hash_one(H::default(), value).to_bytes();
+        }
         ("string", Eip712ValueKind::String(value)) => {
+            schema.charge_dynamic_bytes(value.len())?;
             *out = hash_one(H::default(), value.as_bytes()).to_bytes();
         }
         (name, Eip712ValueKind::Struct(values)) if schema.contains_struct(name) => {

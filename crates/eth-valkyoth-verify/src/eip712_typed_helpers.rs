@@ -1,18 +1,25 @@
 use eth_valkyoth_hash::{Keccak256, hash_one};
 
+use super::eip712_schema::Eip712Budget;
 use super::{
     ADDRESS_PADDING_BYTES, EIP712_MAX_VALUES_PER_STRUCT, Eip712DomainData, Eip712EncodeError,
     Eip712StructType, Eip712Value, Eip712ValueKind, WORD_BYTES,
 };
 
-pub(super) fn update_domain_fields<H>(domain: Eip712DomainData<'_>, hasher: &mut H)
+pub(super) fn update_domain_fields<H>(
+    domain: Eip712DomainData<'_>,
+    hasher: &mut H,
+    budget: &mut Eip712Budget,
+) -> Result<(), Eip712EncodeError>
 where
     H: Default + Keccak256,
 {
     if let Some(name) = domain.name {
+        budget.charge_dynamic_bytes(name.len())?;
         hasher.update(&hash_one(H::default(), name.as_bytes()).to_bytes());
     }
     if let Some(version) = domain.version {
+        budget.charge_dynamic_bytes(version.len())?;
         hasher.update(&hash_one(H::default(), version.as_bytes()).to_bytes());
     }
     if let Some(chain_id) = domain.chain_id {
@@ -23,7 +30,7 @@ where
     if let Some(contract) = domain.verifying_contract {
         let mut word = [0_u8; WORD_BYTES];
         let Some(address) = word.get_mut(ADDRESS_PADDING_BYTES..) else {
-            return;
+            return Ok(());
         };
         address.copy_from_slice(&contract.to_bytes());
         hasher.update(&word);
@@ -31,6 +38,7 @@ where
     if let Some(salt) = domain.salt {
         hasher.update(&salt.to_bytes());
     }
+    Ok(())
 }
 
 pub(super) fn encode_domain_type(
@@ -202,6 +210,15 @@ pub(super) fn validate_identifier(name: &str) -> Result<(), Eip712EncodeError> {
         return Err(Eip712EncodeError::InvalidType);
     }
     Ok(())
+}
+
+pub(super) fn is_supported_atomic_type(type_name: &str) -> Result<bool, Eip712EncodeError> {
+    if matches!(type_name, "address" | "bool" | "bytes" | "string") {
+        return Ok(true);
+    }
+    Ok(unsigned_width(type_name)?.is_some()
+        || signed_width(type_name)?.is_some()
+        || fixed_bytes_width(type_name)?.is_some())
 }
 
 fn resembles_atomic_type(name: &str) -> bool {

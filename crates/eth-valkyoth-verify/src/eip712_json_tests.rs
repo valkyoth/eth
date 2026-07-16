@@ -72,6 +72,29 @@ fn rejects_invalid_struct_and_field_identifiers() {
 }
 
 #[test]
+fn rejects_unsupported_empty_array_member_types() {
+    for field_type in ["uint[]", "bytes33[]", "fixed128x18[]", "UndefinedStruct[]"] {
+        assert_json_error(
+            &json_for_field(field_type, "[]"),
+            Eip712JsonLimits::DEFAULT,
+            Eip712JsonError::Encode(Eip712EncodeError::InvalidType),
+        );
+    }
+}
+
+#[test]
+fn accepts_supported_empty_array_member_types() {
+    let mut scratch = [0_u8; 512];
+    let digest = eip712_json_typed_data_signing_digest::<RealKeccak>(
+        &json_for_field("uint256[]", "[]"),
+        Eip712JsonLimits::DEFAULT,
+        &mut scratch,
+    );
+
+    assert!(digest.is_ok(), "{digest:?}");
+}
+
+#[test]
 fn rejects_missing_primary_type() {
     let mut scratch = [0_u8; 512];
     let json = r#"{"types": {}, "domain": {}, "message": {}}"#;

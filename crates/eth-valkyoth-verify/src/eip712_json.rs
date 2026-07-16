@@ -18,8 +18,9 @@ use scalar::{
 use super::eip712_schema::ValidatedSchema;
 use super::typed_helpers::{find_struct, parse_array_type, validate_identifier};
 use super::{
-    ADDRESS_PADDING_BYTES, Eip712DomainData, Eip712EncodeError, Eip712Field, Eip712StructType,
-    MAX_TYPE_DEPTH, WORD_BYTES, eip712_domain_separator,
+    ADDRESS_PADDING_BYTES, EIP712_MAX_VALUE_NODES, Eip712DomainData, Eip712EncodeError,
+    Eip712Field, Eip712Limits, Eip712StructType, MAX_TYPE_DEPTH, WORD_BYTES,
+    eip712_domain_separator_inner,
 };
 use crate::eip712_signing_digest;
 
@@ -119,8 +120,13 @@ where
     let primary_type = root.get("primaryType")?.as_str()?;
     let domain = parse_domain(root.get("domain")?, limits)?;
     let message = root.get("message")?;
-    let mut schema = ValidatedSchema::try_new(&types)?;
-    let domain_separator = eip712_domain_separator::<H>(domain, type_scratch)?;
+    let encoder_limits = Eip712Limits {
+        max_value_nodes: EIP712_MAX_VALUE_NODES,
+        max_dynamic_value_bytes: limits.max_input_bytes,
+    };
+    let mut schema = ValidatedSchema::try_new_with_limits(&types, encoder_limits)?;
+    let domain_separator =
+        eip712_domain_separator_inner::<H>(domain, type_scratch, schema.budget_mut())?;
     let message_hash =
         hash_json_struct::<H>(&mut schema, primary_type, message, type_scratch, limits, 0)?;
     Ok(eip712_signing_digest(
@@ -215,11 +221,13 @@ where
         }
         "bytes" => {
             let bytes = scalar::parse_hex(value.as_str()?, limits.max_bytes_value)?;
+            schema.charge_dynamic_bytes(bytes.len())?;
             *out = hash_one(H::default(), &bytes).to_bytes();
         }
         "string" => {
             let text = value.as_str()?;
             check_len(text.len(), limits.max_string_bytes)?;
+            schema.charge_dynamic_bytes(text.len())?;
             *out = hash_one(H::default(), text.as_bytes()).to_bytes();
         }
         name if schema.contains_struct(name) => {

@@ -10,6 +10,8 @@ use crate::eip712_signing_digest;
 mod eip712_json;
 #[path = "eip712_schema.rs"]
 mod eip712_schema;
+#[path = "eip712_limits.rs"]
+mod limits;
 #[path = "eip712_type_graph.rs"]
 mod type_graph;
 #[path = "eip712_typed_helpers.rs"]
@@ -18,6 +20,10 @@ mod typed_helpers;
 mod value_encode;
 #[cfg(feature = "json")]
 pub use eip712_json::{Eip712JsonError, Eip712JsonLimits, eip712_json_typed_data_signing_digest};
+pub use limits::{
+    EIP712_MAX_ARRAY_ITEMS, EIP712_MAX_DYNAMIC_VALUE_BYTES, EIP712_MAX_FIELDS_PER_TYPE,
+    EIP712_MAX_TYPES, EIP712_MAX_VALUE_NODES, EIP712_MAX_VALUES_PER_STRUCT, Eip712Limits,
+};
 
 use type_graph::{collect_reachable_types, next_dependency};
 use typed_helpers::{
@@ -26,21 +32,11 @@ use typed_helpers::{
 };
 use value_encode::encode_value_word;
 
-use self::eip712_schema::ValidatedSchema;
+use self::eip712_schema::{Eip712Budget, ValidatedSchema};
 
 const WORD_BYTES: usize = 32;
 const ADDRESS_PADDING_BYTES: usize = 12;
 const MAX_TYPE_DEPTH: usize = 32;
-/// Maximum number of EIP-712 struct types admitted by the bounded encoder.
-pub const EIP712_MAX_TYPES: usize = 64;
-/// Maximum number of fields admitted in one borrowed EIP-712 struct type.
-pub const EIP712_MAX_FIELDS_PER_TYPE: usize = 64;
-/// Maximum number of named values admitted in one borrowed EIP-712 struct.
-pub const EIP712_MAX_VALUES_PER_STRUCT: usize = 64;
-/// Maximum elements admitted at any borrowed EIP-712 array dimension.
-pub const EIP712_MAX_ARRAY_ITEMS: usize = 256;
-/// Maximum recursive EIP-712 value visits admitted in one operation.
-pub const EIP712_MAX_VALUE_NODES: usize = 4096;
 
 /// One EIP-712 struct type definition.
 #[derive(Clone, Copy, Debug, Eq, PartialEq)]
@@ -175,7 +171,7 @@ pub enum Eip712EncodeError {
     RecursionLimit,
     /// The schema exceeds the bounded type-count limit.
     SchemaTooLarge,
-    /// A collection or cumulative value traversal exceeds a release limit.
+    /// A collection or cumulative operation exceeds its configured limit.
     ResourceLimit,
     /// Multiple struct definitions use the same name.
     DuplicateType,
@@ -195,7 +191,7 @@ impl fmt::Display for Eip712EncodeError {
             Self::TypeMismatch => "EIP-712 value does not match its declared type",
             Self::RecursionLimit => "EIP-712 recursion limit was exceeded",
             Self::SchemaTooLarge => "EIP-712 schema exceeds the type-count limit",
-            Self::ResourceLimit => "EIP-712 collection exceeds the release limit",
+            Self::ResourceLimit => "EIP-712 operation exceeds a configured resource limit",
             Self::DuplicateType => "EIP-712 schema contains a duplicate struct type",
             Self::DuplicateField => "EIP-712 struct contains a duplicate field name",
             Self::DuplicateValue => "EIP-712 struct contains a duplicate value name",
@@ -259,7 +255,8 @@ where
 ///
 /// Schema and value names are validated once before encoding. Every borrowed
 /// array dimension is capped at [`EIP712_MAX_ARRAY_ITEMS`], and the complete
-/// operation is capped at [`EIP712_MAX_VALUE_NODES`] recursive value visits.
+/// operation is capped at [`EIP712_MAX_VALUE_NODES`] recursive value visits
+/// and [`EIP712_MAX_DYNAMIC_VALUE_BYTES`] cumulative dynamic bytes by default.
 /// If a field fails after encoding starts, the selected output region is
 /// cleared before the error is returned.
 pub fn encode_eip712_data<H>(
@@ -272,7 +269,29 @@ pub fn encode_eip712_data<H>(
 where
     H: Default + Keccak256,
 {
-    let mut schema = ValidatedSchema::try_new(types)?;
+    encode_eip712_data_with_limits::<H>(
+        types,
+        primary_type,
+        values,
+        Eip712Limits::DEFAULT,
+        output,
+        type_scratch,
+    )
+}
+
+/// Encodes EIP-712 member data with caller-selected work limits.
+pub fn encode_eip712_data_with_limits<H>(
+    types: &[Eip712StructType<'_>],
+    primary_type: &str,
+    values: &[Eip712Value<'_>],
+    limits: Eip712Limits,
+    output: &mut [u8],
+    type_scratch: &mut [u8],
+) -> Result<usize, Eip712EncodeError>
+where
+    H: Default + Keccak256,
+{
+    let mut schema = ValidatedSchema::try_new_with_limits(types, limits)?;
     validate_values(values)?;
     let ty = find_struct(schema.types(), primary_type)?;
     let len = ty
@@ -312,7 +331,8 @@ where
 /// cached in a fixed-size context throughout recursive struct and array
 /// hashing. The complete operation admits at most
 /// [`EIP712_MAX_VALUE_NODES`] recursive value visits, including repeated
-/// visits through shared borrowed slices.
+/// visits through shared borrowed slices, and at most
+/// [`EIP712_MAX_DYNAMIC_VALUE_BYTES`] cumulative dynamic bytes by default.
 pub fn eip712_hash_struct<H>(
     types: &[Eip712StructType<'_>],
     primary_type: &str,
@@ -322,7 +342,27 @@ pub fn eip712_hash_struct<H>(
 where
     H: Default + Keccak256,
 {
-    let mut schema = ValidatedSchema::try_new(types)?;
+    eip712_hash_struct_with_limits::<H>(
+        types,
+        primary_type,
+        values,
+        Eip712Limits::DEFAULT,
+        type_scratch,
+    )
+}
+
+/// Computes EIP-712 `hashStruct(value)` with caller-selected work limits.
+pub fn eip712_hash_struct_with_limits<H>(
+    types: &[Eip712StructType<'_>],
+    primary_type: &str,
+    values: &[Eip712Value<'_>],
+    limits: Eip712Limits,
+    type_scratch: &mut [u8],
+) -> Result<B256, Eip712EncodeError>
+where
+    H: Default + Keccak256,
+{
+    let mut schema = ValidatedSchema::try_new_with_limits(types, limits)?;
     hash_struct_inner::<H>(&mut schema, primary_type, values, type_scratch, 0)
 }
 
@@ -334,6 +374,30 @@ pub fn eip712_domain_separator<H>(
 where
     H: Default + Keccak256,
 {
+    eip712_domain_separator_with_limits::<H>(domain, Eip712Limits::DEFAULT, type_scratch)
+}
+
+/// Computes the EIP-712 domain separator with caller-selected work limits.
+pub fn eip712_domain_separator_with_limits<H>(
+    domain: Eip712DomainData<'_>,
+    limits: Eip712Limits,
+    type_scratch: &mut [u8],
+) -> Result<B256, Eip712EncodeError>
+where
+    H: Default + Keccak256,
+{
+    let mut budget = Eip712Budget::new(limits);
+    eip712_domain_separator_inner::<H>(domain, type_scratch, &mut budget)
+}
+
+fn eip712_domain_separator_inner<H>(
+    domain: Eip712DomainData<'_>,
+    type_scratch: &mut [u8],
+    budget: &mut Eip712Budget,
+) -> Result<B256, Eip712EncodeError>
+where
+    H: Default + Keccak256,
+{
     let type_len = encode_domain_type(domain, type_scratch)?;
     let type_bytes = type_scratch
         .get(..type_len)
@@ -341,7 +405,7 @@ where
     let type_hash = hash_one(H::default(), type_bytes);
     let mut hasher = H::default();
     hasher.update(&type_hash.to_bytes());
-    update_domain_fields::<H>(domain, &mut hasher);
+    update_domain_fields::<H>(domain, &mut hasher, budget)?;
     Ok(hasher.finalize())
 }
 
@@ -356,8 +420,32 @@ pub fn eip712_typed_data_signing_digest<H>(
 where
     H: Default + Keccak256,
 {
-    let domain_separator = eip712_domain_separator::<H>(domain, type_scratch)?;
-    let message_hash = eip712_hash_struct::<H>(types, primary_type, values, type_scratch)?;
+    eip712_typed_data_signing_digest_with_limits::<H>(
+        domain,
+        types,
+        primary_type,
+        values,
+        Eip712Limits::DEFAULT,
+        type_scratch,
+    )
+}
+
+/// Computes the EIP-712 signing digest with caller-selected work limits.
+pub fn eip712_typed_data_signing_digest_with_limits<H>(
+    domain: Eip712DomainData<'_>,
+    types: &[Eip712StructType<'_>],
+    primary_type: &str,
+    values: &[Eip712Value<'_>],
+    limits: Eip712Limits,
+    type_scratch: &mut [u8],
+) -> Result<B256, Eip712EncodeError>
+where
+    H: Default + Keccak256,
+{
+    let mut schema = ValidatedSchema::try_new_with_limits(types, limits)?;
+    let domain_separator =
+        eip712_domain_separator_inner::<H>(domain, type_scratch, schema.budget_mut())?;
+    let message_hash = hash_struct_inner::<H>(&mut schema, primary_type, values, type_scratch, 0)?;
     Ok(eip712_signing_digest(
         domain_separator,
         message_hash,
@@ -406,3 +494,7 @@ mod tests;
 #[cfg(test)]
 #[path = "eip712_security_tests.rs"]
 mod security_tests;
+
+#[cfg(test)]
+#[path = "eip712_limits_tests.rs"]
+mod limits_tests;

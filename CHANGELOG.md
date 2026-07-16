@@ -9,6 +9,8 @@ All notable changes to `eth` are documented here.
   access tracking on failed or reverted stateful runs, validating EIP-712
   identifiers and uniqueness, reserving atomic-looking type names, bounding
   borrowed field/value/array collections and cumulative recursive value work,
+  validating fully unwrapped member types even for empty arrays, bounding
+  cumulative dynamic hashing with default and caller-selected limits,
   validating schemas once, caching recursive type hashes, and clearing partial
   typed-data output on failure.
 - Reworked the facade README opening around a direct crate purpose, early

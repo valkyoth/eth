@@ -3,23 +3,60 @@ use eth_valkyoth_primitives::B256;
 
 use super::typed_helpers::find_struct;
 use super::{
-    EIP712_MAX_TYPES, EIP712_MAX_VALUE_NODES, Eip712EncodeError, Eip712StructType,
+    EIP712_MAX_TYPES, Eip712EncodeError, Eip712Limits, Eip712StructType,
     encode_eip712_type_validated, type_graph::validate_schema,
 };
+
+pub(super) struct Eip712Budget {
+    remaining_value_nodes: usize,
+    remaining_dynamic_bytes: usize,
+}
+
+impl Eip712Budget {
+    pub(super) const fn new(limits: Eip712Limits) -> Self {
+        Self {
+            remaining_value_nodes: limits.max_value_nodes,
+            remaining_dynamic_bytes: limits.max_dynamic_value_bytes,
+        }
+    }
+
+    pub(super) fn charge_value_node(&mut self) -> Result<(), Eip712EncodeError> {
+        self.remaining_value_nodes = self
+            .remaining_value_nodes
+            .checked_sub(1)
+            .ok_or(Eip712EncodeError::ResourceLimit)?;
+        Ok(())
+    }
+
+    pub(super) fn charge_dynamic_bytes(&mut self, len: usize) -> Result<(), Eip712EncodeError> {
+        self.remaining_dynamic_bytes = self
+            .remaining_dynamic_bytes
+            .checked_sub(len)
+            .ok_or(Eip712EncodeError::ResourceLimit)?;
+        Ok(())
+    }
+}
 
 pub(super) struct ValidatedSchema<'a> {
     types: &'a [Eip712StructType<'a>],
     type_hashes: [Option<B256>; EIP712_MAX_TYPES],
-    remaining_value_nodes: usize,
+    budget: Eip712Budget,
 }
 
 impl<'a> ValidatedSchema<'a> {
     pub(super) fn try_new(types: &'a [Eip712StructType<'a>]) -> Result<Self, Eip712EncodeError> {
+        Self::try_new_with_limits(types, Eip712Limits::DEFAULT)
+    }
+
+    pub(super) fn try_new_with_limits(
+        types: &'a [Eip712StructType<'a>],
+        limits: Eip712Limits,
+    ) -> Result<Self, Eip712EncodeError> {
         validate_schema(types)?;
         Ok(Self {
             types,
             type_hashes: [None; EIP712_MAX_TYPES],
-            remaining_value_nodes: EIP712_MAX_VALUE_NODES,
+            budget: Eip712Budget::new(limits),
         })
     }
 
@@ -32,11 +69,15 @@ impl<'a> ValidatedSchema<'a> {
     }
 
     pub(super) fn charge_value_node(&mut self) -> Result<(), Eip712EncodeError> {
-        self.remaining_value_nodes = self
-            .remaining_value_nodes
-            .checked_sub(1)
-            .ok_or(Eip712EncodeError::ResourceLimit)?;
-        Ok(())
+        self.budget.charge_value_node()
+    }
+
+    pub(super) fn charge_dynamic_bytes(&mut self, len: usize) -> Result<(), Eip712EncodeError> {
+        self.budget.charge_dynamic_bytes(len)
+    }
+
+    pub(super) fn budget_mut(&mut self) -> &mut Eip712Budget {
+        &mut self.budget
     }
 
     pub(super) fn type_hash<H>(

@@ -591,13 +591,16 @@ The encoder admits at most `EIP712_MAX_TYPES` (64) struct types, 64 fields per
 struct, 64 named values per struct, and 256 elements at each borrowed array
 dimension. A complete borrowed or JSON operation admits at most 4,096
 recursive value visits, including repeated traversal through shared borrowed
-slices. The encoder rejects malformed, duplicate, and atomic-looking custom
-type names before hashing, validates each schema once per public operation,
-visits each reachable dependency once before canonical lexical emission, and
-caches type hashes across recursive struct and array hashing. `Eip712Value`
-and `Eip712ValueKind` are intentionally not `Copy` or `Clone`; their `Debug`
-output identifies only the value kind and redacts all signing payload
-contents.
+slices. Borrowed entry points also cap cumulative dynamic `bytes`, string, and
+domain-string hashing at 1 MiB by default; `Eip712Limits` and the
+`*_with_limits` functions let deployments select a stricter ceiling. The
+encoder validates every fully unwrapped member type before hashing, including
+empty arrays, and rejects malformed, undefined, duplicate, and atomic-looking
+custom type names. It validates each schema once per public operation, visits
+each reachable dependency once before canonical lexical emission, and caches
+type hashes across recursive struct and array hashing. `Eip712Value` and
+`Eip712ValueKind` are intentionally not `Copy` or `Clone`; their `Debug` output
+identifies only the value kind and redacts all signing payload contents.
 
 ```rust
 use eth::hash::Keccak256;

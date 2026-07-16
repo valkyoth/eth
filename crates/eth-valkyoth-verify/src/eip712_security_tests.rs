@@ -133,6 +133,64 @@ fn borrowed_schema_reserves_atomic_looking_struct_names() {
 }
 
 #[test]
+fn borrowed_schema_rejects_unsupported_empty_array_member_types() {
+    let empty = [];
+    let values = [Eip712Value {
+        name: "items",
+        value: Eip712ValueKind::Array(&empty),
+    }];
+    let mut scratch = [0u8; 96];
+
+    for type_name in ["uint[]", "bytes33[]", "fixed128x18[]", "UndefinedStruct[]"] {
+        let types = [Eip712StructType {
+            name: "Batch",
+            fields: &[Eip712Field {
+                name: "items",
+                type_name,
+            }],
+        }];
+        assert_eq!(
+            eip712_hash_struct::<RealKeccak>(&types, "Batch", &values, &mut scratch),
+            Err(Eip712EncodeError::InvalidType),
+            "{type_name}"
+        );
+    }
+}
+
+#[test]
+fn borrowed_schema_accepts_supported_empty_array_member_types() {
+    let empty = [];
+    let values = [Eip712Value {
+        name: "items",
+        value: Eip712ValueKind::Array(&empty),
+    }];
+    let mut scratch = [0u8; 128];
+    let atomic = [Eip712StructType {
+        name: "Batch",
+        fields: &[Eip712Field {
+            name: "items",
+            type_name: "uint256[]",
+        }],
+    }];
+    let structured = [
+        Eip712StructType {
+            name: "Batch",
+            fields: &[Eip712Field {
+                name: "items",
+                type_name: "Item[]",
+            }],
+        },
+        Eip712StructType {
+            name: "Item",
+            fields: &[],
+        },
+    ];
+
+    assert!(eip712_hash_struct::<RealKeccak>(&atomic, "Batch", &values, &mut scratch).is_ok());
+    assert!(eip712_hash_struct::<RealKeccak>(&structured, "Batch", &values, &mut scratch).is_ok());
+}
+
+#[test]
 fn borrowed_schema_bounds_fields_and_values_before_duplicate_scans() {
     let fields = [Eip712Field {
         name: "value",

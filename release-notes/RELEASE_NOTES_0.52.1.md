@@ -39,7 +39,8 @@ the following `v0.52.2..=v0.52.9` releases.
 - `eth-valkyoth-evm-core` is minor-bumped from `0.25.0` to `0.26.0` for the new
   public wire/frame APIs and tightened execution lifecycle contract.
 - `eth-valkyoth-verify` is minor-bumped from `0.22.0` to `0.23.0` for
-  fail-closed EIP-712 identifier, uniqueness, and partial-output behavior.
+  fail-closed EIP-712 identifier, member-type, resource-budget, uniqueness,
+  and partial-output behavior.
 - `eth` is bumped from `0.52.0` to `0.52.1` and exposes the new domains through
   the optional `evm-core` feature while consuming the hardened verification
   boundary.
@@ -77,6 +78,9 @@ the following `v0.52.2..=v0.52.9` releases.
 - Borrowed and JSON EIP-712 schemas reject invalid struct/field identifiers.
   Atomic-looking aliases, invalid widths, and fixed-point spellings cannot be
   reinterpreted as custom structs.
+- Every fully unwrapped EIP-712 member type must be a supported atomic type or
+  a defined struct before hashing, so empty arrays cannot bypass invalid-width,
+  fixed-point, alias, or undefined-struct rejection.
 - Borrowed schemas and values reject duplicate names before hashing and cap
   each struct at 64 fields and 64 named values before quadratic duplicate
   checks begin.
@@ -85,6 +89,11 @@ the following `v0.52.2..=v0.52.9` releases.
 - Borrowed and JSON operations reject the 4,097th recursive value visit,
   preventing compact shared borrowed slices from multiplying work beyond the
   fixed operation budget.
+- Borrowed operations cap cumulative dynamic `bytes`, string, domain-name, and
+  domain-version hashing at 1 MiB by default. Public `Eip712Limits` and
+  `*_with_limits` entry points allow deployments to select stricter ceilings.
+  The bounded JSON path charges dynamic values against its configured input
+  ceiling.
 - Borrowed and JSON recursive hashing validate the schema once at the public
   boundary and reuse a fixed 64-entry type-hash cache instead of rebuilding
   schema and type-hash state for every nested struct value.

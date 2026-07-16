@@ -2397,7 +2397,9 @@ Deliverables:
   bounds borrowed fields, values, and arrays before expensive traversal,
   caps each complete operation at 4,096 recursive value visits, validates
   schemas once, caches type hashes across recursive borrowed and JSON hashing,
-  and clears partial encode-data output.
+  validates fully unwrapped member types even for empty arrays, caps cumulative
+  dynamic hashing work with default and caller-selected limits, and clears
+  partial encode-data output.
 
 Verification:
 
