@@ -242,14 +242,21 @@ relevant dependency point.
 | Production beacon-node and validator-client executables, packaging, data directories, signals, exit codes, upgrades, and rollback were not explicit. | Added separate binary and packaging milestones at `v0.254.0` and `v0.255.0`. |
 | A Lighthouse/Prysm-class claim lacked deterministic simulation, mandatory Hive suites, broad client matrices, and quantitative long-testnet/performance gates. | Added `v0.257.0..=v0.262.0`, including the numeric acceptance contract at `v0.258.0`. |
 | Later SSZ, BLS, PeerDAS, erasure-coding, and acceleration implementations were not covered by an implementation-level core audit. | Added `v0.265.0` and expanded the integration audits at `v0.266.0..=v0.269.0`. |
-| The final unchanged-candidate claim ignored manifest, lockfile, SBOM, and checksum changes required by a `1.0.0` version promotion. | Added `v0.273.0`, `v0.274.0`, and an explicit `v1.0.0-rc.1` exact-candidate flow; the stable tag must point to the unchanged approved RC commit. |
+| The final unchanged-candidate claim ignored manifest, lockfile, SBOM, and checksum changes required by a `1.0.0` version promotion. | Added an RC-aware tooling foundation at `v0.272.0..=v0.273.0`, then assigned the final rehearsal, admission, and explicit `v1.0.0-rc.1` exact-candidate flow to `v0.308.0..=v0.310.0`; the stable tag must point to the unchanged approved RC commit. |
 | Builder and relay ownership remained ambiguous after local block production moved into the beacon node. | `v0.233.0` now exposes only a fail-closed blinded-production hook before builder admission; `v0.249.0` and `v0.250.0` place relay communication in the beacon node while the validator client submits preferences and independently validates and signs blinded blocks. |
 | Proposer planning incorrectly implied separate sidecar signatures. | `v0.241.0` now requires one beacon-block proposer signature and constructs sidecars carrying the corresponding signed block header, matching pinned Deneb/Fulu honest-validator rules. |
-| RC prose did not yet define package-version/tag mismatch handling, prerelease paths, repeated candidates, gate naming, or exact archive publication. | `v0.272.0..=v0.274.0` and `v1.0.0-rc.1` now require distinct package and candidate identifiers, prerelease-aware tooling/tests, RC-specific gates, exact approved archive upload, and repeated `rc.N` handling. |
-| The RC could be read as forcing every independently versioned support crate to `1.0.0`. | `v0.271.0` classifies each public package's stability promise; only `eth` and deliberately approved products are promoted, while support crates keep independent versions and exact reviewed dependency bindings where needed. |
-| Companion status/spec documents retained obsolete consensus ranges. | The planning pass updates `docs/current-status.md` and `docs/SPEC_MATRIX.md` through `v0.274.0` and `v1.0.0-rc.N`. |
+| RC prose did not yet define package-version/tag mismatch handling, prerelease paths, repeated candidates, gate naming, or exact archive publication. | `v0.272.0..=v0.273.0`, `v0.308.0..=v0.310.0`, and `v1.0.0-rc.1` now require distinct package and candidate identifiers, prerelease-aware tooling/tests, RC-specific gates, exact approved archive upload, and repeated `rc.N` handling. |
+| The RC could be read as forcing every independently versioned support crate to `1.0.0`. | `v0.271.0` records the preliminary crate classification and `v0.307.0` makes the binding promotion decision; only `eth` and deliberately approved products are promoted, while support crates keep independent versions and exact reviewed dependency bindings where needed. |
+| Companion status/spec documents retained obsolete consensus ranges. | The planning pass updates `docs/current-status.md` and `docs/SPEC_MATRIX.md` through `v0.310.0` and `v1.0.0-rc.N`. |
 | Quantitative gates used undefined "client-attributable" failure labels. | `v0.258.0` now requires a machine-enforced attribution taxonomy, predeclared fault windows, conservative ambiguous-event handling, independent approval, and fallback-specific responsibility rules. |
-| The final API freeze and production release candidate occurred before full consensus-client abstractions existed. | Reclassified `v0.182.0..=v0.188.0` as foundation stabilization and moved complete remediation, freeze, rehearsal, promotion, and candidate admission to `v0.270.0..=v0.274.0` plus `v1.0.0-rc.1`. |
+| The final API freeze and production release candidate occurred before full consensus-client abstractions existed. | Reclassified `v0.182.0..=v0.188.0` as foundation stabilization and `v0.271.0..=v0.274.0` as an interim foundation/consensus baseline; the complete freeze, rehearsal, promotion, and candidate admission now occur at `v0.306.0..=v0.310.0` plus `v1.0.0-rc.1`. |
+| Core transaction, EVM, and execution-network paths still depended on optional Keccak-256 and secp256k1 implementations without a first-party replacement milestone. | Added `v0.275.0..=v0.278.0` for first-party Keccak-256, secp256k1 arithmetic, ECDSA/recovery/ECDH, production-path integration, side-channel review, and removal of required `tiny-keccak`/`k256` production dependencies. |
+| Historical execution support did not explicitly implement Ethash seal verification, historical difficulty, ommers, rewards, and irregular pre-Merge transitions. | Added `v0.279.0..=v0.281.0` for Ethash, complete pre-Merge consensus rules, and a genesis-to-Merge historical execution gate. |
+| The roadmap described execution libraries and runtime traits but did not yet produce a complete independently runnable execution client. | Added `v0.282.0..=v0.291.0` for a reviewed production database backend, staged sync and healing, local payload building, authenticated Engine server, inbound execution RPC/GraphQL surfaces, operational discovery, an execution-node binary, recovery tools, and production controls. |
+| Execution assurance focused on fixtures and the beacon node consuming other execution clients, not on independent consensus clients driving the first-party execution client. | Added `v0.292.0..=v0.297.0` for execution Hive/RPC compatibility, multi-consensus-client Engine interoperability, public-network sync/follow evidence, performance, independent audit, and remediation. |
+| Execution and consensus networking milestones could be read as delegating Ethereum semantics to generic networking crates. | Tightened `v0.154.0..=v0.159.0` and `v0.215.0..=v0.220.0`: generic socket, runtime, and reviewed cryptographic adapters may remain optional infrastructure, but Ethereum codecs, validation, fork compatibility, scoring, resource policy, and protocol state machines are first-party. |
+| Separate execution, beacon, and validator binaries did not yet provide an integrated node product, reproducible devnet, or final mixed-client system evidence. | Added `v0.298.0..=v0.305.0` for integrated node orchestration, private-network tooling, mixed-client matrices, long-running integrated tests, performance/recovery, operator guides, full-stack audit, and remediation. |
+| The 1.0 admission gate occurred before the newly identified execution-client and integrated-node product work. | Moved final quantitative admission, API/crate freeze, exact release rehearsal, version promotion, and candidate admission to `v0.306.0..=v0.310.0` plus `v1.0.0-rc.N`. |
 
 ## Phase 0: Repository And Release Discipline
 
@@ -2717,7 +2724,7 @@ Exit criteria:
 The releases below replace the earlier narrow integration roadmap. They assign
 every gap identified by the July 2026 completeness reviews to a version instead
 of leaving work as an unversioned deferral. The roadmap may extend beyond
-`v0.274.0` when new official Ethereum work or a newly discovered completeness
+`v0.310.0` when new official Ethereum work or a newly discovered completeness
 gap requires another small pass. Reaching a high `0.x` version is preferable
 to compressing security-sensitive work into oversized releases.
 
@@ -2745,12 +2752,16 @@ come from pinned official sources, not memory:
 - <https://ethereum.org/roadmap/>
 - <https://ethereum.org/roadmap/statelessness/>
 - <https://github.com/ethereum/execution-specs>
+- <https://github.com/ethereum/execution-spec-tests>
 - <https://github.com/ethereum/consensus-specs>
 - <https://github.com/ethereum/execution-apis>
+- <https://github.com/ethereum/devp2p>
+- <https://github.com/ethereum/portal-network-specs>
 - <https://ethereum.github.io/beacon-APIs/>
 - <https://ethereum.github.io/keymanager-APIs/>
 - <https://ethereum.github.io/builder-specs/>
 - <https://github.com/ethereum/hive>
+- <https://ethereum.github.io/yellowpaper/paper.pdf>
 - <https://eips.ethereum.org/EIPS/eip-3076>
 - <https://eips.ethereum.org/EIPS/eip-3540>
 
@@ -4844,7 +4855,12 @@ Goal: deliver the Networking Threat And Dependency Gate release with this requir
 
 Deliverables:
 
-- Protocol threat model, crypto/transport dependency review, identity/key policy, resource ceilings, and wire-spec locks.
+- Protocol threat model, crypto/transport dependency review, identity/key
+  policy, resource ceilings, and wire-spec locks;
+- first-party ownership rule for discovery, RLPx, `eth`, `snap`, request
+  scheduling, peer scoring, and validation state machines;
+- reviewed optional socket, runtime, and cryptographic adapters only when they
+  cannot decide Ethereum protocol validity or policy.
 
 Verification:
 
@@ -4864,7 +4880,11 @@ Goal: deliver the Discovery And RLPx release with this required outcome: Peers c
 
 Deliverables:
 
-- Discovery v4/v5 as admitted, ENR, node records, handshakes, framing, capabilities, encryption/MAC, and replay protections.
+- First-party Discovery v4/v5 as admitted, ENR, EIP-1459 DNS discovery, node
+  records, handshakes, framing, capability negotiation, encryption/MAC state
+  machines, and replay protections;
+- bootnode, static-peer, trusted-peer, node-key, listen-address, NAT, and
+  advertised-address policy behind runtime-neutral I/O boundaries.
 
 Verification:
 
@@ -6127,7 +6147,13 @@ Goal: deliver the Consensus Networking Threat And Dependency Gate release with t
 
 Deliverables:
 
-- libp2p/discv5/crypto/runtime dependency review, identity/key separation, protocol limits, eclipse/amplification model, and network resource budgets.
+- libp2p/discv5/crypto/runtime dependency review, identity/key separation,
+  protocol limits, eclipse/amplification model, and network resource budgets;
+- first-party ownership rule for Ethereum topic derivation, SSZ framing,
+  gossip validation, ReqResp semantics, peer scoring, fork/custody
+  compatibility, and subnet policy;
+- generic transport/runtime adapters may be optional dependencies, but cannot
+  own consensus validity or Ethereum-specific protocol state.
 
 Verification:
 
@@ -6147,7 +6173,12 @@ Goal: deliver the Discv5 ENR And Secure Transport release with this required out
 
 Deliverables:
 
-- Discovery v5, ENR fork/custody fields, identity persistence, secure multiplexed transport, fork compatibility, and address policy.
+- Discovery v5, ENR fork/custody fields, identity persistence, secure
+  multiplexed transport, fork compatibility, and address policy;
+- first-party protocol codecs and state machines around reviewed optional
+  socket, Noise/QUIC, multiplexing, and cryptographic adapters;
+- bootnode, static-peer, trusted-peer, node-key, listen-address, NAT, and
+  advertised-address policy.
 
 Verification:
 
@@ -7249,7 +7280,7 @@ Exit criteria:
 - `v0.257.0 implementation stop reached. Run pentest for this exact
   commit.`
 
-## Phase 29: Full Consensus Assurance And Final 1.0 Admission
+## Phase 29: Full Consensus Assurance And Product Baseline
 
 ### v0.258.0 - Production Acceptance Matrix And Quantitative Budgets
 
@@ -7602,169 +7633,1155 @@ Exit criteria:
 - `v0.270.0 implementation stop reached. Run pentest for this exact
   commit.`
 
-### v0.271.0 - Complete Public API Freeze
+### v0.271.0 - Foundation And Consensus API Stability Baseline
 
 Status: planned.
 
-Goal: deliver the Complete Public API Freeze release with this required outcome: No foundational API invention remains before 1.0.
+Goal: record a reviewed stability baseline without pretending later
+execution-node and integrated-node APIs are already frozen.
 
 Deliverables:
 
-- Freeze all core, SDK, execution, provider, wallet, contract, storage, beacon,
-  validator, network, slashing, builder, and operational APIs/features with
-  migration/deprecation policy;
-- classify every publishable crate as a `1.0` public product, independently
-  versioned support crate, optional backend/adapter, or internal unpublished
-  crate;
-- promote only `eth` and crates whose individual public APIs have completed a
-  documented `1.0` stability review;
-- preserve independent versions for all other support crates;
-- require exact reviewed dependency pins or an equally strict compatibility
-  contract when a `1.0` public product exposes an independently versioned
-  support crate in its public API;
-- publish a crate-by-crate stability and support matrix.
+- Classify every publishable crate as a future `1.0` product, independently
+  versioned support crate, optional backend/adapter, or internal crate;
+- stabilize the foundation, beacon, validator, slashing, and builder contracts
+  completed through `v0.270.0`;
+- publish the APIs that remain intentionally open for `v0.275.0..=v0.305.0`;
+- preserve independent support-crate versions and strict public dependency
+  compatibility.
 
 Verification:
 
-- Whole-workspace semver and feature review;
-- public-dependency and re-export audit;
-- generated docs/README compatibility checks;
-- tests proving the promotion plan does not force unchanged support crates to
-  `1.0.0`.
+- Workspace semver, feature, re-export, and public-dependency review;
+- generated crate stability matrix;
+- tests proving no support crate is forced to `1.0.0`.
 
 Exit criteria:
 
-- No foundational API invention remains before 1.0, and every crate's
-  independent stability promise is explicit.
+- The completed foundation and consensus surfaces have a reviewable stability
+  baseline, and every remaining pre-1.0 API area is named.
 - `v0.271.0 implementation stop reached. Run pentest for this exact
   commit.`
 
-### v0.272.0 - Complete Release Evidence Dry Run
+### v0.272.0 - RC-Aware Release Tooling Foundation
 
 Status: planned.
 
-Goal: deliver the Complete Release Evidence Dry Run release with this required outcome: The exact 1.0 release mechanics and operator upgrade path have been exercised.
+Goal: make release tooling structurally understand prerelease candidates
+before the final candidate cycle.
 
 Deliverables:
 
-- Rehearse ordered crate publication, signed manifests/checksums,
-  SBOM/provenance, reproducible packages, platform images, database migrations,
-  config migration, binary rollback, and the exact `v1.0.0-rc.1` same-commit
-  promotion procedure;
-- rehearse prerelease report and release-note paths, RC-specific gate naming,
-  candidate-tag/package-version separation, and repeated `rc.N` attempts;
-- rehearse creation and preservation of the exact approved `.crate` archives
-  for later stable publication.
+- Separate package version, candidate tag, report path, release-note path, and
+  gate identifier in release metadata;
+- parse SemVer and repeated `rc.N` identifiers structurally;
+- support RC-specific pentest and release-note paths;
+- retain independent support-crate versions and dependency order.
 
 Verification:
 
-- Full dry run from a clean environment;
-- deliberately failed version-promotion and changed-candidate tests;
-- parser and path tests for `v1.0.0-rc.1`, `v1.0.0-rc.2`, and malformed
-  prerelease identifiers;
-- tests proving `release_1_0_rc_N_gate.sh` or its reviewed generic equivalent
-  selects the correct report, notes, candidate tag, and package version;
-- exact archive checksum and offline re-verification tests;
-- proof that final tagging can occur without rebuilding or changing the
-  candidate commit.
+- Parser and path tests for `rc.1`, `rc.2`, malformed identifiers, and
+  package/tag mismatches;
+- gate-selection and metadata-validation tests;
+- ordinary `0.x` release regression tests.
 
 Exit criteria:
 
-- The exact 1.0 release mechanics and operator upgrade path have been exercised.
+- Release tooling can represent repeated RCs without confusing a package
+  version with a candidate tag.
 - `v0.272.0 implementation stop reached. Run pentest for this exact
   commit.`
 
-### v0.273.0 - Version-Only 1.0 Promotion Rehearsal
+### v0.273.0 - Exact Archive Publication Prototype
 
 Status: planned.
 
-Goal: prove that changing workspace package versions to `1.0.0` is an
-isolated, reviewable promotion step whose outputs are fully regenerated and
-revalidated.
+Goal: prove that approved crate archives can be preserved and published
+without repackaging.
 
 Deliverables:
 
-- Rehearse the exact manifest, workspace dependency, lockfile, crate-version
-  matrix, release-plan metadata, release notes, SBOM, checksum, and provenance
-  changes required for `1.0.0`;
-- keep `release.version = "1.0.0"` distinct from a candidate tag identifier
-  such as `candidate_tag = "v1.0.0-rc.1"`;
-- update `scripts/release_crates.py`, readiness validation, metadata
-  validation, and release-gate selection to parse SemVer package versions and
-  RC tag identifiers structurally;
-- support prerelease pentest paths such as
-  `security/pentest/v1.0.0-rc.1.md` and release-note paths such as
-  `release-notes/RELEASE_NOTES_1.0.0-rc.1.md`;
-- define RC-specific gate names and repeated `rc.N` candidate handling;
-- implement an audited `scripts/publish_approved_archives.py` or equivalent
-  standard-library-only uploader that submits the exact previously approved
-  `.crate` archives to crates.io in dependency order without repackaging;
-- accept publishing credentials only through a documented non-file secret
-  boundary and never write or log them;
-- verify archive package name/version, checksum, manifest, SBOM/provenance
-  binding, candidate commit, and crates.io response before advancing;
-- require a version-only promotion commit with no implementation changes;
-- regenerate every package and compare source contents apart from expected
-  version metadata;
-- apply `1.0.0` only to crates approved as `1.0` products at `v0.271.0`;
-- retain independent versions for all remaining support crates and update only
-  dependency constraints that the promotion actually requires;
-- document rollback and repeated-RC handling.
+- Audited exact-archive uploader prototype;
+- package name/version, checksum, manifest, commit, SBOM, and provenance
+  binding;
+- credential input through a non-file secret boundary with mandatory
+  redaction;
+- interrupted-upload recovery and dependency-order state.
 
 Verification:
 
-- Clean-tree promotion rehearsal;
-- package-content semantic diff;
-- release-tool unit and integration tests for package/tag mismatch, prerelease
-  paths, RC gate selection, repeated candidates, independent crate versions,
-  and exact archive upload dry runs;
-- credential-redaction and interrupted-upload recovery tests;
-- full release-integrity gate on the promoted rehearsal;
-- proof that any non-version change rejects the promotion.
+- Offline archive verification;
+- mock registry upload, interruption, duplicate, and wrong-checksum tests;
+- credential-redaction review.
 
 Exit criteria:
 
-- The project can produce a `1.0.0`-versioned candidate commit through a
-  constrained, audited process rather than pretending a `0.x` artifact is
-  byte-identical after version changes, while preserving independently
-  versioned support crates.
+- Exact approved `.crate` archives can be identified and submitted without
+  invoking Cargo packaging again.
 - `v0.273.0 implementation stop reached. Run pentest for this exact
   commit.`
 
-### v0.274.0 - Production Candidate Admission Gate
+### v0.274.0 - Consensus Product Baseline Gate
 
 Status: planned.
 
-Goal: freeze the final `0.x` implementation and authorize one version-only
-promotion commit to the exact `v1.0.0-rc.1` candidate.
+Goal: close the consensus-client expansion with complete evidence while
+keeping the newly identified execution-product work open.
 
 Deliverables:
 
-- Freeze all implementation;
-- run every official conformance, required Hive, live-node, quantitative
-  long-testnet, audit, formal, compatibility, platform, packaging, and release
-  gate;
-- publish final migration and support matrices;
-- publish the crate-by-crate `1.0` promotion decision and exact archive
-  checksum manifest;
-- authorize only the constrained `v0.273.0` version-promotion operation;
-- invalidate admission if any implementation or non-version metadata changes.
+- Rerun consensus conformance, Hive, mixed execution-client, long-testnet,
+  performance, formal, audit, remediation, platform, and packaging evidence;
+- publish the foundation/consensus support and stability baseline;
+- prove every remaining execution-client and integrated-node gap is assigned
+  to `v0.275.0..=v0.310.0`;
+- make no production-candidate or final API-freeze claim.
 
 Verification:
 
-- Exact implementation-candidate pentest and retest;
+- Exact-candidate pentest and retest for this milestone;
 - green CI and CodeQL;
-- reproducible packages;
-- RC-specific readiness, report-path, release-note-path, gate-selection, and
-  exact-archive publication dry runs;
-- quantitative acceptance-policy pass;
-- no post-review implementation changes.
+- traceability audit from the completeness register to later versions.
+
+Exit criteria:
+
+- Foundation, beacon-node, and validator-client work has a closed baseline,
+  and 1.0 remains blocked on the explicit later product milestones.
+- `v0.274.0 implementation stop reached. Run pentest for this exact
+  commit.`
+
+## Phase 30: First-Party Core Cryptography Completion
+
+### v0.275.0 - First-Party Keccak-256 Core
+
+Status: planned.
+
+Goal: remove the required production dependency on an external Keccak-256
+implementation.
+
+Deliverables:
+
+- Dependency-free Keccak-f[1600], Keccak-256 absorb/finalize, streaming, and
+  fixed-output implementation;
+- constant-time and zeroization policy for state where secret-bearing callers
+  require it;
+- no-alloc and bounded workspace APIs compatible with the existing trait;
+- `tiny-keccak` retained only as an optional differential/reference adapter.
+
+Verification:
+
+- Official and independent KATs including the Keccak/SHA3 empty-input
+  discriminator;
+- permutation-round differential tests, fuzzing, and endian/target matrix;
+- timing, stack, panic, and sanitization review.
+
+Exit criteria:
+
+- Every production Keccak-256 consumer can use a first-party backend.
+- `v0.275.0 implementation stop reached. Run pentest for this exact
+  commit.`
+
+### v0.276.0 - First-Party secp256k1 Arithmetic
+
+Status: planned.
+
+Goal: establish audited field, scalar, and point arithmetic for Ethereum
+signatures and node identities.
+
+Deliverables:
+
+- secp256k1 field/scalar arithmetic, canonical parsing, inversion, point
+  addition/doubling, multiplication, compression, and infinity policy;
+- fixed-work or otherwise reviewed constant-time secret-scalar paths;
+- public-input fast paths separated from secret-bearing operations;
+- bounded no-alloc workspaces.
+
+Verification:
+
+- SEC and independent vectors;
+- group-law, malformed-point, subgroup, and differential property tests;
+- side-channel, fault, stack, and fuzz review.
+
+Exit criteria:
+
+- Ethereum secp256k1 domains no longer depend on external curve arithmetic.
+- `v0.276.0 implementation stop reached. Run pentest for this exact
+  commit.`
+
+### v0.277.0 - First-Party ECDSA Recovery And ECDH
+
+Status: planned.
+
+Goal: complete the secp256k1 operations required by transactions, ECRECOVER,
+ENR, discovery, and RLPx.
+
+Deliverables:
+
+- Deterministic ECDSA signing, strict verification, low-s normalization,
+  recoverable signatures, public-key recovery, and node-key ECDH;
+- explicit transaction-signing and networking-identity domain types;
+- secret nonce/key sanitization and fault-detection policy;
+- compatibility adapters for existing signer and recovery traits.
+
+Verification:
+
+- Ethereum transaction, ECRECOVER, ENR, discovery, and RLPx vectors;
+- cross-checks against at least two independent implementations;
+- nonce-reuse, invalid-recovery, timing, fault, and fuzz tests.
+
+Exit criteria:
+
+- All Ethereum-required secp256k1 operations have a first-party path.
+- `v0.277.0 implementation stop reached. Run pentest for this exact
+  commit.`
+
+### v0.278.0 - Core Cryptography Integration And Audit
+
+Status: planned.
+
+Goal: make first-party Keccak-256 and secp256k1 the production path throughout
+the workspace.
+
+Deliverables:
+
+- Integrate hashing, transaction signing/recovery, EVM `KECCAK256`,
+  ECRECOVER, CREATE address derivation, ENR, discovery, and RLPx;
+- remove required `tiny-keccak` and `k256` production paths while retaining
+  optional reference adapters;
+- audit domain separation, zeroization, error behavior, feature graphs, and
+  acceleration boundaries;
+- publish a core-cryptography conformance report.
+
+Verification:
+
+- Full transaction, EVM, proof, and networking integration tests;
+- dependency graph proving no external Keccak/secp implementation is required;
+- independent cryptography audit, remediation, and clean retest.
+
+Exit criteria:
+
+- Core Ethereum hashing and secp256k1 behavior is first-party and audited.
+- `v0.278.0 implementation stop reached. Run pentest for this exact
+  commit.`
+
+## Phase 31: Historical Proof-Of-Work Execution
+
+### v0.279.0 - Ethash Hashimoto Cache And Dataset
+
+Status: planned.
+
+Goal: verify historical Ethereum proof-of-work seals first party.
+
+Deliverables:
+
+- Ethash epoch, seed, cache, dataset-item, Hashimoto-light/full, mix digest,
+  nonce, target, and seal verification;
+- bounded cache/dataset generation and persistence policy;
+- explicit endian, overflow, cancellation, and resource behavior;
+- optional historical seal-production interface for controlled private tests.
+
+Verification:
+
+- Official historical Ethash vectors and known mainnet headers;
+- light/full equivalence, corruption, boundary, and fuzz tests;
+- memory, disk, CPU, and denial-of-service budgets.
+
+Exit criteria:
+
+- Historical proof-of-work headers can be cryptographically verified without
+  another client.
+- `v0.279.0 implementation stop reached. Run pentest for this exact
+  commit.`
+
+### v0.280.0 - Historical PoW Difficulty Ommers And Rewards
+
+Status: planned.
+
+Goal: implement every pre-Merge block-consensus rule needed to validate
+Ethereum history.
+
+Deliverables:
+
+- Fork-specific difficulty and difficulty-bomb rules;
+- ommer ancestry, age, uniqueness, seal, inclusion, and hash validation;
+- miner/ommer rewards, DAO irregular transition, block rewards, and historical
+  system-state changes;
+- terminal-total-difficulty and Paris transition handling.
+
+Verification:
+
+- Difficulty, blockchain, DAO, reward, ommer, and Merge transition fixtures;
+- mainnet checkpoint differentials and adversarial ancestry tests.
+
+Exit criteria:
+
+- Pre-Merge blocks are validated and applied with their historical consensus
+  rules, not only EVM gas rules.
+- `v0.280.0 implementation stop reached. Run pentest for this exact
+  commit.`
+
+### v0.281.0 - Genesis-To-Merge Historical Execution Gate
+
+Status: planned.
+
+Goal: prove that the first-party execution stack can validate canonical
+Ethereum history from genesis through the Merge.
+
+Deliverables:
+
+- Historical fork-by-fork manifest and checkpoint corpus;
+- genesis-to-Paris import path with Ethash, ommers, rewards, state roots, and
+  total difficulty;
+- archive/pruned verification modes with explicit evidence;
+- unexplained divergence and skip prohibition.
+
+Verification:
+
+- Pinned historical execution-spec-tests and blockchain tests;
+- differential checkpoint roots against independent clients;
+- interrupted import, restart, reorg, and corruption tests.
+
+Exit criteria:
+
+- Historical execution claims cover the complete pre-Merge chain through the
+  first post-Merge block.
+- `v0.281.0 implementation stop reached. Run pentest for this exact
+  commit.`
+
+## Phase 32: Production Execution Client Product
+
+### v0.282.0 - Production Database Backend Admission
+
+Status: planned.
+
+Goal: provide at least one reviewed durable backend capable of running a
+mainnet execution node.
+
+Deliverables:
+
+- Optional production database adapter implementing the `v0.130.0` contract;
+- atomic batches, snapshots, iterators, checksums, corruption detection,
+  backup/restore, migration, and read-only modes;
+- version and capability negotiation so alternative backends remain possible;
+- no database dependency in the default `no_std` facade graph.
+
+Verification:
+
+- Backend conformance, process-kill, torn-write, corruption, and migration
+  suites;
+- mainnet-scale key/value and compaction benchmarks;
+- dependency and security review.
+
+Exit criteria:
+
+- Storage traits have a production backend with measured durability and
+  recovery behavior.
+- `v0.282.0 implementation stop reached. Run pentest for this exact
+  commit.`
+
+### v0.283.0 - Execution Stage Pipeline Unwind And State Healing
+
+Status: planned.
+
+Goal: turn sync and storage components into a restartable production import
+pipeline.
+
+Deliverables:
+
+- Stages for headers, bodies, sender recovery, execution, hashes, trie roots,
+  account/storage history, transaction lookup, pruning, and finish state;
+- durable stage checkpoints, bounded commits, dependency ordering, unwind, and
+  bad-block quarantine;
+- snap pivot changes, state healing, missing-trie recovery, and static/history
+  file production;
+- online follow mode after initial sync.
+
+Verification:
+
+- Stage-by-stage execute/unwind properties;
+- crash/restart, pivot movement, malicious peer, missing-node, and deep-reorg
+  simulations;
+- differential stage checkpoints against independent clients.
+
+Exit criteria:
+
+- Sync can progress, unwind, heal, restart, and enter live follow mode without
+  ad hoc orchestration.
+- `v0.283.0 implementation stop reached. Run pentest for this exact
+  commit.`
+
+### v0.284.0 - Local Execution Payload Builder
+
+Status: planned.
+
+Goal: construct complete fork-valid execution payloads locally for the Engine
+API.
+
+Deliverables:
+
+- Reorg-safe parent/state selection and deterministic payload identifiers;
+- txpool selection/replacement ordering for all transaction families;
+- gas, blob, request, withdrawal, fee-recipient, parent-beacon-root, and
+  deadline handling;
+- incremental execution, receipts, roots, value calculation, cancellation,
+  cache, and invalidation;
+- embeddable builder trait separated from transport.
+
+Verification:
+
+- Engine payload fixtures and cross-client payload differentials;
+- adversarial txpool, deadline, cancellation, reorg, and invalidation tests;
+- value, root, and block-limit checks.
+
+Exit criteria:
+
+- The first-party execution client can build every locally supported payload
+  required by a consensus client.
+- `v0.284.0 implementation stop reached. Run pentest for this exact
+  commit.`
+
+### v0.285.0 - Authenticated Engine API Server
+
+Status: planned.
+
+Goal: expose the complete execution-client side of the Engine API.
+
+Deliverables:
+
+- Versioned `newPayload`, `forkchoiceUpdated`, `getPayload`, payload-body,
+  blob, capability, and transition-configuration methods from pinned specs;
+- JWT authentication, secret generation/loading, clock-skew policy, method
+  allowlist, isolated listener, and redacted audit records;
+- strict sequencing, payload status, `latestValidHash`, idempotency, timeout,
+  cancellation, and restart behavior;
+- integration with `v0.283.0` and `v0.284.0`.
+
+Verification:
+
+- Official Engine API fixtures and Hive engine suites;
+- malformed JWT, replay, stale capability, sequence, invalidation, and restart
+  tests;
+- independent consensus-client smoke tests.
+
+Exit criteria:
+
+- A consensus client can drive the first-party execution client through the
+  complete authenticated Engine API.
+- `v0.285.0 implementation stop reached. Run pentest for this exact
+  commit.`
+
+### v0.286.0 - Public Execution JSON-RPC Server
+
+Status: planned.
+
+Goal: serve the complete pinned standard execution API with production
+security controls.
+
+Deliverables:
+
+- Inbound HTTP, WebSocket, and IPC JSON-RPC servers;
+- complete pinned `eth` method handlers over canonical state, chain, txpool,
+  simulation, fee, proof, filter, and subscription services;
+- namespace allowlists, CORS/origin/vhost policy, batch/concurrency/response
+  limits, timeouts, gas/fee caps, and connection backpressure;
+- explicit separation from the authenticated Engine listener.
+
+Verification:
+
+- Official execution-apis schema/tests and Hive `rpc-compat`;
+- HTTP/WS/IPC interoperability and malicious-client fuzzing;
+- permission, batch-bomb, subscription-flood, and resource tests.
+
+Exit criteria:
+
+- External users and tooling can use the node through a standard bounded
+  execution JSON-RPC server.
+- `v0.286.0 implementation stop reached. Run pentest for this exact
+  commit.`
+
+### v0.287.0 - Filters Subscriptions GraphQL And Client APIs
+
+Status: planned.
+
+Goal: complete the indexed query and operational API surfaces expected from a
+general-purpose execution client.
+
+Deliverables:
+
+- Reorg-correct log/block/pending filters and subscription lifecycle;
+- bloom/log, transaction lookup, account/storage history, and trace indexes
+  with pruning-aware errors;
+- optional official GraphQL schema/server;
+- bounded `net`, `web3`, `txpool`, `debug`, `trace`, and reviewed
+  administrative methods;
+- no unsafe legacy account-unlock or `personal` API by default.
+
+Verification:
+
+- execution-apis GraphQL validation, RPC compatibility, reorg, pruning, and
+  subscription fixtures;
+- index reconstruction and query differential tests;
+- authorization and information-leak review.
+
+Exit criteria:
+
+- Standard queries, filters, subscriptions, GraphQL, and operator APIs are
+  complete without weakening default node security.
+- `v0.287.0 implementation stop reached. Run pentest for this exact
+  commit.`
+
+### v0.288.0 - Execution Discovery DNS And Peer Operations
+
+Status: planned.
+
+Goal: turn first-party DevP2P protocols into an operable public-network peer
+service.
+
+Deliverables:
+
+- EIP-1459 DNS trees, bootnodes, static/trusted peers, node-key persistence,
+  listen/advertise addresses, NAT mapping, and discovery controls;
+- current pinned `eth`/`snap` capability negotiation, fork ID, available block
+  range, serving limits, and protocol downgrade policy;
+- inbound/outbound quotas, diversity, required-block policy, peer events, and
+  operator inspection;
+- public-network and private-network profiles.
+
+Verification:
+
+- Cross-client discovery, RLPx, `eth`, and `snap` matrices;
+- DNS tampering, eclipse, NAT, stale fork ID, range-lie, and flood tests;
+- restart and node-identity persistence tests.
+
+Exit criteria:
+
+- The execution client can discover, connect, serve, and synchronize on public
+  Ethereum networks with explicit peer policy.
+- `v0.288.0 implementation stop reached. Run pentest for this exact
+  commit.`
+
+### v0.289.0 - Execution Node Executable And Packaging
+
+Status: planned.
+
+Goal: ship a standalone production execution-node binary and reusable node
+builder.
+
+Deliverables:
+
+- `eth-execution-node` binary and embeddable node builder;
+- stable CLI/config schema, network presets, data-directory layout, JWT,
+  database, pruning/archive, P2P, RPC, metrics, and payload settings;
+- startup validation, file permissions, signals, exit codes, graceful
+  shutdown, restart, service templates, and platform packages;
+- default-secure listener and namespace policy.
+
+Verification:
+
+- Fresh mainnet/testnet/custom-chain startup;
+- signal, permission, config migration, upgrade/rollback, and package tests;
+- platform smoke matrix.
+
+Exit criteria:
+
+- Operators and downstream builders can run or embed a complete first-party
+  execution client.
+- `v0.289.0 implementation stop reached. Run pentest for this exact
+  commit.`
+
+### v0.290.0 - Execution Database Chain And Snapshot Tools
+
+Status: planned.
+
+Goal: provide supported recovery and data-management tools instead of
+requiring direct database mutation.
+
+Deliverables:
+
+- Database inspect/verify/compact/migrate/repair commands;
+- chain import/export, block/receipt/state dump, snapshot download/verify/
+  import/export, stage inspection/unwind, and bad-block management;
+- history/archive and EIP-4444-era data tooling with provenance;
+- dangerous-operation confirmations and offline locking.
+
+Verification:
+
+- Multi-version migration, corrupt snapshot, interrupted import, wrong-chain,
+  and rollback drills;
+- read-only and destructive-command permission tests.
+
+Exit criteria:
+
+- Operators can inspect, move, recover, and verify execution data through
+  supported tooling.
+- `v0.290.0 implementation stop reached. Run pentest for this exact
+  commit.`
+
+### v0.291.0 - Execution Operations Security And Resource Controls
+
+Status: planned.
+
+Goal: make the execution-node product observable and fail closed under
+resource or configuration pressure.
+
+Deliverables:
+
+- Structured logs/traces, Prometheus metrics, health/readiness, peer/sync/
+  stage/txpool/payload diagnostics, and bounded labels;
+- disk-space shutdown policy, cache and worker budgets, RPC/P2P rate limits,
+  file-descriptor limits, secret redaction, and config validation;
+- backup, incident, degraded-mode, and restart evidence;
+- explicit unsafe-development flags separated from production profiles.
+
+Verification:
+
+- Disk-full, memory pressure, descriptor exhaustion, slow disk, network flood,
+  RPC abuse, and secret-leak tests;
+- monitoring schema and cardinality checks.
+
+Exit criteria:
+
+- The execution node is operable under defined resource budgets without
+  silent data loss or unsafe fallback.
+- `v0.291.0 implementation stop reached. Run pentest for this exact
+  commit.`
+
+## Phase 33: Complete Execution Client Assurance
+
+### v0.292.0 - Execution Hive And RPC Compatibility
+
+Status: planned.
+
+Goal: prove the execution client against mandatory ecosystem conformance
+suites rather than only internal fixtures.
+
+Deliverables:
+
+- Run required Hive blockchain, engine, RPC compatibility, DevP2P, sync, and
+  transaction suites;
+- publish exact suite revisions, pass/fail/skip results, logs, and ownership;
+- prohibit unexplained skips and self-authored substitutions.
+
+Verification:
+
+- Reproducible Hive runner and immutable report;
+- zero unexplained failures for claimed scope.
+
+Exit criteria:
+
+- The first-party execution client passes the required public compatibility
+  suites.
+- `v0.292.0 implementation stop reached. Run pentest for this exact
+  commit.`
+
+### v0.293.0 - Execution Engine Multi-Consensus-Client Interoperability
+
+Status: planned.
+
+Goal: prove that the first-party Engine server is not coupled to the
+first-party beacon node.
+
+Deliverables:
+
+- Full Engine workflows driven by the named independent consensus-client
+  matrix;
+- capabilities, payload building, invalidation, blobs/data columns, requests,
+  restart, and fork transition scenarios;
+- incompatibility ownership and remediation records.
+
+Verification:
+
+- Mixed-client devnets and long-running Engine sessions;
+- malformed, delayed, duplicate, and reordered method tests.
+
+Exit criteria:
+
+- Independent consensus clients can safely drive the first-party execution
+  client.
+- `v0.293.0 implementation stop reached. Run pentest for this exact
+  commit.`
+
+### v0.294.0 - Mainnet And Testnet Sync Follow Gate
+
+Status: planned.
+
+Goal: demonstrate reliable public-network synchronization and continuous
+canonical following.
+
+Deliverables:
+
+- Fresh full/snap sync on mainnet and supported public testnets;
+- genesis/history, checkpoint/snapshot, pruning/archive, restart, peer churn,
+  and reorg profiles;
+- sustained live follow with root/head comparison against independent clients;
+- published hardware, duration, bandwidth, disk, and failure evidence.
+
+Verification:
+
+- Reproducible public-network runbooks and immutable reports;
+- canonical root/head sampling with zero unexplained divergence;
+- interrupted sync and database recovery drills.
+
+Exit criteria:
+
+- The execution node can synchronize and remain canonical on supported public
+  networks.
+- `v0.294.0 implementation stop reached. Run pentest for this exact
+  commit.`
+
+### v0.295.0 - Execution Client Performance Gate
+
+Status: planned.
+
+Goal: enforce mainnet-scale CPU, memory, disk, network, and API budgets for the
+complete execution node.
+
+Deliverables:
+
+- Numeric budgets for import, live execution, payload building, txpool, sync,
+  state healing, database growth, pruning, RPC, tracing, and startup;
+- reproducible reference hardware and regression thresholds;
+- adversarial worst-case transaction, block, proof, peer, and request loads.
+
+Verification:
+
+- Automated benchmark and soak reports;
+- release failure on budget regression without reviewed exception.
+
+Exit criteria:
+
+- The complete execution client meets documented production resource budgets.
+- `v0.295.0 implementation stop reached. Run pentest for this exact
+  commit.`
+
+### v0.296.0 - Complete Execution Client Audit
+
+Status: planned.
+
+Goal: independently review the runnable execution client as one security
+boundary.
+
+Deliverables:
+
+- Audit core cryptography, historical/current execution, storage backend,
+  sync, txpool, DevP2P, payload builder, Engine server, RPC servers, tooling,
+  executable, and operations controls;
+- review first-party versus optional dependency ownership;
+- publish findings, severity, evidence, and remediation assignments.
+
+Verification:
+
+- Independent report covering every execution product component;
+- no omitted production feature or unreviewed critical trust boundary.
+
+Exit criteria:
+
+- Every execution-client finding is recorded with an owner and remediation
+  version.
+- `v0.296.0 implementation stop reached. Run pentest for this exact
+  commit.`
+
+### v0.297.0 - Complete Execution Client Remediation
+
+Status: planned.
+
+Goal: close the execution-client audit and conformance register.
+
+Deliverables:
+
+- Resolve all execution audit, Hive, interoperability, public-sync,
+  performance, documentation, compatibility, and platform findings;
+- rerun the complete execution evidence set;
+- record accepted low risks with expiry and owner.
+
+Verification:
+
+- Clean independent retest;
+- zero critical/high findings and zero unexplained conformance failures;
+- updated SBOM, provenance, support matrix, and runbooks.
+
+Exit criteria:
+
+- The standalone execution client is a production candidate before integrated
+  node work begins.
+- `v0.297.0 implementation stop reached. Run pentest for this exact
+  commit.`
+
+## Phase 34: Integrated Ethereum Node Product
+
+### v0.298.0 - First-Party Integrated Node Orchestration
+
+Status: planned.
+
+Goal: compose the first-party execution and beacon clients into one operable
+Ethereum node without collapsing their security boundaries.
+
+Deliverables:
+
+- `eth-node` launcher and embeddable supervisor for execution plus beacon
+  services;
+- shared network selection, data-root policy, JWT provisioning, startup
+  ordering, health propagation, shutdown, restart, and version compatibility;
+- independent process and in-process deployment modes;
+- validator client remains separately isolated by default.
+
+Verification:
+
+- Fresh sync, restart, partial-service failure, JWT rotation, and version
+  mismatch tests;
+- proof that Engine and public/admin API listeners remain separated.
+
+Exit criteria:
+
+- Operators can run a complete first-party Ethereum full node through one
+  supported orchestration surface.
+- `v0.298.0 implementation stop reached. Run pentest for this exact
+  commit.`
+
+### v0.299.0 - Private Devnet And Custom Network Tooling
+
+Status: planned.
+
+Goal: create reproducible execution/consensus networks for testing and
+downstream client development.
+
+Deliverables:
+
+- Coupled execution genesis, beacon genesis, fork schedule, deposit contract,
+  validator keys, bootnodes, JWT, and chain configuration generation;
+- deterministic ephemeral devnets and persistent private networks;
+- prefunded accounts, validator deposits, configurable fork activation, and
+  safe test-only block timing;
+- artifact manifests and cleanup.
+
+Verification:
+
+- Multi-node first-party devnets across historical/current fork boundaries;
+- wrong-genesis, mismatched-fork, duplicate-key, and restart tests.
+
+Exit criteria:
+
+- Developers can reproduce a complete Ethereum network without hand-assembling
+  incompatible EL/CL configuration.
+- `v0.299.0 implementation stop reached. Run pentest for this exact
+  commit.`
+
+### v0.300.0 - Mixed First-Party And Independent Client Matrix
+
+Status: planned.
+
+Goal: prove every first-party role can be replaced independently.
+
+Deliverables:
+
+- Matrices for first-party EL with independent CLs, first-party CL with
+  independent ELs, independent validators with first-party beacon nodes, and
+  first-party validators with independent beacon nodes;
+- Engine, P2P, Beacon API, Validator API, Builder API, Keymanager, and signer
+  compatibility;
+- fork-transition, restart, invalid-data, and degraded-service scenarios.
+
+Verification:
+
+- Published mixed-client testnet and Hive reports;
+- zero unexplained role-coupling failures.
+
+Exit criteria:
+
+- Downstream users can adopt individual `eth` client components without
+  requiring the entire first-party stack.
+- `v0.300.0 implementation stop reached. Run pentest for this exact
+  commit.`
+
+### v0.301.0 - Long-Running Integrated Ethereum Testnet
+
+Status: planned.
+
+Goal: demonstrate sustained operation of the complete first-party node and
+validator stack.
+
+Deliverables:
+
+- At least 30 continuous days with multiple first-party and independent EL/CL
+  nodes, at least 4,096 validators, transactions, contracts, blobs/data
+  columns, builders, pruning, sync, and validator lifecycle operations;
+- planned reorg, partition, clock, disk, restart, execution invalidation,
+  builder withholding, DA loss, and key-movement faults;
+- deterministic attribution through the `v0.258.0` taxonomy.
+
+Verification:
+
+- Immutable duration, participation, finality, head/root, resource, and fault
+  reports;
+- zero slashable signatures and zero unexplained consensus divergence.
+
+Exit criteria:
+
+- The integrated stack remains correct and recoverable under realistic
+  sustained operation.
+- `v0.301.0 implementation stop reached. Run pentest for this exact
+  commit.`
+
+### v0.302.0 - Integrated Node Performance And Failure Recovery
+
+Status: planned.
+
+Goal: enforce whole-node resource and recovery budgets across execution,
+consensus, and validator boundaries.
+
+Deliverables:
+
+- Combined CPU, RAM, disk, I/O, bandwidth, startup, sync, API, payload, and
+  duty-latency budgets;
+- cascading-failure, backpressure, disk-full, database corruption, Engine
+  outage, network partition, and clock fault scenarios;
+- backup/restore and rolling component upgrade evidence.
+
+Verification:
+
+- Reproducible reference-hardware tests;
+- recovery deadline and attribution checks;
+- no hidden resource double-counting between services.
+
+Exit criteria:
+
+- The complete node meets numeric resource and recovery targets under
+  cross-layer failures.
+- `v0.302.0 implementation stop reached. Run pentest for this exact
+  commit.`
+
+### v0.303.0 - Operator Installation Upgrade And Incident Guides
+
+Status: planned.
+
+Goal: make production deployment and recovery possible without source-code
+archaeology.
+
+Deliverables:
+
+- Install, configuration, firewall, JWT, backup, monitoring, pruning/archive,
+  validator separation, builder, upgrade, rollback, migration, and incident
+  guides;
+- systemd/container/manual deployment profiles;
+- diagnostics decision trees and support bundles with secret redaction;
+- downstream embedding guides for execution, beacon, validator, and full-node
+  builders.
+
+Verification:
+
+- Fresh-operator exercises on every supported desktop/server platform;
+- disaster-recovery drills and documentation link/doctest checks.
+
+Exit criteria:
+
+- A new operator or client builder can deploy, upgrade, diagnose, and recover
+  the supported products from maintained documentation.
+- `v0.303.0 implementation stop reached. Run pentest for this exact
+  commit.`
+
+### v0.304.0 - Complete Full-Stack Security Audit
+
+Status: planned.
+
+Goal: independently review the integrated Ethereum stack and every cross-layer
+trust transition.
+
+Deliverables:
+
+- Audit execution/beacon orchestration, Engine/JWT, shared configuration,
+  databases, networking, APIs, validator isolation, builder fallback,
+  monitoring, packaging, upgrades, and recovery;
+- review mixed-version and partial-compromise behavior;
+- publish complete findings and remediation assignments.
+
+Verification:
+
+- Independent report covering all production binaries and embedding modes;
+- no unreviewed cross-layer trust or privilege path.
+
+Exit criteria:
+
+- Every full-stack finding is recorded before final production admission.
+- `v0.304.0 implementation stop reached. Run pentest for this exact
+  commit.`
+
+### v0.305.0 - Complete Full-Stack Remediation
+
+Status: planned.
+
+Goal: close all integrated-stack findings before final acceptance and API
+freeze.
+
+Deliverables:
+
+- Resolve full-stack audit, long-testnet, mixed-client, performance, recovery,
+  packaging, documentation, and platform findings;
+- rerun all affected component and integrated evidence;
+- publish accepted low-risk register with owner and expiry.
+
+Verification:
+
+- Clean independent retest;
+- zero critical/high findings and zero unexplained cross-layer failures;
+- final pre-freeze SBOM and provenance.
+
+Exit criteria:
+
+- No known implementation or operational blocker remains before final
+  production admission.
+- `v0.305.0 implementation stop reached. Run pentest for this exact
+  commit.`
+
+## Phase 35: Final Production Admission
+
+### v0.306.0 - Final Production Acceptance Matrix
+
+Status: planned.
+
+Goal: apply one quantitative acceptance contract to every production product
+and embedding mode.
+
+Deliverables:
+
+- Consolidate execution, beacon, validator, integrated node, SDK, provider,
+  wallet, contract, light-client, stateless, and tooling gates;
+- require current official conformance/Hive suites and named independent
+  client matrices;
+- define final CPU, memory, disk, network, latency, longevity, recovery,
+  security, compatibility, platform, and documentation thresholds;
+- preserve deterministic failure attribution and reviewed exceptions.
+
+Verification:
+
+- Machine-readable acceptance policy and evidence index;
+- deliberately failing threshold and attribution tests;
+- audit proving every 1.0 support claim has a gate.
+
+Exit criteria:
+
+- Every production claim has a numeric or otherwise objective release-blocking
+  criterion.
+- `v0.306.0 implementation stop reached. Run pentest for this exact
+  commit.`
+
+### v0.307.0 - Complete Public API And Crate Stability Freeze
+
+Status: planned.
+
+Goal: freeze all public contracts only after every planned product exists.
+
+Deliverables:
+
+- Freeze core, SDK, execution, provider, wallet, contract, storage, networking,
+  light-client, beacon, validator, builder, binary, embedding, and operations
+  APIs;
+- finalize crate classifications and independent support-crate versions;
+- require strict compatibility for public support-crate dependencies;
+- publish migration, deprecation, feature, platform, and stability matrices.
+
+Verification:
+
+- Whole-workspace semver, feature-powerset, re-export, and public-dependency
+  review;
+- API snapshots and downstream compile matrix;
+- proof that only approved products are promoted to `1.0.0`.
+
+Exit criteria:
+
+- No foundational or product API invention remains before 1.0.
+- `v0.307.0 implementation stop reached. Run pentest for this exact
+  commit.`
+
+### v0.308.0 - Final Release Evidence Dry Run
+
+Status: planned.
+
+Goal: rehearse the exact final release and operator upgrade path from a clean
+environment.
+
+Deliverables:
+
+- Ordered crate publication, exact archives, checksums, signatures, SBOM,
+  provenance, platform packages, database/config migrations, and rollback;
+- RC-specific reports, notes, gates, candidate/package separation, and
+  repeated `rc.N`;
+- executable and container artifact reproduction;
+- exact approved archive preservation.
+
+Verification:
+
+- Full clean-room dry run;
+- changed-candidate, wrong-version, wrong-checksum, rollback, and repeated-RC
+  tests;
+- offline archive and artifact verification.
+
+Exit criteria:
+
+- The complete 1.0 evidence and upgrade process has been exercised without
+  changing an approved artifact.
+- `v0.308.0 implementation stop reached. Run pentest for this exact
+  commit.`
+
+### v0.309.0 - Version-Only 1.0 Promotion Rehearsal
+
+Status: planned.
+
+Goal: prove the final package-version promotion is isolated, reviewable, and
+reproducible.
+
+Deliverables:
+
+- Rehearse manifests, workspace dependencies, lockfile, version matrix, notes,
+  SBOM, checksums, provenance, packages, binaries, and images for `1.0.0`;
+- keep `release.version = "1.0.0"` separate from
+  `candidate_tag = "v1.0.0-rc.1"`;
+- promote only products approved at `v0.307.0`;
+- preserve independent support-crate versions;
+- use the audited exact-archive uploader from `v0.273.0`.
+
+Verification:
+
+- Semantic package/artifact diff;
+- complete release-tool integration suite;
+- proof that any implementation or unrelated metadata change rejects the
+  promotion.
+
+Exit criteria:
+
+- The project can produce the exact `1.0.0` candidate through a constrained
+  version-only promotion.
+- `v0.309.0 implementation stop reached. Run pentest for this exact
+  commit.`
+
+### v0.310.0 - Production Candidate Admission Gate
+
+Status: planned.
+
+Goal: freeze the final `0.x` implementation and authorize one exact
+version-promotion commit.
+
+Deliverables:
+
+- Run every final acceptance, conformance, Hive, mixed-client, public-sync,
+  long-testnet, performance, formal, audit, platform, documentation,
+  packaging, and release gate;
+- publish final support, stability, migration, artifact, and checksum
+  manifests;
+- authorize only the rehearsed `v0.309.0` version-promotion operation;
+- invalidate admission on any implementation or unrelated metadata change.
+
+Verification:
+
+- Exact implementation-candidate pentest and clean retest;
+- green CI and CodeQL;
+- reproducible packages, binaries, images, and exact archive checks;
+- final `v0.306.0` acceptance-policy pass.
 
 Exit criteria:
 
 - The only permitted next change is the audited version-only promotion commit
-  that will be tagged `v1.0.0-rc.1`.
-- `v0.274.0 implementation stop reached. Run pentest for this exact
+  tagged as `v1.0.0-rc.1`.
+- `v0.310.0 implementation stop reached. Run pentest for this exact
   commit.`
 
 ## v1.0.0-rc.1 - Exact Production Candidate
@@ -7776,7 +8793,7 @@ and use it unchanged for the final stable tag.
 
 Deliverables:
 
-- Apply only the version-promotion changes rehearsed at `v0.273.0`;
+- Apply only the version-promotion changes rehearsed at `v0.309.0`;
 - set `eth` and only the deliberately stabilized public products to their
   approved `1.0.0` versions;
 - preserve every other support crate's independently reviewed version;
@@ -7800,7 +8817,7 @@ Verification:
 - exact archive offline verification and uploader dry run;
 - independent support-crate version-policy verification;
 - semantic package diff proving only approved version metadata differs from
-  `v0.274.0`;
+  `v0.310.0`;
 - repeat as `v1.0.0-rc.N` from a newly reviewed commit if any change is needed.
 
 Exit criteria:
@@ -7822,10 +8839,17 @@ Deliverables:
   storage, canonical-chain, full beacon-node, validator-client,
   consensus-light-client, execution and consensus networking, sync,
   slashing-protection, builder, and stateless-support surfaces described above;
+- first-party Keccak-256, secp256k1, ECDSA/recovery/ECDH, historical Ethash,
+  pre-Merge consensus validation, and genesis-to-head execution support;
+- a production execution-node binary with local payload building,
+  authenticated Engine API server, public JSON-RPC/GraphQL, DevP2P/snap sync,
+  database backend, recovery tools, and operational controls;
 - historical and current fork support backed by pinned official conformance
   evidence;
 - a production beacon node that coordinates with independent execution clients
   through the Engine API, plus a validator client that refuses unsafe duties;
+- an integrated full-node launcher that preserves EL/CL/validator security
+  boundaries while supporting independent component replacement;
 - transactional slashing protection, EIP-3076 interchange, Keymanager API,
   local/remote/HSM signer boundaries, and safe builder fallback;
 - explicit unsupported/future-fork behavior with no silent fallback;
@@ -7843,7 +8867,8 @@ Verification:
 - `cargo audit`
 - `scripts/generate-sbom.sh --check`
 - all official conformance, interoperability, fuzz, Kani, Miri, sanitizer,
-  platform, performance, Hive, long-running validator, and live-node gates
+  platform, performance, Hive, public-sync, long-running execution, validator,
+  integrated-node, and live-node gates
   assigned above;
 - `scripts/validate-release-readiness.sh v1.0.0`
 - verify that `v1.0.0` points to the exact already approved

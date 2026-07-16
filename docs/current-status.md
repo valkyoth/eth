@@ -79,7 +79,12 @@ Legend:
 | Slashing protection, validator keys, duties, and external custody | 🔴 Planned | Assigned to `v0.235.0..=v0.248.0` |
 | Builder and relay integration | 🔴 Planned | Assigned to `v0.249.0..=v0.250.0`; relay communication is beacon-node owned |
 | Consensus safety services, operations, and production executables | 🔴 Planned | Assigned to `v0.251.0..=v0.257.0` |
-| Quantitative assurance, audits, remediation, and 1.0 admission | 🔴 Planned | Assigned to `v0.258.0..=v0.274.0` plus exact candidate `v1.0.0-rc.N` |
+| Consensus assurance and product baseline | 🔴 Planned | Assigned to `v0.258.0..=v0.274.0`; this is not the final 1.0 gate |
+| First-party core cryptography and historical PoW | 🔴 Planned | Keccak-256, secp256k1, ECDSA/ECDH, Ethash, and genesis-to-Merge validation are assigned to `v0.275.0..=v0.281.0` |
+| Standalone production execution client | 🔴 Planned | Database backend, staged sync, payload builder, Engine/RPC servers, networking operations, binary, tooling, and controls are assigned to `v0.282.0..=v0.291.0` |
+| Execution-client production assurance | 🔴 Planned | Hive/RPC compatibility, independent consensus-client interoperability, public sync, performance, audit, and remediation are assigned to `v0.292.0..=v0.297.0` |
+| Integrated Ethereum node product | 🔴 Planned | Full-node orchestration, devnets, mixed-client tests, long-running operation, recovery, guides, audit, and remediation are assigned to `v0.298.0..=v0.305.0` |
+| Final 1.0 production admission | 🔴 Planned | Acceptance, complete API/crate freeze, release rehearsal, promotion, and candidate admission are assigned to `v0.306.0..=v0.310.0` plus exact candidate `v1.0.0-rc.N` |
 | Reth and ecosystem integration | 🔴 Planned | Optional conversion/reference adapters are assigned to `v0.67.0`; no external implementation becomes the first-party core |
 
 ## Security And Release Baseline
