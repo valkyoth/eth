@@ -1,6 +1,6 @@
 <p align="center">
-  <b>no_std-first Ethereum protocol building blocks for Rust.</b><br>
-  Explicit domains, bounded decode policy, constant-time primitives, and security-gated release evidence.
+  <b>Security-focused no_std Ethereum execution-layer library for Rust.</b><br>
+  Bounded codecs, typed transactions, proofs, verification, and first-party EVM components.
 </p>
 
 <div align="center">
@@ -25,198 +25,14 @@
 
 # eth
 
-`eth` is a `no_std`-first Rust workspace for Ethereum execution-layer protocol
-building blocks.
+`eth` provides security-focused, `no_std` Ethereum execution-layer APIs for
+canonical RLP, typed transactions, signing and recovery boundaries, headers,
+receipts, withdrawals, Merkle Patricia Trie proofs, fork-aware validation, and
+bounded first-party EVM components.
 
-The project target is a production-ready Ethereum crate at `1.0.0`, reached
-through small releases with explicit security, conformance, and dependency
-evidence. The first implementation work is intentionally conservative:
-explicit domains, bounded decode policy, stable crate boundaries, and security
-documentation before RPC, signer, REVM, Reth, or P2P adapters become real
-dependencies.
-
-## Current Status
-
-Status: `v0.52.1` adds canonical dependency-free EIP-2537 BLS12-381 field,
-scalar, point-coordinate, and precompile-frame parsing while keeping arithmetic
-and curve/subgroup validation fail closed.
-The optional `evm-core` feature now exposes dependency-free no_std word, stack,
-memory, opcode, program-counter, fork, gas schedule, opcode-table, host-state,
-warm/cold access, historical fork identifiers, opcode-introduction metadata,
-call/create planning domains, return-data ranges, journal checkpoint policy,
-fork-aware precompile descriptors, bounded precompile input/gas policies, and
-bounded interpreter domains for hard-capped basic stack/control-flow bytecode
-plus explicit state reads. Identity, SHA-256, RIPEMD-160, bounded ModExp,
-BN254 add/mul, BN254 pairing frames, and BLAKE2F execute without
-dependencies; ECRECOVER executes through explicit caller-provided secp256k1
-and Keccak boundaries. KZG and BLS cryptographic precompiles remain fail-closed
-execution descriptors. Canonical BLS wire parsing is complete; curve,
-subgroup, arithmetic, mapping, MSM, and pairing execution remain assigned to
-`v0.52.2..=v0.52.9`, with KZG work assigned to `v0.61.0..=v0.61.5`.
-
-Implemented now:
-
-- Rust workspace pinned to stable `1.97.0`.
-- MSRV policy for Rust `1.90.0` through `1.97.0`.
-- `no_std` facade and focused first-party crates.
-- Explicit primitive domains for chain, block, gas, nonce, timestamp, address,
-  hash, wei, and transaction type values.
-- Constant-time equality composition for fixed-width hash and wei values.
-- Bounded decode limits plus stateful cumulative allocation, item, and proof-node
-  accounting.
-- Canonical RLP scalar, list, and integer decoding plus no-allocation canonical
-  encoding helpers.
-- No-allocation primitive RLP encode and exact-decode helpers for chain, block,
-  gas, nonce, timestamp, address, hash, and wei values.
-- EIP-2718 transaction envelope shell classification for typed and legacy
-  transaction bytes.
-- Unvalidated legacy transaction field decoding for nonce, gas price, gas
-  limit, to/create, value, input, and signature words.
-- Unvalidated EIP-2930 access-list transaction field decoding, including
-  bounded borrowed access-list entry and storage-key iteration.
-- Unvalidated EIP-1559 dynamic-fee transaction field decoding for max priority
-  fee, max fee, gas limit, destination/create, value, calldata, access list, and
-  signature words.
-- Unvalidated EIP-4844 blob transaction field decoding for blob fee, required
-  call target, blob versioned hash list, calldata, access list, and signature
-  words.
-- Unvalidated EIP-7702 set-code transaction field decoding for destination,
-  calldata, access list, authorization list, and signature words.
-- No-allocation canonical transaction envelope encoding for admitted
-  unvalidated legacy, EIP-2930, EIP-1559, EIP-4844, and EIP-7702 transaction
-  domains.
-- Explicit caller-provided `ChainSpec`, `ForkSpec`, `Hardfork`, and
-  `ValidationContext` APIs for fork activation selection, including
-  fail-closed checks for duplicate forks, wrong-chain entries, and
-  non-monotonic fork or activation ordering.
-- Unvalidated execution block header decoding for legacy, London, Shanghai,
-  Cancun, and Prague field sets, plus block header hashing through the Keccak
-  trait boundary and a distinct `BlockHash` domain newtype.
-- Unvalidated legacy and EIP-2718 typed receipt decoding, including
-  status/root policy, 256-byte logs bloom, borrowed log entries, topics, and
-  data.
-- Unvalidated EIP-4895 withdrawal-list decoding, including global withdrawal
-  indexes, validator indexes, recipient addresses, and nonzero Gwei amounts.
-- Bounded syntactic MPT node decoding for branch, extension, and leaf nodes,
-  including compact-path validation, eager inline child shape checks, and
-  cumulative proof-node byte/count accounting.
-- Transaction and receipt MPT inclusion proof verification at
-  `rlp(transaction_index)` over the caller-provided Keccak-256 trait boundary,
-  with distinct transaction and receipt root domains.
-- Account and storage MPT inclusion proof verification at
-  `keccak256(address)` and `keccak256(slot_key)` over the caller-provided
-  Keccak-256 trait boundary, with distinct account and storage root domains.
-- Proof-gated transaction typestate transitions for decoded, canonical,
-  fork-validated, and sender-recovered state tokens.
-- Replay-domain validation for legacy EIP-155 and typed transaction chain IDs
-  before sender recovery results are accepted.
-- Canonical transaction signing-preimage encoding and signing-hash helpers for
-  legacy EIP-155, EIP-2930, EIP-1559, EIP-4844, and EIP-7702 decoded
-  transaction domains.
-- EIP-7702 authorization tuple signing-hash and signer recovery helpers, kept
-  separate from transaction signing hashes with explicit domain newtypes.
-- EIP-7702 set-code transaction validity gate for Prague/Pectra fork context,
-  non-empty authorization lists, fee order, caller-computed gas policy, and
-  caller-provided authority account-state checks. Per-authorization failures
-  are counted as skipped tuples instead of rejecting the whole transaction.
-- Optional `evm` feature exposing explicit no-std execution environment,
-  transaction input, state snapshot, result report, and hard-ceiling
-  gas-estimation policy types without admitting an EVM backend.
-- Optional `evm-core` feature exposing first-party no_std EVM word, stack,
-  memory, opcode, program-counter, fork, gas schedule, opcode-table,
-  host-state traits, warm/cold access tracking, and basic bounded interpreter
-  domains with bytecode, step, gas, state-access, call/create, and precompile
-  ceilings as the native execution foundation.
-- Digest-level secp256k1 sender recovery through a caller-provided backend
-  boundary, with low-s rejection, Ethereum y-parity policy, and caller-provided
-  Keccak-256 public-key hashing.
-- Decoded transaction signature validation helpers that combine replay-domain
-  checks, signing hashes, low-s/y-parity policy, sender recovery, and optional
-  expected-sender comparison.
-- External raw mainnet transaction KATs for EIP-2930, EIP-1559, EIP-4844, and
-  EIP-7702 sender recovery.
-- EIP-712 domain-safety checks for required `chainId` and
-  `verifyingContract` fields, plus a domain-gated sender recovery helper.
-- No-allocation EIP-712 typed-data encoder for caller-provided schemas and
-  borrowed values, including `encodeType`, `encodeData`, `hashStruct`, domain
-  separator construction, and typed-data signing digest construction.
-- Optional `eip712-json` parser boundary for JSON-RPC typed-data payloads with
-  duplicate-key rejection, explicit parser limits, and no default dependency
-  impact.
-- Optional `keccak-tiny` software backend using reviewed `tiny-keccak`,
-  disabled by default and covered by Keccak-256 KATs.
-- Core dependency independence audit covering default `subtle`, optional
-  `k256`, `tiny-keccak`, `serde`, `serde_json`, and `sanitization` paths, and
-  dev/reference `alloy-rlp` usage.
-- Runtime dependency policy gate proving reference crates and optional
-  backend/parser crates do not enter the default facade graph.
-- Optional parser and sanitization policy gate proving `serde`, `serde_json`,
-  `eth-valkyoth-sanitization`, and `sanitization` enter only through explicit
-  opt-in features.
-- Public `RlpEncode`/`RlpDecode` traits and derive macros for reviewed simple
-  structs, with bounded decode and trybuild compile-fail coverage.
-- Caller-provided Keccak-256 trait boundary with no default hash
-  implementation dependency.
-- RLP fuzz harness with committed hex seed corpus and crash reproduction docs.
-- Stable error codes, messages, categories, and formatting for codec,
-  protocol, fork, feature, resource, and verification failures.
-- Optional sanitization and derive support crates outside the default feature
-  set.
-- MIT OR Apache-2.0 license.
-- Security, modularity, supply-chain, implementation, and release planning docs.
-- Local check, release-gate, dependency-policy, SBOM, and pentest evidence.
-- Safe upstream advisory checking for REVM and official Ethereum source drift.
-- Independent support-crate release planning for crates.io push limits.
-- Pinned official Ethereum source revisions plus a reproducible external
-  reference-store sync process for `/home/eldryoth/Work/test/eth`.
-- Execution fixture harness for pinned `ethereum/tests` `RLPTests`, with a
-  pass/fail report and explicit unsupported fixture list.
-- Differential structural RLP harness against `alloy-rlp`, with accumulated
-  mismatch reporting.
-
-Not implemented yet:
-
-- No RPC transport.
-- No signer or local key storage.
-- No stateful or production-valid EVM execution adapter.
-- No Reth or P2P integration.
-- No block parser yet.
-- Identity, SHA-256, RIPEMD-160, ECRECOVER, bounded ModExp, BN254 add/mul,
-  BN254 pairing execution, G2 subgroup validation, BLAKE2F execution, the
-  Fp6/Fp12 tower foundation, validated tuple streaming, line-function
-  foundation, Miller-loop accumulator with sparse line-factor multiplication
-  evidence, optimized bounded final exponentiation, Frobenius Q1/-Q2 point
-  mapping, and the projective post-loop line carrier are implemented; non-empty
-  pairing result admission now returns canonical EIP-197 zero/one words, while
-  BLAKE2F now follows EIP-152 input and output rules. `v0.52.1` adds canonical
-  dependency-free BLS12-381 Fp, Fr, Fp2, unrestricted MSM scalar, G1/G2
-  coordinate, infinity, and precompile-frame parsing. These point values are
-  wire-valid only until the curve and subgroup releases land in
-  `v0.52.2..=v0.52.9`; KZG execution remains scheduled through `v0.61.5`.
-- No ABI/contract helper surface yet; scheduled for `v0.70.0` through
-  `v0.78.0`.
-- No consensus/Engine API support yet; scheduled for `v0.79.0` through
-  `v0.85.0`.
-- No P2P, txpool, sync, mining, builder, or validator-adjacent boundary yet;
-  scheduled for `v0.86.0` through `v0.92.0`.
-
-## Trust Dashboard
-
-| Area | Status |
-| --- | --- |
-| License | `MIT OR Apache-2.0` |
-| MSRV | Rust `1.90.0` |
-| Pinned toolchain | Rust `1.97.0` |
-| Default target | `no_std` |
-| Default runtime dependencies | protocol-core support crates plus reviewed `subtle` exception |
-| Optional hardening dependencies | `sanitization` and proc-macro tooling behind opt-in crates/features |
-| Unsafe policy | first-party crates use `#![forbid(unsafe_code)]` |
-| Default features | protocol-core only |
-| Network/signing defaults | none |
-| Release evidence | local gates, cargo-deny, cargo-audit, SBOM, pentest report |
-| Formal verification | Kani harness planned for `v0.94.0` as extra assurance |
-| Crate versions | tracked in [`docs/CRATE_VERSION_MATRIX.md`](docs/CRATE_VERSION_MATRIX.md) |
-| 1.0 target | serious production-ready Ethereum execution-layer toolkit |
+It is a library, not an Ethereum node, wallet, RPC client, or key store.
+Networking, signing, local key storage, and third-party execution backends are
+not enabled by default.
 
 ## Install
 
@@ -231,6 +47,49 @@ For optional sanitization support:
 [dependencies]
 eth = { version = "0.52.1", features = ["sanitization"] }
 ```
+
+## Quick Start
+
+Classify a typed EIP-2718 transaction envelope under explicit decode limits:
+
+```rust
+use eth::codec::DecodeLimits;
+use eth::protocol::{TransactionEnvelope, decode_transaction_envelope};
+
+let limits = DecodeLimits::reviewed_policy(32, 4, 4, 32, 4, 4);
+let envelope = decode_transaction_envelope(&[0x02, 0xc0], limits)?;
+
+assert!(matches!(envelope, TransactionEnvelope::Typed(_)));
+if let TransactionEnvelope::Typed(typed) = envelope {
+    assert_eq!(u8::from(typed.transaction_type), 2);
+    assert_eq!(typed.payload, &[0xc0]);
+}
+# Ok::<(), eth::error::TransactionEnvelopeError>(())
+```
+
+## Capability Status
+
+Legend: 🟢 available for the stated scope, 🟡 implemented but incomplete,
+🔴 not implemented.
+
+| Capability | Status | Current scope |
+| --- | --- | --- |
+| `no_std` protocol core | 🟢 Available | Default facade, bounded domains, stable errors, and no networking or signer defaults |
+| Canonical Ethereum RLP | 🟢 Available | Bounded scalar, list, integer, exact-consumption, encoding, and conservative derive support |
+| EIP-2718 envelopes | 🟢 Available | Legacy and typed envelope classification |
+| Legacy, EIP-2930, EIP-1559, and EIP-4844 transactions | 🟡 Partial | Decode, canonical encode, signing hashes, replay checks, and signature-validation helpers; full state/fork validity is incomplete |
+| EIP-7702 set-code transactions | 🟡 Partial | Decode/encode, transaction and authorization signing, recovery, and context validity gate |
+| EIP-712 typed data | 🟢 Available | Bounded typed encoder and hashing path; optional JSON parser |
+| Headers, receipts, and withdrawals | 🟡 Partial | Canonical syntactic decode and selected hashing; full block/state validity is incomplete |
+| MPT proof verification | 🟢 Available | Transaction, receipt, account, and storage inclusion against caller-trusted roots |
+| Native EVM execution | 🟡 Partial | Bounded basic opcode/state-read interpreter and call/create planning; full state transition is incomplete |
+| Native precompiles through BLAKE2F | 🟢 Available | Identity, SHA-256, RIPEMD-160, ModExp, BN254, and BLAKE2F; ECRECOVER uses explicit caller backends |
+| BLS12-381 and KZG | 🟡 Partial | BLS canonical wire/frame parsing and KZG/BLS gas planning; cryptographic execution remains fail closed |
+| RPC, signer/key storage, ABI helpers, and P2P/node services | 🔴 Planned | Versioned in the release plan; no production implementation is claimed |
+
+See [Current Status](docs/current-status.md) for the detailed release snapshot,
+[Specification Matrix](docs/SPEC_MATRIX.md) for exact support claims, and
+[Release Plan](docs/RELEASE_PLAN.md) for the remaining implementation sequence.
 
 ## Features
 
@@ -1164,32 +1023,8 @@ belongs to a specific account, or interpret the storage scalar. See
 ## Transaction Envelopes
 
 The protocol crate can classify the outer transaction envelope without decoding
-or validating transaction fields:
-
-```rust
-use eth::codec::DecodeLimits;
-use eth::protocol::{TransactionEnvelope, decode_transaction_envelope};
-
-let limits = DecodeLimits {
-    max_input_bytes: 32,
-    max_list_items: 4,
-    max_nesting_depth: 4,
-    max_total_allocation: 32,
-    max_proof_nodes: 4,
-    max_total_items: 4,
-};
-
-let envelope = decode_transaction_envelope(&[0x02, 0xc0], limits)?;
-
-assert!(matches!(envelope, TransactionEnvelope::Typed(_)));
-if let TransactionEnvelope::Typed(typed) = envelope {
-    assert_eq!(u8::from(typed.transaction_type), 2);
-    assert_eq!(typed.payload, &[0xc0]);
-}
-# Ok::<(), eth::error::TransactionEnvelopeError>(())
-```
-
-Typed payloads can be classified first, then decoded with the matching
+or validating transaction fields, as shown in the quick-start example. Typed
+payloads can be classified first, then decoded with the matching
 transaction decoder. Legacy transactions can also be decoded into an explicitly
 unvalidated field model:
 
@@ -1305,6 +1140,7 @@ cargo audit
 
 ## Documentation
 
+- [Current Status](docs/current-status.md)
 - [Implementation Plan](docs/IMPLEMENTATION_PLAN.md)
 - [Release Plan](docs/RELEASE_PLAN.md)
 - [Advanced Precompile Backends](docs/advanced-precompile-backends.md)

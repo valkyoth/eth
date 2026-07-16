@@ -4,6 +4,9 @@ All notable changes to `eth` are documented here.
 
 ## Unreleased
 
+- Reworked the facade README opening around a direct crate purpose, early
+  install and transaction-envelope example, compact capability status table,
+  and a dedicated detailed current-status document.
 - Updated the pinned stable toolchain and full release gate to Rust `1.97.0`,
   while retaining all-feature compatibility checks for Rust `1.90.0` through
   `1.96.1`.

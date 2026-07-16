@@ -31,6 +31,8 @@ the following `v0.52.2..=v0.52.9` releases.
   items.
 - The `bls12381_wire` fuzz target and committed seed corpus.
 - `docs/bls12-381-wire-encodings.md` defining the release's security boundary.
+- `docs/current-status.md` with explicit available, partial, and planned
+  capability boundaries.
 
 ## Changed
 
@@ -43,6 +45,9 @@ the following `v0.52.2..=v0.52.9` releases.
 - The pinned stable toolchain and full release gate now use Rust `1.97.0`;
   Rust `1.90.0` through `1.96.1` retain individual all-feature compatibility
   checks.
+- The facade README now leads with the crate's concrete purpose, installation,
+  a working bounded transaction-envelope example, and a compact support table
+  instead of release-note-style implementation inventory.
 
 ## Security Notes
 

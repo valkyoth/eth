@@ -194,6 +194,7 @@ test -f docs/evm-execution-environment.md
 test -f docs/bn254-pairing-economics.md
 test -f docs/advanced-precompile-backends.md
 test -f docs/bls12-381-wire-encodings.md
+test -f docs/current-status.md
 grep -q 'execution_specs_repo' spec-lock.toml
 grep -q 'local_reference_store_env' spec-lock.toml
 grep -q 'local_reference_store_default' spec-lock.toml
