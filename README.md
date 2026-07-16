@@ -1,6 +1,6 @@
 <p align="center">
-  <b>Security-focused no_std Ethereum execution-layer library for Rust.</b><br>
-  Bounded codecs, typed transactions, proofs, verification, and first-party EVM components.
+  <b>Security-focused no_std Ethereum toolkit for Rust.</b><br>
+  Current release: bounded execution foundations. Roadmap: first-party execution, consensus, validator, and integrated-node components.
 </p>
 
 <div align="center">
@@ -25,14 +25,17 @@
 
 # eth
 
-`eth` provides security-focused, `no_std` Ethereum execution-layer APIs for
-canonical RLP, typed transactions, signing and recovery boundaries, headers,
-receipts, withdrawals, Merkle Patricia Trie proofs, fork-aware validation, and
-bounded first-party EVM components.
+`eth` is a security-focused, `no_std`-first Ethereum toolkit for Rust. The
+current release provides canonical RLP, typed transactions, signing and
+recovery boundaries, headers, receipts, withdrawals, Merkle Patricia Trie
+proofs, fork-aware validation, and bounded first-party EVM components.
 
-It is a library, not an Ethereum node, wallet, RPC client, or key store.
-Networking, signing, local key storage, and third-party execution backends are
-not enabled by default.
+The roadmap extends these foundations into an owned SDK, execution client,
+beacon node, validator client, and integrated Ethereum node while keeping core
+Ethereum behavior first party and independently reviewed. Version `0.52.1` is
+still a library, not a production node, wallet, RPC client, or key store.
+Networking, private-key signing, local key storage, and third-party execution
+backends are not enabled by default.
 
 ## Install
 
@@ -85,11 +88,20 @@ Legend: 🟢 available for the stated scope, 🟡 implemented but incomplete,
 | Native EVM execution | 🟡 Partial | Bounded basic opcode/state-read interpreter and call/create planning; full state transition is incomplete |
 | Native precompiles through BLAKE2F | 🟢 Available | Identity, SHA-256, RIPEMD-160, ModExp, BN254, and BLAKE2F; ECRECOVER uses explicit caller backends |
 | BLS12-381 and KZG | 🟡 Partial | BLS canonical wire/frame parsing and KZG/BLS gas planning; cryptographic execution remains fail closed |
-| RPC, signer/key storage, ABI helpers, and P2P/node services | 🔴 Planned | Versioned in the release plan; no production implementation is claimed |
+| Owned SDK, providers, wallets, and contract tooling | 🔴 Planned | Assigned to `v0.53.0..=v0.68.0` and `v0.92.0..=v0.129.0` |
+| Complete execution, storage, and execution-client product | 🔴 Planned | Assigned to `v0.69.0..=v0.91.0`, `v0.130.0..=v0.140.0`, and `v0.282.0..=v0.297.0` |
+| Consensus, beacon node, and validator client | 🔴 Planned | Foundations start at `v0.141.0`; complete implementation and assurance continue through `v0.274.0` |
+| Ethereum networking, transaction pool, and synchronization | 🔴 Planned | Execution and consensus networking are assigned across `v0.154.0..=v0.164.0`, `v0.215.0..=v0.225.0`, and `v0.288.0` |
+| First-party core cryptography and historical proof of work | 🔴 Planned | Keccak-256, secp256k1, ECDSA/ECDH, Ethash, and genesis-to-Merge validation are assigned to `v0.275.0..=v0.281.0` |
+| Integrated Ethereum node | 🔴 Planned | Orchestration, mixed-client testing, long-running operation, audit, and remediation are assigned to `v0.298.0..=v0.305.0` |
+| Production admission | 🔴 Planned | Final acceptance and stability gates are assigned to `v0.306.0..=v0.310.0` before an exact `v1.0.0-rc.N` candidate |
 
-See [Current Status](docs/current-status.md) for the detailed release snapshot,
-[Specification Matrix](docs/SPEC_MATRIX.md) for exact support claims, and
-[Release Plan](docs/RELEASE_PLAN.md) for the remaining implementation sequence.
+See [Current Status](https://github.com/valkyoth/eth/blob/main/docs/current-status.md)
+for the detailed release snapshot,
+[Specification Matrix](https://github.com/valkyoth/eth/blob/main/docs/SPEC_MATRIX.md)
+for exact support claims, and
+[Release Plan](https://github.com/valkyoth/eth/blob/main/docs/RELEASE_PLAN.md)
+for the remaining implementation sequence.
 
 ## Features
 
@@ -247,15 +259,15 @@ eth = { version = "0.52.1", features = ["evm-core"] }
 State access uses explicit host-state traits and caller-provided fixed-capacity
 warm/cold access sets. Frontier through Istanbul use explicit flat historical
 state-read pricing for the currently executable subset; Berlin and later use
-warm/cold access accounting. See
-[`docs/evm-fork-matrix.md`](docs/evm-fork-matrix.md) for the current native EVM
-fork and opcode support matrix.
+warm/cold access accounting. See the
+[native EVM fork matrix](https://github.com/valkyoth/eth/blob/main/docs/evm-fork-matrix.md)
+for the current fork and opcode support matrix.
 
 EIP-2537 wire parsers validate exact frame lengths, zero padding, field bounds,
 coefficient order, and the unique all-zero infinity encoding without allocating.
 Returned G1/G2 values are canonical wire coordinates, not yet proof of curve or
 subgroup membership. See
-[`docs/bls12-381-wire-encodings.md`](docs/bls12-381-wire-encodings.md).
+[BLS12-381 wire encodings](https://github.com/valkyoth/eth/blob/main/docs/bls12-381-wire-encodings.md).
 
 ```rust
 use eth::evm_core::{EVM_BLS12381_G1_POINT_BYTES, EvmBls12381G1Point};
@@ -801,9 +813,9 @@ let digest = hash_one(
 assert_eq!(<[u8; 32]>::from(digest), [0x44_u8; 32]);
 ```
 
-Implementations must compute Ethereum Keccak-256, not FIPS SHA3-256. See
-[`docs/keccak-boundary.md`](docs/keccak-boundary.md) for the dependency
-decision and future backend admission checklist.
+Implementations must compute Ethereum Keccak-256, not FIPS SHA3-256. See the
+[Keccak boundary](https://github.com/valkyoth/eth/blob/main/docs/keccak-boundary.md)
+for the dependency decision and future backend admission checklist.
 
 ## Stable Errors
 
@@ -904,8 +916,8 @@ assert_eq!(list_output.get(..9), Some([0xc8, 0x83, b'c', b'a', b't', 0x83, b'd',
 ```
 
 The RLP parser surface has cargo-fuzz targets and committed seed fixtures. See
-[`docs/fuzzing.md`](docs/fuzzing.md) for seed materialization, target scope, and
-crash reproduction.
+[Fuzzing](https://github.com/valkyoth/eth/blob/main/docs/fuzzing.md) for seed
+materialization, target scope, and crash reproduction.
 
 ## Withdrawals
 
@@ -1028,7 +1040,7 @@ Account and storage proof APIs derive keys as `keccak256(address)` and
 `keccak256(slot_key)`, then compare the encoded account or storage value
 byte-for-byte. They do not decode account fields, prove that a storage root
 belongs to a specific account, or interpret the storage scalar. See
-[`docs/mpt-nodes.md`](docs/mpt-nodes.md).
+[MPT Nodes](https://github.com/valkyoth/eth/blob/main/docs/mpt-nodes.md).
 
 ## Transaction Envelopes
 
@@ -1150,27 +1162,27 @@ cargo audit
 
 ## Documentation
 
-- [Current Status](docs/current-status.md)
-- [Implementation Plan](docs/IMPLEMENTATION_PLAN.md)
-- [Release Plan](docs/RELEASE_PLAN.md)
-- [Advanced Precompile Backends](docs/advanced-precompile-backends.md)
-- [Block Headers](docs/block-headers.md)
-- [Receipts](docs/receipts.md)
-- [Withdrawals](docs/withdrawals.md)
-- [Keccak Boundary](docs/keccak-boundary.md)
-- [Transaction Signing Hashes](docs/transaction-signing-hashes.md)
-- [Transaction Signature Validation](docs/transaction-signature-validation.md)
-- [k256 Dependency Admission](docs/dependency-admission-k256.md)
-- [Fuzzing](docs/fuzzing.md)
-- [Scope](docs/SCOPE.md)
-- [Threat Model](docs/threat-model.md)
-- [Spec Matrix](docs/SPEC_MATRIX.md)
-- [Spec Source Policy](docs/spec-source-policy.md)
-- [GitHub Security Settings](docs/github-security-settings.md)
-- [Secret Handling Policy](docs/secret-handling-policy.md)
-- [Modularity Policy](docs/modularity-policy.md)
-- [Supply-Chain Security](docs/supply-chain-security.md)
-- [Unsafe Policy](docs/unsafe-policy.md)
+- [Current Status](https://github.com/valkyoth/eth/blob/main/docs/current-status.md)
+- [Implementation Plan](https://github.com/valkyoth/eth/blob/main/docs/IMPLEMENTATION_PLAN.md)
+- [Release Plan](https://github.com/valkyoth/eth/blob/main/docs/RELEASE_PLAN.md)
+- [Advanced Precompile Backends](https://github.com/valkyoth/eth/blob/main/docs/advanced-precompile-backends.md)
+- [Block Headers](https://github.com/valkyoth/eth/blob/main/docs/block-headers.md)
+- [Receipts](https://github.com/valkyoth/eth/blob/main/docs/receipts.md)
+- [Withdrawals](https://github.com/valkyoth/eth/blob/main/docs/withdrawals.md)
+- [Keccak Boundary](https://github.com/valkyoth/eth/blob/main/docs/keccak-boundary.md)
+- [Transaction Signing Hashes](https://github.com/valkyoth/eth/blob/main/docs/transaction-signing-hashes.md)
+- [Transaction Signature Validation](https://github.com/valkyoth/eth/blob/main/docs/transaction-signature-validation.md)
+- [k256 Dependency Admission](https://github.com/valkyoth/eth/blob/main/docs/dependency-admission-k256.md)
+- [Fuzzing](https://github.com/valkyoth/eth/blob/main/docs/fuzzing.md)
+- [Scope](https://github.com/valkyoth/eth/blob/main/docs/SCOPE.md)
+- [Threat Model](https://github.com/valkyoth/eth/blob/main/docs/threat-model.md)
+- [Spec Matrix](https://github.com/valkyoth/eth/blob/main/docs/SPEC_MATRIX.md)
+- [Spec Source Policy](https://github.com/valkyoth/eth/blob/main/docs/spec-source-policy.md)
+- [GitHub Security Settings](https://github.com/valkyoth/eth/blob/main/docs/github-security-settings.md)
+- [Secret Handling Policy](https://github.com/valkyoth/eth/blob/main/docs/secret-handling-policy.md)
+- [Modularity Policy](https://github.com/valkyoth/eth/blob/main/docs/modularity-policy.md)
+- [Supply-Chain Security](https://github.com/valkyoth/eth/blob/main/docs/supply-chain-security.md)
+- [Unsafe Policy](https://github.com/valkyoth/eth/blob/main/docs/unsafe-policy.md)
 
 ## License
 

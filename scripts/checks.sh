@@ -4,6 +4,11 @@ set -eu
 cargo fmt --all --check
 scripts/check_shell_syntax.sh
 scripts/check_doc_links.sh
+if ! cmp -s README.md crates/eth/README.md; then
+    echo "README.md and crates/eth/README.md must remain identical" >&2
+    diff -u README.md crates/eth/README.md >&2 || true
+    exit 1
+fi
 scripts/validate-release-metadata.sh
 python3 scripts/test-sbom-compare.py
 scripts/generate-sbom.sh --check
