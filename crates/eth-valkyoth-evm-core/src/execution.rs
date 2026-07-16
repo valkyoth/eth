@@ -155,7 +155,11 @@ impl<'a, const STACK: usize> EvmExecution<'a, STACK> {
             accesses,
         };
         let result = self.run_inner(bytecode, limits, &mut host);
-        if result.is_err() {
+        let should_restore = match &result {
+            Err(_) => true,
+            Ok(report) => matches!(report.status, ExecutionStatus::Reverted { .. }),
+        };
+        if should_restore {
             host.accesses.restore(access_checkpoint);
         }
         result

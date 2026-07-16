@@ -1,11 +1,14 @@
 use super::typed_helpers::{base_type, reject_reserved_struct_name, validate_identifier};
-use super::{EIP712_MAX_TYPES, Eip712EncodeError, Eip712StructType};
+use super::{EIP712_MAX_FIELDS_PER_TYPE, EIP712_MAX_TYPES, Eip712EncodeError, Eip712StructType};
 
 pub(super) fn validate_schema(types: &[Eip712StructType<'_>]) -> Result<(), Eip712EncodeError> {
     if types.len() > EIP712_MAX_TYPES {
         return Err(Eip712EncodeError::SchemaTooLarge);
     }
     for (type_index, ty) in types.iter().enumerate() {
+        if ty.fields.len() > EIP712_MAX_FIELDS_PER_TYPE {
+            return Err(Eip712EncodeError::ResourceLimit);
+        }
         reject_reserved_struct_name(ty.name)?;
         validate_identifier(ty.name)?;
         if types

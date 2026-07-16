@@ -62,10 +62,10 @@ publication when a crate is marked `unchanged`.
 | `eth-valkyoth-primitives` | `0.11.2` | `0.11.2` | `unchanged` | No | No package changes for v0.52.1. |
 | `eth-valkyoth-hash` | `0.11.2` | `0.11.2` | `unchanged` | No | No package changes for v0.52.1. |
 | `eth-valkyoth-protocol` | `0.25.2` | `0.25.2` | `unchanged` | No | No package changes for v0.52.1. |
-| `eth-valkyoth-verify` | `0.22.0` | `0.23.0` | `code` | Yes | Rejects malformed and duplicate EIP-712 schema/value identifiers and clears partial encode-data output on failure. |
+| `eth-valkyoth-verify` | `0.22.0` | `0.23.0` | `code` | Yes | Hardens EIP-712 identifiers, reserved names, duplicate and resource limits, and partial encode-data output handling. |
 | `eth-valkyoth-derive` | `0.17.3` | `0.17.3` | `unchanged` | No | No package changes for v0.52.1. |
 | `eth-valkyoth-sanitization` | `0.7.5` | `0.7.5` | `unchanged` | No | No package changes for v0.52.1. |
-| `eth-valkyoth-evm-core` | `0.25.0` | `0.26.0` | `code` | Yes | Adds canonical EIP-2537 wire parsing and hardens EVM memory initialization, one-shot execution reuse, and failed-run access accounting. |
+| `eth-valkyoth-evm-core` | `0.25.0` | `0.26.0` | `code` | Yes | Adds canonical EIP-2537 wire parsing and hardens EVM memory initialization, one-shot reuse, and failed/reverted access accounting. |
 | `eth-valkyoth-evm` | `0.10.0` | `0.10.0` | `unchanged` | No | No package changes for v0.52.1. |
 | `eth-valkyoth-rpc` | `0.7.0` | `0.7.0` | `unchanged` | No | No package changes for v0.52.1. |
 | `eth-valkyoth-signer` | `0.7.3` | `0.7.3` | `unchanged` | No | No package changes for v0.52.1. |

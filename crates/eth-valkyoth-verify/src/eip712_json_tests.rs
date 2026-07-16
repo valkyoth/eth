@@ -59,6 +59,16 @@ fn rejects_invalid_struct_and_field_identifiers() {
         Eip712JsonLimits::DEFAULT,
         Eip712JsonError::Encode(Eip712EncodeError::InvalidType),
     );
+    assert_json_error(
+        r#"{
+            "types": {"uint": []},
+            "primaryType": "uint",
+            "domain": {},
+            "message": {}
+        }"#,
+        Eip712JsonLimits::DEFAULT,
+        Eip712JsonError::Encode(Eip712EncodeError::InvalidType),
+    );
 }
 
 #[test]

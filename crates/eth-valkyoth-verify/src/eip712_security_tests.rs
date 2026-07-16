@@ -1,3 +1,7 @@
+extern crate std;
+
+use std::vec::Vec;
+
 use super::*;
 use crate::test_crypto::RealKeccak;
 
@@ -89,6 +93,69 @@ fn borrowed_schema_rejects_duplicate_types_fields_and_values() {
             &mut scratch,
         ),
         Err(Eip712EncodeError::DuplicateValue)
+    );
+}
+
+#[test]
+fn borrowed_schema_reserves_atomic_looking_struct_names() {
+    let mut output = [0u8; 96];
+    for name in [
+        "uint",
+        "int",
+        "uint7",
+        "uint264",
+        "bytes0",
+        "bytes33",
+        "fixed",
+        "ufixed",
+        "fixed128x18",
+        "ufixed256x80",
+    ] {
+        let types = [Eip712StructType { name, fields: &[] }];
+        assert_eq!(
+            encode_eip712_type(&types, name, &mut output),
+            Err(Eip712EncodeError::InvalidType),
+            "{name}"
+        );
+    }
+
+    let types = [Eip712StructType {
+        name: "uintToken",
+        fields: &[],
+    }];
+    assert!(encode_eip712_type(&types, "uintToken", &mut output).is_ok());
+}
+
+#[test]
+fn borrowed_schema_bounds_fields_and_values_before_duplicate_scans() {
+    let fields = [Eip712Field {
+        name: "value",
+        type_name: "uint256",
+    }; EIP712_MAX_FIELDS_PER_TYPE + 1];
+    let types = [Eip712StructType {
+        name: "Oversized",
+        fields: &fields,
+    }];
+    let mut output = [0u8; 96];
+    assert_eq!(
+        encode_eip712_type(&types, "Oversized", &mut output),
+        Err(Eip712EncodeError::ResourceLimit)
+    );
+
+    let valid_types = [Eip712StructType {
+        name: "Value",
+        fields: &[],
+    }];
+    let values = (0..=EIP712_MAX_VALUES_PER_STRUCT)
+        .map(|_| Eip712Value {
+            name: "value",
+            value: Eip712ValueKind::Uint64(1),
+        })
+        .collect::<Vec<_>>();
+    let mut scratch = [0u8; 96];
+    assert_eq!(
+        encode_eip712_data::<RealKeccak>(&valid_types, "Value", &values, &mut output, &mut scratch,),
+        Err(Eip712EncodeError::ResourceLimit)
     );
 }
 

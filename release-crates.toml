@@ -35,7 +35,7 @@ previous_version = "0.22.0"
 version = "0.23.0"
 change = "code"
 publish = true
-reason = "Rejects malformed and duplicate EIP-712 schema/value identifiers and clears partial encode-data output on failure."
+reason = "Hardens EIP-712 identifiers, reserved names, duplicate and resource limits, and partial encode-data output handling."
 
 [crates."eth-valkyoth-derive"]
 previous_version = "0.17.3"
@@ -56,7 +56,7 @@ previous_version = "0.25.0"
 version = "0.26.0"
 change = "code"
 publish = true
-reason = "Adds canonical EIP-2537 wire parsing and hardens EVM memory initialization, one-shot execution reuse, and failed-run access accounting."
+reason = "Adds canonical EIP-2537 wire parsing and hardens EVM memory initialization, one-shot reuse, and failed/reverted access accounting."
 
 [crates."eth-valkyoth-evm"]
 previous_version = "0.10.0"

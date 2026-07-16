@@ -586,6 +586,10 @@ EIP-712 signing paths can build the structured-data digest from reviewed
 borrowed type descriptors and values without adding a concrete Keccak backend
 to the default graph:
 
+The encoder admits at most `EIP712_MAX_TYPES` (64) struct types, 64 fields per
+struct, and 64 named values per struct. It rejects malformed, duplicate, and
+atomic-looking custom type names before hashing.
+
 ```rust
 use eth::hash::Keccak256;
 use eth::primitives::{Address, B256, ChainId};

@@ -1,8 +1,8 @@
 use eth_valkyoth_hash::{Keccak256, hash_one};
 
 use super::{
-    ADDRESS_PADDING_BYTES, Eip712DomainData, Eip712EncodeError, Eip712StructType, Eip712Value,
-    Eip712ValueKind, MAX_TYPE_DEPTH, WORD_BYTES, hash_struct_inner,
+    ADDRESS_PADDING_BYTES, EIP712_MAX_VALUES_PER_STRUCT, Eip712DomainData, Eip712EncodeError,
+    Eip712StructType, Eip712Value, Eip712ValueKind, MAX_TYPE_DEPTH, WORD_BYTES, hash_struct_inner,
 };
 
 pub(super) fn encode_value_word<H>(
@@ -184,6 +184,9 @@ pub(super) fn find_value<'a>(
 }
 
 pub(super) fn validate_values(values: &[Eip712Value<'_>]) -> Result<(), Eip712EncodeError> {
+    if values.len() > EIP712_MAX_VALUES_PER_STRUCT {
+        return Err(Eip712EncodeError::ResourceLimit);
+    }
     for (index, value) in values.iter().enumerate() {
         validate_identifier(value.name)?;
         if values
@@ -250,7 +253,7 @@ fn write_domain_field(
 }
 
 pub(super) fn reject_reserved_struct_name(name: &str) -> Result<(), Eip712EncodeError> {
-    if is_reserved_atomic_type(name) {
+    if resembles_atomic_type(name) {
         return Err(Eip712EncodeError::InvalidType);
     }
     Ok(())
@@ -267,11 +270,38 @@ pub(super) fn validate_identifier(name: &str) -> Result<(), Eip712EncodeError> {
     Ok(())
 }
 
-fn is_reserved_atomic_type(name: &str) -> bool {
+fn resembles_atomic_type(name: &str) -> bool {
     matches!(name, "address" | "bool" | "bytes" | "string")
-        || matches!(unsigned_width(name), Ok(Some(_)))
-        || matches!(signed_width(name), Ok(Some(_)))
-        || matches!(fixed_bytes_width(name), Ok(Some(_)))
+        || has_numeric_suffix(name, "uint")
+        || has_numeric_suffix(name, "int")
+        || has_numeric_suffix(name, "bytes")
+        || resembles_fixed_point(name)
+}
+
+fn has_numeric_suffix(name: &str, prefix: &str) -> bool {
+    let Some(suffix) = name.strip_prefix(prefix) else {
+        return false;
+    };
+    suffix.is_empty() || suffix.bytes().all(|byte| byte.is_ascii_digit())
+}
+
+fn resembles_fixed_point(name: &str) -> bool {
+    let suffix = name
+        .strip_prefix("ufixed")
+        .or_else(|| name.strip_prefix("fixed"));
+    let Some(suffix) = suffix else {
+        return false;
+    };
+    if suffix.is_empty() {
+        return true;
+    }
+    let Some((integer, fractional)) = suffix.split_once('x') else {
+        return false;
+    };
+    !integer.is_empty()
+        && !fractional.is_empty()
+        && integer.bytes().all(|byte| byte.is_ascii_digit())
+        && fractional.bytes().all(|byte| byte.is_ascii_digit())
 }
 
 pub(super) fn encode_numeric_or_fixed_bytes(

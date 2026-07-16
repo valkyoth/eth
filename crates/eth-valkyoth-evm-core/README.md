@@ -85,8 +85,9 @@ The complete wire contract is documented in
   stack, memory, or program-counter reuse across requests.
 - State access is available only through explicit host-state traits and
   caller-provided fixed-capacity warm/cold access sets.
-- Failed stateful runs restore the caller's warm/cold access tracker so an
-  out-of-gas retry cannot inherit discounted access costs.
+- Failed and reverted stateful runs restore the caller's warm/cold access
+  checkpoint so retries and reverted scopes cannot inherit discounted access
+  costs.
 - Warm/cold access sets are linear-scan, allocation-free structures; choose
   capacities that are bounded relative to the gas limit and deployment policy.
 - Frontier through Istanbul use explicit flat historical state-read pricing for

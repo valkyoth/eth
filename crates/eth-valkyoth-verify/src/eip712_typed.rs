@@ -26,6 +26,10 @@ const ADDRESS_PADDING_BYTES: usize = 12;
 const MAX_TYPE_DEPTH: usize = 32;
 /// Maximum number of EIP-712 struct types admitted by the bounded encoder.
 pub const EIP712_MAX_TYPES: usize = 64;
+/// Maximum number of fields admitted in one borrowed EIP-712 struct type.
+pub const EIP712_MAX_FIELDS_PER_TYPE: usize = 64;
+/// Maximum number of named values admitted in one borrowed EIP-712 struct.
+pub const EIP712_MAX_VALUES_PER_STRUCT: usize = 64;
 
 /// One EIP-712 struct type definition.
 #[derive(Clone, Copy, Debug, Eq, PartialEq)]
@@ -160,6 +164,8 @@ pub enum Eip712EncodeError {
     RecursionLimit,
     /// The schema exceeds the bounded type-count limit.
     SchemaTooLarge,
+    /// A field or value collection exceeds the release hard limit.
+    ResourceLimit,
     /// Multiple struct definitions use the same name.
     DuplicateType,
     /// Multiple fields in one struct use the same name.
@@ -178,6 +184,7 @@ impl fmt::Display for Eip712EncodeError {
             Self::TypeMismatch => "EIP-712 value does not match its declared type",
             Self::RecursionLimit => "EIP-712 recursion limit was exceeded",
             Self::SchemaTooLarge => "EIP-712 schema exceeds the type-count limit",
+            Self::ResourceLimit => "EIP-712 field or value count exceeds the release limit",
             Self::DuplicateType => "EIP-712 schema contains a duplicate struct type",
             Self::DuplicateField => "EIP-712 struct contains a duplicate field name",
             Self::DuplicateValue => "EIP-712 struct contains a duplicate value name",

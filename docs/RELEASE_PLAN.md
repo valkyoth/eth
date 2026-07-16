@@ -2317,9 +2317,11 @@ Deliverables:
 - malformed-field, padding, infinity, and frame-boundary fuzz coverage.
 - pentest remediation that zero-initializes caller-provided EVM memory, makes
   execution one-shot until destructive reset, and restores warm/cold access
-  tracking on every failed stateful run;
+  tracking on every failed or reverted stateful run;
 - pentest remediation that validates EIP-712 identifiers, rejects duplicate
-  borrowed type/field/value names, and clears partial encode-data output.
+  borrowed type/field/value names and atomic-looking custom struct names,
+  bounds borrowed fields and values before duplicate scans, and clears partial
+  encode-data output.
 
 Verification:
 

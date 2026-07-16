@@ -44,8 +44,12 @@ The `v0.52.1` pentest hardening makes the signing schema fail closed before
 hashing:
 
 - struct and field names must use EIP-712 identifier syntax;
+- unsupported aliases and atomic-looking names such as `uint`, `int`, invalid
+  integer/byte widths, and fixed-point spellings cannot be custom structs;
 - borrowed schemas reject duplicate struct and field names;
 - borrowed values reject duplicate names at every nested struct level;
+- borrowed structs admit at most 64 fields and 64 named values before the
+  bounded duplicate checks run;
 - the optional JSON path applies the same identifier validation before graph
   traversal;
 - failed `encode_eip712_data` calls clear the selected output region if any

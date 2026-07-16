@@ -1,7 +1,7 @@
 use crate::{
-    EVM_DEFAULT_GAS_LIMIT, EVM_DEFAULT_STEP_LIMIT, EvmAccessSet, EvmAccount, EvmAddress,
-    EvmCoreError, EvmExecution, EvmFork, EvmState, EvmStateContext, EvmWord, ExecutionLimits,
-    ExecutionStatus,
+    EVM_DEFAULT_GAS_LIMIT, EVM_DEFAULT_STEP_LIMIT, EvmAccessSet, EvmAccessStatus, EvmAccount,
+    EvmAddress, EvmCoreError, EvmExecution, EvmFork, EvmState, EvmStateContext, EvmWord,
+    ExecutionLimits, ExecutionStatus,
 };
 
 fn limits(gas: u64) -> Result<ExecutionLimits, EvmCoreError> {
@@ -66,6 +66,43 @@ fn failed_state_run_restores_warm_access_tracking() -> Result<(), EvmCoreError> 
     );
     assert_eq!(accesses.address_len(), 0);
     assert_eq!(accesses.storage_len(), 0);
+    Ok(())
+}
+
+#[test]
+fn reverted_state_run_restores_access_checkpoint() -> Result<(), EvmCoreError> {
+    let mut memory = [];
+    let mut execution = EvmExecution::<8>::try_new(&mut memory)?;
+    let mut state = StateFixture;
+    let mut accesses = EvmAccessSet::<4, 4>::try_new()?;
+    let initial_address = EvmAddress::from_word(EvmWord::from_usize(9));
+    let initial_key = EvmWord::from_usize(9);
+    assert_eq!(
+        accesses.warm_storage(initial_address, initial_key)?,
+        EvmAccessStatus::Cold
+    );
+    let code = [
+        0x60, 0x02, 0x31, 0x50, 0x60, 0x03, 0x54, 0x50, 0x60, 0x00, 0x60, 0x00, 0xfd,
+    ];
+
+    let report = execution.run_with_state(
+        &code,
+        limits(EVM_DEFAULT_GAS_LIMIT)?,
+        EvmStateContext::new(EvmAddress::ZERO),
+        &mut state,
+        &mut accesses,
+    )?;
+
+    assert_eq!(
+        report.status,
+        ExecutionStatus::Reverted { offset: 0, len: 0 }
+    );
+    assert_eq!(accesses.address_len(), 1);
+    assert_eq!(accesses.storage_len(), 1);
+    assert_eq!(
+        accesses.warm_storage(initial_address, initial_key)?,
+        EvmAccessStatus::Warm
+    );
     Ok(())
 }
 

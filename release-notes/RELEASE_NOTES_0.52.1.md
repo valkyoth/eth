@@ -71,16 +71,22 @@ the following `v0.52.2..=v0.52.9` releases.
 - Caller-provided EVM memory is zeroed on construction. An `EvmExecution` can
   run only once until explicit destructive reset clears its stack, memory, and
   program counter.
-- Failed stateful execution restores the caller-provided warm/cold access set,
-  preventing out-of-gas retries from inheriting warm pricing.
+- Failed or reverted stateful execution restores the caller-provided warm/cold
+  access checkpoint, preventing retries or reverted scopes from inheriting
+  newly warmed entries.
 - Borrowed and JSON EIP-712 schemas reject invalid struct/field identifiers.
-  Borrowed schemas and values also reject duplicate names before hashing.
+  Atomic-looking aliases, invalid widths, and fixed-point spellings cannot be
+  reinterpreted as custom structs.
+- Borrowed schemas and values reject duplicate names before hashing and cap
+  each struct at 64 fields and 64 named values before quadratic duplicate
+  checks begin.
 - `encode_eip712_data` clears its selected output region if a later field
   fails, so partial signing material is not left in pooled buffers.
 
 ## Verification
 
 - Official EIP-2537 encoding rules checked on 2026-07-16.
+- Official EIP-712 type and identifier rules checked on 2026-07-16.
 - `cargo test -p eth-valkyoth-evm-core bls12_wire_tests --all-features`
 - `cargo test -p eth-valkyoth-evm-core --all-features`
 - `cargo test -p eth-valkyoth-verify --all-features`
