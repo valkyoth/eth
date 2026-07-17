@@ -125,9 +125,10 @@ The first production value is:
   BLS12-381 execution, `v0.52.19..=v0.52.21` freeze architecture,
   resource-governor, and cryptographic-provider contracts, and
   `v0.52.22..=v0.52.32` implement/audit first-party core crypto plus shared
-  cross-format accounting, session-safe clocks, bounded object/peer evidence,
-  early secp proof, signing/transport separation, non-forgeable validation
-  contexts, and authority-tagged consensus/wire/operational limit contracts; and
+  cross-format accounting, session-safe clocks, atomically reserved bounded
+  object/peer evidence, early secp proof, signing/transport separation,
+  non-forgeable constant-size validation contexts, and authority-tagged
+  consensus/wire/operational limit contracts; and
   `v0.77.0` through `v0.81.0` build first-party KZG/blob verification before
   later releases claim complete affected-fork execution.
 - `eth-valkyoth-sdk`: optional owned models, prelude, builders, and high-level

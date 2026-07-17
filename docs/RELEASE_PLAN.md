@@ -299,6 +299,8 @@ relevant dependency point.
 | Invalidity and peer evidence could itself amplify memory, persistence, serialization, logging, or diagnostic output. | Expanded `v0.52.29`, `v0.134.0`, `v0.136.0`, `v0.158.0`, `v0.218.0`, `v0.253.0`, and `v0.258.0` with evidence budgets, compact witnesses, bounded counters/windows, retention, redaction, and fail-local construction semantics. |
 | Proof limits did not distinguish consensus-embedded proofs from Snap/MPT wire proofs and RPC/provider policy. | Expanded `v0.52.32`, `v0.92.0`, `v0.100.0`, `v0.157.0`, and `v0.165.0` with authority-tagged proof limits and cross-domain non-substitution tests. |
 | Peer-observation windows lacked restart/session and rollback-safe time semantics. | Expanded `v0.52.28`, `v0.52.29`, `v0.158.0`, and `v0.220.0` with monotonic in-session windows, boot/session identity, carefully defined UTC persistence, and rollback/stale-source expiry tests. |
+| Evidence-budget exhaustion after proving invalidity could erase the authoritative result. | Expanded `v0.52.29`, `v0.72.0`, `v0.73.0`, `v0.136.0`, `v0.143.0`, and `v0.218.0` with pre-validation fixed `EvidenceSlot` reservation, infallible allocation-free minimal evidence, and optional cache/diagnostic/persistence attachments that cannot change the immediate result. |
+| Validation contexts could remain non-forgeable yet accidentally retain recursive ancestry or unstable process-local identities. | Expanded `v0.52.32`, `v0.63.0`, `v0.73.0`, `v0.74.0`, `v0.88.1`, and `v0.134.0` with bounded parent handles, borrowed child contexts, deterministic lease release, canonical versioned encoding, domain-separated cryptographic digests, and constant-size/stability tests. |
 | First-party cryptographic arithmetic needed explicit machine-checked implementation evidence beyond the early secp gate. | Added `v0.178.1 - Kani Cryptographic Arithmetic Proofs` for limbs, reduction, conversion, inversion, square roots, point exceptions, scalar multiplication, and canonical serialization across the broader cryptographic core. |
 | Provider JSON-RPC, HTTP, WebSocket, and IPC boundaries lacked several canonicality, redirect, rebinding, proxy, credential, and local-peer controls. | Expanded `v0.92.0` and `v0.94.0..=v0.97.0` with canonical quantity/bytes/ID rules, decoded-byte charging, redirect/origin/DNS/proxy/credential policy, Unix ownership/symlink checks, and Windows pipe ACL/identity checks. |
 | Txpool entries were not explicitly revalidated across heads, forks, fees, restarts, account/delegation state, and blob-sidecar lifecycle. | Expanded `v0.160.0`; persisted/local/protected status never bypasses fresh consensus validation. |
@@ -2525,6 +2527,8 @@ Deliverables:
 
 Verification:
 
+- Focused pre-implementation review of `DecodeSession` ownership, accounting
+  conservation, reset authority, and nested-consumer composition;
 - Complexity-oracle tests for near-limit nested RLP and composite typed
   transactions;
 - fuzzing that asserts cumulative counters never reset or exceed policy;
@@ -3441,15 +3445,24 @@ Deliverables:
 - one non-copyable operation-wide `EvidenceBudget` covering entry bytes,
   observation count, diagnostic/path length, stored witness bytes,
   serialization/output bytes, and persistent retention reservations;
+- a fixed-capacity `EvidenceSlot` is reserved atomically before any operation
+  begins authoritative validation that may return `ProtocolInvalid`; inability
+  to reserve returns `LocalResourceExhausted` before validation starts;
+- once reserved, minimal `ObjectInvalidityEvidence` construction is infallible,
+  allocation-free, and fixed-size, containing only object digest,
+  context/rules digest, validation version, stage, stable reason code, and a
+  bounded field/index location;
 - compact evidence stores object and context/rules digests, stable reason code,
   bounded field/path location, and the minimum verification witness; full
   malformed objects require a separately reserved object store and are never
   retained implicitly as evidence;
 - peer-policy evidence uses bounded counters and windows rather than event
   vectors, with time/session identity supplied by `v0.52.28`;
-- evidence-construction exhaustion returns a local resource outcome, emits no
-  authoritative evidence, and cannot turn the original invalid determination
-  into validity or a different protocol reason;
+- diagnostic excerpts, detailed witnesses, traces, serialization,
+  persistence, and cache insertion are optional attachments after minimal
+  evidence exists; their exhaustion/failure is reported separately and cannot
+  erase or alter the immediate `ProtocolInvalid` result;
+- non-invalid validation paths release the reserved slot deterministically;
 - public evidence diagnostics redact peer addresses, credentials, transaction
   privacy data, and secret-adjacent fields while preserving stable reason codes;
 - only `ObjectInvalidityEvidence` may enter bad-block, bad-transaction,
@@ -3494,6 +3507,9 @@ Deliverables:
 
 Verification:
 
+- Focused pre-implementation review of `EvidenceSlot`,
+  `ObjectInvalidityEvidence`, optional attachments, and side-effect failure
+  ordering;
 - Compile-fail tests preventing local outcomes and peer evidence from
   constructing object-invalidity evidence or entering object-negative caches;
 - fault injection at every validation stage for memory, budget, timeout,
@@ -3516,8 +3532,14 @@ Verification:
 - maximum evidence entry, observation, path, witness, serialization, output,
   and retention boundary tests plus multi-megabyte malformed-object cases that
   retain only digest and bounded witness;
-- allocation/serialization/persistence fault injection proving evidence
-  construction fails locally without changing object classification;
+- pre-validation slot-reservation exhaustion tests proving no authoritative
+  validation starts without minimal-evidence capacity;
+- diagnostic, witness, allocation, serialization, persistence, and negative-
+  cache insertion fault injection after invalidity is detected; the immediate
+  minimal `ProtocolInvalid` result remains available while optional side
+  effects fail separately;
+- fixed-layout/no-allocation tests for every minimal reason/stage/location
+  combination and deterministic slot release on valid/local outcomes;
 - diagnostic snapshot tests proving required redaction and bounded output;
 - model checking for outcome composition, retry, and evidence conservation.
 
@@ -3526,7 +3548,8 @@ Exit criteria:
 - A constrained or faulty local node cannot label a valid object invalid or
   poison an object cache, peer sanctions cannot be created without peer-bound
   evidence, and evidence itself cannot become an unbounded storage, memory,
-  serialization, logging, or privacy channel.
+  serialization, logging, or privacy channel; once authoritative validation
+  starts, enough capacity already exists to preserve any minimal invalid result.
 - `v0.52.29 implementation stop reached. Run pentest for this exact
   commit.`
 
@@ -3593,6 +3616,8 @@ Deliverables:
 
 Verification:
 
+- Focused pre-implementation review of signer capability traits, key/custody
+  ownership, scheme separation, and transport non-signing authority;
 - Compile-fail tests proving secp signers cannot consume consensus duties and
   BLS signers cannot consume execution/message requests;
 - compile-fail tests proving a transport identity/key cannot satisfy either
@@ -3629,6 +3654,20 @@ Deliverables:
 - every context embeds parent identity/evidence plus a rules/limits digest used
   by caches and evidence; transaction, call, and precompile contexts derive as
   sealed children of the block context rather than caller-supplied structures;
+- `VerifiedParent` and `GenesisContext` are bounded capabilities/handles that
+  contain only required header, state, snapshot, and identity references; they
+  never own a parent `ValidationContext` or recursive ancestry chain;
+- block contexts retain bounded parent identity/evidence, not complete parent
+  contexts; transaction/call/precompile children borrow or reference the
+  minimum immutable rules/environment and never clone the block or parent
+  evidence graph;
+- context representation size is constant with chain height and call depth;
+  dropping the final block/transaction scope deterministically releases its
+  snapshot lease, arena reference, and other scoped capabilities;
+- rules, limits, and context digests use canonical versioned encoding plus a
+  domain-separated cryptographic hash; process-local `Hash`, pointer identity,
+  randomized map state, and compiler-dependent struct layout are forbidden for
+  persistent/cache/evidence identity;
 - RPC input, peers, adapters, and stored records cannot deserialize, manually
   assemble, or substitute authoritative contexts; stored hints must be
   rederived and checked through the rules engine;
@@ -3669,6 +3708,8 @@ Deliverables:
 
 Verification:
 
+- Focused pre-implementation review of `ValidationContext`, bounded parent
+  handles, child borrowing, digest encoding, and lease ownership/drop order;
 - Static-maximum SSZ, consensus-proof, field/count, and request fixtures for
   every advertised network profile plus parent/candidate/gas-derived
   transaction and block work vectors;
@@ -3677,6 +3718,14 @@ Verification:
   tests;
 - genesis, unknown-parent, parent-evidence mismatch, corrupted stored-context,
   and rules/limits-digest substitution tests;
+- million-parent synthetic-chain tests proving constant context size, child-
+  context instrumentation proving no parent-evidence clone, and deep-call tests
+  proving constant representation size;
+- digest fixtures stable across restart, supported targets, map insertion
+  order, and compiler settings; validation-version or canonical-encoding
+  changes invalidate old hints safely;
+- corrupted-handle, expired-snapshot-lease, deterministic-drop, and stored-
+  context non-revival tests;
 - concurrent canonical, side-branch, historical, out-of-order, and fork-digest
   validation using distinct immutable contexts;
 - startup mode/configuration/resource-envelope matrices and compile-time type
@@ -3696,7 +3745,8 @@ Exit criteria:
   invalid; advertised static maxima are supported, dynamic work uses immutable
   rules-engine-issued candidate context, physical exhaustion removes readiness
   without manufacturing invalidity, and no caller can forge consensus
-  authority by constructing a context or crossing limit domains.
+  authority by constructing a context or crossing limit domains; context size
+  and identity remain bounded, non-recursive, canonical, and stable.
 - `v0.52.32 implementation stop reached. Run pentest for this exact
   commit.`
 
@@ -3975,14 +4025,19 @@ Deliverables:
   header/envelope, and implementation version;
 - issue and verify parent identity/evidence plus the rules/limits digest, and
   derive sealed transaction/call/precompile child contexts without mutating
-  one node-global active profile.
+  one node-global active profile;
+- parent capabilities are bounded non-recursive handles and all chain/rules/
+  limits/context digests use canonical versioned encoding plus domain-separated
+  cryptographic hashing.
 
 Verification:
 
 - Historical mainnet vectors, custom-chain schedules, monotonicity/property
   tests, concurrent pre/post-fork side-branch validation, historical and
   out-of-order validation, genesis/unknown-parent cases, and direct-context/
-  fork/limit/parent/digest substitution tests.
+  fork/limit/parent/digest substitution tests;
+- million-parent constant-size handle tests and digest fixtures stable across
+  restart and every supported target.
 
 Exit criteria:
 
@@ -4164,12 +4219,16 @@ Deliverables:
   initcode, sender, and fork checks for every transaction type;
 - consume only a sealed transaction child context derived from the containing
   block context; RPC or caller-supplied fork/limit structures have no
-  consensus authority.
+  consensus authority;
+- reserve a `v0.52.29` minimal `EvidenceSlot` before authoritative semantic
+  validation; reservation failure returns local exhaustion before checks begin
+  and every invalid path fills the slot allocation-free.
 
 Verification:
 
 - Official transaction tests, cross-type property tests, client differential
-  checks, and compile-fail caller-context substitution tests.
+  checks, compile-fail caller-context substitution tests, and evidence-slot
+  reservation/fill/release fault tests for every invalid reason.
 
 Exit criteria:
 
@@ -4193,6 +4252,8 @@ Deliverables:
 - reject contexts not issued by the sealed rules engine or whose parent
   evidence, candidate identity, validation version, or rules/limits digest no
   longer matches;
+- reserve a `v0.52.29` minimal `EvidenceSlot` before authoritative header/block
+  checks, so every invalid path has infallible allocation-free evidence;
 - every failure is classified through `v0.52.29`; only complete
   `ObjectInvalidityEvidence` can permanently reject the block.
 
@@ -4200,7 +4261,9 @@ Verification:
 
 - Blockchain/header fixtures across all claimed forks plus concurrent
   pre/post-fork, unknown-parent, stale/corrupted-context, and context-
-  substitution cases.
+  substitution cases;
+- pre-validation slot exhaustion and post-invalid diagnostic/cache/persistence
+  failure tests preserving the immediate invalid result.
 
 Exit criteria:
 
@@ -4220,6 +4283,10 @@ Deliverables:
 - Derive block gas, EVM memory, and precompile work from the immutable parent/
   candidate/fork context and supplied gas; operational caps may suspend
   readiness but cannot redefine validity.
+- Transaction, call, and precompile scopes borrow the minimum sealed block
+  rules/environment and snapshot lease without cloning parent evidence or
+  recursively owning caller contexts; final-scope drop releases leases and
+  arenas deterministically.
 - Implement complete EIP-7702 state application: process authorization tuples
   before transaction execution after sender-nonce increment, warm recovered
   authorities, apply skip-instead-of-reject tuple rules, account refunds,
@@ -4233,6 +4300,11 @@ Deliverables:
 Verification:
 
 - State-transition fixtures, nested revert tests, crash-free bounded execution.
+- Million-depth synthetic context construction remains constant-size, child-
+  creation clone counters remain zero, and cancellation/unwind/drop releases
+  every scoped lease exactly once.
+- Focused pre-implementation review of `StateJournal`, context ownership,
+  rollback, and evidence-slot interaction.
 - Official EIP-7702 transaction/state fixtures covering duplicate authorities,
   invalid tuple skips, delegation clearing, refunds, persistent effects after
   execution failure, delegated transaction origins/destinations, one-hop loop
@@ -4600,13 +4672,16 @@ Deliverables:
   transaction/block reset policy;
 - atomic invalidation or rebinding on reorg and fork-rule changes;
 - access-list and trace-driven prefetch whose results remain untrusted until
-  validated against the active snapshot.
+  validated against the active snapshot;
+- cache/prefetch scopes hold bounded snapshot handles rather than recursive
+  validation contexts, and expired leases cannot be revived by persisted hints.
 
 Verification:
 
 - Cross-root, cross-fork, cross-chain, and validation-level substitution tests;
 - reorg/fork-transition races, deterministic eviction, memory-pressure, and
-  stale-prefetch tests;
+  stale-prefetch tests, deterministic lease-release checks, and expired-handle
+  non-revival across restart;
 - cached/uncached differential execution over the complete fixture corpus.
 
 Exit criteria:
@@ -5692,6 +5767,9 @@ Deliverables:
   eviction, and schema compatibility reports;
 - persisted validation contexts are non-authoritative digest/hint records and
   must be rederived through the `v0.63.0` rules engine before use;
+- stored rules/limits/context digests use canonical versioned encodings and
+  domain-separated cryptographic hashes; process-local hash/layout/pointer
+  identities are rejected and expired snapshot/arena handles are never stored;
 - persistent invalidity and peer evidence obeys the `v0.52.29` entry-size,
   witness, observation, serialization, and retention budgets; full malformed
   objects require a separately bounded object store.
@@ -5700,7 +5778,9 @@ Verification:
 
 - Upgrade/downgrade fixtures, snapshot checksums, cache-pressure and evidence-
   retention tests, corrupted/forged stored-context rejection, and oversized-
-  evidence migration tests.
+  evidence migration tests;
+- cross-restart/platform digest fixtures, encoding/version invalidation, and
+  corrupted-handle/expired-lease non-revival tests.
 
 Exit criteria:
 
@@ -5774,13 +5854,17 @@ Deliverables:
   rules are transactional with canonical import/reorg changes;
 - cache insertion reserves the complete evidence entry and serialization
   budget before mutation and stores compact digest/reason/location/witness
-  records rather than implicit full malformed objects.
+  records rather than implicit full malformed objects;
+- failure to serialize or insert optional persistent/cache attachments never
+  changes the immediate minimal `ProtocolInvalid` result returned by import.
 
 Verification:
 
 - Competing-chain and deep-reorg simulations, crash recovery, local-fault
   injection, bad-block-cache poisoning/flood tests, and evidence reservation/
-  partial-write/oversized-witness tests.
+  partial-write/oversized-witness tests;
+- post-invalid serialization, persistence, and cache-insertion failures with
+  unchanged immediate result and clean transactional rollback.
 
 Exit criteria:
 
@@ -5954,6 +6038,9 @@ Deliverables:
   `v0.52.29` `ObjectInvalidityEvidence`; syncing, missing dependencies,
   resource exhaustion, cancellation, backend/storage errors, and internal
   faults map to non-invalid statuses/errors.
+- authoritative payload validation reserves minimal evidence first; once
+  `INVALID` is established, failure of diagnostics, tracing, persistence, or
+  negative-cache insertion cannot downgrade or erase that response.
 - Small typed semantic surface for capability negotiation, `newPayload`,
   `forkchoiceUpdated`, and `getPayload`, including typed payload IDs,
   deadlines, cancellation, evidence-rich status, and exact
@@ -5965,7 +6052,10 @@ Deliverables:
 Verification:
 
 - execution-apis fixtures and client interoperability snapshots;
-- model-check traces, seeded invariant violations, and trace-to-Rust regressions.
+- model-check traces, seeded invariant violations, and trace-to-Rust
+  regressions;
+- post-invalid diagnostic/cache/persistence fault injection preserving exact
+  `INVALID` and `latestValidHash` semantics.
 
 Exit criteria:
 
@@ -7905,13 +7995,18 @@ Deliverables:
   identity invariant and never mix untrusted with verified entries;
 - invalid-message and peer evidence consumes bounded `v0.52.29` entry,
   observation, witness, serialization, and retention budgets before cache or
-  scoring mutation.
+  scoring mutation;
+- every authoritative object-validation stage reserves minimal invalidity
+  evidence before execution; seen-cache, negative-cache, scoring, logging, or
+  persistence failure cannot erase an immediate object-invalid result.
 
 Verification:
 
 - Official gossip validation functions, malformed/future/dependency fuzzing,
   cache-pressure tests, object/peer evidence non-interchangeability tests, and
-  oversized-evidence/observation-flood fault injection.
+  oversized-evidence/observation-flood fault injection;
+- post-invalid cache/scoring/logging/persistence failure tests preserving the
+  immediate validation result while suppressing only failed side effects.
 
 Exit criteria:
 
