@@ -301,6 +301,7 @@ relevant dependency point.
 | Peer-observation windows lacked restart/session and rollback-safe time semantics. | Expanded `v0.52.28`, `v0.52.29`, `v0.158.0`, and `v0.220.0` with monotonic in-session windows, boot/session identity, carefully defined UTC persistence, and rollback/stale-source expiry tests. |
 | Evidence-budget exhaustion after proving invalidity could erase the authoritative result. | Expanded `v0.52.29`, `v0.72.0`, `v0.73.0`, `v0.136.0`, `v0.143.0`, and `v0.218.0` with pre-validation fixed `EvidenceSlot` reservation, infallible allocation-free minimal evidence, and optional cache/diagnostic/persistence attachments that cannot change the immediate result. |
 | Nested and batch validators could independently reserve, reset, duplicate, or lose evidence capacity. | Added `v0.52.33 - Hierarchical Evidence Capability Composition` and expanded `v0.72.0`, `v0.73.0`, `v0.74.0..=v0.74.1`, `v0.79.0`, `v0.134.0`, `v0.136.0`, `v0.177.0`, `v0.179.1`, `v0.192.0`, `v0.193.0`, and `v0.218.0` with linear parent/child reservations, bounded batch cardinality, exactly-once lifecycle rules, committed-record recovery, Kani conservation proofs, and Loom concurrency checks. |
+| Evidence collection cardinality and optional sink access could be left implicit, allowing diagnostics to affect validity or consume slot authority. | Added `v0.52.34 - Evidence Collection Modes And Immutable Sink Access` and expanded `v0.52.32`, `v0.72.0`, `v0.73.0`, `v0.79.0`, `v0.134.0`, `v0.136.0`, `v0.143.0`, `v0.177.0`, `v0.192.0`, `v0.193.0`, and `v0.218.0` with explicit `FirstInvalid`, `CollectUpTo<N>`, and `BatchIsolateUpTo<N>` operational modes, validity invariance, immutable evidence borrowing, and one final slot-ownership transition. |
 | Validation contexts could remain non-forgeable yet accidentally retain recursive ancestry or unstable process-local identities. | Expanded `v0.52.32`, `v0.63.0`, `v0.73.0`, `v0.74.0`, `v0.88.1`, and `v0.134.0` with bounded parent handles, borrowed child contexts, deterministic lease release, canonical versioned encoding, domain-separated cryptographic digests, and constant-size/stability tests. |
 | First-party cryptographic arithmetic needed explicit machine-checked implementation evidence beyond the early secp gate. | Added `v0.178.1 - Kani Cryptographic Arithmetic Proofs` for limbs, reduction, conversion, inversion, square roots, point exceptions, scalar multiplication, and canonical serialization across the broader cryptographic core. |
 | Provider JSON-RPC, HTTP, WebSocket, and IPC boundaries lacked several canonicality, redirect, rebinding, proxy, credential, and local-peer controls. | Expanded `v0.92.0` and `v0.94.0..=v0.97.0` with canonical quantity/bytes/ID rules, decoded-byte charging, redirect/origin/DNS/proxy/credential policy, Unix ownership/symlink checks, and Windows pipe ACL/identity checks. |
@@ -3691,7 +3692,8 @@ Deliverables:
   violations through `PeerProtocolViolationEvidence`, never blockchain-object
   invalidity by themselves;
 - `OperationalLimits` for local concurrency, caches, queues, peers, RPC,
-  serving, scheduling, and reservations without authority over validity;
+  serving, scheduling, reservations, and additional evidence-collection
+  cardinality without authority over validity;
 - startup rejects static validating capacity below the advertised network
   profile or enters an explicit non-validating/light mode that cannot claim
   block validity;
@@ -3738,7 +3740,9 @@ Verification:
 - cross-domain proof tests showing RPC serving-policy rejection preserves
   cryptographic validity, oversized wire envelopes do not poison contained
   objects, local work exhaustion can later retry successfully, and consensus
-  limits cannot be built from wire or operational limits.
+  limits cannot be built from wire or operational limits;
+- evidence-collection-limit substitution tests proving operational cardinality
+  never enters consensus rules/context digests or changes validity.
 
 Exit criteria:
 
@@ -3761,8 +3765,9 @@ nested, concurrent, batch, and persistent validation workflows.
 Deliverables:
 
 - private, non-`Copy`, non-`Clone` `ReservedEvidenceSlot` and
-  `FilledEvidenceSlot` typestates with exactly-once fill, attach, persist,
-  return, or release transitions;
+  `FilledEvidenceSlot` typestates with exactly-once fill and one final
+  return/commit/release ownership transition; optional attachments only borrow
+  immutable evidence as refined by `v0.52.34`;
 - RAII releases unused reservations during ordinary return, cancellation,
   unwinding, deferred processing, and local failure without permitting double
   release, use after return, or reuse of a filled slot;
@@ -3805,8 +3810,9 @@ Verification:
   independent maximum evidence count and no attribution for unfilled members;
 - cancellation, panic/unwind, deferred, local-failure, valid, and ordinary-return
   tests proving every unused reservation is released exactly once;
-- fault injection at every reserved, derived, filled, attached, serialized,
-  persisted, cached, returned, and released transition;
+- fault injection at every reserved, derived, filled, final-return/commit, and
+  released transition plus every non-authoritative attachment, serialization,
+  persistence, and cache side effect;
 - deterministic recovery-model fixtures proving only committed filled records
   become authoritative evidence, with process-kill backend coverage assigned
   to `v0.134.0` and `v0.136.0`;
@@ -3820,6 +3826,76 @@ Exit criteria:
   without a filled slot; nested and batch validation preserve bounded cardinality
   and object identity, and recovery recognizes only committed filled evidence.
 - `v0.52.33 implementation stop reached. Run pentest for this exact
+  commit.`
+
+### v0.52.34 - Evidence Collection Modes And Immutable Sink Access
+
+Status: planned.
+
+Goal: make evidence cardinality and optional sink behavior explicit without
+allowing operational diagnostics to influence consensus validity or consume
+linear slot authority.
+
+Deliverables:
+
+- sealed `EvidenceCollectionMode` domains for `FirstInvalid`,
+  `CollectUpTo<N>`, and `BatchIsolateUpTo<N>` with validated nonzero compile-
+  time or bounded runtime cardinality;
+- `FirstInvalid` is the default consensus-validation mode and reserves only
+  the `v0.52.33` child and parent records required to reject the object;
+- `CollectUpTo<N>` is an operational diagnostic mode: collection stops at `N`,
+  exhaustion or sink failure is reported separately, and the first established
+  validity result and authoritative evidence remain unchanged;
+- `BatchIsolateUpTo<N>` starts only after `BatchContainsInvalid`, bounds
+  member-specific attribution work independently of batch size, and leaves
+  members beyond `N` explicitly unattributed;
+- every collection cardinality is an `OperationalLimit` plus evidence-budget
+  reservation, never a consensus rule, context/rules digest input, fork rule,
+  object-invalid reason, or peer fault by itself;
+- mode changes may affect only additional diagnostics, cache candidates, and
+  peer attribution; they cannot turn invalid into valid, valid into invalid,
+  or local failure into protocol invalidity;
+- filling a `ReservedEvidenceSlot` remains exactly once and produces immutable
+  evidence that cache, persistence, logging, tracing, and diagnostic sinks may
+  borrow without taking or cloning slot authority;
+- optional sink adapters accept immutable evidence views and return independent
+  side-effect outcomes; they cannot fill, release, return, persist-authorize,
+  or otherwise transition the slot;
+- one final ownership transition returns/commits the filled authoritative
+  record and releases reservation authority exactly once after all optional
+  borrows end;
+- a second authoritative object record always requires a distinct pre-reserved
+  slot, even when its bytes, reason, parent, or diagnostic sinks overlap;
+- public API documentation states which entry points use each mode and which
+  outputs are authoritative, diagnostic-only, unattributed, or retryable.
+
+Verification:
+
+- Compile-fail tests preventing optional sinks from owning, cloning, filling,
+  releasing, returning, or retaining slot authority beyond the evidence borrow;
+- cross-mode property tests proving identical validity and identical first
+  authoritative evidence for the same object/context regardless of operational
+  collection limit;
+- `FirstInvalid` child/parent reservation minima and no-extra-work tests;
+- `CollectUpTo<N>` zero/one/maximum/beyond-limit tests proving deterministic
+  stop behavior and unchanged validity under diagnostic allocation, logging,
+  serialization, and sink failure;
+- `BatchIsolateUpTo<N>` mixed-invalid and capacity-pressure tests proving
+  members beyond `N` remain unattributed and cannot enter negative caches or
+  peer sanctions;
+- borrow-order permutations across cache, persistence, logging, tracing, and
+  diagnostics followed by exactly one final ownership transition;
+- property and compile-fail tests proving a second authoritative record cannot
+  reuse the first record's slot or immutable evidence view;
+- Kani-ready mode/slot reference model consumed by `v0.177.0`.
+
+Exit criteria:
+
+- Consensus validity is invariant across evidence-collection modes, evidence
+  count is operationally bounded, optional sinks can observe but never consume
+  authority, and each authoritative object record corresponds to one separately
+  reserved and exactly-once-finalized slot.
+- `v0.52.34 implementation stop reached. Run pentest for this exact
   commit.`
 
 ## Roadmap Expansion From The 2026 Gap Analysis
@@ -4298,7 +4374,10 @@ Deliverables:
 - follow `v0.52.33`: standalone transaction validation reserves its own slot,
   while block-embedded validation accepts only a block-derived child
   reservation and produces equivalent transaction evidence without resetting
-  the parent budget.
+  the parent budget;
+- use `v0.52.34` `FirstInvalid` for authoritative consensus entry points;
+  diagnostic collection may gather more bounded evidence but cannot change the
+  transaction result or first authoritative record.
 
 Verification:
 
@@ -4306,6 +4385,8 @@ Verification:
   checks, compile-fail caller-context substitution tests, and evidence-slot
   reservation/fill/release fault tests for every invalid reason;
 - standalone-versus-embedded equivalence and parent-budget conservation tests.
+- cross-mode validity/first-evidence equivalence and diagnostic-sink failure
+  tests.
 
 Exit criteria:
 
@@ -4335,6 +4416,9 @@ Deliverables:
   the selected block-validation mode before nested authoritative checks; child
   validators consume derived reservations, and simultaneous transaction- and
   block-specific evidence requires an explicit two-entry reservation;
+- authoritative import uses `v0.52.34` `FirstInvalid`; explicitly requested
+  operational diagnostics may use bounded `CollectUpTo<N>` without changing
+  block validity, first evidence, Engine outcome, or bad-block authority;
 - every failure is classified through `v0.52.29`; only complete
   `ObjectInvalidityEvidence` can permanently reject the block.
 
@@ -4346,7 +4430,9 @@ Verification:
 - pre-validation slot exhaustion and post-invalid diagnostic/cache/persistence
   failure tests preserving the immediate invalid result;
 - block to transaction to proof/precompile/system-operation nesting, child
-  identity composition, two-entry boundary, and exactly-once release tests.
+  identity composition, two-entry boundary, and exactly-once release tests;
+- collection-mode and optional-sink fault matrices with invariant block result
+  and first authoritative evidence.
 
 Exit criteria:
 
@@ -4550,6 +4636,9 @@ Deliverables:
   maximum of member child slots before isolation; evidence cardinality is
   independent of batch size, isolation stops locally at capacity, and only
   filled member slots permit caching or attribution;
+- expose bounded isolation only through `v0.52.34`
+  `BatchIsolateUpTo<N>`; members beyond `N` remain unattributed, and changing
+  `N` cannot change the batch's cryptographic validity result;
 - cache identities include complete message, setup, domain, fork, and
   validation-level context.
 
@@ -4558,7 +4647,8 @@ Verification:
 - Official EIP-4844 fixtures, differential vectors, malformed/batch fuzzing;
 - adversarial coefficient-reuse/control, transcript-collision, entropy-failure,
   mixed-context cache, bounded-isolation, slot-pressure, and maximum-evidence-
-  cardinality tests.
+  cardinality tests;
+- cross-`N` result invariance and beyond-limit non-attribution tests.
 
 Exit criteria:
 
@@ -5874,7 +5964,10 @@ Deliverables:
   objects require a separately bounded object store;
 - evidence persistence follows `v0.52.33`: only atomically committed filled
   records are authoritative, while reserved/derived/abandoned lifecycle state
-  is non-authoritative and discarded during recovery.
+  is non-authoritative and discarded during recovery;
+- cache, migration, snapshot, and persistence adapters follow `v0.52.34` by
+  borrowing immutable evidence views; no sink owns or clones slot authority,
+  and sink failure cannot prevent the final return/commit transition.
 
 Verification:
 
@@ -5884,7 +5977,8 @@ Verification:
 - cross-restart/platform digest fixtures, encoding/version invalidation, and
   corrupted-handle/expired-lease non-revival tests;
 - crash-at-every-transition recovery tests proving abandoned reservations never
-  become invalidity evidence.
+  become invalidity evidence;
+- sink borrow-order, failure, cancellation, and final-ownership-transition tests.
 
 Exit criteria:
 
@@ -5963,7 +6057,10 @@ Deliverables:
   changes the immediate minimal `ProtocolInvalid` result returned by import;
 - import stages consume one `v0.52.33` hierarchical reservation tree, and
   durable writes expose only committed filled leaves rather than reservation
-  bookkeeping.
+  bookkeeping;
+- bad-block/cache/persistence/logging consumers borrow the `v0.52.34`
+  immutable evidence record and cannot consume slot authority; only the final
+  import outcome performs its one ownership transition.
 
 Verification:
 
@@ -5973,7 +6070,9 @@ Verification:
 - post-invalid serialization, persistence, and cache-insertion failures with
   unchanged immediate result and clean transactional rollback;
 - process-kill tests across slot derivation/fill/persist/commit/release proving
-  recovery cannot promote abandoned reservations.
+  recovery cannot promote abandoned reservations;
+- optional-sink permutation and fault tests proving import always returns the
+  same invalid result and finalizes slot ownership exactly once.
 
 Exit criteria:
 
@@ -6150,6 +6249,9 @@ Deliverables:
 - authoritative payload validation reserves minimal evidence first; once
   `INVALID` is established, failure of diagnostics, tracing, persistence, or
   negative-cache insertion cannot downgrade or erase that response.
+- Engine consensus validation uses `v0.52.34` `FirstInvalid`; diagnostic,
+  tracing, persistence, and cache consumers only borrow immutable evidence and
+  cannot consume slot authority or alter `INVALID`/`latestValidHash`.
 - Small typed semantic surface for capability negotiation, `newPayload`,
   `forkchoiceUpdated`, and `getPayload`, including typed payload IDs,
   deadlines, cancellation, evidence-rich status, and exact
@@ -6164,7 +6266,9 @@ Verification:
 - model-check traces, seeded invariant violations, and trace-to-Rust
   regressions;
 - post-invalid diagnostic/cache/persistence fault injection preserving exact
-  `INVALID` and `latestValidHash` semantics.
+  `INVALID` and `latestValidHash` semantics;
+- sink borrow-order and collection-mode tests proving exactly one final slot
+  transition and invariant Engine status.
 
 Exit criteria:
 
@@ -7068,13 +7172,18 @@ Deliverables:
   slot state machine;
 - slot-conservation proofs across reserve, derive, fill, return, and release,
   including one-entry/two-entry parent-child composition and bounded batch
-  cardinality.
+  cardinality;
+- `v0.52.34` mode proofs showing collection-limit changes preserve validity and
+  first evidence, immutable sink borrows cannot transition authority, and each
+  additional authoritative record consumes a distinct slot.
 
 Verification:
 
 - Pinned Kani toolchain and reproducible proof report;
 - seeded double-fill, double-release, child-minting, use-after-return, and slot-
-  leak models rejected within documented bounds.
+  leak models rejected within documented bounds;
+- seeded mode-dependent-validity, sink-consumes-authority, and slot-reuse models
+  rejected within documented bounds.
 
 Exit criteria:
 
@@ -7530,6 +7639,9 @@ Deliverables:
   independent maximum of member slots before isolation; capacity exhaustion
   stops isolation locally, and only filled member slots authorize caching or
   attribution;
+- member isolation uses `v0.52.34` `BatchIsolateUpTo<N>` and treats `N` only
+  as an operational attribution/work limit; members beyond it remain
+  unattributed without changing aggregate verification validity;
 - bounded verification-queue latency and maximum batch age so attackers cannot
   delay block processing by preventing batches from filling;
 - cache keys contain complete message/domain/fork/validation context.
@@ -7539,7 +7651,8 @@ Verification:
 - Official BLS vectors, independent differential tests, subgroup/fault/batch
   fuzzing, coefficient/transcript/cache attacks, queue-latency simulations,
   entropy-failure tests, evidence-capacity-pressure/cardinality tests, and
-  timing review.
+  timing review;
+- cross-`N` aggregate-result invariance and beyond-limit non-attribution tests.
 
 Exit criteria:
 
@@ -7570,6 +7683,8 @@ Deliverables:
 - `v0.52.33` batch reservations bound the number of member evidence records
   independently of cell/column count and prohibit cache or peer attribution
   for members whose child slots were not filled;
+- `v0.52.34` `BatchIsolateUpTo<N>` bounds attribution work and leaves cells or
+  columns beyond `N` unattributed without changing the batch result;
 - bounded reusable workspaces;
 - explicit acceleration/backend boundaries;
 - canonical failure and partial-output behavior.
@@ -7583,6 +7698,7 @@ Verification:
 - CPU, memory, and workspace ceilings;
 - multi-invalid isolation under evidence-slot pressure and maximum-result-
   cardinality tests;
+- cross-`N` validity invariance and beyond-limit non-attribution tests;
 - default-graph and backend-admission checks.
 
 Exit criteria:
@@ -8130,7 +8246,10 @@ Deliverables:
   persistence failure cannot erase an immediate object-invalid result;
 - nested gossip decode/signature/state/fork-choice checks share one
   `v0.52.33` parent-authorized reservation tree; a child cannot mint capacity,
-  and only filled child evidence can enter caches or peer attribution.
+  and only filled child evidence can enter caches or peer attribution;
+- authoritative gossip validation uses `v0.52.34` `FirstInvalid`; bounded
+  operational diagnostics and member isolation cannot change accept/reject/
+  ignore validity, and scoring/cache/logging sinks only borrow evidence.
 
 Verification:
 
@@ -8140,7 +8259,9 @@ Verification:
 - post-invalid cache/scoring/logging/persistence failure tests preserving the
   immediate validation result while suppressing only failed side effects;
 - cancellation and concurrent staged-validation tests proving child slots are
-  returned or released exactly once and parent accounting is conserved.
+  returned or released exactly once and parent accounting is conserved;
+- cross-mode GossipSub result invariance, beyond-limit non-attribution, sink-
+  failure, and final-slot-ownership tests.
 
 Exit criteria:
 
