@@ -295,6 +295,10 @@ relevant dependency point.
 | First-party secp256k1 arithmetic proofs were scheduled after local signer and network-identity consumers. | Added `v0.52.30 - Early secp256k1 Arithmetic Proof Gate` before those consumers; `v0.178.1` retains the broader cross-primitive consolidation and extension gate. |
 | Generic signer and key abstractions could permit secp256k1 execution or transport material to cross into BLS consensus duties. | Added `v0.52.31 - Signing And Transport Capability Separation` and expanded `v0.109.0`, `v0.110.0`, `v0.155.0`, `v0.238.0`, and `v0.239.0` with sealed scheme-specific signing capabilities, a separate non-signing transport identity capability, opaque tagged custody types, withdrawal-key separation, and compile-fail cross-capability tests. |
 | Deployment resource policy could accidentally narrow protocol-valid object limits and create local consensus divergence. | Added `v0.52.32 - Contextual Protocol, Wire And Operational Limit Domains` and expanded `v0.63.0`, `v0.139.0`, networking consumers, and consensus Req/Resp with immutable per-object contexts, advertised static envelopes, dynamic candidate-derived work, protocol-versioned wire limits, readiness withdrawal, and local-only exhaustion outcomes. |
+| An immutable validation context could still be forged if callers could construct, deserialize, or substitute its fork and limit fields. | Expanded `v0.52.32`, `v0.62.0`, `v0.63.0`, `v0.73.0`, and `v0.134.0` with private context fields, sealed rules-engine constructors, verified parent/genesis authority, rules/limits digests, derived child contexts, and corrupted-storage tests. |
+| Invalidity and peer evidence could itself amplify memory, persistence, serialization, logging, or diagnostic output. | Expanded `v0.52.29`, `v0.134.0`, `v0.136.0`, `v0.158.0`, `v0.218.0`, `v0.253.0`, and `v0.258.0` with evidence budgets, compact witnesses, bounded counters/windows, retention, redaction, and fail-local construction semantics. |
+| Proof limits did not distinguish consensus-embedded proofs from Snap/MPT wire proofs and RPC/provider policy. | Expanded `v0.52.32`, `v0.92.0`, `v0.100.0`, `v0.157.0`, and `v0.165.0` with authority-tagged proof limits and cross-domain non-substitution tests. |
+| Peer-observation windows lacked restart/session and rollback-safe time semantics. | Expanded `v0.52.28`, `v0.52.29`, `v0.158.0`, and `v0.220.0` with monotonic in-session windows, boot/session identity, carefully defined UTC persistence, and rollback/stale-source expiry tests. |
 | First-party cryptographic arithmetic needed explicit machine-checked implementation evidence beyond the early secp gate. | Added `v0.178.1 - Kani Cryptographic Arithmetic Proofs` for limbs, reduction, conversion, inversion, square roots, point exceptions, scalar multiplication, and canonical serialization across the broader cryptographic core. |
 | Provider JSON-RPC, HTTP, WebSocket, and IPC boundaries lacked several canonicality, redirect, rebinding, proxy, credential, and local-peer controls. | Expanded `v0.92.0` and `v0.94.0..=v0.97.0` with canonical quantity/bytes/ID rules, decoded-byte charging, redirect/origin/DNS/proxy/credential policy, Unix ownership/symlink checks, and Windows pipe ACL/identity checks. |
 | Txpool entries were not explicitly revalidated across heads, forks, fees, restarts, account/delegation state, and blob-sidecar lifecycle. | Expanded `v0.160.0`; persisted/local/protected status never bypasses fresh consensus validation. |
@@ -3383,6 +3387,12 @@ Deliverables:
 
 - Separate monotonic time for deadlines/cancellation from wall/UTC time for
   slots, epochs, timestamps, and operator display;
+- monotonic time governs peer rate windows, retries, and in-process sanctions;
+  every persisted observation carries an explicit boot/session identity;
+- UTC is permitted for operator display and explicitly defined persisted
+  expiry only, never as an in-process elapsed-time source;
+- clock rollback, stale external time, restart, or session mismatch cannot
+  extend a ban, revive expired evidence, or replay an old observation window;
 - detected step/slew, stale-time, unavailable-time, uncertainty, and source
   evidence states;
 - test/deterministic clock implementations and bounded external-source adapters;
@@ -3393,6 +3403,8 @@ Verification:
 
 - Backward/forward step, slew, pause, stale source, disagreement, and rollover
   simulations;
+- restart/session-change, persisted-expiry, ban-extension, and expired-evidence
+  replay simulations;
 - compile-time separation of monotonic and UTC timestamp domains;
 - deterministic network and validator scenario integration.
 
@@ -3426,6 +3438,20 @@ Deliverables:
   observation, and time window;
 - distinct `PeerPolicyViolationEvidence` bound to connection/peer identity,
   policy version, announced quota/rule, observations, and time window;
+- one non-copyable operation-wide `EvidenceBudget` covering entry bytes,
+  observation count, diagnostic/path length, stored witness bytes,
+  serialization/output bytes, and persistent retention reservations;
+- compact evidence stores object and context/rules digests, stable reason code,
+  bounded field/path location, and the minimum verification witness; full
+  malformed objects require a separately reserved object store and are never
+  retained implicitly as evidence;
+- peer-policy evidence uses bounded counters and windows rather than event
+  vectors, with time/session identity supplied by `v0.52.28`;
+- evidence-construction exhaustion returns a local resource outcome, emits no
+  authoritative evidence, and cannot turn the original invalid determination
+  into validity or a different protocol reason;
+- public evidence diagnostics redact peer addresses, credentials, transaction
+  privacy data, and secret-adjacent fields while preserving stable reason codes;
 - only `ObjectInvalidityEvidence` may enter bad-block, bad-transaction,
   invalid-proof, or sidecar caches, produce Engine `INVALID`/
   `latestValidHash`, produce object-invalid GossipSub `REJECT`, or permanently
@@ -3487,13 +3513,20 @@ Verification:
   tests for blobs, PeerDAS, KZG, Engine bundles, and Snap ranges;
 - negative-cache assumption-change, collision/substitution, expiry, eviction,
   and unique-invalid-object flood tests;
+- maximum evidence entry, observation, path, witness, serialization, output,
+  and retention boundary tests plus multi-megabyte malformed-object cases that
+  retain only digest and bounded witness;
+- allocation/serialization/persistence fault injection proving evidence
+  construction fails locally without changing object classification;
+- diagnostic snapshot tests proving required redaction and bounded output;
 - model checking for outcome composition, retry, and evidence conservation.
 
 Exit criteria:
 
 - A constrained or faulty local node cannot label a valid object invalid or
-  poison an object cache, and peer sanctions cannot be created without
-  peer-bound evidence that remains incapable of proving object invalidity.
+  poison an object cache, peer sanctions cannot be created without peer-bound
+  evidence, and evidence itself cannot become an unbounded storage, memory,
+  serialization, logging, or privacy channel.
 - `v0.52.29 implementation stop reached. Run pentest for this exact
   commit.`
 
@@ -3589,16 +3622,31 @@ Deliverables:
 - separate `ConsensusRules<Fork>`, `ContextLimits<Parent, Candidate>`,
   `WireLimits<Protocol, Version>`, `OperationalLimits`, and `WorkBudget`
   domains with no authority-conferring integer conversions among them;
-- immutable per-operation `ValidationContext` binding chain/genesis identity,
-  parent context, candidate identity, fork/rules identity, consensus limits,
-  and validation version; historical blocks, side branches, out-of-order
-  blocks, and concurrent fork contexts never consult one mutable global profile;
-- static consensus capacities cover every static maximum in the advertised
-  supported network profile, including transactions, blocks, SSZ objects,
-  proofs, and request structures;
+- non-forgeable immutable per-operation `ValidationContext` with private fields
+  and sealed rules-engine constructors accepting only trusted `ChainSpec`, a
+  `VerifiedParent` or `GenesisContext`, the candidate header/envelope, and the
+  validation implementation version;
+- every context embeds parent identity/evidence plus a rules/limits digest used
+  by caches and evidence; transaction, call, and precompile contexts derive as
+  sealed children of the block context rather than caller-supplied structures;
+- RPC input, peers, adapters, and stored records cannot deserialize, manually
+  assemble, or substitute authoritative contexts; stored hints must be
+  rederived and checked through the rules engine;
+- historical blocks, side branches, out-of-order blocks, and concurrent fork
+  contexts never consult one mutable global profile;
+- static consensus capacities cover every explicit static maximum in the
+  advertised supported network profile, including SSZ objects,
+  consensus-embedded fixed SSZ branches, protocol-defined KZG proofs, fixed
+  field/count dimensions, and request structures;
+- Snap/MPT range proofs use negotiated `WireLimits` plus verification
+  `WorkBudget`; JSON-RPC proofs use provider/RPC `OperationalLimits` plus
+  verification work; neither category can create consensus invalidity solely
+  from transport size or local policy;
 - context-derived consensus work, including block-gas-limit changes, EVM
   memory, and ModExp/precompile work, is derived from the candidate's immutable
   parent/gas/fork context rather than startup constants;
+- transactions and blocks constrained dynamically by gas receive no invented
+  implementation-specific static byte maximum;
 - protocol/version-negotiated wire limits classify message or connection
   violations through `PeerProtocolViolationEvidence`, never blockchain-object
   invalidity by themselves;
@@ -3621,8 +3669,14 @@ Deliverables:
 
 Verification:
 
-- Maximum-static transaction, block, SSZ, proof, and request fixtures for every
-  advertised network profile plus parent/candidate/gas-derived work vectors;
+- Static-maximum SSZ, consensus-proof, field/count, and request fixtures for
+  every advertised network profile plus parent/candidate/gas-derived
+  transaction and block work vectors;
+- compile-fail direct-construction, deserialization, context mutation, fork/
+  limit substitution, child-context escalation, and limit-domain conversion
+  tests;
+- genesis, unknown-parent, parent-evidence mismatch, corrupted stored-context,
+  and rules/limits-digest substitution tests;
 - concurrent canonical, side-branch, historical, out-of-order, and fork-digest
   validation using distinct immutable contexts;
 - startup mode/configuration/resource-envelope matrices and compile-time type
@@ -3630,14 +3684,19 @@ Verification:
 - fault tests proving within-protocol local exhaustion never produces
   invalidity and always withdraws/re-establishes readiness safely;
 - wire-version violation, fork-context substitution, and
-  serving-versus-validation independence tests.
+  serving-versus-validation independence tests;
+- cross-domain proof tests showing RPC serving-policy rejection preserves
+  cryptographic validity, oversized wire envelopes do not poison contained
+  objects, local work exhaustion can later retry successfully, and consensus
+  limits cannot be built from wire or operational limits.
 
 Exit criteria:
 
 - No implementation-specific cap classifies a contextually valid object as
   invalid; advertised static maxima are supported, dynamic work uses immutable
-  candidate context, and physical exhaustion removes readiness without
-  manufacturing invalidity.
+  rules-engine-issued candidate context, physical exhaustion removes readiness
+  without manufacturing invalidity, and no caller can forge consensus
+  authority by constructing a context or crossing limit domains.
 - `v0.52.32 implementation stop reached. Run pentest for this exact
   commit.`
 
@@ -3857,11 +3916,16 @@ Goal: deliver the Decode Policies And Error Context release with this required o
 
 Deliverables:
 
-- Named deployment policy builders plus structured field/index/offset/source error context without secret leakage.
+- Named deployment policy builders plus structured, bounded field/index/
+  offset/source error context without secret leakage or diagnostic-output
+  amplification;
+- error paths and excerpts consume the `v0.52.29` evidence/diagnostic budget
+  when promoted into persistent or public evidence.
 
 Verification:
 
-- Error snapshot tests, redaction tests, nested malformed fixtures, compatibility checks.
+- Error snapshot tests, redaction and maximum-path/output tests, nested
+  malformed fixtures, compatibility checks.
 
 Exit criteria:
 
@@ -3877,11 +3941,16 @@ Goal: deliver the Payload-Bound Typestates release with this required outcome: V
 
 Deliverables:
 
-- Transaction/block payloads travel with canonicality, fork, signature, proof, and execution evidence; constructors remain proof-gated.
+- Transaction/block payloads travel with canonicality, fork, signature, proof,
+  execution evidence, and the non-forgeable rules-engine context capability
+  from `v0.52.32`; constructors remain proof-gated;
+- no typestate accepts a caller-built or deserialized authoritative
+  `ValidationContext`.
 
 Verification:
 
-- Compile-fail transition tests, evidence preservation tests, forged-state rejection.
+- Compile-fail transition/context-construction tests, evidence preservation
+  tests, forged-state and context-substitution rejection.
 
 Exit criteria:
 
@@ -3899,15 +3968,21 @@ Deliverables:
 
 - Separate fork identity, activation schedule, rule capabilities, parameters,
   system hooks, and complete historical/custom-chain configuration;
-- construct immutable per-object `ValidationContext` values required by
-  `v0.52.32` from chain identity, parent/candidate context, fork rules, and
-  consensus limits without mutating one node-global active profile.
+- validate configuration into a non-forgeable trusted `ChainSpec` capability;
+- the sealed rules engine is the only constructor of immutable per-object
+  `ValidationContext` values required by `v0.52.32`, accepting only trusted
+  chain specification, `VerifiedParent` or `GenesisContext`, candidate
+  header/envelope, and implementation version;
+- issue and verify parent identity/evidence plus the rules/limits digest, and
+  derive sealed transaction/call/precompile child contexts without mutating
+  one node-global active profile.
 
 Verification:
 
 - Historical mainnet vectors, custom-chain schedules, monotonicity/property
   tests, concurrent pre/post-fork side-branch validation, historical and
-  out-of-order validation, and context-substitution tests.
+  out-of-order validation, genesis/unknown-parent cases, and direct-context/
+  fork/limit/parent/digest substitution tests.
 
 Exit criteria:
 
@@ -4085,11 +4160,16 @@ Goal: deliver the Semantic Transaction Validity release with this required outco
 
 Deliverables:
 
-- Complete intrinsic gas, nonce, balance, fee, chain, authorization, blob, initcode, sender, and fork checks for every transaction type.
+- Complete intrinsic gas, nonce, balance, fee, chain, authorization, blob,
+  initcode, sender, and fork checks for every transaction type;
+- consume only a sealed transaction child context derived from the containing
+  block context; RPC or caller-supplied fork/limit structures have no
+  consensus authority.
 
 Verification:
 
-- Official transaction tests, cross-type property tests, client differential checks.
+- Official transaction tests, cross-type property tests, client differential
+  checks, and compile-fail caller-context substitution tests.
 
 Exit criteria:
 
@@ -4110,13 +4190,17 @@ Deliverables:
 - consume one immutable `v0.52.32` `ValidationContext` per candidate, so
   canonical, side-branch, historical, and out-of-order blocks can use distinct
   fork rules concurrently;
+- reject contexts not issued by the sealed rules engine or whose parent
+  evidence, candidate identity, validation version, or rules/limits digest no
+  longer matches;
 - every failure is classified through `v0.52.29`; only complete
   `ObjectInvalidityEvidence` can permanently reject the block.
 
 Verification:
 
 - Blockchain/header fixtures across all claimed forks plus concurrent
-  pre/post-fork and context-substitution cases.
+  pre/post-fork, unknown-parent, stale/corrupted-context, and context-
+  substitution cases.
 
 Exit criteria:
 
@@ -4647,6 +4731,9 @@ Deliverables:
   and supported extension namespaces;
 - each method binds its parameter type, response type, trust classification,
   response-size ceiling, idempotence, retry policy, and fork availability;
+- method response and proof-size ceilings are provider/RPC
+  `OperationalLimits`; exceeding them refuses that operation without declaring
+  the underlying account, block, trie data, or cryptographic proof invalid;
 - JSON request/response parsing consumes the `v0.52.27` parent ledger, rejects
   duplicate object keys, and bounds structural depth, node count, strings,
   arrays, allocations, and output in addition to raw bytes;
@@ -4664,7 +4751,8 @@ Verification:
   policy tests, structural-depth/node complexity oracles, and allocation-before-
   reservation rejection tests;
 - quantity/byte-string canonicality, odd hex, casing, overflow, float,
-  exponent, and decoded-byte accounting matrices.
+  exponent, and decoded-byte accounting matrices;
+- valid-proof-over-endpoint-policy and retry-with-larger-work-budget tests.
 
 Exit criteria:
 
@@ -4850,12 +4938,18 @@ Deliverables:
   result domains rather than trust booleans;
 - multi-provider quorum, proof-backed reads, finalized/safe policies,
   disagreement evidence, and tracing metadata;
+- proof verification consumes an explicit `WorkBudget`; provider/RPC size
+  policy remains separate from cryptographic proof validity, so a locally
+  refused proof may be retried under a larger admitted budget;
+- disagreement and trace evidence consumes bounded `EvidenceBudget` entries
+  with compact provider identities, reason codes, and redacted diagnostics;
 - no implicit conversion from trusted or quorum data into cryptographically
   verified data.
 
 Verification:
 
-- Byzantine provider simulations and proof/quorum fixtures.
+- Byzantine provider simulations, proof/quorum fixtures, endpoint-policy/
+  proof-validity separation, and bounded-work retry tests.
 
 Exit criteria:
 
@@ -5594,11 +5688,19 @@ Goal: deliver the Migrations Snapshots And Cache Policy release with this requir
 
 Deliverables:
 
-- Forward migrations, rollback limits, snapshot import/export, cache sizing/eviction, and schema compatibility reports.
+- Forward migrations, rollback limits, snapshot import/export, cache sizing/
+  eviction, and schema compatibility reports;
+- persisted validation contexts are non-authoritative digest/hint records and
+  must be rederived through the `v0.63.0` rules engine before use;
+- persistent invalidity and peer evidence obeys the `v0.52.29` entry-size,
+  witness, observation, serialization, and retention budgets; full malformed
+  objects require a separately bounded object store.
 
 Verification:
 
-- Upgrade/downgrade fixtures, snapshot checksums, cache pressure tests.
+- Upgrade/downgrade fixtures, snapshot checksums, cache-pressure and evidence-
+  retention tests, corrupted/forged stored-context rejection, and oversized-
+  evidence migration tests.
 
 Exit criteria:
 
@@ -5669,12 +5771,16 @@ Deliverables:
 - every stage preserves `v0.52.29` outcome/evidence, and only proven
   `ObjectInvalidityEvidence` enters persistent bad-block state;
 - bounded negative-cache identity, invalidation, retention, and anti-flood
-  rules are transactional with canonical import/reorg changes.
+  rules are transactional with canonical import/reorg changes;
+- cache insertion reserves the complete evidence entry and serialization
+  budget before mutation and stores compact digest/reason/location/witness
+  records rather than implicit full malformed objects.
 
 Verification:
 
 - Competing-chain and deep-reorg simulations, crash recovery, local-fault
-  injection, and bad-block-cache poisoning/flood tests.
+  injection, bad-block-cache poisoning/flood tests, and evidence reservation/
+  partial-write/oversized-witness tests.
 
 Exit criteria:
 
@@ -6247,6 +6353,9 @@ Deliverables:
   rules, and response limits for both consumption and serving;
 - negotiated `WireLimits<Snap, Version>` separated from snapshot/proof
   validity and local serving policy;
+- MPT/range-proof verification consumes an explicit `WorkBudget`; wire-size or
+  local serving rejection cannot create invalid-proof evidence and a locally
+  exhausted verification can be retried under a larger admitted budget;
 - snapshot-pinned account/storage range generation and canonical range-proof
   construction without mixed-snapshot nodes;
 - serving-side database-read, proof-generation, compression, allocation,
@@ -6258,7 +6367,8 @@ Verification:
 
 - Cross-client consume/serve fixtures, proof verification, response-bomb and
   compression-bomb tests, mixed-snapshot rejection, snapshot-loss
-  cancellation, and serving-fairness simulations.
+  cancellation, serving-fairness simulations, oversized-wire/valid-proof
+  separation, and larger-budget verification retry.
 
 Exit criteria:
 
@@ -6279,6 +6389,10 @@ Deliverables:
   identity or scoring state;
 - hierarchical resource capabilities and peer accountability for malformed,
   wasteful, timed-out, and inconsistent work;
+- bounded evidence counters/windows and compact witnesses consume
+  `v0.52.29` budgets; peer histories cannot grow per-event vectors;
+- rate windows and in-process sanctions use monotonic time, persisted records
+  carry `v0.52.28` boot/session identity, and UTC rollback cannot extend bans;
 - penalties and bans require `v0.52.29` object-invalidity evidence composed
   with an authenticated peer-delivery observation, peer-protocol evidence, or
   peer-policy evidence; local validation failures never accuse the supplying
@@ -6287,7 +6401,8 @@ Deliverables:
 Verification:
 
 - Churn/eclipse/flood simulations, restart tests, and evidence substitution/
-  time-window/policy-version tests.
+  time-window/policy-version tests plus maximum-evidence, session-change,
+  clock-rollback, and expired-ban replay cases.
 
 Exit criteria:
 
@@ -6461,10 +6576,20 @@ Goal: deliver the Proof Format Abstraction release with this required outcome: M
 
 Deliverables:
 
-- Commitment/proof traits, domain-separated roots/keys, batch proofs, capability negotiation, and migration-safe evidence types.
+- Commitment/proof traits, domain-separated roots/keys, batch proofs,
+  capability negotiation, and migration-safe evidence types;
+- authority-tagged proof categories: consensus-embedded proofs consume
+  `ConsensusRules`, network-carried MPT/range proofs consume `WireLimits` plus
+  verification `WorkBudget`, and provider proofs consume RPC
+  `OperationalLimits` plus verification work;
+- no proof adapter may convert wire or operational rejection into consensus or
+  cryptographic invalidity.
 
 Verification:
 
+- Compile-fail authority-domain conversions and cross-format fixtures proving
+  valid proofs survive RPC policy refusal, oversized transport envelopes, and
+  retry after local work exhaustion.
 - Backend conformance suite and domain-substitution compile tests.
 
 Exit criteria:
@@ -7777,12 +7902,16 @@ Deliverables:
 - missing dependencies, stale time, local budgets, cancellation, or backend
   faults remain ignore/defer/retry outcomes;
 - seen/deferred caches follow the global chain/fork/root/object/validation-level
-  identity invariant and never mix untrusted with verified entries.
+  identity invariant and never mix untrusted with verified entries;
+- invalid-message and peer evidence consumes bounded `v0.52.29` entry,
+  observation, witness, serialization, and retention budgets before cache or
+  scoring mutation.
 
 Verification:
 
 - Official gossip validation functions, malformed/future/dependency fuzzing,
-  cache-pressure tests, and object/peer evidence non-interchangeability tests.
+  cache-pressure tests, object/peer evidence non-interchangeability tests, and
+  oversized-evidence/observation-flood fault injection.
 
 Exit criteria:
 
@@ -7830,6 +7959,9 @@ Deliverables:
 - Peer reputation, topic scores, custody-response scoring, bans, diversity,
   request budgets, rate limits, fair queues, clock disparity through
   `v0.52.28` evidence, and eclipse defenses;
+- monotonic peer windows and in-process sanctions, boot/session-bound persisted
+  observations, and rollback-safe UTC expiry that cannot extend bans or revive
+  expired evidence;
 - all score changes and sanctions consume object evidence composed with an
   authenticated delivery observation, peer-protocol evidence, or peer-policy
   evidence from `v0.52.29`; duplicate or policy outcomes alone cannot
@@ -7839,7 +7971,9 @@ Verification:
 
 - Byzantine peer/flood/partition simulations, resource-ceiling benchmarks,
   evidence expiry/policy-version tests, and object/peer evidence substitution
-  failures.
+  failures;
+- restart/session-change, backward/stale-clock, ban-extension, and expired-
+  evidence replay simulations.
 
 Exit criteria:
 
@@ -8757,12 +8891,16 @@ Deliverables:
 - safe shutdown and service supervision;
 - validator inclusion distance, effectiveness, missed-duty, balance, reward,
   sync participation, proposal, and slashing-risk analytics;
-- privacy/redaction policy for validator identifiers and endpoints.
+- privacy/redaction policy for validator identifiers and endpoints;
+- all evidence/log/trace rendering uses stable reason codes and bounded
+  diagnostics while redacting peer addresses, credentials, transaction privacy
+  data, and secret-adjacent fields required by `v0.52.29`.
 
 Verification:
 
 - Config compatibility;
-- redaction and cardinality tests;
+- redaction, cardinality, maximum-diagnostic/output, and malformed-evidence
+  rendering tests;
 - overload, shutdown, restart, and observability tests;
 - analytics differentials against beacon-state outcomes.
 
@@ -8922,6 +9060,9 @@ Deliverables:
 - conservative treatment of ambiguous failures as client-attributable until a
   maintainer and an independent release reviewer approve a different
   classification from immutable evidence;
+- all acceptance evidence and event ledgers obey explicit entry, witness,
+  observation, diagnostic, serialization, output, and retention limits; links
+  reference separately reserved artifacts instead of embedding unbounded data;
 - required restart, database recovery, execution disagreement, reorg,
   clock-skew, network partition, DA loss, and builder-withholding scenarios;
 - numeric mainnet-scale CPU, RAM, stack, disk-growth, disk-I/O, bandwidth,
@@ -8934,13 +9075,16 @@ Verification:
 
 - Machine-readable acceptance-policy schema and validator;
 - machine-readable event ledger, attribution records, evidence links, reviewer
-  identities, and immutable classification history;
+  identities, and immutable classification history with schema-enforced
+  evidence budgets and redaction;
 - scenario coverage audit;
 - hardware-profile reproducibility check;
 - dry-run reports that fail on every deliberately violated threshold;
 - adversarial reclassification tests proving planned faults, external
   failures, fallback failures, and ambiguous causes cannot be relabeled to
-  bypass a gate.
+  bypass a gate;
+- oversized artifact, observation-flood, diagnostic-redaction, and retention-
+  expiry tests.
 
 Exit criteria:
 
