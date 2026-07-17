@@ -302,6 +302,7 @@ relevant dependency point.
 | Evidence-budget exhaustion after proving invalidity could erase the authoritative result. | Expanded `v0.52.29`, `v0.72.0`, `v0.73.0`, `v0.136.0`, `v0.143.0`, and `v0.218.0` with pre-validation fixed `EvidenceSlot` reservation, infallible allocation-free minimal evidence, and optional cache/diagnostic/persistence attachments that cannot change the immediate result. |
 | Nested and batch validators could independently reserve, reset, duplicate, or lose evidence capacity. | Added `v0.52.33 - Hierarchical Evidence Capability Composition` and expanded `v0.72.0`, `v0.73.0`, `v0.74.0..=v0.74.1`, `v0.79.0`, `v0.134.0`, `v0.136.0`, `v0.177.0`, `v0.179.1`, `v0.192.0`, `v0.193.0`, and `v0.218.0` with linear parent/child reservations, bounded batch cardinality, exactly-once lifecycle rules, committed-record recovery, Kani conservation proofs, and Loom concurrency checks. |
 | Evidence collection cardinality and optional sink access could be left implicit, allowing diagnostics to affect validity or consume slot authority. | Added `v0.52.34 - Evidence Collection Modes And Immutable Sink Access` and expanded `v0.52.32`, `v0.72.0`, `v0.73.0`, `v0.79.0`, `v0.134.0`, `v0.136.0`, `v0.143.0`, `v0.177.0`, `v0.192.0`, `v0.193.0`, and `v0.218.0` with explicit `FirstInvalid`, `CollectUpTo<N>`, and `BatchIsolateUpTo<N>` operational modes, validity invariance, immutable evidence borrowing, and one final slot-ownership transition. |
+| Evidence safety machinery could impose valid-path allocation, contention, hashing, sink work, code-size growth, or public API complexity. | Added `v0.52.35 - Evidence Hot-Path And API Containment Gate` and expanded `v0.52.19`, `v0.52.33..=v0.52.34`, `v0.72.0`, `v0.73.0`, `v0.79.0`, `v0.88.0`, `v0.140.0`, `v0.176.0`, `v0.180.0`, `v0.192.0`, `v0.193.0`, `v0.218.0`, `v0.258.0`, and `v0.262.0` with allocation-free uncontended valid paths, parent arenas/index handles, amortized reservation, admitted cardinalities, internal machinery, stable non-generic outcomes, evidence-disabled internal baselines, and release-blocking overhead/size thresholds. |
 | Validation contexts could remain non-forgeable yet accidentally retain recursive ancestry or unstable process-local identities. | Expanded `v0.52.32`, `v0.63.0`, `v0.73.0`, `v0.74.0`, `v0.88.1`, and `v0.134.0` with bounded parent handles, borrowed child contexts, deterministic lease release, canonical versioned encoding, domain-separated cryptographic digests, and constant-size/stability tests. |
 | First-party cryptographic arithmetic needed explicit machine-checked implementation evidence beyond the early secp gate. | Added `v0.178.1 - Kani Cryptographic Arithmetic Proofs` for limbs, reduction, conversion, inversion, square roots, point exceptions, scalar multiplication, and canonical serialization across the broader cryptographic core. |
 | Provider JSON-RPC, HTTP, WebSocket, and IPC boundaries lacked several canonicality, redirect, rebinding, proxy, credential, and local-peer controls. | Expanded `v0.92.0` and `v0.94.0..=v0.97.0` with canonical quantity/bytes/ID rules, decoded-byte charging, redirect/origin/DNS/proxy/credential policy, Unix ownership/symlink checks, and Windows pipe ACL/identity checks. |
@@ -3081,6 +3082,15 @@ Deliverables:
   exceptions and owners;
 - consensus-kernel versus orchestration/API boundary tests;
 - public API and semver budgets for every independently published crate;
+- evidence slots, reservation trees/arenas, collection cardinalities, sink
+  adapters, and internal context lifetimes remain private to validation
+  services wherever possible; ordinary SDK users consume a stable
+  `ValidationOutcome<T, E>`-style result rather than becoming generic over
+  evidence machinery;
+- feature combinations cannot change consensus validity, validation return
+  types, evidence authority, or collection defaults, and optional sinks cannot
+  pull `std`, allocation, async, or runtime requirements into the `no_std`
+  kernel;
 - an architecture-wide cache identity rule requiring chain/genesis, fork
   rules, snapshot/root, object key, and validation level in every
   security-relevant cache key;
@@ -3098,7 +3108,9 @@ Verification:
 
 - CI architecture tests over all feature combinations and dependency graphs;
 - unsafe inventory and exception review;
-- compile-fail tests for forbidden dependency and capability directions.
+- compile-fail tests for forbidden dependency and capability directions;
+- public API surface snapshots proving internal evidence capabilities,
+  lifetimes, sink types, and arbitrary cardinality generics do not leak.
 
 Exit criteria:
 
@@ -3795,7 +3807,16 @@ Deliverables:
   have no authoritative recovery representation and are discarded after a
   crash;
 - one shared transition contract and adapters for transaction, block, proof,
-  precompile, system-operation, batch, gossip, Engine, and import consumers.
+  precompile, system-operation, batch, gossip, Engine, and import consumers;
+- valid-object preparation is allocation-free and performs no diagnostic-only
+  hashing/serialization, global mutex acquisition, globally contended atomic
+  operation per child, parent/context clone, or optional sink invocation;
+- "atomic reservation" means logical all-or-nothing ownership, not mandatory
+  shared hardware atomics: standalone validation prefers a caller-owned fixed
+  slot, block validation uses one parent-reserved bounded arena, and child slots
+  are linear index handles with reservation amortized across nested validation;
+- optional per-worker pools require explicit ownership, reset, generation, and
+  cross-worker transfer rules and cannot hide stale-slot reuse.
 
 Verification:
 
@@ -3804,6 +3825,10 @@ Verification:
   transitions;
 - block to transaction to proof/precompile/system-operation nested reservation
   tests and standalone-versus-embedded validation/evidence equivalence tests;
+- allocation counters, lock/atomic instrumentation, clone counters, and sink
+  spies proving the valid path satisfies every hot-path prohibition;
+- bounded `O(1)` reservation/release bookkeeping tests plus parent-arena/index-
+  handle and per-worker-pool reset/generation tests;
 - child-to-parent evidence composition and explicit one-entry/two-entry
   reservation boundary tests preserving child object identity;
 - multi-invalid batch isolation under capacity pressure, with a batch-size-
@@ -3840,7 +3865,9 @@ Deliverables:
 
 - sealed `EvidenceCollectionMode` domains for `FirstInvalid`,
   `CollectUpTo<N>`, and `BatchIsolateUpTo<N>` with validated nonzero compile-
-  time or bounded runtime cardinality;
+  time or bounded runtime cardinality; public compile-time modes expose only a
+  small reviewed set of admitted `N` values rather than unrestricted
+  monomorphization;
 - `FirstInvalid` is the default consensus-validation mode and reserves only
   the `v0.52.33` child and parent records required to reject the object;
 - `CollectUpTo<N>` is an operational diagnostic mode: collection stops at `N`,
@@ -3867,12 +3894,21 @@ Deliverables:
 - a second authoritative object record always requires a distinct pre-reserved
   slot, even when its bytes, reason, parent, or diagnostic sinks overlap;
 - public API documentation states which entry points use each mode and which
-  outputs are authoritative, diagnostic-only, unattributed, or retryable.
+  outputs are authoritative, diagnostic-only, unattributed, or retryable;
+- reservation trees, slot/index handles, collection implementations, sink
+  types, and internal evidence lifetimes remain private; diagnostic modes keep
+  the same public validation outcome shape as `FirstInvalid`;
+- optional sinks stay outside the `no_std` kernel and cannot require heap
+  allocation, `std`, async, or a runtime from consensus validation.
 
 Verification:
 
 - Compile-fail tests preventing optional sinks from owning, cloning, filling,
   releasing, returning, or retaining slot authority beyond the evidence borrow;
+- API and code-size snapshots across every admitted cardinality and feature
+  graph, including rejection of arbitrary public const-generic instantiations;
+- `no_std` default builds proving diagnostic sinks introduce no allocation,
+  `std`, async, or runtime dependency;
 - cross-mode property tests proving identical validity and identical first
   authoritative evidence for the same object/context regardless of operational
   collection limit;
@@ -3896,6 +3932,83 @@ Exit criteria:
   authority, and each authoritative object record corresponds to one separately
   reserved and exactly-once-finalized slot.
 - `v0.52.34 implementation stop reached. Run pentest for this exact
+  commit.`
+
+### v0.52.35 - Evidence Hot-Path And API Containment Gate
+
+Status: planned.
+
+Goal: prove that evidence safety remains cheap for valid objects and does not
+force internal reservation, cardinality, sink, or lifetime complexity into the
+public SDK.
+
+Deliverables:
+
+- production implementations of the `v0.52.33` caller-owned standalone slot,
+  block-owned bounded arena, linear child index handle, amortized nested
+  reservation, and explicit per-worker pool ownership/reset contracts;
+- valid-object fast paths with zero heap allocation, zero diagnostic-only
+  serialization/hashing, zero global mutex acquisition, zero globally
+  contended atomic operation per nested validator, zero validation-context or
+  parent-reservation clones, and zero optional sink calls;
+- bounded `O(1)` slot reservation/release bookkeeping with operation counts
+  independent of chain depth, call depth, and already-consumed arena entries;
+- a private evidence service boundary: public validation APIs return one stable
+  `ValidationOutcome<T, E>`-style shape and are not generic over slots,
+  reservation trees, cardinality implementations, sinks, internal lifetimes,
+  allocators, async runtimes, or worker pools;
+- a small reviewed set of compile-time collection cardinalities plus one
+  validated bounded runtime representation; unrestricted public
+  `CollectUpTo<N>` monomorphization is not exposed;
+- identical public return types and consensus behavior for `FirstInvalid`,
+  diagnostic collection, default/minimal/all-feature graphs, and optional sink
+  adapters;
+- optional logging/cache/persistence/trace/diagnostic adapters remain outside
+  the dependency-free `no_std` kernel and cannot require allocation, `std`,
+  async, or a runtime from core validation;
+- an internal evidence-disabled benchmark baseline compiled only by the
+  benchmark harness, never as a production feature or validity path;
+- committed absolute and relative regression thresholds for slot operations,
+  representative valid/nested validation, synthetic staged/batch contention,
+  first-invalid, and diagnostic workloads on a reproducible hardware/toolchain
+  profile, with real transaction/block/batch/gossip consumers required to adopt
+  the baseline in their named later releases;
+- committed stack size, validation-context size, reservation/arena size,
+  generated code size, peak/retained memory, allocation count, lock/atomic
+  operation count, and cycles/time measurements;
+- threshold changes require benchmark evidence plus performance and security
+  review rather than silent relaxation.
+
+Verification:
+
+- representative valid and nested validator benchmarks with normal evidence
+  machinery and the internal evidence-disabled baseline, including allocation/
+  lock/atomic/clone/sink instrumentation;
+- synthetic parent-arena benchmarks across child counts proving one amortized
+  reservation and constant child bookkeeping;
+- deterministic staged-worker benchmarks across worker counts and scheduling
+  seeds, with no globally contended per-child operation;
+- synthetic high-contention batch benchmarks for `BatchContainsInvalid` and
+  bounded member isolation;
+- `FirstInvalid`, every admitted compile-time collection cardinality, and
+  minimum/maximum bounded runtime diagnostic-mode benchmarks;
+- stack/context/slot/index/arena/code-size and peak/retained-memory reports for
+  default, minimal, diagnostic, and all-feature graphs;
+- API snapshots and compile-fail tests for leaked internal lifetimes, slots,
+  arenas, sinks, worker pools, arbitrary `N`, and mode-dependent return types;
+- `no_std` target builds with allocator/std/async/runtime dependency checks;
+- seeded allocation, serialization, global-lock, contended-atomic, clone, sink-
+  invocation, linear-scan reservation, stale-pool-reset, and monomorphization
+  regressions that breach the gate.
+
+Exit criteria:
+
+- Valid-object evidence overhead stays within committed release thresholds with
+  no prohibited allocation, diagnostic work, contention, cloning, or sink
+  invocation; public APIs expose stable validation outcomes rather than
+  evidence machinery, and all feature/mode combinations preserve consensus
+  behavior and the `no_std` kernel boundary.
+- `v0.52.35 implementation stop reached. Run pentest for this exact
   commit.`
 
 ## Roadmap Expansion From The 2026 Gap Analysis
@@ -4384,9 +4497,13 @@ Verification:
 - Official transaction tests, cross-type property tests, client differential
   checks, compile-fail caller-context substitution tests, and evidence-slot
   reservation/fill/release fault tests for every invalid reason;
-- standalone-versus-embedded equivalence and parent-budget conservation tests.
+- standalone-versus-embedded equivalence and parent-budget conservation tests;
 - cross-mode validity/first-evidence equivalence and diagnostic-sink failure
-  tests.
+  tests;
+- valid-transaction benchmarks with and without the internal `v0.52.35`
+  evidence baseline across transaction types and evidence modes, enforcing no
+  allocation, diagnostic hashing/serialization, contention, clone, or sink
+  invocation on the valid `FirstInvalid` path.
 
 Exit criteria:
 
@@ -4432,7 +4549,10 @@ Verification:
 - block to transaction to proof/precompile/system-operation nesting, child
   identity composition, two-entry boundary, and exactly-once release tests;
 - collection-mode and optional-sink fault matrices with invariant block result
-  and first authoritative evidence.
+  and first authoritative evidence;
+- valid block-envelope benchmarks across transaction counts and worker
+  configurations, proving one amortized arena reservation, constant child
+  bookkeeping, and the `v0.52.35` overhead thresholds.
 
 Exit criteria:
 
@@ -4648,7 +4768,10 @@ Verification:
 - adversarial coefficient-reuse/control, transcript-collision, entropy-failure,
   mixed-context cache, bounded-isolation, slot-pressure, and maximum-evidence-
   cardinality tests;
-- cross-`N` result invariance and beyond-limit non-attribution tests.
+- cross-`N` result invariance and beyond-limit non-attribution tests;
+- high-contention batch verification/isolation benchmarks against the internal
+  `v0.52.35` evidence-disabled baseline, with allocation, contention, retained-
+  memory, and evidence-overhead thresholds.
 
 Exit criteria:
 
@@ -4831,11 +4954,17 @@ Deliverables:
 - use official execution-spec fixtures plus an implementation-diverse Geth,
   Besu, and Nethermind matrix; REVM and Reth remain useful development oracles
   but do not count as the only independent implementations;
-- establish CPU, memory, stack, deterministic work, and gas benchmarks.
+- establish CPU, memory, stack, deterministic work, and gas benchmarks;
+- benchmark complete valid blocks across empty, small, typical, high-count,
+  and maximum admitted work profiles against the internal `v0.52.35`
+  evidence-disabled baseline, enforcing reservation, allocation, contention,
+  clone, code-size, peak/retained-memory, and overhead thresholds.
 
 Verification:
 
 - Reproducible differential corpus and regression thresholds;
+- evidence-enabled/evidence-disabled full-block reports with one amortized
+  parent reservation and constant child-bookkeeping evidence;
 - zero unexplained field-level mismatches or skipped official vectors.
 
 Exit criteria:
@@ -6161,11 +6290,17 @@ Goal: deliver the Storage And Client Performance Gate release with this required
 
 Deliverables:
 
-- Benchmark import, state access, roots, reorgs, snapshots, pruning, memory, disk amplification, and startup recovery.
+- Benchmark import, state access, roots, reorgs, snapshots, pruning, memory,
+  disk amplification, and startup recovery;
+- carry the `v0.52.35` evidence-overhead baseline through valid canonical
+  import, reorg validation, bad-object handling, persistence/cache sinks, stack,
+  context/arena size, and retained-memory measurements.
 
 Verification:
 
-- Reproducible hardware profile and regression thresholds.
+- Reproducible hardware profile and regression thresholds;
+- evidence-enabled/evidence-disabled import comparisons and sink-disabled valid-
+  path instrumentation.
 
 Exit criteria:
 
@@ -7116,11 +7251,22 @@ Goal: deliver the Whole-System Performance Program release with this required ou
 
 Deliverables:
 
-- Benchmarks and budgets for codec, crypto, EVM, proofs, providers, storage, sync, ABI, wallets, and end-to-end workflows.
+- Benchmarks and budgets for codec, crypto, EVM, proofs, providers, storage,
+  sync, ABI, wallets, and end-to-end workflows;
+- integrate every `v0.52.35` evidence benchmark: valid transactions, complete
+  blocks across transaction counts, gossip across worker counts, high-
+  contention batches, `FirstInvalid`, admitted diagnostic modes, stack/context/
+  reservation/code sizes, allocation/lock/atomic/clone/sink counts, and peak/
+  retained memory;
+- preserve an internal benchmark-only evidence-disabled baseline and fail on
+  relative or absolute threshold regressions; production features can never
+  disable evidence authority.
 
 Verification:
 
-- Reproducible benchmark runner and regression thresholds.
+- Reproducible benchmark runner and regression thresholds;
+- cross-platform/toolchain variance policy and seeded evidence-overhead
+  regressions proving each threshold is release-blocking.
 
 Exit criteria:
 
@@ -7345,11 +7491,20 @@ Goal: deliver the Compatibility And Semver Gate release with this required outco
 
 Deliverables:
 
-- cargo-semver-checks, feature powerset, minimal/default/all-feature graphs, README dependency versions, serde/text snapshots, and MSRV/stable checks.
+- cargo-semver-checks, feature powerset, minimal/default/all-feature graphs,
+  README dependency versions, serde/text snapshots, and MSRV/stable checks;
+- public API guards from `v0.52.35`: stable validation outcome shapes, no
+  internal evidence lifetime/slot/arena/sink/worker-pool exposure, no arbitrary
+  cardinality monomorphization, and no feature- or mode-dependent consensus
+  behavior or return type;
+- code-size and monomorphization budgets for every admitted collection mode and
+  feature graph.
 
 Verification:
 
-- Automated compatibility report for every published crate.
+- Automated compatibility report for every published crate;
+- API snapshots, compile-fail containment cases, feature-power-set behavior
+  equivalence, and generated-code-size reports.
 
 Exit criteria:
 
@@ -7652,7 +7807,10 @@ Verification:
   fuzzing, coefficient/transcript/cache attacks, queue-latency simulations,
   entropy-failure tests, evidence-capacity-pressure/cardinality tests, and
   timing review;
-- cross-`N` aggregate-result invariance and beyond-limit non-attribution tests.
+- cross-`N` aggregate-result invariance and beyond-limit non-attribution tests;
+- high-contention verification/isolation benchmarks across batch sizes and
+  worker counts against the `v0.52.35` baseline, including allocation, global-
+  contention, stack, arena, and retained-memory thresholds.
 
 Exit criteria:
 
@@ -7699,6 +7857,9 @@ Verification:
 - multi-invalid isolation under evidence-slot pressure and maximum-result-
   cardinality tests;
 - cross-`N` validity invariance and beyond-limit non-attribution tests;
+- high-contention cell/column verification and isolation benchmarks against the
+  `v0.52.35` evidence-disabled baseline, including allocation, contention,
+  arena, stack, and retained-memory thresholds;
 - default-graph and backend-admission checks.
 
 Exit criteria:
@@ -8261,7 +8422,11 @@ Verification:
 - cancellation and concurrent staged-validation tests proving child slots are
   returned or released exactly once and parent accounting is conserved;
 - cross-mode GossipSub result invariance, beyond-limit non-attribution, sink-
-  failure, and final-slot-ownership tests.
+  failure, and final-slot-ownership tests;
+- valid gossip benchmarks across worker counts, topics, and scheduling seeds
+  against the `v0.52.35` evidence-disabled baseline, proving no optional sink,
+  allocation, parent/context clone, global mutex, or globally contended per-
+  child atomic operation on the common path.
 
 Exit criteria:
 
@@ -9418,6 +9583,10 @@ Deliverables:
 - numeric mainnet-scale CPU, RAM, stack, disk-growth, disk-I/O, bandwidth,
   API-latency, duty-latency, and startup/recovery budgets on a reproducible
   reference hardware profile;
+- numeric `v0.52.35` evidence-overhead, reservation/arena/context/code-size,
+  allocation, contention, and retained-memory ceilings for execution,
+  consensus, gossip, batch, and validator workloads, including a policy for
+  evidence-disabled internal baseline measurements;
 - an exception process requiring written security review and a replacement
   gate, never silent threshold reduction.
 
@@ -9429,6 +9598,8 @@ Verification:
   evidence budgets and redaction;
 - scenario coverage audit;
 - hardware-profile reproducibility check;
+- evidence-enabled/evidence-disabled threshold reports across the required
+  workload matrix;
 - dry-run reports that fail on every deliberately violated threshold;
 - adversarial reclassification tests proving planned faults, external
   failures, fallback failures, and ambiguous causes cannot be relabeled to
@@ -9529,12 +9700,17 @@ Deliverables:
 
 - Enforce the numeric `v0.258.0` budgets for SSZ roots, BLS batches,
   transition/epoch processing, fork choice, pools, storage, networking, sync,
-  DA, validator duties, slashing DB, APIs, startup, and recovery.
+  DA, validator duties, slashing DB, APIs, startup, and recovery;
+- enforce evidence hot-path budgets across valid consensus objects, gossip
+  workers, BLS/PeerDAS batches, `FirstInvalid`, diagnostic modes, stack/context/
+  arena/code size, allocation, contention, and retained memory.
 
 Verification:
 
 - Reproducible reference hardware profile;
 - mainnet-scale load tests;
+- evidence-enabled/evidence-disabled comparisons with valid-path
+  allocation/lock/atomic/clone/sink instrumentation;
 - threshold validator;
 - regression alarms that fail the release.
 
