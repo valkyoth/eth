@@ -304,7 +304,7 @@ relevant dependency point.
 | Evidence collection cardinality and optional sink access could be left implicit, allowing diagnostics to affect validity or consume slot authority. | Added `v0.52.34 - Evidence Collection Modes And Immutable Sink Access` and expanded `v0.52.32`, `v0.72.0`, `v0.73.0`, `v0.79.0`, `v0.134.0`, `v0.136.0`, `v0.143.0`, `v0.177.0`, `v0.192.0`, `v0.193.0`, and `v0.218.0` with explicit `FirstInvalid`, `CollectUpTo<N>`, and `BatchIsolateUpTo<N>` operational modes, validity invariance, immutable evidence borrowing, and one final slot-ownership transition. |
 | Evidence safety machinery could impose valid-path allocation, contention, hashing, sink work, code-size growth, or public API complexity. | Added `v0.52.35 - Evidence Hot-Path And API Containment Gate` and expanded `v0.52.19`, `v0.52.33..=v0.52.34`, `v0.72.0`, `v0.73.0`, `v0.79.0`, `v0.88.0`, `v0.140.0`, `v0.176.0`, `v0.180.0`, `v0.192.0`, `v0.193.0`, `v0.218.0`, `v0.258.0`, and `v0.262.0` with allocation-free uncontended valid paths, parent arenas/index handles, amortized reservation, admitted cardinalities, internal machinery, stable non-generic outcomes, evidence-disabled internal baselines, and release-blocking overhead/size thresholds. |
 | Evidence arenas lacked an explicit capacity, reuse, transfer, and structurally equivalent benchmark-baseline contract. | Added `v0.52.36 - Evidence Arena Capacity And Benchmark Integrity` and expanded `v0.52.20`, `v0.52.33..=v0.52.35`, `v0.73.0`, `v0.74.0`, `v0.88.2`, `v0.139.0`, `v0.175.0`, `v0.176.0`, `v0.177.0`, `v0.179.1`, `v0.180.0`, and `v0.218.0` with capability-backed simultaneous-work sizing, local backpressure/exhaustion, ABA-safe handles, audited stack placement, reference-safe transfer/cancellation, optional benchmark-justified pools, non-generic public mode dispatch, and optimizer-resistant equivalent baselines. |
-| Invalid-path baselines, benchmark timing/instrumentation, runtime cardinality-class mapping, and generation-wrap behavior remained ambiguous. | Added `v0.52.37 - Evidence Benchmark Measurement And Dispatch Closure` and expanded `v0.52.34..=v0.52.36`, `v0.176.0`, `v0.177.0`, `v0.180.0`, `v0.258.0`, and `v0.262.0` with valid-only disabled baselines, invalid semantic projections/minimal-evidence baselines, protocol-versus-evidence counters, untimed setup/result work, uninstrumented production thresholds, separate non-perturbing conformance instrumentation, exact requested-limit enforcement over upward internal capacity classes, and fail-closed generation retirement. |
+| Invalid-path baselines, benchmark timing/instrumentation, runtime cardinality-class mapping, and generation-wrap behavior remained ambiguous. | Added `v0.52.37 - Evidence Benchmark Measurement And Dispatch Closure` and expanded `v0.52.34..=v0.52.36`, `v0.176.0`, `v0.177.0`, `v0.180.0`, `v0.258.0`, and `v0.262.0` with valid-only disabled baselines, invalid semantic projections/minimal-evidence baselines, protocol-versus-evidence counters, lifecycle-complete timing with untimed setup/result work, uninstrumented production thresholds, separate non-perturbing conformance instrumentation, exact requested-limit enforcement over upward internal capacity classes, physical-class resource charging, and fail-closed generation retirement. |
 | Validation contexts could remain non-forgeable yet accidentally retain recursive ancestry or unstable process-local identities. | Expanded `v0.52.32`, `v0.63.0`, `v0.73.0`, `v0.74.0`, `v0.88.1`, and `v0.134.0` with bounded parent handles, borrowed child contexts, deterministic lease release, canonical versioned encoding, domain-separated cryptographic digests, and constant-size/stability tests. |
 | First-party cryptographic arithmetic needed explicit machine-checked implementation evidence beyond the early secp gate. | Added `v0.178.1 - Kani Cryptographic Arithmetic Proofs` for limbs, reduction, conversion, inversion, square roots, point exceptions, scalar multiplication, and canonical serialization across the broader cryptographic core. |
 | Provider JSON-RPC, HTTP, WebSocket, and IPC boundaries lacked several canonicality, redirect, rebinding, proxy, credential, and local-peer controls. | Expanded `v0.92.0` and `v0.94.0..=v0.97.0` with canonical quantity/bytes/ID rules, decoded-byte charging, redirect/origin/DNS/proxy/credential policy, Unix ownership/symlink checks, and Windows pipe ACL/identity checks. |
@@ -4193,10 +4193,14 @@ Deliverables:
   evidence-operation counters cover reserve, derive, fill, borrow, finalize,
   attach, and sink work and are intentionally compared rather than required to
   match;
-- timed regions contain only the validator invocation and the evidence
-  operations belonging to the selected production/baseline path; input/object/
-  context construction, stable-digest/result hashing, output equality checks,
-  report formatting, and benchmark-barrier preparation occur outside timing;
+- timed regions contain the complete validator invocation and the evidence
+  operations belonging to the selected production/baseline path, including
+  polling async validators to completion and finalizing or releasing operation-
+  scoped reservations, child handles, leases, cancellation guards, temporary
+  arenas, RAII destructors, deferred cleanup, and resource counters; input/
+  object/context construction, stable-digest/result hashing, output equality
+  checks, report formatting, and benchmark-barrier preparation occur outside
+  timing, and only the compact returned outcome may remain alive afterward;
 - authoritative production latency/throughput thresholds run uninstrumented;
   allocation, lock, atomic, clone, and sink-spy checks run in separate
   instrumented conformance binaries/configurations;
@@ -4209,6 +4213,10 @@ Deliverables:
   documented maximum before validation; admitted values dispatch upward to the
   smallest internal capacity class that can hold them while enforcing the
   exact requested collection/isolation stop;
+- memory permits, worker accounting, and admission control charge and reserve
+  the full selected physical capacity class before validation begins, never
+  merely the caller's smaller logical limit; failure to reserve that class is
+  a retryable local outcome and no validator work starts;
 - internal capacity-class rounding never becomes visible as extra diagnostics,
   cache entries, peer attribution, evidence records, or work beyond the public
   operational limit, and no value is rounded down;
@@ -4226,7 +4234,9 @@ Verification:
 - first-invalid, diagnostic, batch-isolation, cancellation, local-exhaustion,
   and optional-sink-failure benchmark cases;
 - timed-region boundary tests proving setup, digest/result hashing, equality
-  checks, barriers, and report work are excluded;
+  checks, barriers, and report work are excluded while async polling, resource
+  release/finalization, RAII destruction, deferred cleanup, and restoration of
+  expected post-operation counters are included;
 - uninstrumented threshold reports paired with separate instrumented allocation/
   lock/atomic/clone/sink conformance reports;
 - instrumentation self-tests and seeded perturbation cases proving counters or
@@ -4235,6 +4245,9 @@ Verification:
 - exhaustive public limit tests over zero, one, every internal class boundary,
   between-class values, maximum, and above-maximum values, proving upward class
   mapping with exact requested stop and pre-validation rejection where required;
+- constrained-permit boundary tests proving, for example, that logical limit 17
+  selects and charges capacity 32, stops collection at 17, and cannot begin
+  validation when the capacity-32 memory/worker reservation is unavailable;
 - generation-at-maximum, retirement, stale-handle, ABA, concurrent borrow,
   cancellation, transfer, persistence/restart, and retryable-local-outcome tests;
 - Kani-ready dispatch and generation state models consumed at `v0.177.0`.
@@ -4242,9 +4255,11 @@ Verification:
 Exit criteria:
 
 - Benchmarks compare semantically equivalent work without timing setup or
-  instrumentation artifacts, production thresholds remain uninstrumented and
-  authoritative, runtime mode dispatch never exceeds the exact requested
-  operational limit, and generation identity can never wrap or resurrect.
+  instrumentation artifacts, but include complete async and resource-cleanup
+  lifecycle cost; production thresholds remain uninstrumented and authoritative,
+  runtime mode dispatch charges its physical class without exceeding the exact
+  requested operational limit, and generation identity can never wrap or
+  resurrect.
 - `v0.52.37 implementation stop reached. Run pentest for this exact
   commit.`
 

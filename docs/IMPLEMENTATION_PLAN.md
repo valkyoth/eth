@@ -133,8 +133,9 @@ The first production value is:
   collection modes, immutable optional-sink access, allocation-free valid
   paths, measurable overhead gates, contained public APIs, capability-backed
   ABA-safe arenas, structurally equivalent benchmarks, explicit measurement
-  boundaries, exact runtime-mode dispatch, and fail-closed generation
-  retirement; and
+  boundaries through async/resource lifecycle completion, exact runtime-mode
+  dispatch with physical-capacity-class resource charging, and fail-closed
+  generation retirement; and
   `v0.77.0` through `v0.81.0` build first-party KZG/blob verification before
   later releases claim complete affected-fork execution.
 - `eth-valkyoth-sdk`: optional owned models, prelude, builders, and high-level
