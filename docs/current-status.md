@@ -107,7 +107,8 @@ Legend:
 full-width multiplication scalar, point-coordinate, infinity, and all
 `0x0b..=0x11` frame parsers. Point values are wire-valid only: curve membership,
 subgroup validation, mapping, arithmetic, MSM, pairing, and precompile execution
-remain assigned to `v0.52.2..=v0.52.9`.
+remain assigned to `v0.52.11..=v0.52.18` after the consensus-correctness and
+resource-boundary releases at `v0.52.2..=v0.52.10`.
 
 The release also zero-initializes EVM memory, makes execution contexts one-shot
 until destructive reset, restores warm/cold tracking after failed stateful

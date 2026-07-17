@@ -12,7 +12,7 @@ this release.
 
 It does not prove that a non-infinity point lies on the BLS12-381 curve, belongs
 to the required subgroup, or is valid for arithmetic. Those checks and the
-precompile implementations are assigned to `v0.52.2..=v0.52.9`.
+precompile implementations are assigned to `v0.52.11..=v0.52.18`.
 
 ## Canonical Rules
 

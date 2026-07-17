@@ -120,7 +120,10 @@ The first production value is:
   first-party dependency-free EIP-152 BLAKE2F execution and the optimized
   BN254 final-exponentiation remediation; `v0.52.0` fixes the remaining
   KZG/BLS frame, output, gas, conformance, and backend-admission contracts;
-  `v0.52.1` through `v0.52.9` build first-party BLS12-381 execution; and
+  `v0.52.1` defines BLS12-381 wire domains, `v0.52.2..=v0.52.10` close
+  consensus/resource/precompile gaps, `v0.52.11..=v0.52.18` build first-party
+  BLS12-381 execution, and `v0.52.19..=v0.52.21` freeze architecture,
+  resource-governor, and cryptographic-provider contracts; and
   `v0.77.0` through `v0.81.0` build first-party KZG/blob verification before
   later releases claim complete affected-fork execution.
 - `eth-valkyoth-sdk`: optional owned models, prelude, builders, and high-level
