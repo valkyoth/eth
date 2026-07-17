@@ -51,7 +51,8 @@ Every release should prefer:
 
 ## Required Milestone Format
 
-Every untagged release must remain a standalone implementation handoff with
+Every release, including historical tagged releases, must remain a standalone
+implementation handoff with
 these explicit sections:
 
 - `Status`: whether the release is planned, in implementation, awaiting
@@ -316,6 +317,8 @@ relevant dependency point.
 
 ### v0.1.0 - Repository Foundation
 
+Status: tagged as `v0.1.0`.
+
 Goal: initialize the serious Rust workspace and policy baseline.
 
 Deliverables:
@@ -337,8 +340,12 @@ Exit criteria:
 
 - A new contributor can understand the scope, security posture, and release
   process from the repository docs.
+- `v0.1.0 implementation stop reached. Run pentest for this exact
+  commit.`
 
 ### v0.2.0 - Release Readiness Gate
+
+Status: tagged as `v0.2.0`.
 
 Goal: make the pentest-before-tag process and crates.io publish order
 enforceable by local tooling.
@@ -369,10 +376,14 @@ Exit criteria:
 - The project can refuse a tag-ready claim when pentest or release evidence is
   missing.
 - Future protocol milestones have an explicit source-check workflow.
+- `v0.2.0 implementation stop reached. Run pentest for this exact
+  commit.`
 
 ## Phase 1: Primitive And Error Foundation
 
 ### v0.3.0 - Domain Newtypes
+
+Status: tagged as `v0.3.0`.
 
 Goal: make Ethereum numeric and byte domains explicit.
 
@@ -395,8 +406,12 @@ Verification:
 Exit criteria:
 
 - Public APIs no longer use unqualified integers for core protocol concepts.
+- `v0.3.0 implementation stop reached. Run pentest for this exact
+  commit.`
 
 ### v0.4.0 - Stable Error Model
+
+Status: tagged as `v0.4.0`.
 
 Goal: establish non-panicking error categories for protocol operations.
 
@@ -420,8 +435,12 @@ Exit criteria:
 
 - Malformed input and unsupported protocol data return errors, not panics.
 - Unchanged support crates are not republished for the `0.4.0` release.
+- `v0.4.0 implementation stop reached. Run pentest for this exact
+  commit.`
 
 ### v0.5.0 - Decode Budget Model
+
+Status: tagged as `v0.5.0`.
 
 Goal: make resource limits mandatory for untrusted bytes.
 
@@ -438,10 +457,14 @@ Verification:
 Exit criteria:
 
 - No decoder entry point can be designed without an explicit budget parameter.
+- `v0.5.0 implementation stop reached. Run pentest for this exact
+  commit.`
 
 ## Phase 2: RLP Codec In Small Passes
 
 ### v0.6.0 - RLP Scalar Decoder
+
+Status: tagged as `v0.6.0`.
 
 Goal: decode RLP bytes and strings with exact consumption.
 
@@ -462,8 +485,12 @@ Verification:
 Exit criteria:
 
 - Scalar RLP inputs are accepted or rejected deterministically.
+- `v0.6.0 implementation stop reached. Run pentest for this exact
+  commit.`
 
 ### v0.7.0 - RLP List Decoder
+
+Status: tagged as `v0.7.0`.
 
 Goal: decode nested RLP lists under resource limits.
 
@@ -481,8 +508,12 @@ Verification:
 Exit criteria:
 
 - Deep or oversized RLP lists fail closed.
+- `v0.7.0 implementation stop reached. Run pentest for this exact
+  commit.`
 
 ### v0.8.0 - Canonical RLP Integers
+
+Status: tagged as `v0.8.0`.
 
 Goal: enforce Ethereum canonical integer rules.
 
@@ -500,8 +531,12 @@ Verification:
 Exit criteria:
 
 - Noncanonical integer encodings cannot reach protocol validation.
+- `v0.8.0 implementation stop reached. Run pentest for this exact
+  commit.`
 
 ### v0.9.0 - RLP Encoding Round Trips
+
+Status: tagged as `v0.9.0`.
 
 Goal: add canonical encoding for admitted RLP values.
 
@@ -518,8 +553,12 @@ Verification:
 Exit criteria:
 
 - Canonical values round-trip without accepting noncanonical forms.
+- `v0.9.0 implementation stop reached. Run pentest for this exact
+  commit.`
 
 ### v0.9.1 - Canonical Integer Source Of Truth
+
+Status: tagged as `v0.9.1`.
 
 Goal: remove duplicated Ethereum RLP integer canonicality logic between
 `eth-valkyoth-codec` and `eth-valkyoth-primitives`.
@@ -545,8 +584,12 @@ Exit criteria:
 - There is one implementation of canonical RLP integer payload rules.
 - A canonicality-rule change cannot silently diverge between codec and
   primitive domain constructors.
+- `v0.9.1 implementation stop reached. Run pentest for this exact
+  commit.`
 
 ### v0.9.2 - Primitive RLP Bridge
+
+Status: tagged as `v0.9.2`.
 
 Goal: make primitive domain types directly usable with the bounded RLP codec
 without callers writing repeated field glue.
@@ -571,8 +614,12 @@ Exit criteria:
   reimplementing codec/primitive bridging themselves.
 - Primitive RLP helpers preserve the single canonicality source established in
   `v0.9.1`.
+- `v0.9.2 implementation stop reached. Run pentest for this exact
+  commit.`
 
 ### v0.9.3 - Keccak Boundary Decision
+
+Status: tagged as `v0.9.3`.
 
 Goal: decide and document the Keccak-256 boundary before transaction hashes,
 sender recovery, or header hashing are implemented.
@@ -600,8 +647,12 @@ Exit criteria:
 
 - Later transaction and proof work has an explicit hashing boundary and cannot
   accidentally pull hashing into the default graph without review.
+- `v0.9.3 implementation stop reached. Run pentest for this exact
+  commit.`
 
 ### v0.10.0 - RLP Fuzz Harness
+
+Status: tagged as `v0.10.0`.
 
 Goal: continuously fuzz every RLP parser.
 
@@ -623,10 +674,14 @@ Exit criteria:
 
 - Every future RLP parser change has a fuzz target to update.
 - No untrusted parser ships without a corresponding fuzz target.
+- `v0.10.0 implementation stop reached. Run pentest for this exact
+  commit.`
 
 ## Phase 3: Transaction Envelopes
 
 ### v0.11.0 - Transaction Envelope Shell
+
+Status: tagged as `v0.11.0`.
 
 Goal: classify legacy and typed transaction envelopes safely.
 
@@ -645,8 +700,12 @@ Exit criteria:
 
 - Unknown transaction types are rejected or represented explicitly without
   panics.
+- `v0.11.0 implementation stop reached. Run pentest for this exact
+  commit.`
 
 ### v0.12.0 - Legacy Transaction Decode
+
+Status: tagged as `v0.12.0`.
 
 Goal: decode legacy Ethereum transactions without sender recovery.
 
@@ -663,6 +722,8 @@ Verification:
 Exit criteria:
 
 - Legacy transactions can be decoded into an unvalidated state only.
+- `v0.12.0 implementation stop reached. Run pentest for this exact
+  commit.`
 
 ### v0.13.0 - Access List Transaction Decode
 
@@ -685,6 +746,8 @@ Verification:
 Exit criteria:
 
 - Access lists are bounded before validation.
+- `v0.13.0 implementation stop reached. Run pentest for this exact
+  commit.`
 
 ### v0.14.0 - Dynamic Fee Transaction Decode
 
@@ -707,6 +770,8 @@ Verification:
 Exit criteria:
 
 - Dynamic-fee transactions parse without implying they are valid for a fork.
+- `v0.14.0 implementation stop reached. Run pentest for this exact
+  commit.`
 
 ### v0.15.0 - Blob Transaction Decode
 
@@ -728,6 +793,8 @@ Verification:
 Exit criteria:
 
 - Blob transaction data remains bounded and fork-unvalidated.
+- `v0.15.0 implementation stop reached. Run pentest for this exact
+  commit.`
 
 ### v0.16.0 - Transaction Encoding
 
@@ -750,6 +817,8 @@ Verification:
 Exit criteria:
 
 - Transaction encoding cannot produce known noncanonical forms.
+- `v0.16.0 implementation stop reached. Run pentest for this exact
+  commit.`
 
 ### v0.16.1 - RLP Derive Evaluation
 
@@ -777,6 +846,8 @@ Exit criteria:
 
 - Derive macros cannot bypass decode budgets, canonicality checks, or
   transaction/fork validation typestates.
+- `v0.16.1 implementation stop reached. Run pentest for this exact
+  commit.`
 
 ## Phase 4: Fork And Validation States
 
@@ -802,6 +873,8 @@ Verification:
 Exit criteria:
 
 - Consensus-sensitive operations require explicit chain and fork context.
+- `v0.17.0 implementation stop reached. Run pentest for this exact
+  commit.`
 
 ### v0.18.0 - Transaction Validation Typestates
 
@@ -822,6 +895,8 @@ Verification:
 Exit criteria:
 
 - Callers cannot accidentally treat decoded bytes as fork-valid transactions.
+- `v0.18.0 implementation stop reached. Run pentest for this exact
+  commit.`
 
 ### v0.19.0 - Replay Domain Validation
 
@@ -842,6 +917,8 @@ Verification:
 Exit criteria:
 
 - Wrong-chain transactions fail before sender recovery results are accepted.
+- `v0.19.0 implementation stop reached. Run pentest for this exact
+  commit.`
 
 ### v0.20.0 - Sender Recovery
 
@@ -867,6 +944,8 @@ Verification:
 Exit criteria:
 
 - Sender recovery has deterministic failure modes and dependency evidence.
+- `v0.20.0 implementation stop reached. Run pentest for this exact
+  commit.`
 
 ### v0.21.0 - EIP-712 Domain Safety
 
@@ -891,6 +970,8 @@ Verification:
 Exit criteria:
 
 - Raw digest signing is not the primary safe signing interface.
+- `v0.21.0 implementation stop reached. Run pentest for this exact
+  commit.`
 
 ## Phase 4A: Signing And Encoding Completeness
 
@@ -924,6 +1005,8 @@ Exit criteria:
 
 - Sender recovery no longer requires downstream callers to hand-build standard
   transaction signing digests.
+- `v0.22.0 implementation stop reached. Run pentest for this exact
+  commit.`
 
 ### v0.23.0 - Full Transaction Signature Validation
 
@@ -953,6 +1036,8 @@ Exit criteria:
 
 - A caller can validate decoded transaction signatures without using raw digest
   recovery as the primary API.
+- `v0.23.0 implementation stop reached. Run pentest for this exact
+  commit.`
 
 ### v0.24.0 - Set-Code Transaction Decode
 
@@ -986,6 +1071,8 @@ Implementation note:
   transaction type `0x04`, authorization magic `0x05`, transaction payload
   fields, required destination address, and authorization tuple shape
   `[chain_id, address, nonce, y_parity, r, s]`.
+- `v0.24.0 implementation stop reached. Run pentest for this exact
+  commit.`
 
 ### v0.24.1 - Set-Code Signing And Authorization Validation
 
@@ -1029,6 +1116,8 @@ Implementation note:
 - Official source check refreshed against final EIP-7702 on 2026-07-02:
   set-code transactions sign `keccak256(0x04 || TransactionPayload)`, and
   authorization tuples sign `keccak256(0x05 || rlp([chain_id, address, nonce]))`.
+- `v0.24.1 implementation stop reached. Run pentest for this exact
+  commit.`
 
 ### v0.24.2 - Set-Code Transaction Validity Gate
 
@@ -1081,6 +1170,8 @@ Implementation note:
   must be empty or an EIP-7702 delegation indicator before a tuple can be
   applied. Failed tuple checks skip that tuple rather than rejecting the whole
   transaction.
+- `v0.24.2 implementation stop reached. Run pentest for this exact
+  commit.`
 
 ### v0.25.0 - Public RLP Derives
 
@@ -1108,6 +1199,8 @@ Exit criteria:
 
 - Users can derive RLP for simple reviewed structs without bypassing the
   bounded codec contract.
+- `v0.25.0 implementation stop reached. Run pentest for this exact
+  commit.`
 
 ### v0.26.0 - EIP-712 Typed-Data Encoder
 
@@ -1144,6 +1237,8 @@ Implementation note:
 - `v0.26.0` accepts caller-provided borrowed descriptors and values. It does
   not parse JSON typed-data documents, so the default crate remains `no_std`
   and allocation-free. JSON parsing is a separate boundary in `v0.26.1`.
+- `v0.26.0 implementation stop reached. Run pentest for this exact
+  commit.`
 
 ### v0.26.1 - EIP-712 JSON Typed-Data Parser Boundary
 
@@ -1178,6 +1273,8 @@ Exit criteria:
 
 - JSON-RPC typed-data payload handling has an explicit, versioned boundary
   instead of being treated as an informal caller responsibility.
+- `v0.26.1 implementation stop reached. Run pentest for this exact
+  commit.`
 
 ### v0.27.0 - Optional Keccak Backend Admission
 
@@ -1209,6 +1306,8 @@ Exit criteria:
 
 - Applications that want a first-party software backend can opt in without
   changing the dependency-free default boundary.
+- `v0.27.0 implementation stop reached. Run pentest for this exact
+  commit.`
 
 ## Phase 5: Blocks, Receipts, And Proofs
 
@@ -1233,6 +1332,8 @@ Verification:
 Exit criteria:
 
 - Headers can be decoded without implying full block validity.
+- `v0.28.0 implementation stop reached. Run pentest for this exact
+  commit.`
 
 ### v0.29.0 - Receipt Decode
 
@@ -1254,6 +1355,8 @@ Verification:
 Exit criteria:
 
 - Receipt data is bounded before trie or block validation.
+- `v0.29.0 implementation stop reached. Run pentest for this exact
+  commit.`
 
 ### v0.30.0 - Withdrawal And Post-Merge Fields
 
@@ -1275,6 +1378,8 @@ Verification:
 Exit criteria:
 
 - Post-merge fields are not bolted onto pre-merge validation paths.
+- `v0.30.0 implementation stop reached. Run pentest for this exact
+  commit.`
 
 ### v0.31.0 - MPT Node Decoder
 
@@ -1295,6 +1400,8 @@ Verification:
 Exit criteria:
 
 - Trie proof input cannot allocate or recurse without limits.
+- `v0.31.0 implementation stop reached. Run pentest for this exact
+  commit.`
 
 ### v0.32.0 - Inclusion Proof Verification
 
@@ -1322,6 +1429,8 @@ Verification:
 Exit criteria:
 
 - Inclusion proof APIs distinguish malformed, absent, and wrong-root proofs.
+- `v0.32.0 implementation stop reached. Run pentest for this exact
+  commit.`
 
 ### v0.33.0 - Account And Storage Proofs
 
@@ -1350,6 +1459,8 @@ Verification:
 Exit criteria:
 
 - Verified RPC state has a cryptographic proof path separate from trusted RPC.
+- `v0.33.0 implementation stop reached. Run pentest for this exact
+  commit.`
 
 ## Phase 6: Conformance And Test Infrastructure
 
@@ -1374,6 +1485,8 @@ Verification:
 Exit criteria:
 
 - Every conformance claim names exact upstream revisions.
+- `v0.34.0 implementation stop reached. Run pentest for this exact
+  commit.`
 
 ### v0.35.0 - Execution Test Harness
 
@@ -1394,6 +1507,8 @@ Verification:
 Exit criteria:
 
 - Validation behavior is tested against external Ethereum material.
+- `v0.35.0 implementation stop reached. Run pentest for this exact
+  commit.`
 
 ### v0.36.0 - Differential Test Harness
 
@@ -1414,6 +1529,8 @@ Verification:
 Exit criteria:
 
 - The project is not only testing wrappers against themselves.
+- `v0.36.0 implementation stop reached. Run pentest for this exact
+  commit.`
 
 ## Phase 7: Optional Execution
 
@@ -1438,6 +1555,8 @@ Verification:
 Exit criteria:
 
 - REVM cannot enter the graph until cargo-deny, MSRV, and feature policy pass.
+- `v0.37.0 implementation stop reached. Run pentest for this exact
+  commit.`
 
 ### v0.37.1 - REVM Dependency Recheck
 
@@ -1474,6 +1593,8 @@ Exit criteria:
 
 - Execution work is either unblocked by a clean admitted graph or remains
   explicitly blocked with a documented reason.
+- `v0.37.1 implementation stop reached. Run pentest for this exact
+  commit.`
 
 ### v0.37.2 - Core Dependency Independence Audit
 
@@ -1506,6 +1627,8 @@ Exit criteria:
 - No core Ethereum dependency is accidental or undocumented.
 - Every third-party core implementation has a boundary, an optional/reference
   classification, or a first-party replacement milestone.
+- `v0.37.2 implementation stop reached. Run pentest for this exact
+  commit.`
 
 ### v0.37.3 - Signature And Crypto Backend Boundaries
 
@@ -1540,6 +1663,8 @@ Exit criteria:
 - Core signature verification APIs are boundary-driven.
 - Concrete cryptographic implementation crates are explicit choices, not
   invisible protocol-core dependencies.
+- `v0.37.3 implementation stop reached. Run pentest for this exact
+  commit.`
 
 ### v0.37.4 - Constant-Time And Reference Dependency Policy
 
@@ -1571,6 +1696,8 @@ Exit criteria:
   accepted as a reviewed exception.
 - Reference oracle crates are documented as test/fuzz-only and cannot silently
   become runtime protocol dependencies.
+- `v0.37.4 implementation stop reached. Run pentest for this exact
+  commit.`
 
 ### v0.37.5 - Optional Parser And Sanitization Boundary Review
 
@@ -1606,6 +1733,8 @@ Exit criteria:
 - Downstream callers can see exactly when those dependencies enter the graph.
 - The permanent pentest report is committed at
   `security/pentest/v0.37.5.md`.
+- `v0.37.5 implementation stop reached. Run pentest for this exact
+  commit.`
 
 ### v0.38.0 - Explicit Execution Environment
 
@@ -1636,6 +1765,8 @@ Exit criteria:
 - No concrete EVM backend is admitted by this release.
 - The permanent pentest report is committed at
   `security/pentest/v0.38.0.md`.
+- `v0.38.0 implementation stop reached. Run pentest for this exact
+  commit.`
 
 ### v0.39.0 - Bounded Gas Estimation
 
@@ -1669,6 +1800,8 @@ Exit criteria:
 - No concrete EVM backend is admitted by this release.
 - The permanent pentest report is committed at
   `security/pentest/v0.39.0.md`.
+- `v0.39.0 implementation stop reached. Run pentest for this exact
+  commit.`
 
 ## Phase 8: Native Audited EVM Engine
 
@@ -1699,6 +1832,8 @@ Verification:
 Exit criteria:
 
 - The native engine has a small audited type foundation independent of REVM.
+- `v0.40.0 implementation stop reached. Run pentest for this exact
+  commit.`
 
 ### v0.41.0 - Native EVM Arithmetic And Control Flow
 
@@ -1726,6 +1861,8 @@ Exit criteria:
 
 - Claimed basic bytecode executes deterministically and fails closed on invalid
   control flow.
+- `v0.41.0 implementation stop reached. Run pentest for this exact
+  commit.`
 
 ### v0.42.0 - Native EVM Gas Accounting
 
@@ -1748,6 +1885,8 @@ Verification:
 Exit criteria:
 
 - Every executed opcode in the claimed set consumes gas before side effects.
+- `v0.42.0 implementation stop reached. Run pentest for this exact
+  commit.`
 
 ### v0.43.0 - Native EVM State Access
 
@@ -1772,6 +1911,8 @@ Verification:
 Exit criteria:
 
 - State access is explicit, bounded, and fork-aware.
+- `v0.43.0 implementation stop reached. Run pentest for this exact
+  commit.`
 
 ### v0.43.1 - Native EVM Historical Fork Matrix
 
@@ -1804,6 +1945,8 @@ Exit criteria:
 
 - A caller can select every historical Ethereum execution fork by name, and
   unsupported behavior fails with explicit fork/opcode errors.
+- `v0.43.1 implementation stop reached. Run pentest for this exact
+  commit.`
 
 ### v0.43.2 - Native EVM Pre-Berlin State Gas Schedules
 
@@ -1836,6 +1979,8 @@ Exit criteria:
 
 - Pre-London state execution is enabled only for forks with implemented,
   reviewed, and tested historical gas/opcode rules.
+- `v0.43.2 implementation stop reached. Run pentest for this exact
+  commit.`
 
 ### v0.44.0 - Native EVM Calls And Create
 
@@ -1863,6 +2008,8 @@ Exit criteria:
 
 - Calls and creation cannot execute host behavior or commit state outside the
   explicit journal policy.
+- `v0.44.0 implementation stop reached. Run pentest for this exact
+  commit.`
 
 ### v0.45.0 - Native EVM Precompiles
 
@@ -1893,6 +2040,8 @@ Exit criteria:
 
 - Precompiles are explicit audited modules and do not pull unreviewed crypto
   dependencies into the default graph.
+- `v0.45.0 implementation stop reached. Run pentest for this exact
+  commit.`
 
 ### v0.46.0 - Native EVM Hash Precompiles
 
@@ -1923,6 +2072,8 @@ Exit criteria:
 
 - Hash precompile execution is deterministic, bounded, and covered by vectors
   before broader state tests can claim Frontier precompile support.
+- `v0.46.0 implementation stop reached. Run pentest for this exact
+  commit.`
 
 ### v0.47.0 - Native EVM ECRECOVER Precompile
 
@@ -1953,6 +2104,8 @@ Exit criteria:
 
 - ECRECOVER cannot silently bypass replay/signature policy or introduce a
   default signing/recovery dependency.
+- `v0.47.0 implementation stop reached. Run pentest for this exact
+  commit.`
 
 ### v0.48.0 - Native EVM ModExp Precompile
 
@@ -1980,6 +2133,8 @@ Verification:
 Exit criteria:
 
 - ModExp cannot allocate or run unboundedly from hostile calldata.
+- `v0.48.0 implementation stop reached. Run pentest for this exact
+  commit.`
 
 ### v0.49.0 - Native EVM BN254 Add And Mul Precompiles
 
@@ -2007,6 +2162,8 @@ Exit criteria:
 
 - BN254 add/mul execution is isolated and vector-backed before pairing support
   adds more complex batch behavior.
+- `v0.49.0 implementation stop reached. Run pentest for this exact
+  commit.`
 
 ### v0.50.0 - Native EVM BN254 Pairing Frame Boundary
 
@@ -2036,6 +2193,8 @@ Exit criteria:
   gas and release limits.
 - Non-empty pairing algebra remains explicitly fail-closed until subgroup and
   pairing arithmetic releases land.
+- `v0.50.0 implementation stop reached. Run pentest for this exact
+  commit.`
 
 ### v0.50.1 - Native EVM BN254 Pairing Subgroup Validation
 
@@ -2064,6 +2223,8 @@ Exit criteria:
 
 - Every non-empty pairing tuple is rejected unless both G1 and G2 inputs are in
   the admitted groups.
+- `v0.50.1 implementation stop reached. Run pentest for this exact
+  commit.`
 
 ### v0.50.2 - Native EVM BN254 Fp6/Fp12 Tower Foundation
 
@@ -2099,6 +2260,8 @@ Exit criteria:
 - Future dispatcher integration must treat `PrecompileBackendUnavailable` as a
   reverting precompile call and must charge the precompile gas before invoking
   pairing parsing or execution.
+- `v0.50.2 implementation stop reached. Run pentest for this exact
+  commit.`
 
 ### v0.50.3 - Native EVM BN254 Pairing Tuple Stream
 
@@ -2132,6 +2295,8 @@ Exit criteria:
   input length, and does not claim Miller-loop or pairing correctness.
 - Dispatcher-style plan execution cannot reach BN254 pairing validation work
   without charging the supplied gas meter for that call.
+- `v0.50.3 implementation stop reached. Run pentest for this exact
+  commit.`
 
 ### v0.50.4 - Native EVM BN254 Line-Function Foundation
 
@@ -2164,6 +2329,8 @@ Exit criteria:
 - Dispatcher-facing ModExp, BN254 add/mul, and BN254 pairing execution cannot
   reach validation or arithmetic work without charging the supplied gas meter
   for that call.
+- `v0.50.4 implementation stop reached. Run pentest for this exact
+  commit.`
 
 ### v0.50.5 - Native EVM BN254 Miller Loop
 
@@ -2192,6 +2359,8 @@ Exit criteria:
 - Miller-loop accumulation is deterministic, bounded, and vector-backed.
 - Non-empty EIP-197 pairing execution remains fail-closed until final
   exponentiation is admitted.
+- `v0.50.5 implementation stop reached. Run pentest for this exact
+  commit.`
 
 ### v0.50.6 - Native EVM BN254 Sparse Miller Economics
 
@@ -2218,6 +2387,8 @@ Exit criteria:
 
 - Non-empty EIP-197 pairing remains fail-closed, and final exponentiation cannot
   be admitted until sparse multiplication and gas/CPU evidence are reviewed.
+- `v0.50.6 implementation stop reached. Run pentest for this exact
+  commit.`
 
 ### v0.50.7 - Native EVM BN254 Pairing Final Exponentiation Foundation
 
@@ -2251,6 +2422,8 @@ Exit criteria:
   unbounded CPU path independent of gas and release limits.
 - Non-empty EIP-197 pairing execution remains fail-closed until the optimal-ate
   post-loop line terms and final result admission are reviewed.
+- `v0.50.7 implementation stop reached. Run pentest for this exact
+  commit.`
 
 ### v0.50.8 - Native EVM BN254 Frobenius Post-Loop Point Foundation
 
@@ -2285,6 +2458,8 @@ Exit criteria:
 - The Q1/-Q2 point foundation is vector-backed and bounded, but public
   non-empty success remains disabled until the line-carrier and
   result-admission releases.
+- `v0.50.8 implementation stop reached. Run pentest for this exact
+  commit.`
 
 ### v0.50.9 - Native EVM BN254 Projective Post-Loop Line Carrier
 
@@ -2319,6 +2494,8 @@ Exit criteria:
 
 - The complete optimal-ate accumulator is vector-backed and bounded, but public
   non-empty success remains disabled until the result-admission release.
+- `v0.50.9 implementation stop reached. Run pentest for this exact
+  commit.`
 
 ### v0.50.10 - Native EVM BN254 Pairing Result Admission
 
@@ -2348,6 +2525,8 @@ Exit criteria:
 
 - Pairing execution cannot create an unbounded CPU path independent of gas and
   release limits, and every admitted non-empty result is vector-backed.
+- `v0.50.10 implementation stop reached. Run pentest for this exact
+  commit.`
 
 ### v0.51.0 - Native EVM BLAKE2F Precompile
 
@@ -2384,6 +2563,8 @@ Exit criteria:
   accept alternate encodings.
 - The BN254 final-exponentiation pentest finding is closed without adding
   default crypto, bigint, allocator, or backend dependencies.
+- `v0.51.0 implementation stop reached. Run pentest for this exact
+  commit.`
 
 ### v0.52.0 - Native EVM Advanced Precompile Backends
 
@@ -2422,6 +2603,8 @@ Exit criteria:
 - Every changed support-crate public API has a semver-compatible independent
   crate version and matching workspace, fuzz, publish-plan, lockfile, and
   crate-matrix metadata.
+- `v0.52.0 implementation stop reached. Run pentest for this exact
+  commit.`
 
 ### v0.52.1 - BLS12-381 Canonical Field And Point Encodings
 
@@ -11436,10 +11619,12 @@ Exit criteria:
 
 - The exact commit is approved for the final `v1.0.0` tag with no further
   source, manifest, lockfile, documentation, SBOM, or packaging changes.
-- `v1.0.0-rc.1 implementation stop reached. Run final candidate pentest for
-  this exact commit.`
+- `v1.0.0-rc.1 implementation stop reached. Run pentest for this exact
+  commit.`
 
 ## v1.0.0 - Complete Production Ethereum Toolkit
+
+Status: planned.
 
 Goal: publish the first serious production-ready release only after the complete
 roadmap above has reached its exit criteria for every capability claimed by
@@ -11499,3 +11684,4 @@ Exit criteria:
   accurately in the support matrix;
 - the final `v1.0.0` tag points to the unchanged approved
   `v1.0.0-rc.N` commit.
+- `v1.0.0 implementation stop reached. Run pentest for this exact commit.`

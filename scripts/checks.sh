@@ -4,6 +4,8 @@ set -eu
 cargo fmt --all --check
 scripts/check_shell_syntax.sh
 scripts/check_doc_links.sh
+scripts/check_release_plan.sh
+scripts/test-release-plan.sh
 scripts/test-check-latest-tools.sh
 if ! cmp -s README.md crates/eth/README.md; then
     echo "README.md and crates/eth/README.md must remain identical" >&2
