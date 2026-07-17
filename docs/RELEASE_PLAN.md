@@ -286,18 +286,19 @@ relevant dependency point.
 | Security-relevant caches lacked one global identity and validation-level invariant. | Expanded `v0.52.19`, `v0.88.1`, and `v0.218.0` with chain/genesis, fork, snapshot/root, object, and validation-domain identity plus atomic reorg/fork invalidation. |
 | Snap was planned mainly as a consumer rather than a bounded snapshot-pinned serving protocol. | Expanded `v0.157.0` with range/proof construction, serving budgets, fairness, snapshot cancellation, and mixed-snapshot rejection. |
 | ModExp length handling and shared time semantics needed explicit wide-integer and clock-domain contracts. | Expanded `v0.52.10` with 256-bit length preservation and virtual padding; added `v0.52.28 - Shared Clock And Time-Evidence Contract`. |
-| Local resource, timeout, dependency, storage, or backend failures could be confused with consensus invalidity. | Added `v0.52.29 - Validation Outcomes And Invalidity Evidence` and required its non-forgeable evidence in block import, Engine, sync, txpool, peer penalties, gossip, and negative caches. |
-| Expected policy refusal, unsupported capabilities, duplicate objects, and deferred processing could be misclassified as either local failure or protocol invalidity. | Expanded `v0.52.29` with explicit non-punitive outcomes and propagation rules that forbid bad-object evidence, negative-cache insertion, or peer penalties. |
-| A failed cryptographic batch could incorrectly identify every member or every contributing peer as invalid. | Expanded `v0.52.29`, `v0.79.0`, `v0.192.0`, and `v0.193.0` with bounded individual isolation and mixed-source attribution requirements before member-specific invalidity or punishment. |
+| Local resource, timeout, dependency, storage, or backend failures could be confused with consensus invalidity. | Added `v0.52.29 - Validation Outcomes, Object Invalidity And Peer Evidence` and required its non-forgeable evidence in block import, Engine, sync, txpool, peer scoring, gossip, and negative caches. |
+| Expected policy refusal, unsupported capabilities, duplicate objects, and deferred processing could be misclassified as either local failure or protocol invalidity. | Expanded `v0.52.29` with explicit non-action outcomes: they cannot create object-invalidity evidence, while separately evidenced repeated quota abuse may create peer-policy evidence without poisoning the object. |
+| Object invalidity and peer protocol/policy violations were conflated, contradicting later peer-scoring requirements. | Expanded `v0.52.29`, `v0.158.0..=v0.161.0`, and `v0.218.0..=v0.220.0` with disjoint evidence types, identities, consumers, and cache authority. |
+| A failed cryptographic batch could incorrectly identify every member or every contributing peer as invalid. | Added the non-attributable `BatchContainsInvalid` outcome to `v0.52.29` and expanded `v0.79.0`, `v0.192.0`, and `v0.193.0` with bounded individual isolation before member-specific invalidity or punishment. |
 | Invalidity evidence did not explicitly bind auxiliary objects such as blob sidecars, PeerDAS data, KZG domains, Engine bundles, and Snap ranges. | Expanded `v0.52.29` with auxiliary-object identities and substitution tests so one invalid component cannot poison a valid sibling or containing block. |
 | Deterministic ECDSA was ordered before its RFC 6979 HMAC-SHA256 dependency and lacked complete nonce/fault requirements. | Expanded and renamed `v0.52.24 - First-Party HMAC ECDSA Recovery And ECDH`; `v0.52.25` now consumes its admitted HMAC implementation. |
 | First-party secp256k1 arithmetic proofs were scheduled after local signer and network-identity consumers. | Added `v0.52.30 - Early secp256k1 Arithmetic Proof Gate` before those consumers; `v0.178.1` retains the broader cross-primitive consolidation and extension gate. |
-| Generic signer and key abstractions could permit secp256k1 execution or transport material to cross into BLS consensus duties. | Added `v0.52.31 - Cryptographic Signing Scheme Separation` and expanded `v0.109.0`, `v0.110.0`, `v0.238.0`, and `v0.239.0` with sealed scheme-specific capabilities, opaque tagged custody types, withdrawal-key separation, and compile-fail cross-scheme tests. |
-| Deployment resource policy could accidentally narrow protocol-valid object limits and create local consensus divergence. | Added `v0.52.32 - Protocol And Operational Limit Domains` and expanded `v0.63.0` plus `v0.139.0` with fork-derived protocol profiles, startup-mode enforcement, maximum-valid fixtures, and local-only exhaustion outcomes. |
+| Generic signer and key abstractions could permit secp256k1 execution or transport material to cross into BLS consensus duties. | Added `v0.52.31 - Signing And Transport Capability Separation` and expanded `v0.109.0`, `v0.110.0`, `v0.155.0`, `v0.238.0`, and `v0.239.0` with sealed scheme-specific signing capabilities, a separate non-signing transport identity capability, opaque tagged custody types, withdrawal-key separation, and compile-fail cross-capability tests. |
+| Deployment resource policy could accidentally narrow protocol-valid object limits and create local consensus divergence. | Added `v0.52.32 - Contextual Protocol, Wire And Operational Limit Domains` and expanded `v0.63.0`, `v0.139.0`, networking consumers, and consensus Req/Resp with immutable per-object contexts, advertised static envelopes, dynamic candidate-derived work, protocol-versioned wire limits, readiness withdrawal, and local-only exhaustion outcomes. |
 | First-party cryptographic arithmetic needed explicit machine-checked implementation evidence beyond the early secp gate. | Added `v0.178.1 - Kani Cryptographic Arithmetic Proofs` for limbs, reduction, conversion, inversion, square roots, point exceptions, scalar multiplication, and canonical serialization across the broader cryptographic core. |
 | Provider JSON-RPC, HTTP, WebSocket, and IPC boundaries lacked several canonicality, redirect, rebinding, proxy, credential, and local-peer controls. | Expanded `v0.92.0` and `v0.94.0..=v0.97.0` with canonical quantity/bytes/ID rules, decoded-byte charging, redirect/origin/DNS/proxy/credential policy, Unix ownership/symlink checks, and Windows pipe ACL/identity checks. |
 | Txpool entries were not explicitly revalidated across heads, forks, fees, restarts, account/delegation state, and blob-sidecar lifecycle. | Expanded `v0.160.0`; persisted/local/protected status never bypasses fresh consensus validation. |
-| Negative and bad-block caches needed stricter evidence, identity, invalidation, retention, and anti-flood rules. | Expanded `v0.52.29`, `v0.136.0..=v0.137.0`, `v0.161.0`, and `v0.218.0`; only proven protocol-invalid outcomes may be cached or punished. |
+| Negative and bad-block caches needed stricter evidence, identity, invalidation, retention, and anti-flood rules. | Expanded `v0.52.29`, `v0.136.0..=v0.137.0`, `v0.161.0`, and `v0.218.0`; only `ObjectInvalidityEvidence` may enter object-negative caches, while peer evidence remains separate. |
 | Speculative parallel execution did not enumerate all implicit transaction and block dependencies. | Expanded `v0.88.2` with nonce/balance, coinbase, creation/code, SELFDESTRUCT, EIP-7702, transient/original/warm state, system request, precompile environment, receipt/log/gas/order dependencies, and sequential fee-delta commit. |
 
 ## Phase 0: Repository And Release Discipline
@@ -3078,7 +3079,7 @@ Deliverables:
   fork-rule changes;
 - an architecture rule that local resource, timeout, cancellation, dependency,
   backend, storage, and internal failures can never be promoted into
-  protocol-invalid evidence or negative-cache authority;
+  `ObjectInvalidityEvidence` or object-negative-cache authority;
 - an architecture decision stating that the dependency-free `no_std`
   consensus kernel may use optional audited platform adapters, while those
   adapters cannot decide Ethereum validity.
@@ -3402,26 +3403,38 @@ Exit criteria:
 - `v0.52.28 implementation stop reached. Run pentest for this exact
   commit.`
 
-### v0.52.29 - Validation Outcomes And Invalidity Evidence
+### v0.52.29 - Validation Outcomes, Object Invalidity And Peer Evidence
 
 Status: planned.
 
-Goal: ensure only cryptographically or semantically proven protocol invalidity
-can become permanent consensus rejection, peer punishment, or negative-cache
-state.
+Goal: ensure object invalidity, peer protocol violations, peer policy abuse,
+and non-action outcomes have disjoint evidence and authority.
 
 Deliverables:
 
-- Shared `Valid`, `ProtocolInvalid { evidence }`, `MissingDependency`/
+- Shared `Valid`, `ProtocolInvalid { evidence: ObjectInvalidityEvidence }`,
+  `MissingDependency`/
   `Syncing`, `LocalResourceExhausted`, `Cancelled`/`Stale`,
   `BackendUnavailable`, `InternalFault`, `PolicyRejected { policy_id }`,
   `UnsupportedCapability`, `Duplicate`/`AlreadyKnown`, and
-  `DeferredUntil { dependency }` domains;
-- non-forgeable protocol-invalid evidence bound to exact object bytes/hash,
+  `DeferredUntil { dependency }` domains plus non-attributable
+  `BatchContainsInvalid`;
+- non-forgeable `ObjectInvalidityEvidence` bound to exact object bytes/hash,
   chain/genesis, fork rules, parent/root, validation version, stage, and reason;
-- only `ProtocolInvalid` may enter bad-block/invalid-proof caches, penalize or
-  ban peers, produce Engine `INVALID`/`latestValidHash`, produce GossipSub
-  `REJECT`, or permanently reject transactions/blocks;
+- distinct `PeerProtocolViolationEvidence` bound to connection/peer identity,
+  negotiated capabilities and protocol version, offending message,
+  observation, and time window;
+- distinct `PeerPolicyViolationEvidence` bound to connection/peer identity,
+  policy version, announced quota/rule, observations, and time window;
+- only `ObjectInvalidityEvidence` may enter bad-block, bad-transaction,
+  invalid-proof, or sidecar caches, produce Engine `INVALID`/
+  `latestValidHash`, produce object-invalid GossipSub `REJECT`, or permanently
+  reject a blockchain object;
+- peer penalties, disconnects, and bans require `ObjectInvalidityEvidence`
+  composed with a peer-bound authenticated delivery observation,
+  `PeerProtocolViolationEvidence`, or `PeerPolicyViolationEvidence`; peer
+  evidence can never prove that the transported blockchain object is invalid
+  or enter an object-negative cache;
 - negative entries bind exact object bytes/hash, chain/genesis, fork rules,
   parent/root, validation version, validation stage, and failure evidence;
 - invalidate negative entries when any validation assumption changes, bound
@@ -3429,14 +3442,18 @@ Deliverables:
 - missing trie nodes/state, resource exhaustion, timeout, cancellation, stale
   snapshots, unavailable cryptography, disk/backend errors, and internal faults
   remain local/retryable and preserve the original object's unknown status;
-- local fee/tip/configuration refusal is `PolicyRejected`, non-negotiated
-  methods/protocols are `UnsupportedCapability`, seen objects are
+- local fee/tip/configuration refusal is `PolicyRejected`, locally unavailable
+  methods/capabilities are `UnsupportedCapability`, seen objects are
   `Duplicate`/`AlreadyKnown`, and future nonces/missing sidecars are
-  `DeferredUntil`; none creates bad-object evidence or consensus penalties;
-- a failed mixed-source cryptographic batch proves only that the batch contains
-  invalid evidence, not which member or peer is responsible; bounded
-  individual isolation must establish member-specific `ProtocolInvalid`
-  evidence before penalty or caching;
+  `DeferredUntil`; none creates object-invalidity evidence, while repeated
+  quota abuse requires separate peer-policy evidence;
+- a peer sending malformed or unnegotiated wire messages creates scoped
+  `PeerProtocolViolationEvidence`, not `UnsupportedCapability` or object
+  invalidity;
+- a failed mixed-source cryptographic batch returns `BatchContainsInvalid`,
+  proving only that the batch cannot be accepted, not which member or peer is
+  responsible; bounded individual isolation must establish member-specific
+  `ObjectInvalidityEvidence` before penalty or caching;
 - budget, entropy, cancellation, or backend failure during batch isolation
   returns its corresponding local outcome and never penalizes all represented
   peers;
@@ -3451,15 +3468,19 @@ Deliverables:
 
 Verification:
 
-- Compile-fail tests preventing local outcomes from constructing invalidity
-  evidence;
+- Compile-fail tests preventing local outcomes and peer evidence from
+  constructing object-invalidity evidence or entering object-negative caches;
 - fault injection at every validation stage for memory, budget, timeout,
   cancellation, missing data, stale snapshot, crypto backend, disk, and
   internal failures;
-- property tests proving only protocol evidence reaches permanent rejection,
-  negative caches, peer penalties, Engine `INVALID`, or GossipSub `REJECT`;
+- property tests proving only object evidence reaches permanent object
+  rejection, object-negative caches, Engine `INVALID`, or object-invalid
+  GossipSub `REJECT`, and only peer-bound evidence reaches peer sanctions;
 - policy/unsupported/duplicate/deferred mapping tests for txpool, RPC, gossip,
   capability negotiation, and sidecar/future-nonce workflows;
+- single-duplicate, duplicate-flood, low-tip, malformed-negotiated-message,
+  unnegotiated-message, authenticated-delivery attribution, and repeated-rate-
+  abuse evidence tests;
 - mixed-source batch failure and bounded member-isolation tests proving no
   group penalty without member-specific evidence;
 - auxiliary-object substitution and sibling/containing-block non-poisoning
@@ -3470,9 +3491,9 @@ Verification:
 
 Exit criteria:
 
-- A constrained or faulty local node cannot label a valid object invalid,
-  poison consensus caches, or punish its supplier without protocol-invalid
-  evidence.
+- A constrained or faulty local node cannot label a valid object invalid or
+  poison an object cache, and peer sanctions cannot be created without
+  peer-bound evidence that remains incapable of proving object invalidity.
 - `v0.52.29 implementation stop reached. Run pentest for this exact
   commit.`
 
@@ -3511,18 +3532,21 @@ Exit criteria:
 - `v0.52.30 implementation stop reached. Run pentest for this exact
   commit.`
 
-### v0.52.31 - Cryptographic Signing Scheme Separation
+### v0.52.31 - Signing And Transport Capability Separation
 
 Status: planned.
 
-Goal: prevent secp256k1 execution/transport signers and BLS12-381 consensus
-signers, keys, signatures, roots, and keystores from being interchanged.
+Goal: prevent secp256k1 execution signers, BLS12-381 consensus signers, and
+secp256k1 transport key-agreement identities from being interchanged.
 
 Deliverables:
 
-- Distinct sealed `ExecutionSigner` (secp256k1/ECDSA), `ConsensusSigner`
-  (BLS12-381), and `TransportIdentity` (secp256k1/ECDH where required)
-  capabilities, or an equivalent sealed `SigningScheme` associated type;
+- Distinct sealed `ExecutionSigner` (secp256k1/ECDSA) and `ConsensusSigner`
+  (BLS12-381) capabilities plus a non-signing `TransportIdentity`
+  (secp256k1/ECDH where required) key-agreement capability;
+- shared secp256k1 arithmetic remains an internal implementation detail; no
+  public general-purpose signing supertrait or transport `sign` operation
+  connects `TransportIdentity` to `ExecutionSigner`;
 - scheme-tagged opaque key IDs, public keys, signatures, keystores, signing
   requests, roots/digests, and custody handles with no runtime algorithm strings;
 - withdrawal credentials and withdrawal keys remain separate from validator
@@ -3531,16 +3555,20 @@ Deliverables:
   EIP-7702 authorizations; consensus signing covers only fork/domain-bound
   validator duties;
 - provider, wallet, validator, hardware, remote, HSM/KMS, and threshold
-  adapters must select one explicit scheme capability.
+  signer adapters must select one explicit signing scheme capability, while
+  networking adapters consume only `TransportIdentity`.
 
 Verification:
 
 - Compile-fail tests proving secp signers cannot consume consensus duties and
   BLS signers cannot consume execution/message requests;
+- compile-fail tests proving a transport identity/key cannot satisfy either
+  signing capability or reach transaction/message signing APIs;
 - compile-fail substitution tests across BLS/secp keys, signatures, IDs,
   keystores, roots, and requests;
 - withdrawal-credential/key rejection tests for validator-signing slots;
-- no string-selected algorithm dispatch in public signing APIs.
+- no string-selected algorithm dispatch or general-purpose signing capability
+  in public signer or transport APIs.
 
 Exit criteria:
 
@@ -3549,43 +3577,67 @@ Exit criteria:
 - `v0.52.31 implementation stop reached. Run pentest for this exact
   commit.`
 
-### v0.52.32 - Protocol And Operational Limit Domains
+### v0.52.32 - Contextual Protocol, Wire And Operational Limit Domains
 
 Status: planned.
 
-Goal: prevent local resource policy from silently becoming a stricter Ethereum
-consensus rule.
+Goal: prevent global state, wire policy, or local resource capacity from
+silently becoming a stricter Ethereum consensus rule.
 
 Deliverables:
 
-- `ProtocolLimits` derived atomically from `ChainSpec`, active fork, and pinned
-  specifications for maximum-valid transactions, blocks, SSZ objects,
-  precompile calls, proofs, requests, and other consensus inputs;
+- separate `ConsensusRules<Fork>`, `ContextLimits<Parent, Candidate>`,
+  `WireLimits<Protocol, Version>`, `OperationalLimits`, and `WorkBudget`
+  domains with no authority-conferring integer conversions among them;
+- immutable per-operation `ValidationContext` binding chain/genesis identity,
+  parent context, candidate identity, fork/rules identity, consensus limits,
+  and validation version; historical blocks, side branches, out-of-order
+  blocks, and concurrent fork contexts never consult one mutable global profile;
+- static consensus capacities cover every static maximum in the advertised
+  supported network profile, including transactions, blocks, SSZ objects,
+  proofs, and request structures;
+- context-derived consensus work, including block-gas-limit changes, EVM
+  memory, and ModExp/precompile work, is derived from the candidate's immutable
+  parent/gas/fork context rather than startup constants;
+- protocol/version-negotiated wire limits classify message or connection
+  violations through `PeerProtocolViolationEvidence`, never blockchain-object
+  invalidity by themselves;
 - `OperationalLimits` for local concurrency, caches, queues, peers, RPC,
   serving, scheduling, and reservations without authority over validity;
-- startup rejects validating configurations below protocol maxima or enters an
-  explicit non-validating/light mode that cannot claim block validity;
+- startup rejects static validating capacity below the advertised network
+  profile or enters an explicit non-validating/light mode that cannot claim
+  block validity;
 - gas-derived execution/precompile bounds cannot be replaced by arbitrary
   local byte caps;
-- above-protocol objects may produce `ProtocolInvalid`; within-protocol objects
-  that exceed available local resources produce `LocalResourceExhausted`;
+- objects violating consensus/context rules may produce
+  `ProtocolInvalid { evidence: ObjectInvalidityEvidence }`; contextually valid
+  objects that exceed available physical resources produce
+  `LocalResourceExhausted` and withdraw validation readiness until capacity is
+  restored;
 - serving limits may be lower only as willingness-to-serve policy;
-- fork activation atomically switches the protocol-limit profile without a
-  mixed-rule window.
+- production profiles publish a supported static and dynamic resource envelope;
+- atomicity means one immutable validation context cannot mix fork rules or
+  limits, not that the node has only one active ruleset.
 
 Verification:
 
-- Maximum-valid transaction, block, SSZ, proof, request, and precompile
-  fixtures for every claimed fork;
-- startup mode/configuration matrices and compile-time type separation;
+- Maximum-static transaction, block, SSZ, proof, and request fixtures for every
+  advertised network profile plus parent/candidate/gas-derived work vectors;
+- concurrent canonical, side-branch, historical, out-of-order, and fork-digest
+  validation using distinct immutable contexts;
+- startup mode/configuration/resource-envelope matrices and compile-time type
+  separation;
 - fault tests proving within-protocol local exhaustion never produces
-  invalidity;
-- fork-boundary atomicity and serving-versus-validation independence tests.
+  invalidity and always withdraws/re-establishes readiness safely;
+- wire-version violation, fork-context substitution, and
+  serving-versus-validation independence tests.
 
 Exit criteria:
 
-- Every validating mode can process all protocol-valid objects, and every
-  smaller local limit affects capacity or service only, never consensus.
+- No implementation-specific cap classifies a contextually valid object as
+  invalid; advertised static maxima are supported, dynamic work uses immutable
+  candidate context, and physical exhaustion removes readiness without
+  manufacturing invalidity.
 - `v0.52.32 implementation stop reached. Run pentest for this exact
   commit.`
 
@@ -3847,13 +3899,15 @@ Deliverables:
 
 - Separate fork identity, activation schedule, rule capabilities, parameters,
   system hooks, and complete historical/custom-chain configuration;
-- derive the active `ProtocolLimits` profile required by `v0.52.32` directly
-  from chain/fork rules and switch it atomically at activation.
+- construct immutable per-object `ValidationContext` values required by
+  `v0.52.32` from chain identity, parent/candidate context, fork rules, and
+  consensus limits without mutating one node-global active profile.
 
 Verification:
 
 - Historical mainnet vectors, custom-chain schedules, monotonicity/property
-  tests, protocol-limit source and fork-activation atomicity tests.
+  tests, concurrent pre/post-fork side-branch validation, historical and
+  out-of-order validation, and context-substitution tests.
 
 Exit criteria:
 
@@ -4053,12 +4107,16 @@ Deliverables:
 
 - Parent linkage, gas/base fee, difficulty/TTD, timestamps, ommers,
   withdrawals, blob gas, requests, roots, and fork-field validation;
+- consume one immutable `v0.52.32` `ValidationContext` per candidate, so
+  canonical, side-branch, historical, and out-of-order blocks can use distinct
+  fork rules concurrently;
 - every failure is classified through `v0.52.29`; only complete
-  protocol-invalid evidence can permanently reject the block.
+  `ObjectInvalidityEvidence` can permanently reject the block.
 
 Verification:
 
-- Blockchain/header fixtures across all claimed forks.
+- Blockchain/header fixtures across all claimed forks plus concurrent
+  pre/post-fork and context-substitution cases.
 
 Exit criteria:
 
@@ -4075,6 +4133,9 @@ Goal: deliver the State Transition And Journaling release with this required out
 Deliverables:
 
 - Execute ordered transactions, commit/revert journaled state, apply rewards/system operations, and emit deterministic outcomes.
+- Derive block gas, EVM memory, and precompile work from the immutable parent/
+  candidate/fork context and supplied gas; operational caps may suspend
+  readiness but cannot redefine validity.
 - Implement complete EIP-7702 state application: process authorization tuples
   before transaction execution after sender-nonce increment, warm recovered
   authorities, apply skip-instead-of-reject tuple rules, account refunds,
@@ -4232,9 +4293,9 @@ Deliverables:
   domain-separated transcript covering every statement and fork/domain input;
 - fail-closed entropy/transcript handling, bounded batch-failure isolation, and
   prohibition of attacker-controlled or cross-batch coefficient reuse;
-- batch failure returns only batch-level inconclusive evidence; member-specific
-  `v0.52.29` invalidity requires successful bounded individual isolation, while
-  local isolation failure remains retryable;
+- batch failure returns `v0.52.29` `BatchContainsInvalid`; member-specific
+  object invalidity requires successful bounded individual isolation, while
+  local isolation failure remains retryable and non-attributable;
 - cache identities include complete message, setup, domain, fork, and
   validation-level context.
 
@@ -4986,8 +5047,9 @@ Deliverables:
 
 Verification:
 
-- Mock execution/consensus/transport signer suites, compile-fail cross-scheme
-  tests, wrong-domain/chain tests, redaction audit.
+- Mock execution/consensus signer suites, compile-fail cross-scheme and
+  transport-identity substitution tests, wrong-domain/chain tests, redaction
+  audit.
 
 Exit criteria:
 
@@ -5605,7 +5667,7 @@ Deliverables:
 - Block import pipeline, validation stages, total-difficulty/fork-choice
   inputs, canonical indexes, unwind, and re-execution;
 - every stage preserves `v0.52.29` outcome/evidence, and only proven
-  protocol-invalid results enter persistent bad-block state;
+  `ObjectInvalidityEvidence` enters persistent bad-block state;
 - bounded negative-cache identity, invalidation, retention, and anti-flood
   rules are transactional with canonical import/reorg changes.
 
@@ -5629,8 +5691,9 @@ Goal: deliver the Heads Fork Choice And Orphans release with this required outco
 Deliverables:
 
 - Unsafe/safe/finalized heads, orphan queues, ancestry checks, invalid
-  ancestors backed by `v0.52.29` evidence, checkpoint constraints, and chain
-  events; unknown/local-failure ancestry remains unresolved rather than invalid.
+  ancestors backed by `v0.52.29` `ObjectInvalidityEvidence`, checkpoint
+  constraints, and chain events; unknown/local-failure ancestry remains
+  unresolved rather than invalid.
 
 Verification:
 
@@ -5672,16 +5735,19 @@ Deliverables:
 
 - Supervised bounded tasks for import, providers, peers, sync, pruning, metrics,
   shutdown, and restart without imposing one async runtime on core crates;
-- startup validates `OperationalLimits` against active/future
-  `ProtocolLimits`, refusing unsafe validating configurations or entering an
-  explicit non-validating/light mode;
+- startup validates static implementation capacity against each advertised
+  supported network profile, refusing unsafe validating configurations or
+  entering an explicit non-validating/light mode;
+- publish the production static/dynamic resource envelope and withdraw
+  validation readiness on physical exhaustion until capacity is restored;
 - runtime resource faults preserve `v0.52.29` local outcomes and cannot poison
   validation state.
 
 Verification:
 
 - Failure injection, graceful shutdown/restart, validating/light mode startup
-  matrices, maximum-valid object admission, and resource-cap tests.
+  matrices, advertised static-maximum admission, dynamic parent/candidate work,
+  readiness withdrawal/recovery, and resource-cap tests.
 
 Exit criteria:
 
@@ -5779,9 +5845,9 @@ Deliverables:
 
 - All pinned Engine API versions, payload attributes, execution status, capabilities, transition configuration, and strict validation.
 - Engine `INVALID` and `latestValidHash` are constructible only from
-  `v0.52.29` protocol-invalid evidence; syncing, missing dependencies, resource
-  exhaustion, cancellation, backend/storage errors, and internal faults map to
-  non-invalid statuses/errors.
+  `v0.52.29` `ObjectInvalidityEvidence`; syncing, missing dependencies,
+  resource exhaustion, cancellation, backend/storage errors, and internal
+  faults map to non-invalid statuses/errors.
 - Small typed semantic surface for capability negotiation, `newPayload`,
   `forkchoiceUpdated`, and `getPayload`, including typed payload IDs,
   deadlines, cancellation, evidence-rich status, and exact
@@ -6087,6 +6153,8 @@ Deliverables:
 
 - Protocol threat model, crypto/transport dependency review, identity/key
   policy, resource ceilings, and wire-spec locks;
+- assign every protocol/version pair an explicit `WireLimits` profile from
+  `v0.52.32` and every sanction path an evidence type from `v0.52.29`;
 - first-party ownership rule for discovery, RLPx, `eth`, `snap`, request
   scheduling, peer scoring, and validation state machines;
 - reviewed optional socket, runtime, and cryptographic adapters only when they
@@ -6126,12 +6194,16 @@ Deliverables:
   machines, and replay protections;
 - use the admitted `v0.52.23..=v0.52.25` secp256k1, ECDH, AES-CTR,
   HMAC-SHA256, ECIES/KDF, and transcript contracts rather than unnamed crypto;
+- consume only the non-signing `TransportIdentity` capability from `v0.52.31`;
+  node/transport keys cannot satisfy `ExecutionSigner` or sign transactions,
+  messages, EIP-712 data, or EIP-7702 authorizations;
 - bootnode, static-peer, trusted-peer, node-key, listen-address, NAT, and
   advertised-address policy behind runtime-neutral I/O boundaries.
 
 Verification:
 
-- Official/reference vectors, packet/frame fuzzing, interoperability tests.
+- Official/reference vectors, packet/frame fuzzing, interoperability tests,
+  and compile-fail transport-key-to-execution-signer substitution tests.
 
 Exit criteria:
 
@@ -6147,11 +6219,15 @@ Goal: deliver the Eth Protocol Messages release with this required outcome: Exec
 
 Deliverables:
 
-- Status negotiation and all admitted `eth` protocol request/response/announcement messages with fork capability checks.
+- Status negotiation and all admitted `eth` protocol request/response/
+  announcement messages with fork capability checks;
+- negotiated `WireLimits<Eth, Version>` profiles whose violation creates peer
+  protocol evidence without declaring transported chain data invalid.
 
 Verification:
 
-- Cross-client devp2p fixtures and malformed message fuzzing.
+- Cross-client devp2p fixtures, per-version boundary tests, malformed message
+  fuzzing, and wire-violation/object-invalidity separation tests.
 
 Exit criteria:
 
@@ -6169,6 +6245,8 @@ Deliverables:
 
 - Account ranges, storage ranges, bytecodes, trie nodes, proofs, continuation
   rules, and response limits for both consumption and serving;
+- negotiated `WireLimits<Snap, Version>` separated from snapshot/proof
+  validity and local serving policy;
 - snapshot-pinned account/storage range generation and canonical range-proof
   construction without mixed-snapshot nodes;
 - serving-side database-read, proof-generation, compression, allocation,
@@ -6201,13 +6279,15 @@ Deliverables:
   identity or scoring state;
 - hierarchical resource capabilities and peer accountability for malformed,
   wasteful, timed-out, and inconsistent work;
-- penalties and bans require `v0.52.29` protocol-invalid evidence or explicit
-  local peer-policy violations; local validation failures never accuse the
-  supplying peer.
+- penalties and bans require `v0.52.29` object-invalidity evidence composed
+  with an authenticated peer-delivery observation, peer-protocol evidence, or
+  peer-policy evidence; local validation failures never accuse the supplying
+  peer and peer evidence never enters object-negative caches.
 
 Verification:
 
-- Churn/eclipse/flood simulations and restart tests.
+- Churn/eclipse/flood simulations, restart tests, and evidence substitution/
+  time-window/policy-version tests.
 
 Exit criteria:
 
@@ -6225,7 +6305,7 @@ Deliverables:
 
 - Correlated requests, deadlines, retries, hierarchical per-request/per-peer/
   per-protocol/node budgets, cancellation, fair scheduling, queue slots,
-  bandwidth limits, and invalid-response penalties;
+  bandwidth limits, and evidence-bound invalid-response penalties;
 - cancellation propagates when fork choice invalidates work and refunds only
   reservations whose resources were released, never consumed work;
 - executable retry/backpressure and fairness models refined from `v0.154.0`.
@@ -6263,8 +6343,10 @@ Deliverables:
   change, blob-sidecar arrival/expiry, and EIP-7702 authority-state change;
 - persisted admission evidence is historical only; local/protected status can
   affect eviction/propagation policy but never exempt consensus revalidation;
-- only `v0.52.29` protocol-invalid evidence permits permanent rejection or peer
-  penalty; local failures remain retryable.
+- only `v0.52.29` object-invalidity evidence permits permanent transaction
+  rejection or bad-transaction caching; peer sanctions additionally require
+  an authenticated delivery observation or peer protocol/policy evidence, and
+  local failures remain retryable.
 
 Verification:
 
@@ -6290,8 +6372,9 @@ Deliverables:
   with bounded queues and shared resource capabilities;
 - durable checkpoints, bad-block caches, peer accountability, progress
   persistence, invalidation, restart, and strategy selection;
-- bad-block and invalid-proof caches accept only `v0.52.29` evidence and follow
-  its identity, invalidation, retention, and anti-flood rules;
+- bad-block and invalid-proof caches accept only `v0.52.29`
+  `ObjectInvalidityEvidence` and follow its identity, invalidation, retention,
+  and anti-flood rules; peer evidence remains in separately scoped peer state;
 - immediate cancellation of obsolete work when fork choice changes.
 
 Verification:
@@ -7106,9 +7189,9 @@ Deliverables:
 - entropy/transcript failure fails closed, coefficient reuse across contexts is
   prohibited, and bounded batch-failure isolation cannot become an unbounded
   fallback attack;
-- failed mixed-source batches never identify or penalize members/peers until
-  bounded individual verification establishes member-specific `v0.52.29`
-  protocol-invalid evidence;
+- failed mixed-source batches return `v0.52.29` `BatchContainsInvalid` and
+  never identify or penalize members/peers until bounded individual
+  verification establishes member-specific object-invalidity evidence;
 - bounded verification-queue latency and maximum batch age so attackers cannot
   delay block processing by preventing batches from filling;
 - cache keys contain complete message/domain/fork/validation context.
@@ -7142,8 +7225,9 @@ Deliverables:
 - batch verification;
 - sound nonzero coefficient/transcript generation, fail-closed entropy,
   context-complete cache identities, and bounded failure isolation;
-- mixed-source batch failures and local isolation failures follow the
-  `v0.52.29` batch/member outcome contract;
+- mixed-source batch failures return `v0.52.29` `BatchContainsInvalid`; local
+  isolation failures remain local and member/peer attribution requires
+  individual object-invalidity evidence;
 - bounded reusable workspaces;
 - explicit acceleration/backend boundaries;
 - canonical failure and partial-output behavior.
@@ -7656,6 +7740,8 @@ Deliverables:
 - Fork-digest topics, beacon blocks, aggregate/attestation subnets, sync
   committees, data columns, operation topics, subscription rotation, and mesh
   policy;
+- fork-digest/topic-specific `WireLimits<Gossip, ForkDigest>` contexts kept
+  separate from consensus-object validation contexts and local mesh policy;
 - GossipSub payload and SSZ-Snappy decoding consume compressed/decompressed,
   ratio, structural, signature, allocation, and output budgets from
   `v0.52.27` before promotion.
@@ -7682,15 +7768,21 @@ Deliverables:
 - Decode/signature/state/fork-choice validation stages, dependency deferral,
   duplicate suppression, seen caches, invalid-message penalties, and no partial
   promotion;
-- GossipSub `REJECT` and peer penalties require `v0.52.29`
-  protocol-invalid evidence; missing dependencies, stale time, local budgets,
-  cancellation, or backend faults remain ignore/defer/retry outcomes;
+- object-invalid GossipSub `REJECT` and object-negative caches require
+  `v0.52.29` `ObjectInvalidityEvidence`; peer penalties additionally admit
+  peer-protocol or peer-policy evidence bound to the peer and observation
+  window, never as proof that the gossip object is invalid;
+- one duplicate remains `Duplicate`/ignore, while repeated announced-quota
+  abuse may create peer-policy evidence without a bad-object cache entry;
+- missing dependencies, stale time, local budgets, cancellation, or backend
+  faults remain ignore/defer/retry outcomes;
 - seen/deferred caches follow the global chain/fork/root/object/validation-level
   identity invariant and never mix untrusted with verified entries.
 
 Verification:
 
-- Official gossip validation functions, malformed/future/dependency fuzzing, cache pressure tests.
+- Official gossip validation functions, malformed/future/dependency fuzzing,
+  cache-pressure tests, and object/peer evidence non-interchangeability tests.
 
 Exit criteria:
 
@@ -7709,14 +7801,17 @@ Deliverables:
 - Status, metadata, blocks, blobs, data columns, light-client data,
   states/checkpoints where admitted, chunk framing, context bytes, error
   responses, and cancellation;
+- negotiated `WireLimits<ReqResp, Version>` profiles separated from consensus
+  object validity and local serving willingness;
 - each chunk consumes compressed/decompressed bytes, ratio, framing,
   structural, allocation, hash, and output work from `v0.52.27` before
   decompression or ownership conversion.
 
 Verification:
 
-- Cross-client protocol matrix, malformed chunk fuzzing, decompression-bomb and
-  complexity-oracle cases, unavailable-data cases.
+- Cross-client protocol matrix, per-version wire boundaries, malformed chunk
+  fuzzing, decompression-bomb and complexity-oracle cases, unavailable-data
+  cases, and wire-violation/object-invalidity separation tests.
 
 Exit criteria:
 
@@ -7734,11 +7829,17 @@ Deliverables:
 
 - Peer reputation, topic scores, custody-response scoring, bans, diversity,
   request budgets, rate limits, fair queues, clock disparity through
-  `v0.52.28` evidence, and eclipse defenses.
+  `v0.52.28` evidence, and eclipse defenses;
+- all score changes and sanctions consume object evidence composed with an
+  authenticated delivery observation, peer-protocol evidence, or peer-policy
+  evidence from `v0.52.29`; duplicate or policy outcomes alone cannot
+  manufacture peer evidence.
 
 Verification:
 
-- Byzantine peer/flood/partition simulations, resource-ceiling benchmarks.
+- Byzantine peer/flood/partition simulations, resource-ceiling benchmarks,
+  evidence expiry/policy-version tests, and object/peer evidence substitution
+  failures.
 
 Exit criteria:
 
