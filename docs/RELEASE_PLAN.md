@@ -304,6 +304,7 @@ relevant dependency point.
 | Evidence collection cardinality and optional sink access could be left implicit, allowing diagnostics to affect validity or consume slot authority. | Added `v0.52.34 - Evidence Collection Modes And Immutable Sink Access` and expanded `v0.52.32`, `v0.72.0`, `v0.73.0`, `v0.79.0`, `v0.134.0`, `v0.136.0`, `v0.143.0`, `v0.177.0`, `v0.192.0`, `v0.193.0`, and `v0.218.0` with explicit `FirstInvalid`, `CollectUpTo<N>`, and `BatchIsolateUpTo<N>` operational modes, validity invariance, immutable evidence borrowing, and one final slot-ownership transition. |
 | Evidence safety machinery could impose valid-path allocation, contention, hashing, sink work, code-size growth, or public API complexity. | Added `v0.52.35 - Evidence Hot-Path And API Containment Gate` and expanded `v0.52.19`, `v0.52.33..=v0.52.34`, `v0.72.0`, `v0.73.0`, `v0.79.0`, `v0.88.0`, `v0.140.0`, `v0.176.0`, `v0.180.0`, `v0.192.0`, `v0.193.0`, `v0.218.0`, `v0.258.0`, and `v0.262.0` with allocation-free uncontended valid paths, parent arenas/index handles, amortized reservation, admitted cardinalities, internal machinery, stable non-generic outcomes, evidence-disabled internal baselines, and release-blocking overhead/size thresholds. |
 | Evidence arenas lacked an explicit capacity, reuse, transfer, and structurally equivalent benchmark-baseline contract. | Added `v0.52.36 - Evidence Arena Capacity And Benchmark Integrity` and expanded `v0.52.20`, `v0.52.33..=v0.52.35`, `v0.73.0`, `v0.74.0`, `v0.88.2`, `v0.139.0`, `v0.175.0`, `v0.176.0`, `v0.177.0`, `v0.179.1`, `v0.180.0`, and `v0.218.0` with capability-backed simultaneous-work sizing, local backpressure/exhaustion, ABA-safe handles, audited stack placement, reference-safe transfer/cancellation, optional benchmark-justified pools, non-generic public mode dispatch, and optimizer-resistant equivalent baselines. |
+| Invalid-path baselines, benchmark timing/instrumentation, runtime cardinality-class mapping, and generation-wrap behavior remained ambiguous. | Added `v0.52.37 - Evidence Benchmark Measurement And Dispatch Closure` and expanded `v0.52.34..=v0.52.36`, `v0.176.0`, `v0.177.0`, `v0.180.0`, `v0.258.0`, and `v0.262.0` with valid-only disabled baselines, invalid semantic projections/minimal-evidence baselines, protocol-versus-evidence counters, untimed setup/result work, uninstrumented production thresholds, separate non-perturbing conformance instrumentation, exact requested-limit enforcement over upward internal capacity classes, and fail-closed generation retirement. |
 | Validation contexts could remain non-forgeable yet accidentally retain recursive ancestry or unstable process-local identities. | Expanded `v0.52.32`, `v0.63.0`, `v0.73.0`, `v0.74.0`, `v0.88.1`, and `v0.134.0` with bounded parent handles, borrowed child contexts, deterministic lease release, canonical versioned encoding, domain-separated cryptographic digests, and constant-size/stability tests. |
 | First-party cryptographic arithmetic needed explicit machine-checked implementation evidence beyond the early secp gate. | Added `v0.178.1 - Kani Cryptographic Arithmetic Proofs` for limbs, reduction, conversion, inversion, square roots, point exceptions, scalar multiplication, and canonical serialization across the broader cryptographic core. |
 | Provider JSON-RPC, HTTP, WebSocket, and IPC boundaries lacked several canonicality, redirect, rebinding, proxy, credential, and local-peer controls. | Expanded `v0.92.0` and `v0.94.0..=v0.97.0` with canonical quantity/bytes/ID rules, decoded-byte charging, redirect/origin/DNS/proxy/credential policy, Unix ownership/symlink checks, and Windows pipe ACL/identity checks. |
@@ -3918,6 +3919,10 @@ Deliverables:
   the same public validation outcome shape as `FirstInvalid`, and internal
   dispatch maps validated runtime configuration onto a small reviewed set of
   admitted implementations;
+- public requested limits of zero or above the documented maximum are rejected
+  before validation; other limits map upward to the smallest admitted internal
+  capacity class, but collection/isolation still stops at the exact requested
+  limit and never silently rounds the operational policy upward;
 - optional sinks stay outside the `no_std` kernel and cannot require heap
   allocation, `std`, async, or a runtime from consensus validation.
 
@@ -3937,6 +3942,9 @@ Verification:
 - `CollectUpTo<N>` zero/one/maximum/beyond-limit tests proving deterministic
   stop behavior and unchanged validity under diagnostic allocation, logging,
   serialization, and sink failure;
+- internal-class boundary tests for every public requested limit, including
+  zero/above-maximum rejection, upward capacity-class dispatch, exact requested
+  stop, and no rounding-down behavior;
 - `BatchIsolateUpTo<N>` mixed-invalid and capacity-pressure tests proving
   members beyond `N` remain unattributed and cannot enter negative caches or
   peer sanctions;
@@ -3992,13 +4000,26 @@ Deliverables:
   the dependency-free `no_std` kernel and cannot require allocation, `std`,
   async, or a runtime from core validation;
 - an internal evidence-disabled benchmark baseline compiled only by the
-  benchmark harness, never as a production feature or validity path; it uses
-  identical inputs, contexts, scheduling, validator implementation, work
-  counters, and output consumption and replaces only evidence reserve/fill/
+  benchmark harness, never as a production feature or validity path; this fully
+  disabled baseline is valid-path only and replaces only evidence reserve/fill/
   finalize operations;
-- baseline and evidence-enabled runs must produce equal validation outcomes and
-  deterministic-work counters, and consume result digests through benchmark
-  barriers so the optimizer cannot remove unrelated validation work;
+- invalid-path comparisons use both a stable semantic projection containing
+  classification, reason, stage, object/context digests, and protocol-work
+  counters and a minimal-evidence baseline that still constructs the fixed
+  authoritative record but disables arena hierarchy and optional attachments;
+- paired runs use identical inputs, contexts, scheduling, validator
+  implementation, protocol-work accounting, and output consumption; valid
+  outcomes and invalid semantic projections must match, protocol-work counters
+  must remain equal, and evidence-operation counters are expected to differ;
+- input construction, result/stable-digest hashing, benchmark-barrier setup, and
+  equality verification occur outside the timed region;
+- authoritative production thresholds use uninstrumented builds; allocation/
+  lock/atomic/clone counters and sink spies run as separate conformance
+  measurements using caller-owned/preallocated instrumentation that does not
+  introduce the allocation or contention under test;
+- all runs compute and consume result digests after the timed validator region
+  through benchmark barriers so the optimizer cannot remove unrelated
+  validation work;
 - absolute production thresholds are authoritative; relative disabled-baseline
   deltas are diagnostic and cannot excuse an absolute regression;
 - committed absolute and relative regression thresholds for slot operations,
@@ -4016,7 +4037,11 @@ Verification:
 
 - representative valid and nested validator benchmarks with normal evidence
   machinery and the internal evidence-disabled baseline, including allocation/
-  lock/atomic/clone/sink instrumentation and equality of outcomes/work counters;
+  lock/atomic/clone/sink conformance measurements and equality of outcomes/
+  protocol-work counters;
+- invalid-path semantic-projection and minimal-evidence-baseline benchmarks for
+  first-invalid and diagnostic modes, with intentionally different evidence-
+  operation counters;
 - synthetic parent-arena benchmarks across child counts proving one amortized
   reservation and constant child bookkeeping;
 - deterministic staged-worker benchmarks across worker counts and scheduling
@@ -4032,6 +4057,9 @@ Verification:
 - benchmark-harness audits proving identical code paths around the replaced
   evidence operations, consumed output digests/barriers, and seeded optimizer-
   elision detection;
+- timed-region audits and separate uninstrumented-performance/instrumented-
+  conformance reports, including instrumentation self-tests proving counters
+  and spies do not allocate or add global contention;
 - `no_std` target builds with allocator/std/async/runtime dependency checks;
 - seeded allocation, serialization, global-lock, contended-atomic, clone, sink-
   invocation, linear-scan reservation, and monomorphization regressions that
@@ -4071,6 +4099,9 @@ Deliverables:
   a consensus-rule change;
 - scoped child borrows where possible and generation-tagged indexes where
   reuse/transfer requires handles, preventing stale-handle and ABA aliasing;
+- generation exhaustion/wrap retires the affected slot or arena and returns a
+  retryable local outcome; it never wraps into a previously valid handle
+  identity or resets generation state in place;
 - cancellation, unwind, timeout, and cross-worker transfer protocols retain a
   live-borrow/lease count so no slot can be released, reset, reused, or returned
   while a validator still references it;
@@ -4088,10 +4119,15 @@ Deliverables:
   reviewed const-generic implementations;
 - an optimizer-resistant paired benchmark contract: identical input, context,
   validator, schedule, work accounting, and output consumption, replacing only
-  evidence reservation/fill/finalization operations;
-- paired runs assert equal validation outcomes and deterministic-work counters,
-  consume stable result digests through benchmark barriers, and report evidence-
-  attributable allocation separately from total consumer allocation;
+  evidence reservation/fill/finalization operations on valid paths;
+- invalid paths compare the `v0.52.37` semantic projection and minimal-evidence
+  baseline rather than requiring a fully disabled run to synthesize an
+  impossible byte-identical `ObjectInvalidityEvidence`;
+- paired runs assert equal valid outcomes or invalid semantic projections and
+  equal protocol-work counters, treat evidence-operation counters as expected
+  differences, consume untimed stable result digests through benchmark
+  barriers, and report evidence-attributable allocation separately from total
+  consumer allocation;
 - absolute production thresholds remain release authority; relative baseline
   deltas are supporting diagnostics only.
 
@@ -4103,7 +4139,7 @@ Verification:
 - partial memory/worker reservation rollback, serialization/backpressure,
   reduced-diagnostic, and retryable-local-exhaustion tests with no invalidity or
   peer attribution;
-- stale index, generation wrap policy, ABA, double reuse, use-after-release,
+- stale index, generation retirement/wrap, ABA, double reuse, use-after-release,
   live-borrow cancellation, timeout/unwind, and cross-worker transfer races;
 - Loom models for allocate/borrow/fill/cancel/transfer/release/reset and Kani-
   ready capacity/conservation state models consumed at `v0.177.0` and
@@ -4113,7 +4149,9 @@ Verification:
 - A/B harness source/IR or equivalent structural checks proving only evidence
   operations differ, with identical scheduling and validator dispatch;
 - equal-outcome/equal-work-counter assertions, consumed result digests,
-  benchmark barriers, and seeded dead-code-elimination regressions;
+  benchmark barriers, invalid semantic projections/minimal-evidence baselines,
+  protocol/evidence counter separation, and seeded dead-code-elimination
+  regressions;
 - allocation attribution tests distinguishing evidence allocations from
   unrelated consumer allocations for transaction, block, gossip, import, and
   batch harnesses;
@@ -4127,6 +4165,87 @@ Exit criteria:
   pools exist only with evidence, and benchmark deltas isolate evidence work
   without weakening authoritative absolute production thresholds.
 - `v0.52.36 implementation stop reached. Run pentest for this exact
+  commit.`
+
+### v0.52.37 - Evidence Benchmark Measurement And Dispatch Closure
+
+Status: planned.
+
+Goal: make valid/invalid benchmark comparisons, timed regions,
+instrumentation, runtime mode dispatch, and generation exhaustion fully
+deterministic and fail closed.
+
+Deliverables:
+
+- the fully evidence-disabled baseline is restricted to valid paths, where both
+  production and baseline return the same valid outcome without requiring an
+  impossible evidence-bearing invalid result;
+- a canonical benchmark-only invalid semantic projection containing outcome
+  classification, stable reason code, validation stage, object digest, context/
+  rules digest, validation version, bounded location, and protocol-work
+  counters, excluding optional attachments and slot/arena identity;
+- a minimal-evidence invalid baseline that constructs the same fixed
+  allocation-free `ObjectInvalidityEvidence` but disables hierarchical arena
+  operations and every optional sink/attachment, permitting separate
+  measurement of hierarchy and attachment overhead;
+- protocol-work counters cover consensus/protocol decode, hash, signature,
+  proof, state, and deterministic validation work and must match paired runs;
+  evidence-operation counters cover reserve, derive, fill, borrow, finalize,
+  attach, and sink work and are intentionally compared rather than required to
+  match;
+- timed regions contain only the validator invocation and the evidence
+  operations belonging to the selected production/baseline path; input/object/
+  context construction, stable-digest/result hashing, output equality checks,
+  report formatting, and benchmark-barrier preparation occur outside timing;
+- authoritative production latency/throughput thresholds run uninstrumented;
+  allocation, lock, atomic, clone, and sink-spy checks run in separate
+  instrumented conformance binaries/configurations;
+- instrumentation is caller-owned or preallocated, avoids global locks and
+  heap allocation in the measured path, and has self-tests demonstrating that
+  it does not create the behavior it detects;
+- every result is consumed after timing through a stable digest or equivalent
+  benchmark barrier, with seeded optimizer-elision checks;
+- the public non-generic mode/configuration rejects zero and values above the
+  documented maximum before validation; admitted values dispatch upward to the
+  smallest internal capacity class that can hold them while enforcing the
+  exact requested collection/isolation stop;
+- internal capacity-class rounding never becomes visible as extra diagnostics,
+  cache entries, peer attribution, evidence records, or work beyond the public
+  operational limit, and no value is rounded down;
+- generation increment exhaustion permanently retires the slot/arena identity
+  or returns a retryable local outcome; no wrap, in-place reset, or identity
+  resurrection is permitted.
+
+Verification:
+
+- valid-path full-disable comparisons with byte/semantic outcome and protocol-
+  work equality;
+- invalid-path production/minimal-evidence comparisons using the canonical
+  semantic projection, equal protocol-work counters, and expected evidence-
+  operation deltas;
+- first-invalid, diagnostic, batch-isolation, cancellation, local-exhaustion,
+  and optional-sink-failure benchmark cases;
+- timed-region boundary tests proving setup, digest/result hashing, equality
+  checks, barriers, and report work are excluded;
+- uninstrumented threshold reports paired with separate instrumented allocation/
+  lock/atomic/clone/sink conformance reports;
+- instrumentation self-tests and seeded perturbation cases proving counters or
+  spies cannot add measured allocation, global lock acquisition, or contention;
+- optimizer-elision fixtures caught by consumed result digests/barriers;
+- exhaustive public limit tests over zero, one, every internal class boundary,
+  between-class values, maximum, and above-maximum values, proving upward class
+  mapping with exact requested stop and pre-validation rejection where required;
+- generation-at-maximum, retirement, stale-handle, ABA, concurrent borrow,
+  cancellation, transfer, persistence/restart, and retryable-local-outcome tests;
+- Kani-ready dispatch and generation state models consumed at `v0.177.0`.
+
+Exit criteria:
+
+- Benchmarks compare semantically equivalent work without timing setup or
+  instrumentation artifacts, production thresholds remain uninstrumented and
+  authoritative, runtime mode dispatch never exceeds the exact requested
+  operational limit, and generation identity can never wrap or resurrect.
+- `v0.52.37 implementation stop reached. Run pentest for this exact
   commit.`
 
 ## Roadmap Expansion From The 2026 Gap Analysis
@@ -7409,8 +7528,12 @@ Deliverables:
   disable evidence authority;
 - enforce `v0.52.36` paired-run integrity: identical input/context/schedule/
   validator/work counters/output consumption, only evidence operations
-  replaced, equal outcomes/work, consumed result digests/barriers, and separate
-  evidence-attributable versus total allocation reports;
+  replaced on valid paths, and separate evidence-attributable versus total
+  allocation reports;
+- enforce `v0.52.37` invalid semantic projections/minimal-evidence baselines,
+  protocol-versus-evidence operation counters, untimed setup/result hashing/
+  equality/barrier preparation, uninstrumented production thresholds, and
+  separate non-perturbing instrumented conformance runs;
 - absolute production thresholds remain authoritative and cannot be waived by
   a favorable relative disabled-baseline delta.
 
@@ -7419,7 +7542,9 @@ Verification:
 - Reproducible benchmark runner and regression thresholds;
 - cross-platform/toolchain variance policy and seeded evidence-overhead
   regressions proving each threshold is release-blocking;
-- harness structural-equivalence and dead-code-elimination audit reports.
+- harness structural-equivalence and dead-code-elimination audit reports;
+- timed-boundary, instrumentation-self-test, invalid-projection, and minimal-
+  evidence-baseline reports.
 
 Exit criteria:
 
@@ -7478,7 +7603,10 @@ Deliverables:
 - `v0.52.36` capacity/handle proofs showing attacker counts cannot size arenas,
   partial capability reservation conserves resources, stale generations cannot
   access reused slots, and live borrows prevent release/reset within documented
-  bounds.
+  bounds;
+- `v0.52.37` dispatch/generation proofs showing upward internal class mapping
+  enforces the exact requested stop, rejected values cannot begin validation,
+  and maximum-generation identities retire rather than wrap.
 
 Verification:
 
@@ -7488,7 +7616,9 @@ Verification:
 - seeded mode-dependent-validity, sink-consumes-authority, and slot-reuse models
   rejected within documented bounds;
 - seeded stale-generation, ABA, release-with-live-borrow, and partial-
-  reservation-leak models rejected within documented bounds.
+  reservation-leak models rejected within documented bounds;
+- seeded over-collection, rounding-down, above-maximum admission, and
+  generation-resurrection models rejected within documented bounds.
 
 Exit criteria:
 
@@ -7664,6 +7794,9 @@ Deliverables:
 - enforce the `v0.52.36` public non-generic validated mode/configuration value
   and private admitted-implementation dispatch; benchmark-disabled baselines
   cannot appear in production features or public APIs;
+- enforce `v0.52.37` zero/above-maximum rejection, upward internal capacity-
+  class mapping with exact requested stop, stable mode-independent
+  `ValidationOutcome<T, E>`, and private benchmark semantic projections;
 - code-size and monomorphization budgets for every admitted collection mode and
   feature graph.
 
@@ -7671,7 +7804,9 @@ Verification:
 
 - Automated compatibility report for every published crate;
 - API snapshots, compile-fail containment cases, feature-power-set behavior
-  equivalence, and generated-code-size reports.
+  equivalence, and generated-code-size reports;
+- public mode boundary/configuration compatibility tests and proof that
+  benchmark-only projections/baselines are absent from production APIs.
 
 Exit criteria:
 
@@ -9759,6 +9894,10 @@ Deliverables:
   allocation, contention, and retained-memory ceilings for execution,
   consensus, gossip, batch, and validator workloads, including a policy for
   evidence-disabled internal baseline measurements;
+- `v0.52.37` measurement policy making uninstrumented absolute production
+  thresholds authoritative, restricting full-disable comparisons to valid
+  paths, and requiring invalid semantic projections/minimal-evidence baselines,
+  untimed setup/result work, and separate non-perturbing instrumentation;
 - an exception process requiring written security review and a replacement
   gate, never silent threshold reduction.
 
@@ -9772,6 +9911,8 @@ Verification:
 - hardware-profile reproducibility check;
 - evidence-enabled/evidence-disabled threshold reports across the required
   workload matrix;
+- invalid semantic-projection/minimal-evidence and uninstrumented-production/
+  instrumented-conformance report pairs with timing-boundary attestations;
 - dry-run reports that fail on every deliberately violated threshold;
 - adversarial reclassification tests proving planned faults, external
   failures, fallback failures, and ambiguous causes cannot be relabeled to
@@ -9883,6 +10024,9 @@ Verification:
 - mainnet-scale load tests;
 - evidence-enabled/evidence-disabled comparisons with valid-path
   allocation/lock/atomic/clone/sink instrumentation;
+- `v0.52.37` uninstrumented production runs, invalid semantic-projection/
+  minimal-evidence comparisons, untimed setup/result work, and separate
+  instrumentation conformance runs;
 - threshold validator;
 - regression alarms that fail the release.
 
