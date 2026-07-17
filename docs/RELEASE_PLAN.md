@@ -215,7 +215,7 @@ relevant dependency point.
 | ENS and common ERC/application standards were not scheduled. | Added `v0.127.0..=v0.129.0` for common standards, ENS, permit, interface helpers, and contract-tooling fuzz/DX gates. |
 | Node-level sync, txpool, mining/validator boundaries, and observability were not scheduled. | Added storage/client releases `v0.130.0..=v0.140.0`, networking/sync releases `v0.154.0..=v0.164.0`, and operational-runtime release `v0.139.0`. |
 | REVM dependency admission failed the existing dependency policy. | Added `v0.37.1 - REVM Dependency Recheck` before execution work may continue. |
-| Native audited EVM execution was not explicitly versioned; REVM could look like the long-term core. | Added the first-party engine, correctness, resource-boundary, precompile, core-crypto, and shared-capability sequence at `v0.40.0..=v0.52.29`, then complete execution, state transition, conformance, tracing, and simulation at `v0.69.0..=v0.91.0`. |
+| Native audited EVM execution was not explicitly versioned; REVM could look like the long-term core. | Added the first-party engine, correctness, resource-boundary, precompile, core-crypto, and shared-capability sequence at `v0.40.0..=v0.52.32`, then complete execution, state transition, conformance, tracing, and simulation at `v0.69.0..=v0.91.0`. |
 | Default verification previously depended directly on `k256` and used direct `sha3` test wrappers, which conflicted with the long-term first-party-core goal. | Added `v0.37.2` and `v0.37.3` to audit core dependencies, move cryptographic implementation crates behind explicit boundaries/features, and document any accepted cryptographic backend plan. |
 | `subtle`, `alloy-rlp`, dev `serde_json`, optional `serde`/`serde_json`, and optional `sanitization` need explicit long-term dependency classifications before execution grows. | Added `v0.37.4` and `v0.37.5` so constant-time helpers, reference oracles, JSON parser support, and sanitization bridges remain deliberate dependency choices. |
 | `v0.45.0` deliberately admits cryptographic precompiles as fail-closed descriptors without concrete execution backends. | Added `v0.46.0` through `v0.52.0` for SHA-256, RIPEMD-160, ECRECOVER, ModExp, BN254, BLAKE2F, KZG/BLS backend planning, conformance vectors, fuzzing, dependency review, and pentest gates before state-test claims depend on them. |
@@ -287,8 +287,14 @@ relevant dependency point.
 | Snap was planned mainly as a consumer rather than a bounded snapshot-pinned serving protocol. | Expanded `v0.157.0` with range/proof construction, serving budgets, fairness, snapshot cancellation, and mixed-snapshot rejection. |
 | ModExp length handling and shared time semantics needed explicit wide-integer and clock-domain contracts. | Expanded `v0.52.10` with 256-bit length preservation and virtual padding; added `v0.52.28 - Shared Clock And Time-Evidence Contract`. |
 | Local resource, timeout, dependency, storage, or backend failures could be confused with consensus invalidity. | Added `v0.52.29 - Validation Outcomes And Invalidity Evidence` and required its non-forgeable evidence in block import, Engine, sync, txpool, peer penalties, gossip, and negative caches. |
+| Expected policy refusal, unsupported capabilities, duplicate objects, and deferred processing could be misclassified as either local failure or protocol invalidity. | Expanded `v0.52.29` with explicit non-punitive outcomes and propagation rules that forbid bad-object evidence, negative-cache insertion, or peer penalties. |
+| A failed cryptographic batch could incorrectly identify every member or every contributing peer as invalid. | Expanded `v0.52.29`, `v0.79.0`, `v0.192.0`, and `v0.193.0` with bounded individual isolation and mixed-source attribution requirements before member-specific invalidity or punishment. |
+| Invalidity evidence did not explicitly bind auxiliary objects such as blob sidecars, PeerDAS data, KZG domains, Engine bundles, and Snap ranges. | Expanded `v0.52.29` with auxiliary-object identities and substitution tests so one invalid component cannot poison a valid sibling or containing block. |
 | Deterministic ECDSA was ordered before its RFC 6979 HMAC-SHA256 dependency and lacked complete nonce/fault requirements. | Expanded and renamed `v0.52.24 - First-Party HMAC ECDSA Recovery And ECDH`; `v0.52.25` now consumes its admitted HMAC implementation. |
-| First-party cryptographic arithmetic needed explicit machine-checked implementation evidence. | Added `v0.178.1 - Kani Cryptographic Arithmetic Proofs` for limbs, reduction, conversion, inversion, square roots, point exceptions, scalar multiplication, and canonical serialization. |
+| First-party secp256k1 arithmetic proofs were scheduled after local signer and network-identity consumers. | Added `v0.52.30 - Early secp256k1 Arithmetic Proof Gate` before those consumers; `v0.178.1` retains the broader cross-primitive consolidation and extension gate. |
+| Generic signer and key abstractions could permit secp256k1 execution or transport material to cross into BLS consensus duties. | Added `v0.52.31 - Cryptographic Signing Scheme Separation` and expanded `v0.109.0`, `v0.110.0`, `v0.238.0`, and `v0.239.0` with sealed scheme-specific capabilities, opaque tagged custody types, withdrawal-key separation, and compile-fail cross-scheme tests. |
+| Deployment resource policy could accidentally narrow protocol-valid object limits and create local consensus divergence. | Added `v0.52.32 - Protocol And Operational Limit Domains` and expanded `v0.63.0` plus `v0.139.0` with fork-derived protocol profiles, startup-mode enforcement, maximum-valid fixtures, and local-only exhaustion outcomes. |
+| First-party cryptographic arithmetic needed explicit machine-checked implementation evidence beyond the early secp gate. | Added `v0.178.1 - Kani Cryptographic Arithmetic Proofs` for limbs, reduction, conversion, inversion, square roots, point exceptions, scalar multiplication, and canonical serialization across the broader cryptographic core. |
 | Provider JSON-RPC, HTTP, WebSocket, and IPC boundaries lacked several canonicality, redirect, rebinding, proxy, credential, and local-peer controls. | Expanded `v0.92.0` and `v0.94.0..=v0.97.0` with canonical quantity/bytes/ID rules, decoded-byte charging, redirect/origin/DNS/proxy/credential policy, Unix ownership/symlink checks, and Windows pipe ACL/identity checks. |
 | Txpool entries were not explicitly revalidated across heads, forks, fees, restarts, account/delegation state, and blob-sidecar lifecycle. | Expanded `v0.160.0`; persisted/local/protected status never bypasses fresh consensus validation. |
 | Negative and bad-block caches needed stricter evidence, identity, invalidation, retention, and anti-flood rules. | Expanded `v0.52.29`, `v0.136.0..=v0.137.0`, `v0.161.0`, and `v0.218.0`; only proven protocol-invalid outcomes may be cached or punished. |
@@ -3243,8 +3249,9 @@ Deliverables:
   additional entropy only through a reviewed domain-separated input;
 - strict verification, low-s normalization, recoverable signatures,
   public-key recovery, and ECDH;
-- distinct transaction, message, authorization, validator, and networking
-  identity domains;
+- distinct execution transaction, message, EIP-712, authorization, and
+  networking-identity domains; consensus validator duties are explicitly
+  excluded because they require BLS12-381;
 - no nonce/HMAC state reuse across keys or requests;
 - sanitation of HMAC state, nonce candidates, intermediate scalars, and keys;
 - fault detection prevents any signature from escaping after an arithmetic,
@@ -3407,7 +3414,9 @@ Deliverables:
 
 - Shared `Valid`, `ProtocolInvalid { evidence }`, `MissingDependency`/
   `Syncing`, `LocalResourceExhausted`, `Cancelled`/`Stale`,
-  `BackendUnavailable`, and `InternalFault` domains;
+  `BackendUnavailable`, `InternalFault`, `PolicyRejected { policy_id }`,
+  `UnsupportedCapability`, `Duplicate`/`AlreadyKnown`, and
+  `DeferredUntil { dependency }` domains;
 - non-forgeable protocol-invalid evidence bound to exact object bytes/hash,
   chain/genesis, fork rules, parent/root, validation version, stage, and reason;
 - only `ProtocolInvalid` may enter bad-block/invalid-proof caches, penalize or
@@ -3420,6 +3429,23 @@ Deliverables:
 - missing trie nodes/state, resource exhaustion, timeout, cancellation, stale
   snapshots, unavailable cryptography, disk/backend errors, and internal faults
   remain local/retryable and preserve the original object's unknown status;
+- local fee/tip/configuration refusal is `PolicyRejected`, non-negotiated
+  methods/protocols are `UnsupportedCapability`, seen objects are
+  `Duplicate`/`AlreadyKnown`, and future nonces/missing sidecars are
+  `DeferredUntil`; none creates bad-object evidence or consensus penalties;
+- a failed mixed-source cryptographic batch proves only that the batch contains
+  invalid evidence, not which member or peer is responsible; bounded
+  individual isolation must establish member-specific `ProtocolInvalid`
+  evidence before penalty or caching;
+- budget, entropy, cancellation, or backend failure during batch isolation
+  returns its corresponding local outcome and never penalizes all represented
+  peers;
+- auxiliary evidence identities cover blob sidecars by block/index/commitment/
+  blob/proof, PeerDAS cells/columns by block root/coordinate/commitment/proof,
+  KZG by setup digest/domain, Engine bundles by payload/blobs/requests/parent
+  beacon root, and Snap ranges by snapshot/start/end/continuation/proof nodes;
+- invalid auxiliary evidence is scoped to that exact object and cannot poison
+  its containing block or sibling auxiliary objects;
 - conversion and composition rules consumed by proof verification, block
   import, Engine, sync, txpool, gossip, and serving layers.
 
@@ -3432,6 +3458,12 @@ Verification:
   internal failures;
 - property tests proving only protocol evidence reaches permanent rejection,
   negative caches, peer penalties, Engine `INVALID`, or GossipSub `REJECT`;
+- policy/unsupported/duplicate/deferred mapping tests for txpool, RPC, gossip,
+  capability negotiation, and sidecar/future-nonce workflows;
+- mixed-source batch failure and bounded member-isolation tests proving no
+  group penalty without member-specific evidence;
+- auxiliary-object substitution and sibling/containing-block non-poisoning
+  tests for blobs, PeerDAS, KZG, Engine bundles, and Snap ranges;
 - negative-cache assumption-change, collision/substitution, expiry, eviction,
   and unique-invalid-object flood tests;
 - model checking for outcome composition, retry, and evidence conservation.
@@ -3442,6 +3474,119 @@ Exit criteria:
   poison consensus caches, or punish its supplier without protocol-invalid
   evidence.
 - `v0.52.29 implementation stop reached. Run pentest for this exact
+  commit.`
+
+### v0.52.30 - Early secp256k1 Arithmetic Proof Gate
+
+Status: planned.
+
+Goal: provide machine-checked evidence for the secret-bearing secp256k1 core
+before the local execution signer or network identity consumers are built.
+
+Deliverables:
+
+- Kani proofs for secp256k1 limb carries/borrows, wide multiplication,
+  reduction, canonical field/scalar conversion, and serialization rejection;
+- bounded scalar-multiplication equivalence against a small reviewed
+  mathematical model;
+- exceptional point-addition/doubling cases required by signing, recovery, and
+  ECDH;
+- explicit assumptions and unproved full-width domains paired with vector,
+  property, differential, fuzz, side-channel, and audit evidence;
+- reusable proof patterns fed into the broader `v0.178.1` crypto proof gate.
+
+Verification:
+
+- Pinned Kani report and independently reviewed mathematical model;
+- seeded carry, reduction, exceptional-point, scalar-multiplication, and
+  non-canonical serialization defects detected by the harnesses;
+- exact first-party code paths from `v0.52.23..=v0.52.24` are proven rather
+  than separate toy implementations.
+
+Exit criteria:
+
+- The first secret-bearing execution signer at `v0.110.0` and RLPx identity at
+  `v0.155.0` do not rely only on vectors, fuzzing, and audit for core secp
+  arithmetic invariants.
+- `v0.52.30 implementation stop reached. Run pentest for this exact
+  commit.`
+
+### v0.52.31 - Cryptographic Signing Scheme Separation
+
+Status: planned.
+
+Goal: prevent secp256k1 execution/transport signers and BLS12-381 consensus
+signers, keys, signatures, roots, and keystores from being interchanged.
+
+Deliverables:
+
+- Distinct sealed `ExecutionSigner` (secp256k1/ECDSA), `ConsensusSigner`
+  (BLS12-381), and `TransportIdentity` (secp256k1/ECDH where required)
+  capabilities, or an equivalent sealed `SigningScheme` associated type;
+- scheme-tagged opaque key IDs, public keys, signatures, keystores, signing
+  requests, roots/digests, and custody handles with no runtime algorithm strings;
+- withdrawal credentials and withdrawal keys remain separate from validator
+  signing keys and cannot implement `ConsensusSigner`;
+- execution signing covers transactions, EIP-712, personal messages, and
+  EIP-7702 authorizations; consensus signing covers only fork/domain-bound
+  validator duties;
+- provider, wallet, validator, hardware, remote, HSM/KMS, and threshold
+  adapters must select one explicit scheme capability.
+
+Verification:
+
+- Compile-fail tests proving secp signers cannot consume consensus duties and
+  BLS signers cannot consume execution/message requests;
+- compile-fail substitution tests across BLS/secp keys, signatures, IDs,
+  keystores, roots, and requests;
+- withdrawal-credential/key rejection tests for validator-signing slots;
+- no string-selected algorithm dispatch in public signing APIs.
+
+Exit criteria:
+
+- Algorithm and key-role confusion is structurally impossible before any
+  signer implementation or validator duty is admitted.
+- `v0.52.31 implementation stop reached. Run pentest for this exact
+  commit.`
+
+### v0.52.32 - Protocol And Operational Limit Domains
+
+Status: planned.
+
+Goal: prevent local resource policy from silently becoming a stricter Ethereum
+consensus rule.
+
+Deliverables:
+
+- `ProtocolLimits` derived atomically from `ChainSpec`, active fork, and pinned
+  specifications for maximum-valid transactions, blocks, SSZ objects,
+  precompile calls, proofs, requests, and other consensus inputs;
+- `OperationalLimits` for local concurrency, caches, queues, peers, RPC,
+  serving, scheduling, and reservations without authority over validity;
+- startup rejects validating configurations below protocol maxima or enters an
+  explicit non-validating/light mode that cannot claim block validity;
+- gas-derived execution/precompile bounds cannot be replaced by arbitrary
+  local byte caps;
+- above-protocol objects may produce `ProtocolInvalid`; within-protocol objects
+  that exceed available local resources produce `LocalResourceExhausted`;
+- serving limits may be lower only as willingness-to-serve policy;
+- fork activation atomically switches the protocol-limit profile without a
+  mixed-rule window.
+
+Verification:
+
+- Maximum-valid transaction, block, SSZ, proof, request, and precompile
+  fixtures for every claimed fork;
+- startup mode/configuration matrices and compile-time type separation;
+- fault tests proving within-protocol local exhaustion never produces
+  invalidity;
+- fork-boundary atomicity and serving-versus-validation independence tests.
+
+Exit criteria:
+
+- Every validating mode can process all protocol-valid objects, and every
+  smaller local limit affects capacity or service only, never consensus.
+- `v0.52.32 implementation stop reached. Run pentest for this exact
   commit.`
 
 ## Roadmap Expansion From The 2026 Gap Analysis
@@ -3700,11 +3845,15 @@ Goal: deliver the Chain Specification And Fork Rules 2.0 release with this requi
 
 Deliverables:
 
-- Separate fork identity, activation schedule, rule capabilities, parameters, system hooks, and complete historical/custom-chain configuration.
+- Separate fork identity, activation schedule, rule capabilities, parameters,
+  system hooks, and complete historical/custom-chain configuration;
+- derive the active `ProtocolLimits` profile required by `v0.52.32` directly
+  from chain/fork rules and switch it atomically at activation.
 
 Verification:
 
-- Historical mainnet vectors, custom-chain schedules, monotonicity/property tests.
+- Historical mainnet vectors, custom-chain schedules, monotonicity/property
+  tests, protocol-limit source and fork-activation atomicity tests.
 
 Exit criteria:
 
@@ -4083,6 +4232,9 @@ Deliverables:
   domain-separated transcript covering every statement and fork/domain input;
 - fail-closed entropy/transcript handling, bounded batch-failure isolation, and
   prohibition of attacker-controlled or cross-batch coefficient reuse;
+- batch failure returns only batch-level inconclusive evidence; member-specific
+  `v0.52.29` invalidity requires successful bounded individual isolation, while
+  local isolation failure remains retryable;
 - cache identities include complete message, setup, domain, fork, and
   validation-level context.
 
@@ -4823,9 +4975,10 @@ Goal: deliver the Signer Interface 2.0 release with this required outcome: Every
 
 Deliverables:
 
-- Runtime-neutral capability contracts with separate typed, domain-separated
-  requests for transactions, EIP-712 data, personal messages, EIP-7702
-  authorizations, and consensus duties;
+- Runtime-neutral capability contracts consuming the sealed `v0.52.31`
+  scheme separation: execution requests for transactions, EIP-712 data,
+  personal messages, and EIP-7702 authorizations remain distinct from BLS
+  consensus-duty requests;
 - every request binds chain, signing domain, digest, review metadata, policy
   context, and signer capability evidence;
 - signers return only public signatures and metadata, never raw secret access
@@ -4833,7 +4986,8 @@ Deliverables:
 
 Verification:
 
-- Mock signer suite, wrong-domain/chain tests, redaction audit.
+- Mock execution/consensus/transport signer suites, compile-fail cross-scheme
+  tests, wrong-domain/chain tests, redaction audit.
 
 Exit criteria:
 
@@ -4850,7 +5004,8 @@ Goal: deliver the Local Secret Signer release with this required outcome: Local 
 Deliverables:
 
 - Optional local signer using the already admitted `v0.52.23..=v0.52.26`
-  first-party secp256k1/ECDSA path in a separate opt-in crate or isolated worker,
+  first-party secp256k1/ECDSA path and `v0.52.30` proof evidence as an
+  `ExecutionSigner` only, in a separate opt-in crate or isolated worker,
   with locked/sanitized opaque secret ownership, deterministic signatures, and
   explicit export prohibition;
 - in-place crypto operations, RAII sanitation guards, redacted non-Clone/
@@ -5515,11 +5670,18 @@ Goal: deliver the Operational Client Runtime release with this required outcome:
 
 Deliverables:
 
-- Supervised bounded tasks for import, providers, peers, sync, pruning, metrics, shutdown, and restart without imposing one async runtime on core crates.
+- Supervised bounded tasks for import, providers, peers, sync, pruning, metrics,
+  shutdown, and restart without imposing one async runtime on core crates;
+- startup validates `OperationalLimits` against active/future
+  `ProtocolLimits`, refusing unsafe validating configurations or entering an
+  explicit non-validating/light mode;
+- runtime resource faults preserve `v0.52.29` local outcomes and cannot poison
+  validation state.
 
 Verification:
 
-- Failure injection, graceful shutdown/restart, resource-cap tests.
+- Failure injection, graceful shutdown/restart, validating/light mode startup
+  matrices, maximum-valid object admission, and resource-cap tests.
 
 Exit criteria:
 
@@ -6533,6 +6695,9 @@ Status: planned.
 Goal: add machine-checked implementation evidence for the highest-risk
 first-party field, scalar, curve, signature, and pairing arithmetic.
 
+This release consolidates and extends the early secp256k1 subset admitted at
+`v0.52.30`; it does not defer secret-bearing secp proof evidence until here.
+
 Deliverables:
 
 - Bounded carry/borrow proofs for limb addition and subtraction;
@@ -6550,6 +6715,8 @@ Verification:
 
 - Pinned Kani harnesses and reproducible reports for Keccak/secp256k1, BN254,
   BLS12-381, KZG, and related fixed-width helpers as applicable;
+- compatibility and coverage checks proving the `v0.52.30` harnesses remain
+  attached to the production secp implementation;
 - seeded carry, reduction, exceptional-point, and serialization defects caught
   by the proof suite;
 - independent review of the mathematical models, assumptions, and uncovered
@@ -6939,6 +7106,9 @@ Deliverables:
 - entropy/transcript failure fails closed, coefficient reuse across contexts is
   prohibited, and bounded batch-failure isolation cannot become an unbounded
   fallback attack;
+- failed mixed-source batches never identify or penalize members/peers until
+  bounded individual verification establishes member-specific `v0.52.29`
+  protocol-invalid evidence;
 - bounded verification-queue latency and maximum batch age so attackers cannot
   delay block processing by preventing batches from filling;
 - cache keys contain complete message/domain/fork/validation context.
@@ -6972,6 +7142,8 @@ Deliverables:
 - batch verification;
 - sound nonzero coefficient/transcript generation, fail-closed entropy,
   context-complete cache identities, and bounded failure isolation;
+- mixed-source batch failures and local isolation failures follow the
+  `v0.52.29` batch/member outcome contract;
 - bounded reusable workspaces;
 - explicit acceleration/backend boundaries;
 - canonical failure and partial-output behavior.
@@ -8012,6 +8184,8 @@ Deliverables:
 - EIP-2334 validator derivation paths;
 - cryptographically secure entropy requirements and deterministic test seams;
 - validator signing-key and withdrawal-key role types;
+- scheme-tagged opaque key IDs, BLS public keys/signatures, EIP-2335 keystores,
+  and custody handles conforming to `v0.52.31`;
 - withdrawal credentials for BLS and execution-address modes;
 - offline withdrawal-key workflow;
 - deposit message, deposit-data root, signature, and JSON artifact generation;
@@ -8044,19 +8218,24 @@ using the key roles and derivation rules established at `v0.238.0`.
 Deliverables:
 
 - Consensus-domain signing packages;
+- implement only the BLS12-381 `ConsensusSigner` capability from `v0.52.31`;
 - EIP-2335 keystore import/export and password policy;
 - locked and sanitized key memory;
 - final fork, genesis, domain, signing-root, and duty-context validation;
 - mandatory transactional slashing check before signature release;
 - signing audit log, refusal policy, and local key lifecycle;
-- hard rejection of withdrawal keys in validator-signing slots.
+- hard rejection of withdrawal keys in validator-signing slots;
+- no transaction, EIP-712, personal-message, EIP-7702, secp256k1, or
+  transport-identity request can reach this signer.
 
 Verification:
 
 - Official and independent signing/keystore vectors;
 - memory-sanitization review;
 - wrong-domain, wrong-genesis, withdrawal-key, slashing-DB failure, and
-  audit-redaction tests.
+  audit-redaction tests;
+- compile-fail execution/transport request and cross-scheme key/signature/
+  keystore substitution tests.
 
 Exit criteria:
 

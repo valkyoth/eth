@@ -124,8 +124,9 @@ The first production value is:
   consensus/resource/precompile gaps, `v0.52.11..=v0.52.18` build first-party
   BLS12-381 execution, `v0.52.19..=v0.52.21` freeze architecture,
   resource-governor, and cryptographic-provider contracts, and
-  `v0.52.22..=v0.52.29` implement/audit first-party core crypto plus shared
-  cross-format accounting, clock, and validation-outcome contracts; and
+  `v0.52.22..=v0.52.32` implement/audit first-party core crypto plus shared
+  cross-format accounting, clock, validation-outcome, early secp proof,
+  signing-scheme separation, and protocol/operational-limit contracts; and
   `v0.77.0` through `v0.81.0` build first-party KZG/blob verification before
   later releases claim complete affected-fork execution.
 - `eth-valkyoth-sdk`: optional owned models, prelude, builders, and high-level
