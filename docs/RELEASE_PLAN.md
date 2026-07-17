@@ -300,6 +300,7 @@ relevant dependency point.
 | Proof limits did not distinguish consensus-embedded proofs from Snap/MPT wire proofs and RPC/provider policy. | Expanded `v0.52.32`, `v0.92.0`, `v0.100.0`, `v0.157.0`, and `v0.165.0` with authority-tagged proof limits and cross-domain non-substitution tests. |
 | Peer-observation windows lacked restart/session and rollback-safe time semantics. | Expanded `v0.52.28`, `v0.52.29`, `v0.158.0`, and `v0.220.0` with monotonic in-session windows, boot/session identity, carefully defined UTC persistence, and rollback/stale-source expiry tests. |
 | Evidence-budget exhaustion after proving invalidity could erase the authoritative result. | Expanded `v0.52.29`, `v0.72.0`, `v0.73.0`, `v0.136.0`, `v0.143.0`, and `v0.218.0` with pre-validation fixed `EvidenceSlot` reservation, infallible allocation-free minimal evidence, and optional cache/diagnostic/persistence attachments that cannot change the immediate result. |
+| Nested and batch validators could independently reserve, reset, duplicate, or lose evidence capacity. | Added `v0.52.33 - Hierarchical Evidence Capability Composition` and expanded `v0.72.0`, `v0.73.0`, `v0.74.0..=v0.74.1`, `v0.79.0`, `v0.134.0`, `v0.136.0`, `v0.177.0`, `v0.179.1`, `v0.192.0`, `v0.193.0`, and `v0.218.0` with linear parent/child reservations, bounded batch cardinality, exactly-once lifecycle rules, committed-record recovery, Kani conservation proofs, and Loom concurrency checks. |
 | Validation contexts could remain non-forgeable yet accidentally retain recursive ancestry or unstable process-local identities. | Expanded `v0.52.32`, `v0.63.0`, `v0.73.0`, `v0.74.0`, `v0.88.1`, and `v0.134.0` with bounded parent handles, borrowed child contexts, deterministic lease release, canonical versioned encoding, domain-separated cryptographic digests, and constant-size/stability tests. |
 | First-party cryptographic arithmetic needed explicit machine-checked implementation evidence beyond the early secp gate. | Added `v0.178.1 - Kani Cryptographic Arithmetic Proofs` for limbs, reduction, conversion, inversion, square roots, point exceptions, scalar multiplication, and canonical serialization across the broader cryptographic core. |
 | Provider JSON-RPC, HTTP, WebSocket, and IPC boundaries lacked several canonicality, redirect, rebinding, proxy, credential, and local-peer controls. | Expanded `v0.92.0` and `v0.94.0..=v0.97.0` with canonical quantity/bytes/ID rules, decoded-byte charging, redirect/origin/DNS/proxy/credential policy, Unix ownership/symlink checks, and Windows pipe ACL/identity checks. |
@@ -3750,6 +3751,77 @@ Exit criteria:
 - `v0.52.32 implementation stop reached. Run pentest for this exact
   commit.`
 
+### v0.52.33 - Hierarchical Evidence Capability Composition
+
+Status: planned.
+
+Goal: make evidence capacity a conserved linear capability across standalone,
+nested, concurrent, batch, and persistent validation workflows.
+
+Deliverables:
+
+- private, non-`Copy`, non-`Clone` `ReservedEvidenceSlot` and
+  `FilledEvidenceSlot` typestates with exactly-once fill, attach, persist,
+  return, or release transitions;
+- RAII releases unused reservations during ordinary return, cancellation,
+  unwinding, deferred processing, and local failure without permitting double
+  release, use after return, or reuse of a filled slot;
+- nested validators borrow a parent-authorized slot or consume an explicitly
+  derived child reservation; they cannot mint capacity, reset accounting, or
+  reserve an unrelated operation-wide slot;
+- standalone transaction/proof/precompile/system-operation entry points reserve
+  their own typed slot, while the same validators embedded in block validation
+  require a parent-provided reservation;
+- child invalidity evidence composes into parent evidence without changing the
+  child's object identity, validation context, stage, or stable reason;
+- producing both child-specific and parent-specific invalidity records requires
+  an explicit atomic two-entry reservation before either authoritative check;
+- batch verification reserves one slot for `BatchContainsInvalid`; bounded
+  member isolation reserves a configured maximum of per-member child slots
+  before those individual checks, independently of attacker-controlled batch
+  size;
+- member isolation stops with a local resource outcome when another child slot
+  cannot be reserved, and only successfully filled member slots may reach
+  negative caches, peer attribution, or sanctions;
+- filled authoritative evidence is immutable: optional cache, persistence,
+  attachment, diagnostic, or serialization failure cannot reclaim, mutate, or
+  downgrade it;
+- persistent stores commit only filled evidence records; abandoned reservations
+  have no authoritative recovery representation and are discarded after a
+  crash;
+- one shared transition contract and adapters for transaction, block, proof,
+  precompile, system-operation, batch, gossip, Engine, and import consumers.
+
+Verification:
+
+- Compile-fail tests for copy, clone, direct construction, child capacity minting,
+  fill after return, second fill, second release, and invalid typestate
+  transitions;
+- block to transaction to proof/precompile/system-operation nested reservation
+  tests and standalone-versus-embedded validation/evidence equivalence tests;
+- child-to-parent evidence composition and explicit one-entry/two-entry
+  reservation boundary tests preserving child object identity;
+- multi-invalid batch isolation under capacity pressure, with a batch-size-
+  independent maximum evidence count and no attribution for unfilled members;
+- cancellation, panic/unwind, deferred, local-failure, valid, and ordinary-return
+  tests proving every unused reservation is released exactly once;
+- fault injection at every reserved, derived, filled, attached, serialized,
+  persisted, cached, returned, and released transition;
+- deterministic recovery-model fixtures proving only committed filled records
+  become authoritative evidence, with process-kill backend coverage assigned
+  to `v0.134.0` and `v0.136.0`;
+- bounded reference state-machine and deterministic concurrency tests plus
+  stable harness interfaces consumed by the Kani proofs at `v0.177.0` and Loom
+  exploration at `v0.179.1`.
+
+Exit criteria:
+
+- Evidence capacity cannot be created, duplicated, reset, leaked, or attributed
+  without a filled slot; nested and batch validation preserve bounded cardinality
+  and object identity, and recovery recognizes only committed filled evidence.
+- `v0.52.33 implementation stop reached. Run pentest for this exact
+  commit.`
+
 ## Roadmap Expansion From The 2026 Gap Analysis
 
 The releases below replace the earlier narrow integration roadmap. They assign
@@ -4222,13 +4294,18 @@ Deliverables:
   consensus authority;
 - reserve a `v0.52.29` minimal `EvidenceSlot` before authoritative semantic
   validation; reservation failure returns local exhaustion before checks begin
-  and every invalid path fills the slot allocation-free.
+  and every invalid path fills the slot allocation-free;
+- follow `v0.52.33`: standalone transaction validation reserves its own slot,
+  while block-embedded validation accepts only a block-derived child
+  reservation and produces equivalent transaction evidence without resetting
+  the parent budget.
 
 Verification:
 
 - Official transaction tests, cross-type property tests, client differential
   checks, compile-fail caller-context substitution tests, and evidence-slot
-  reservation/fill/release fault tests for every invalid reason.
+  reservation/fill/release fault tests for every invalid reason;
+- standalone-versus-embedded equivalence and parent-budget conservation tests.
 
 Exit criteria:
 
@@ -4254,6 +4331,10 @@ Deliverables:
   longer matches;
 - reserve a `v0.52.29` minimal `EvidenceSlot` before authoritative header/block
   checks, so every invalid path has infallible allocation-free evidence;
+- reserve the complete `v0.52.33` parent/child evidence cardinality required by
+  the selected block-validation mode before nested authoritative checks; child
+  validators consume derived reservations, and simultaneous transaction- and
+  block-specific evidence requires an explicit two-entry reservation;
 - every failure is classified through `v0.52.29`; only complete
   `ObjectInvalidityEvidence` can permanently reject the block.
 
@@ -4263,7 +4344,9 @@ Verification:
   pre/post-fork, unknown-parent, stale/corrupted-context, and context-
   substitution cases;
 - pre-validation slot exhaustion and post-invalid diagnostic/cache/persistence
-  failure tests preserving the immediate invalid result.
+  failure tests preserving the immediate invalid result;
+- block to transaction to proof/precompile/system-operation nesting, child
+  identity composition, two-entry boundary, and exactly-once release tests.
 
 Exit criteria:
 
@@ -4287,6 +4370,10 @@ Deliverables:
   rules/environment and snapshot lease without cloning parent evidence or
   recursively owning caller contexts; final-scope drop releases leases and
   arenas deterministically.
+- Transaction, proof, precompile, and system-operation scopes consume only
+  `v0.52.33` parent-authorized evidence reservations; rollback, cancellation,
+  local failure, and successful completion release unused child reservations
+  exactly once without resetting block-wide accounting.
 - Implement complete EIP-7702 state application: process authorization tuples
   before transaction execution after sender-nonce increment, warm recovered
   authorities, apply skip-instead-of-reject tuple rules, account refunds,
@@ -4305,6 +4392,8 @@ Verification:
   every scoped lease exactly once.
 - Focused pre-implementation review of `StateJournal`, context ownership,
   rollback, and evidence-slot interaction.
+- Nested evidence-capability conservation, rollback, cancellation, and
+  exactly-once release tests across every transition stage.
 - Official EIP-7702 transaction/state fixtures covering duplicate authorities,
   invalid tuple skips, delegation clearing, refunds, persistent effects after
   execution failure, delegated transaction origins/destinations, one-hop loop
@@ -4337,12 +4426,17 @@ Deliverables:
 - exact pre-block/post-block placement, system caller/address, gas, code
   validation, rollback, and state-persistence rules;
 - Engine payload encoding and execution-header/request-root binding.
+- system-operation and execution-request validation consumes explicit
+  `v0.52.33` block-derived child reservations and cannot independently mint or
+  reset evidence capacity.
 
 Verification:
 
 - Official execution-spec and execution-apis fixtures for each EIP;
 - exact ordering tests around transactions, withdrawals, rewards, and other
   system operations;
+- child-reservation exhaustion, invalidity composition, rollback, and
+  exactly-once release tests for every system operation and request;
 - invalid/missing system-contract code, revert, empty request, reordered
   request, wrong header root, and payload mismatch tests;
 - differential state, receipt, request, and header-root checks against Geth,
@@ -4452,6 +4546,10 @@ Deliverables:
 - batch failure returns `v0.52.29` `BatchContainsInvalid`; member-specific
   object invalidity requires successful bounded individual isolation, while
   local isolation failure remains retryable and non-attributable;
+- follow `v0.52.33`: reserve one batch-result slot plus an explicit configured
+  maximum of member child slots before isolation; evidence cardinality is
+  independent of batch size, isolation stops locally at capacity, and only
+  filled member slots permit caching or attribution;
 - cache identities include complete message, setup, domain, fork, and
   validation-level context.
 
@@ -4459,7 +4557,8 @@ Verification:
 
 - Official EIP-4844 fixtures, differential vectors, malformed/batch fuzzing;
 - adversarial coefficient-reuse/control, transcript-collision, entropy-failure,
-  mixed-context cache, and bounded-isolation tests.
+  mixed-context cache, bounded-isolation, slot-pressure, and maximum-evidence-
+  cardinality tests.
 
 Exit criteria:
 
@@ -5772,7 +5871,10 @@ Deliverables:
   identities are rejected and expired snapshot/arena handles are never stored;
 - persistent invalidity and peer evidence obeys the `v0.52.29` entry-size,
   witness, observation, serialization, and retention budgets; full malformed
-  objects require a separately bounded object store.
+  objects require a separately bounded object store;
+- evidence persistence follows `v0.52.33`: only atomically committed filled
+  records are authoritative, while reserved/derived/abandoned lifecycle state
+  is non-authoritative and discarded during recovery.
 
 Verification:
 
@@ -5780,7 +5882,9 @@ Verification:
   retention tests, corrupted/forged stored-context rejection, and oversized-
   evidence migration tests;
 - cross-restart/platform digest fixtures, encoding/version invalidation, and
-  corrupted-handle/expired-lease non-revival tests.
+  corrupted-handle/expired-lease non-revival tests;
+- crash-at-every-transition recovery tests proving abandoned reservations never
+  become invalidity evidence.
 
 Exit criteria:
 
@@ -5856,7 +5960,10 @@ Deliverables:
   budget before mutation and stores compact digest/reason/location/witness
   records rather than implicit full malformed objects;
 - failure to serialize or insert optional persistent/cache attachments never
-  changes the immediate minimal `ProtocolInvalid` result returned by import.
+  changes the immediate minimal `ProtocolInvalid` result returned by import;
+- import stages consume one `v0.52.33` hierarchical reservation tree, and
+  durable writes expose only committed filled leaves rather than reservation
+  bookkeeping.
 
 Verification:
 
@@ -5864,7 +5971,9 @@ Verification:
   injection, bad-block-cache poisoning/flood tests, and evidence reservation/
   partial-write/oversized-witness tests;
 - post-invalid serialization, persistence, and cache-insertion failures with
-  unchanged immediate result and clean transactional rollback.
+  unchanged immediate result and clean transactional rollback;
+- process-kill tests across slot derivation/fill/persist/commit/release proving
+  recovery cannot promote abandoned reservations.
 
 Exit criteria:
 
@@ -6954,11 +7063,18 @@ Goal: deliver the Kani Codec Primitive And Typestate Proofs release with this re
 
 Deliverables:
 
-- Bounded proofs for arithmetic, canonical decoding, budget accounting, writers, conversions, and impossible typestate transitions.
+- Bounded proofs for arithmetic, canonical decoding, budget accounting, writers,
+  conversions, impossible typestate transitions, and the `v0.52.33` evidence-
+  slot state machine;
+- slot-conservation proofs across reserve, derive, fill, return, and release,
+  including one-entry/two-entry parent-child composition and bounded batch
+  cardinality.
 
 Verification:
 
-- Pinned Kani toolchain and reproducible proof report.
+- Pinned Kani toolchain and reproducible proof report;
+- seeded double-fill, double-release, child-minting, use-after-return, and slot-
+  leak models rejected within documented bounds.
 
 Exit criteria:
 
@@ -7060,7 +7176,8 @@ Deliverables:
 - TLA+, Quint, or Apalache models for fork activation, Engine sequencing,
   fork choice, txpool replacement, and slashing invariants;
 - Loom models for request IDs, schedulers, txpool coordination, resource-token
-  conservation, and slashing-database concurrency;
+  conservation, hierarchical evidence-slot derivation/fill/return/release, and
+  slashing-database concurrency;
 - trace-to-test adapters that turn model counterexamples into deterministic
   Rust regressions.
 
@@ -7068,6 +7185,8 @@ Verification:
 
 - Pinned model-checker versions and reproducible reports;
 - seeded broken invariants detected by each model family;
+- concurrent evidence tests covering racing child derivation, fill versus
+  cancellation, return versus release, and exactly-once parent accounting;
 - zero unexplained counterexamples within documented bounds.
 
 Exit criteria:
@@ -7407,6 +7526,10 @@ Deliverables:
 - failed mixed-source batches return `v0.52.29` `BatchContainsInvalid` and
   never identify or penalize members/peers until bounded individual
   verification establishes member-specific object-invalidity evidence;
+- follow `v0.52.33`: reserve one batch slot and a configured batch-size-
+  independent maximum of member slots before isolation; capacity exhaustion
+  stops isolation locally, and only filled member slots authorize caching or
+  attribution;
 - bounded verification-queue latency and maximum batch age so attackers cannot
   delay block processing by preventing batches from filling;
 - cache keys contain complete message/domain/fork/validation context.
@@ -7415,7 +7538,8 @@ Verification:
 
 - Official BLS vectors, independent differential tests, subgroup/fault/batch
   fuzzing, coefficient/transcript/cache attacks, queue-latency simulations,
-  entropy-failure tests, and timing review.
+  entropy-failure tests, evidence-capacity-pressure/cardinality tests, and
+  timing review.
 
 Exit criteria:
 
@@ -7443,6 +7567,9 @@ Deliverables:
 - mixed-source batch failures return `v0.52.29` `BatchContainsInvalid`; local
   isolation failures remain local and member/peer attribution requires
   individual object-invalidity evidence;
+- `v0.52.33` batch reservations bound the number of member evidence records
+  independently of cell/column count and prohibit cache or peer attribution
+  for members whose child slots were not filled;
 - bounded reusable workspaces;
 - explicit acceleration/backend boundaries;
 - canonical failure and partial-output behavior.
@@ -7454,6 +7581,8 @@ Verification:
 - malformed proof, cell, and reconstruction fuzzing;
 - corruption and insufficient-column tests;
 - CPU, memory, and workspace ceilings;
+- multi-invalid isolation under evidence-slot pressure and maximum-result-
+  cardinality tests;
 - default-graph and backend-admission checks.
 
 Exit criteria:
@@ -7998,7 +8127,10 @@ Deliverables:
   scoring mutation;
 - every authoritative object-validation stage reserves minimal invalidity
   evidence before execution; seen-cache, negative-cache, scoring, logging, or
-  persistence failure cannot erase an immediate object-invalid result.
+  persistence failure cannot erase an immediate object-invalid result;
+- nested gossip decode/signature/state/fork-choice checks share one
+  `v0.52.33` parent-authorized reservation tree; a child cannot mint capacity,
+  and only filled child evidence can enter caches or peer attribution.
 
 Verification:
 
@@ -8006,7 +8138,9 @@ Verification:
   cache-pressure tests, object/peer evidence non-interchangeability tests, and
   oversized-evidence/observation-flood fault injection;
 - post-invalid cache/scoring/logging/persistence failure tests preserving the
-  immediate validation result while suppressing only failed side effects.
+  immediate validation result while suppressing only failed side effects;
+- cancellation and concurrent staged-validation tests proving child slots are
+  returned or released exactly once and parent accounting is conserved.
 
 Exit criteria:
 
