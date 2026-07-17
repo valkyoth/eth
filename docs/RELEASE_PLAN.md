@@ -210,12 +210,12 @@ relevant dependency point.
 | Full EIP-712 `encodeType`/`encodeData`/`hashStruct` support was missing from the roadmap. | Added `v0.26.0 - EIP-712 Typed-Data Encoder`. |
 | EIP-712 JSON-RPC typed-data parsing was deferred from the no-JSON typed encoder without a visible patch milestone. | Added `v0.26.1 - EIP-712 JSON Typed-Data Parser Boundary`. |
 | A first-party optional software Keccak backend was deferred without a versioned admission point. | Added `v0.27.0 - Optional Keccak Backend Admission`. |
-| Formal verification evidence was not scheduled. | Added `v0.177.0` through `v0.179.2` for Kani, Miri, sanitizers, protocol/concurrency model checking, side-channel review, and bounded invariant evidence as extra assurance, not replacements for fuzzing, conformance tests, pentest, or audit. |
+| Formal verification evidence was not scheduled. | Added `v0.177.0` through `v0.179.2`, including `v0.178.1` cryptographic arithmetic proofs, for Kani, Miri, sanitizers, protocol/concurrency model checking, side-channel review, and bounded invariant evidence as extra assurance, not replacements for fuzzing, conformance tests, pentest, or audit. |
 | ABI encoding, Engine API, SSZ, and DevP2P/RLPx were marked deferred. | Added explicit ABI/contract releases `v0.120.0..=v0.129.0`, consensus/Engine releases `v0.141.0..=v0.153.0`, and networking releases `v0.154.0..=v0.164.0`. |
 | ENS and common ERC/application standards were not scheduled. | Added `v0.127.0..=v0.129.0` for common standards, ENS, permit, interface helpers, and contract-tooling fuzz/DX gates. |
 | Node-level sync, txpool, mining/validator boundaries, and observability were not scheduled. | Added storage/client releases `v0.130.0..=v0.140.0`, networking/sync releases `v0.154.0..=v0.164.0`, and operational-runtime release `v0.139.0`. |
 | REVM dependency admission failed the existing dependency policy. | Added `v0.37.1 - REVM Dependency Recheck` before execution work may continue. |
-| Native audited EVM execution was not explicitly versioned; REVM could look like the long-term core. | Added the first-party engine, correctness, resource-boundary, precompile, core-crypto, and shared-capability sequence at `v0.40.0..=v0.52.28`, then complete execution, state transition, conformance, tracing, and simulation at `v0.69.0..=v0.91.0`. |
+| Native audited EVM execution was not explicitly versioned; REVM could look like the long-term core. | Added the first-party engine, correctness, resource-boundary, precompile, core-crypto, and shared-capability sequence at `v0.40.0..=v0.52.29`, then complete execution, state transition, conformance, tracing, and simulation at `v0.69.0..=v0.91.0`. |
 | Default verification previously depended directly on `k256` and used direct `sha3` test wrappers, which conflicted with the long-term first-party-core goal. | Added `v0.37.2` and `v0.37.3` to audit core dependencies, move cryptographic implementation crates behind explicit boundaries/features, and document any accepted cryptographic backend plan. |
 | `subtle`, `alloy-rlp`, dev `serde_json`, optional `serde`/`serde_json`, and optional `sanitization` need explicit long-term dependency classifications before execution grows. | Added `v0.37.4` and `v0.37.5` so constant-time helpers, reference oracles, JSON parser support, and sanitization bridges remain deliberate dependency choices. |
 | `v0.45.0` deliberately admits cryptographic precompiles as fail-closed descriptors without concrete execution backends. | Added `v0.46.0` through `v0.52.0` for SHA-256, RIPEMD-160, ECRECOVER, ModExp, BN254, BLAKE2F, KZG/BLS backend planning, conformance vectors, fuzzing, dependency review, and pentest gates before state-test claims depend on them. |
@@ -286,6 +286,13 @@ relevant dependency point.
 | Security-relevant caches lacked one global identity and validation-level invariant. | Expanded `v0.52.19`, `v0.88.1`, and `v0.218.0` with chain/genesis, fork, snapshot/root, object, and validation-domain identity plus atomic reorg/fork invalidation. |
 | Snap was planned mainly as a consumer rather than a bounded snapshot-pinned serving protocol. | Expanded `v0.157.0` with range/proof construction, serving budgets, fairness, snapshot cancellation, and mixed-snapshot rejection. |
 | ModExp length handling and shared time semantics needed explicit wide-integer and clock-domain contracts. | Expanded `v0.52.10` with 256-bit length preservation and virtual padding; added `v0.52.28 - Shared Clock And Time-Evidence Contract`. |
+| Local resource, timeout, dependency, storage, or backend failures could be confused with consensus invalidity. | Added `v0.52.29 - Validation Outcomes And Invalidity Evidence` and required its non-forgeable evidence in block import, Engine, sync, txpool, peer penalties, gossip, and negative caches. |
+| Deterministic ECDSA was ordered before its RFC 6979 HMAC-SHA256 dependency and lacked complete nonce/fault requirements. | Expanded and renamed `v0.52.24 - First-Party HMAC ECDSA Recovery And ECDH`; `v0.52.25` now consumes its admitted HMAC implementation. |
+| First-party cryptographic arithmetic needed explicit machine-checked implementation evidence. | Added `v0.178.1 - Kani Cryptographic Arithmetic Proofs` for limbs, reduction, conversion, inversion, square roots, point exceptions, scalar multiplication, and canonical serialization. |
+| Provider JSON-RPC, HTTP, WebSocket, and IPC boundaries lacked several canonicality, redirect, rebinding, proxy, credential, and local-peer controls. | Expanded `v0.92.0` and `v0.94.0..=v0.97.0` with canonical quantity/bytes/ID rules, decoded-byte charging, redirect/origin/DNS/proxy/credential policy, Unix ownership/symlink checks, and Windows pipe ACL/identity checks. |
+| Txpool entries were not explicitly revalidated across heads, forks, fees, restarts, account/delegation state, and blob-sidecar lifecycle. | Expanded `v0.160.0`; persisted/local/protected status never bypasses fresh consensus validation. |
+| Negative and bad-block caches needed stricter evidence, identity, invalidation, retention, and anti-flood rules. | Expanded `v0.52.29`, `v0.136.0..=v0.137.0`, `v0.161.0`, and `v0.218.0`; only proven protocol-invalid outcomes may be cached or punished. |
+| Speculative parallel execution did not enumerate all implicit transaction and block dependencies. | Expanded `v0.88.2` with nonce/balance, coinbase, creation/code, SELFDESTRUCT, EIP-7702, transient/original/warm state, system request, precompile environment, receipt/log/gas/order dependencies, and sequential fee-delta commit. |
 
 ## Phase 0: Repository And Release Discipline
 
@@ -3063,6 +3070,9 @@ Deliverables:
 - separate cache domains for untrusted, quorum-derived, and cryptographically
   verified values, with atomic invalidation or rebinding on canonical-head and
   fork-rule changes;
+- an architecture rule that local resource, timeout, cancellation, dependency,
+  backend, storage, and internal failures can never be promoted into
+  protocol-invalid evidence or negative-cache authority;
 - an architecture decision stating that the dependency-free `no_std`
   consensus kernel may use optional audited platform adapters, while those
   adapters cannot decide Ethereum validity.
@@ -3102,6 +3112,8 @@ Deliverables:
   semantics;
 - prohibit wall-clock CPU time as a consensus-admission input; deterministic
   work units govern validity while wall time governs scheduling and peer policy;
+- resource exhaustion, cancellation, timeout, and unavailable schedulers map
+  to retryable local outcomes defined at `v0.52.29`, never protocol invalidity;
 - `no_std` accounting traits plus optional runtime schedulers that cannot mint
   or bypass consensus work authorization.
 
@@ -3214,27 +3226,38 @@ Exit criteria:
 - `v0.52.23 implementation stop reached. Run pentest for this exact
   commit.`
 
-### v0.52.24 - First-Party ECDSA Recovery And ECDH
+### v0.52.24 - First-Party HMAC ECDSA Recovery And ECDH
 
 Status: planned.
 
-Goal: complete the first-party secp256k1 operations required by transactions,
-ECRECOVER, node identity, discovery, and RLPx.
+Goal: complete the first-party HMAC-SHA256 and secp256k1 operations required by
+deterministic signing, transactions, ECRECOVER, node identity, discovery, and
+RLPx in dependency order.
 
 Deliverables:
 
-- Deterministic ECDSA signing, strict verification, low-s normalization,
-  recoverable signatures, public-key recovery, and ECDH;
+- First-party HMAC-SHA256 compatible with the frozen provider contract;
+- RFC 6979-compatible deterministic ECDSA nonce generation with exact
+  message-to-scalar handling;
+- bounded retry for zero or out-of-range nonce, `r`, or `s`, and optional
+  additional entropy only through a reviewed domain-separated input;
+- strict verification, low-s normalization, recoverable signatures,
+  public-key recovery, and ECDH;
 - distinct transaction, message, authorization, validator, and networking
   identity domains;
-- secret nonce/key sanitation and fault-detection policy;
+- no nonce/HMAC state reuse across keys or requests;
+- sanitation of HMAC state, nonce candidates, intermediate scalars, and keys;
+- fault detection prevents any signature from escaping after an arithmetic,
+  nonce-generation, or consistency fault;
 - compatibility adapters for existing signer and recovery provider traits.
 
 Verification:
 
 - Ethereum transaction, ECRECOVER, ENR, discovery, and RLPx vectors;
 - two-implementation differential checks and dual-backend consumer tests;
-- nonce-reuse, invalid-recovery, timing, fault, and fuzz tests.
+- RFC 6979 vectors, message-to-scalar boundaries, retry-path, additional-
+  entropy domain, nonce-state isolation, invalid-recovery, timing, fault,
+  escaped-signature, and fuzz tests.
 
 Exit criteria:
 
@@ -3252,7 +3275,8 @@ by RLPx and Web3 keystores before those consumers are built.
 
 Deliverables:
 
-- First-party or separately audited AES-CTR and HMAC-SHA256 capabilities;
+- First-party or separately audited AES-CTR capability and reuse of the
+  admitted HMAC-SHA256 implementation from `v0.52.24`;
 - exact RLPx ECIES, KDF, MAC, key schedule, and transcript behavior;
 - Web3 keystore cipher, MAC, PBKDF/scrypt parameter, and password-handling
   contracts;
@@ -3369,6 +3393,55 @@ Exit criteria:
 - No deadline, slot, peer, or signer safety path silently mixes monotonic and
   wall time or treats an external source as authority.
 - `v0.52.28 implementation stop reached. Run pentest for this exact
+  commit.`
+
+### v0.52.29 - Validation Outcomes And Invalidity Evidence
+
+Status: planned.
+
+Goal: ensure only cryptographically or semantically proven protocol invalidity
+can become permanent consensus rejection, peer punishment, or negative-cache
+state.
+
+Deliverables:
+
+- Shared `Valid`, `ProtocolInvalid { evidence }`, `MissingDependency`/
+  `Syncing`, `LocalResourceExhausted`, `Cancelled`/`Stale`,
+  `BackendUnavailable`, and `InternalFault` domains;
+- non-forgeable protocol-invalid evidence bound to exact object bytes/hash,
+  chain/genesis, fork rules, parent/root, validation version, stage, and reason;
+- only `ProtocolInvalid` may enter bad-block/invalid-proof caches, penalize or
+  ban peers, produce Engine `INVALID`/`latestValidHash`, produce GossipSub
+  `REJECT`, or permanently reject transactions/blocks;
+- negative entries bind exact object bytes/hash, chain/genesis, fork rules,
+  parent/root, validation version, validation stage, and failure evidence;
+- invalidate negative entries when any validation assumption changes, bound
+  retention and capacity, and prevent unique-invalid-object cache flooding;
+- missing trie nodes/state, resource exhaustion, timeout, cancellation, stale
+  snapshots, unavailable cryptography, disk/backend errors, and internal faults
+  remain local/retryable and preserve the original object's unknown status;
+- conversion and composition rules consumed by proof verification, block
+  import, Engine, sync, txpool, gossip, and serving layers.
+
+Verification:
+
+- Compile-fail tests preventing local outcomes from constructing invalidity
+  evidence;
+- fault injection at every validation stage for memory, budget, timeout,
+  cancellation, missing data, stale snapshot, crypto backend, disk, and
+  internal failures;
+- property tests proving only protocol evidence reaches permanent rejection,
+  negative caches, peer penalties, Engine `INVALID`, or GossipSub `REJECT`;
+- negative-cache assumption-change, collision/substitution, expiry, eviction,
+  and unique-invalid-object flood tests;
+- model checking for outcome composition, retry, and evidence conservation.
+
+Exit criteria:
+
+- A constrained or faulty local node cannot label a valid object invalid,
+  poison consensus caches, or punish its supplier without protocol-invalid
+  evidence.
+- `v0.52.29 implementation stop reached. Run pentest for this exact
   commit.`
 
 ## Roadmap Expansion From The 2026 Gap Analysis
@@ -3829,7 +3902,10 @@ Goal: deliver the Header And Block Validity release with this required outcome: 
 
 Deliverables:
 
-- Parent linkage, gas/base fee, difficulty/TTD, timestamps, ommers, withdrawals, blob gas, requests, roots, and fork-field validation.
+- Parent linkage, gas/base fee, difficulty/TTD, timestamps, ommers,
+  withdrawals, blob gas, requests, roots, and fork-field validation;
+- every failure is classified through `v0.52.29`; only complete
+  protocol-invalid evidence can permanently reject the block.
 
 Verification:
 
@@ -4257,6 +4333,13 @@ Deliverables:
   bounded worker/memory reservations, cancellation, and cache integration;
 - automatic deterministic fallback to sequential execution on conflict,
   ambiguity, resource exhaustion, or scheduler failure;
+- read/write sets include sender nonce/balance, coinbase fee credit, account
+  creation/collision, code deposit, fork-specific `SELFDESTRUCT`, EIP-7702
+  delegation/authorization nonces, transient storage, access warmth, original
+  storage values, block-level system contracts/requests, precompile-visible
+  state/environment, logs, receipts, cumulative gas, and request ordering;
+- an optional deferred coinbase fee-delta reduction commits in original
+  transaction order and falls back when equivalence cannot be proven;
 - no parallel scheduling decision or conflict-detection failure can alter
   transaction validity or final block outcome.
 
@@ -4266,6 +4349,8 @@ Verification:
   traces, and final-root comparisons;
 - adversarial conflict graphs, hidden dependencies, reverts, selfdestruct,
   EIP-7702, system-operation, reorg, cancellation, and fault tests;
+- dedicated dependency tests for every read/write-set class plus direct versus
+  deferred coinbase-credit equivalence;
 - deterministic replay across worker counts and scheduling seeds.
 
 Exit criteria:
@@ -4352,6 +4437,11 @@ Deliverables:
 - JSON request/response parsing consumes the `v0.52.27` parent ledger, rejects
   duplicate object keys, and bounds structural depth, node count, strings,
   arrays, allocations, and output in addition to raw bytes;
+- canonical JSON-RPC quantity parsing rejects leading zeroes except `0x0`,
+  distinguishes quantities from byte strings, and defines exact odd-length
+  hex and casing policy;
+- reject overflow, invalid hex, floats, exponents, and type-domain
+  substitutions; charge decoded byte length before hex allocation;
 - callers cannot assemble core methods from untyped JSON values or override a
   method's security metadata.
 
@@ -4359,7 +4449,9 @@ Verification:
 
 - Official execution-apis fixtures, serde snapshots, duplicate/unknown-field
   policy tests, structural-depth/node complexity oracles, and allocation-before-
-  reservation rejection tests.
+  reservation rejection tests;
+- quantity/byte-string canonicality, odd hex, casing, overflow, float,
+  exponent, and decoded-byte accounting matrices.
 
 Exit criteria:
 
@@ -4400,11 +4492,19 @@ Goal: deliver the HTTP Provider release with this required outcome: A production
 
 Deliverables:
 
-- Optional reviewed HTTP/TLS adapters, authentication redaction, payload limits, timeout policy, and endpoint allowlists.
+- Optional reviewed HTTP/TLS adapters, authentication redaction, payload
+  limits, timeout policy, and endpoint allowlists;
+- redirects disabled by default; when enabled, every hop repeats scheme,
+  origin, hostname, DNS, address-range, credential, and allowlist validation;
+- DNS rebinding and hostname re-resolution policy plus explicit opt-in proxy
+  and environment-proxy behavior;
+- credentials are never forwarded across origins, and URL credentials,
+  authorization headers, cookies, proxy credentials, and logs are redacted.
 
 Verification:
 
-- Malicious server fixtures, TLS/config matrix, cancellation/load tests.
+- Malicious server fixtures, redirect/rebinding/proxy/credential-leak cases,
+  TLS/config matrix, cancellation/load tests.
 
 Exit criteria:
 
@@ -4420,11 +4520,14 @@ Goal: deliver the WebSocket Provider release with this required outcome: Long-li
 
 Deliverables:
 
-- Subscription lifecycle, bounded queues, reconnect/resubscribe policy, missed-event signaling, and backpressure.
+- Subscription lifecycle, bounded queues, reconnect/resubscribe policy,
+  missed-event signaling, backpressure, explicit WebSocket origin, redirect,
+  DNS re-resolution, proxy, and cross-origin credential policy.
 
 Verification:
 
-- Disconnect/reorder/flood tests and local-node integration.
+- Disconnect/reorder/flood, origin/redirect/rebinding/proxy/credential tests and
+  local-node integration.
 
 Exit criteria:
 
@@ -4440,11 +4543,15 @@ Goal: deliver the IPC Custom And EIP-1193 Transports release with this required 
 
 Deliverables:
 
-- Unix/Windows IPC, caller-supplied transport, browser EIP-1193, and WASM adapter boundaries.
+- Unix IPC with socket ownership/mode checks, parent-directory trust, symlink/
+  path-swap protection, and peer credential verification;
+- Windows named-pipe ACL, owner, peer identity, impersonation, and path policy;
+- caller-supplied transport, browser EIP-1193, and WASM adapter boundaries.
 
 Verification:
 
-- Platform matrix, browser mock tests, framing/flood tests.
+- Platform matrix, Unix ownership/symlink race tests, Windows ACL/peer identity
+  tests, browser mock tests, framing/flood tests.
 
 Exit criteria:
 
@@ -4460,11 +4567,13 @@ Goal: deliver the RPC IDs Batching And Cancellation release with this required o
 
 Deliverables:
 
-- Collision-safe IDs, batch correlation, partial failures, cancellation races, concurrency caps, and response size limits.
+- Collision-safe typed ID domains, duplicate request/response ID rejection,
+  invalid/null/fractional/out-of-range ID policy, batch correlation, partial
+  failures, cancellation races, concurrency caps, and response size limits.
 
 Verification:
 
-- Reordering/duplication/flood fuzzing and race tests.
+- Reordering/duplication/invalid-ID/flood fuzzing and race tests.
 
 Exit criteria:
 
@@ -5338,11 +5447,17 @@ Goal: deliver the Canonical Import And Reorg release with this required outcome:
 
 Deliverables:
 
-- Block import pipeline, validation stages, total-difficulty/fork-choice inputs, canonical indexes, unwind, and re-execution.
+- Block import pipeline, validation stages, total-difficulty/fork-choice
+  inputs, canonical indexes, unwind, and re-execution;
+- every stage preserves `v0.52.29` outcome/evidence, and only proven
+  protocol-invalid results enter persistent bad-block state;
+- bounded negative-cache identity, invalidation, retention, and anti-flood
+  rules are transactional with canonical import/reorg changes.
 
 Verification:
 
-- Competing-chain and deep-reorg simulations, crash recovery.
+- Competing-chain and deep-reorg simulations, crash recovery, local-fault
+  injection, and bad-block-cache poisoning/flood tests.
 
 Exit criteria:
 
@@ -5358,7 +5473,9 @@ Goal: deliver the Heads Fork Choice And Orphans release with this required outco
 
 Deliverables:
 
-- Unsafe/safe/finalized heads, orphan queues, ancestry checks, invalid ancestors, checkpoint constraints, and chain events.
+- Unsafe/safe/finalized heads, orphan queues, ancestry checks, invalid
+  ancestors backed by `v0.52.29` evidence, checkpoint constraints, and chain
+  events; unknown/local-failure ancestry remains unresolved rather than invalid.
 
 Verification:
 
@@ -5499,6 +5616,10 @@ Goal: deliver the Engine API Types And Validation release with this required out
 Deliverables:
 
 - All pinned Engine API versions, payload attributes, execution status, capabilities, transition configuration, and strict validation.
+- Engine `INVALID` and `latestValidHash` are constructible only from
+  `v0.52.29` protocol-invalid evidence; syncing, missing dependencies, resource
+  exhaustion, cancellation, backend/storage errors, and internal faults map to
+  non-invalid statuses/errors.
 - Small typed semantic surface for capability negotiation, `newPayload`,
   `forkchoiceUpdated`, and `getPayload`, including typed payload IDs,
   deadlines, cancellation, evidence-rich status, and exact
@@ -5917,7 +6038,10 @@ Deliverables:
   disconnect reasons, persistence, and metrics without sharing consensus-plane
   identity or scoring state;
 - hierarchical resource capabilities and peer accountability for malformed,
-  wasteful, timed-out, and inconsistent work.
+  wasteful, timed-out, and inconsistent work;
+- penalties and bans require `v0.52.29` protocol-invalid evidence or explicit
+  local peer-policy violations; local validation failures never accuse the
+  supplying peer.
 
 Verification:
 
@@ -5971,12 +6095,20 @@ Deliverables:
 - reorg journaling/reinjection, bounded local-transaction protection,
   persistence boundaries, and propagation-privacy policy;
 - a design-time replacement/eviction/reorg model with counterexamples promoted
-  into deterministic implementation regressions.
+  into deterministic implementation regressions;
+- complete revalidation on canonical-head change, fork activation, base-fee or
+  blob-fee class change, restart/reload, account nonce/balance/code/delegation
+  change, blob-sidecar arrival/expiry, and EIP-7702 authority-state change;
+- persisted admission evidence is historical only; local/protected status can
+  affect eviction/propagation policy but never exempt consensus revalidation;
+- only `v0.52.29` protocol-invalid evidence permits permanent rejection or peer
+  penalty; local failures remain retryable.
 
 Verification:
 
-- Client differential cases, adversarial pool loads, reorg tests, and model-
-  checked replacement/eviction invariants.
+- Client differential cases, adversarial pool loads, restart/persistence,
+  fee/fork/head/account/blob/authorization revalidation, reorg tests, and
+  model-checked replacement/eviction invariants.
 
 Exit criteria:
 
@@ -5996,6 +6128,8 @@ Deliverables:
   with bounded queues and shared resource capabilities;
 - durable checkpoints, bad-block caches, peer accountability, progress
   persistence, invalidation, restart, and strategy selection;
+- bad-block and invalid-proof caches accept only `v0.52.29` evidence and follow
+  its identity, invalidation, retention, and anti-flood rules;
 - immediate cancellation of obsolete work when fork choice changes.
 
 Verification:
@@ -6390,6 +6524,43 @@ Exit criteria:
 
 - Selected consensus-critical execution invariants have machine-checked evidence.
 - `v0.178.0 implementation stop reached. Run pentest for this exact
+  commit.`
+
+### v0.178.1 - Kani Cryptographic Arithmetic Proofs
+
+Status: planned.
+
+Goal: add machine-checked implementation evidence for the highest-risk
+first-party field, scalar, curve, signature, and pairing arithmetic.
+
+Deliverables:
+
+- Bounded carry/borrow proofs for limb addition and subtraction;
+- wide multiplication and modular-reduction invariants;
+- canonical field/scalar conversion and serialization round trips with
+  non-canonical rejection;
+- inversion and square-root postconditions;
+- point addition/doubling exceptional cases, including infinity, equality, and
+  inverses;
+- secret scalar multiplication equivalence against a small mathematical model;
+- documented proof bounds where full 256-bit state exploration is infeasible,
+  paired with independent arithmetic specifications and differential tests.
+
+Verification:
+
+- Pinned Kani harnesses and reproducible reports for Keccak/secp256k1, BN254,
+  BLS12-381, KZG, and related fixed-width helpers as applicable;
+- seeded carry, reduction, exceptional-point, and serialization defects caught
+  by the proof suite;
+- independent review of the mathematical models, assumptions, and uncovered
+  domains.
+
+Exit criteria:
+
+- Critical arithmetic implementation invariants have explicit machine-checked
+  evidence, and every unproved full-width claim has documented differential,
+  property, vector, fuzz, and audit coverage.
+- `v0.178.1 implementation stop reached. Run pentest for this exact
   commit.`
 
 ### v0.179.0 - Miri Sanitizers And Undefined-Behavior Gate
@@ -7339,6 +7510,9 @@ Deliverables:
 - Decode/signature/state/fork-choice validation stages, dependency deferral,
   duplicate suppression, seen caches, invalid-message penalties, and no partial
   promotion;
+- GossipSub `REJECT` and peer penalties require `v0.52.29`
+  protocol-invalid evidence; missing dependencies, stale time, local budgets,
+  cancellation, or backend faults remain ignore/defer/retry outcomes;
 - seen/deferred caches follow the global chain/fork/root/object/validation-level
   identity invariant and never mix untrusted with verified entries.
 
