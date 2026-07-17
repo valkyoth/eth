@@ -303,6 +303,7 @@ relevant dependency point.
 | Nested and batch validators could independently reserve, reset, duplicate, or lose evidence capacity. | Added `v0.52.33 - Hierarchical Evidence Capability Composition` and expanded `v0.72.0`, `v0.73.0`, `v0.74.0..=v0.74.1`, `v0.79.0`, `v0.134.0`, `v0.136.0`, `v0.177.0`, `v0.179.1`, `v0.192.0`, `v0.193.0`, and `v0.218.0` with linear parent/child reservations, bounded batch cardinality, exactly-once lifecycle rules, committed-record recovery, Kani conservation proofs, and Loom concurrency checks. |
 | Evidence collection cardinality and optional sink access could be left implicit, allowing diagnostics to affect validity or consume slot authority. | Added `v0.52.34 - Evidence Collection Modes And Immutable Sink Access` and expanded `v0.52.32`, `v0.72.0`, `v0.73.0`, `v0.79.0`, `v0.134.0`, `v0.136.0`, `v0.143.0`, `v0.177.0`, `v0.192.0`, `v0.193.0`, and `v0.218.0` with explicit `FirstInvalid`, `CollectUpTo<N>`, and `BatchIsolateUpTo<N>` operational modes, validity invariance, immutable evidence borrowing, and one final slot-ownership transition. |
 | Evidence safety machinery could impose valid-path allocation, contention, hashing, sink work, code-size growth, or public API complexity. | Added `v0.52.35 - Evidence Hot-Path And API Containment Gate` and expanded `v0.52.19`, `v0.52.33..=v0.52.34`, `v0.72.0`, `v0.73.0`, `v0.79.0`, `v0.88.0`, `v0.140.0`, `v0.176.0`, `v0.180.0`, `v0.192.0`, `v0.193.0`, `v0.218.0`, `v0.258.0`, and `v0.262.0` with allocation-free uncontended valid paths, parent arenas/index handles, amortized reservation, admitted cardinalities, internal machinery, stable non-generic outcomes, evidence-disabled internal baselines, and release-blocking overhead/size thresholds. |
+| Evidence arenas lacked an explicit capacity, reuse, transfer, and structurally equivalent benchmark-baseline contract. | Added `v0.52.36 - Evidence Arena Capacity And Benchmark Integrity` and expanded `v0.52.20`, `v0.52.33..=v0.52.35`, `v0.73.0`, `v0.74.0`, `v0.88.2`, `v0.139.0`, `v0.175.0`, `v0.176.0`, `v0.177.0`, `v0.179.1`, `v0.180.0`, and `v0.218.0` with capability-backed simultaneous-work sizing, local backpressure/exhaustion, ABA-safe handles, audited stack placement, reference-safe transfer/cancellation, optional benchmark-justified pools, non-generic public mode dispatch, and optimizer-resistant equivalent baselines. |
 | Validation contexts could remain non-forgeable yet accidentally retain recursive ancestry or unstable process-local identities. | Expanded `v0.52.32`, `v0.63.0`, `v0.73.0`, `v0.74.0`, `v0.88.1`, and `v0.134.0` with bounded parent handles, borrowed child contexts, deterministic lease release, canonical versioned encoding, domain-separated cryptographic digests, and constant-size/stability tests. |
 | First-party cryptographic arithmetic needed explicit machine-checked implementation evidence beyond the early secp gate. | Added `v0.178.1 - Kani Cryptographic Arithmetic Proofs` for limbs, reduction, conversion, inversion, square roots, point exceptions, scalar multiplication, and canonical serialization across the broader cryptographic core. |
 | Provider JSON-RPC, HTTP, WebSocket, and IPC boundaries lacked several canonicality, redirect, rebinding, proxy, credential, and local-peer controls. | Expanded `v0.92.0` and `v0.94.0..=v0.97.0` with canonical quantity/bytes/ID rules, decoded-byte charging, redirect/origin/DNS/proxy/credential policy, Unix ownership/symlink checks, and Windows pipe ACL/identity checks. |
@@ -3136,6 +3137,9 @@ Deliverables:
 - distinct reservations for queue slots, memory capacity, and worker permits,
   refundable only on release, plus rate resources for bandwidth, request
   frequency, and CPU scheduling quotas replenished only by explicit policy;
+- evidence arenas reserve memory and simultaneous-validation worker capacity
+  through these capabilities before construction; attacker-controlled object,
+  transaction, proof, cell, or message counts cannot directly size an arena;
 - child-token conservation, cross-thread transfer, partial consumption,
   cancellation, timeout, double-release prevention, and fail-closed exhaustion
   semantics;
@@ -3151,6 +3155,8 @@ Verification:
 - Conservation and non-forgeability property tests for every resource class;
 - nested cancellation/refund, retry amplification, cross-thread transfer,
   partial-consumption, concurrent exhaustion, and double-release simulations;
+- evidence-arena memory/worker reservation, serialization/backpressure, local-
+  exhaustion, cancellation, and transfer-with-live-borrow simulations;
 - Kani-ready bounded state-machine harnesses and complexity-oracle adapters.
 
 Exit criteria:
@@ -3815,8 +3821,18 @@ Deliverables:
   shared hardware atomics: standalone validation prefers a caller-owned fixed
   slot, block validation uses one parent-reserved bounded arena, and child slots
   are linear index handles with reservation amortized across nested validation;
-- optional per-worker pools require explicit ownership, reset, generation, and
-  cross-worker transfer rules and cannot hide stale-slot reuse.
+- arena capacity derives from maximum simultaneous authorized validation work
+  and the evidence mode, never attacker-controlled object or transaction count,
+  and consumes `v0.52.20` memory/worker reservations before use;
+- index reuse is protected by scoped borrowing or generation-tagged handles;
+  cancellation/transfer cannot release a slot while a validator still borrows
+  it, and exhaustion serializes, backpressures, or returns a retryable local
+  outcome rather than object invalidity;
+- large arenas are caller-supplied or externally allocated; stack placement is
+  allowed only below a platform-audited ceiling;
+- per-worker pools are optional and implemented only if `v0.52.35` benchmarks
+  justify them; any admitted pool requires explicit ownership, reset,
+  generation, and cross-worker transfer rules and cannot hide stale-slot reuse.
 
 Verification:
 
@@ -3828,7 +3844,10 @@ Verification:
 - allocation counters, lock/atomic instrumentation, clone counters, and sink
   spies proving the valid path satisfies every hot-path prohibition;
 - bounded `O(1)` reservation/release bookkeeping tests plus parent-arena/index-
-  handle and per-worker-pool reset/generation tests;
+  handle tests and, only when a pool is admitted, pool reset/generation tests;
+- attacker-count-independent capacity, memory/worker capability exhaustion,
+  stack-ceiling, stale-generation/ABA, live-borrow cancellation, and cross-
+  worker transfer tests;
 - child-to-parent evidence composition and explicit one-entry/two-entry
   reservation boundary tests preserving child object identity;
 - multi-invalid batch isolation under capacity pressure, with a batch-size-
@@ -3864,10 +3883,9 @@ linear slot authority.
 Deliverables:
 
 - sealed `EvidenceCollectionMode` domains for `FirstInvalid`,
-  `CollectUpTo<N>`, and `BatchIsolateUpTo<N>` with validated nonzero compile-
-  time or bounded runtime cardinality; public compile-time modes expose only a
-  small reviewed set of admitted `N` values rather than unrestricted
-  monomorphization;
+  internal `CollectUpTo<N>` and internal `BatchIsolateUpTo<N>` implementations
+  with validated nonzero cardinality plus one public non-generic bounded mode/
+  configuration value; orchestration cannot instantiate arbitrary `N`;
 - `FirstInvalid` is the default consensus-validation mode and reserves only
   the `v0.52.33` child and parent records required to reject the object;
 - `CollectUpTo<N>` is an operational diagnostic mode: collection stops at `N`,
@@ -3897,7 +3915,9 @@ Deliverables:
   outputs are authoritative, diagnostic-only, unattributed, or retryable;
 - reservation trees, slot/index handles, collection implementations, sink
   types, and internal evidence lifetimes remain private; diagnostic modes keep
-  the same public validation outcome shape as `FirstInvalid`;
+  the same public validation outcome shape as `FirstInvalid`, and internal
+  dispatch maps validated runtime configuration onto a small reviewed set of
+  admitted implementations;
 - optional sinks stay outside the `no_std` kernel and cannot require heap
   allocation, `std`, async, or a runtime from consensus validation.
 
@@ -3906,7 +3926,8 @@ Verification:
 - Compile-fail tests preventing optional sinks from owning, cloning, filling,
   releasing, returning, or retaining slot authority beyond the evidence borrow;
 - API and code-size snapshots across every admitted cardinality and feature
-  graph, including rejection of arbitrary public const-generic instantiations;
+  graph, including proof that const generics remain internal and arbitrary
+  public instantiation is impossible;
 - `no_std` default builds proving diagnostic sinks introduce no allocation,
   `std`, async, or runtime dependency;
 - cross-mode property tests proving identical validity and identical first
@@ -3945,21 +3966,25 @@ public SDK.
 Deliverables:
 
 - production implementations of the `v0.52.33` caller-owned standalone slot,
-  block-owned bounded arena, linear child index handle, amortized nested
-  reservation, and explicit per-worker pool ownership/reset contracts;
-- valid-object fast paths with zero heap allocation, zero diagnostic-only
+  block-owned bounded arena, linear child index handle, and amortized nested
+  reservation; per-worker pools are implemented only if measured contention/
+  throughput evidence justifies their added lifecycle complexity;
+- valid-object fast paths with zero heap allocation attributable to evidence
+  machinery, zero diagnostic-only
   serialization/hashing, zero global mutex acquisition, zero globally
   contended atomic operation per nested validator, zero validation-context or
-  parent-reservation clones, and zero optional sink calls;
+  parent-reservation clones, and zero optional sink calls; pre-existing
+  consumer allocations are measured separately and are not mislabeled as
+  evidence overhead;
 - bounded `O(1)` slot reservation/release bookkeeping with operation counts
   independent of chain depth, call depth, and already-consumed arena entries;
 - a private evidence service boundary: public validation APIs return one stable
   `ValidationOutcome<T, E>`-style shape and are not generic over slots,
   reservation trees, cardinality implementations, sinks, internal lifetimes,
   allocators, async runtimes, or worker pools;
-- a small reviewed set of compile-time collection cardinalities plus one
-  validated bounded runtime representation; unrestricted public
-  `CollectUpTo<N>` monomorphization is not exposed;
+- a small reviewed set of internal compile-time collection implementations plus
+  one public non-generic validated bounded mode/configuration value;
+  unrestricted public `CollectUpTo<N>` monomorphization is impossible;
 - identical public return types and consensus behavior for `FirstInvalid`,
   diagnostic collection, default/minimal/all-feature graphs, and optional sink
   adapters;
@@ -3967,7 +3992,15 @@ Deliverables:
   the dependency-free `no_std` kernel and cannot require allocation, `std`,
   async, or a runtime from core validation;
 - an internal evidence-disabled benchmark baseline compiled only by the
-  benchmark harness, never as a production feature or validity path;
+  benchmark harness, never as a production feature or validity path; it uses
+  identical inputs, contexts, scheduling, validator implementation, work
+  counters, and output consumption and replaces only evidence reserve/fill/
+  finalize operations;
+- baseline and evidence-enabled runs must produce equal validation outcomes and
+  deterministic-work counters, and consume result digests through benchmark
+  barriers so the optimizer cannot remove unrelated validation work;
+- absolute production thresholds are authoritative; relative disabled-baseline
+  deltas are diagnostic and cannot excuse an absolute regression;
 - committed absolute and relative regression thresholds for slot operations,
   representative valid/nested validation, synthetic staged/batch contention,
   first-invalid, and diagnostic workloads on a reproducible hardware/toolchain
@@ -3983,7 +4016,7 @@ Verification:
 
 - representative valid and nested validator benchmarks with normal evidence
   machinery and the internal evidence-disabled baseline, including allocation/
-  lock/atomic/clone/sink instrumentation;
+  lock/atomic/clone/sink instrumentation and equality of outcomes/work counters;
 - synthetic parent-arena benchmarks across child counts proving one amortized
   reservation and constant child bookkeeping;
 - deterministic staged-worker benchmarks across worker counts and scheduling
@@ -3996,10 +4029,14 @@ Verification:
   default, minimal, diagnostic, and all-feature graphs;
 - API snapshots and compile-fail tests for leaked internal lifetimes, slots,
   arenas, sinks, worker pools, arbitrary `N`, and mode-dependent return types;
+- benchmark-harness audits proving identical code paths around the replaced
+  evidence operations, consumed output digests/barriers, and seeded optimizer-
+  elision detection;
 - `no_std` target builds with allocator/std/async/runtime dependency checks;
 - seeded allocation, serialization, global-lock, contended-atomic, clone, sink-
-  invocation, linear-scan reservation, stale-pool-reset, and monomorphization
-  regressions that breach the gate.
+  invocation, linear-scan reservation, and monomorphization regressions that
+  breach the gate, plus stale-pool-reset regressions only when pools are
+  admitted.
 
 Exit criteria:
 
@@ -4009,6 +4046,87 @@ Exit criteria:
   evidence machinery, and all feature/mode combinations preserve consensus
   behavior and the `no_std` kernel boundary.
 - `v0.52.35 implementation stop reached. Run pentest for this exact
+  commit.`
+
+### v0.52.36 - Evidence Arena Capacity And Benchmark Integrity
+
+Status: planned.
+
+Goal: close arena sizing/reuse races and prove that evidence-overhead
+comparisons measure only evidence machinery rather than optimizer or workload
+differences.
+
+Deliverables:
+
+- an explicit `EvidenceArenaCapacity` derived from the maximum simultaneous
+  validation work authorized by sealed worker/memory capabilities and the
+  selected evidence mode, never raw attacker-controlled object, transaction,
+  proof, cell, column, or message counts;
+- arena construction consumes `v0.52.20` memory and worker reservations before
+  exposing handles; partial reservation rolls back atomically and cannot begin
+  authoritative validation;
+- exhaustion has only operational outcomes: serialize work, apply bounded
+  backpressure, reduce optional diagnostic/isolation work, or return
+  `LocalResourceExhausted`; it cannot produce object invalidity, peer fault, or
+  a consensus-rule change;
+- scoped child borrows where possible and generation-tagged indexes where
+  reuse/transfer requires handles, preventing stale-handle and ABA aliasing;
+- cancellation, unwind, timeout, and cross-worker transfer protocols retain a
+  live-borrow/lease count so no slot can be released, reset, reused, or returned
+  while a validator still references it;
+- caller-supplied or externally allocated storage for arenas above a committed
+  platform stack ceiling; stack placement is admitted only by audited size and
+  target-specific stack evidence;
+- per-worker pools remain absent by default and are implemented only after
+  `v0.52.35` measurements show a material threshold benefit that outweighs
+  synchronization, generation, reset, memory-retention, and transfer costs;
+- any admitted pool has bounded retained memory, explicit owner/worker identity,
+  generation/reset on reuse, deterministic drain/drop, and no implicit cross-
+  worker migration;
+- one public non-generic evidence mode/configuration value with validation and
+  bounded runtime cardinality; internal dispatch alone selects from the small
+  reviewed const-generic implementations;
+- an optimizer-resistant paired benchmark contract: identical input, context,
+  validator, schedule, work accounting, and output consumption, replacing only
+  evidence reservation/fill/finalization operations;
+- paired runs assert equal validation outcomes and deterministic-work counters,
+  consume stable result digests through benchmark barriers, and report evidence-
+  attributable allocation separately from total consumer allocation;
+- absolute production thresholds remain release authority; relative baseline
+  deltas are supporting diagnostics only.
+
+Verification:
+
+- capacity property tests across evidence modes, worker counts, memory permits,
+  and adversarially large object-count fields proving attacker counts do not
+  size arenas;
+- partial memory/worker reservation rollback, serialization/backpressure,
+  reduced-diagnostic, and retryable-local-exhaustion tests with no invalidity or
+  peer attribution;
+- stale index, generation wrap policy, ABA, double reuse, use-after-release,
+  live-borrow cancellation, timeout/unwind, and cross-worker transfer races;
+- Loom models for allocate/borrow/fill/cancel/transfer/release/reset and Kani-
+  ready capacity/conservation state models consumed at `v0.177.0` and
+  `v0.179.1`;
+- platform stack-ceiling checks, large-arena external-storage tests, retained-
+  memory bounds, and deterministic pool drain/drop tests when pools are admitted;
+- A/B harness source/IR or equivalent structural checks proving only evidence
+  operations differ, with identical scheduling and validator dispatch;
+- equal-outcome/equal-work-counter assertions, consumed result digests,
+  benchmark barriers, and seeded dead-code-elimination regressions;
+- allocation attribution tests distinguishing evidence allocations from
+  unrelated consumer allocations for transaction, block, gossip, import, and
+  batch harnesses;
+- public API snapshots proving non-generic mode configuration and identical
+  `ValidationOutcome<T, E>` across all admitted modes.
+
+Exit criteria:
+
+- Arena capacity is capability-backed and attacker-count-independent, stale or
+  live handles cannot observe reused storage, exhaustion stays local, optional
+  pools exist only with evidence, and benchmark deltas isolate evidence work
+  without weakening authoritative absolute production thresholds.
+- `v0.52.36 implementation stop reached. Run pentest for this exact
   commit.`
 
 ## Roadmap Expansion From The 2026 Gap Analysis
@@ -4536,6 +4654,10 @@ Deliverables:
 - authoritative import uses `v0.52.34` `FirstInvalid`; explicitly requested
   operational diagnostics may use bounded `CollectUpTo<N>` without changing
   block validity, first evidence, Engine outcome, or bad-block authority;
+- derive `v0.52.36` arena capacity from simultaneous authorized block/
+  transaction work and evidence mode rather than block transaction count;
+  arena exhaustion serializes/backpressures or returns a retryable local
+  outcome;
 - every failure is classified through `v0.52.29`; only complete
   `ObjectInvalidityEvidence` can permanently reject the block.
 
@@ -4552,7 +4674,9 @@ Verification:
   and first authoritative evidence;
 - valid block-envelope benchmarks across transaction counts and worker
   configurations, proving one amortized arena reservation, constant child
-  bookkeeping, and the `v0.52.35` overhead thresholds.
+  bookkeeping, and the `v0.52.35` overhead thresholds;
+- attacker-count-independent arena sizing, capability exhaustion, stale-handle,
+  cancellation/transfer, and local-backpressure tests.
 
 Exit criteria:
 
@@ -4580,6 +4704,9 @@ Deliverables:
   `v0.52.33` parent-authorized evidence reservations; rollback, cancellation,
   local failure, and successful completion release unused child reservations
   exactly once without resetting block-wide accounting.
+- evidence-arena child borrows and generation handles follow `v0.52.36` so
+  journal rollback, nested calls, cancellation, and worker transfer cannot
+  release/reuse storage while a scope still references it.
 - Implement complete EIP-7702 state application: process authorization tuples
   before transaction execution after sender-nonce increment, warm recovered
   authorities, apply skip-instead-of-reject tuple rules, account refunds,
@@ -4599,7 +4726,9 @@ Verification:
 - Focused pre-implementation review of `StateJournal`, context ownership,
   rollback, and evidence-slot interaction.
 - Nested evidence-capability conservation, rollback, cancellation, and
-  exactly-once release tests across every transition stage.
+  exactly-once release tests across every transition stage;
+- live-borrow rollback/cancellation, stale-generation, and cross-worker
+  transfer races with unchanged state and evidence outcomes.
 - Official EIP-7702 transaction/state fixtures covering duplicate authorities,
   invalid tuple skips, delegation clearing, refunds, persistent effects after
   execution failure, delegated transaction origins/destinations, one-hop loop
@@ -5021,6 +5150,10 @@ Deliverables:
 - Snapshot-bound speculative execution with explicit read/write sets;
 - deterministic conflict detection, sequential-order validation and commit,
   bounded worker/memory reservations, cancellation, and cache integration;
+- evidence arenas consume the same `v0.52.20` worker/memory capability tree,
+  use `v0.52.36` generation-safe transfer handles where work crosses workers,
+  and backpressure/fall back sequentially before arena exhaustion can affect
+  validity;
 - automatic deterministic fallback to sequential execution on conflict,
   ambiguity, resource exhaustion, or scheduler failure;
 - read/write sets include sender nonce/balance, coinbase fee credit, account
@@ -5041,7 +5174,9 @@ Verification:
   EIP-7702, system-operation, reorg, cancellation, and fault tests;
 - dedicated dependency tests for every read/write-set class plus direct versus
   deferred coinbase-credit equivalence;
-- deterministic replay across worker counts and scheduling seeds.
+- deterministic replay across worker counts and scheduling seeds;
+- arena-capacity, live-borrow cancellation/transfer, stale-generation, worker-
+  pool-absent/default, and sequential-fallback equivalence tests.
 
 Exit criteria:
 
@@ -6268,13 +6403,19 @@ Deliverables:
 - publish the production static/dynamic resource envelope and withdraw
   validation readiness on physical exhaustion until capacity is restored;
 - runtime resource faults preserve `v0.52.29` local outcomes and cannot poison
-  validation state.
+  validation state;
+- evidence arenas use `v0.52.36` capability-backed simultaneous-work sizing;
+  runtime scheduling serializes/backpressures or withdraws readiness on
+  exhaustion and admits per-worker pools only when benchmark evidence and
+  explicit lifecycle configuration exist.
 
 Verification:
 
 - Failure injection, graceful shutdown/restart, validating/light mode startup
   matrices, advertised static-maximum admission, dynamic parent/candidate work,
-  readiness withdrawal/recovery, and resource-cap tests.
+  readiness withdrawal/recovery, and resource-cap tests;
+- arena capability exhaustion, backpressure, cancellation/transfer, optional-
+  pool lifecycle, and retained-memory tests.
 
 Exit criteria:
 
@@ -7231,11 +7372,16 @@ Goal: deliver the Platform And Target Matrix release with this required outcome:
 
 Deliverables:
 
-- Linux, Windows, BSD, macOS, Android, iOS, WASM where applicable, big/little-endian review, and Aesynx-readiness constraints.
+- Linux, Windows, BSD, macOS, Android, iOS, WASM where applicable, big/little-
+  endian review, and Aesynx-readiness constraints;
+- target-specific stack ceilings for `v0.52.36` slot/index/arena placement,
+  requiring caller/external storage above each audited bound.
 
 Verification:
 
-- Cross-target builds/tests and documented unsupported combinations.
+- Cross-target builds/tests and documented unsupported combinations;
+- stack-usage reports and boundary fixtures proving large evidence arenas are
+  never placed on undersized target stacks.
 
 Exit criteria:
 
@@ -7260,13 +7406,20 @@ Deliverables:
   retained memory;
 - preserve an internal benchmark-only evidence-disabled baseline and fail on
   relative or absolute threshold regressions; production features can never
-  disable evidence authority.
+  disable evidence authority;
+- enforce `v0.52.36` paired-run integrity: identical input/context/schedule/
+  validator/work counters/output consumption, only evidence operations
+  replaced, equal outcomes/work, consumed result digests/barriers, and separate
+  evidence-attributable versus total allocation reports;
+- absolute production thresholds remain authoritative and cannot be waived by
+  a favorable relative disabled-baseline delta.
 
 Verification:
 
 - Reproducible benchmark runner and regression thresholds;
 - cross-platform/toolchain variance policy and seeded evidence-overhead
-  regressions proving each threshold is release-blocking.
+  regressions proving each threshold is release-blocking;
+- harness structural-equivalence and dead-code-elimination audit reports.
 
 Exit criteria:
 
@@ -7321,7 +7474,11 @@ Deliverables:
   cardinality;
 - `v0.52.34` mode proofs showing collection-limit changes preserve validity and
   first evidence, immutable sink borrows cannot transition authority, and each
-  additional authoritative record consumes a distinct slot.
+  additional authoritative record consumes a distinct slot;
+- `v0.52.36` capacity/handle proofs showing attacker counts cannot size arenas,
+  partial capability reservation conserves resources, stale generations cannot
+  access reused slots, and live borrows prevent release/reset within documented
+  bounds.
 
 Verification:
 
@@ -7329,7 +7486,9 @@ Verification:
 - seeded double-fill, double-release, child-minting, use-after-return, and slot-
   leak models rejected within documented bounds;
 - seeded mode-dependent-validity, sink-consumes-authority, and slot-reuse models
-  rejected within documented bounds.
+  rejected within documented bounds;
+- seeded stale-generation, ABA, release-with-live-borrow, and partial-
+  reservation-leak models rejected within documented bounds.
 
 Exit criteria:
 
@@ -7433,6 +7592,9 @@ Deliverables:
 - Loom models for request IDs, schedulers, txpool coordination, resource-token
   conservation, hierarchical evidence-slot derivation/fill/return/release, and
   slashing-database concurrency;
+- `v0.52.36` arena models for capability reservation, scoped/generation handle
+  reuse, live borrows, cancellation, timeout, cross-worker transfer, reset,
+  drain, and optional pool ownership;
 - trace-to-test adapters that turn model counterexamples into deterministic
   Rust regressions.
 
@@ -7442,6 +7604,8 @@ Verification:
 - seeded broken invariants detected by each model family;
 - concurrent evidence tests covering racing child derivation, fill versus
   cancellation, return versus release, and exactly-once parent accounting;
+- seeded stale-handle/ABA, release-with-live-borrow, transfer/reset, and pool-
+  generation defects detected within documented bounds;
 - zero unexplained counterexamples within documented bounds.
 
 Exit criteria:
@@ -7497,6 +7661,9 @@ Deliverables:
   internal evidence lifetime/slot/arena/sink/worker-pool exposure, no arbitrary
   cardinality monomorphization, and no feature- or mode-dependent consensus
   behavior or return type;
+- enforce the `v0.52.36` public non-generic validated mode/configuration value
+  and private admitted-implementation dispatch; benchmark-disabled baselines
+  cannot appear in production features or public APIs;
 - code-size and monomorphization budgets for every admitted collection mode and
   feature graph.
 
@@ -8410,7 +8577,10 @@ Deliverables:
   and only filled child evidence can enter caches or peer attribution;
 - authoritative gossip validation uses `v0.52.34` `FirstInvalid`; bounded
   operational diagnostics and member isolation cannot change accept/reject/
-  ignore validity, and scoring/cache/logging sinks only borrow evidence.
+  ignore validity, and scoring/cache/logging sinks only borrow evidence;
+- worker arenas follow `v0.52.36`: capacity derives from authorized concurrent
+  validation and mode, queue pressure triggers bounded backpressure/local
+  outcomes, and generation-safe handles prevent cancellation/transfer reuse.
 
 Verification:
 
@@ -8426,7 +8596,9 @@ Verification:
 - valid gossip benchmarks across worker counts, topics, and scheduling seeds
   against the `v0.52.35` evidence-disabled baseline, proving no optional sink,
   allocation, parent/context clone, global mutex, or globally contended per-
-  child atomic operation on the common path.
+  child atomic operation on the common path;
+- arena-capability pressure, attacker message-count independence, stale-handle/
+  ABA, live-borrow cancellation/transfer, and optional-pool-absent tests.
 
 Exit criteria:
 
