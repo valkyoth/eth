@@ -80,7 +80,7 @@ Legend:
 | Builder and relay integration | 🔴 Planned | Assigned to `v0.249.0..=v0.250.0`; relay communication is beacon-node owned |
 | Consensus safety services, operations, and production executables | 🔴 Planned | Assigned to `v0.251.0..=v0.257.0` |
 | Consensus assurance and product baseline | 🔴 Planned | Assigned to `v0.258.0..=v0.274.0`; this is not the final 1.0 gate |
-| First-party core cryptography and historical PoW | 🔴 Planned | Keccak-256, secp256k1, ECDSA/ECDH, Ethash, and genesis-to-Merge validation are assigned to `v0.275.0..=v0.281.0` |
+| First-party core cryptography and historical PoW | 🔴 Planned | Keccak-256, secp256k1, ECDSA/ECDH, and transport/keystore primitives are assigned to `v0.52.22..=v0.52.26`; full-stack crypto revalidation is `v0.275.0..=v0.278.0`, followed by Ethash and genesis-to-Merge validation at `v0.279.0..=v0.281.0` |
 | Standalone production execution client | 🔴 Planned | Database backend, staged sync, payload builder, Engine/RPC servers, networking operations, binary, tooling, and controls are assigned to `v0.282.0..=v0.291.0` |
 | Execution-client production assurance | 🔴 Planned | Hive/RPC compatibility, independent consensus-client interoperability, public sync, performance, audit, and remediation are assigned to `v0.292.0..=v0.297.0` |
 | Integrated Ethereum node product | 🔴 Planned | Full-node orchestration, devnets, mixed-client tests, long-running operation, recovery, guides, audit, and remediation are assigned to `v0.298.0..=v0.305.0` |

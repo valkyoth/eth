@@ -215,7 +215,7 @@ relevant dependency point.
 | ENS and common ERC/application standards were not scheduled. | Added `v0.127.0..=v0.129.0` for common standards, ENS, permit, interface helpers, and contract-tooling fuzz/DX gates. |
 | Node-level sync, txpool, mining/validator boundaries, and observability were not scheduled. | Added storage/client releases `v0.130.0..=v0.140.0`, networking/sync releases `v0.154.0..=v0.164.0`, and operational-runtime release `v0.139.0`. |
 | REVM dependency admission failed the existing dependency policy. | Added `v0.37.1 - REVM Dependency Recheck` before execution work may continue. |
-| Native audited EVM execution was not explicitly versioned; REVM could look like the long-term core. | Added the first-party engine, correctness, resource-boundary, and precompile sequence at `v0.40.0..=v0.52.21`, then complete execution, state transition, conformance, tracing, and simulation at `v0.69.0..=v0.91.0`. |
+| Native audited EVM execution was not explicitly versioned; REVM could look like the long-term core. | Added the first-party engine, correctness, resource-boundary, precompile, core-crypto, and shared-capability sequence at `v0.40.0..=v0.52.28`, then complete execution, state transition, conformance, tracing, and simulation at `v0.69.0..=v0.91.0`. |
 | Default verification previously depended directly on `k256` and used direct `sha3` test wrappers, which conflicted with the long-term first-party-core goal. | Added `v0.37.2` and `v0.37.3` to audit core dependencies, move cryptographic implementation crates behind explicit boundaries/features, and document any accepted cryptographic backend plan. |
 | `subtle`, `alloy-rlp`, dev `serde_json`, optional `serde`/`serde_json`, and optional `sanitization` need explicit long-term dependency classifications before execution grows. | Added `v0.37.4` and `v0.37.5` so constant-time helpers, reference oracles, JSON parser support, and sanitization bridges remain deliberate dependency choices. |
 | `v0.45.0` deliberately admits cryptographic precompiles as fail-closed descriptors without concrete execution backends. | Added `v0.46.0` through `v0.52.0` for SHA-256, RIPEMD-160, ECRECOVER, ModExp, BN254, BLAKE2F, KZG/BLS backend planning, conformance vectors, fuzzing, dependency review, and pentest gates before state-test claims depend on them. |
@@ -253,7 +253,7 @@ relevant dependency point.
 | Companion status/spec documents retained obsolete consensus ranges. | The planning pass updates `docs/current-status.md` and `docs/SPEC_MATRIX.md` through `v0.310.0` and `v1.0.0-rc.N`. |
 | Quantitative gates used undefined "client-attributable" failure labels. | `v0.258.0` now requires a machine-enforced attribution taxonomy, predeclared fault windows, conservative ambiguous-event handling, independent approval, and fallback-specific responsibility rules. |
 | The final API freeze and production release candidate occurred before full consensus-client abstractions existed. | Reclassified `v0.182.0..=v0.188.0` as foundation stabilization and `v0.271.0..=v0.274.0` as an interim foundation/consensus baseline; the complete freeze, rehearsal, promotion, and candidate admission now occur at `v0.306.0..=v0.310.0` plus `v1.0.0-rc.1`. |
-| Core transaction, EVM, and execution-network paths still depended on optional Keccak-256 and secp256k1 implementations without a first-party replacement milestone. | Added `v0.275.0..=v0.278.0` for first-party Keccak-256, secp256k1 arithmetic, ECDSA/recovery/ECDH, production-path integration, side-channel review, and removal of required `tiny-keccak`/`k256` production dependencies. |
+| Core transaction, EVM, and execution-network paths still depended on optional Keccak-256 and secp256k1 implementations without a first-party replacement milestone. | Moved first-party Keccak-256, secp256k1 arithmetic, ECDSA/recovery/ECDH, symmetric transport/keystore primitives, integration, and initial audit forward to `v0.52.22..=v0.52.26`; `v0.275.0..=v0.278.0` now revalidate the completed full-stack consumer set instead of introducing core crypto late. |
 | Historical execution support did not explicitly implement Ethash seal verification, historical difficulty, ommers, rewards, and irregular pre-Merge transitions. | Added `v0.279.0..=v0.281.0` for Ethash, complete pre-Merge consensus rules, and a genesis-to-Merge historical execution gate. |
 | The roadmap described execution libraries and runtime traits but did not yet produce a complete independently runnable execution client. | Added `v0.282.0..=v0.291.0` for a reviewed production database backend, staged sync and healing, local payload building, authenticated Engine server, inbound execution RPC/GraphQL surfaces, operational discovery, an execution-node binary, recovery tools, and production controls. |
 | Execution assurance focused on fixtures and the beacon node consuming other execution clients, not on independent consensus clients driving the first-party execution client. | Added `v0.292.0..=v0.297.0` for execution Hive/RPC compatibility, multi-consensus-client Engine interoperability, public-network sync/follow evidence, performance, independent audit, and remediation. |
@@ -275,6 +275,17 @@ relevant dependency point.
 | End-to-end Engine integration first appeared too late in the roadmap. | Added `v0.144.1 - Early Engine Vertical Devnet`, an expanding in-process/authenticated adapter-equivalence lane reused by later milestones. |
 | Execution and consensus networking risked sharing peer semantics, while txpool and sync requirements lacked several adversarial policies. | Strengthened `v0.154.0..=v0.162.0` with separate protocol planes, hierarchical resource capabilities, policy/consensus separation, EIP-7702/blob/reorg behavior, backpressured stages, and snapshot-bound composed proofs. |
 | Fuzzing lacked deep valid structures and work oracles; protocol/concurrency and side-channel assurance were incomplete. | Added `v0.176.1`, `v0.179.1`, and `v0.179.2` for structure-aware continuous fuzzing, complexity oracles, mutation/regression policy, TLA+/Quint/Apalache and Loom models, secret-path testing, and public gas-to-cycles evidence. |
+| Shared decode accounting covered RLP/MPT but not SSZ, JSON, ABI, Snappy, SSZ-Snappy, Req/Resp, or GossipSub. | Added `v0.52.27 - Cross-Format Decode Work Accounting` and bound the concrete format milestones at `v0.92.0`, `v0.121.0..=v0.122.0`, `v0.141.0`, `v0.154.0`, `v0.157.0`, and `v0.217.0..=v0.219.0` to its parent ledger. |
+| Core cryptographic implementations were scheduled after wallets and networking, and AES-CTR/HMAC/ECIES/KDF boundaries were unnamed. | Added `v0.52.22..=v0.52.26` before Phase 9; local signing and RLPx now consume already admitted first-party or explicitly audited primitives. |
+| Current-fork system operations and execution requests were hidden inside broad transition milestones. | Added `v0.74.1 - System Operations And Execution Requests` for EIP-4788, EIP-2935, EIP-6110, EIP-7002, EIP-7251, EIP-7685, ordering, rollback, persistence, Engine encoding, and header binding. |
+| Resource cancellation could conflate consumed work, reservations, and replenishing rate limits. | Expanded `v0.52.20` with distinct non-refundable work, releasable reservations, policy-replenished rates, cross-thread conservation, double-release prevention, and deterministic consensus work units. |
+| Node-scale execution lacked snapshot-bound cache/prefetch and deterministic speculative parallelism milestones. | Added `v0.88.1 - Snapshot-Bound Execution Caches And Prefetch` and `v0.88.2 - Deterministic Speculative Parallel Execution`. |
+| KZG/BLS batch verification did not state coefficient, transcript, entropy, cache, isolation, or latency soundness. | Expanded `v0.79.0`, `v0.192.0`, and `v0.193.0` with fail-closed context-complete batch contracts. |
+| Differential execution did not enumerate all compared consensus outputs or require sufficiently diverse clients. | Expanded `v0.88.0` to compare status, halts, gas/refunds, logs/bloom, receipts and all roots, account/code changes, diffs, and traces against official fixtures plus Geth, Besu, and Nethermind. |
+| Engine, scheduling, backpressure, and txpool models were planned only after implementations. | Added design-time executable models to `v0.52.20`, `v0.143.0..=v0.144.0`, `v0.154.0..=v0.159.0`, and `v0.160.0`, while retaining `v0.179.1` as the integrated formal gate. |
+| Security-relevant caches lacked one global identity and validation-level invariant. | Expanded `v0.52.19`, `v0.88.1`, and `v0.218.0` with chain/genesis, fork, snapshot/root, object, and validation-domain identity plus atomic reorg/fork invalidation. |
+| Snap was planned mainly as a consumer rather than a bounded snapshot-pinned serving protocol. | Expanded `v0.157.0` with range/proof construction, serving budgets, fairness, snapshot cancellation, and mixed-snapshot rejection. |
+| ModExp length handling and shared time semantics needed explicit wide-integer and clock-domain contracts. | Expanded `v0.52.10` with 256-bit length preservation and virtual padding; added `v0.52.28 - Shared Clock And Time-Evidence Contract`. |
 
 ## Phase 0: Repository And Release Discipline
 
@@ -2708,6 +2719,10 @@ Deliverables:
 
 - Arbitrary declared base, exponent, and modulus lengths admitted whenever the
   protocol gas and memory rules permit them;
+- keep all declared 256-bit lengths wide through gas calculation and convert
+  to `usize` only after charged bounds prove the conversion representable;
+- virtual right-padding and streamed reads avoid allocating attacker-declared
+  absent payload bytes;
 - bounded big-integer workspace or streaming arithmetic whose limits derive
   from the transaction/block gas envelope;
 - exact adjusted-exponent-length, gas, zero modulus, zero-length, truncation,
@@ -3042,6 +3057,12 @@ Deliverables:
   exceptions and owners;
 - consensus-kernel versus orchestration/API boundary tests;
 - public API and semver budgets for every independently published crate;
+- an architecture-wide cache identity rule requiring chain/genesis, fork
+  rules, snapshot/root, object key, and validation level in every
+  security-relevant cache key;
+- separate cache domains for untrusted, quorum-derived, and cryptographically
+  verified values, with atomic invalidation or rebinding on canonical-head and
+  fork-rule changes;
 - an architecture decision stating that the dependency-free `no_std`
   consensus kernel may use optional audited platform adapters, while those
   adapters cannot decide Ethereum validity.
@@ -3070,17 +3091,25 @@ Deliverables:
 
 - Hierarchical capabilities for node, connection, peer, protocol, request,
   decode session, execution, proof, and background-task scopes;
-- counters for bytes, parsing work, hashes, database reads, CPU tasks, queue
-  slots, bandwidth, deadlines, output, and allocation;
-- reservation, child-budget, refund, cancellation, timeout, and fail-closed
-  exhaustion semantics;
+- distinct monotonic consumed-work units for bytes scanned, hashes, signature
+  checks, database reads, and deterministic validation work, which are never
+  refundable;
+- distinct reservations for queue slots, memory capacity, and worker permits,
+  refundable only on release, plus rate resources for bandwidth, request
+  frequency, and CPU scheduling quotas replenished only by explicit policy;
+- child-token conservation, cross-thread transfer, partial consumption,
+  cancellation, timeout, double-release prevention, and fail-closed exhaustion
+  semantics;
+- prohibit wall-clock CPU time as a consensus-admission input; deterministic
+  work units govern validity while wall time governs scheduling and peer policy;
 - `no_std` accounting traits plus optional runtime schedulers that cannot mint
   or bypass consensus work authorization.
 
 Verification:
 
-- Conservation and non-forgeability property tests;
-- nested cancellation/refund and concurrent exhaustion simulations;
+- Conservation and non-forgeability property tests for every resource class;
+- nested cancellation/refund, retry amplification, cross-thread transfer,
+  partial-consumption, concurrent exhaustion, and double-release simulations;
 - Kani-ready bounded state-machine harnesses and complexity-oracle adapters.
 
 Exit criteria:
@@ -3101,7 +3130,8 @@ details.
 Deliverables:
 
 - Separate public-input and secret-bearing backend contracts for Keccak-256,
-  secp256k1, KZG, BLS, entropy, and authenticated transport primitives;
+  secp256k1, KZG, BLS, AES-CTR, HMAC-SHA256, RLPx ECIES/KDF behavior,
+  keystore KDF/cipher behavior, entropy, and authenticated transport primitives;
 - explicit conformance, fixed-work/constant-time, zeroization, trusted-setup,
   maximum-work/output, error, and acceleration requirements per domain;
 - backend admission and replacement rules that preserve first-party consensus
@@ -3121,6 +3151,224 @@ Exit criteria:
   concrete third-party implementation or an impossible absolute-erasure
   promise.
 - `v0.52.21 implementation stop reached. Run pentest for this exact
+  commit.`
+
+### v0.52.22 - First-Party Keccak-256 Core
+
+Status: planned.
+
+Goal: admit the first-party Ethereum Keccak-256 implementation before any
+wallet, network, proof, or execution consumer can make a production claim.
+
+Deliverables:
+
+- Dependency-free Keccak-f[1600] and Keccak-256 absorb/finalize, streaming,
+  fixed-output, `no_std`, no-allocation implementation;
+- compatibility with the frozen `v0.52.21` provider contract;
+- explicit separation from SHA3-256 and reviewed state-clearing behavior for
+  secret-bearing callers;
+- external implementations retained only as optional differential/reference
+  adapters.
+
+Verification:
+
+- Official and independent KATs including the empty-input Keccak/SHA3
+  discriminator;
+- permutation-round differential tests, fuzzing, endian/target matrix, stack,
+  panic, timing, and sanitization review;
+- dual-backend differentials for every existing transaction, proof, and EVM
+  hashing consumer.
+
+Exit criteria:
+
+- Every existing production hashing path can select a first-party Keccak-256
+  backend before higher-level consumers are implemented.
+- `v0.52.22 implementation stop reached. Run pentest for this exact
+  commit.`
+
+### v0.52.23 - First-Party secp256k1 Arithmetic
+
+Status: planned.
+
+Goal: establish first-party field, scalar, and point arithmetic before local
+signers, node identity, discovery, or RLPx are implemented.
+
+Deliverables:
+
+- Canonical secp256k1 field/scalar parsing and bounded arithmetic;
+- point addition, doubling, multiplication, compression, decompression, and
+  infinity policy;
+- fixed-work reviewed secret-scalar paths separated from public-input paths;
+- dependency-free `no_std` operation with bounded caller-owned workspaces.
+
+Verification:
+
+- SEC and independent vectors plus group-law and malformed-point properties;
+- differential checks against at least two independent implementations;
+- subgroup, fault, side-channel, stack, panic, and fuzz review.
+
+Exit criteria:
+
+- Ethereum secp256k1 domains have a first-party arithmetic foundation before
+  any production signer or network identity depends on them.
+- `v0.52.23 implementation stop reached. Run pentest for this exact
+  commit.`
+
+### v0.52.24 - First-Party ECDSA Recovery And ECDH
+
+Status: planned.
+
+Goal: complete the first-party secp256k1 operations required by transactions,
+ECRECOVER, node identity, discovery, and RLPx.
+
+Deliverables:
+
+- Deterministic ECDSA signing, strict verification, low-s normalization,
+  recoverable signatures, public-key recovery, and ECDH;
+- distinct transaction, message, authorization, validator, and networking
+  identity domains;
+- secret nonce/key sanitation and fault-detection policy;
+- compatibility adapters for existing signer and recovery provider traits.
+
+Verification:
+
+- Ethereum transaction, ECRECOVER, ENR, discovery, and RLPx vectors;
+- two-implementation differential checks and dual-backend consumer tests;
+- nonce-reuse, invalid-recovery, timing, fault, and fuzz tests.
+
+Exit criteria:
+
+- All Ethereum-required secp256k1 operations have a first-party path before
+  wallet and networking implementation begins.
+- `v0.52.24 implementation stop reached. Run pentest for this exact
+  commit.`
+
+### v0.52.25 - Symmetric Transport And Keystore Cryptography
+
+Status: planned.
+
+Goal: provide or explicitly admit every non-TLS cryptographic primitive needed
+by RLPx and Web3 keystores before those consumers are built.
+
+Deliverables:
+
+- First-party or separately audited AES-CTR and HMAC-SHA256 capabilities;
+- exact RLPx ECIES, KDF, MAC, key schedule, and transcript behavior;
+- Web3 keystore cipher, MAC, PBKDF/scrypt parameter, and password-handling
+  contracts;
+- explicit audited-adapter boundaries for TLS, QUIC, Noise, OS entropy, and
+  hardware acceleration, none of which can decide Ethereum validity;
+- bounded work, key separation, nonce/IV policy, error, and zeroization rules.
+
+Verification:
+
+- Published RLPx, Web3 keystore, AES, HMAC, ECIES, and KDF vectors;
+- malformed, downgrade, parameter-DoS, nonce/IV reuse, oracle, and
+  interoperability tests;
+- dependency, side-channel, secret-taint, and backend-admission review.
+
+Exit criteria:
+
+- RLPx and keystore milestones have no unnamed cryptographic dependency or
+  ambiguous trust boundary.
+- `v0.52.25 implementation stop reached. Run pentest for this exact
+  commit.`
+
+### v0.52.26 - Early Core Cryptography Integration And Audit
+
+Status: planned.
+
+Goal: make the first-party Keccak/secp path the default production-capable core
+before owned SDK, wallets, providers, and networking expand.
+
+Deliverables:
+
+- Integrate hashing, transaction signing/recovery, EVM `KECCAK256`,
+  ECRECOVER, CREATE address derivation, proof hashing, ENR, discovery, and RLPx
+  provider seams available at this point;
+- retain external implementations only behind explicit reference or optional
+  acceleration features;
+- audit domain separation, constant-time boundaries, zeroization, feature
+  graphs, errors, and backend replacement;
+- publish a first-party core-cryptography conformance report.
+
+Verification:
+
+- Workspace dual-backend differential matrix;
+- dependency graph proving no external Keccak/secp implementation is required
+  by production core paths;
+- independent cryptography audit, remediation, and clean retest.
+
+Exit criteria:
+
+- Later signers and networking use an already admitted first-party core rather
+  than being migrated from a temporary backend near release.
+- `v0.52.26 implementation stop reached. Run pentest for this exact
+  commit.`
+
+### v0.52.27 - Cross-Format Decode Work Accounting
+
+Status: planned.
+
+Goal: extend the shared decode/session ledger from RLP and MPT into every later
+untrusted serialization and compression boundary.
+
+Deliverables:
+
+- Reusable child-ledger contracts for SSZ, JSON, ABI, Snappy, SSZ-Snappy,
+  Req/Resp chunks, and GossipSub messages;
+- deterministic accounting for compressed/decompressed bytes, ratio,
+  structural nodes, depth, offsets, strings, list/bitlist elements, chunks,
+  hashes, Merkleization, allocation capacity, and output;
+- reject before decompression, allocation, hashing, or ownership conversion
+  when the relevant reservation/work budget cannot be acquired;
+- JSON duplicate-key rejection and bounded structural depth/node count;
+- format-specific releases must prove they consume this parent ledger rather
+  than creating fresh local budgets.
+
+Verification:
+
+- Cross-format conservation and nested-child property tests;
+- compression-bomb, duplicate-key, offset, list, bitlist, chunk, and output
+  complexity-oracle fixtures;
+- adapters that deliberately reset accounting are rejected by conformance tests.
+
+Exit criteria:
+
+- Every planned wire format has one defined route into operation-wide resource
+  accounting before its parser is implemented.
+- `v0.52.27 implementation stop reached. Run pentest for this exact
+  commit.`
+
+### v0.52.28 - Shared Clock And Time-Evidence Contract
+
+Status: planned.
+
+Goal: define one explicit time capability for networking, Engine, consensus,
+validator, and operational scheduling before those layers diverge.
+
+Deliverables:
+
+- Separate monotonic time for deadlines/cancellation from wall/UTC time for
+  slots, epochs, timestamps, and operator display;
+- detected step/slew, stale-time, unavailable-time, uncertainty, and source
+  evidence states;
+- test/deterministic clock implementations and bounded external-source adapters;
+- external time evidence may inform policy but cannot directly override
+  validator slashing or consensus safety decisions.
+
+Verification:
+
+- Backward/forward step, slew, pause, stale source, disagreement, and rollover
+  simulations;
+- compile-time separation of monotonic and UTC timestamp domains;
+- deterministic network and validator scenario integration.
+
+Exit criteria:
+
+- No deadline, slot, peer, or signer safety path silently mixes monotonic and
+  wall time or treats an external source as authority.
+- `v0.52.28 implementation stop reached. Run pentest for this exact
   commit.`
 
 ## Roadmap Expansion From The 2026 Gap Analysis
@@ -3630,6 +3878,41 @@ Exit criteria:
 - `v0.74.0 implementation stop reached. Run pentest for this exact
   commit.`
 
+### v0.74.1 - System Operations And Execution Requests
+
+Status: planned.
+
+Goal: implement every consensus-critical system operation and execution
+request with explicit block-order, rollback, persistence, and header binding.
+
+Deliverables:
+
+- EIP-4788 beacon-root and EIP-2935 historical-block-hash system calls;
+- EIP-6110 deposit, EIP-7002 withdrawal, and EIP-7251 consolidation request
+  extraction and processing;
+- EIP-7685 canonical request ordering, encoding, empty-list behavior, and
+  `requestsHash` calculation;
+- exact pre-block/post-block placement, system caller/address, gas, code
+  validation, rollback, and state-persistence rules;
+- Engine payload encoding and execution-header/request-root binding.
+
+Verification:
+
+- Official execution-spec and execution-apis fixtures for each EIP;
+- exact ordering tests around transactions, withdrawals, rewards, and other
+  system operations;
+- invalid/missing system-contract code, revert, empty request, reordered
+  request, wrong header root, and payload mismatch tests;
+- differential state, receipt, request, and header-root checks against Geth,
+  Besu, and Nethermind.
+
+Exit criteria:
+
+- Current-fork system calls and requests are complete named transition stages,
+  not an implied part of generic system-operation prose.
+- `v0.74.1 implementation stop reached. Run pentest for this exact
+  commit.`
+
 ### v0.75.0 - Receipts Logs Bloom And Withdrawals
 
 Status: planned.
@@ -3718,11 +4001,20 @@ Goal: deliver the KZG Commitments And Proofs release with this required outcome:
 
 Deliverables:
 
-- Blob commitments, proof creation/verification, batch verification, and versioned-hash derivation.
+- Blob commitments, proof creation/verification, batch verification, and
+  versioned-hash derivation;
+- nonzero attacker-unpredictable random coefficients or a reviewed
+  domain-separated transcript covering every statement and fork/domain input;
+- fail-closed entropy/transcript handling, bounded batch-failure isolation, and
+  prohibition of attacker-controlled or cross-batch coefficient reuse;
+- cache identities include complete message, setup, domain, fork, and
+  validation-level context.
 
 Verification:
 
-- Official EIP-4844 fixtures, differential vectors, malformed/batch fuzzing.
+- Official EIP-4844 fixtures, differential vectors, malformed/batch fuzzing;
+- adversarial coefficient-reuse/control, transcript-collision, entropy-failure,
+  mixed-context cache, and bounded-isolation tests.
 
 Exit criteria:
 
@@ -3898,16 +4190,89 @@ Goal: deliver the Execution Differential And Performance Gate release with this 
 
 Deliverables:
 
-- Differentially compare blocks/state roots with independent clients and establish CPU, memory, stack, and gas benchmarks.
+- Differentially compare execution status, exceptional halt, gas used, refunds,
+  logs, bloom, receipts, receipt root, transaction root, withdrawal root,
+  request root, state root, created/deleted accounts, code, state diffs, and
+  traces;
+- use official execution-spec fixtures plus an implementation-diverse Geth,
+  Besu, and Nethermind matrix; REVM and Reth remain useful development oracles
+  but do not count as the only independent implementations;
+- establish CPU, memory, stack, deterministic work, and gas benchmarks.
 
 Verification:
 
-- Reproducible differential corpus and regression thresholds.
+- Reproducible differential corpus and regression thresholds;
+- zero unexplained field-level mismatches or skipped official vectors.
 
 Exit criteria:
 
 - The first-party engine is correct and operationally bounded enough for higher layers.
 - `v0.88.0 implementation stop reached. Run pentest for this exact
+  commit.`
+
+### v0.88.1 - Snapshot-Bound Execution Caches And Prefetch
+
+Status: planned.
+
+Goal: add node-scale state and code acceleration without allowing cache
+identity, staleness, or prefetched trust to affect validity.
+
+Deliverables:
+
+- Account, storage, and code caches bound to chain/genesis, fork rules,
+  state-root/snapshot, object key, and validation level;
+- code entries keyed by code hash and storage entries keyed by snapshot/root,
+  address, and slot;
+- deterministic bounded eviction, retained-memory ceilings, and
+  transaction/block reset policy;
+- atomic invalidation or rebinding on reorg and fork-rule changes;
+- access-list and trace-driven prefetch whose results remain untrusted until
+  validated against the active snapshot.
+
+Verification:
+
+- Cross-root, cross-fork, cross-chain, and validation-level substitution tests;
+- reorg/fork-transition races, deterministic eviction, memory-pressure, and
+  stale-prefetch tests;
+- cached/uncached differential execution over the complete fixture corpus.
+
+Exit criteria:
+
+- Caching and prefetch improve throughput without creating a path for stale or
+  weakly validated data to influence consensus execution.
+- `v0.88.1 implementation stop reached. Run pentest for this exact
+  commit.`
+
+### v0.88.2 - Deterministic Speculative Parallel Execution
+
+Status: planned.
+
+Goal: make parallel transaction execution an optional optimization that is
+provably equivalent to sequential block order.
+
+Deliverables:
+
+- Snapshot-bound speculative execution with explicit read/write sets;
+- deterministic conflict detection, sequential-order validation and commit,
+  bounded worker/memory reservations, cancellation, and cache integration;
+- automatic deterministic fallback to sequential execution on conflict,
+  ambiguity, resource exhaustion, or scheduler failure;
+- no parallel scheduling decision or conflict-detection failure can alter
+  transaction validity or final block outcome.
+
+Verification:
+
+- Parallel/sequential differential status, gas, receipts, logs, requests,
+  traces, and final-root comparisons;
+- adversarial conflict graphs, hidden dependencies, reverts, selfdestruct,
+  EIP-7702, system-operation, reorg, cancellation, and fault tests;
+- deterministic replay across worker counts and scheduling seeds.
+
+Exit criteria:
+
+- Every admitted parallel result matches sequential execution exactly, and
+  every uncertain case falls back without changing consensus behavior.
+- `v0.88.2 implementation stop reached. Run pentest for this exact
   commit.`
 
 ### v0.89.0 - Inspector And Hook Framework
@@ -3984,12 +4349,17 @@ Deliverables:
   and supported extension namespaces;
 - each method binds its parameter type, response type, trust classification,
   response-size ceiling, idempotence, retry policy, and fork availability;
+- JSON request/response parsing consumes the `v0.52.27` parent ledger, rejects
+  duplicate object keys, and bounds structural depth, node count, strings,
+  arrays, allocations, and output in addition to raw bytes;
 - callers cannot assemble core methods from untyped JSON values or override a
   method's security metadata.
 
 Verification:
 
-- Official execution-apis fixtures, serde snapshots, unknown-field policy tests.
+- Official execution-apis fixtures, serde snapshots, duplicate/unknown-field
+  policy tests, structural-depth/node complexity oracles, and allocation-before-
+  reservation rejection tests.
 
 Exit criteria:
 
@@ -4370,7 +4740,8 @@ Goal: deliver the Local Secret Signer release with this required outcome: Local 
 
 Deliverables:
 
-- Optional local secp256k1 signer in a separate opt-in crate or isolated worker,
+- Optional local signer using the already admitted `v0.52.23..=v0.52.26`
+  first-party secp256k1/ECDSA path in a separate opt-in crate or isolated worker,
   with locked/sanitized opaque secret ownership, deterministic signatures, and
   explicit export prohibition;
 - in-place crypto operations, RAII sanitation guards, redacted non-Clone/
@@ -4599,11 +4970,15 @@ Goal: deliver the ABI Encode Decode release with this required outcome: ABI valu
 
 Deliverables:
 
-- First-party head/tail encoding and strict decoding with offset, overlap, padding, depth, count, and allocation checks.
+- First-party head/tail encoding and strict decoding with offset, overlap,
+  padding, depth, count, string/byte, allocation, and output checks;
+- ABI decoding consumes the `v0.52.27` parent work ledger and charges every
+  offset traversal and structural node before following or allocating it.
 
 Verification:
 
-- Official/reference vectors, malformed-offset fuzzing, round trips.
+- Official/reference vectors, malformed-offset fuzzing, round trips, and
+  offset/node/allocation complexity oracles.
 
 Exit criteria:
 
@@ -4619,7 +4994,9 @@ Goal: deliver the Artifact And Metadata Ingestion release with this required out
 
 Deliverables:
 
-- Bounded JSON ingestion for ABI, bytecode, deployed bytecode, link references, compiler metadata, and source maps.
+- Bounded duplicate-key-rejecting JSON ingestion for ABI, bytecode, deployed
+  bytecode, link references, compiler metadata, and source maps through the
+  `v0.52.27` structural and allocation ledger.
 
 Verification:
 
@@ -5066,8 +5443,10 @@ cached, full-client surface.
 Deliverables:
 
 - First-party basic and composite SSZ type rules;
-- bounded canonical encode/decode;
-- offset validation;
+- bounded canonical encode/decode consuming the `v0.52.27` parent ledger;
+- charged offset traversal, container/list/vector elements, bitlists,
+  bitvectors, allocation capacity, hashes, Merkleization work, and output;
+- offset validation and reject-before-allocation/hash behavior;
 - generalized indices;
 - baseline Merkleization, branches, and hash-tree roots;
 - explicit exclusions for incremental mutation, cached trees, and
@@ -5077,6 +5456,8 @@ Verification:
 
 - Official consensus-spec vectors;
 - malformed-offset fuzzing;
+- list/bitlist/offset/Merkleization complexity oracles and nested-ledger
+  conservation tests;
 - baseline root differentials;
 - cross-check that later full-client APIs cannot be inferred from this
   foundational release.
@@ -5122,10 +5503,14 @@ Deliverables:
   `forkchoiceUpdated`, and `getPayload`, including typed payload IDs,
   deadlines, cancellation, evidence-rich status, and exact
   `latestValidHash` semantics.
+- A design-time executable model for Engine sequencing, idempotency,
+  invalidation, retries, cancellation, and `latestValidHash`, maintained before
+  transport and coordinator implementations consume it.
 
 Verification:
 
-- execution-apis fixtures and client interoperability snapshots.
+- execution-apis fixtures and client interoperability snapshots;
+- model-check traces, seeded invariant violations, and trace-to-Rust regressions.
 
 Exit criteria:
 
@@ -5146,6 +5531,8 @@ Deliverables:
 - authenticated transport adapter;
 - request/response sequencing primitives;
 - idempotency, cancellation, timeout, and error mapping;
+- conformance to the `v0.143.0` sequencing model across in-process and
+  authenticated transport paths;
 - explicit statement that beacon fork-choice and payload orchestration belong
   to the Beacon Engine Coordinator at `v0.226.0`.
 
@@ -5153,7 +5540,8 @@ Verification:
 
 - Protocol sequence tests;
 - JWT and redaction review;
-- transport conformance tests independent of beacon-node policy.
+- transport conformance tests independent of beacon-node policy;
+- retry/reorder/duplicate/cancellation traces generated from the design model.
 
 Exit criteria:
 
@@ -5209,12 +5597,17 @@ Deliverables:
 - pagination and version negotiation;
 - finality, blob, and data-column responses;
 - bounded transport policy;
+- duplicate-key-rejecting Beacon JSON parsing through the `v0.52.27` parent
+  ledger with structural depth/node, string, array, allocation, and output
+  accounting;
 - explicit server-side ownership assigned to `v0.232.0`.
 
 Verification:
 
 - Beacon API client fixtures;
 - local independent consensus-client integration;
+- duplicate-key, structural-depth/node, oversized-string/array, and allocation-
+  before-reservation tests;
 - compile and documentation checks separating provider and server roles.
 
 Exit criteria:
@@ -5233,7 +5626,9 @@ Goal: deliver the Light Client Bootstrap And Weak Subjectivity release with this
 
 Deliverables:
 
-- Trusted checkpoint/bootstrap validation, fork/genesis binding, weak-subjectivity periods, stale-checkpoint rejection, and clock policy.
+- Trusted checkpoint/bootstrap validation, fork/genesis binding,
+  weak-subjectivity periods, stale-checkpoint rejection, and clock policy using
+  the monotonic/UTC/evidence domains from `v0.52.28`.
 
 Verification:
 
@@ -5418,11 +5813,16 @@ Deliverables:
   allowed, but identity, scoring, banning, compatibility, and peer state are
   not collapsed into one generic Ethereum peer abstraction;
 - bind every connection, peer, protocol, and request to child capabilities
-  from the `v0.52.20` resource governor.
+  from the `v0.52.20` resource governor;
+- admit Snappy and SSZ-Snappy only through `v0.52.27` compressed-byte,
+  decompressed-byte, ratio, allocation, structural-work, and output budgets;
+- design-time models for retry/backpressure and peer scheduling must exist
+  before live request scheduling.
 
 Verification:
 
-- cargo-deny/audit, protocol corpus plan, architecture review.
+- cargo-deny/audit, protocol corpus plan, architecture review, decompression-
+  bomb fixtures, and seeded scheduling-model violations.
 
 Exit criteria:
 
@@ -5441,6 +5841,8 @@ Deliverables:
 - First-party Discovery v4/v5 as admitted, ENR, EIP-1459 DNS discovery, node
   records, handshakes, framing, capability negotiation, encryption/MAC state
   machines, and replay protections;
+- use the admitted `v0.52.23..=v0.52.25` secp256k1, ECDH, AES-CTR,
+  HMAC-SHA256, ECIES/KDF, and transcript contracts rather than unnamed crypto;
 - bootnode, static-peer, trusted-peer, node-key, listen-address, NAT, and
   advertised-address policy behind runtime-neutral I/O boundaries.
 
@@ -5482,11 +5884,20 @@ Goal: deliver the Snap Protocol release with this required outcome: Snapshot dat
 
 Deliverables:
 
-- Account ranges, storage ranges, bytecodes, trie nodes, proofs, continuation rules, and response limits.
+- Account ranges, storage ranges, bytecodes, trie nodes, proofs, continuation
+  rules, and response limits for both consumption and serving;
+- snapshot-pinned account/storage range generation and canonical range-proof
+  construction without mixed-snapshot nodes;
+- serving-side database-read, proof-generation, compression, allocation,
+  bandwidth, and output budgets plus fair scheduling against local sync;
+- cancellation when a serving snapshot becomes unavailable;
+- all compressed and decompressed work consumes the `v0.52.27` parent ledger.
 
 Verification:
 
-- Cross-client fixtures, proof verification, response-bomb tests.
+- Cross-client consume/serve fixtures, proof verification, response-bomb and
+  compression-bomb tests, mixed-snapshot rejection, snapshot-loss
+  cancellation, and serving-fairness simulations.
 
 Exit criteria:
 
@@ -5530,11 +5941,13 @@ Deliverables:
   per-protocol/node budgets, cancellation, fair scheduling, queue slots,
   bandwidth limits, and invalid-response penalties;
 - cancellation propagates when fork choice invalidates work and refunds only
-  resources whose work did not occur.
+  reservations whose resources were released, never consumed work;
+- executable retry/backpressure and fairness models refined from `v0.154.0`.
 
 Verification:
 
-- Loss/reorder/timeout/load simulations and race tests.
+- Loss/reorder/timeout/load simulations, model traces, retry-amplification
+  checks, conservation assertions, and race tests.
 
 Exit criteria:
 
@@ -5556,11 +5969,14 @@ Deliverables:
   replacement, eviction, and competing-hash tracking;
 - blob-sidecar lifecycle and EIP-7702 authority-conflict handling;
 - reorg journaling/reinjection, bounded local-transaction protection,
-  persistence boundaries, and propagation-privacy policy.
+  persistence boundaries, and propagation-privacy policy;
+- a design-time replacement/eviction/reorg model with counterexamples promoted
+  into deterministic implementation regressions.
 
 Verification:
 
-- Client differential cases, adversarial pool loads, reorg tests.
+- Client differential cases, adversarial pool loads, reorg tests, and model-
+  checked replacement/eviction invariants.
 
 Exit criteria:
 
@@ -6311,7 +6727,11 @@ Deliverables:
 - mutable generalized-index operations;
 - branches and multiproofs;
 - cached trees and cache-invalidation rules;
+- cached SSZ/Merkle entries follow chain/genesis, fork, state-root/generalized-
+  index, and validation-level identity;
 - bounded transactional mutation APIs;
+- all decoding, offset traversal, bitlist/list work, hashing, Merkleization,
+  mutation, allocation, and proof output consume `v0.52.27` child ledgers;
 - compatibility with the canonical encoding and baseline roots from
   `v0.141.0`.
 
@@ -6339,11 +6759,24 @@ Goal: deliver the BLS Signing Aggregation And Batch Verification release with th
 
 Deliverables:
 
-- First-party BLS signing, verification, aggregation, aggregate verification, randomized batch verification, proof of possession where required, secret/public key domains, and optional acceleration only behind audited adapters.
+- First-party BLS signing, verification, aggregation, aggregate verification,
+  randomized batch verification, proof of possession where required,
+  secret/public key domains, and optional acceleration only behind audited
+  adapters;
+- nonzero attacker-unpredictable coefficients or a reviewed domain-separated
+  transcript covering every public key, message, domain, fork, and signature;
+- entropy/transcript failure fails closed, coefficient reuse across contexts is
+  prohibited, and bounded batch-failure isolation cannot become an unbounded
+  fallback attack;
+- bounded verification-queue latency and maximum batch age so attackers cannot
+  delay block processing by preventing batches from filling;
+- cache keys contain complete message/domain/fork/validation context.
 
 Verification:
 
-- Official BLS vectors, independent differential tests, subgroup/fault/batch fuzzing, timing review.
+- Official BLS vectors, independent differential tests, subgroup/fault/batch
+  fuzzing, coefficient/transcript/cache attacks, queue-latency simulations,
+  entropy-failure tests, and timing review.
 
 Exit criteria:
 
@@ -6366,6 +6799,8 @@ Deliverables:
 - data-column construction;
 - erasure coding and bounded reconstruction;
 - batch verification;
+- sound nonzero coefficient/transcript generation, fail-closed entropy,
+  context-complete cache identities, and bounded failure isolation;
 - bounded reusable workspaces;
 - explicit acceleration/backend boundaries;
 - canonical failure and partial-output behavior.
@@ -6875,11 +7310,17 @@ Goal: deliver the GossipSub Topics And Subnet Management release with this requi
 
 Deliverables:
 
-- Fork-digest topics, beacon blocks, aggregate/attestation subnets, sync committees, data columns, operation topics, subscription rotation, and mesh policy.
+- Fork-digest topics, beacon blocks, aggregate/attestation subnets, sync
+  committees, data columns, operation topics, subscription rotation, and mesh
+  policy;
+- GossipSub payload and SSZ-Snappy decoding consume compressed/decompressed,
+  ratio, structural, signature, allocation, and output budgets from
+  `v0.52.27` before promotion.
 
 Verification:
 
-- Cross-client topic/subnet tests, fork-boundary simulations, bounded subscription tests.
+- Cross-client topic/subnet tests, fork-boundary simulations, bounded
+  subscription tests, decompression bombs, and structural complexity oracles.
 
 Exit criteria:
 
@@ -6895,7 +7336,11 @@ Goal: deliver the Staged Gossip Validation And Seen Caches release with this req
 
 Deliverables:
 
-- Decode/signature/state/fork-choice validation stages, dependency deferral, duplicate suppression, seen caches, invalid-message penalties, and no partial promotion.
+- Decode/signature/state/fork-choice validation stages, dependency deferral,
+  duplicate suppression, seen caches, invalid-message penalties, and no partial
+  promotion;
+- seen/deferred caches follow the global chain/fork/root/object/validation-level
+  identity invariant and never mix untrusted with verified entries.
 
 Verification:
 
@@ -6915,11 +7360,17 @@ Goal: deliver the Consensus Req Resp Protocols release with this required outcom
 
 Deliverables:
 
-- Status, metadata, blocks, blobs, data columns, light-client data, states/checkpoints where admitted, chunk framing, context bytes, error responses, and cancellation.
+- Status, metadata, blocks, blobs, data columns, light-client data,
+  states/checkpoints where admitted, chunk framing, context bytes, error
+  responses, and cancellation;
+- each chunk consumes compressed/decompressed bytes, ratio, framing,
+  structural, allocation, hash, and output work from `v0.52.27` before
+  decompression or ownership conversion.
 
 Verification:
 
-- Cross-client protocol matrix, malformed chunk fuzzing, unavailable-data cases.
+- Cross-client protocol matrix, malformed chunk fuzzing, decompression-bomb and
+  complexity-oracle cases, unavailable-data cases.
 
 Exit criteria:
 
@@ -6935,7 +7386,9 @@ Goal: deliver the Consensus Peer Scoring And Backpressure release with this requ
 
 Deliverables:
 
-- Peer reputation, topic scores, custody-response scoring, bans, diversity, request budgets, rate limits, fair queues, clock disparity, and eclipse defenses.
+- Peer reputation, topic scores, custody-response scoring, bans, diversity,
+  request budgets, rate limits, fair queues, clock disparity through
+  `v0.52.28` evidence, and eclipse defenses.
 
 Verification:
 
@@ -7219,11 +7672,18 @@ Goal: deliver the Beacon Node REST And Event APIs release with this required out
 
 Deliverables:
 
-- Versioned JSON/SSZ Beacon API server, events, node identity/peers, config/spec, blocks/states, pools, light-client, debug, authentication, TLS, and rate limits.
+- Versioned JSON/SSZ Beacon API server, events, node identity/peers,
+  config/spec, blocks/states, pools, light-client, debug, authentication, TLS,
+  and rate limits;
+- JSON parsing rejects duplicate keys and both JSON/SSZ routes consume the
+  `v0.52.27` structural, allocation, hash, and output budgets before work;
+- server responses, event queues, and serialization are bounded by request and
+  connection child resources.
 
 Verification:
 
-- Official Beacon API conformance, client compatibility, malformed/request-flood tests.
+- Official Beacon API conformance, client compatibility, duplicate-key,
+  structural-depth/node, malformed, allocation, output, and request-flood tests.
 
 Exit criteria:
 
@@ -7441,7 +7901,10 @@ Goal: deliver the Validator Duty Scheduler And Safety State release with this re
 
 Deliverables:
 
-- Drift-aware slot clock, duty lookahead/cache, reorg refresh, multi-beacon-node quorum/failover, doppelganger detection, and optimistic/unsafe refusal.
+- Drift-aware slot clock built on `v0.52.28`, duty lookahead/cache, reorg
+  refresh, multi-beacon-node quorum/failover, doppelganger detection, and
+  optimistic/unsafe refusal; external time evidence cannot override slashing or
+  duty-safety decisions.
 
 Verification:
 
@@ -8437,117 +8900,124 @@ Exit criteria:
 - `v0.274.0 implementation stop reached. Run pentest for this exact
   commit.`
 
-## Phase 30: First-Party Core Cryptography Completion
+## Phase 30: Full-Stack Core Cryptography Revalidation
 
-### v0.275.0 - First-Party Keccak-256 Core
+The first-party Keccak-256, secp256k1, ECDSA, ECDH, and required symmetric
+transport/keystore primitives are implemented and initially audited at
+`v0.52.22..=v0.52.26`. This late phase revalidates those foundations after all
+execution, wallet, networking, consensus, validator, and storage consumers
+exist; it does not postpone their initial implementation.
+
+### v0.275.0 - Core Cryptography Consumer Inventory
 
 Status: planned.
 
-Goal: remove the required production dependency on an external Keccak-256
-implementation.
+Goal: prove every production cryptographic consumer uses an admitted provider,
+domain, cache identity, and failure contract.
 
 Deliverables:
 
-- Dependency-free Keccak-f[1600], Keccak-256 absorb/finalize, streaming, and
-  fixed-output implementation;
-- constant-time and zeroization policy for state where secret-bearing callers
-  require it;
-- no-alloc and bounded workspace APIs compatible with the existing trait;
-- `tiny-keccak` retained only as an optional differential/reference adapter.
+- Inventory all hashing, signing, recovery, ECDH, KDF, MAC, cipher, KZG, BLS,
+  entropy, transport, keystore, validator, and acceleration consumers;
+- trace each consumer to its first-party or explicitly audited provider and
+  domain-separated request type;
+- identify temporary, reference-only, duplicate, or bypass paths for removal.
 
 Verification:
 
-- Official and independent KATs including the Keccak/SHA3 empty-input
-  discriminator;
-- permutation-round differential tests, fuzzing, and endian/target matrix;
-- timing, stack, panic, and sanitization review.
+- Feature-power-set dependency and call-path analysis;
+- compile-fail tests for direct backend access;
+- zero unexplained production consumers outside the inventory.
 
 Exit criteria:
 
-- Every production Keccak-256 consumer can use a first-party backend.
+- The complete product has no hidden cryptographic implementation or provider
+  bypass.
 - `v0.275.0 implementation stop reached. Run pentest for this exact
   commit.`
 
-### v0.276.0 - First-Party secp256k1 Arithmetic
+### v0.276.0 - Core Crypto Side-Channel And Acceleration Revalidation
 
 Status: planned.
 
-Goal: establish audited field, scalar, and point arithmetic for Ethereum
-signatures and node identities.
+Goal: repeat side-channel, fault, zeroization, and acceleration review against
+the final compiler, platforms, and production call patterns.
 
 Deliverables:
 
-- secp256k1 field/scalar arithmetic, canonical parsing, inversion, point
-  addition/doubling, multiplication, compression, and infinity policy;
-- fixed-work or otherwise reviewed constant-time secret-scalar paths;
-- public-input fast paths separated from secret-bearing operations;
-- bounded no-alloc workspaces.
+- Revalidate fixed-work/constant-time secret paths and public gas-to-cycles
+  bounds across supported targets;
+- audit hardware/vector acceleration, fallback equivalence, feature dispatch,
+  fault handling, and backend state clearing;
+- update the secret-taint inventory for all wallet, validator, networking, and
+  key-custody paths.
 
 Verification:
 
-- SEC and independent vectors;
-- group-law, malformed-point, subgroup, and differential property tests;
-- side-channel, fault, stack, and fuzz review.
+- dudect/ctgrind-style reports, assembly review, fault injection, and
+  accelerated/scalar differential tests on named platforms.
 
 Exit criteria:
 
-- Ethereum secp256k1 domains no longer depend on external curve arithmetic.
+- Final production builds preserve the admitted cryptographic security
+  properties across every supported backend and target.
 - `v0.276.0 implementation stop reached. Run pentest for this exact
   commit.`
 
-### v0.277.0 - First-Party ECDSA Recovery And ECDH
+### v0.277.0 - Cryptographic Cache Transcript And Batch Audit
 
 Status: planned.
 
-Goal: complete the secp256k1 operations required by transactions, ECRECOVER,
-ENR, discovery, and RLPx.
+Goal: audit cross-system domain separation, transcript soundness, batching,
+and cache identity after every consumer is integrated.
 
 Deliverables:
 
-- Deterministic ECDSA signing, strict verification, low-s normalization,
-  recoverable signatures, public-key recovery, and node-key ECDH;
-- explicit transaction-signing and networking-identity domain types;
-- secret nonce/key sanitization and fault-detection policy;
-- compatibility adapters for existing signer and recovery traits.
+- Review KZG/BLS batch coefficients, transcript domains, entropy failures,
+  failure isolation, queue latency, and reuse policy;
+- review signature/proof/hash caches for complete chain, fork, root, message,
+  setup, key, and validation-level identity;
+- test cross-protocol substitution among execution, consensus, validator,
+  networking, wallet, and account-abstraction domains.
 
 Verification:
 
-- Ethereum transaction, ECRECOVER, ENR, discovery, and RLPx vectors;
-- cross-checks against at least two independent implementations;
-- nonce-reuse, invalid-recovery, timing, fault, and fuzz tests.
+- Adversarial transcript/collision/cache/batch corpus;
+- cross-domain compile-fail and runtime substitution tests;
+- independent review with zero unexplained cache or transcript equivalence.
 
 Exit criteria:
 
-- All Ethereum-required secp256k1 operations have a first-party path.
+- No final cryptographic batch or cache can accept evidence from an incomplete
+  or different security context.
 - `v0.277.0 implementation stop reached. Run pentest for this exact
   commit.`
 
-### v0.278.0 - Core Cryptography Integration And Audit
+### v0.278.0 - Core Cryptography Production Readmission
 
 Status: planned.
 
-Goal: make first-party Keccak-256 and secp256k1 the production path throughout
-the workspace.
+Goal: close all full-stack cryptographic findings and readmit the exact final
+production paths before historical and executable product completion.
 
 Deliverables:
 
-- Integrate hashing, transaction signing/recovery, EVM `KECCAK256`,
-  ECRECOVER, CREATE address derivation, ENR, discovery, and RLPx;
-- remove required `tiny-keccak` and `k256` production paths while retaining
-  optional reference adapters;
-- audit domain separation, zeroization, error behavior, feature graphs, and
-  acceleration boundaries;
-- publish a core-cryptography conformance report.
+- Resolve the `v0.275.0..=v0.277.0` inventory, side-channel, acceleration,
+  transcript, batching, cache, dependency, and domain findings;
+- rerun all KAT, differential, fuzz, timing, fault, platform, feature, and
+  consumer integration evidence;
+- publish the full-stack core-cryptography conformance and audit report.
 
 Verification:
 
-- Full transaction, EVM, proof, and networking integration tests;
-- dependency graph proving no external Keccak/secp implementation is required;
-- independent cryptography audit, remediation, and clean retest.
+- Independent cryptography audit, remediation, and clean retest;
+- dependency graph proving no unapproved required implementation remains;
+- zero critical/high findings and zero unexplained vector failures.
 
 Exit criteria:
 
-- Core Ethereum hashing and secp256k1 behavior is first-party and audited.
+- The early first-party cryptographic core remains correct and secure in the
+  complete production system.
 - `v0.278.0 implementation stop reached. Run pentest for this exact
   commit.`
 

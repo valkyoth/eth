@@ -53,7 +53,7 @@ exposed until a future review can pass:
 
 The v0.37.1 release adds `scripts/check_ethereum_upstream.py` as the follow-up
 dependency recheck before any temporary execution adapter is implemented.
-`v0.40.0..=v0.52.21` and `v0.69.0..=v0.91.0` reserve the first-party native EVM
+`v0.40.0..=v0.52.28` and `v0.69.0..=v0.91.0` reserve the first-party native EVM
 and complete execution path, so
 a future REVM adapter is reference or compatibility infrastructure rather than
 the trusted 1.0 execution core.

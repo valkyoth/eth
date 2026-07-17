@@ -92,7 +92,7 @@ Legend: 🟢 available for the stated scope, 🟡 implemented but incomplete,
 | Complete execution, storage, and execution-client product | 🔴 Planned | Assigned to `v0.69.0..=v0.91.0`, `v0.130.0..=v0.140.0`, and `v0.282.0..=v0.297.0` |
 | Consensus, beacon node, and validator client | 🔴 Planned | Foundations start at `v0.141.0`; complete implementation and assurance continue through `v0.274.0` |
 | Ethereum networking, transaction pool, and synchronization | 🔴 Planned | Execution and consensus networking are assigned across `v0.154.0..=v0.164.0`, `v0.215.0..=v0.225.0`, and `v0.288.0` |
-| First-party core cryptography and historical proof of work | 🔴 Planned | Keccak-256, secp256k1, ECDSA/ECDH, Ethash, and genesis-to-Merge validation are assigned to `v0.275.0..=v0.281.0` |
+| First-party core cryptography and historical proof of work | 🔴 Planned | Keccak-256, secp256k1, ECDSA/ECDH, and transport/keystore primitives are assigned to `v0.52.22..=v0.52.26`; full-stack crypto revalidation is `v0.275.0..=v0.278.0`, followed by Ethash and genesis-to-Merge validation at `v0.279.0..=v0.281.0` |
 | Integrated Ethereum node | 🔴 Planned | Orchestration, mixed-client testing, long-running operation, audit, and remediation are assigned to `v0.298.0..=v0.305.0` |
 | Production admission | 🔴 Planned | Final acceptance and stability gates are assigned to `v0.306.0..=v0.310.0` before an exact `v1.0.0-rc.N` candidate |
 
