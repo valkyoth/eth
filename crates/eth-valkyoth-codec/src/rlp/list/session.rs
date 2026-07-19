@@ -25,12 +25,37 @@ impl<'a> RlpListItems<'a> {
         &mut self,
         session: &mut DecodeSession,
     ) -> Option<Result<RlpItem<'a>, DecodeError>> {
-        let item = self.next()?;
-        Some(item.and_then(|item| {
+        if self.remaining == 0 {
+            return None;
+        }
+
+        let result = parse_item(self.input, self.cursor, self.input.len()).and_then(|item| {
+            let encoded_len = item
+                .item_end
+                .checked_sub(self.cursor)
+                .ok_or(DecodeError::LengthOverflow)?;
             let headers = usize::from(item.header_len() != 0);
-            session.account_rlp_reparse(item.encoded_len(), headers, 1)?;
-            Ok(item)
-        }))
+            session.account_rlp_reparse(encoded_len, headers, 1)?;
+            item.into_rlp_item_in_session(
+                self.input,
+                self.cursor,
+                self.limits,
+                self.depth_remaining,
+                session,
+            )
+        });
+        self.remaining = self.remaining.saturating_sub(1);
+
+        match result {
+            Ok((item, next_cursor)) => {
+                self.cursor = next_cursor;
+                Some(Ok(item))
+            }
+            Err(error) => {
+                self.remaining = 0;
+                Some(Err(error))
+            }
+        }
     }
 }
 

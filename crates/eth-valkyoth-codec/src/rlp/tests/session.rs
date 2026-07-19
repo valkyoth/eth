@@ -50,7 +50,54 @@ fn nested_cursor_steps_share_one_non_resetting_ledger() -> Result<(), &'static s
     assert!(session.total_work() > before);
     assert_eq!(session.encoded_bytes(), 11);
     assert_eq!(session.rlp_headers(), 3);
-    assert_eq!(session.items(), 9);
+    assert_eq!(session.items(), 11);
+    Ok(())
+}
+
+#[test]
+fn nested_list_recount_charges_every_immediate_visit() -> Result<(), &'static str> {
+    const MANY_CHILDREN: &[u8] = &[0xc6, 0xc5, 0x01, 0x02, 0x03, 0x04, 0x05];
+    let mut session = test_session()?;
+    let list = decode_rlp_list_in_session(MANY_CHILDREN, &mut session)
+        .map_err(|_| "nested list must decode")?;
+    let before_items = session.items();
+    let before_headers = session.rlp_headers();
+    let before_bytes = session.encoded_bytes();
+
+    let mut items = list.items();
+    assert!(matches!(
+        items.next_in_session(&mut session),
+        Some(Ok(RlpItem::List(_)))
+    ));
+    assert_eq!(session.items() - before_items, 6);
+    assert_eq!(session.rlp_headers() - before_headers, 1);
+    assert_eq!(session.encoded_bytes() - before_bytes, 6);
+    Ok(())
+}
+
+#[test]
+fn nested_list_recount_cannot_exceed_item_ceiling() -> Result<(), &'static str> {
+    const MANY_CHILDREN: &[u8] = &[0xc6, 0xc5, 0x01, 0x02, 0x03, 0x04, 0x05];
+    let limits = DecodeLimits {
+        max_input_bytes: 7,
+        max_list_items: 8,
+        max_nesting_depth: 2,
+        max_total_allocation: 7,
+        max_proof_nodes: 1,
+        max_total_items: 11,
+    };
+    let policy = DecodeSessionPolicy::reviewed_policy(limits, 16, 8, 1, 1, 64)
+        .map_err(|_| "policy must be valid")?;
+    let mut session = DecodeSession::new(policy).map_err(|_| "session must initialize")?;
+    let list = decode_rlp_list_in_session(MANY_CHILDREN, &mut session)
+        .map_err(|_| "nested list must decode")?;
+    let mut items = list.items();
+
+    assert_eq!(
+        items.next_in_session(&mut session),
+        Some(Err(DecodeError::ItemCountExceeded))
+    );
+    assert_eq!(session.items(), limits.max_total_items);
     Ok(())
 }
 

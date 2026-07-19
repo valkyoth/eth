@@ -9,6 +9,86 @@ use crate::transaction::fields::{
     next_list as next_shared_list, next_scalar as next_shared_scalar,
 };
 
+impl<'a> AccessList<'a> {
+    /// Iterates entries while charging every borrowed-model reparse.
+    pub fn entries_in_session<'s>(
+        self,
+        session: &'s mut DecodeSession,
+    ) -> AccessListSessionEntries<'a, 's> {
+        AccessListSessionEntries {
+            inner: self.entries(),
+            session,
+        }
+    }
+}
+
+impl<'a> AccessListEntries<'a> {
+    /// Advances one entry while borrowing the session only for this step.
+    pub fn next_in_session(
+        &mut self,
+        session: &mut DecodeSession,
+    ) -> Option<Result<AccessListEntry<'a>, AccessListTransactionDecodeError>> {
+        let item = self.items.next_in_session(session)?;
+        Some(decode_entry(item, session).map_err(map_access_list_decode_error))
+    }
+}
+
+/// Accounted iterator over borrowed access-list entries.
+pub struct AccessListSessionEntries<'a, 's> {
+    inner: AccessListEntries<'a>,
+    session: &'s mut DecodeSession,
+}
+
+impl<'a> Iterator for AccessListSessionEntries<'a, '_> {
+    type Item = Result<AccessListEntry<'a>, AccessListTransactionDecodeError>;
+
+    fn next(&mut self) -> Option<Self::Item> {
+        self.inner.next_in_session(self.session)
+    }
+}
+
+impl core::iter::FusedIterator for AccessListSessionEntries<'_, '_> {}
+
+impl<'a> AccessListStorageKeys<'a> {
+    /// Iterates storage keys while charging every borrowed-model reparse.
+    pub fn keys_in_session<'s>(
+        self,
+        session: &'s mut DecodeSession,
+    ) -> AccessListStorageKeysSessionItems<'a, 's> {
+        AccessListStorageKeysSessionItems {
+            inner: self.keys(),
+            session,
+        }
+    }
+}
+
+impl<'a> AccessListStorageKeyItems<'a> {
+    /// Advances one key while borrowing the session only for this step.
+    pub fn next_in_session(
+        &mut self,
+        session: &mut DecodeSession,
+    ) -> Option<Result<B256, AccessListTransactionDecodeError>> {
+        let item = self.items.next_in_session(session)?;
+        Some(decode_storage_key_item(item).map_err(map_access_list_decode_error))
+    }
+}
+
+/// Accounted iterator over borrowed access-list storage keys.
+pub struct AccessListStorageKeysSessionItems<'a, 's> {
+    inner: AccessListStorageKeyItems<'a>,
+    session: &'s mut DecodeSession,
+}
+
+impl Iterator for AccessListStorageKeysSessionItems<'_, '_> {
+    type Item = Result<B256, AccessListTransactionDecodeError>;
+
+    fn next(&mut self) -> Option<Self::Item> {
+        self.inner.next_in_session(self.session)
+    }
+}
+
+impl core::iter::FusedIterator for AccessListStorageKeysSessionItems<'_, '_> {}
+
 /// Decodes an EIP-2930 transaction through one cumulative work session.
 pub fn decode_access_list_transaction_in_session<'a>(
     input: &'a [u8],

@@ -5,6 +5,46 @@ use crate::transaction::access_list::decode_access_list_in_session;
 use crate::transaction::envelope::decode_transaction_envelope_in_session;
 use crate::transaction::fields::fixed_fields_in_session;
 
+impl<'a> BlobVersionedHashes<'a> {
+    /// Iterates hashes while charging every borrowed-model reparse.
+    pub fn hashes_in_session<'s>(
+        self,
+        session: &'s mut DecodeSession,
+    ) -> BlobVersionedHashesSessionItems<'a, 's> {
+        BlobVersionedHashesSessionItems {
+            inner: self.hashes(),
+            session,
+        }
+    }
+}
+
+impl<'a> BlobVersionedHashItems<'a> {
+    /// Advances one hash while borrowing the session only for this step.
+    pub fn next_in_session(
+        &mut self,
+        session: &mut DecodeSession,
+    ) -> Option<Result<B256, BlobTransactionDecodeError>> {
+        let item = self.items.next_in_session(session)?;
+        Some(decode_blob_versioned_hash_item(item))
+    }
+}
+
+/// Accounted iterator over borrowed blob versioned hashes.
+pub struct BlobVersionedHashesSessionItems<'a, 's> {
+    inner: BlobVersionedHashItems<'a>,
+    session: &'s mut DecodeSession,
+}
+
+impl Iterator for BlobVersionedHashesSessionItems<'_, '_> {
+    type Item = Result<B256, BlobTransactionDecodeError>;
+
+    fn next(&mut self) -> Option<Self::Item> {
+        self.inner.next_in_session(self.session)
+    }
+}
+
+impl core::iter::FusedIterator for BlobVersionedHashesSessionItems<'_, '_> {}
+
 /// Decodes an EIP-4844 transaction through one cumulative work session.
 pub fn decode_blob_transaction_in_session<'a>(
     input: &'a [u8],

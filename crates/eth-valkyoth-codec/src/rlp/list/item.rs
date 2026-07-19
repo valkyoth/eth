@@ -1,4 +1,4 @@
-use crate::{DecodeError, DecodeLimits, checked_len_add, require_range_in_bounds};
+use crate::{DecodeError, DecodeLimits, DecodeSession, checked_len_add, require_range_in_bounds};
 
 use super::{
     LONG_LIST_OFFSET, RlpItem, RlpList, RlpListForm, RlpScalar, SHORT_LIST_OFFSET,
@@ -69,6 +69,65 @@ impl ParsedItem {
         };
         Ok((item, self.item_end))
     }
+
+    pub(super) fn into_rlp_item_in_session<'a>(
+        self,
+        input: &'a [u8],
+        offset: usize,
+        limits: DecodeLimits,
+        depth_remaining: usize,
+        session: &mut DecodeSession,
+    ) -> Result<(RlpItem<'a>, usize), DecodeError> {
+        let payload = input
+            .get(self.payload_start..self.payload_end)
+            .ok_or(DecodeError::OffsetOutOfBounds)?;
+        let encoded_len = self
+            .item_end
+            .checked_sub(offset)
+            .ok_or(DecodeError::LengthOverflow)?;
+        let item = match self.kind {
+            ParsedItemKind::Scalar(form) => RlpItem::Scalar(RlpScalar {
+                payload,
+                encoded_len,
+                header_len: self.header_len,
+                form,
+            }),
+            ParsedItemKind::List(form) => {
+                if depth_remaining == 0 {
+                    return Err(DecodeError::NestingTooDeep);
+                }
+                RlpItem::List(RlpList {
+                    payload,
+                    encoded_len,
+                    header_len: self.header_len,
+                    item_count: count_immediate_items_in_session(payload, limits, session)?,
+                    form,
+                    limits,
+                    iteration_depth_remaining: depth_remaining.saturating_sub(1),
+                })
+            }
+        };
+        Ok((item, self.item_end))
+    }
+}
+
+fn count_immediate_items_in_session(
+    input: &[u8],
+    limits: DecodeLimits,
+    session: &mut DecodeSession,
+) -> Result<usize, DecodeError> {
+    let mut count = 0usize;
+    let mut cursor = 0usize;
+    while cursor < input.len() {
+        let prefix = *input.get(cursor).ok_or(DecodeError::Malformed)?;
+        let headers = usize::from(prefix > 0x7f);
+        session.account_rlp_reparse(0, headers, 1)?;
+        let item = parse_item(input, cursor, input.len())?;
+        count = checked_len_add(count, 1)?;
+        limits.check_list_count(count)?;
+        cursor = item.item_end;
+    }
+    Ok(count)
 }
 
 #[derive(Clone, Copy)]

@@ -13,7 +13,10 @@ mod session;
 
 pub use error::{AccessListTransactionDecodeError, AccessListTransactionDecodeErrorCategory};
 pub(crate) use session::decode_access_list_in_session;
-pub use session::decode_access_list_transaction_in_session;
+pub use session::{
+    AccessListSessionEntries, AccessListStorageKeysSessionItems,
+    decode_access_list_transaction_in_session,
+};
 
 /// EIP-2930 transaction type byte.
 pub const ACCESS_LIST_TRANSACTION_TYPE: u8 = 0x01;
@@ -136,7 +139,7 @@ impl<'a> AccessList<'a> {
     /// The transaction decoder validates every access-list entry before
     /// returning this borrowed model. Iterating re-parses the same bounded RLP
     /// bytes so callers can use zero-copy access without storing decoded
-    /// entries.
+    /// entries. Use [`Self::entries_in_session`] for untrusted shared work.
     #[must_use]
     pub const fn entries(self) -> AccessListEntries<'a> {
         AccessListEntries {
@@ -188,6 +191,7 @@ impl<'a> AccessListStorageKeys<'a> {
     /// The parent access-list decoder validates every storage key before
     /// returning this borrowed model. Iterating re-parses the same bounded RLP
     /// bytes so callers can use zero-copy access without storing decoded keys.
+    /// Use [`Self::keys_in_session`] for untrusted shared work.
     #[must_use]
     pub const fn keys(self) -> AccessListStorageKeyItems<'a> {
         AccessListStorageKeyItems {

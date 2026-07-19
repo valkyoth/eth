@@ -15,17 +15,17 @@ mod tests;
 
 pub use access_list::{
     ACCESS_LIST_TRANSACTION_FIELD_COUNT, ACCESS_LIST_TRANSACTION_TYPE, AccessList,
-    AccessListEntries, AccessListEntry, AccessListStorageKeyItems, AccessListStorageKeys,
-    AccessListTransactionDecodeError, AccessListTransactionDecodeErrorCategory,
-    AccessListTransactionField, AccessListTransactionTo, InvalidSignatureYParity, SignatureYParity,
-    UnvalidatedAccessListTransaction, decode_access_list_transaction,
-    decode_access_list_transaction_in_session,
+    AccessListEntries, AccessListEntry, AccessListSessionEntries, AccessListStorageKeyItems,
+    AccessListStorageKeys, AccessListStorageKeysSessionItems, AccessListTransactionDecodeError,
+    AccessListTransactionDecodeErrorCategory, AccessListTransactionField, AccessListTransactionTo,
+    InvalidSignatureYParity, SignatureYParity, UnvalidatedAccessListTransaction,
+    decode_access_list_transaction, decode_access_list_transaction_in_session,
 };
 pub use blob::{
     BLOB_TRANSACTION_FIELD_COUNT, BLOB_TRANSACTION_TYPE, BlobTransactionDecodeError,
     BlobTransactionDecodeErrorCategory, BlobTransactionField, BlobVersionedHashItems,
-    BlobVersionedHashes, UnvalidatedBlobTransaction, decode_blob_transaction,
-    decode_blob_transaction_in_session,
+    BlobVersionedHashes, BlobVersionedHashesSessionItems, UnvalidatedBlobTransaction,
+    decode_blob_transaction, decode_blob_transaction_in_session,
 };
 pub use dynamic_fee::{
     DYNAMIC_FEE_TRANSACTION_FIELD_COUNT, DYNAMIC_FEE_TRANSACTION_TYPE,
@@ -58,7 +58,8 @@ pub use set_code::{
     SetCodeAuthorityCode, SetCodeAuthorityStateView, SetCodeAuthorization,
     SetCodeAuthorizationAuthority, SetCodeAuthorizationAuthorityView, SetCodeAuthorizationChainId,
     SetCodeAuthorizationField, SetCodeAuthorizationItems, SetCodeAuthorizationList,
-    SetCodeTransactionDecodeError, SetCodeTransactionDecodeErrorCategory, SetCodeTransactionField,
+    SetCodeAuthorizationSessionItems, SetCodeTransactionDecodeError,
+    SetCodeTransactionDecodeErrorCategory, SetCodeTransactionField,
     SetCodeTransactionValidationContext, SetCodeTransactionValidityError,
     SetCodeTransactionValidityErrorCategory, UnvalidatedSetCodeTransaction,
     ValidSetCodeTransaction, decode_set_code_transaction, decode_set_code_transaction_in_session,

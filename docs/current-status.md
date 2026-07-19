@@ -109,7 +109,9 @@ nested access-list/blob-hash/authorization, and MPT syntax entry points share
 cumulative counters instead of resetting local budgets between stages.
 
 Structural RLP validation charges each encoded byte once. Later zero-copy
-semantic reparses are charged as actual additional work. The ledger covers
+semantic reparses have public session-aware traversal and are charged as actual
+additional work. Nested-list metadata recounts debit each immediate child
+before parsing it. The ledger covers
 bytes, headers, items, nesting, requested allocation capacity, proof nodes,
 hashes, hash bytes, and aggregate work with checked arithmetic. Current
 session-aware transaction and MPT models are borrowed and allocate nothing.

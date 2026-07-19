@@ -1,5 +1,5 @@
 use super::*;
-use eth_valkyoth_codec::{DecodeError, DecodeLimits};
+use eth_valkyoth_codec::{DecodeError, DecodeLimits, DecodeSession, DecodeSessionPolicy};
 use eth_valkyoth_primitives::{Address, Gas, Nonce, Wei};
 use std::vec::Vec;
 
@@ -46,6 +46,38 @@ fn decodes_set_code_transaction_as_unvalidated() {
         }
         assert_eq!(authorizations.next(), None);
     }
+}
+
+#[test]
+fn authorization_session_traversal_charges_exact_tuple_delta() -> Result<(), &'static str> {
+    let to = test_to_address();
+    let auth_address = test_authorization_address();
+    let auth = authorization_tuple(
+        &[],
+        &auth_address,
+        test_authorization_nonce(),
+        valid_authorization_y_parity(),
+    );
+    let tx = set_code_tx(&[1], &to, &[auth.as_slice()], 1);
+    let limits = DecodeLimits::reviewed_policy(1024, 32, 8, 1024, 4, 256);
+    let policy = DecodeSessionPolicy::reviewed_policy(limits, 4096, 1024, 4, 1024, 16_384)
+        .map_err(|_| "policy must be valid")?;
+    let mut session = DecodeSession::new(policy).map_err(|_| "session must initialize")?;
+    let decoded = decode_set_code_transaction_in_session(&tx, &mut session)
+        .map_err(|_| "set-code transaction must decode")?;
+    let before_items = session.items();
+    let before_headers = session.rlp_headers();
+    let before_bytes = session.encoded_bytes();
+    let mut authorizations = decoded.authorization_list.authorizations();
+
+    assert!(matches!(
+        authorizations.next_in_session(&mut session),
+        Some(Ok(_))
+    ));
+    assert_eq!(session.items() - before_items, 13);
+    assert_eq!(session.rlp_headers() - before_headers, 5);
+    assert_eq!(session.encoded_bytes() - before_bytes, 53);
+    Ok(())
 }
 
 #[test]

@@ -76,6 +76,21 @@ fn policy_rejects_inconsistent_cross_limits() {
 }
 
 #[test]
+fn policy_rejects_item_and_proof_ceilings_above_total_work() {
+    let item_limits = DecodeLimits::reviewed_policy(1, 1, 1, 1, 1, 3);
+    assert_eq!(
+        DecodeSessionPolicy::reviewed_policy(item_limits, 1, 1, 1, 1, 2),
+        Err(DecodeError::InvalidSessionPolicy)
+    );
+
+    let proof_limits = DecodeLimits::reviewed_policy(1, 1, 1, 1, 3, 3);
+    assert_eq!(
+        DecodeSessionPolicy::reviewed_policy(proof_limits, 1, 1, 1, 1, 2),
+        Err(DecodeError::InvalidSessionPolicy)
+    );
+}
+
+#[test]
 fn deployment_starter_requires_complete_review() {
     assert_eq!(
         DecodeSessionPolicy::DEPLOYMENT_STARTING_POINT.validate_deployment_policy(),

@@ -101,6 +101,8 @@ impl DecodeSessionPolicy {
     pub const fn validate_relationships(self) -> Result<(), DecodeError> {
         if self.limits.max_list_items > self.limits.max_total_items
             || self.limits.max_proof_nodes > self.limits.max_total_items
+            || self.limits.max_total_items > self.max_total_work
+            || self.limits.max_proof_nodes > self.max_total_work
             || self.limits.max_input_bytes > self.max_encoded_bytes
             || self.max_encoded_bytes > self.max_total_work
             || self.max_rlp_headers > self.max_total_work

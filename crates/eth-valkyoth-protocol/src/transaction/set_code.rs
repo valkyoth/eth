@@ -16,7 +16,7 @@ mod validity;
 pub use error::{
     SetCodeAuthorizationField, SetCodeTransactionDecodeError, SetCodeTransactionDecodeErrorCategory,
 };
-pub use session::decode_set_code_transaction_in_session;
+pub use session::{SetCodeAuthorizationSessionItems, decode_set_code_transaction_in_session};
 pub use validity::*;
 
 /// EIP-7702 set-code transaction type byte.
@@ -124,7 +124,8 @@ impl<'a> SetCodeAuthorizationList<'a> {
     ///
     /// The transaction decoder validates every tuple before returning this
     /// borrowed model. Iterating re-parses the same bounded RLP bytes so callers
-    /// can use zero-copy access without storing decoded authorizations.
+    /// can use zero-copy access without storing decoded authorizations. Use
+    /// [`Self::authorizations_in_session`] for untrusted shared work.
     #[must_use]
     pub const fn authorizations(self) -> SetCodeAuthorizationItems<'a> {
         SetCodeAuthorizationItems {
@@ -360,51 +361,7 @@ fn decode_authorization_item(
         );
     }
 
-    let mut fields = list.items();
-    let chain_id = decode_authorization_chain_id(next_shared_scalar(
-        &mut fields,
-        SetCodeTransactionField::AuthorizationList,
-        |_, source| auth_field_error(SetCodeAuthorizationField::ChainId, source),
-    )?)?;
-    let address = decode_authorization_address(next_shared_scalar(
-        &mut fields,
-        SetCodeTransactionField::AuthorizationList,
-        |_, source| auth_field_error(SetCodeAuthorizationField::Address, source),
-    )?)?;
-    let nonce = Nonce::new(decode_shared_u64_field(
-        &mut fields,
-        SetCodeTransactionField::AuthorizationList,
-        |_, source| auth_field_error(SetCodeAuthorizationField::Nonce, source),
-    )?);
-    let y_parity = SignatureYParity::try_new(decode_shared_u64_field(
-        &mut fields,
-        SetCodeTransactionField::AuthorizationList,
-        |_, source| auth_field_error(SetCodeAuthorizationField::YParity, source),
-    )?)
-    .map_err(
-        |error| SetCodeAuthorizationDecodeError::InvalidAuthorizationYParity {
-            value: error.value(),
-        },
-    )?;
-    let r = decode_shared_u256_field(
-        &mut fields,
-        SetCodeTransactionField::AuthorizationList,
-        |_, source| auth_field_error(SetCodeAuthorizationField::R, source),
-    )?;
-    let s = decode_shared_u256_field(
-        &mut fields,
-        SetCodeTransactionField::AuthorizationList,
-        |_, source| auth_field_error(SetCodeAuthorizationField::S, source),
-    )?;
-
-    Ok(SetCodeAuthorization {
-        chain_id,
-        address,
-        nonce,
-        y_parity,
-        r,
-        s,
-    })
+    session::decode_authorization_fields(&mut list.items())
 }
 
 fn decode_authorization_chain_id(

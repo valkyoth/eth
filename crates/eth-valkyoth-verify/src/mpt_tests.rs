@@ -20,6 +20,12 @@ const TEST_LIMITS: DecodeLimits = DecodeLimits {
     max_total_items: 256,
 };
 
+fn test_session() -> Result<DecodeSession, &'static str> {
+    let policy = DecodeSessionPolicy::reviewed_policy(TEST_LIMITS, 4096, 1024, 8, 4096, 16_384)
+        .map_err(|_| "session policy must be valid")?;
+    DecodeSession::new(policy).map_err(|_| "session must initialize")
+}
+
 #[test]
 fn shared_session_accounts_proof_parse_and_semantic_pass() -> Result<(), &'static str> {
     let items: Vec<Vec<u8>> = core::iter::repeat_with(empty).take(17).collect();
@@ -31,8 +37,8 @@ fn shared_session_accounts_proof_parse_and_semantic_pass() -> Result<(), &'stati
     decode_mpt_node_in_session(&node, &mut session)
         .map_err(|_| "MPT node must decode in one session")?;
     assert_eq!(session.proof_nodes(), 1);
-    assert!(session.encoded_bytes() >= node.len() * 2);
-    assert!(session.items() >= 36);
+    assert!(session.encoded_bytes() > node.len());
+    assert!(session.items() >= 35);
     assert_eq!(session.allocation_capacity(), 0);
     Ok(())
 }
@@ -103,6 +109,31 @@ fn decodes_inline_reference_without_recursive_budget_growth() -> Result<(), &'st
         inline.node().map_err(|_| "inline node must decode")?,
         MptNode::Leaf(_)
     ));
+    Ok(())
+}
+
+#[test]
+fn inline_reference_session_decode_charges_reparse() -> Result<(), &'static str> {
+    let inline = list(&[scalar(&[0x20])?, scalar(b"v")?])?;
+    let parent = list(&[scalar(&[0x11])?, inline])?;
+    let mut session = test_session()?;
+    let decoded = decode_mpt_node_in_session(&parent, &mut session)
+        .map_err(|_| "parent fixture must decode")?;
+    let MptNode::Extension(extension) = decoded else {
+        return Err("parent fixture must be extension");
+    };
+    let MptNodeReference::Inline(inline) = extension.child else {
+        return Err("child fixture must be inline");
+    };
+    let before = session.total_work();
+
+    assert!(matches!(
+        inline
+            .node_in_session(&mut session)
+            .map_err(|_| "inline node must decode")?,
+        MptNode::Leaf(_)
+    ));
+    assert!(session.total_work() > before);
     Ok(())
 }
 

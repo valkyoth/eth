@@ -22,10 +22,16 @@ or complete MPT proof preflight, which is the next planned release.
   items, nesting, requested allocation capacity, proof nodes, hashes, hash
   bytes, and total work.
 - Added session-aware scalar/list RLP entry points and per-step nested cursors.
+- Nested-list compatibility recounts now charge each immediate child item and
+  header before parsing it, including rejection at exact component ceilings.
 - Added session-aware envelope and transaction decoders for legacy, EIP-2930,
   EIP-1559, EIP-4844, and EIP-7702, including access lists, storage keys, blob
   hashes, and authorization tuples.
 - Added session-aware MPT node and proof-node syntax decoders.
+- Added charged borrowed-model traversal for access-list entries and storage
+  keys, blob hashes, EIP-7702 authorizations, and inline MPT nodes.
+- EIP-7702 authorization decoding consumes the already charged tuple fields
+  instead of repeating an unaccounted compatibility parse.
 - Extended the decode-budget fuzz target across every session work domain.
 - Clarified the facade README: the project is implementing the complete
   Ethereum stack in audited stages, while incomplete products remain explicit.
@@ -36,6 +42,8 @@ or complete MPT proof preflight, which is the next planned release.
 - Structural RLP validation visits each encoded byte once; actual zero-copy
   semantic reparses are charged separately.
 - Composite RLP and hash charges are atomic and use checked arithmetic.
+- Reviewed policies reject total-item and proof-node ceilings above aggregate
+  work, in addition to the existing component relationship checks.
 - Borrowed transaction and MPT decode paths perform no allocations, so they do
   not create misleading allocation charges. Future owned conversions must
   debit requested capacity before allocation.
@@ -54,8 +62,10 @@ or complete MPT proof preflight, which is the next planned release.
 
 ## Verification
 
-- Focused counter conservation, no-reset, cross-limit, and atomicity tests.
+- Focused counter conservation, exact nested-recount, no-reset, cross-limit,
+  and atomicity tests.
 - Composite access-list transaction and MPT semantic-pass accounting tests.
+- Exact EIP-7702 tuple-delta and charged inline-MPT reparse tests.
 - `cargo test -p eth-valkyoth-codec -p eth-valkyoth-protocol -p eth-valkyoth-verify --all-features`
 - `cargo clippy -p eth-valkyoth-codec -p eth-valkyoth-protocol -p eth-valkyoth-verify --all-targets --all-features -- -D warnings`
 - `cargo check --manifest-path fuzz/Cargo.toml --all-targets`

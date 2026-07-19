@@ -5,6 +5,46 @@ use crate::transaction::access_list::decode_access_list_in_session;
 use crate::transaction::envelope::decode_transaction_envelope_in_session;
 use crate::transaction::fields::fixed_fields_in_session;
 
+impl<'a> SetCodeAuthorizationList<'a> {
+    /// Iterates authorizations while charging every borrowed-model reparse.
+    pub fn authorizations_in_session<'s>(
+        self,
+        session: &'s mut DecodeSession,
+    ) -> SetCodeAuthorizationSessionItems<'a, 's> {
+        SetCodeAuthorizationSessionItems {
+            inner: self.authorizations(),
+            session,
+        }
+    }
+}
+
+impl<'a> SetCodeAuthorizationItems<'a> {
+    /// Advances one authorization while borrowing the session for this step.
+    pub fn next_in_session(
+        &mut self,
+        session: &mut DecodeSession,
+    ) -> Option<Result<SetCodeAuthorization, SetCodeTransactionDecodeError>> {
+        let item = self.items.next_in_session(session)?;
+        Some(decode_authorization(item, session).map_err(map_authorization_error))
+    }
+}
+
+/// Accounted iterator over borrowed EIP-7702 authorization tuples.
+pub struct SetCodeAuthorizationSessionItems<'a, 's> {
+    inner: SetCodeAuthorizationItems<'a>,
+    session: &'s mut DecodeSession,
+}
+
+impl Iterator for SetCodeAuthorizationSessionItems<'_, '_> {
+    type Item = Result<SetCodeAuthorization, SetCodeTransactionDecodeError>;
+
+    fn next(&mut self) -> Option<Self::Item> {
+        self.inner.next_in_session(self.session)
+    }
+}
+
+impl core::iter::FusedIterator for SetCodeAuthorizationSessionItems<'_, '_> {}
+
 /// Decodes an EIP-7702 transaction through one cumulative work session.
 pub fn decode_set_code_transaction_in_session<'a>(
     input: &'a [u8],
@@ -162,7 +202,58 @@ fn decode_authorization(
             },
         );
     }
-    let _ = fixed_fields_in_session::<SET_CODE_AUTHORIZATION_FIELD_COUNT>(list, session)
+    let decoded = fixed_fields_in_session::<SET_CODE_AUTHORIZATION_FIELD_COUNT>(list, session)
         .map_err(SetCodeAuthorizationDecodeError::TupleDecode)?;
-    decode_authorization_item(Ok(RlpItem::List(list)))
+    let mut fields = decoded
+        .into_iter()
+        .map(|item| item.ok_or(DecodeError::Malformed));
+    decode_authorization_fields(&mut fields)
+}
+
+pub(super) fn decode_authorization_fields<'a>(
+    fields: &mut impl Iterator<Item = Result<RlpItem<'a>, DecodeError>>,
+) -> Result<SetCodeAuthorization, SetCodeAuthorizationDecodeError> {
+    let chain_id = decode_authorization_chain_id(next_shared_scalar(
+        fields,
+        SetCodeTransactionField::AuthorizationList,
+        |_, source| auth_field_error(SetCodeAuthorizationField::ChainId, source),
+    )?)?;
+    let address = decode_authorization_address(next_shared_scalar(
+        fields,
+        SetCodeTransactionField::AuthorizationList,
+        |_, source| auth_field_error(SetCodeAuthorizationField::Address, source),
+    )?)?;
+    let nonce = Nonce::new(decode_shared_u64_field(
+        fields,
+        SetCodeTransactionField::AuthorizationList,
+        |_, source| auth_field_error(SetCodeAuthorizationField::Nonce, source),
+    )?);
+    let y_parity = SignatureYParity::try_new(decode_shared_u64_field(
+        fields,
+        SetCodeTransactionField::AuthorizationList,
+        |_, source| auth_field_error(SetCodeAuthorizationField::YParity, source),
+    )?)
+    .map_err(
+        |error| SetCodeAuthorizationDecodeError::InvalidAuthorizationYParity {
+            value: error.value(),
+        },
+    )?;
+    let r = decode_shared_u256_field(
+        fields,
+        SetCodeTransactionField::AuthorizationList,
+        |_, source| auth_field_error(SetCodeAuthorizationField::R, source),
+    )?;
+    let s = decode_shared_u256_field(
+        fields,
+        SetCodeTransactionField::AuthorizationList,
+        |_, source| auth_field_error(SetCodeAuthorizationField::S, source),
+    )?;
+    Ok(SetCodeAuthorization {
+        chain_id,
+        address,
+        nonce,
+        y_parity,
+        r,
+        s,
+    })
 }

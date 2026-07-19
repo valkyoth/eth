@@ -2709,8 +2709,10 @@ Deliverables:
   owned conversion;
 - cumulative counters for encoded bytes scanned, RLP headers visited, items,
   nesting, allocation capacity, hashes, hash bytes, and total work;
-- single-pass structural visitation or a bounded structural index that removes
-  overlapping nested-list rescans;
+- single-pass structural visitation plus pre-charged exact nested-list recounts
+  for compatibility metadata;
+- charged borrowed-model traversal for access lists, storage keys, blob hashes,
+  authorization tuples, and inline MPT nodes;
 - named reviewed policies with checked cross-limit relationships and actual
   allocation-capacity debits before allocation.
 

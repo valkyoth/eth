@@ -13,7 +13,7 @@ mod error;
 mod session;
 
 pub use error::{BlobTransactionDecodeError, BlobTransactionDecodeErrorCategory};
-pub use session::decode_blob_transaction_in_session;
+pub use session::{BlobVersionedHashesSessionItems, decode_blob_transaction_in_session};
 
 /// EIP-4844 blob transaction type byte.
 pub const BLOB_TRANSACTION_TYPE: u8 = 0x03;
@@ -92,7 +92,8 @@ impl<'a> BlobVersionedHashes<'a> {
     ///
     /// The transaction decoder validates every hash length before returning
     /// this borrowed model. Iterating re-parses the same bounded RLP bytes so
-    /// callers can use zero-copy access without storing decoded hashes.
+    /// callers can use zero-copy access without storing decoded hashes. Use
+    /// [`Self::hashes_in_session`] for untrusted shared work.
     #[must_use]
     pub const fn hashes(self) -> BlobVersionedHashItems<'a> {
         BlobVersionedHashItems {

@@ -5,7 +5,9 @@ use eth_valkyoth_codec::{
 use eth_valkyoth_primitives::B256;
 
 mod error;
+mod session;
 pub use error::{MptNodeDecodeError, MptNodeDecodeErrorCategory, MptNodeField};
+pub use session::{decode_mpt_node_in_session, decode_mpt_proof_nodes_in_session};
 
 /// Number of child references in an MPT branch node.
 pub const MPT_BRANCH_CHILD_COUNT: usize = 16;
@@ -164,8 +166,19 @@ pub struct MptInlineNode<'a> {
 
 impl<'a> MptInlineNode<'a> {
     /// Decodes the inline node list into its syntactic node representation.
+    ///
+    /// Use [`Self::node_in_session`] when this reparse belongs to an untrusted
+    /// operation governed by a shared decode session.
     pub fn node(self) -> Result<MptNode<'a>, MptNodeDecodeError> {
         decode_mpt_node_from_list(self.list, self.depth_remaining)
+    }
+
+    /// Decodes the inline node while charging its semantic reparse.
+    pub fn node_in_session(
+        self,
+        session: &mut DecodeSession,
+    ) -> Result<MptNode<'a>, MptNodeDecodeError> {
+        session::decode_mpt_node_from_list_in_session(self.list, self.depth_remaining, session)
     }
 }
 
@@ -213,50 +226,6 @@ pub fn decode_mpt_proof_nodes<'a>(
     let mut accumulator = limits.accumulator();
     for node in encoded_nodes {
         let _ = decode_mpt_node_with_accumulator(node, &mut accumulator)?;
-    }
-    Ok(MptProofNodes { encoded_nodes })
-}
-
-/// Decodes one canonical MPT node through a shared work session.
-pub fn decode_mpt_node_in_session<'a>(
-    input: &'a [u8],
-    session: &mut DecodeSession,
-) -> Result<MptNode<'a>, MptNodeDecodeError> {
-    session
-        .account_proof_nodes(1)
-        .map_err(|source| field_error(MptNodeField::ProofNode, source))?;
-    let items_before = session.items();
-    let headers_before = session.rlp_headers();
-    let list = decode_rlp_list_partial_in_session(input, session)
-        .map_err(|source| field_error(MptNodeField::Node, source))?;
-    require_exact_consumption(list.encoded_len(), input.len())
-        .map_err(|source| field_error(MptNodeField::Node, source))?;
-
-    // The borrowed semantic model performs a second bounded traversal. Debit
-    // that pass before it starts, using the exact structural visit counts from
-    // the first traversal and the full encoded span as a conservative byte
-    // ceiling.
-    let semantic_items = session
-        .items()
-        .checked_sub(items_before)
-        .ok_or(field_error(MptNodeField::Node, DecodeError::LengthOverflow))?;
-    let semantic_headers = session
-        .rlp_headers()
-        .checked_sub(headers_before)
-        .ok_or(field_error(MptNodeField::Node, DecodeError::LengthOverflow))?;
-    session
-        .account_rlp_reparse(input.len(), semantic_headers, semantic_items)
-        .map_err(|source| field_error(MptNodeField::Node, source))?;
-    decode_mpt_node_from_list(list, MPT_INLINE_REFERENCE_DEPTH_LIMIT)
-}
-
-/// Validates proof-node syntax through one cumulative work session.
-pub fn decode_mpt_proof_nodes_in_session<'a>(
-    encoded_nodes: &'a [&'a [u8]],
-    session: &mut DecodeSession,
-) -> Result<MptProofNodes<'a>, MptNodeDecodeError> {
-    for node in encoded_nodes {
-        let _ = decode_mpt_node_in_session(node, session)?;
     }
     Ok(MptProofNodes { encoded_nodes })
 }
