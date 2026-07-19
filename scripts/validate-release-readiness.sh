@@ -13,9 +13,22 @@ esac
 version="${tag#v}"
 release_notes="release-notes/RELEASE_NOTES_${version}.md"
 pentest_report="security/pentest/${tag}.md"
+publish_tag="${ETH_RELEASE_PUBLISH_TAG:-}"
 
 if git rev-parse -q --verify "refs/tags/${tag}" >/dev/null; then
-    echo "tag already exists locally: ${tag}" >&2
+    if [ "$publish_tag" != "$tag" ]; then
+        echo "tag already exists locally: ${tag}" >&2
+        exit 1
+    fi
+
+    tag_commit="$(git rev-list -n 1 "$tag")"
+    head_commit="$(git rev-parse HEAD)"
+    if [ "$tag_commit" != "$head_commit" ]; then
+        echo "publish tag ${tag} does not point at HEAD" >&2
+        exit 1
+    fi
+elif [ -n "$publish_tag" ]; then
+    echo "publish tag context requires existing tag: ${tag}" >&2
     exit 1
 fi
 

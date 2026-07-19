@@ -100,7 +100,7 @@ A version is not tag-ready until:
   pass on implementation and retest commits;
 - `scripts/validate-release-readiness.sh vX.Y.Z` requires the matching
   `security/pentest/vX.Y.Z.md` report to have `Status: PASS` and is run by the
-  local release gate before tagging or publishing;
+  local release gate before tagging and again by the publisher after tagging;
 - `sbom/eth.spdx.json` exists, is non-empty, and passes semantic drift
   comparison against a freshly generated document;
 - the tag does not already exist locally;
@@ -108,7 +108,9 @@ A version is not tag-ready until:
   created;
 - GitHub's release workflow is metadata-only and manually dispatched. Do not
   rely on a tag-push workflow for readiness: after a tag is pushed, the
-  readiness script intentionally fails closed because the tag already exists.
+  readiness script still fails closed when invoked directly because the tag
+  already exists. `release_crates.py` supplies a guarded post-tag context only
+  after verifying that the expected tag resolves exactly to `HEAD`.
 
 `scripts/check_latest_tools.sh` is a mandatory networked release check. Every
 version-specific release gate must run it before tagging so stale stable Rust,
@@ -153,6 +155,9 @@ Use this loop for every version:
 12. `scripts/validate-release-readiness.sh vX.Y.Z` passes locally through the
     versioned release gate before the tag is created.
 13. Tagging and pushing tags happen only when explicitly requested.
+14. Publishing reruns the versioned gate through `release_crates.py`; its
+    post-tag readiness mode requires the expected release tag to resolve
+    exactly to `HEAD`.
 
 Root `PENTEST.md` is temporary scratch input. It must not be committed.
 The permanent report is part of the release tag. Because committing the report

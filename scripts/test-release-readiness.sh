@@ -1,6 +1,9 @@
 #!/usr/bin/env sh
 set -eu
 
+# The fixture scenarios control post-tag mode explicitly.
+unset ETH_RELEASE_PUBLISH_TAG
+
 tmp="$(mktemp -d)"
 trap 'rm -rf "$tmp"' EXIT
 mkdir -p "$tmp/bin"
@@ -183,4 +186,40 @@ repo="$(make_fixture ready)"
     git commit -q -m "report"
 
     scripts/validate-release-readiness.sh "v0.2.0"
+)
+
+repo="$(make_fixture post-tag-ready)"
+(
+    cd "$repo"
+    reviewed_commit="$(git rev-parse HEAD)"
+    write_release_notes "0.2.0"
+    write_sbom
+    write_pentest "v0.2.0" "$reviewed_commit"
+    git add "security/pentest/v0.2.0.md"
+    git commit -q -m "report"
+    git tag "v0.2.0"
+
+    ETH_RELEASE_PUBLISH_TAG="v0.2.0" \
+        scripts/validate-release-readiness.sh "v0.2.0"
+)
+
+repo="$(make_fixture missing-publish-tag)"
+(
+    cd "$repo"
+    assert_fails_with "publish tag context requires existing tag: v0.2.0" \
+        env ETH_RELEASE_PUBLISH_TAG="v0.2.0" \
+        scripts/validate-release-readiness.sh "v0.2.0"
+)
+
+repo="$(make_fixture stale-publish-tag)"
+(
+    cd "$repo"
+    git tag "v0.2.0"
+    printf 'later\n' >later.txt
+    git add later.txt
+    git commit -q -m "later"
+
+    assert_fails_with "publish tag v0.2.0 does not point at HEAD" \
+        env ETH_RELEASE_PUBLISH_TAG="v0.2.0" \
+        scripts/validate-release-readiness.sh "v0.2.0"
 )

@@ -6,6 +6,7 @@ from __future__ import annotations
 import copy
 import importlib.util
 from pathlib import Path
+from types import SimpleNamespace
 
 
 ROOT = Path(__file__).resolve().parents[1]
@@ -219,6 +220,48 @@ def test_publish_plan_skips_unchanged_crates() -> None:
     assert release_crates.publish_plan(plan) == ("eth-valkyoth-codec",)
 
 
+def test_post_tag_preflight_passes_guarded_publish_context() -> None:
+    calls = []
+    original_run = release_crates.run
+    release_crates.run = lambda command, **kwargs: calls.append((command, kwargs))
+    try:
+        args = SimpleNamespace(
+            version="0.52.3",
+            skip_checks=False,
+            dry_run=False,
+        )
+        release_crates.run_preflight(args, release_tag_at_head=True)
+    finally:
+        release_crates.run = original_run
+
+    assert calls[0] == (
+        ["scripts/release_0_52_3_gate.sh"],
+        {
+            "dry_run": False,
+            "extra_env": {"ETH_RELEASE_PUBLISH_TAG": "v0.52.3"},
+        },
+    )
+    assert calls[1][1] == {"dry_run": False}
+    assert calls[2][1] == {"dry_run": False}
+
+
+def test_pre_tag_preflight_does_not_set_publish_context() -> None:
+    calls = []
+    original_run = release_crates.run
+    release_crates.run = lambda command, **kwargs: calls.append((command, kwargs))
+    try:
+        args = SimpleNamespace(
+            version="0.52.3",
+            skip_checks=False,
+            dry_run=False,
+        )
+        release_crates.run_preflight(args, release_tag_at_head=False)
+    finally:
+        release_crates.run = original_run
+
+    assert calls[0][1] == {"dry_run": False, "extra_env": None}
+
+
 def run_tests() -> None:
     tests = (
         test_current_plan_accepts_unchanged_crates,
@@ -232,6 +275,8 @@ def run_tests() -> None:
         test_metadata_changes_use_milestone_version,
         test_metadata_changes_must_be_published,
         test_publish_plan_skips_unchanged_crates,
+        test_post_tag_preflight_passes_guarded_publish_context,
+        test_pre_tag_preflight_does_not_set_publish_context,
     )
     for test in tests:
         test()

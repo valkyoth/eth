@@ -5,6 +5,7 @@ from __future__ import annotations
 
 import argparse
 import json
+import os
 import subprocess
 import sys
 import time
@@ -39,11 +40,20 @@ PUBLISH_ORDER = (
 )
 
 
-def run(command: list[str], *, dry_run: bool) -> None:
+def run(
+    command: list[str],
+    *,
+    dry_run: bool,
+    extra_env: dict[str, str] | None = None,
+) -> None:
     print(f"+ {' '.join(command)}", flush=True)
     if dry_run:
         return
-    subprocess.run(command, cwd=ROOT, check=True)
+    environment = None
+    if extra_env is not None:
+        environment = os.environ.copy()
+        environment.update(extra_env)
+    subprocess.run(command, cwd=ROOT, check=True, env=environment)
 
 
 def capture(command: list[str]) -> str:
@@ -234,7 +244,7 @@ def verify_publish_order(packages: dict[str, dict], plan: dict) -> None:
         seen.add(package_name)
 
 
-def check_release_tag(version: str, *, require_tag: bool) -> None:
+def check_release_tag(version: str, *, require_tag: bool) -> bool:
     tag = f"v{version}"
     head = try_capture(["git", "rev-parse", "HEAD"])
     tagged_commit = try_capture(["git", "rev-list", "-n", "1", tag])
@@ -244,7 +254,7 @@ def check_release_tag(version: str, *, require_tag: bool) -> None:
             print(f"Refusing to publish: {message}.", file=sys.stderr)
             sys.exit(1)
         print(f"Warning: {message}.", file=sys.stderr)
-        return
+        return False
 
     if head != tagged_commit:
         message = f"HEAD is not tagged as {tag} (HEAD {head}, {tag} {tagged_commit})"
@@ -252,9 +262,10 @@ def check_release_tag(version: str, *, require_tag: bool) -> None:
             print(f"Refusing to publish: {message}.", file=sys.stderr)
             sys.exit(1)
         print(f"Warning: {message}.", file=sys.stderr)
-        return
+        return False
 
     print(f"Release tag {tag} points at HEAD.")
+    return True
 
 
 def confirm_no_verify(args: argparse.Namespace) -> int:
@@ -274,15 +285,22 @@ def confirm_no_verify(args: argparse.Namespace) -> int:
     return 0
 
 
-def run_preflight(args: argparse.Namespace) -> None:
+def run_preflight(args: argparse.Namespace, *, release_tag_at_head: bool) -> None:
     if args.skip_checks:
         print("Skipping preflight checks by request.")
         return
 
     version = parse_version(args.version)
     gate = ROOT / "scripts" / f"release_{version[0]}_{version[1]}_{version[2]}_gate.sh"
+    gate_env = None
+    if release_tag_at_head:
+        gate_env = {"ETH_RELEASE_PUBLISH_TAG": f"v{args.version}"}
     if gate.exists():
-        run([str(gate.relative_to(ROOT))], dry_run=args.dry_run)
+        run(
+            [str(gate.relative_to(ROOT))],
+            dry_run=args.dry_run,
+            extra_env=gate_env,
+        )
     else:
         run(["scripts/checks.sh"], dry_run=args.dry_run)
     run(["cargo", "deny", "check"], dry_run=args.dry_run)
@@ -411,7 +429,9 @@ def main() -> int:
         return 0
 
     require_clean_tree(allow_dirty=args.allow_dirty or args.dry_run)
-    check_release_tag(args.version, require_tag=args.require_tag)
+    release_tag_at_head = check_release_tag(
+        args.version, require_tag=args.require_tag
+    )
 
     planned_publish = publish_plan(plan)
     start_at = args.start_at or (planned_publish[0] if planned_publish else "")
@@ -439,7 +459,7 @@ def main() -> int:
     if no_verify_result != 0:
         return no_verify_result
 
-    run_preflight(args)
+    run_preflight(args, release_tag_at_head=release_tag_at_head)
 
     for index, package in enumerate(steps):
         publish(package, args)
