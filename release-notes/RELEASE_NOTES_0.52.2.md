@@ -27,9 +27,10 @@ work builds on the bytecode scanner.
   with a direct compatible support-crate dependency.
 - Bumped the `eth` facade from `0.52.1` to `0.52.2` and updated its optional
   `evm-core` dependency.
-- Expressed the public all-zero EVM word through `u8::MIN` so CodeQL does not
-  misclassify this protocol value as embedded cryptographic material; the
-  value and public API are unchanged.
+- Expressed the public all-zero EVM word through `u8::MIN` while investigating
+  a CodeQL report; CodeQL correctly followed the equivalent constant value,
+  and alert `#40` was dismissed with an audited false-positive justification.
+  The value and public API are unchanged.
 
 ## Security Notes
 
@@ -46,6 +47,9 @@ work builds on the bytecode scanner.
   matches or references.
 - A direct invariant test confirms `EvmWord::ZERO` remains the canonical zero
   word after the semantics-neutral CodeQL remediation.
+- The dismissed alert traced that public zero to the `CREATE` plan's documented
+  not-applicable salt placeholder. `CREATE` has no salt; `CREATE2` reads its
+  runtime salt from the EVM stack. The CodeQL query remains enabled globally.
 
 ## Verification
 
