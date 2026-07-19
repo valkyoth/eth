@@ -2753,6 +2753,8 @@ Deliverables:
   and local syntax, followed by a conservative dry traversal that atomically
   checks every remaining parser, hash, nibble, value, and aggregate-work
   ceiling;
+- charge the dry traversal itself to the caller's operation-wide session while
+  keeping the future verification plan opaque and noncommitting;
 - charge and reject before each Keccak invocation;
 - reject zero-nibble extension paths and every locally detectable redundant
   extension or degenerate branch form required by canonical trie construction;

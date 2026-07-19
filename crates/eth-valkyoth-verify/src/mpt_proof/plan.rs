@@ -1,7 +1,7 @@
 use eth_valkyoth_codec::{DecodeSession, DecodeSessionCharges};
 
 use crate::mpt::{
-    MPT_MAX_INLINE_REFERENCE_BYTES, MptNode, MptNodeDecodeError, MptNodeReference,
+    MPT_MAX_INLINE_REFERENCE_BYTES, MptInlineNode, MptNode, MptNodeDecodeError, MptNodeReference,
     decode_mpt_node_body_in_session,
 };
 
@@ -15,15 +15,22 @@ pub(super) fn plan_remaining_work(
     key: &[u8],
     expected_value: &[u8],
     proof_nodes: &[&[u8]],
-    session: &DecodeSession,
+    session: &mut DecodeSession,
 ) -> Result<DecodeSessionCharges, MptProofVerificationError> {
-    let mut planned = DecodeSession::new(session.policy()).map_err(proof_resource_error)?;
+    let mut future = DecodeSession::new(session.policy()).map_err(proof_resource_error)?;
     let mut cursor = PlanningCursor::new(proof_nodes);
-    let Some(first) = cursor.next_node(false, false, &mut planned)? else {
-        return Ok(planned.charges());
+    let Some(first) = cursor.next_node(false, false, session, &mut future)? else {
+        return Ok(future.charges());
     };
-    plan_walk(first, key, expected_value, &mut cursor, &mut planned)?;
-    Ok(planned.charges())
+    plan_walk(
+        first,
+        key,
+        expected_value,
+        &mut cursor,
+        session,
+        &mut future,
+    )?;
+    Ok(future.charges())
 }
 
 fn plan_walk<'a>(
@@ -32,6 +39,7 @@ fn plan_walk<'a>(
     expected_value: &[u8],
     cursor: &mut PlanningCursor<'a>,
     session: &mut DecodeSession,
+    future: &mut DecodeSession,
 ) -> Result<(), MptProofVerificationError> {
     let mut key_offset = 0usize;
     let mut depth = 0usize;
@@ -47,7 +55,7 @@ fn plan_walk<'a>(
         let reference = match node {
             MptNode::Branch(branch) => {
                 if key_offset == key_nibble_len(key) {
-                    plan_value_comparison(branch.value(), expected_value, session)?;
+                    plan_value_comparison(branch.value(), expected_value, session, future)?;
                     return Ok(());
                 }
                 let child_index = key_nibble(key, key_offset)?;
@@ -61,7 +69,8 @@ fn plan_walk<'a>(
                 }
             }
             MptNode::Extension(extension) => {
-                let Some(consumed) = plan_compact_path(extension.path, key, key_offset, session)?
+                let Some(consumed) =
+                    plan_compact_path(extension.path, key, key_offset, session, future)?
                 else {
                     return Ok(());
                 };
@@ -69,11 +78,13 @@ fn plan_walk<'a>(
                 extension.child
             }
             MptNode::Leaf(leaf) => {
-                let Some(consumed) = plan_compact_path(leaf.path, key, key_offset, session)? else {
+                let Some(consumed) =
+                    plan_compact_path(leaf.path, key, key_offset, session, future)?
+                else {
                     return Ok(());
                 };
                 if key_offset.saturating_add(consumed) == key_nibble_len(key) {
-                    plan_value_comparison(leaf.value, expected_value, session)?;
+                    plan_value_comparison(leaf.value, expected_value, session, future)?;
                 }
                 return Ok(());
             }
@@ -83,14 +94,12 @@ fn plan_walk<'a>(
             MptNodeReference::Empty => return Ok(()),
             MptNodeReference::Hash(_) => {
                 let require_branch = matches!(node, MptNode::Extension(_));
-                let Some(next) = cursor.next_node(true, require_branch, session)? else {
+                let Some(next) = cursor.next_node(true, require_branch, session, future)? else {
                     return Ok(());
                 };
                 next
             }
-            MptNodeReference::Inline(inline) => inline
-                .node_in_session(session)
-                .map_err(MptProofVerificationError::MalformedNode)?,
+            MptNodeReference::Inline(inline) => plan_inline_node(inline, session, future)?,
         };
     }
 }
@@ -100,6 +109,7 @@ fn plan_compact_path(
     key: &[u8],
     key_offset: usize,
     session: &mut DecodeSession,
+    future: &mut DecodeSession,
 ) -> Result<Option<usize>, MptProofVerificationError> {
     if !path.is_leaf() && key_offset == key_nibble_len(key) {
         return Ok(None);
@@ -108,6 +118,9 @@ fn plan_compact_path(
         .nibble_count()
         .map_err(MptProofVerificationError::MalformedNode)?;
     session
+        .account_nibbles(count)
+        .map_err(proof_resource_error)?;
+    future
         .account_nibbles(count)
         .map_err(proof_resource_error)?;
     if key_offset.saturating_add(count) > key_nibble_len(key) {
@@ -128,6 +141,7 @@ fn plan_value_comparison(
     found: &[u8],
     expected: &[u8],
     session: &mut DecodeSession,
+    future: &mut DecodeSession,
 ) -> Result<(), MptProofVerificationError> {
     let compared = found
         .len()
@@ -135,7 +149,32 @@ fn plan_value_comparison(
         .ok_or_else(|| proof_resource_error(eth_valkyoth_codec::DecodeError::ValueBytesExceeded))?;
     session
         .account_value_bytes(compared)
+        .map_err(proof_resource_error)?;
+    future
+        .account_value_bytes(compared)
         .map_err(proof_resource_error)
+}
+
+fn plan_inline_node<'a>(
+    inline: MptInlineNode<'a>,
+    session: &mut DecodeSession,
+    future: &mut DecodeSession,
+) -> Result<MptNode<'a>, MptProofVerificationError> {
+    let mut decoded = None;
+    let replay = session
+        .measure_replay_charges(|session| {
+            decoded = Some(inline.node_in_session(session));
+        })
+        .map_err(proof_resource_error)?;
+    future
+        .account_charges(replay)
+        .map_err(proof_resource_error)?;
+    match decoded {
+        Some(result) => result.map_err(MptProofVerificationError::MalformedNode),
+        None => Err(proof_resource_error(
+            eth_valkyoth_codec::DecodeError::Malformed,
+        )),
+    }
 }
 
 struct PlanningCursor<'a> {
@@ -153,6 +192,7 @@ impl<'a> PlanningCursor<'a> {
         is_child: bool,
         require_branch: bool,
         session: &mut DecodeSession,
+        future: &mut DecodeSession,
     ) -> Result<Option<MptNode<'a>>, MptProofVerificationError> {
         let Some(encoded) = self.nodes.get(self.index).copied() else {
             return Ok(None);
@@ -164,14 +204,29 @@ impl<'a> PlanningCursor<'a> {
                 },
             ));
         }
-        let node = decode_mpt_node_body_in_session(encoded, session)
-            .map_err(MptProofVerificationError::MalformedNode)?;
+        let mut decoded = None;
+        let replay = session
+            .measure_replay_charges(|session| {
+                decoded = Some(decode_mpt_node_body_in_session(encoded, session));
+            })
+            .map_err(proof_resource_error)?;
+        future
+            .account_charges(replay)
+            .map_err(proof_resource_error)?;
+        let node = match decoded {
+            Some(result) => result.map_err(MptProofVerificationError::MalformedNode)?,
+            None => {
+                return Err(proof_resource_error(
+                    eth_valkyoth_codec::DecodeError::Malformed,
+                ));
+            }
+        };
         if require_branch && !matches!(node, MptNode::Branch(_)) {
             return Err(MptProofVerificationError::MalformedNode(
                 MptNodeDecodeError::NonCanonicalExtensionChild,
             ));
         }
-        session
+        future
             .account_hashes(1, encoded.len())
             .map_err(proof_resource_error)?;
         self.index = self.index.saturating_add(1);

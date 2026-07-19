@@ -297,8 +297,8 @@ fn shared_session_accounts_complete_leaf_proof_work() -> Result<(), &'static str
     assert_eq!(session.proof_nodes(), 1);
     assert_eq!(session.hashes(), 1);
     assert_eq!(session.hash_bytes(), root_node.len());
-    assert_eq!(session.nibbles(), 6);
-    assert_eq!(session.value_bytes(), value.len().saturating_mul(5));
+    assert_eq!(session.nibbles(), 10);
+    assert_eq!(session.value_bytes(), value.len().saturating_mul(8));
     Ok(())
 }
 

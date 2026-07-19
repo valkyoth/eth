@@ -171,7 +171,7 @@ pub(crate) fn check_preflighted_key_inclusion_capacity(
     key: &[u8],
     value: &[u8],
     proof_nodes: &[&[u8]],
-    session: &DecodeSession,
+    session: &mut DecodeSession,
 ) -> Result<(), MptProofVerificationError> {
     let planned = plan_remaining_work(key, value, proof_nodes, session)?;
     session

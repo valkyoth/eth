@@ -84,6 +84,33 @@ fn complete_capacity_check_is_noncommitting() -> Result<(), DecodeError> {
 }
 
 #[test]
+fn replay_charges_exclude_already_paid_nesting_work() -> Result<(), DecodeError> {
+    let mut source = DecodeSession::new(policy())?;
+    source.check_nesting_depth(2)?;
+    let mut measured = Ok(());
+    let replay = source.measure_replay_charges(|session| {
+        measured = (|| {
+            session.check_nesting_depth(3)?;
+            session.account_rlp_reparse(7, 2, 3)?;
+            session.account_nibbles(4)
+        })();
+    })?;
+    measured?;
+    assert_eq!(source.max_nesting_depth(), 3);
+    assert_eq!(source.total_work(), 19);
+    let mut future = DecodeSession::new(policy())?;
+    future.account_charges(replay)?;
+
+    assert_eq!(future.encoded_bytes(), 7);
+    assert_eq!(future.rlp_headers(), 2);
+    assert_eq!(future.items(), 3);
+    assert_eq!(future.max_nesting_depth(), 0);
+    assert_eq!(future.nibbles(), 4);
+    assert_eq!(future.total_work(), 16);
+    Ok(())
+}
+
+#[test]
 fn failed_complete_capacity_check_is_noncommitting() -> Result<(), DecodeError> {
     let mut planned = DecodeSession::new(policy())?;
     planned.account_encoded_bytes(32)?;
@@ -93,6 +120,11 @@ fn failed_complete_capacity_check_is_noncommitting() -> Result<(), DecodeError> 
 
     assert_eq!(
         session.check_remaining_capacity(planned.charges()),
+        Err(DecodeError::EncodedBytesExceeded)
+    );
+    assert_eq!(session.charges(), before);
+    assert_eq!(
+        session.account_charges(planned.charges()),
         Err(DecodeError::EncodedBytesExceeded)
     );
     assert_eq!(session.charges(), before);

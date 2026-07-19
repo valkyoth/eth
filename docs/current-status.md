@@ -105,7 +105,8 @@ Legend:
 `v0.52.4` extends the non-copyable `DecodeSession` with compact-path nibble and
 trie-value byte ceilings. Inclusion verification preflights every supplied node
 and performs a conservative dry traversal to check all remaining parser, hash,
-nibble, value, and aggregate work before the first proof-node hash. Each actual
+nibble, value, and aggregate work before the first proof-node hash. All
+planning work is debited from the caller's shared session, and each actual
 Keccak invocation is still charged immediately before calling the backend.
 
 MPT decoding now rejects locally detectable noncanonical construction: empty

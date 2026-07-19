@@ -19,6 +19,7 @@ The session tracks:
 - requested allocation capacity;
 - admitted proof nodes;
 - hash operations and hashed bytes;
+- compact-path nibbles and trie-value bytes;
 - aggregate work units across all of those domains.
 
 Counter updates use checked arithmetic and fail closed. Composite hash and RLP
@@ -49,6 +50,12 @@ blob hashes, and authorization tuples. Session-aware MPT entry points cover
 single nodes and proof-node syntax. The older `DecodeLimits` entry points stay
 available for source compatibility; callers composing multiple untrusted
 stages should use the `_in_session` APIs.
+
+MPT proof verification charges syntax preflight, conservative planning, and
+the final verification walk to the caller's session. Planning uses an opaque
+replay-charge description to check that the later walk fits before hashing any
+proof node, but the planning pass itself is never run against a reset side
+ledger.
 
 Borrowed models expose charged traversal at every reparse boundary:
 
@@ -82,7 +89,8 @@ contract.
   session and allocation capacity remains zero for borrowed decoding.
 - An exact EIP-7702 tuple oracle proves charged fields are consumed directly
   without an unaccounted second parse.
-- MPT tests debit structural and semantic passes plus proof-node count.
+- MPT tests debit structural, planning, and verification passes plus proof-node
+  count, and prove rejected retries cannot repeat planning work for free.
 - The `decode_limits` fuzz target drives every session counter, atomic RLP
   reparses, overflow edges, and post-call policy invariants.
 - Strict clippy, workspace tests, `no_std` checks, and the release gate cover

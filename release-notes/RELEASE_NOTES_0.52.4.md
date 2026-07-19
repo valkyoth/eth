@@ -24,6 +24,9 @@ account/storage authority and canonical account decoding are assigned to
   hash bytes, expected-value work, and local syntax, then performs a
   conservative dry traversal to check all remaining parser, hash, nibble,
   value, and aggregate work before the first proof-node Keccak invocation.
+- Dry-traversal parsing, path comparison, and value comparison now debit the
+  caller's operation-wide session; only the opaque future-work check remains
+  noncommitting.
 - Added public session-aware transaction, receipt, account, and storage
   inclusion APIs.
 - Rejects zero-nibble extensions, empty leaf values, branches with fewer than
@@ -41,8 +44,10 @@ account/storage authority and canonical account decoding are assigned to
   capacity also causes zero proof-node hasher invocations.
 - Account and storage key hashing is included in the same hash-count and
   hash-byte capacity preflight as proof-node hashing.
-- Preflight parsing and later traversal parsing are both charged because both
-  consume attacker-controlled work.
+- Preflight parsing, dry planning, and later traversal parsing are all charged
+  because each consumes attacker-controlled work.
+- Rejected retries cannot repeat the dry traversal against a reset side ledger;
+  work already performed remains charged to the caller's session.
 - Legacy APIs remain bounded by a conservative compatibility session derived
   from `DecodeLimits`; security-sensitive composite callers should select an
   explicit `DecodeSessionPolicy` and use the `*_in_session` APIs.

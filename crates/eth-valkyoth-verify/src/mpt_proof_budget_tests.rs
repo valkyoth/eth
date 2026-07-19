@@ -120,7 +120,95 @@ fn every_remaining_traversal_budget_fails_before_proof_hashing() -> Result<(), &
         assert_eq!(calls.get(), 0);
         assert_eq!(session.hashes(), 0);
         assert_eq!(session.hash_bytes(), 0);
+
+        if domain == BudgetDomain::TotalWork {
+            let after_first = Counts::read(&session);
+            assert!(after_first.total_work > preflight.total_work);
+            let repeated = verify_transaction_inclusion_in_session(
+                root,
+                0,
+                &value,
+                &proof,
+                &mut session,
+                || {
+                    calls.set(calls.get().saturating_add(1));
+                    TestHasher::default()
+                },
+            );
+            assert!(repeated.is_err());
+            assert!(session.total_work() > after_first.total_work);
+            assert_eq!(calls.get(), 0);
+            assert_eq!(session.hashes(), 0);
+        }
     }
+    Ok(())
+}
+
+#[test]
+fn near_exhaustion_stops_and_debits_dry_traversal() -> Result<(), &'static str> {
+    let key = index_key(0)?;
+    let value = tx_value();
+    let root_node = leaf_node(&key, &value);
+    let root = TransactionTrieRoot::from_b256(test_hash(&root_node));
+    let proof = [&root_node[..]];
+    let roomy = roomy_policy(root_node.len(), value.len())?;
+
+    let mut measured = DecodeSession::new(roomy).map_err(|_| "measured session")?;
+    preflight_proof(&proof, &value, 0, 0, &mut measured).map_err(|_| "preflight succeeds")?;
+    let preflight = Counts::read(&measured);
+    check_preflighted_key_inclusion_capacity(&key, &value, &proof, &mut measured)
+        .map_err(|_| "planning succeeds")?;
+    let planned = Counts::read(&measured);
+    let planning_work = planned
+        .total_work
+        .checked_sub(preflight.total_work)
+        .ok_or("planning work delta")?;
+    let mut complete_session = DecodeSession::new(roomy).map_err(|_| "complete session")?;
+    verify_transaction_inclusion_in_session(
+        root,
+        0,
+        &value,
+        &proof,
+        &mut complete_session,
+        TestHasher::default,
+    )
+    .map_err(|_| "proof verifies")?;
+    let complete = Counts::read(&complete_session);
+    let maximum = planned
+        .nibbles
+        .checked_sub(1)
+        .ok_or("planned nibble work must be nonzero")?;
+    let policy = constrained_policy(
+        root_node.len(),
+        value.len(),
+        complete,
+        BudgetDomain::Nibbles,
+        maximum,
+    )?;
+    let mut session = DecodeSession::new(policy).map_err(|_| "constrained session")?;
+    let calls = Cell::new(0usize);
+
+    let first =
+        verify_transaction_inclusion_in_session(root, 0, &value, &proof, &mut session, || {
+            calls.set(calls.get().saturating_add(1));
+            TestHasher::default()
+        });
+    assert!(first.is_err());
+    assert!(session.total_work() > preflight.total_work);
+    assert_eq!(calls.get(), 0);
+    assert_eq!(session.hashes(), 0);
+
+    let before_retry = session.total_work();
+    let second =
+        verify_transaction_inclusion_in_session(root, 0, &value, &proof, &mut session, || {
+            calls.set(calls.get().saturating_add(1));
+            TestHasher::default()
+        });
+    assert!(second.is_err());
+    let retry_work = session.total_work().saturating_sub(before_retry);
+    assert!(retry_work < planning_work);
+    assert_eq!(calls.get(), 0);
+    assert_eq!(session.hashes(), 0);
     Ok(())
 }
 
