@@ -30,6 +30,8 @@ fn drive_limits(data: &[u8], limits: DecodeLimits) {
         usize::MAX,
         usize::MAX,
         usize::MAX,
+        usize::MAX,
+        usize::MAX,
     ) {
         Ok(policy) => policy,
         Err(_) => return,
@@ -62,6 +64,8 @@ fn drive_limits(data: &[u8], limits: DecodeLimits) {
         let _ = session.account_allocation_capacity(value);
         let _ = session.account_proof_nodes(value);
         let _ = session.account_hashes(value, value);
+        let _ = session.account_nibbles(value);
+        let _ = session.account_value_bytes(value);
         let _ = session.account_rlp_reparse(value, value, value);
 
         assert!(session.encoded_bytes() <= policy.max_encoded_bytes());
@@ -71,6 +75,8 @@ fn drive_limits(data: &[u8], limits: DecodeLimits) {
         assert!(session.proof_nodes() <= limits.max_proof_nodes);
         assert!(session.hashes() <= policy.max_hashes());
         assert!(session.hash_bytes() <= policy.max_hash_bytes());
+        assert!(session.nibbles() <= policy.max_nibbles());
+        assert!(session.value_bytes() <= policy.max_value_bytes());
         assert!(session.total_work() <= policy.max_total_work());
     }
 }

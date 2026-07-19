@@ -7,6 +7,7 @@ use eth_valkyoth_primitives::B256;
 mod error;
 mod session;
 pub use error::{MptNodeDecodeError, MptNodeDecodeErrorCategory, MptNodeField};
+pub(crate) use session::decode_mpt_node_body_in_session;
 pub use session::{decode_mpt_node_in_session, decode_mpt_proof_nodes_in_session};
 
 /// Number of child references in an MPT branch node.
@@ -272,6 +273,7 @@ fn decode_branch_node<'a>(
         *slot = decode_node_reference_item(item, MptNodeField::BranchChild, true, depth_remaining)?;
     }
     let value = next_scalar(&mut items, MptNodeField::BranchValue)?.payload();
+    require_canonical_branch(&children, value)?;
     Ok(MptNode::Branch(MptBranchNode { children, value }))
 }
 
@@ -283,8 +285,12 @@ fn decode_compact_node<'a>(
     let path = decode_compact_path(next_scalar(&mut fields, MptNodeField::CompactPath)?.payload())?;
     if path.is_leaf() {
         let value = next_scalar(&mut fields, MptNodeField::LeafValue)?.payload();
+        if value.is_empty() {
+            return Err(MptNodeDecodeError::EmptyLeafValue);
+        }
         Ok(MptNode::Leaf(MptLeafNode { path, value }))
     } else {
+        require_nonempty_extension_path(path)?;
         let child_item = fields.next().ok_or(field_error(
             MptNodeField::ExtensionChild,
             DecodeError::Malformed,
@@ -338,13 +344,46 @@ fn decode_node_reference_item<'a>(
             let next_depth = depth_remaining
                 .checked_sub(1)
                 .ok_or(MptNodeDecodeError::InlineNodeTooDeep)?;
-            let _ = decode_mpt_node_from_list(list, next_depth)?;
+            let decoded = decode_mpt_node_from_list(list, next_depth)?;
+            require_canonical_extension_child(field, decoded)?;
             Ok(MptNodeReference::Inline(MptInlineNode {
                 list,
                 depth_remaining: next_depth,
             }))
         }
     }
+}
+
+fn require_nonempty_extension_path(path: MptCompactPath<'_>) -> Result<(), MptNodeDecodeError> {
+    if path.nibble_count()? == 0 {
+        return Err(MptNodeDecodeError::EmptyExtensionPath);
+    }
+    Ok(())
+}
+
+fn require_canonical_branch(
+    children: &[MptNodeReference<'_>; MPT_BRANCH_CHILD_COUNT],
+    value: &[u8],
+) -> Result<(), MptNodeDecodeError> {
+    let occupied = children
+        .iter()
+        .filter(|child| !matches!(child, MptNodeReference::Empty))
+        .count()
+        .saturating_add(usize::from(!value.is_empty()));
+    if occupied < 2 {
+        return Err(MptNodeDecodeError::DegenerateBranch { occupied });
+    }
+    Ok(())
+}
+
+fn require_canonical_extension_child(
+    field: MptNodeField,
+    node: MptNode<'_>,
+) -> Result<(), MptNodeDecodeError> {
+    if matches!(field, MptNodeField::ExtensionChild) && !matches!(node, MptNode::Branch(_)) {
+        return Err(MptNodeDecodeError::NonCanonicalExtensionChild);
+    }
+    Ok(())
 }
 
 fn decode_scalar_reference<'a>(

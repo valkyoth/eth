@@ -6,8 +6,6 @@ use eth_valkyoth_codec::DecodeLimits;
 use eth_valkyoth_hash::{Keccak256, Keccak256Digest};
 use eth_valkyoth_primitives::{Address, B256};
 
-use crate::MAX_PROOF_WALK_DEPTH;
-
 use super::*;
 
 const TEST_LIMITS: DecodeLimits = DecodeLimits {
@@ -219,64 +217,60 @@ fn rejects_absent_storage_key() -> Result<(), &'static str> {
 }
 
 #[test]
-fn rejects_account_proof_walk_beyond_fixed_depth_cap() -> Result<(), &'static str> {
+fn rejects_redundant_account_extension() -> Result<(), &'static str> {
     let address = test_address();
     let key = test_hash(&address.to_bytes()).to_bytes();
     let value = account_value();
-    let mut proof_nodes = vec![leaf_node(&key, &value)];
-    for _ in 0..MAX_PROOF_WALK_DEPTH {
-        let child = proof_nodes.first().ok_or("proof node exists")?;
-        let child_hash = test_hash(child).to_bytes();
-        proof_nodes.insert(0, extension_node_hash(&child_hash));
-    }
-    let root_node = proof_nodes.first().ok_or("root node exists")?;
-    let root = AccountTrieRoot::from_b256(test_hash(root_node));
-    let proof = proof_nodes
-        .iter()
-        .map(Vec::as_slice)
-        .collect::<Vec<&[u8]>>();
+    let leaf = leaf_node(&key, &value);
+    let leaf_hash = test_hash(&leaf).to_bytes();
+    let redundant = extension_node_hash(0, &leaf_hash);
+    let redundant_hash = test_hash(&redundant).to_bytes();
+    let first_nibble = key_nibbles(&key).first().copied().ok_or("key nibble")?;
+    let root_node = extension_node_hash(first_nibble, &redundant_hash);
+    let root = AccountTrieRoot::from_b256(test_hash(&root_node));
+    let proof = [&root_node[..], &redundant[..], &leaf[..]];
 
     let error = verify_account_inclusion(
         root,
         address,
         &value,
         &proof,
-        deep_limits(),
+        TEST_LIMITS,
         TestHasher::default,
     );
 
-    assert_eq!(error, Err(MptProofVerificationError::ProofTooDeep));
+    assert_eq!(
+        error,
+        Err(MptProofVerificationError::MalformedNode(
+            crate::MptNodeDecodeError::NonCanonicalExtensionChild
+        ))
+    );
     Ok(())
 }
 
 #[test]
-fn rejects_storage_proof_walk_beyond_fixed_depth_cap() -> Result<(), &'static str> {
+fn rejects_redundant_storage_extension() -> Result<(), &'static str> {
     let slot = test_slot();
     let key = test_hash(&slot.to_b256().to_bytes()).to_bytes();
     let value = storage_value();
-    let mut proof_nodes = vec![leaf_node(&key, &value)];
-    for _ in 0..MAX_PROOF_WALK_DEPTH {
-        let child = proof_nodes.first().ok_or("proof node exists")?;
-        let child_hash = test_hash(child).to_bytes();
-        proof_nodes.insert(0, extension_node_hash(&child_hash));
-    }
-    let root_node = proof_nodes.first().ok_or("root node exists")?;
-    let root = StorageTrieRoot::from_b256(test_hash(root_node));
-    let proof = proof_nodes
-        .iter()
-        .map(Vec::as_slice)
-        .collect::<Vec<&[u8]>>();
+    let leaf = leaf_node(&key, &value);
+    let leaf_hash = test_hash(&leaf).to_bytes();
+    let redundant = extension_node_hash(0, &leaf_hash);
+    let redundant_hash = test_hash(&redundant).to_bytes();
+    let first_nibble = key_nibbles(&key).first().copied().ok_or("key nibble")?;
+    let root_node = extension_node_hash(first_nibble, &redundant_hash);
+    let root = StorageTrieRoot::from_b256(test_hash(&root_node));
+    let proof = [&root_node[..], &redundant[..], &leaf[..]];
 
-    let error = verify_storage_inclusion(
-        root,
-        slot,
-        &value,
-        &proof,
-        deep_limits(),
-        TestHasher::default,
+    let error =
+        verify_storage_inclusion(root, slot, &value, &proof, TEST_LIMITS, TestHasher::default);
+
+    assert_eq!(
+        error,
+        Err(MptProofVerificationError::MalformedNode(
+            crate::MptNodeDecodeError::NonCanonicalExtensionChild
+        ))
     );
-
-    assert_eq!(error, Err(MptProofVerificationError::ProofTooDeep));
     Ok(())
 }
 
@@ -324,22 +318,26 @@ fn branch_node(child_nibble: u8, child: Vec<u8>, value: Vec<u8>) -> Vec<u8> {
         }
     }
     items.push(value);
+    let mut occupied = items
+        .iter()
+        .filter(|item| item.as_slice() != [0x80])
+        .count();
+    let mut offset = 1u8;
+    while occupied < 2 {
+        let index = usize::from(child_nibble.wrapping_add(offset) & 0x0f);
+        if let Some(item) = items.get_mut(index)
+            && item.as_slice() == [0x80]
+        {
+            *item = list(&[scalar(&[0x30 | (offset & 0x0f)]), scalar(b"d")]);
+            occupied = occupied.saturating_add(1);
+        }
+        offset = offset.saturating_add(1);
+    }
     list(&items)
 }
 
-fn extension_node_hash(child_hash: &[u8; 32]) -> Vec<u8> {
-    list(&[scalar(&[0x00]), scalar(child_hash)])
-}
-
-fn deep_limits() -> DecodeLimits {
-    DecodeLimits {
-        max_input_bytes: 4096,
-        max_list_items: 256,
-        max_nesting_depth: 16,
-        max_total_allocation: 16_384,
-        max_proof_nodes: 256,
-        max_total_items: 1024,
-    }
+fn extension_node_hash(nibble: u8, child_hash: &[u8; 32]) -> Vec<u8> {
+    list(&[scalar(&[0x10 | (nibble & 0x0f)]), scalar(child_hash)])
 }
 
 fn compact_path_leaf(path: &[u8]) -> Vec<u8> {

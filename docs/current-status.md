@@ -1,7 +1,6 @@
 # Current Status
 
-Release snapshot: `v0.52.3` implementation and clean pentest retest complete;
-final release gate and GitHub checks pending.
+Release snapshot: `v0.52.4` implementation complete; pentest pending.
 
 This document summarizes what the workspace can do now. The
 [Specification Matrix](SPEC_MATRIX.md) is the source of truth for exact
@@ -20,7 +19,7 @@ Legend:
 | Capability | Status | Current scope |
 | --- | --- | --- |
 | Primitive domains | 🟢 Available | Chain ID, block number, gas, nonce, timestamp, address, hash, Wei, and transaction-type newtypes |
-| Canonical RLP | 🟢 Available | Bounded scalar, list, integer, exact-consumption, encoding, primitive bridges, conservative derives, and operation-wide shared decode sessions |
+| Canonical RLP | 🟢 Available | Bounded scalar, list, integer, exact-consumption, encoding, primitive bridges, conservative derives, and operation-wide shared decode sessions with trie-work ceilings |
 | EIP-2718 envelopes | 🟢 Available | Legacy and typed outer-envelope classification |
 | Legacy transactions | 🟡 Partial | Canonical field decode/encode, EIP-155 replay checks, signing hashes, and signature validation |
 | EIP-2930 | 🟡 Partial | Access-list decode/encode, signing hashes, replay checks, and signature validation |
@@ -40,8 +39,8 @@ Legend:
 | Keccak-256 | 🟢 Available | First-party trait boundary plus optional reviewed `tiny-keccak` backend |
 | secp256k1 recovery | 🟢 Available | First-party validation boundary plus optional reviewed `k256` adapter |
 | Transaction signing | 🟢 Available | Signing preimages and hashes for legacy, EIP-2930, EIP-1559, EIP-4844, and EIP-7702 |
-| MPT node decoding | 🟢 Available | Bounded branch, extension, leaf, compact-path, inline-reference, and proof-list parsing with optional shared-session accounting |
-| MPT inclusion proofs | 🟢 Available | Transaction, receipt, account, and storage inclusion against caller-trusted roots |
+| MPT node decoding | 🟢 Available | Strict locally canonical branch, extension, leaf, compact-path, inline-reference, and proof-list parsing with shared-session accounting |
+| MPT inclusion proofs | 🟢 Available | Full-proof preflight and session-metered transaction, receipt, account, and storage inclusion against caller-trusted roots |
 | Secret sanitization | 🟢 Optional | Explicit opt-in bridge to the separately published `sanitization` crate |
 
 ## EVM Support
@@ -103,21 +102,17 @@ Legend:
 
 ## Current Release
 
-`v0.52.3` adds a non-copyable `DecodeSession` and reviewed policy for one
-complete untrusted operation. Session-aware RLP, legacy and typed transaction,
-nested access-list/blob-hash/authorization, and MPT syntax entry points share
-cumulative counters instead of resetting local budgets between stages.
+`v0.52.4` extends the non-copyable `DecodeSession` with compact-path nibble and
+trie-value byte ceilings. Inclusion verification preflights every supplied node
+and complete hash capacity before the first proof-node hash, then charges each
+actual Keccak invocation immediately before calling the backend.
 
-Structural RLP validation charges each encoded byte once. Later zero-copy
-semantic reparses have public session-aware traversal and are charged as actual
-additional work. Nested-list metadata recounts debit each immediate child
-before parsing it. The ledger covers
-bytes, headers, items, nesting, requested allocation capacity, proof nodes,
-hashes, hash bytes, and aggregate work with checked arithmetic. Current
-session-aware transaction and MPT models are borrowed and allocate nothing.
-
-Complete MPT proof preflight and reject-before-hash behavior remain assigned
-to `v0.52.4`; this release does not broaden proof-validity claims.
+MPT decoding now rejects locally detectable noncanonical construction: empty
+extension paths, empty leaf values, branches with fewer than two occupied
+outcomes, extension-to-extension or extension-to-leaf children, inline nodes at
+or above 32 encoded bytes, and hashed children below 32 encoded bytes. Public
+`*_in_session` APIs cover transaction, receipt, account, and storage inclusion.
+Account-to-storage proof composition remains assigned to `v0.52.5`.
 
 The current workspace uses Rust `1.97.1` for the full gate and checks every
 supported Rust toolchain from `1.90.0` through `1.97.0` with

@@ -86,7 +86,7 @@ fn nested_list_recount_cannot_exceed_item_ceiling() -> Result<(), &'static str> 
         max_proof_nodes: 1,
         max_total_items: 11,
     };
-    let policy = DecodeSessionPolicy::reviewed_policy(limits, 16, 8, 1, 1, 64)
+    let policy = DecodeSessionPolicy::reviewed_policy(limits, 16, 8, 1, 1, 1, 1, 64)
         .map_err(|_| "policy must be valid")?;
     let mut session = DecodeSession::new(policy).map_err(|_| "session must initialize")?;
     let list = decode_rlp_list_in_session(MANY_CHILDREN, &mut session)
@@ -111,7 +111,7 @@ fn cumulative_encoded_budget_cannot_reset_between_values() -> Result<(), &'stati
         max_proof_nodes: 1,
         max_total_items: 8,
     };
-    let policy = DecodeSessionPolicy::reviewed_policy(limits, 4, 4, 1, 4, 16)
+    let policy = DecodeSessionPolicy::reviewed_policy(limits, 4, 4, 1, 4, 4, 4, 16)
         .map_err(|_| "invalid test policy")?;
     let mut session = DecodeSession::new(policy).map_err(|_| "invalid test session")?;
 

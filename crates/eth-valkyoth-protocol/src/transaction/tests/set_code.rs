@@ -60,8 +60,9 @@ fn authorization_session_traversal_charges_exact_tuple_delta() -> Result<(), &'s
     );
     let tx = set_code_tx(&[1], &to, &[auth.as_slice()], 1);
     let limits = DecodeLimits::reviewed_policy(1024, 32, 8, 1024, 4, 256);
-    let policy = DecodeSessionPolicy::reviewed_policy(limits, 4096, 1024, 4, 1024, 16_384)
-        .map_err(|_| "policy must be valid")?;
+    let policy =
+        DecodeSessionPolicy::reviewed_policy(limits, 4096, 1024, 4, 1024, 1024, 1024, 16_384)
+            .map_err(|_| "policy must be valid")?;
     let mut session = DecodeSession::new(policy).map_err(|_| "session must initialize")?;
     let decoded = decode_set_code_transaction_in_session(&tx, &mut session)
         .map_err(|_| "set-code transaction must decode")?;

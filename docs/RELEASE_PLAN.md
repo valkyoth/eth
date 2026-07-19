@@ -2742,7 +2742,7 @@ Exit criteria:
 
 ### v0.52.4 - MPT Proof Preflight And Strict Canonicality
 
-Status: planned.
+Status: implementation complete; pentest pending.
 
 Goal: reject over-budget or locally non-canonical trie proofs before hashing
 attacker-controlled node bytes.

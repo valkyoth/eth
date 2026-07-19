@@ -33,7 +33,7 @@ receipts, withdrawals, Merkle Patricia Trie proofs, fork-aware validation, and
 bounded first-party EVM components.
 
 The complete stack is built in small independently reviewed milestones rather
-than claimed ahead of its evidence. Version `0.52.3` is still a library, not a
+than claimed ahead of its evidence. Version `0.52.4` is still a library, not a
 production node, wallet, RPC client, or key store.
 Networking, private-key signing, local key storage, and third-party execution
 backends are not enabled by default.
@@ -42,14 +42,14 @@ backends are not enabled by default.
 
 ```toml
 [dependencies]
-eth = "0.52.3"
+eth = "0.52.4"
 ```
 
 For optional sanitization support:
 
 ```toml
 [dependencies]
-eth = { version = "0.52.3", features = ["sanitization"] }
+eth = { version = "0.52.4", features = ["sanitization"] }
 ```
 
 ## Quick Start
@@ -85,7 +85,7 @@ Legend: 🟢 available for the stated scope, 🟡 implemented but incomplete,
 | EIP-7702 set-code transactions | 🟡 Partial | Decode/encode, transaction and authorization signing, recovery, and context validity gate |
 | EIP-712 typed data | 🟢 Available | Bounded typed encoder and hashing path; optional JSON parser |
 | Headers, receipts, and withdrawals | 🟡 Partial | Canonical syntactic decode and selected hashing; full block/state validity is incomplete |
-| MPT proof verification | 🟢 Available | Transaction, receipt, account, and storage inclusion against caller-trusted roots |
+| MPT proof verification | 🟢 Available | Strict canonical proof preflight and session-metered transaction, receipt, account, and storage inclusion against caller-trusted roots |
 | Native EVM execution | 🟡 Partial | Bounded basic opcode/state-read interpreter, consensus-correct truncated PUSH handling, and call/create planning; full state transition is incomplete |
 | Native precompiles through BLAKE2F | 🟢 Available | Identity, SHA-256, RIPEMD-160, ModExp, BN254, and BLAKE2F; ECRECOVER uses explicit caller backends |
 | BLS12-381 and KZG | 🟡 Partial | BLS canonical wire/frame parsing and KZG/BLS gas planning; cryptographic execution remains fail closed |
@@ -128,7 +128,7 @@ Optional reviewed software Keccak backend:
 
 ```toml
 [dependencies]
-eth = { version = "0.52.3", features = ["keccak-tiny"] }
+eth = { version = "0.52.4", features = ["keccak-tiny"] }
 ```
 
 ```rust
@@ -142,14 +142,14 @@ Optional reviewed secp256k1 recovery adapter:
 
 ```toml
 [dependencies]
-eth = { version = "0.52.3", features = ["secp256k1-k256"] }
+eth = { version = "0.52.4", features = ["secp256k1-k256"] }
 ```
 
 Optional bounded EVM gas-estimation boundary:
 
 ```toml
 [dependencies]
-eth = { version = "0.52.3", features = ["evm"] }
+eth = { version = "0.52.4", features = ["evm"] }
 ```
 
 ```rust
@@ -254,7 +254,7 @@ Optional native EVM core domains:
 
 ```toml
 [dependencies]
-eth = { version = "0.52.3", features = ["evm-core"] }
+eth = { version = "0.52.4", features = ["evm-core"] }
 ```
 
 State access uses explicit host-state traits and caller-provided fixed-capacity
@@ -869,7 +869,8 @@ buffer-based and do not allocate:
 For composite untrusted operations, `DecodeSession` is the operation-wide
 security boundary. It cannot be copied, cloned, or reset, and its reviewed
 policy accumulates encoded bytes, headers, items, nesting, allocation
-capacity, proof nodes, hashes, hash bytes, and total work across nested
+capacity, proof nodes, hashes, hash bytes, compact-path nibbles, trie-value
+bytes, and total work across nested
 transaction and proof consumers. See the
 [shared decode session contract](https://github.com/valkyoth/eth/blob/main/docs/decode-session.md).
 Callers traversing borrowed nested models from untrusted input must continue
@@ -976,7 +977,7 @@ reference or scalar value:
 
 ```rust
 use eth::codec::DecodeLimits;
-use eth::verify::{MptNode, MptNodeReference, decode_mpt_node};
+use eth::verify::{MptNode, MptNodeDecodeError, decode_mpt_node};
 
 let limits = DecodeLimits {
     max_input_bytes: 64,
@@ -1000,21 +1001,20 @@ if let MptNode::Leaf(leaf) = node {
 
 let branch = [0xd1, 0x80, 0x80, 0x80, 0x80, 0x80, 0x80, 0x80, 0x80, 0x80,
     0x80, 0x80, 0x80, 0x80, 0x80, 0x80, 0x80, 0x80];
-let branch = decode_mpt_node(&branch, limits)?;
-if let MptNode::Branch(branch) = branch {
-    assert!(branch
-        .children()
-        .all(|child| matches!(child, Ok(MptNodeReference::Empty))));
-} else {
-    assert!(false);
-}
+assert_eq!(
+    decode_mpt_node(&branch, limits),
+    Err(MptNodeDecodeError::DegenerateBranch { occupied: 0 }),
+);
 # Ok::<(), Box<dyn std::error::Error>>(())
 ```
 
 Transaction and receipt inclusion proofs can be checked against trusted trie
-roots. The verifier derives the key as `rlp(transaction_index)`, hashes proof
-nodes through the caller-provided Keccak boundary, and compares the included
-value byte-for-byte:
+roots. Before the first proof-node hash, the verifier admits every supplied
+node under one `DecodeSession`, checks complete hash capacity, and rejects
+locally noncanonical empty extensions, empty leaves, degenerate branches,
+redundant extension children, and invalid inline/hash thresholds. It derives
+the key as `rlp(transaction_index)`, charges immediately before each
+caller-provided Keccak call, and compares the included value byte-for-byte:
 
 ```rust
 use eth::codec::DecodeLimits;
@@ -1150,7 +1150,7 @@ friendly, and independently testable.
 The minimum supported Rust version is Rust `1.90.0`. New deployments should use
 the pinned stable Rust `1.97.1` until the toolchain policy is updated.
 
-Compatibility evidence for `0.52.3`:
+Compatibility evidence for `0.52.4`:
 
 | Rust | Local Evidence |
 | --- | --- |
@@ -1161,7 +1161,7 @@ Compatibility evidence for `0.52.3`:
 
 ```bash
 scripts/checks.sh
-scripts/release_0_52_3_gate.sh
+scripts/release_0_52_4_gate.sh
 ```
 
 For dependency-policy checks, install `cargo-deny` and `cargo-audit`, then run:

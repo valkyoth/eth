@@ -52,7 +52,8 @@ pub use mpt_proof::{
     MAX_PROOF_WALK_DEPTH, MptProofRoot, MptProofVerificationError,
     MptProofVerificationErrorCategory, ReceiptTrieRoot, TransactionTrieRoot,
     VerifiedReceiptInclusion, VerifiedTransactionInclusion, verify_receipt_inclusion,
-    verify_transaction_inclusion,
+    verify_receipt_inclusion_in_session, verify_transaction_inclusion,
+    verify_transaction_inclusion_in_session,
 };
 pub use replay::{
     require_access_list_replay_domain, require_blob_replay_domain,
@@ -74,7 +75,8 @@ pub use set_code_authorization::{
 };
 pub use state_proof::{
     AccountTrieRoot, StorageSlotKey, StorageTrieRoot, VerifiedAccountInclusion,
-    VerifiedStorageInclusion, verify_account_inclusion, verify_storage_inclusion,
+    VerifiedStorageInclusion, verify_account_inclusion, verify_account_inclusion_in_session,
+    verify_storage_inclusion, verify_storage_inclusion_in_session,
 };
 pub use transaction_hash::{
     SetCodeAuthorizationSigningHash, TransactionSigningHash, TransactionSigningHashError,

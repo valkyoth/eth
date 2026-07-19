@@ -88,5 +88,7 @@ contract.
 - Strict clippy, workspace tests, `no_std` checks, and the release gate cover
   the public APIs on the supported Rust range.
 
-`v0.52.4` builds on this ledger to preflight complete proof work and reject
-before each Keccak operation.
+`v0.52.4` adds explicit compact-path nibble and trie-value byte counters,
+noncommitting complete hash-capacity checks, and MPT proof preflight before the
+first proof-node Keccak operation. Every actual hash is then charged atomically
+immediately before the backend call.

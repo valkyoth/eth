@@ -10,6 +10,13 @@ pub fn decode_mpt_node_in_session<'a>(
     session
         .account_proof_nodes(1)
         .map_err(|source| field_error(MptNodeField::ProofNode, source))?;
+    decode_mpt_node_body_in_session(input, session)
+}
+
+pub(crate) fn decode_mpt_node_body_in_session<'a>(
+    input: &'a [u8],
+    session: &mut DecodeSession,
+) -> Result<MptNode<'a>, MptNodeDecodeError> {
     let list = decode_rlp_list_partial_in_session(input, session)
         .map_err(|source| field_error(MptNodeField::Node, source))?;
     require_exact_consumption(list.encoded_len(), input.len())
@@ -61,6 +68,10 @@ fn decode_branch<'a>(
         )?;
     }
     let value = next_scalar(&mut items, MptNodeField::BranchValue, session)?.payload();
+    session
+        .account_value_bytes(value.len())
+        .map_err(|source| field_error(MptNodeField::BranchValue, source))?;
+    require_canonical_branch(&children, value)?;
     Ok(MptNode::Branch(MptBranchNode { children, value }))
 }
 
@@ -73,10 +84,21 @@ fn decode_compact<'a>(
     let path = decode_compact_path(
         next_scalar(&mut fields, MptNodeField::CompactPath, session)?.payload(),
     )?;
+    let nibble_count = path.nibble_count()?;
+    session
+        .account_nibbles(nibble_count)
+        .map_err(|source| field_error(MptNodeField::CompactPath, source))?;
     if path.is_leaf() {
         let value = next_scalar(&mut fields, MptNodeField::LeafValue, session)?.payload();
+        if value.is_empty() {
+            return Err(MptNodeDecodeError::EmptyLeafValue);
+        }
+        session
+            .account_value_bytes(value.len())
+            .map_err(|source| field_error(MptNodeField::LeafValue, source))?;
         Ok(MptNode::Leaf(MptLeafNode { path, value }))
     } else {
+        require_nonempty_extension_path(path)?;
         let item = fields.next_in_session(session).ok_or(field_error(
             MptNodeField::ExtensionChild,
             DecodeError::Malformed,
@@ -109,7 +131,8 @@ fn decode_reference<'a>(
             let next_depth = depth_remaining
                 .checked_sub(1)
                 .ok_or(MptNodeDecodeError::InlineNodeTooDeep)?;
-            let _ = decode_mpt_node_from_list_in_session(list, next_depth, session)?;
+            let decoded = decode_mpt_node_from_list_in_session(list, next_depth, session)?;
+            require_canonical_extension_child(field, decoded)?;
             Ok(MptNodeReference::Inline(MptInlineNode {
                 list,
                 depth_remaining: next_depth,

@@ -1,131 +1,7 @@
 use crate::{DecodeError, DecodeLimits};
 
-/// Complete work policy for one untrusted decode operation.
-#[derive(Clone, Copy, Debug, Eq, PartialEq)]
-pub struct DecodeSessionPolicy {
-    limits: DecodeLimits,
-    max_encoded_bytes: usize,
-    max_rlp_headers: usize,
-    max_hashes: usize,
-    max_hash_bytes: usize,
-    max_total_work: usize,
-}
-
-impl DecodeSessionPolicy {
-    /// Policy for unit tests, conformance fixtures, and fuzz targets.
-    #[cfg(any(test, feature = "testing"))]
-    pub const TEST_FIXTURE: Self = Self {
-        limits: DecodeLimits::TEST_FIXTURE,
-        max_encoded_bytes: 1 << 20,
-        max_rlp_headers: 8192,
-        max_hashes: 1024,
-        max_hash_bytes: 1 << 20,
-        max_total_work: 4 << 20,
-    };
-
-    /// Starting point for externally reachable decode sessions.
-    ///
-    /// This policy must be copied, reviewed field by field, and tightened for
-    /// the deployment before use. [`Self::validate_deployment_policy`] rejects
-    /// the unchanged value.
-    pub const DEPLOYMENT_STARTING_POINT: Self = Self {
-        limits: DecodeLimits::DEPLOYMENT_STARTING_POINT,
-        max_encoded_bytes: 4 << 20,
-        max_rlp_headers: 65_536,
-        max_hashes: 4096,
-        max_hash_bytes: 4 << 20,
-        max_total_work: 16 << 20,
-    };
-
-    /// Constructs an explicit policy and validates all cross-limit relations.
-    pub const fn reviewed_policy(
-        limits: DecodeLimits,
-        max_encoded_bytes: usize,
-        max_rlp_headers: usize,
-        max_hashes: usize,
-        max_hash_bytes: usize,
-        max_total_work: usize,
-    ) -> Result<Self, DecodeError> {
-        let policy = Self {
-            limits,
-            max_encoded_bytes,
-            max_rlp_headers,
-            max_hashes,
-            max_hash_bytes,
-            max_total_work,
-        };
-        match policy.validate_relationships() {
-            Ok(()) => {}
-            Err(error) => return Err(error),
-        }
-        Ok(policy)
-    }
-
-    /// Returns the structural decode limits.
-    #[must_use]
-    pub const fn limits(self) -> DecodeLimits {
-        self.limits
-    }
-
-    /// Returns the cumulative encoded-byte scan limit.
-    #[must_use]
-    pub const fn max_encoded_bytes(self) -> usize {
-        self.max_encoded_bytes
-    }
-
-    /// Returns the cumulative RLP-header visit limit.
-    #[must_use]
-    pub const fn max_rlp_headers(self) -> usize {
-        self.max_rlp_headers
-    }
-
-    /// Returns the cumulative hash count limit.
-    #[must_use]
-    pub const fn max_hashes(self) -> usize {
-        self.max_hashes
-    }
-
-    /// Returns the cumulative hashed-byte limit.
-    #[must_use]
-    pub const fn max_hash_bytes(self) -> usize {
-        self.max_hash_bytes
-    }
-
-    /// Returns the aggregate work-unit limit.
-    #[must_use]
-    pub const fn max_total_work(self) -> usize {
-        self.max_total_work
-    }
-
-    /// Rejects inconsistent component and aggregate ceilings.
-    pub const fn validate_relationships(self) -> Result<(), DecodeError> {
-        if self.limits.max_list_items > self.limits.max_total_items
-            || self.limits.max_proof_nodes > self.limits.max_total_items
-            || self.limits.max_total_items > self.max_total_work
-            || self.limits.max_proof_nodes > self.max_total_work
-            || self.limits.max_input_bytes > self.max_encoded_bytes
-            || self.max_encoded_bytes > self.max_total_work
-            || self.max_rlp_headers > self.max_total_work
-            || self.limits.max_nesting_depth > self.max_total_work
-            || self.limits.max_total_allocation > self.max_total_work
-            || self.max_hashes > self.max_total_work
-            || self.max_hash_bytes > self.max_total_work
-        {
-            return Err(DecodeError::InvalidSessionPolicy);
-        }
-        Ok(())
-    }
-
-    /// Rejects an unchanged deployment starter policy.
-    pub fn validate_deployment_policy(self) -> Result<(), DecodeError> {
-        self.validate_relationships()?;
-        self.limits.validate_deployment_policy()?;
-        if self == Self::DEPLOYMENT_STARTING_POINT {
-            return Err(DecodeError::UnreviewedDeploymentPolicy);
-        }
-        Ok(())
-    }
-}
+mod policy;
+pub use policy::DecodeSessionPolicy;
 
 /// Non-copyable work capability for one untrusted decode operation.
 ///
@@ -143,6 +19,8 @@ pub struct DecodeSession {
     proof_nodes: usize,
     hashes: usize,
     hash_bytes: usize,
+    nibbles: usize,
+    value_bytes: usize,
     total_work: usize,
 }
 
@@ -163,6 +41,8 @@ impl DecodeSession {
             proof_nodes: 0,
             hashes: 0,
             hash_bytes: 0,
+            nibbles: 0,
+            value_bytes: 0,
             total_work: 0,
         })
     }
@@ -176,7 +56,7 @@ impl DecodeSession {
     /// Returns the structural limits used by this session.
     #[must_use]
     pub const fn limits(&self) -> DecodeLimits {
-        self.policy.limits
+        self.policy.limits()
     }
 
     /// Returns cumulative encoded bytes charged as scanned.
@@ -227,6 +107,18 @@ impl DecodeSession {
         self.hash_bytes
     }
 
+    /// Returns cumulative compact-path nibbles charged.
+    #[must_use]
+    pub const fn nibbles(&self) -> usize {
+        self.nibbles
+    }
+
+    /// Returns cumulative trie-value bytes charged.
+    #[must_use]
+    pub const fn value_bytes(&self) -> usize {
+        self.value_bytes
+    }
+
     /// Returns aggregate charged work units.
     #[must_use]
     pub const fn total_work(&self) -> usize {
@@ -235,17 +127,17 @@ impl DecodeSession {
 
     /// Checks an outer input length without resetting or charging the session.
     pub fn check_input_len(&self, len: usize) -> Result<(), DecodeError> {
-        self.policy.limits.check_input_len(len)
+        self.policy.limits().check_input_len(len)
     }
 
     /// Checks a per-list item count.
     pub fn check_list_count(&self, count: usize) -> Result<(), DecodeError> {
-        self.policy.limits.check_list_count(count)
+        self.policy.limits().check_list_count(count)
     }
 
     /// Checks and records a nesting depth.
     pub fn check_nesting_depth(&mut self, depth: usize) -> Result<(), DecodeError> {
-        self.policy.limits.check_nesting_depth(depth)?;
+        self.policy.limits().check_nesting_depth(depth)?;
         if depth > self.max_nesting_depth {
             let additional_depth = depth
                 .checked_sub(self.max_nesting_depth)
@@ -262,7 +154,7 @@ impl DecodeSession {
         let encoded = checked_counter(
             self.encoded_bytes,
             count,
-            self.policy.max_encoded_bytes,
+            self.policy.max_encoded_bytes(),
             DecodeError::EncodedBytesExceeded,
         )?;
         let work = self.checked_work(count)?;
@@ -276,7 +168,7 @@ impl DecodeSession {
         let headers = checked_counter(
             self.rlp_headers,
             count,
-            self.policy.max_rlp_headers,
+            self.policy.max_rlp_headers(),
             DecodeError::RlpHeaderCountExceeded,
         )?;
         let work = self.checked_work(count)?;
@@ -295,19 +187,19 @@ impl DecodeSession {
         let encoded = checked_counter(
             self.encoded_bytes,
             encoded_bytes,
-            self.policy.max_encoded_bytes,
+            self.policy.max_encoded_bytes(),
             DecodeError::EncodedBytesExceeded,
         )?;
         let rlp_headers = checked_counter(
             self.rlp_headers,
             headers,
-            self.policy.max_rlp_headers,
+            self.policy.max_rlp_headers(),
             DecodeError::RlpHeaderCountExceeded,
         )?;
         let item_count = checked_counter(
             self.items,
             items,
-            self.policy.limits.max_total_items,
+            self.policy.limits().max_total_items,
             DecodeError::ItemCountExceeded,
         )?;
         let work_charge = encoded_bytes
@@ -327,7 +219,7 @@ impl DecodeSession {
         let items = checked_counter(
             self.items,
             count,
-            self.policy.limits.max_total_items,
+            self.policy.limits().max_total_items,
             DecodeError::ItemCountExceeded,
         )?;
         let work = self.checked_work(count)?;
@@ -341,7 +233,7 @@ impl DecodeSession {
         let allocation = checked_counter(
             self.allocation_capacity,
             capacity,
-            self.policy.limits.max_total_allocation,
+            self.policy.limits().max_total_allocation,
             DecodeError::AllocationExceeded,
         )?;
         let work = self.checked_work(capacity)?;
@@ -355,7 +247,7 @@ impl DecodeSession {
         let nodes = checked_counter(
             self.proof_nodes,
             count,
-            self.policy.limits.max_proof_nodes,
+            self.policy.limits().max_proof_nodes,
             DecodeError::ProofTooLarge,
         )?;
         let work = self.checked_work(count)?;
@@ -369,13 +261,13 @@ impl DecodeSession {
         let hashes = checked_counter(
             self.hashes,
             count,
-            self.policy.max_hashes,
+            self.policy.max_hashes(),
             DecodeError::HashCountExceeded,
         )?;
         let hash_bytes = checked_counter(
             self.hash_bytes,
             bytes,
-            self.policy.max_hash_bytes,
+            self.policy.max_hash_bytes(),
             DecodeError::HashBytesExceeded,
         )?;
         let work_delta = count.checked_add(bytes).ok_or(DecodeError::WorkExceeded)?;
@@ -386,11 +278,62 @@ impl DecodeSession {
         Ok(())
     }
 
+    /// Checks whether a future set of hashes fits without committing counters.
+    ///
+    /// Callers must still use [`Self::account_hashes`] immediately before each
+    /// admitted hash operation. This preflight prevents a proof from starting
+    /// cryptographic work when its complete hash shape is already over budget.
+    pub fn check_hash_capacity(&self, count: usize, bytes: usize) -> Result<(), DecodeError> {
+        let _ = checked_counter(
+            self.hashes,
+            count,
+            self.policy.max_hashes(),
+            DecodeError::HashCountExceeded,
+        )?;
+        let _ = checked_counter(
+            self.hash_bytes,
+            bytes,
+            self.policy.max_hash_bytes(),
+            DecodeError::HashBytesExceeded,
+        )?;
+        let work_delta = count.checked_add(bytes).ok_or(DecodeError::WorkExceeded)?;
+        let _ = self.checked_work(work_delta)?;
+        Ok(())
+    }
+
+    /// Charges compact-path nibbles inspected by a trie operation.
+    pub fn account_nibbles(&mut self, count: usize) -> Result<(), DecodeError> {
+        let nibbles = checked_counter(
+            self.nibbles,
+            count,
+            self.policy.max_nibbles(),
+            DecodeError::NibbleCountExceeded,
+        )?;
+        let work = self.checked_work(count)?;
+        self.nibbles = nibbles;
+        self.total_work = work;
+        Ok(())
+    }
+
+    /// Charges trie value bytes exposed or compared by an operation.
+    pub fn account_value_bytes(&mut self, count: usize) -> Result<(), DecodeError> {
+        let value_bytes = checked_counter(
+            self.value_bytes,
+            count,
+            self.policy.max_value_bytes(),
+            DecodeError::ValueBytesExceeded,
+        )?;
+        let work = self.checked_work(count)?;
+        self.value_bytes = value_bytes;
+        self.total_work = work;
+        Ok(())
+    }
+
     fn checked_work(&self, count: usize) -> Result<usize, DecodeError> {
         checked_counter(
             self.total_work,
             count,
-            self.policy.max_total_work,
+            self.policy.max_total_work(),
             DecodeError::WorkExceeded,
         )
     }

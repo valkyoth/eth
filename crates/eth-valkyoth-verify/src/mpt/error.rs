@@ -50,6 +50,17 @@ pub enum MptNodeDecodeError {
         /// Decoded low-nibble padding value.
         found: u8,
     },
+    /// An extension node encoded an empty path segment.
+    EmptyExtensionPath,
+    /// A leaf node encoded an empty trie value.
+    EmptyLeafValue,
+    /// A branch node had fewer than two occupied child/value outcomes.
+    DegenerateBranch {
+        /// Number of non-empty child references plus a non-empty value slot.
+        occupied: usize,
+    },
+    /// An inline extension child was not a canonical branch node.
+    NonCanonicalExtensionChild,
     /// Required child reference was empty.
     EmptyNodeReference {
         /// Field being decoded.
@@ -69,6 +80,11 @@ pub enum MptNodeDecodeError {
         /// Actual encoded child-list length.
         found: usize,
     },
+    /// A hashed child encoded below the mandatory 32-byte threshold.
+    HashedNodeTooShort {
+        /// Actual encoded child-node length.
+        found: usize,
+    },
     /// Length arithmetic overflowed.
     LengthOverflow,
     /// Inline child nodes exceeded the explicit decoder traversal limit.
@@ -85,9 +101,14 @@ impl MptNodeDecodeError {
             Self::EmptyCompactPath => "ETH_MPT_EMPTY_COMPACT_PATH",
             Self::InvalidCompactPathFlag { .. } => "ETH_MPT_INVALID_COMPACT_PATH_FLAG",
             Self::InvalidCompactPathPadding { .. } => "ETH_MPT_INVALID_COMPACT_PATH_PADDING",
+            Self::EmptyExtensionPath => "ETH_MPT_EMPTY_EXTENSION_PATH",
+            Self::EmptyLeafValue => "ETH_MPT_EMPTY_LEAF_VALUE",
+            Self::DegenerateBranch { .. } => "ETH_MPT_DEGENERATE_BRANCH",
+            Self::NonCanonicalExtensionChild => "ETH_MPT_NONCANONICAL_EXTENSION_CHILD",
             Self::EmptyNodeReference { .. } => "ETH_MPT_EMPTY_NODE_REFERENCE",
             Self::InvalidNodeReferenceLength { .. } => "ETH_MPT_INVALID_NODE_REFERENCE_LENGTH",
             Self::InlineNodeTooLarge { .. } => "ETH_MPT_INLINE_NODE_TOO_LARGE",
+            Self::HashedNodeTooShort { .. } => "ETH_MPT_HASHED_NODE_TOO_SHORT",
             Self::LengthOverflow => "ETH_MPT_LENGTH_OVERFLOW",
             Self::InlineNodeTooDeep => "ETH_MPT_INLINE_NODE_TOO_DEEP",
         }
@@ -106,6 +127,14 @@ impl MptNodeDecodeError {
             Self::InvalidCompactPathPadding { .. } => {
                 "MPT compact path has nonzero even-path padding"
             }
+            Self::EmptyExtensionPath => "MPT extension path must contain at least one nibble",
+            Self::EmptyLeafValue => "MPT leaf value must not be empty",
+            Self::DegenerateBranch { .. } => {
+                "MPT branch must contain at least two child/value outcomes"
+            }
+            Self::NonCanonicalExtensionChild => {
+                "MPT extension child must be a canonical branch node"
+            }
             Self::EmptyNodeReference { .. } => "MPT child reference must not be empty",
             Self::InvalidNodeReferenceLength { .. } => {
                 "MPT scalar child reference must be empty or 32 bytes"
@@ -113,6 +142,7 @@ impl MptNodeDecodeError {
             Self::InlineNodeTooLarge { .. } => {
                 "MPT inline child reference must be shorter than 32 encoded bytes"
             }
+            Self::HashedNodeTooShort { .. } => "MPT hashed child must be at least 32 encoded bytes",
             Self::LengthOverflow => "MPT length arithmetic overflowed",
             Self::InlineNodeTooDeep => "MPT inline child-node depth limit exceeded",
         }
@@ -133,9 +163,14 @@ impl MptNodeDecodeError {
             | Self::EmptyCompactPath
             | Self::InvalidCompactPathFlag { .. }
             | Self::InvalidCompactPathPadding { .. }
+            | Self::EmptyExtensionPath
+            | Self::EmptyLeafValue
+            | Self::DegenerateBranch { .. }
+            | Self::NonCanonicalExtensionChild
             | Self::EmptyNodeReference { .. }
             | Self::InvalidNodeReferenceLength { .. }
             | Self::InlineNodeTooLarge { .. }
+            | Self::HashedNodeTooShort { .. }
             | Self::LengthOverflow => MptNodeDecodeErrorCategory::MalformedInput,
             Self::InlineNodeTooDeep => MptNodeDecodeErrorCategory::ResourceExhaustion,
         }

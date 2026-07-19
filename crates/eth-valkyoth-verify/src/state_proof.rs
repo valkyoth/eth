@@ -1,8 +1,11 @@
-use eth_valkyoth_codec::DecodeLimits;
+use eth_valkyoth_codec::{DecodeLimits, DecodeSession};
 use eth_valkyoth_hash::{Keccak256, hash_one};
 use eth_valkyoth_primitives::{Address, B256};
 
-use crate::mpt_proof::{MptProofRoot, MptProofVerificationError, verify_key_inclusion};
+use crate::mpt_proof::{
+    MptProofRoot, MptProofVerificationError, compatibility_session, preflight_proof,
+    proof_resource_error, verify_preflighted_key_inclusion,
+};
 
 /// Ethereum state trie root hash domain.
 #[derive(Clone, Copy, Debug, Eq, PartialEq)]
@@ -131,18 +134,52 @@ pub fn verify_account_inclusion<H>(
     encoded_account: &[u8],
     proof_nodes: &[&[u8]],
     limits: DecodeLimits,
+    new_hasher: impl FnMut() -> H,
+) -> Result<VerifiedAccountInclusion, MptProofVerificationError>
+where
+    H: Keccak256,
+{
+    let mut session = compatibility_session(limits)?;
+    verify_account_inclusion_in_session(
+        root,
+        address,
+        encoded_account,
+        proof_nodes,
+        &mut session,
+        new_hasher,
+    )
+}
+
+/// Verifies account inclusion through one shared decode/work session.
+pub fn verify_account_inclusion_in_session<H>(
+    root: AccountTrieRoot,
+    address: Address,
+    encoded_account: &[u8],
+    proof_nodes: &[&[u8]],
+    session: &mut DecodeSession,
     mut new_hasher: impl FnMut() -> H,
 ) -> Result<VerifiedAccountInclusion, MptProofVerificationError>
 where
     H: Keccak256,
 {
-    let key = hash_one(new_hasher(), &address.to_bytes()).to_bytes();
-    verify_key_inclusion(
+    let address_bytes = address.to_bytes();
+    preflight_proof(
+        proof_nodes,
+        encoded_account,
+        1,
+        address_bytes.len(),
+        session,
+    )?;
+    session
+        .account_hashes(1, address_bytes.len())
+        .map_err(proof_resource_error)?;
+    let key = hash_one(new_hasher(), &address_bytes).to_bytes();
+    verify_preflighted_key_inclusion(
         root.into(),
         &key,
         encoded_account,
         proof_nodes,
-        limits,
+        session,
         new_hasher,
     )?;
     Ok(VerifiedAccountInclusion::new(address, root))
@@ -164,18 +201,52 @@ pub fn verify_storage_inclusion<H>(
     encoded_storage_value: &[u8],
     proof_nodes: &[&[u8]],
     limits: DecodeLimits,
+    new_hasher: impl FnMut() -> H,
+) -> Result<VerifiedStorageInclusion, MptProofVerificationError>
+where
+    H: Keccak256,
+{
+    let mut session = compatibility_session(limits)?;
+    verify_storage_inclusion_in_session(
+        root,
+        slot,
+        encoded_storage_value,
+        proof_nodes,
+        &mut session,
+        new_hasher,
+    )
+}
+
+/// Verifies storage inclusion through one shared decode/work session.
+pub fn verify_storage_inclusion_in_session<H>(
+    root: StorageTrieRoot,
+    slot: StorageSlotKey,
+    encoded_storage_value: &[u8],
+    proof_nodes: &[&[u8]],
+    session: &mut DecodeSession,
     mut new_hasher: impl FnMut() -> H,
 ) -> Result<VerifiedStorageInclusion, MptProofVerificationError>
 where
     H: Keccak256,
 {
-    let key = hash_one(new_hasher(), &slot.to_b256().to_bytes()).to_bytes();
-    verify_key_inclusion(
+    let slot_bytes = slot.to_b256().to_bytes();
+    preflight_proof(
+        proof_nodes,
+        encoded_storage_value,
+        1,
+        slot_bytes.len(),
+        session,
+    )?;
+    session
+        .account_hashes(1, slot_bytes.len())
+        .map_err(proof_resource_error)?;
+    let key = hash_one(new_hasher(), &slot_bytes).to_bytes();
+    verify_preflighted_key_inclusion(
         root.into(),
         &key,
         encoded_storage_value,
         proof_nodes,
-        limits,
+        session,
         new_hasher,
     )?;
     Ok(VerifiedStorageInclusion::new(slot, root))

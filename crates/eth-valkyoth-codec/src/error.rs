@@ -34,6 +34,10 @@ pub enum DecodeError {
     HashCountExceeded,
     /// A decode session hashed more bytes than its work policy permits.
     HashBytesExceeded,
+    /// A decode session inspected more trie path nibbles than permitted.
+    NibbleCountExceeded,
+    /// A decode session exposed or compared more trie value bytes than permitted.
+    ValueBytesExceeded,
     /// A decode session exceeded its aggregate work budget.
     WorkExceeded,
     /// Decode-session limits have inconsistent cross-limit relationships.
@@ -66,6 +70,8 @@ impl DecodeError {
             Self::RlpHeaderCountExceeded => "ETH_CODEC_RLP_HEADER_COUNT_EXCEEDED",
             Self::HashCountExceeded => "ETH_CODEC_HASH_COUNT_EXCEEDED",
             Self::HashBytesExceeded => "ETH_CODEC_HASH_BYTES_EXCEEDED",
+            Self::NibbleCountExceeded => "ETH_CODEC_NIBBLE_COUNT_EXCEEDED",
+            Self::ValueBytesExceeded => "ETH_CODEC_VALUE_BYTES_EXCEEDED",
             Self::WorkExceeded => "ETH_CODEC_WORK_EXCEEDED",
             Self::InvalidSessionPolicy => "ETH_CODEC_INVALID_SESSION_POLICY",
             Self::UnreviewedDeploymentPolicy => "ETH_CODEC_UNREVIEWED_DEPLOYMENT_POLICY",
@@ -93,6 +99,8 @@ impl DecodeError {
             Self::RlpHeaderCountExceeded => "decoder exceeded the RLP-header work limit",
             Self::HashCountExceeded => "decoder exceeded the hash-count work limit",
             Self::HashBytesExceeded => "decoder exceeded the hashed-byte work limit",
+            Self::NibbleCountExceeded => "decoder exceeded the trie-nibble work limit",
+            Self::ValueBytesExceeded => "decoder exceeded the trie-value byte limit",
             Self::WorkExceeded => "decoder exceeded the aggregate work limit",
             Self::InvalidSessionPolicy => "decode-session policy relationships are invalid",
             Self::UnreviewedDeploymentPolicy => {
@@ -117,6 +125,8 @@ impl DecodeError {
             | Self::RlpHeaderCountExceeded
             | Self::HashCountExceeded
             | Self::HashBytesExceeded
+            | Self::NibbleCountExceeded
+            | Self::ValueBytesExceeded
             | Self::WorkExceeded
             | Self::InvalidSessionPolicy
             | Self::UnreviewedDeploymentPolicy => DecodeErrorCategory::ResourceExhaustion,
@@ -145,6 +155,8 @@ impl DecodeError {
             Self::RlpHeaderCountExceeded => Some(ResourceError::RlpHeaders),
             Self::HashCountExceeded => Some(ResourceError::Hashes),
             Self::HashBytesExceeded => Some(ResourceError::HashBytes),
+            Self::NibbleCountExceeded => Some(ResourceError::Nibbles),
+            Self::ValueBytesExceeded => Some(ResourceError::ValueBytes),
             Self::WorkExceeded => Some(ResourceError::TotalWork),
             Self::InvalidSessionPolicy => Some(ResourceError::SessionPolicy),
             Self::UnreviewedDeploymentPolicy => Some(ResourceError::DeploymentPolicy),
@@ -202,6 +214,10 @@ pub enum ResourceError {
     Hashes,
     /// Cumulative hashed-byte limit was exceeded.
     HashBytes,
+    /// Cumulative trie-path nibble limit was exceeded.
+    Nibbles,
+    /// Cumulative trie-value byte limit was exceeded.
+    ValueBytes,
     /// Aggregate decode-work limit was exceeded.
     TotalWork,
     /// Decode-session policy relationships were invalid.
@@ -225,6 +241,8 @@ impl ResourceError {
             Self::RlpHeaders => "ETH_RESOURCE_RLP_HEADERS",
             Self::Hashes => "ETH_RESOURCE_HASHES",
             Self::HashBytes => "ETH_RESOURCE_HASH_BYTES",
+            Self::Nibbles => "ETH_RESOURCE_NIBBLES",
+            Self::ValueBytes => "ETH_RESOURCE_VALUE_BYTES",
             Self::TotalWork => "ETH_RESOURCE_TOTAL_WORK",
             Self::SessionPolicy => "ETH_RESOURCE_SESSION_POLICY",
             Self::DeploymentPolicy => "ETH_RESOURCE_DEPLOYMENT_POLICY",
@@ -245,6 +263,8 @@ impl ResourceError {
             Self::RlpHeaders => "RLP-header visit budget exceeded",
             Self::Hashes => "hash-count budget exceeded",
             Self::HashBytes => "hashed-byte budget exceeded",
+            Self::Nibbles => "trie-path nibble budget exceeded",
+            Self::ValueBytes => "trie-value byte budget exceeded",
             Self::TotalWork => "aggregate decode-work budget exceeded",
             Self::SessionPolicy => "decode-session policy is inconsistent",
             Self::DeploymentPolicy => "deployment policy review required",

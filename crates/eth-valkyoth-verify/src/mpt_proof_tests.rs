@@ -1,8 +1,8 @@
 extern crate std;
 
-use std::{vec, vec::Vec};
+use std::{cell::Cell, vec, vec::Vec};
 
-use eth_valkyoth_codec::DecodeLimits;
+use eth_valkyoth_codec::{DecodeLimits, DecodeSession, DecodeSessionPolicy};
 use eth_valkyoth_hash::Keccak256Digest;
 
 use super::*;
@@ -182,7 +182,7 @@ fn rejects_trailing_proof_nodes() -> Result<(), &'static str> {
     let key = index_key(0)?;
     let value = tx_value();
     let root_node = leaf_node(&key, &value);
-    let extra = leaf_node(&key, b"extra");
+    let extra = leaf_node(&key, &receipt_value());
     let root = TransactionTrieRoot::from_b256(test_hash(&root_node));
     let proof = [&root_node[..], &extra[..]];
 
@@ -194,33 +194,111 @@ fn rejects_trailing_proof_nodes() -> Result<(), &'static str> {
 }
 
 #[test]
-fn rejects_proof_walk_beyond_fixed_depth_cap() -> Result<(), &'static str> {
+fn rejects_redundant_hashed_extension() -> Result<(), &'static str> {
     let key = index_key(0)?;
     let value = tx_value();
-    let mut proof_nodes = vec![leaf_node(&key, &value)];
-    for _ in 0..MAX_PROOF_WALK_DEPTH {
-        let child = proof_nodes.first().ok_or("proof node exists")?;
-        let child_hash = test_hash(child).to_bytes();
-        proof_nodes.insert(0, extension_node_hash(&child_hash));
-    }
-    let root_node = proof_nodes.first().ok_or("root node exists")?;
-    let root = TransactionTrieRoot::from_b256(test_hash(root_node));
-    let proof = proof_nodes
-        .iter()
-        .map(Vec::as_slice)
-        .collect::<Vec<&[u8]>>();
-    let limits = DecodeLimits {
-        max_input_bytes: 4096,
-        max_list_items: 256,
-        max_nesting_depth: 16,
-        max_total_allocation: 16_384,
-        max_proof_nodes: 256,
-        max_total_items: 1024,
-    };
+    let leaf = leaf_node(&key, &value);
+    let leaf_hash = test_hash(&leaf).to_bytes();
+    let redundant = extension_node_hash(0x00, &leaf_hash);
+    let redundant_hash = test_hash(&redundant).to_bytes();
+    let root_node = extension_node_hash(0x08, &redundant_hash);
+    let root = TransactionTrieRoot::from_b256(test_hash(&root_node));
+    let proof = [&root_node[..], &redundant[..], &leaf[..]];
+    let calls = Cell::new(0usize);
 
-    let error = verify_transaction_inclusion(root, 0, &value, &proof, limits, TestHasher::default);
+    let error = verify_transaction_inclusion(root, 0, &value, &proof, TEST_LIMITS, || {
+        calls.set(calls.get().saturating_add(1));
+        TestHasher::default()
+    });
 
-    assert_eq!(error, Err(MptProofVerificationError::ProofTooDeep));
+    assert_eq!(
+        error,
+        Err(MptProofVerificationError::MalformedNode(
+            MptNodeDecodeError::NonCanonicalExtensionChild
+        ))
+    );
+    assert_eq!(calls.get(), 0);
+    Ok(())
+}
+
+#[test]
+fn preflight_rejects_malformed_trailing_node_before_hashing() -> Result<(), &'static str> {
+    let key = index_key(0)?;
+    let value = tx_value();
+    let root_node = leaf_node(&key, &value);
+    let malformed = [0xc0_u8];
+    let root = TransactionTrieRoot::from_b256(test_hash(&root_node));
+    let proof = [&root_node[..], &malformed[..]];
+    let calls = Cell::new(0usize);
+
+    let error = verify_transaction_inclusion(root, 0, &value, &proof, TEST_LIMITS, || {
+        calls.set(calls.get().saturating_add(1));
+        TestHasher::default()
+    });
+
+    assert!(matches!(
+        error,
+        Err(MptProofVerificationError::MalformedNode(_))
+    ));
+    assert_eq!(calls.get(), 0);
+    Ok(())
+}
+
+#[test]
+fn preflight_rejects_hash_budget_before_hashing() -> Result<(), &'static str> {
+    let key = index_key(0)?;
+    let value = tx_value();
+    let root_node = leaf_node(&key, &value);
+    let root = TransactionTrieRoot::from_b256(test_hash(&root_node));
+    let proof = [&root_node[..]];
+    let policy =
+        DecodeSessionPolicy::reviewed_policy(TEST_LIMITS, 4096, 1024, 0, 4096, 4096, 4096, 16_384)
+            .map_err(|_| "policy")?;
+    let mut session = DecodeSession::new(policy).map_err(|_| "session")?;
+    let calls = Cell::new(0usize);
+
+    let error =
+        verify_transaction_inclusion_in_session(root, 0, &value, &proof, &mut session, || {
+            calls.set(calls.get().saturating_add(1));
+            TestHasher::default()
+        });
+
+    assert!(matches!(
+        error,
+        Err(MptProofVerificationError::MalformedNode(_))
+    ));
+    assert_eq!(calls.get(), 0);
+    assert_eq!(session.hashes(), 0);
+    Ok(())
+}
+
+#[test]
+fn shared_session_accounts_complete_leaf_proof_work() -> Result<(), &'static str> {
+    let key = index_key(0)?;
+    let value = tx_value();
+    let root_node = leaf_node(&key, &value);
+    let root = TransactionTrieRoot::from_b256(test_hash(&root_node));
+    let proof = [&root_node[..]];
+    let policy =
+        DecodeSessionPolicy::reviewed_policy(TEST_LIMITS, 4096, 1024, 8, 4096, 4096, 4096, 16_384)
+            .map_err(|_| "policy")?;
+    let mut session = DecodeSession::new(policy).map_err(|_| "session")?;
+
+    verify_transaction_inclusion_in_session(
+        root,
+        0,
+        &value,
+        &proof,
+        &mut session,
+        TestHasher::default,
+    )
+    .map_err(|_| "proof verifies")?;
+
+    assert_eq!(session.proof_nodes(), 1);
+    assert_eq!(session.hashes(), 1);
+    assert_eq!(session.hash_bytes(), root_node.len());
+    assert_eq!(session.nibbles(), 6);
+    assert_eq!(session.value_bytes(), value.len().saturating_mul(5));
     Ok(())
 }
 
@@ -264,7 +342,10 @@ fn tx_value() -> Vec<u8> {
 }
 
 fn receipt_value() -> Vec<u8> {
-    scalar(b"receipt")
+    let payload = (0..40)
+        .map(|index| u8::try_from(index).unwrap_or(u8::MAX))
+        .collect::<Vec<_>>();
+    scalar(&payload)
 }
 
 fn leaf_node(key: &[u8], value: &[u8]) -> Vec<u8> {
@@ -275,8 +356,8 @@ fn leaf_node_from_nibbles(nibbles: &[u8], value: &[u8]) -> Vec<u8> {
     list(&[scalar(&compact_path_leaf_nibbles(nibbles)), scalar(value)])
 }
 
-fn extension_node_hash(child_hash: &[u8; 32]) -> Vec<u8> {
-    list(&[scalar(&[0x00]), scalar(child_hash)])
+fn extension_node_hash(nibble: u8, child_hash: &[u8; 32]) -> Vec<u8> {
+    list(&[scalar(&[0x10 | (nibble & 0x0f)]), scalar(child_hash)])
 }
 
 fn branch_node(child_nibble: u8, child: Vec<u8>, value: Vec<u8>) -> Vec<u8> {
@@ -289,6 +370,21 @@ fn branch_node(child_nibble: u8, child: Vec<u8>, value: Vec<u8>) -> Vec<u8> {
         }
     }
     items.push(value);
+    let mut occupied = items
+        .iter()
+        .filter(|item| item.as_slice() != [0x80])
+        .count();
+    let mut offset = 1u8;
+    while occupied < 2 {
+        let index = usize::from(child_nibble.wrapping_add(offset) & 0x0f);
+        if let Some(item) = items.get_mut(index)
+            && item.as_slice() == [0x80]
+        {
+            *item = leaf_node_from_nibbles(&[offset & 0x0f], b"d");
+            occupied = occupied.saturating_add(1);
+        }
+        offset = offset.saturating_add(1);
+    }
     list(&items)
 }
 

@@ -29,9 +29,11 @@ fn main() -> Result<(), &'static str> {
             input.len(),
             1,
             input.len(),
+            input.len(),
+            input.len(),
             input
                 .len()
-                .checked_mul(4)
+                .checked_mul(6)
                 .ok_or("benchmark work limit overflow")?,
         )
         .map_err(|_| "benchmark policy must be valid")?;

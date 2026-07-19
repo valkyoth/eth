@@ -12,12 +12,12 @@ cargo-fuzz = true
 
 [dependencies]
 alloy-rlp = "0.3.16"
-eth-valkyoth-codec = { path = "../crates/eth-valkyoth-codec", version = "0.20.0", features = ["testing"] }
+eth-valkyoth-codec = { path = "../crates/eth-valkyoth-codec", version = "0.21.0", features = ["testing"] }
 eth-valkyoth-evm-core = { path = "../crates/eth-valkyoth-evm-core", version = "0.26.1", features = ["testing"] }
-eth-valkyoth-hash = { path = "../crates/eth-valkyoth-hash", version = "0.11.3", features = ["tiny-keccak"] }
-eth-valkyoth-primitives = { path = "../crates/eth-valkyoth-primitives", version = "0.11.3" }
-eth-valkyoth-protocol = { path = "../crates/eth-valkyoth-protocol", version = "0.26.0" }
-eth-valkyoth-verify = { path = "../crates/eth-valkyoth-verify", version = "0.24.0", features = ["json", "secp256k1-k256"] }
+eth-valkyoth-hash = { path = "../crates/eth-valkyoth-hash", version = "0.11.4", features = ["tiny-keccak"] }
+eth-valkyoth-primitives = { path = "../crates/eth-valkyoth-primitives", version = "0.11.4" }
+eth-valkyoth-protocol = { path = "../crates/eth-valkyoth-protocol", version = "0.26.1" }
+eth-valkyoth-verify = { path = "../crates/eth-valkyoth-verify", version = "0.25.0", features = ["json", "secp256k1-k256"] }
 libfuzzer-sys = "0.4.13"
 
 [[bin]]

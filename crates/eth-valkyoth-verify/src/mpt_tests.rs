@@ -21,17 +21,19 @@ const TEST_LIMITS: DecodeLimits = DecodeLimits {
 };
 
 fn test_session() -> Result<DecodeSession, &'static str> {
-    let policy = DecodeSessionPolicy::reviewed_policy(TEST_LIMITS, 4096, 1024, 8, 4096, 16_384)
-        .map_err(|_| "session policy must be valid")?;
+    let policy =
+        DecodeSessionPolicy::reviewed_policy(TEST_LIMITS, 4096, 1024, 8, 4096, 4096, 4096, 16_384)
+            .map_err(|_| "session policy must be valid")?;
     DecodeSession::new(policy).map_err(|_| "session must initialize")
 }
 
 #[test]
 fn shared_session_accounts_proof_parse_and_semantic_pass() -> Result<(), &'static str> {
-    let items: Vec<Vec<u8>> = core::iter::repeat_with(empty).take(17).collect();
+    let items = canonical_branch_items()?;
     let node = list(&items)?;
-    let policy = DecodeSessionPolicy::reviewed_policy(TEST_LIMITS, 4096, 1024, 8, 4096, 16_384)
-        .map_err(|_| "session policy must be valid")?;
+    let policy =
+        DecodeSessionPolicy::reviewed_policy(TEST_LIMITS, 4096, 1024, 8, 4096, 4096, 4096, 16_384)
+            .map_err(|_| "session policy must be valid")?;
     let mut session = DecodeSession::new(policy).map_err(|_| "session must initialize")?;
 
     decode_mpt_node_in_session(&node, &mut session)
@@ -44,8 +46,8 @@ fn shared_session_accounts_proof_parse_and_semantic_pass() -> Result<(), &'stati
 }
 
 #[test]
-fn decodes_branch_node_with_empty_children() -> Result<(), &'static str> {
-    let items: Vec<Vec<u8>> = core::iter::repeat_with(empty).take(17).collect();
+fn decodes_branch_node_with_two_outcomes() -> Result<(), &'static str> {
+    let items = canonical_branch_items()?;
     let node = list(&items)?;
     let decoded = decode_ok(&node)?;
     let MptNode::Branch(branch) = decoded else {
@@ -53,12 +55,22 @@ fn decodes_branch_node_with_empty_children() -> Result<(), &'static str> {
     };
 
     assert_eq!(branch.children().count(), MPT_BRANCH_CHILD_COUNT);
-    for child in branch.children() {
-        assert_eq!(
-            child.map_err(|_| "branch child must decode")?,
-            MptNodeReference::Empty
-        );
-    }
+    assert!(matches!(
+        branch
+            .children()
+            .next()
+            .ok_or("first child")?
+            .map_err(|_| "first child decodes")?,
+        MptNodeReference::Inline(_)
+    ));
+    assert!(matches!(
+        branch
+            .children()
+            .nth(1)
+            .ok_or("second child")?
+            .map_err(|_| "second child decodes")?,
+        MptNodeReference::Inline(_)
+    ));
     assert_eq!(branch.value(), &[] as &[u8]);
     Ok(())
 }
@@ -80,15 +92,15 @@ fn decodes_leaf_node_with_even_compact_path() -> Result<(), &'static str> {
 
 #[test]
 fn decodes_extension_node_with_hash_reference() -> Result<(), &'static str> {
-    let node = list(&[scalar(&[0x00])?, scalar(&hash_bytes())?])?;
+    let node = list(&[scalar(&[0x11])?, scalar(&hash_bytes())?])?;
     let decoded = decode_ok(&node)?;
     let MptNode::Extension(extension) = decoded else {
         return Err("extension fixture must decode as extension");
     };
 
     assert_eq!(extension.path.kind, MptCompactPathKind::Extension);
-    assert!(!extension.path.has_odd_nibbles());
-    assert_eq!(extension.path.nibble_count().map_err(|_| "nibbles")?, 0);
+    assert!(extension.path.has_odd_nibbles());
+    assert_eq!(extension.path.nibble_count().map_err(|_| "nibbles")?, 1);
     assert!(matches!(extension.child, MptNodeReference::Hash(_)));
     Ok(())
 }
@@ -96,12 +108,17 @@ fn decodes_extension_node_with_hash_reference() -> Result<(), &'static str> {
 #[test]
 fn decodes_inline_reference_without_recursive_budget_growth() -> Result<(), &'static str> {
     let inline = list(&[scalar(&[0x20])?, scalar(b"v")?])?;
-    let parent = list(&[scalar(&[0x11])?, inline])?;
+    let parent = branch_with_inline_children(inline)?;
     let decoded = decode_ok(&parent)?;
-    let MptNode::Extension(extension) = decoded else {
-        return Err("parent fixture must decode as extension");
+    let MptNode::Branch(branch) = decoded else {
+        return Err("parent fixture must decode as branch");
     };
-    let MptNodeReference::Inline(inline) = extension.child else {
+    let MptNodeReference::Inline(inline) = branch
+        .children()
+        .next()
+        .ok_or("first child")?
+        .map_err(|_| "first child decodes")?
+    else {
         return Err("child fixture must decode as inline");
     };
 
@@ -115,14 +132,19 @@ fn decodes_inline_reference_without_recursive_budget_growth() -> Result<(), &'st
 #[test]
 fn inline_reference_session_decode_charges_reparse() -> Result<(), &'static str> {
     let inline = list(&[scalar(&[0x20])?, scalar(b"v")?])?;
-    let parent = list(&[scalar(&[0x11])?, inline])?;
+    let parent = branch_with_inline_children(inline)?;
     let mut session = test_session()?;
     let decoded = decode_mpt_node_in_session(&parent, &mut session)
         .map_err(|_| "parent fixture must decode")?;
-    let MptNode::Extension(extension) = decoded else {
-        return Err("parent fixture must be extension");
+    let MptNode::Branch(branch) = decoded else {
+        return Err("parent fixture must be branch");
     };
-    let MptNodeReference::Inline(inline) = extension.child else {
+    let MptNodeReference::Inline(inline) = branch
+        .children()
+        .next()
+        .ok_or("first child")?
+        .map_err(|_| "first child decodes")?
+    else {
         return Err("child fixture must be inline");
     };
     let before = session.total_work();
@@ -198,7 +220,7 @@ fn rejects_nonzero_even_path_padding() -> Result<(), &'static str> {
 
 #[test]
 fn rejects_empty_extension_child_reference() -> Result<(), &'static str> {
-    let node = list(&[scalar(&[0x00])?, empty()])?;
+    let node = list(&[scalar(&[0x11])?, empty()])?;
     assert_eq!(
         decode_mpt_node(&node, TEST_LIMITS),
         Err(MptNodeDecodeError::EmptyNodeReference {
@@ -210,13 +232,44 @@ fn rejects_empty_extension_child_reference() -> Result<(), &'static str> {
 
 #[test]
 fn rejects_short_scalar_child_reference() -> Result<(), &'static str> {
-    let node = list(&[scalar(&[0x00])?, scalar(&[1, 2])?])?;
+    let node = list(&[scalar(&[0x11])?, scalar(&[1, 2])?])?;
     assert_eq!(
         decode_mpt_node(&node, TEST_LIMITS),
         Err(MptNodeDecodeError::InvalidNodeReferenceLength {
             field: MptNodeField::ExtensionChild,
             found: 2
         })
+    );
+    Ok(())
+}
+
+#[test]
+fn rejects_zero_nibble_extension() -> Result<(), &'static str> {
+    let node = list(&[scalar(&[0x00])?, scalar(&hash_bytes())?])?;
+    assert_eq!(
+        decode_mpt_node(&node, TEST_LIMITS),
+        Err(MptNodeDecodeError::EmptyExtensionPath)
+    );
+    Ok(())
+}
+
+#[test]
+fn rejects_empty_leaf_value() -> Result<(), &'static str> {
+    let node = list(&[scalar(&[0x20])?, empty()])?;
+    assert_eq!(
+        decode_mpt_node(&node, TEST_LIMITS),
+        Err(MptNodeDecodeError::EmptyLeafValue)
+    );
+    Ok(())
+}
+
+#[test]
+fn rejects_degenerate_branch() -> Result<(), &'static str> {
+    let items: Vec<Vec<u8>> = core::iter::repeat_with(empty).take(17).collect();
+    let node = list(&items)?;
+    assert_eq!(
+        decode_mpt_node(&node, TEST_LIMITS),
+        Err(MptNodeDecodeError::DegenerateBranch { occupied: 0 })
     );
     Ok(())
 }
@@ -261,6 +314,23 @@ fn decode_ok(input: &[u8]) -> Result<MptNode<'_>, &'static str> {
 
 fn hash_bytes() -> [u8; 32] {
     core::array::from_fn(|index| u8::try_from(index).unwrap_or(0).wrapping_add(1))
+}
+
+fn canonical_branch_items() -> Result<Vec<Vec<u8>>, &'static str> {
+    let first = list(&[scalar(&[0x20])?, scalar(b"a")?])?;
+    let second = list(&[scalar(&[0x20])?, scalar(b"b")?])?;
+    let mut items: Vec<Vec<u8>> = core::iter::repeat_with(empty).take(17).collect();
+    *items.get_mut(0).ok_or("first branch slot")? = first;
+    *items.get_mut(1).ok_or("second branch slot")? = second;
+    Ok(items)
+}
+
+fn branch_with_inline_children(first: Vec<u8>) -> Result<Vec<u8>, &'static str> {
+    let second = list(&[scalar(&[0x20])?, scalar(b"w")?])?;
+    let mut items: Vec<Vec<u8>> = core::iter::repeat_with(empty).take(17).collect();
+    *items.get_mut(0).ok_or("first branch slot")? = first;
+    *items.get_mut(1).ok_or("second branch slot")? = second;
+    list(&items)
 }
 
 fn empty() -> Vec<u8> {

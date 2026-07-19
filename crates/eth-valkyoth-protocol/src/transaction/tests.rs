@@ -40,7 +40,7 @@ fn shared_session_accounts_composite_access_list_decode() -> Result<(), &'static
         max_total_items: 128,
         ..TEST_LIMITS
     };
-    let policy = DecodeSessionPolicy::reviewed_policy(limits, 1024, 256, 4, 128, 4096);
+    let policy = DecodeSessionPolicy::reviewed_policy(limits, 1024, 256, 4, 128, 128, 128, 4096);
     let mut session = policy
         .and_then(DecodeSession::new)
         .map_err(|_| "test policy must be valid")?;
