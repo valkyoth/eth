@@ -872,6 +872,9 @@ policy accumulates encoded bytes, headers, items, nesting, allocation
 capacity, proof nodes, hashes, hash bytes, and total work across nested
 transaction and proof consumers. See the
 [shared decode session contract](https://github.com/valkyoth/eth/blob/main/docs/decode-session.md).
+Callers traversing borrowed nested models from untrusted input must continue
+using the documented `*_in_session` methods; compatibility iterators are only
+for trusted or independently bounded data.
 
 ```rust
 use eth::codec::{
@@ -1158,7 +1161,7 @@ Compatibility evidence for `0.52.3`:
 
 ```bash
 scripts/checks.sh
-scripts/release_0_52_2_gate.sh
+scripts/release_0_52_3_gate.sh
 ```
 
 For dependency-policy checks, install `cargo-deny` and `cargo-audit`, then run:

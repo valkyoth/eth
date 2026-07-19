@@ -1,6 +1,7 @@
 # Release Notes - eth v0.52.3
 
-Status: implementation complete; independent pentest pending.
+Status: implementation complete; pentest findings remediated; clean retest
+complete; final release gate and GitHub checks pending.
 
 ## Summary
 
@@ -69,10 +70,19 @@ or complete MPT proof preflight, which is the next planned release.
 - `cargo test -p eth-valkyoth-codec -p eth-valkyoth-protocol -p eth-valkyoth-verify --all-features`
 - `cargo clippy -p eth-valkyoth-codec -p eth-valkyoth-protocol -p eth-valkyoth-verify --all-targets --all-features -- -D warnings`
 - `cargo check --manifest-path fuzz/Cargo.toml --all-targets`
-- Full workspace and release-gate verification remains required before tag.
+- The exact full release gate and green GitHub checks remain required before
+  tag.
 
 ## Pentest
 
-This exact implementation commit must be independently pentested. Findings,
-remediation, and clean retest evidence will be recorded in
-`security/pentest/v0.52.3.md` before release.
+The independent review found three Medium resource-accounting/capability gaps
+and one Low cross-limit policy-validation gap. The remediation pre-charges
+nested recount work, consumes already charged EIP-7702 fields, adds charged
+borrowed-model traversal, and validates every component ceiling against total
+work. The clean retest found no unresolved issue.
+
+The permanent report is recorded at `security/pentest/v0.52.3.md`. External
+consumers processing untrusted data must use the `*_in_session` traversal APIs;
+the explicit compatibility iterators remain intended only for trusted or
+independently bounded data. Compile-time hardening of that integration boundary
+is assigned to `v0.54.4`.

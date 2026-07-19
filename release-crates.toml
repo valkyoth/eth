@@ -7,7 +7,7 @@ previous_version = "0.19.0"
 version = "0.20.0"
 change = "code"
 publish = true
-reason = "Adds the public non-copyable DecodeSession policy, cumulative work ledger, atomic reparse charging, and session-aware RLP APIs."
+reason = "Adds the public non-copyable DecodeSession policy, cumulative work ledger, atomic pre-charged nested recounts, and session-aware RLP APIs."
 
 [crates."eth-valkyoth-primitives"]
 previous_version = "0.11.2"
@@ -28,14 +28,14 @@ previous_version = "0.25.2"
 version = "0.26.0"
 change = "code"
 publish = true
-reason = "Adds public session-aware envelope and transaction decoders across every supported transaction family and nested substructure."
+reason = "Adds public session-aware envelope and transaction decoders plus charged borrowed traversal across every supported transaction family and nested substructure."
 
 [crates."eth-valkyoth-verify"]
 previous_version = "0.23.0"
 version = "0.24.0"
 change = "code"
 publish = true
-reason = "Adds public shared-session MPT node and proof-node syntax decoding and updates protocol dependencies."
+reason = "Adds public shared-session MPT node and proof-node syntax decoding, charged inline-node traversal, and updated protocol dependencies."
 
 [crates."eth-valkyoth-derive"]
 previous_version = "0.17.3"

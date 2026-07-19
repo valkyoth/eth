@@ -1,7 +1,7 @@
 # Current Status
 
-Release snapshot: `v0.52.3` implementation complete; independent pentest
-pending.
+Release snapshot: `v0.52.3` implementation and clean pentest retest complete;
+final release gate and GitHub checks pending.
 
 This document summarizes what the workspace can do now. The
 [Specification Matrix](SPEC_MATRIX.md) is the source of truth for exact
