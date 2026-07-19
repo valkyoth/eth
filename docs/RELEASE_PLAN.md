@@ -2742,7 +2742,8 @@ Exit criteria:
 
 ### v0.52.4 - MPT Proof Preflight And Strict Canonicality
 
-Status: implementation complete; pentest pending.
+Status: release candidate; pentest remediation and clean retest complete;
+awaiting green GitHub CI and CodeQL before tagging.
 
 Goal: reject over-budget or locally non-canonical trie proofs before hashing
 attacker-controlled node bytes.

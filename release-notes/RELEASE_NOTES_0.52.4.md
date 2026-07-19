@@ -1,6 +1,6 @@
 # Release Notes - eth v0.52.4
 
-Status: implementation complete; pentest pending.
+Status: release candidate; pentest remediation and clean retest complete.
 
 ## Summary
 
@@ -83,6 +83,8 @@ account/storage authority and canonical account decoding are assigned to
 
 ## Pentest
 
-An independent pentest and clean retest are mandatory before this release can
-be tagged. The permanent report will be recorded at
-`security/pentest/v0.52.4.md`.
+The independent pentest found two Medium resource-accounting issues and one
+Low transferable-charge issue. All findings were remediated, focused
+regression coverage was added, and the final retest found no remaining
+Critical, High, Medium, or Low security issue. The permanent PASS report is
+recorded at `security/pentest/v0.52.4.md`.
