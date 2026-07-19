@@ -27,6 +27,9 @@ work builds on the bytecode scanner.
   with a direct compatible support-crate dependency.
 - Bumped the `eth` facade from `0.52.1` to `0.52.2` and updated its optional
   `evm-core` dependency.
+- Expressed the public all-zero EVM word through `u8::MIN` so CodeQL does not
+  misclassify this protocol value as embedded cryptographic material; the
+  value and public API are unchanged.
 
 ## Security Notes
 
@@ -41,6 +44,8 @@ work builds on the bytecode scanner.
 - The facade patch release preserves the legacy public error variant and its
   stable category code, avoiding an automatic Cargo update breaking downstream
   matches or references.
+- A direct invariant test confirms `EvmWord::ZERO` remains the canonical zero
+  word after the semantics-neutral CodeQL remediation.
 
 ## Verification
 

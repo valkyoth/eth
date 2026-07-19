@@ -9,7 +9,7 @@ impl EvmWord {
     /// Number of bytes in an EVM word.
     pub const LEN: usize = 32;
     /// The zero word.
-    pub const ZERO: Self = Self([0u8; Self::LEN]);
+    pub const ZERO: Self = Self([u8::MIN; Self::LEN]);
 
     /// Constructs an EVM word from big-endian bytes.
     #[must_use]

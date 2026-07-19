@@ -18,6 +18,7 @@ fn stack_push_pop_tracks_depth_and_clears_slots() -> Result<(), EvmCoreError> {
     let mut stack = EvmStack::<2>::try_new()?;
     let word = EvmWord::from_be_bytes([7u8; EvmWord::LEN]);
 
+    assert!(EvmWord::ZERO.is_zero());
     assert!(stack.is_empty());
     stack.push(word)?;
     assert_eq!(stack.len(), 1);
