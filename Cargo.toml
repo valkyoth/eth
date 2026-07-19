@@ -48,7 +48,7 @@ alloy-rlp = { version = "0.3.16", default-features = false }
 eth-valkyoth-codec = { path = "crates/eth-valkyoth-codec", version = "0.19.0" }
 eth-valkyoth-derive = { path = "crates/eth-valkyoth-derive", version = "0.17.3" }
 eth-valkyoth-evm = { path = "crates/eth-valkyoth-evm", version = "0.10.0" }
-eth-valkyoth-evm-core = { path = "crates/eth-valkyoth-evm-core", version = "0.27.0" }
+eth-valkyoth-evm-core = { path = "crates/eth-valkyoth-evm-core", version = "0.26.1" }
 eth-valkyoth-hash = { path = "crates/eth-valkyoth-hash", version = "0.11.2" }
 eth-valkyoth-primitives = { path = "crates/eth-valkyoth-primitives", version = "0.11.2" }
 eth-valkyoth-protocol = { path = "crates/eth-valkyoth-protocol", version = "0.25.2" }

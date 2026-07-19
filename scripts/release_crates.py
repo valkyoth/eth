@@ -19,7 +19,7 @@ except ModuleNotFoundError:  # pragma: no cover - release host guard.
 
 ROOT = Path(__file__).resolve().parents[1]
 DEFAULT_PLAN = ROOT / "release-crates.toml"
-CHANGE_KINDS = ("code", "dependency", "metadata", "unchanged")
+CHANGE_KINDS = ("code", "bugfix", "dependency", "metadata", "unchanged")
 
 PUBLISH_ORDER = (
     "eth-valkyoth-codec",
@@ -151,6 +151,17 @@ def validate_plan_entry(package_name: str, entry: dict, release: str) -> None:
             )
         if not publish:
             raise RuntimeError(f"{package_name} has code changes but publish is false")
+    elif change == "bugfix":
+        if package_name == "eth":
+            raise RuntimeError("eth bug fixes must use the milestone code version")
+        expected = (previous_version[0], previous_version[1], previous_version[2] + 1)
+        if planned_version != expected:
+            raise RuntimeError(
+                f"{package_name} has an API-compatible bug fix, so independent "
+                f"support-crate version must be {expected[0]}.{expected[1]}.{expected[2]}"
+            )
+        if not publish:
+            raise RuntimeError(f"{package_name} has a bug fix but publish is false")
     elif change == "metadata":
         if planned_version != release_parts:
             raise RuntimeError(

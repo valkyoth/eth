@@ -22,8 +22,9 @@ work builds on the bytecode scanner.
 - Retained `EvmCoreError::PushImmediateOutOfBounds` as a hidden legacy
   compatibility variant while ensuring no production execution path returns
   it; truncated PUSH is valid Ethereum bytecode, not an execution error.
-- Minor-bumped `eth-valkyoth-evm-core` from `0.26.0` to `0.27.0` for the public
-  error-domain and consensus-behavior change.
+- Patch-bumped `eth-valkyoth-evm-core` from `0.26.0` to `0.26.1` for the
+  API-compatible consensus bug fix, preserving type identity for facade users
+  with a direct compatible support-crate dependency.
 - Bumped the `eth` facade from `0.52.1` to `0.52.2` and updated its optional
   `evm-core` dependency.
 

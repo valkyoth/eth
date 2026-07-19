@@ -1,20 +1,20 @@
 {
   "SPDXID": "SPDXRef-DOCUMENT",
   "creationInfo": {
-    "created": "2026-07-19T07:19:17Z",
+    "created": "2026-07-19T07:57:07Z",
     "creators": [
       "Tool: cargo-sbom-v0.10.0"
     ]
   },
   "dataLicense": "CC0-1.0",
-  "documentNamespace": "https://spdx.org/spdxdocs/eth-0590682f-03cd-40f9-a717-689dfc8610f9",
+  "documentNamespace": "https://spdx.org/spdxdocs/eth-91d66019-dff0-40ae-a783-5ce307aebfe8",
   "files": [
     {
       "SPDXID": "SPDXRef-File-eth",
       "checksums": [
         {
           "algorithm": "SHA1",
-          "checksumValue": "139d301233ea7f741390dc700e2743a31fab8c20"
+          "checksumValue": "8649b74f653ce6be6a4f5f1f63982d128ebc2581"
         }
       ],
       "fileName": "./Cargo.lock",
@@ -28,7 +28,7 @@
       "checksums": [
         {
           "algorithm": "SHA1",
-          "checksumValue": "139d301233ea7f741390dc700e2743a31fab8c20"
+          "checksumValue": "8649b74f653ce6be6a4f5f1f63982d128ebc2581"
         }
       ],
       "fileName": "./Cargo.lock",
@@ -42,7 +42,7 @@
       "checksums": [
         {
           "algorithm": "SHA1",
-          "checksumValue": "139d301233ea7f741390dc700e2743a31fab8c20"
+          "checksumValue": "8649b74f653ce6be6a4f5f1f63982d128ebc2581"
         }
       ],
       "fileName": "./Cargo.lock",
@@ -56,7 +56,7 @@
       "checksums": [
         {
           "algorithm": "SHA1",
-          "checksumValue": "139d301233ea7f741390dc700e2743a31fab8c20"
+          "checksumValue": "8649b74f653ce6be6a4f5f1f63982d128ebc2581"
         }
       ],
       "fileName": "./Cargo.lock",
@@ -70,7 +70,7 @@
       "checksums": [
         {
           "algorithm": "SHA1",
-          "checksumValue": "139d301233ea7f741390dc700e2743a31fab8c20"
+          "checksumValue": "8649b74f653ce6be6a4f5f1f63982d128ebc2581"
         }
       ],
       "fileName": "./Cargo.lock",
@@ -84,7 +84,7 @@
       "checksums": [
         {
           "algorithm": "SHA1",
-          "checksumValue": "139d301233ea7f741390dc700e2743a31fab8c20"
+          "checksumValue": "8649b74f653ce6be6a4f5f1f63982d128ebc2581"
         }
       ],
       "fileName": "./Cargo.lock",
@@ -98,7 +98,7 @@
       "checksums": [
         {
           "algorithm": "SHA1",
-          "checksumValue": "139d301233ea7f741390dc700e2743a31fab8c20"
+          "checksumValue": "8649b74f653ce6be6a4f5f1f63982d128ebc2581"
         }
       ],
       "fileName": "./Cargo.lock",
@@ -112,7 +112,7 @@
       "checksums": [
         {
           "algorithm": "SHA1",
-          "checksumValue": "139d301233ea7f741390dc700e2743a31fab8c20"
+          "checksumValue": "8649b74f653ce6be6a4f5f1f63982d128ebc2581"
         }
       ],
       "fileName": "./Cargo.lock",
@@ -126,7 +126,7 @@
       "checksums": [
         {
           "algorithm": "SHA1",
-          "checksumValue": "139d301233ea7f741390dc700e2743a31fab8c20"
+          "checksumValue": "8649b74f653ce6be6a4f5f1f63982d128ebc2581"
         }
       ],
       "fileName": "./Cargo.lock",
@@ -140,7 +140,7 @@
       "checksums": [
         {
           "algorithm": "SHA1",
-          "checksumValue": "139d301233ea7f741390dc700e2743a31fab8c20"
+          "checksumValue": "8649b74f653ce6be6a4f5f1f63982d128ebc2581"
         }
       ],
       "fileName": "./Cargo.lock",
@@ -154,7 +154,7 @@
       "checksums": [
         {
           "algorithm": "SHA1",
-          "checksumValue": "139d301233ea7f741390dc700e2743a31fab8c20"
+          "checksumValue": "8649b74f653ce6be6a4f5f1f63982d128ebc2581"
         }
       ],
       "fileName": "./Cargo.lock",
@@ -168,7 +168,7 @@
       "checksums": [
         {
           "algorithm": "SHA1",
-          "checksumValue": "139d301233ea7f741390dc700e2743a31fab8c20"
+          "checksumValue": "8649b74f653ce6be6a4f5f1f63982d128ebc2581"
         }
       ],
       "fileName": "./Cargo.lock",
@@ -182,7 +182,7 @@
       "checksums": [
         {
           "algorithm": "SHA1",
-          "checksumValue": "139d301233ea7f741390dc700e2743a31fab8c20"
+          "checksumValue": "8649b74f653ce6be6a4f5f1f63982d128ebc2581"
         }
       ],
       "fileName": "./Cargo.lock",
@@ -195,129 +195,20 @@
   "name": "eth",
   "packages": [
     {
-      "SPDXID": "SPDXRef-Package-signature-3.0.0",
-      "description": "Traits for cryptographic signature algorithms (e.g. ECDSA, Ed25519)",
+      "SPDXID": "SPDXRef-Package-itoa-1.0.18",
+      "description": "Fast integer primitive to string conversion",
       "downloadLocation": "registry+https://github.com/rust-lang/crates.io-index",
       "externalRefs": [
         {
           "referenceCategory": "PACKAGE-MANAGER",
-          "referenceLocator": "pkg:cargo/signature@3.0.0",
-          "referenceType": "purl"
-        }
-      ],
-      "licenseConcluded": "Apache-2.0 OR MIT",
-      "licenseDeclared": "Apache-2.0 OR MIT",
-      "name": "signature",
-      "versionInfo": "3.0.0"
-    },
-    {
-      "SPDXID": "SPDXRef-Package-sha2-0.11.0",
-      "description": "Pure Rust implementation of the SHA-2 hash function family\nincluding SHA-224, SHA-256, SHA-384, and SHA-512.\n",
-      "downloadLocation": "registry+https://github.com/rust-lang/crates.io-index",
-      "externalRefs": [
-        {
-          "referenceCategory": "PACKAGE-MANAGER",
-          "referenceLocator": "pkg:cargo/sha2@0.11.0",
+          "referenceLocator": "pkg:cargo/itoa@1.0.18",
           "referenceType": "purl"
         }
       ],
       "licenseConcluded": "MIT OR Apache-2.0",
       "licenseDeclared": "MIT OR Apache-2.0",
-      "name": "sha2",
-      "versionInfo": "0.11.0"
-    },
-    {
-      "SPDXID": "SPDXRef-Package-const-oid-0.10.2",
-      "description": "Const-friendly implementation of the ISO/IEC Object Identifier (OID) standard\nas defined in ITU X.660, with support for BER/DER encoding/decoding as well as\nheapless no_std (i.e. embedded) support\n",
-      "downloadLocation": "registry+https://github.com/rust-lang/crates.io-index",
-      "externalRefs": [
-        {
-          "referenceCategory": "PACKAGE-MANAGER",
-          "referenceLocator": "pkg:cargo/const-oid@0.10.2",
-          "referenceType": "purl"
-        }
-      ],
-      "homepage": "https://github.com/RustCrypto/formats/tree/master/const-oid",
-      "licenseConcluded": "Apache-2.0 OR MIT",
-      "licenseDeclared": "Apache-2.0 OR MIT",
-      "name": "const-oid",
-      "versionInfo": "0.10.2"
-    },
-    {
-      "SPDXID": "SPDXRef-Package-unicode-ident-1.0.24",
-      "description": "Determine whether characters have the XID_Start or XID_Continue properties according to Unicode Standard Annex #31",
-      "downloadLocation": "registry+https://github.com/rust-lang/crates.io-index",
-      "externalRefs": [
-        {
-          "referenceCategory": "PACKAGE-MANAGER",
-          "referenceLocator": "pkg:cargo/unicode-ident@1.0.24",
-          "referenceType": "purl"
-        }
-      ],
-      "licenseConcluded": "(MIT OR Apache-2.0) AND Unicode-3.0",
-      "licenseDeclared": "(MIT OR Apache-2.0) AND Unicode-3.0",
-      "name": "unicode-ident",
-      "versionInfo": "1.0.24"
-    },
-    {
-      "SPDXID": "SPDXRef-Package-k256-0.14.0",
-      "description": "secp256k1 elliptic curve library written in pure Rust with support for ECDSA\nsigning/verification/public-key recovery, Taproot Schnorr signatures (BIP340),\nElliptic Curve Diffie-Hellman (ECDH), and general-purpose secp256k1 elliptic\ncurve group operations which can be used to implement arbitrary protocols\n",
-      "downloadLocation": "registry+https://github.com/rust-lang/crates.io-index",
-      "externalRefs": [
-        {
-          "referenceCategory": "PACKAGE-MANAGER",
-          "referenceLocator": "pkg:cargo/k256@0.14.0",
-          "referenceType": "purl"
-        }
-      ],
-      "homepage": "https://github.com/RustCrypto/elliptic-curves/tree/master/k256",
-      "licenseConcluded": "Apache-2.0 OR MIT",
-      "licenseDeclared": "Apache-2.0 OR MIT",
-      "name": "k256",
-      "versionInfo": "0.14.0"
-    },
-    {
-      "SPDXID": "SPDXRef-Package-serde-1.0.228",
-      "description": "A generic serialization/deserialization framework",
-      "downloadLocation": "registry+https://github.com/rust-lang/crates.io-index",
-      "externalRefs": [
-        {
-          "referenceCategory": "PACKAGE-MANAGER",
-          "referenceLocator": "pkg:cargo/serde@1.0.228",
-          "referenceType": "purl"
-        }
-      ],
-      "homepage": "https://serde.rs",
-      "licenseConcluded": "MIT OR Apache-2.0",
-      "licenseDeclared": "MIT OR Apache-2.0",
-      "name": "serde",
-      "versionInfo": "1.0.228"
-    },
-    {
-      "SPDXID": "SPDXRef-Package-eth-valkyoth-testkit-0.7.0",
-      "description": "Testing helpers and future Ethereum conformance fixtures for eth.",
-      "downloadLocation": "NONE",
-      "homepage": "https://github.com/valkyoth/eth",
-      "licenseConcluded": "MIT OR Apache-2.0",
-      "licenseDeclared": "MIT OR Apache-2.0",
-      "name": "eth-valkyoth-testkit",
-      "versionInfo": "0.7.0"
-    },
-    {
-      "SPDXID": "SPDXRef-Package-cmov-0.5.4",
-      "description": "Conditional move CPU intrinsics which are guaranteed on major platforms (ARM32/ARM64, x86/x86_64,\nRISC-V) to execute in constant-time and not be rewritten as branches by the compiler. Provides\nwrappers for the CMOV family of instructions on x86/x86_64 and CSEL on AArch64, along with a\nportable \"best-effort\" pure Rust fallback implementation.\n",
-      "downloadLocation": "registry+https://github.com/rust-lang/crates.io-index",
-      "externalRefs": [
-        {
-          "referenceCategory": "PACKAGE-MANAGER",
-          "referenceLocator": "pkg:cargo/cmov@0.5.4",
-          "referenceType": "purl"
-        }
-      ],
-      "licenseConcluded": "Apache-2.0 OR MIT",
-      "licenseDeclared": "Apache-2.0 OR MIT",
-      "name": "cmov",
-      "versionInfo": "0.5.4"
+      "name": "itoa",
+      "versionInfo": "1.0.18"
     },
     {
       "SPDXID": "SPDXRef-Package-rfc6979-0.6.0",
@@ -337,78 +228,62 @@
       "versionInfo": "0.6.0"
     },
     {
-      "SPDXID": "SPDXRef-Package-ctutils-0.4.2",
-      "description": "Constant-time utility library with selection and equality testing support targeting cryptographic\napplications. Supports `const fn` where appropriate. Built on the `cmov` crate which provides\narchitecture-specific predication intrinsics. Heavily inspired by the `subtle` crate.\n",
+      "SPDXID": "SPDXRef-Package-quote-1.0.46",
+      "description": "Quasi-quoting macro quote!(...)",
       "downloadLocation": "registry+https://github.com/rust-lang/crates.io-index",
       "externalRefs": [
         {
           "referenceCategory": "PACKAGE-MANAGER",
-          "referenceLocator": "pkg:cargo/ctutils@0.4.2",
+          "referenceLocator": "pkg:cargo/quote@1.0.46",
           "referenceType": "purl"
         }
       ],
-      "homepage": "https://github.com/RustCrypto/utils/tree/master/ctselect",
-      "licenseConcluded": "Apache-2.0 OR MIT",
-      "licenseDeclared": "Apache-2.0 OR MIT",
-      "name": "ctutils",
-      "versionInfo": "0.4.2"
+      "licenseConcluded": "MIT OR Apache-2.0",
+      "licenseDeclared": "MIT OR Apache-2.0",
+      "name": "quote",
+      "versionInfo": "1.0.46"
     },
     {
-      "SPDXID": "SPDXRef-Package-eth-valkyoth-derive-0.17.3",
-      "description": "Optional sanitization and RLP derive macros for eth.",
+      "SPDXID": "SPDXRef-Package-hmac-0.13.0",
+      "description": "Generic implementation of Hash-based Message Authentication Code (HMAC)",
+      "downloadLocation": "registry+https://github.com/rust-lang/crates.io-index",
+      "externalRefs": [
+        {
+          "referenceCategory": "PACKAGE-MANAGER",
+          "referenceLocator": "pkg:cargo/hmac@0.13.0",
+          "referenceType": "purl"
+        }
+      ],
+      "licenseConcluded": "MIT OR Apache-2.0",
+      "licenseDeclared": "MIT OR Apache-2.0",
+      "name": "hmac",
+      "versionInfo": "0.13.0"
+    },
+    {
+      "SPDXID": "SPDXRef-Package-crypto-common-0.2.2",
+      "description": "Common traits used by cryptographic algorithms",
+      "downloadLocation": "registry+https://github.com/rust-lang/crates.io-index",
+      "externalRefs": [
+        {
+          "referenceCategory": "PACKAGE-MANAGER",
+          "referenceLocator": "pkg:cargo/crypto-common@0.2.2",
+          "referenceType": "purl"
+        }
+      ],
+      "licenseConcluded": "MIT OR Apache-2.0",
+      "licenseDeclared": "MIT OR Apache-2.0",
+      "name": "crypto-common",
+      "versionInfo": "0.2.2"
+    },
+    {
+      "SPDXID": "SPDXRef-Package-eth-valkyoth-testkit-0.7.0",
+      "description": "Testing helpers and future Ethereum conformance fixtures for eth.",
       "downloadLocation": "NONE",
       "homepage": "https://github.com/valkyoth/eth",
       "licenseConcluded": "MIT OR Apache-2.0",
       "licenseDeclared": "MIT OR Apache-2.0",
-      "name": "eth-valkyoth-derive",
-      "versionInfo": "0.17.3"
-    },
-    {
-      "SPDXID": "SPDXRef-Package-eth-valkyoth-reth-0.7.0",
-      "description": "Future Reth integration boundary for eth.",
-      "downloadLocation": "NONE",
-      "homepage": "https://github.com/valkyoth/eth",
-      "licenseConcluded": "MIT OR Apache-2.0",
-      "licenseDeclared": "MIT OR Apache-2.0",
-      "name": "eth-valkyoth-reth",
+      "name": "eth-valkyoth-testkit",
       "versionInfo": "0.7.0"
-    },
-    {
-      "SPDXID": "SPDXRef-Package-group-0.14.0",
-      "description": "Elliptic curve group traits and utilities",
-      "downloadLocation": "registry+https://github.com/rust-lang/crates.io-index",
-      "externalRefs": [
-        {
-          "referenceCategory": "PACKAGE-MANAGER",
-          "referenceLocator": "pkg:cargo/group@0.14.0",
-          "referenceType": "purl"
-        }
-      ],
-      "homepage": "https://github.com/zkcrypto/group",
-      "licenseConcluded": "MIT OR Apache-2.0",
-      "licenseDeclared": "MIT OR Apache-2.0",
-      "name": "group",
-      "versionInfo": "0.14.0"
-    },
-    {
-      "SPDXID": "SPDXRef-Package-eth-valkyoth-protocol-0.25.2",
-      "description": "Fork-aware no_std Ethereum protocol validation state.",
-      "downloadLocation": "NONE",
-      "homepage": "https://github.com/valkyoth/eth",
-      "licenseConcluded": "MIT OR Apache-2.0",
-      "licenseDeclared": "MIT OR Apache-2.0",
-      "name": "eth-valkyoth-protocol",
-      "versionInfo": "0.25.2"
-    },
-    {
-      "SPDXID": "SPDXRef-Package-eth-valkyoth-primitives-0.11.2",
-      "description": "Core no_std Ethereum protocol primitives.",
-      "downloadLocation": "NONE",
-      "homepage": "https://github.com/valkyoth/eth",
-      "licenseConcluded": "MIT OR Apache-2.0",
-      "licenseDeclared": "MIT OR Apache-2.0",
-      "name": "eth-valkyoth-primitives",
-      "versionInfo": "0.11.2"
     },
     {
       "SPDXID": "SPDXRef-Package-ff-0.14.0",
@@ -428,68 +303,6 @@
       "versionInfo": "0.14.0"
     },
     {
-      "SPDXID": "SPDXRef-Package-zmij-1.0.21",
-      "description": "A double-to-string conversion algorithm based on Schubfach and yy",
-      "downloadLocation": "registry+https://github.com/rust-lang/crates.io-index",
-      "externalRefs": [
-        {
-          "referenceCategory": "PACKAGE-MANAGER",
-          "referenceLocator": "pkg:cargo/zmij@1.0.21",
-          "referenceType": "purl"
-        }
-      ],
-      "licenseConcluded": "MIT",
-      "licenseDeclared": "MIT",
-      "name": "zmij",
-      "versionInfo": "1.0.21"
-    },
-    {
-      "SPDXID": "SPDXRef-Package-block-buffer-0.12.1",
-      "description": "Buffer types for block processing of data",
-      "downloadLocation": "registry+https://github.com/rust-lang/crates.io-index",
-      "externalRefs": [
-        {
-          "referenceCategory": "PACKAGE-MANAGER",
-          "referenceLocator": "pkg:cargo/block-buffer@0.12.1",
-          "referenceType": "purl"
-        }
-      ],
-      "licenseConcluded": "MIT OR Apache-2.0",
-      "licenseDeclared": "MIT OR Apache-2.0",
-      "name": "block-buffer",
-      "versionInfo": "0.12.1"
-    },
-    {
-      "SPDXID": "SPDXRef-Package-eth-valkyoth-signer-0.7.3",
-      "description": "Future signer isolation boundary for eth.",
-      "downloadLocation": "NONE",
-      "homepage": "https://github.com/valkyoth/eth",
-      "licenseConcluded": "MIT OR Apache-2.0",
-      "licenseDeclared": "MIT OR Apache-2.0",
-      "name": "eth-valkyoth-signer",
-      "versionInfo": "0.7.3"
-    },
-    {
-      "SPDXID": "SPDXRef-Package-eth-valkyoth-codec-0.19.0",
-      "description": "Bounded no_std Ethereum wire codec policy.",
-      "downloadLocation": "NONE",
-      "homepage": "https://github.com/valkyoth/eth",
-      "licenseConcluded": "MIT OR Apache-2.0",
-      "licenseDeclared": "MIT OR Apache-2.0",
-      "name": "eth-valkyoth-codec",
-      "versionInfo": "0.19.0"
-    },
-    {
-      "SPDXID": "SPDXRef-Package-eth-valkyoth-hash-0.11.2",
-      "description": "no_std Ethereum Keccak-256 hashing trait boundary.",
-      "downloadLocation": "NONE",
-      "homepage": "https://github.com/valkyoth/eth",
-      "licenseConcluded": "MIT OR Apache-2.0",
-      "licenseDeclared": "MIT OR Apache-2.0",
-      "name": "eth-valkyoth-hash",
-      "versionInfo": "0.11.2"
-    },
-    {
       "SPDXID": "SPDXRef-Package-syn-2.0.118",
       "description": "Parser for Rust source code",
       "downloadLocation": "registry+https://github.com/rust-lang/crates.io-index",
@@ -504,177 +317,6 @@
       "licenseDeclared": "MIT OR Apache-2.0",
       "name": "syn",
       "versionInfo": "2.0.118"
-    },
-    {
-      "SPDXID": "SPDXRef-Package-eth-valkyoth-verify-0.23.0",
-      "description": "no_std Ethereum verification boundaries.",
-      "downloadLocation": "NONE",
-      "homepage": "https://github.com/valkyoth/eth",
-      "licenseConcluded": "MIT OR Apache-2.0",
-      "licenseDeclared": "MIT OR Apache-2.0",
-      "name": "eth-valkyoth-verify",
-      "versionInfo": "0.23.0"
-    },
-    {
-      "SPDXID": "SPDXRef-Package-eth-0.52.2",
-      "description": "no_std-first Ethereum execution-layer protocol toolkit facade.",
-      "downloadLocation": "NONE",
-      "homepage": "https://github.com/valkyoth/eth",
-      "licenseConcluded": "MIT OR Apache-2.0",
-      "licenseDeclared": "MIT OR Apache-2.0",
-      "name": "eth",
-      "versionInfo": "0.52.2"
-    },
-    {
-      "SPDXID": "SPDXRef-Package-wnaf-0.14.0",
-      "description": "wNAF (w-ary non-adjacent form) variable-time scalar multiplication implemented generically\nover elliptic curve groups with full `no_alloc` support, including multiscalar multiplication using\nStraus's interleaved window method. Contains an implementation adapted from the `group` crate which\nhas been forked and enhanced but is otherwise compatible with that crate's traits, along with the\n`ff` crate's traits for finite field representations\n",
-      "downloadLocation": "registry+https://github.com/rust-lang/crates.io-index",
-      "externalRefs": [
-        {
-          "referenceCategory": "PACKAGE-MANAGER",
-          "referenceLocator": "pkg:cargo/wnaf@0.14.0",
-          "referenceType": "purl"
-        }
-      ],
-      "homepage": "https://github.com/RustCrypto/elliptic-curves/tree/master/wnaf",
-      "licenseConcluded": "Apache-2.0 OR MIT",
-      "licenseDeclared": "Apache-2.0 OR MIT",
-      "name": "wnaf",
-      "versionInfo": "0.14.0"
-    },
-    {
-      "SPDXID": "SPDXRef-Package-eth-valkyoth-evm-0.10.0",
-      "description": "Explicit no_std EVM execution boundary for eth.",
-      "downloadLocation": "NONE",
-      "homepage": "https://github.com/valkyoth/eth",
-      "licenseConcluded": "MIT OR Apache-2.0",
-      "licenseDeclared": "MIT OR Apache-2.0",
-      "name": "eth-valkyoth-evm",
-      "versionInfo": "0.10.0"
-    },
-    {
-      "SPDXID": "SPDXRef-Package-cfg-if-1.0.4",
-      "description": "A macro to ergonomically define an item depending on a large number of #[cfg]\nparameters. Structured like an if-else chain, the first matching branch is the\nitem that gets emitted.\n",
-      "downloadLocation": "registry+https://github.com/rust-lang/crates.io-index",
-      "externalRefs": [
-        {
-          "referenceCategory": "PACKAGE-MANAGER",
-          "referenceLocator": "pkg:cargo/cfg-if@1.0.4",
-          "referenceType": "purl"
-        }
-      ],
-      "licenseConcluded": "MIT OR Apache-2.0",
-      "licenseDeclared": "MIT OR Apache-2.0",
-      "name": "cfg-if",
-      "versionInfo": "1.0.4"
-    },
-    {
-      "SPDXID": "SPDXRef-Package-libc-0.2.186",
-      "description": "Raw FFI bindings to platform libraries like libc.",
-      "downloadLocation": "registry+https://github.com/rust-lang/crates.io-index",
-      "externalRefs": [
-        {
-          "referenceCategory": "PACKAGE-MANAGER",
-          "referenceLocator": "pkg:cargo/libc@0.2.186",
-          "referenceType": "purl"
-        }
-      ],
-      "licenseConcluded": "MIT OR Apache-2.0",
-      "licenseDeclared": "MIT OR Apache-2.0",
-      "name": "libc",
-      "versionInfo": "0.2.186"
-    },
-    {
-      "SPDXID": "SPDXRef-Package-elliptic-curve-0.14.1",
-      "description": "General purpose Elliptic Curve Cryptography (ECC) support, including traits and generic types for\nrepresenting various elliptic curve forms, scalars, points, and public/secret keys composed thereof.\n",
-      "downloadLocation": "registry+https://github.com/rust-lang/crates.io-index",
-      "externalRefs": [
-        {
-          "referenceCategory": "PACKAGE-MANAGER",
-          "referenceLocator": "pkg:cargo/elliptic-curve@0.14.1",
-          "referenceType": "purl"
-        }
-      ],
-      "licenseConcluded": "Apache-2.0 OR MIT",
-      "licenseDeclared": "Apache-2.0 OR MIT",
-      "name": "elliptic-curve",
-      "versionInfo": "0.14.1"
-    },
-    {
-      "SPDXID": "SPDXRef-Package-eth-valkyoth-evm-core-0.27.0",
-      "description": "Dependency-free no_std Ethereum EVM core domains for eth.",
-      "downloadLocation": "NONE",
-      "homepage": "https://github.com/valkyoth/eth",
-      "licenseConcluded": "MIT OR Apache-2.0",
-      "licenseDeclared": "MIT OR Apache-2.0",
-      "name": "eth-valkyoth-evm-core",
-      "versionInfo": "0.27.0"
-    },
-    {
-      "SPDXID": "SPDXRef-Package-typenum-1.20.1",
-      "description": "Typenum is a Rust library for type-level numbers evaluated at\n    compile time. It currently supports bits, unsigned integers, and signed\n    integers. It also provides a type-level array of type-level numbers, but its\n    implementation is incomplete.",
-      "downloadLocation": "registry+https://github.com/rust-lang/crates.io-index",
-      "externalRefs": [
-        {
-          "referenceCategory": "PACKAGE-MANAGER",
-          "referenceLocator": "pkg:cargo/typenum@1.20.1",
-          "referenceType": "purl"
-        }
-      ],
-      "licenseConcluded": "MIT OR Apache-2.0",
-      "licenseDeclared": "MIT OR Apache-2.0",
-      "name": "typenum",
-      "versionInfo": "1.20.1"
-    },
-    {
-      "SPDXID": "SPDXRef-Package-sec1-0.8.1",
-      "description": "Pure Rust implementation of SEC1: Elliptic Curve Cryptography encoding formats including ASN.1 DER\nencoded private keys as well as the Elliptic-Curve-Point-to-Octet-String encoding\n",
-      "downloadLocation": "registry+https://github.com/rust-lang/crates.io-index",
-      "externalRefs": [
-        {
-          "referenceCategory": "PACKAGE-MANAGER",
-          "referenceLocator": "pkg:cargo/sec1@0.8.1",
-          "referenceType": "purl"
-        }
-      ],
-      "homepage": "https://github.com/RustCrypto/formats/tree/master/sec1",
-      "licenseConcluded": "Apache-2.0 OR MIT",
-      "licenseDeclared": "Apache-2.0 OR MIT",
-      "name": "sec1",
-      "versionInfo": "0.8.1"
-    },
-    {
-      "SPDXID": "SPDXRef-Package-primefield-0.14.0",
-      "description": "Generic implementation of prime fields built on `crypto-bigint`, along with macros for writing\nfield element newtypes including ones with formally verified arithmetic using `fiat-crypto`\n",
-      "downloadLocation": "registry+https://github.com/rust-lang/crates.io-index",
-      "externalRefs": [
-        {
-          "referenceCategory": "PACKAGE-MANAGER",
-          "referenceLocator": "pkg:cargo/primefield@0.14.0",
-          "referenceType": "purl"
-        }
-      ],
-      "homepage": "https://github.com/RustCrypto/elliptic-curves/tree/master/primefield",
-      "licenseConcluded": "Apache-2.0 OR MIT",
-      "licenseDeclared": "Apache-2.0 OR MIT",
-      "name": "primefield",
-      "versionInfo": "0.14.0"
-    },
-    {
-      "SPDXID": "SPDXRef-Package-serde--json-1.0.150",
-      "description": "A JSON serialization file format",
-      "downloadLocation": "registry+https://github.com/rust-lang/crates.io-index",
-      "externalRefs": [
-        {
-          "referenceCategory": "PACKAGE-MANAGER",
-          "referenceLocator": "pkg:cargo/serde_json@1.0.150",
-          "referenceType": "purl"
-        }
-      ],
-      "licenseConcluded": "MIT OR Apache-2.0",
-      "licenseDeclared": "MIT OR Apache-2.0",
-      "name": "serde_json",
-      "versionInfo": "1.0.150"
     },
     {
       "SPDXID": "SPDXRef-Package-tiny-keccak-2.0.2",
@@ -694,6 +336,43 @@
       "versionInfo": "2.0.2"
     },
     {
+      "SPDXID": "SPDXRef-Package-primeorder-0.14.0",
+      "description": "Pure Rust implementation of complete addition formulas for prime order elliptic\ncurves (Renes-Costello-Batina 2015). Generic over field elements and curve\nequation coefficients\n",
+      "downloadLocation": "registry+https://github.com/rust-lang/crates.io-index",
+      "externalRefs": [
+        {
+          "referenceCategory": "PACKAGE-MANAGER",
+          "referenceLocator": "pkg:cargo/primeorder@0.14.0",
+          "referenceType": "purl"
+        }
+      ],
+      "homepage": "https://github.com/RustCrypto/elliptic-curves/tree/master/primeorder",
+      "licenseConcluded": "Apache-2.0 OR MIT",
+      "licenseDeclared": "Apache-2.0 OR MIT",
+      "name": "primeorder",
+      "versionInfo": "0.14.0"
+    },
+    {
+      "SPDXID": "SPDXRef-Package-eth-valkyoth-signer-0.7.3",
+      "description": "Future signer isolation boundary for eth.",
+      "downloadLocation": "NONE",
+      "homepage": "https://github.com/valkyoth/eth",
+      "licenseConcluded": "MIT OR Apache-2.0",
+      "licenseDeclared": "MIT OR Apache-2.0",
+      "name": "eth-valkyoth-signer",
+      "versionInfo": "0.7.3"
+    },
+    {
+      "SPDXID": "SPDXRef-Package-eth-valkyoth-hash-0.11.2",
+      "description": "no_std Ethereum Keccak-256 hashing trait boundary.",
+      "downloadLocation": "NONE",
+      "homepage": "https://github.com/valkyoth/eth",
+      "licenseConcluded": "MIT OR Apache-2.0",
+      "licenseDeclared": "MIT OR Apache-2.0",
+      "name": "eth-valkyoth-hash",
+      "versionInfo": "0.11.2"
+    },
+    {
       "SPDXID": "SPDXRef-Package-eth-valkyoth-sanitization-0.7.5",
       "description": "Optional sanitization bridge for eth secret-bearing Ethereum data.",
       "downloadLocation": "NONE",
@@ -701,54 +380,6 @@
       "licenseConcluded": "MIT OR Apache-2.0",
       "licenseDeclared": "MIT OR Apache-2.0",
       "name": "eth-valkyoth-sanitization",
-      "versionInfo": "0.7.5"
-    },
-    {
-      "SPDXID": "SPDXRef-Package-zeroize-1.9.0",
-      "description": "Securely clear secrets from memory with a simple trait built on\nstable Rust primitives which guarantee memory is zeroed using an\noperation will not be 'optimized away' by the compiler.\nUses a portable pure Rust implementation that works everywhere,\neven WASM!\n",
-      "downloadLocation": "registry+https://github.com/rust-lang/crates.io-index",
-      "externalRefs": [
-        {
-          "referenceCategory": "PACKAGE-MANAGER",
-          "referenceLocator": "pkg:cargo/zeroize@1.9.0",
-          "referenceType": "purl"
-        }
-      ],
-      "licenseConcluded": "Apache-2.0 OR MIT",
-      "licenseDeclared": "Apache-2.0 OR MIT",
-      "name": "zeroize",
-      "versionInfo": "1.9.0"
-    },
-    {
-      "SPDXID": "SPDXRef-Package-hmac-0.13.0",
-      "description": "Generic implementation of Hash-based Message Authentication Code (HMAC)",
-      "downloadLocation": "registry+https://github.com/rust-lang/crates.io-index",
-      "externalRefs": [
-        {
-          "referenceCategory": "PACKAGE-MANAGER",
-          "referenceLocator": "pkg:cargo/hmac@0.13.0",
-          "referenceType": "purl"
-        }
-      ],
-      "licenseConcluded": "MIT OR Apache-2.0",
-      "licenseDeclared": "MIT OR Apache-2.0",
-      "name": "hmac",
-      "versionInfo": "0.13.0"
-    },
-    {
-      "SPDXID": "SPDXRef-Package-crypto-bigint-0.7.5",
-      "description": "Pure Rust implementation of a big integer library which has been designed from\nthe ground-up for use in cryptographic applications. Provides constant-time,\nno_std-friendly implementations of modern formulas using const generics.\n",
-      "downloadLocation": "registry+https://github.com/rust-lang/crates.io-index",
-      "externalRefs": [
-        {
-          "referenceCategory": "PACKAGE-MANAGER",
-          "referenceLocator": "pkg:cargo/crypto-bigint@0.7.5",
-          "referenceType": "purl"
-        }
-      ],
-      "licenseConcluded": "Apache-2.0 OR MIT",
-      "licenseDeclared": "Apache-2.0 OR MIT",
-      "name": "crypto-bigint",
       "versionInfo": "0.7.5"
     },
     {
@@ -769,237 +400,95 @@
       "versionInfo": "0.8.1"
     },
     {
-      "SPDXID": "SPDXRef-Package-primeorder-0.14.0",
-      "description": "Pure Rust implementation of complete addition formulas for prime order elliptic\ncurves (Renes-Costello-Batina 2015). Generic over field elements and curve\nequation coefficients\n",
+      "SPDXID": "SPDXRef-Package-crypto-bigint-0.7.5",
+      "description": "Pure Rust implementation of a big integer library which has been designed from\nthe ground-up for use in cryptographic applications. Provides constant-time,\nno_std-friendly implementations of modern formulas using const generics.\n",
       "downloadLocation": "registry+https://github.com/rust-lang/crates.io-index",
       "externalRefs": [
         {
           "referenceCategory": "PACKAGE-MANAGER",
-          "referenceLocator": "pkg:cargo/primeorder@0.14.0",
+          "referenceLocator": "pkg:cargo/crypto-bigint@0.7.5",
           "referenceType": "purl"
         }
       ],
-      "homepage": "https://github.com/RustCrypto/elliptic-curves/tree/master/primeorder",
       "licenseConcluded": "Apache-2.0 OR MIT",
       "licenseDeclared": "Apache-2.0 OR MIT",
-      "name": "primeorder",
-      "versionInfo": "0.14.0"
+      "name": "crypto-bigint",
+      "versionInfo": "0.7.5"
     },
     {
-      "SPDXID": "SPDXRef-Package-sanitization-1.2.4",
-      "description": "Dependency-free no_std secret memory sanitization with safe defaults and an explicit volatile wipe backend.",
+      "SPDXID": "SPDXRef-Package-cfg-if-1.0.4",
+      "description": "A macro to ergonomically define an item depending on a large number of #[cfg]\nparameters. Structured like an if-else chain, the first matching branch is the\nitem that gets emitted.\n",
       "downloadLocation": "registry+https://github.com/rust-lang/crates.io-index",
       "externalRefs": [
         {
           "referenceCategory": "PACKAGE-MANAGER",
-          "referenceLocator": "pkg:cargo/sanitization@1.2.4",
-          "referenceType": "purl"
-        }
-      ],
-      "homepage": "https://github.com/valkyoth/sanitization",
-      "licenseConcluded": "MIT OR Apache-2.0",
-      "licenseDeclared": "MIT OR Apache-2.0",
-      "name": "sanitization",
-      "versionInfo": "1.2.4"
-    },
-    {
-      "SPDXID": "SPDXRef-Package-crunchy-0.2.4",
-      "description": "Crunchy unroller: deterministically unroll constant loops",
-      "downloadLocation": "registry+https://github.com/rust-lang/crates.io-index",
-      "externalRefs": [
-        {
-          "referenceCategory": "PACKAGE-MANAGER",
-          "referenceLocator": "pkg:cargo/crunchy@0.2.4",
-          "referenceType": "purl"
-        }
-      ],
-      "homepage": "https://github.com/eira-fransham/crunchy",
-      "licenseConcluded": "MIT",
-      "licenseDeclared": "MIT",
-      "name": "crunchy",
-      "versionInfo": "0.2.4"
-    },
-    {
-      "SPDXID": "SPDXRef-Package-rand--core-0.10.1",
-      "description": "Core random number generation traits and tools for implementation.",
-      "downloadLocation": "registry+https://github.com/rust-lang/crates.io-index",
-      "externalRefs": [
-        {
-          "referenceCategory": "PACKAGE-MANAGER",
-          "referenceLocator": "pkg:cargo/rand_core@0.10.1",
-          "referenceType": "purl"
-        }
-      ],
-      "homepage": "https://rust-random.github.io/book",
-      "licenseConcluded": "MIT OR Apache-2.0",
-      "licenseDeclared": "MIT OR Apache-2.0",
-      "name": "rand_core",
-      "versionInfo": "0.10.1"
-    },
-    {
-      "SPDXID": "SPDXRef-Package-subtle-2.6.1",
-      "description": "Pure-Rust traits and utilities for constant-time cryptographic implementations.",
-      "downloadLocation": "registry+https://github.com/rust-lang/crates.io-index",
-      "externalRefs": [
-        {
-          "referenceCategory": "PACKAGE-MANAGER",
-          "referenceLocator": "pkg:cargo/subtle@2.6.1",
-          "referenceType": "purl"
-        }
-      ],
-      "homepage": "https://dalek.rs/",
-      "licenseConcluded": "BSD-3-Clause",
-      "licenseDeclared": "BSD-3-Clause",
-      "name": "subtle",
-      "versionInfo": "2.6.1"
-    },
-    {
-      "SPDXID": "SPDXRef-Package-memchr-2.8.2",
-      "description": "Provides extremely fast (uses SIMD on x86_64, aarch64 and wasm32) routines for\n1, 2 or 3 byte search and single substring search.\n",
-      "downloadLocation": "registry+https://github.com/rust-lang/crates.io-index",
-      "externalRefs": [
-        {
-          "referenceCategory": "PACKAGE-MANAGER",
-          "referenceLocator": "pkg:cargo/memchr@2.8.2",
-          "referenceType": "purl"
-        }
-      ],
-      "homepage": "https://github.com/BurntSushi/memchr",
-      "licenseConcluded": "Unlicense OR MIT",
-      "licenseDeclared": "Unlicense OR MIT",
-      "name": "memchr",
-      "versionInfo": "2.8.2"
-    },
-    {
-      "SPDXID": "SPDXRef-Package-digest-0.11.3",
-      "description": "Traits for cryptographic hash functions and message authentication codes",
-      "downloadLocation": "registry+https://github.com/rust-lang/crates.io-index",
-      "externalRefs": [
-        {
-          "referenceCategory": "PACKAGE-MANAGER",
-          "referenceLocator": "pkg:cargo/digest@0.11.3",
+          "referenceLocator": "pkg:cargo/cfg-if@1.0.4",
           "referenceType": "purl"
         }
       ],
       "licenseConcluded": "MIT OR Apache-2.0",
       "licenseDeclared": "MIT OR Apache-2.0",
-      "name": "digest",
-      "versionInfo": "0.11.3"
+      "name": "cfg-if",
+      "versionInfo": "1.0.4"
     },
     {
-      "SPDXID": "SPDXRef-Package-itoa-1.0.18",
-      "description": "Fast integer primitive to string conversion",
+      "SPDXID": "SPDXRef-Package-zeroize-1.9.0",
+      "description": "Securely clear secrets from memory with a simple trait built on\nstable Rust primitives which guarantee memory is zeroed using an\noperation will not be 'optimized away' by the compiler.\nUses a portable pure Rust implementation that works everywhere,\neven WASM!\n",
       "downloadLocation": "registry+https://github.com/rust-lang/crates.io-index",
       "externalRefs": [
         {
           "referenceCategory": "PACKAGE-MANAGER",
-          "referenceLocator": "pkg:cargo/itoa@1.0.18",
+          "referenceLocator": "pkg:cargo/zeroize@1.9.0",
           "referenceType": "purl"
         }
       ],
-      "licenseConcluded": "MIT OR Apache-2.0",
-      "licenseDeclared": "MIT OR Apache-2.0",
-      "name": "itoa",
-      "versionInfo": "1.0.18"
+      "licenseConcluded": "Apache-2.0 OR MIT",
+      "licenseDeclared": "Apache-2.0 OR MIT",
+      "name": "zeroize",
+      "versionInfo": "1.9.0"
     },
     {
-      "SPDXID": "SPDXRef-Package-num-traits-0.2.19",
-      "description": "Numeric traits for generic mathematics",
+      "SPDXID": "SPDXRef-Package-serde-1.0.228",
+      "description": "A generic serialization/deserialization framework",
       "downloadLocation": "registry+https://github.com/rust-lang/crates.io-index",
       "externalRefs": [
         {
           "referenceCategory": "PACKAGE-MANAGER",
-          "referenceLocator": "pkg:cargo/num-traits@0.2.19",
-          "referenceType": "purl"
-        }
-      ],
-      "homepage": "https://github.com/rust-num/num-traits",
-      "licenseConcluded": "MIT OR Apache-2.0",
-      "licenseDeclared": "MIT OR Apache-2.0",
-      "name": "num-traits",
-      "versionInfo": "0.2.19"
-    },
-    {
-      "SPDXID": "SPDXRef-Package-proc-macro2-1.0.106",
-      "description": "A substitute implementation of the compiler's `proc_macro` API to decouple token-based libraries from the procedural macro use case.",
-      "downloadLocation": "registry+https://github.com/rust-lang/crates.io-index",
-      "externalRefs": [
-        {
-          "referenceCategory": "PACKAGE-MANAGER",
-          "referenceLocator": "pkg:cargo/proc-macro2@1.0.106",
-          "referenceType": "purl"
-        }
-      ],
-      "licenseConcluded": "MIT OR Apache-2.0",
-      "licenseDeclared": "MIT OR Apache-2.0",
-      "name": "proc-macro2",
-      "versionInfo": "1.0.106"
-    },
-    {
-      "SPDXID": "SPDXRef-Package-serde--derive-1.0.228",
-      "description": "Macros 1.1 implementation of #[derive(Serialize, Deserialize)]",
-      "downloadLocation": "registry+https://github.com/rust-lang/crates.io-index",
-      "externalRefs": [
-        {
-          "referenceCategory": "PACKAGE-MANAGER",
-          "referenceLocator": "pkg:cargo/serde_derive@1.0.228",
+          "referenceLocator": "pkg:cargo/serde@1.0.228",
           "referenceType": "purl"
         }
       ],
       "homepage": "https://serde.rs",
       "licenseConcluded": "MIT OR Apache-2.0",
       "licenseDeclared": "MIT OR Apache-2.0",
-      "name": "serde_derive",
+      "name": "serde",
       "versionInfo": "1.0.228"
     },
     {
-      "SPDXID": "SPDXRef-Package-cpubits-0.1.1",
-      "description": "Compile-time detection heuristics for the optimal word size to use for the\ntarget CPU, which in some cases may differ from its address size a.k.a.\n`target_pointer_width`. Implemented as `macro_rules!`\n",
-      "downloadLocation": "registry+https://github.com/rust-lang/crates.io-index",
-      "externalRefs": [
-        {
-          "referenceCategory": "PACKAGE-MANAGER",
-          "referenceLocator": "pkg:cargo/cpubits@0.1.1",
-          "referenceType": "purl"
-        }
-      ],
+      "SPDXID": "SPDXRef-Package-eth-valkyoth-verify-0.23.0",
+      "description": "no_std Ethereum verification boundaries.",
+      "downloadLocation": "NONE",
+      "homepage": "https://github.com/valkyoth/eth",
       "licenseConcluded": "MIT OR Apache-2.0",
       "licenseDeclared": "MIT OR Apache-2.0",
-      "name": "cpubits",
-      "versionInfo": "0.1.1"
+      "name": "eth-valkyoth-verify",
+      "versionInfo": "0.23.0"
     },
     {
-      "SPDXID": "SPDXRef-Package-ecdsa-0.17.0",
-      "description": "Pure Rust implementation of the Elliptic Curve Digital Signature Algorithm (ECDSA) as specified in\nFIPS 186-4 (Digital Signature Standard), implemented generically over elliptic curves, providing\nRFC6979 deterministic signing support as well as randomized signatures and signature verification\n",
+      "SPDXID": "SPDXRef-Package-elliptic-curve-0.14.1",
+      "description": "General purpose Elliptic Curve Cryptography (ECC) support, including traits and generic types for\nrepresenting various elliptic curve forms, scalars, points, and public/secret keys composed thereof.\n",
       "downloadLocation": "registry+https://github.com/rust-lang/crates.io-index",
       "externalRefs": [
         {
           "referenceCategory": "PACKAGE-MANAGER",
-          "referenceLocator": "pkg:cargo/ecdsa@0.17.0",
+          "referenceLocator": "pkg:cargo/elliptic-curve@0.14.1",
           "referenceType": "purl"
         }
       ],
-      "homepage": "https://github.com/RustCrypto/signatures/tree/master/ecdsa",
       "licenseConcluded": "Apache-2.0 OR MIT",
       "licenseDeclared": "Apache-2.0 OR MIT",
-      "name": "ecdsa",
-      "versionInfo": "0.17.0"
-    },
-    {
-      "SPDXID": "SPDXRef-Package-cpufeatures-0.3.0",
-      "description": "Lightweight runtime CPU feature detection for aarch64, loongarch64, and x86/x86_64 targets,\nwith no_std support and support for mobile targets including Android and iOS\n",
-      "downloadLocation": "registry+https://github.com/rust-lang/crates.io-index",
-      "externalRefs": [
-        {
-          "referenceCategory": "PACKAGE-MANAGER",
-          "referenceLocator": "pkg:cargo/cpufeatures@0.3.0",
-          "referenceType": "purl"
-        }
-      ],
-      "licenseConcluded": "MIT OR Apache-2.0",
-      "licenseDeclared": "MIT OR Apache-2.0",
-      "name": "cpufeatures",
-      "versionInfo": "0.3.0"
+      "name": "elliptic-curve",
+      "versionInfo": "0.14.1"
     },
     {
       "SPDXID": "SPDXRef-Package-serde--core-1.0.228",
@@ -1019,20 +508,261 @@
       "versionInfo": "1.0.228"
     },
     {
-      "SPDXID": "SPDXRef-Package-quote-1.0.46",
-      "description": "Quasi-quoting macro quote!(...)",
+      "SPDXID": "SPDXRef-Package-primefield-0.14.0",
+      "description": "Generic implementation of prime fields built on `crypto-bigint`, along with macros for writing\nfield element newtypes including ones with formally verified arithmetic using `fiat-crypto`\n",
       "downloadLocation": "registry+https://github.com/rust-lang/crates.io-index",
       "externalRefs": [
         {
           "referenceCategory": "PACKAGE-MANAGER",
-          "referenceLocator": "pkg:cargo/quote@1.0.46",
+          "referenceLocator": "pkg:cargo/primefield@0.14.0",
+          "referenceType": "purl"
+        }
+      ],
+      "homepage": "https://github.com/RustCrypto/elliptic-curves/tree/master/primefield",
+      "licenseConcluded": "Apache-2.0 OR MIT",
+      "licenseDeclared": "Apache-2.0 OR MIT",
+      "name": "primefield",
+      "versionInfo": "0.14.0"
+    },
+    {
+      "SPDXID": "SPDXRef-Package-subtle-2.6.1",
+      "description": "Pure-Rust traits and utilities for constant-time cryptographic implementations.",
+      "downloadLocation": "registry+https://github.com/rust-lang/crates.io-index",
+      "externalRefs": [
+        {
+          "referenceCategory": "PACKAGE-MANAGER",
+          "referenceLocator": "pkg:cargo/subtle@2.6.1",
+          "referenceType": "purl"
+        }
+      ],
+      "homepage": "https://dalek.rs/",
+      "licenseConcluded": "BSD-3-Clause",
+      "licenseDeclared": "BSD-3-Clause",
+      "name": "subtle",
+      "versionInfo": "2.6.1"
+    },
+    {
+      "SPDXID": "SPDXRef-Package-typenum-1.20.1",
+      "description": "Typenum is a Rust library for type-level numbers evaluated at\n    compile time. It currently supports bits, unsigned integers, and signed\n    integers. It also provides a type-level array of type-level numbers, but its\n    implementation is incomplete.",
+      "downloadLocation": "registry+https://github.com/rust-lang/crates.io-index",
+      "externalRefs": [
+        {
+          "referenceCategory": "PACKAGE-MANAGER",
+          "referenceLocator": "pkg:cargo/typenum@1.20.1",
           "referenceType": "purl"
         }
       ],
       "licenseConcluded": "MIT OR Apache-2.0",
       "licenseDeclared": "MIT OR Apache-2.0",
-      "name": "quote",
-      "versionInfo": "1.0.46"
+      "name": "typenum",
+      "versionInfo": "1.20.1"
+    },
+    {
+      "SPDXID": "SPDXRef-Package-eth-valkyoth-primitives-0.11.2",
+      "description": "Core no_std Ethereum protocol primitives.",
+      "downloadLocation": "NONE",
+      "homepage": "https://github.com/valkyoth/eth",
+      "licenseConcluded": "MIT OR Apache-2.0",
+      "licenseDeclared": "MIT OR Apache-2.0",
+      "name": "eth-valkyoth-primitives",
+      "versionInfo": "0.11.2"
+    },
+    {
+      "SPDXID": "SPDXRef-Package-sha2-0.11.0",
+      "description": "Pure Rust implementation of the SHA-2 hash function family\nincluding SHA-224, SHA-256, SHA-384, and SHA-512.\n",
+      "downloadLocation": "registry+https://github.com/rust-lang/crates.io-index",
+      "externalRefs": [
+        {
+          "referenceCategory": "PACKAGE-MANAGER",
+          "referenceLocator": "pkg:cargo/sha2@0.11.0",
+          "referenceType": "purl"
+        }
+      ],
+      "licenseConcluded": "MIT OR Apache-2.0",
+      "licenseDeclared": "MIT OR Apache-2.0",
+      "name": "sha2",
+      "versionInfo": "0.11.0"
+    },
+    {
+      "SPDXID": "SPDXRef-Package-eth-valkyoth-reth-0.7.0",
+      "description": "Future Reth integration boundary for eth.",
+      "downloadLocation": "NONE",
+      "homepage": "https://github.com/valkyoth/eth",
+      "licenseConcluded": "MIT OR Apache-2.0",
+      "licenseDeclared": "MIT OR Apache-2.0",
+      "name": "eth-valkyoth-reth",
+      "versionInfo": "0.7.0"
+    },
+    {
+      "SPDXID": "SPDXRef-Package-wnaf-0.14.0",
+      "description": "wNAF (w-ary non-adjacent form) variable-time scalar multiplication implemented generically\nover elliptic curve groups with full `no_alloc` support, including multiscalar multiplication using\nStraus's interleaved window method. Contains an implementation adapted from the `group` crate which\nhas been forked and enhanced but is otherwise compatible with that crate's traits, along with the\n`ff` crate's traits for finite field representations\n",
+      "downloadLocation": "registry+https://github.com/rust-lang/crates.io-index",
+      "externalRefs": [
+        {
+          "referenceCategory": "PACKAGE-MANAGER",
+          "referenceLocator": "pkg:cargo/wnaf@0.14.0",
+          "referenceType": "purl"
+        }
+      ],
+      "homepage": "https://github.com/RustCrypto/elliptic-curves/tree/master/wnaf",
+      "licenseConcluded": "Apache-2.0 OR MIT",
+      "licenseDeclared": "Apache-2.0 OR MIT",
+      "name": "wnaf",
+      "versionInfo": "0.14.0"
+    },
+    {
+      "SPDXID": "SPDXRef-Package-eth-valkyoth-evm-core-0.26.1",
+      "description": "Dependency-free no_std Ethereum EVM core domains for eth.",
+      "downloadLocation": "NONE",
+      "homepage": "https://github.com/valkyoth/eth",
+      "licenseConcluded": "MIT OR Apache-2.0",
+      "licenseDeclared": "MIT OR Apache-2.0",
+      "name": "eth-valkyoth-evm-core",
+      "versionInfo": "0.26.1"
+    },
+    {
+      "SPDXID": "SPDXRef-Package-unicode-ident-1.0.24",
+      "description": "Determine whether characters have the XID_Start or XID_Continue properties according to Unicode Standard Annex #31",
+      "downloadLocation": "registry+https://github.com/rust-lang/crates.io-index",
+      "externalRefs": [
+        {
+          "referenceCategory": "PACKAGE-MANAGER",
+          "referenceLocator": "pkg:cargo/unicode-ident@1.0.24",
+          "referenceType": "purl"
+        }
+      ],
+      "licenseConcluded": "(MIT OR Apache-2.0) AND Unicode-3.0",
+      "licenseDeclared": "(MIT OR Apache-2.0) AND Unicode-3.0",
+      "name": "unicode-ident",
+      "versionInfo": "1.0.24"
+    },
+    {
+      "SPDXID": "SPDXRef-Package-const-oid-0.10.2",
+      "description": "Const-friendly implementation of the ISO/IEC Object Identifier (OID) standard\nas defined in ITU X.660, with support for BER/DER encoding/decoding as well as\nheapless no_std (i.e. embedded) support\n",
+      "downloadLocation": "registry+https://github.com/rust-lang/crates.io-index",
+      "externalRefs": [
+        {
+          "referenceCategory": "PACKAGE-MANAGER",
+          "referenceLocator": "pkg:cargo/const-oid@0.10.2",
+          "referenceType": "purl"
+        }
+      ],
+      "homepage": "https://github.com/RustCrypto/formats/tree/master/const-oid",
+      "licenseConcluded": "Apache-2.0 OR MIT",
+      "licenseDeclared": "Apache-2.0 OR MIT",
+      "name": "const-oid",
+      "versionInfo": "0.10.2"
+    },
+    {
+      "SPDXID": "SPDXRef-Package-memchr-2.8.2",
+      "description": "Provides extremely fast (uses SIMD on x86_64, aarch64 and wasm32) routines for\n1, 2 or 3 byte search and single substring search.\n",
+      "downloadLocation": "registry+https://github.com/rust-lang/crates.io-index",
+      "externalRefs": [
+        {
+          "referenceCategory": "PACKAGE-MANAGER",
+          "referenceLocator": "pkg:cargo/memchr@2.8.2",
+          "referenceType": "purl"
+        }
+      ],
+      "homepage": "https://github.com/BurntSushi/memchr",
+      "licenseConcluded": "Unlicense OR MIT",
+      "licenseDeclared": "Unlicense OR MIT",
+      "name": "memchr",
+      "versionInfo": "2.8.2"
+    },
+    {
+      "SPDXID": "SPDXRef-Package-cmov-0.5.4",
+      "description": "Conditional move CPU intrinsics which are guaranteed on major platforms (ARM32/ARM64, x86/x86_64,\nRISC-V) to execute in constant-time and not be rewritten as branches by the compiler. Provides\nwrappers for the CMOV family of instructions on x86/x86_64 and CSEL on AArch64, along with a\nportable \"best-effort\" pure Rust fallback implementation.\n",
+      "downloadLocation": "registry+https://github.com/rust-lang/crates.io-index",
+      "externalRefs": [
+        {
+          "referenceCategory": "PACKAGE-MANAGER",
+          "referenceLocator": "pkg:cargo/cmov@0.5.4",
+          "referenceType": "purl"
+        }
+      ],
+      "licenseConcluded": "Apache-2.0 OR MIT",
+      "licenseDeclared": "Apache-2.0 OR MIT",
+      "name": "cmov",
+      "versionInfo": "0.5.4"
+    },
+    {
+      "SPDXID": "SPDXRef-Package-eth-valkyoth-rpc-0.7.0",
+      "description": "Future RPC trust-policy boundary for eth.",
+      "downloadLocation": "NONE",
+      "homepage": "https://github.com/valkyoth/eth",
+      "licenseConcluded": "MIT OR Apache-2.0",
+      "licenseDeclared": "MIT OR Apache-2.0",
+      "name": "eth-valkyoth-rpc",
+      "versionInfo": "0.7.0"
+    },
+    {
+      "SPDXID": "SPDXRef-Package-zmij-1.0.21",
+      "description": "A double-to-string conversion algorithm based on Schubfach and yy",
+      "downloadLocation": "registry+https://github.com/rust-lang/crates.io-index",
+      "externalRefs": [
+        {
+          "referenceCategory": "PACKAGE-MANAGER",
+          "referenceLocator": "pkg:cargo/zmij@1.0.21",
+          "referenceType": "purl"
+        }
+      ],
+      "licenseConcluded": "MIT",
+      "licenseDeclared": "MIT",
+      "name": "zmij",
+      "versionInfo": "1.0.21"
+    },
+    {
+      "SPDXID": "SPDXRef-Package-proc-macro2-1.0.106",
+      "description": "A substitute implementation of the compiler's `proc_macro` API to decouple token-based libraries from the procedural macro use case.",
+      "downloadLocation": "registry+https://github.com/rust-lang/crates.io-index",
+      "externalRefs": [
+        {
+          "referenceCategory": "PACKAGE-MANAGER",
+          "referenceLocator": "pkg:cargo/proc-macro2@1.0.106",
+          "referenceType": "purl"
+        }
+      ],
+      "licenseConcluded": "MIT OR Apache-2.0",
+      "licenseDeclared": "MIT OR Apache-2.0",
+      "name": "proc-macro2",
+      "versionInfo": "1.0.106"
+    },
+    {
+      "SPDXID": "SPDXRef-Package-eth-valkyoth-evm-0.10.0",
+      "description": "Explicit no_std EVM execution boundary for eth.",
+      "downloadLocation": "NONE",
+      "homepage": "https://github.com/valkyoth/eth",
+      "licenseConcluded": "MIT OR Apache-2.0",
+      "licenseDeclared": "MIT OR Apache-2.0",
+      "name": "eth-valkyoth-evm",
+      "versionInfo": "0.10.0"
+    },
+    {
+      "SPDXID": "SPDXRef-Package-signature-3.0.0",
+      "description": "Traits for cryptographic signature algorithms (e.g. ECDSA, Ed25519)",
+      "downloadLocation": "registry+https://github.com/rust-lang/crates.io-index",
+      "externalRefs": [
+        {
+          "referenceCategory": "PACKAGE-MANAGER",
+          "referenceLocator": "pkg:cargo/signature@3.0.0",
+          "referenceType": "purl"
+        }
+      ],
+      "licenseConcluded": "Apache-2.0 OR MIT",
+      "licenseDeclared": "Apache-2.0 OR MIT",
+      "name": "signature",
+      "versionInfo": "3.0.0"
+    },
+    {
+      "SPDXID": "SPDXRef-Package-eth-0.52.2",
+      "description": "no_std-first Ethereum execution-layer protocol toolkit facade.",
+      "downloadLocation": "NONE",
+      "homepage": "https://github.com/valkyoth/eth",
+      "licenseConcluded": "MIT OR Apache-2.0",
+      "licenseDeclared": "MIT OR Apache-2.0",
+      "name": "eth",
+      "versionInfo": "0.52.2"
     },
     {
       "SPDXID": "SPDXRef-Package-hybrid-array-0.4.13",
@@ -1051,30 +781,183 @@
       "versionInfo": "0.4.13"
     },
     {
-      "SPDXID": "SPDXRef-Package-eth-valkyoth-rpc-0.7.0",
-      "description": "Future RPC trust-policy boundary for eth.",
+      "SPDXID": "SPDXRef-Package-eth-valkyoth-codec-0.19.0",
+      "description": "Bounded no_std Ethereum wire codec policy.",
       "downloadLocation": "NONE",
       "homepage": "https://github.com/valkyoth/eth",
       "licenseConcluded": "MIT OR Apache-2.0",
       "licenseDeclared": "MIT OR Apache-2.0",
-      "name": "eth-valkyoth-rpc",
-      "versionInfo": "0.7.0"
+      "name": "eth-valkyoth-codec",
+      "versionInfo": "0.19.0"
     },
     {
-      "SPDXID": "SPDXRef-Package-crypto-common-0.2.2",
-      "description": "Common traits used by cryptographic algorithms",
+      "SPDXID": "SPDXRef-Package-rand--core-0.10.1",
+      "description": "Core random number generation traits and tools for implementation.",
       "downloadLocation": "registry+https://github.com/rust-lang/crates.io-index",
       "externalRefs": [
         {
           "referenceCategory": "PACKAGE-MANAGER",
-          "referenceLocator": "pkg:cargo/crypto-common@0.2.2",
+          "referenceLocator": "pkg:cargo/rand_core@0.10.1",
+          "referenceType": "purl"
+        }
+      ],
+      "homepage": "https://rust-random.github.io/book",
+      "licenseConcluded": "MIT OR Apache-2.0",
+      "licenseDeclared": "MIT OR Apache-2.0",
+      "name": "rand_core",
+      "versionInfo": "0.10.1"
+    },
+    {
+      "SPDXID": "SPDXRef-Package-block-buffer-0.12.1",
+      "description": "Buffer types for block processing of data",
+      "downloadLocation": "registry+https://github.com/rust-lang/crates.io-index",
+      "externalRefs": [
+        {
+          "referenceCategory": "PACKAGE-MANAGER",
+          "referenceLocator": "pkg:cargo/block-buffer@0.12.1",
           "referenceType": "purl"
         }
       ],
       "licenseConcluded": "MIT OR Apache-2.0",
       "licenseDeclared": "MIT OR Apache-2.0",
-      "name": "crypto-common",
-      "versionInfo": "0.2.2"
+      "name": "block-buffer",
+      "versionInfo": "0.12.1"
+    },
+    {
+      "SPDXID": "SPDXRef-Package-ecdsa-0.17.0",
+      "description": "Pure Rust implementation of the Elliptic Curve Digital Signature Algorithm (ECDSA) as specified in\nFIPS 186-4 (Digital Signature Standard), implemented generically over elliptic curves, providing\nRFC6979 deterministic signing support as well as randomized signatures and signature verification\n",
+      "downloadLocation": "registry+https://github.com/rust-lang/crates.io-index",
+      "externalRefs": [
+        {
+          "referenceCategory": "PACKAGE-MANAGER",
+          "referenceLocator": "pkg:cargo/ecdsa@0.17.0",
+          "referenceType": "purl"
+        }
+      ],
+      "homepage": "https://github.com/RustCrypto/signatures/tree/master/ecdsa",
+      "licenseConcluded": "Apache-2.0 OR MIT",
+      "licenseDeclared": "Apache-2.0 OR MIT",
+      "name": "ecdsa",
+      "versionInfo": "0.17.0"
+    },
+    {
+      "SPDXID": "SPDXRef-Package-sec1-0.8.1",
+      "description": "Pure Rust implementation of SEC1: Elliptic Curve Cryptography encoding formats including ASN.1 DER\nencoded private keys as well as the Elliptic-Curve-Point-to-Octet-String encoding\n",
+      "downloadLocation": "registry+https://github.com/rust-lang/crates.io-index",
+      "externalRefs": [
+        {
+          "referenceCategory": "PACKAGE-MANAGER",
+          "referenceLocator": "pkg:cargo/sec1@0.8.1",
+          "referenceType": "purl"
+        }
+      ],
+      "homepage": "https://github.com/RustCrypto/formats/tree/master/sec1",
+      "licenseConcluded": "Apache-2.0 OR MIT",
+      "licenseDeclared": "Apache-2.0 OR MIT",
+      "name": "sec1",
+      "versionInfo": "0.8.1"
+    },
+    {
+      "SPDXID": "SPDXRef-Package-libc-0.2.186",
+      "description": "Raw FFI bindings to platform libraries like libc.",
+      "downloadLocation": "registry+https://github.com/rust-lang/crates.io-index",
+      "externalRefs": [
+        {
+          "referenceCategory": "PACKAGE-MANAGER",
+          "referenceLocator": "pkg:cargo/libc@0.2.186",
+          "referenceType": "purl"
+        }
+      ],
+      "licenseConcluded": "MIT OR Apache-2.0",
+      "licenseDeclared": "MIT OR Apache-2.0",
+      "name": "libc",
+      "versionInfo": "0.2.186"
+    },
+    {
+      "SPDXID": "SPDXRef-Package-eth-valkyoth-protocol-0.25.2",
+      "description": "Fork-aware no_std Ethereum protocol validation state.",
+      "downloadLocation": "NONE",
+      "homepage": "https://github.com/valkyoth/eth",
+      "licenseConcluded": "MIT OR Apache-2.0",
+      "licenseDeclared": "MIT OR Apache-2.0",
+      "name": "eth-valkyoth-protocol",
+      "versionInfo": "0.25.2"
+    },
+    {
+      "SPDXID": "SPDXRef-Package-serde--json-1.0.150",
+      "description": "A JSON serialization file format",
+      "downloadLocation": "registry+https://github.com/rust-lang/crates.io-index",
+      "externalRefs": [
+        {
+          "referenceCategory": "PACKAGE-MANAGER",
+          "referenceLocator": "pkg:cargo/serde_json@1.0.150",
+          "referenceType": "purl"
+        }
+      ],
+      "licenseConcluded": "MIT OR Apache-2.0",
+      "licenseDeclared": "MIT OR Apache-2.0",
+      "name": "serde_json",
+      "versionInfo": "1.0.150"
+    },
+    {
+      "SPDXID": "SPDXRef-Package-cpubits-0.1.1",
+      "description": "Compile-time detection heuristics for the optimal word size to use for the\ntarget CPU, which in some cases may differ from its address size a.k.a.\n`target_pointer_width`. Implemented as `macro_rules!`\n",
+      "downloadLocation": "registry+https://github.com/rust-lang/crates.io-index",
+      "externalRefs": [
+        {
+          "referenceCategory": "PACKAGE-MANAGER",
+          "referenceLocator": "pkg:cargo/cpubits@0.1.1",
+          "referenceType": "purl"
+        }
+      ],
+      "licenseConcluded": "MIT OR Apache-2.0",
+      "licenseDeclared": "MIT OR Apache-2.0",
+      "name": "cpubits",
+      "versionInfo": "0.1.1"
+    },
+    {
+      "SPDXID": "SPDXRef-Package-ctutils-0.4.2",
+      "description": "Constant-time utility library with selection and equality testing support targeting cryptographic\napplications. Supports `const fn` where appropriate. Built on the `cmov` crate which provides\narchitecture-specific predication intrinsics. Heavily inspired by the `subtle` crate.\n",
+      "downloadLocation": "registry+https://github.com/rust-lang/crates.io-index",
+      "externalRefs": [
+        {
+          "referenceCategory": "PACKAGE-MANAGER",
+          "referenceLocator": "pkg:cargo/ctutils@0.4.2",
+          "referenceType": "purl"
+        }
+      ],
+      "homepage": "https://github.com/RustCrypto/utils/tree/master/ctselect",
+      "licenseConcluded": "Apache-2.0 OR MIT",
+      "licenseDeclared": "Apache-2.0 OR MIT",
+      "name": "ctutils",
+      "versionInfo": "0.4.2"
+    },
+    {
+      "SPDXID": "SPDXRef-Package-serde--derive-1.0.228",
+      "description": "Macros 1.1 implementation of #[derive(Serialize, Deserialize)]",
+      "downloadLocation": "registry+https://github.com/rust-lang/crates.io-index",
+      "externalRefs": [
+        {
+          "referenceCategory": "PACKAGE-MANAGER",
+          "referenceLocator": "pkg:cargo/serde_derive@1.0.228",
+          "referenceType": "purl"
+        }
+      ],
+      "homepage": "https://serde.rs",
+      "licenseConcluded": "MIT OR Apache-2.0",
+      "licenseDeclared": "MIT OR Apache-2.0",
+      "name": "serde_derive",
+      "versionInfo": "1.0.228"
+    },
+    {
+      "SPDXID": "SPDXRef-Package-eth-valkyoth-derive-0.17.3",
+      "description": "Optional sanitization and RLP derive macros for eth.",
+      "downloadLocation": "NONE",
+      "homepage": "https://github.com/valkyoth/eth",
+      "licenseConcluded": "MIT OR Apache-2.0",
+      "licenseDeclared": "MIT OR Apache-2.0",
+      "name": "eth-valkyoth-derive",
+      "versionInfo": "0.17.3"
     },
     {
       "SPDXID": "SPDXRef-Package-base16ct-1.0.0",
@@ -1092,364 +975,126 @@
       "licenseDeclared": "Apache-2.0 OR MIT",
       "name": "base16ct",
       "versionInfo": "1.0.0"
+    },
+    {
+      "SPDXID": "SPDXRef-Package-k256-0.14.0",
+      "description": "secp256k1 elliptic curve library written in pure Rust with support for ECDSA\nsigning/verification/public-key recovery, Taproot Schnorr signatures (BIP340),\nElliptic Curve Diffie-Hellman (ECDH), and general-purpose secp256k1 elliptic\ncurve group operations which can be used to implement arbitrary protocols\n",
+      "downloadLocation": "registry+https://github.com/rust-lang/crates.io-index",
+      "externalRefs": [
+        {
+          "referenceCategory": "PACKAGE-MANAGER",
+          "referenceLocator": "pkg:cargo/k256@0.14.0",
+          "referenceType": "purl"
+        }
+      ],
+      "homepage": "https://github.com/RustCrypto/elliptic-curves/tree/master/k256",
+      "licenseConcluded": "Apache-2.0 OR MIT",
+      "licenseDeclared": "Apache-2.0 OR MIT",
+      "name": "k256",
+      "versionInfo": "0.14.0"
+    },
+    {
+      "SPDXID": "SPDXRef-Package-group-0.14.0",
+      "description": "Elliptic curve group traits and utilities",
+      "downloadLocation": "registry+https://github.com/rust-lang/crates.io-index",
+      "externalRefs": [
+        {
+          "referenceCategory": "PACKAGE-MANAGER",
+          "referenceLocator": "pkg:cargo/group@0.14.0",
+          "referenceType": "purl"
+        }
+      ],
+      "homepage": "https://github.com/zkcrypto/group",
+      "licenseConcluded": "MIT OR Apache-2.0",
+      "licenseDeclared": "MIT OR Apache-2.0",
+      "name": "group",
+      "versionInfo": "0.14.0"
+    },
+    {
+      "SPDXID": "SPDXRef-Package-crunchy-0.2.4",
+      "description": "Crunchy unroller: deterministically unroll constant loops",
+      "downloadLocation": "registry+https://github.com/rust-lang/crates.io-index",
+      "externalRefs": [
+        {
+          "referenceCategory": "PACKAGE-MANAGER",
+          "referenceLocator": "pkg:cargo/crunchy@0.2.4",
+          "referenceType": "purl"
+        }
+      ],
+      "homepage": "https://github.com/eira-fransham/crunchy",
+      "licenseConcluded": "MIT",
+      "licenseDeclared": "MIT",
+      "name": "crunchy",
+      "versionInfo": "0.2.4"
+    },
+    {
+      "SPDXID": "SPDXRef-Package-num-traits-0.2.19",
+      "description": "Numeric traits for generic mathematics",
+      "downloadLocation": "registry+https://github.com/rust-lang/crates.io-index",
+      "externalRefs": [
+        {
+          "referenceCategory": "PACKAGE-MANAGER",
+          "referenceLocator": "pkg:cargo/num-traits@0.2.19",
+          "referenceType": "purl"
+        }
+      ],
+      "homepage": "https://github.com/rust-num/num-traits",
+      "licenseConcluded": "MIT OR Apache-2.0",
+      "licenseDeclared": "MIT OR Apache-2.0",
+      "name": "num-traits",
+      "versionInfo": "0.2.19"
+    },
+    {
+      "SPDXID": "SPDXRef-Package-sanitization-1.2.4",
+      "description": "Dependency-free no_std secret memory sanitization with safe defaults and an explicit volatile wipe backend.",
+      "downloadLocation": "registry+https://github.com/rust-lang/crates.io-index",
+      "externalRefs": [
+        {
+          "referenceCategory": "PACKAGE-MANAGER",
+          "referenceLocator": "pkg:cargo/sanitization@1.2.4",
+          "referenceType": "purl"
+        }
+      ],
+      "homepage": "https://github.com/valkyoth/sanitization",
+      "licenseConcluded": "MIT OR Apache-2.0",
+      "licenseDeclared": "MIT OR Apache-2.0",
+      "name": "sanitization",
+      "versionInfo": "1.2.4"
+    },
+    {
+      "SPDXID": "SPDXRef-Package-digest-0.11.3",
+      "description": "Traits for cryptographic hash functions and message authentication codes",
+      "downloadLocation": "registry+https://github.com/rust-lang/crates.io-index",
+      "externalRefs": [
+        {
+          "referenceCategory": "PACKAGE-MANAGER",
+          "referenceLocator": "pkg:cargo/digest@0.11.3",
+          "referenceType": "purl"
+        }
+      ],
+      "licenseConcluded": "MIT OR Apache-2.0",
+      "licenseDeclared": "MIT OR Apache-2.0",
+      "name": "digest",
+      "versionInfo": "0.11.3"
+    },
+    {
+      "SPDXID": "SPDXRef-Package-cpufeatures-0.3.0",
+      "description": "Lightweight runtime CPU feature detection for aarch64, loongarch64, and x86/x86_64 targets,\nwith no_std support and support for mobile targets including Android and iOS\n",
+      "downloadLocation": "registry+https://github.com/rust-lang/crates.io-index",
+      "externalRefs": [
+        {
+          "referenceCategory": "PACKAGE-MANAGER",
+          "referenceLocator": "pkg:cargo/cpufeatures@0.3.0",
+          "referenceType": "purl"
+        }
+      ],
+      "licenseConcluded": "MIT OR Apache-2.0",
+      "licenseDeclared": "MIT OR Apache-2.0",
+      "name": "cpufeatures",
+      "versionInfo": "0.3.0"
     }
   ],
   "relationships": [
-    {
-      "relatedSpdxElement": "SPDXRef-Package-eth-valkyoth-rpc-0.7.0",
-      "relationshipType": "GENERATED_FROM",
-      "spdxElementId": "SPDXRef-File-eth_valkyoth_rpc"
-    },
-    {
-      "relatedSpdxElement": "SPDXRef-Package-eth-valkyoth-evm-0.10.0",
-      "relationshipType": "GENERATED_FROM",
-      "spdxElementId": "SPDXRef-File-eth_valkyoth_evm"
-    },
-    {
-      "relatedSpdxElement": "SPDXRef-File-eth_valkyoth_testkit",
-      "relationshipType": "DESCRIBES",
-      "spdxElementId": "SPDXRef-DOCUMENT"
-    },
-    {
-      "relatedSpdxElement": "SPDXRef-Package-itoa-1.0.18",
-      "relationshipType": "DEPENDS_ON",
-      "spdxElementId": "SPDXRef-Package-serde--json-1.0.150"
-    },
-    {
-      "relatedSpdxElement": "SPDXRef-Package-eth-valkyoth-codec-0.19.0",
-      "relationshipType": "GENERATED_FROM",
-      "spdxElementId": "SPDXRef-File-eth_valkyoth_codec"
-    },
-    {
-      "relatedSpdxElement": "SPDXRef-Package-k256-0.14.0",
-      "relationshipType": "DEPENDS_ON",
-      "spdxElementId": "SPDXRef-Package-eth-valkyoth-verify-0.23.0"
-    },
-    {
-      "relatedSpdxElement": "SPDXRef-Package-eth-valkyoth-sanitization-0.7.5",
-      "relationshipType": "DEPENDS_ON",
-      "spdxElementId": "SPDXRef-Package-eth-0.52.2"
-    },
-    {
-      "relatedSpdxElement": "SPDXRef-Package-eth-valkyoth-codec-0.19.0",
-      "relationshipType": "DEPENDS_ON",
-      "spdxElementId": "SPDXRef-Package-eth-valkyoth-protocol-0.25.2"
-    },
-    {
-      "relatedSpdxElement": "SPDXRef-Package-eth-valkyoth-primitives-0.11.2",
-      "relationshipType": "DEPENDS_ON",
-      "spdxElementId": "SPDXRef-Package-eth-0.52.2"
-    },
-    {
-      "relatedSpdxElement": "SPDXRef-Package-eth-valkyoth-codec-0.19.0",
-      "relationshipType": "DEPENDS_ON",
-      "spdxElementId": "SPDXRef-Package-eth-valkyoth-verify-0.23.0"
-    },
-    {
-      "relatedSpdxElement": "SPDXRef-Package-rfc6979-0.6.0",
-      "relationshipType": "DEPENDS_ON",
-      "spdxElementId": "SPDXRef-Package-ecdsa-0.17.0"
-    },
-    {
-      "relatedSpdxElement": "SPDXRef-Package-sanitization-1.2.4",
-      "relationshipType": "DEPENDS_ON",
-      "spdxElementId": "SPDXRef-Package-eth-valkyoth-sanitization-0.7.5"
-    },
-    {
-      "relatedSpdxElement": "SPDXRef-Package-subtle-2.6.1",
-      "relationshipType": "DEPENDS_ON",
-      "spdxElementId": "SPDXRef-Package-ctutils-0.4.2"
-    },
-    {
-      "relatedSpdxElement": "SPDXRef-Package-hybrid-array-0.4.13",
-      "relationshipType": "DEPENDS_ON",
-      "spdxElementId": "SPDXRef-Package-elliptic-curve-0.14.1"
-    },
-    {
-      "relatedSpdxElement": "SPDXRef-Package-primefield-0.14.0",
-      "relationshipType": "DEPENDS_ON",
-      "spdxElementId": "SPDXRef-Package-primeorder-0.14.0"
-    },
-    {
-      "relatedSpdxElement": "SPDXRef-Package-eth-valkyoth-testkit-0.7.0",
-      "relationshipType": "DEPENDS_ON",
-      "spdxElementId": "SPDXRef-Package-eth-0.52.2"
-    },
-    {
-      "relatedSpdxElement": "SPDXRef-Package-rand--core-0.10.1",
-      "relationshipType": "DEPENDS_ON",
-      "spdxElementId": "SPDXRef-Package-crypto-common-0.2.2"
-    },
-    {
-      "relatedSpdxElement": "SPDXRef-File-eth_valkyoth_verify",
-      "relationshipType": "DESCRIBES",
-      "spdxElementId": "SPDXRef-DOCUMENT"
-    },
-    {
-      "relatedSpdxElement": "SPDXRef-Package-wnaf-0.14.0",
-      "relationshipType": "DEPENDS_ON",
-      "spdxElementId": "SPDXRef-Package-k256-0.14.0"
-    },
-    {
-      "relatedSpdxElement": "SPDXRef-Package-digest-0.11.3",
-      "relationshipType": "DEPENDS_ON",
-      "spdxElementId": "SPDXRef-Package-ecdsa-0.17.0"
-    },
-    {
-      "relatedSpdxElement": "SPDXRef-File-eth_valkyoth_rpc",
-      "relationshipType": "DESCRIBES",
-      "spdxElementId": "SPDXRef-DOCUMENT"
-    },
-    {
-      "relatedSpdxElement": "SPDXRef-Package-eth-valkyoth-signer-0.7.3",
-      "relationshipType": "GENERATED_FROM",
-      "spdxElementId": "SPDXRef-File-eth_valkyoth_signer"
-    },
-    {
-      "relatedSpdxElement": "SPDXRef-Package-eth-valkyoth-codec-0.19.0",
-      "relationshipType": "DEPENDS_ON",
-      "spdxElementId": "SPDXRef-Package-eth-valkyoth-evm-0.10.0"
-    },
-    {
-      "relatedSpdxElement": "SPDXRef-Package-digest-0.11.3",
-      "relationshipType": "DEPENDS_ON",
-      "spdxElementId": "SPDXRef-Package-elliptic-curve-0.14.1"
-    },
-    {
-      "relatedSpdxElement": "SPDXRef-Package-proc-macro2-1.0.106",
-      "relationshipType": "DEPENDS_ON",
-      "spdxElementId": "SPDXRef-Package-syn-2.0.118"
-    },
-    {
-      "relatedSpdxElement": "SPDXRef-Package-sec1-0.8.1",
-      "relationshipType": "DEPENDS_ON",
-      "spdxElementId": "SPDXRef-Package-elliptic-curve-0.14.1"
-    },
-    {
-      "relatedSpdxElement": "SPDXRef-Package-crypto-bigint-0.7.5",
-      "relationshipType": "DEPENDS_ON",
-      "spdxElementId": "SPDXRef-Package-elliptic-curve-0.14.1"
-    },
-    {
-      "relatedSpdxElement": "SPDXRef-File-eth_valkyoth_signer",
-      "relationshipType": "DESCRIBES",
-      "spdxElementId": "SPDXRef-DOCUMENT"
-    },
-    {
-      "relatedSpdxElement": "SPDXRef-Package-serde-1.0.228",
-      "relationshipType": "DEPENDS_ON",
-      "spdxElementId": "SPDXRef-Package-serde--json-1.0.150"
-    },
-    {
-      "relatedSpdxElement": "SPDXRef-Package-eth-valkyoth-hash-0.11.2",
-      "relationshipType": "GENERATED_FROM",
-      "spdxElementId": "SPDXRef-File-eth_valkyoth_hash"
-    },
-    {
-      "relatedSpdxElement": "SPDXRef-Package-eth-0.52.2",
-      "relationshipType": "GENERATED_FROM",
-      "spdxElementId": "SPDXRef-File-eth"
-    },
-    {
-      "relatedSpdxElement": "SPDXRef-File-eth_valkyoth_evm",
-      "relationshipType": "DESCRIBES",
-      "spdxElementId": "SPDXRef-DOCUMENT"
-    },
-    {
-      "relatedSpdxElement": "SPDXRef-Package-cpubits-0.1.1",
-      "relationshipType": "DEPENDS_ON",
-      "spdxElementId": "SPDXRef-Package-k256-0.14.0"
-    },
-    {
-      "relatedSpdxElement": "SPDXRef-Package-block-buffer-0.12.1",
-      "relationshipType": "DEPENDS_ON",
-      "spdxElementId": "SPDXRef-Package-digest-0.11.3"
-    },
-    {
-      "relatedSpdxElement": "SPDXRef-Package-memchr-2.8.2",
-      "relationshipType": "DEPENDS_ON",
-      "spdxElementId": "SPDXRef-Package-serde--json-1.0.150"
-    },
-    {
-      "relatedSpdxElement": "SPDXRef-Package-primeorder-0.14.0",
-      "relationshipType": "DEPENDS_ON",
-      "spdxElementId": "SPDXRef-Package-k256-0.14.0"
-    },
-    {
-      "relatedSpdxElement": "SPDXRef-Package-zeroize-1.9.0",
-      "relationshipType": "DEPENDS_ON",
-      "spdxElementId": "SPDXRef-Package-elliptic-curve-0.14.1"
-    },
-    {
-      "relatedSpdxElement": "SPDXRef-Package-eth-valkyoth-evm-0.10.0",
-      "relationshipType": "DEPENDS_ON",
-      "spdxElementId": "SPDXRef-Package-eth-0.52.2"
-    },
-    {
-      "relatedSpdxElement": "SPDXRef-Package-der-0.8.1",
-      "relationshipType": "DEPENDS_ON",
-      "spdxElementId": "SPDXRef-Package-ecdsa-0.17.0"
-    },
-    {
-      "relatedSpdxElement": "SPDXRef-Package-tiny-keccak-2.0.2",
-      "relationshipType": "DEPENDS_ON",
-      "spdxElementId": "SPDXRef-Package-eth-valkyoth-hash-0.11.2"
-    },
-    {
-      "relatedSpdxElement": "SPDXRef-Package-hybrid-array-0.4.13",
-      "relationshipType": "DEPENDS_ON",
-      "spdxElementId": "SPDXRef-Package-sec1-0.8.1"
-    },
-    {
-      "relatedSpdxElement": "SPDXRef-Package-eth-valkyoth-hash-0.11.2",
-      "relationshipType": "DEPENDS_ON",
-      "spdxElementId": "SPDXRef-Package-eth-valkyoth-protocol-0.25.2"
-    },
-    {
-      "relatedSpdxElement": "SPDXRef-Package-sha2-0.11.0",
-      "relationshipType": "DEPENDS_ON",
-      "spdxElementId": "SPDXRef-Package-k256-0.14.0"
-    },
-    {
-      "relatedSpdxElement": "SPDXRef-Package-crypto-common-0.2.2",
-      "relationshipType": "DEPENDS_ON",
-      "spdxElementId": "SPDXRef-Package-primefield-0.14.0"
-    },
-    {
-      "relatedSpdxElement": "SPDXRef-Package-eth-valkyoth-codec-0.19.0",
-      "relationshipType": "DEPENDS_ON",
-      "spdxElementId": "SPDXRef-Package-eth-valkyoth-primitives-0.11.2"
-    },
-    {
-      "relatedSpdxElement": "SPDXRef-Package-base16ct-1.0.0",
-      "relationshipType": "DEPENDS_ON",
-      "spdxElementId": "SPDXRef-Package-elliptic-curve-0.14.1"
-    },
-    {
-      "relatedSpdxElement": "SPDXRef-Package-zeroize-1.9.0",
-      "relationshipType": "DEPENDS_ON",
-      "spdxElementId": "SPDXRef-Package-hybrid-array-0.4.13"
-    },
-    {
-      "relatedSpdxElement": "SPDXRef-Package-eth-valkyoth-derive-0.17.3",
-      "relationshipType": "DEPENDS_ON",
-      "spdxElementId": "SPDXRef-Package-eth-valkyoth-sanitization-0.7.5"
-    },
-    {
-      "relatedSpdxElement": "SPDXRef-Package-const-oid-0.10.2",
-      "relationshipType": "DEPENDS_ON",
-      "spdxElementId": "SPDXRef-Package-digest-0.11.3"
-    },
-    {
-      "relatedSpdxElement": "SPDXRef-Package-eth-valkyoth-signer-0.7.3",
-      "relationshipType": "DEPENDS_ON",
-      "spdxElementId": "SPDXRef-Package-eth-0.52.2"
-    },
-    {
-      "relatedSpdxElement": "SPDXRef-Package-rand--core-0.10.1",
-      "relationshipType": "DEPENDS_ON",
-      "spdxElementId": "SPDXRef-Package-primefield-0.14.0"
-    },
-    {
-      "relatedSpdxElement": "SPDXRef-Package-zeroize-1.9.0",
-      "relationshipType": "DEPENDS_ON",
-      "spdxElementId": "SPDXRef-Package-ecdsa-0.17.0"
-    },
-    {
-      "relatedSpdxElement": "SPDXRef-Package-unicode-ident-1.0.24",
-      "relationshipType": "DEPENDS_ON",
-      "spdxElementId": "SPDXRef-Package-syn-2.0.118"
-    },
-    {
-      "relatedSpdxElement": "SPDXRef-Package-proc-macro2-1.0.106",
-      "relationshipType": "DEPENDS_ON",
-      "spdxElementId": "SPDXRef-Package-eth-valkyoth-derive-0.17.3"
-    },
-    {
-      "relatedSpdxElement": "SPDXRef-Package-unicode-ident-1.0.24",
-      "relationshipType": "DEPENDS_ON",
-      "spdxElementId": "SPDXRef-Package-proc-macro2-1.0.106"
-    },
-    {
-      "relatedSpdxElement": "SPDXRef-Package-eth-valkyoth-hash-0.11.2",
-      "relationshipType": "DEPENDS_ON",
-      "spdxElementId": "SPDXRef-Package-eth-0.52.2"
-    },
-    {
-      "relatedSpdxElement": "SPDXRef-Package-cpufeatures-0.3.0",
-      "relationshipType": "DEPENDS_ON",
-      "spdxElementId": "SPDXRef-Package-sha2-0.11.0"
-    },
-    {
-      "relatedSpdxElement": "SPDXRef-Package-crunchy-0.2.4",
-      "relationshipType": "DEPENDS_ON",
-      "spdxElementId": "SPDXRef-Package-tiny-keccak-2.0.2"
-    },
-    {
-      "relatedSpdxElement": "SPDXRef-Package-crypto-common-0.2.2",
-      "relationshipType": "DEPENDS_ON",
-      "spdxElementId": "SPDXRef-Package-elliptic-curve-0.14.1"
-    },
-    {
-      "relatedSpdxElement": "SPDXRef-Package-ctutils-0.4.2",
-      "relationshipType": "DEPENDS_ON",
-      "spdxElementId": "SPDXRef-Package-crypto-bigint-0.7.5"
-    },
-    {
-      "relatedSpdxElement": "SPDXRef-Package-subtle-2.6.1",
-      "relationshipType": "DEPENDS_ON",
-      "spdxElementId": "SPDXRef-Package-group-0.14.0"
-    },
-    {
-      "relatedSpdxElement": "SPDXRef-Package-ctutils-0.4.2",
-      "relationshipType": "DEPENDS_ON",
-      "spdxElementId": "SPDXRef-Package-sec1-0.8.1"
-    },
-    {
-      "relatedSpdxElement": "SPDXRef-Package-digest-0.11.3",
-      "relationshipType": "DEPENDS_ON",
-      "spdxElementId": "SPDXRef-Package-signature-3.0.0"
-    },
-    {
-      "relatedSpdxElement": "SPDXRef-File-eth_valkyoth_reth",
-      "relationshipType": "DESCRIBES",
-      "spdxElementId": "SPDXRef-DOCUMENT"
-    },
-    {
-      "relatedSpdxElement": "SPDXRef-Package-rand--core-0.10.1",
-      "relationshipType": "DEPENDS_ON",
-      "spdxElementId": "SPDXRef-Package-signature-3.0.0"
-    },
-    {
-      "relatedSpdxElement": "SPDXRef-Package-subtle-2.6.1",
-      "relationshipType": "DEPENDS_ON",
-      "spdxElementId": "SPDXRef-Package-hybrid-array-0.4.13"
-    },
-    {
-      "relatedSpdxElement": "SPDXRef-Package-quote-1.0.46",
-      "relationshipType": "DEPENDS_ON",
-      "spdxElementId": "SPDXRef-Package-syn-2.0.118"
-    },
-    {
-      "relatedSpdxElement": "SPDXRef-Package-eth-valkyoth-hash-0.11.2",
-      "relationshipType": "DEPENDS_ON",
-      "spdxElementId": "SPDXRef-Package-eth-valkyoth-verify-0.23.0"
-    },
-    {
-      "relatedSpdxElement": "SPDXRef-Package-eth-valkyoth-primitives-0.11.2",
-      "relationshipType": "DEPENDS_ON",
-      "spdxElementId": "SPDXRef-Package-eth-valkyoth-signer-0.7.3"
-    },
-    {
-      "relatedSpdxElement": "SPDXRef-File-eth",
-      "relationshipType": "DESCRIBES",
-      "spdxElementId": "SPDXRef-DOCUMENT"
-    },
-    {
-      "relatedSpdxElement": "SPDXRef-Package-eth-valkyoth-protocol-0.25.2",
-      "relationshipType": "DEPENDS_ON",
-      "spdxElementId": "SPDXRef-Package-eth-0.52.2"
-    },
     {
       "relatedSpdxElement": "SPDXRef-Package-eth-valkyoth-reth-0.7.0",
       "relationshipType": "DEPENDS_ON",
@@ -1458,12 +1103,367 @@
     {
       "relatedSpdxElement": "SPDXRef-Package-subtle-2.6.1",
       "relationshipType": "DEPENDS_ON",
+      "spdxElementId": "SPDXRef-Package-primefield-0.14.0"
+    },
+    {
+      "relatedSpdxElement": "SPDXRef-Package-eth-valkyoth-codec-0.19.0",
+      "relationshipType": "GENERATED_FROM",
+      "spdxElementId": "SPDXRef-File-eth_valkyoth_codec"
+    },
+    {
+      "relatedSpdxElement": "SPDXRef-Package-eth-valkyoth-codec-0.19.0",
+      "relationshipType": "DEPENDS_ON",
+      "spdxElementId": "SPDXRef-Package-eth-valkyoth-evm-0.10.0"
+    },
+    {
+      "relatedSpdxElement": "SPDXRef-File-eth_valkyoth_protocol",
+      "relationshipType": "DESCRIBES",
+      "spdxElementId": "SPDXRef-DOCUMENT"
+    },
+    {
+      "relatedSpdxElement": "SPDXRef-Package-eth-valkyoth-verify-0.23.0",
+      "relationshipType": "GENERATED_FROM",
+      "spdxElementId": "SPDXRef-File-eth_valkyoth_verify"
+    },
+    {
+      "relatedSpdxElement": "SPDXRef-Package-base16ct-1.0.0",
+      "relationshipType": "DEPENDS_ON",
+      "spdxElementId": "SPDXRef-Package-sec1-0.8.1"
+    },
+    {
+      "relatedSpdxElement": "SPDXRef-Package-zeroize-1.9.0",
+      "relationshipType": "DEPENDS_ON",
+      "spdxElementId": "SPDXRef-Package-ecdsa-0.17.0"
+    },
+    {
+      "relatedSpdxElement": "SPDXRef-Package-eth-valkyoth-protocol-0.25.2",
+      "relationshipType": "DEPENDS_ON",
+      "spdxElementId": "SPDXRef-Package-eth-0.52.2"
+    },
+    {
+      "relatedSpdxElement": "SPDXRef-Package-eth-0.52.2",
+      "relationshipType": "GENERATED_FROM",
+      "spdxElementId": "SPDXRef-File-eth"
+    },
+    {
+      "relatedSpdxElement": "SPDXRef-File-eth_valkyoth_verify",
+      "relationshipType": "DESCRIBES",
+      "spdxElementId": "SPDXRef-DOCUMENT"
+    },
+    {
+      "relatedSpdxElement": "SPDXRef-Package-zmij-1.0.21",
+      "relationshipType": "DEPENDS_ON",
+      "spdxElementId": "SPDXRef-Package-serde--json-1.0.150"
+    },
+    {
+      "relatedSpdxElement": "SPDXRef-Package-eth-valkyoth-evm-core-0.26.1",
+      "relationshipType": "GENERATED_FROM",
+      "spdxElementId": "SPDXRef-File-eth_valkyoth_evm_core"
+    },
+    {
+      "relatedSpdxElement": "SPDXRef-Package-elliptic-curve-0.14.1",
+      "relationshipType": "DEPENDS_ON",
+      "spdxElementId": "SPDXRef-Package-k256-0.14.0"
+    },
+    {
+      "relatedSpdxElement": "SPDXRef-Package-eth-valkyoth-reth-0.7.0",
+      "relationshipType": "GENERATED_FROM",
+      "spdxElementId": "SPDXRef-File-eth_valkyoth_reth"
+    },
+    {
+      "relatedSpdxElement": "SPDXRef-Package-hybrid-array-0.4.13",
+      "relationshipType": "DEPENDS_ON",
+      "spdxElementId": "SPDXRef-Package-elliptic-curve-0.14.1"
+    },
+    {
+      "relatedSpdxElement": "SPDXRef-Package-libc-0.2.186",
+      "relationshipType": "DEPENDS_ON",
+      "spdxElementId": "SPDXRef-Package-cpufeatures-0.3.0"
+    },
+    {
+      "relatedSpdxElement": "SPDXRef-Package-serde--derive-1.0.228",
+      "relationshipType": "DEPENDS_ON",
+      "spdxElementId": "SPDXRef-Package-serde--core-1.0.228"
+    },
+    {
+      "relatedSpdxElement": "SPDXRef-Package-cmov-0.5.4",
+      "relationshipType": "DEPENDS_ON",
+      "spdxElementId": "SPDXRef-Package-ctutils-0.4.2"
+    },
+    {
+      "relatedSpdxElement": "SPDXRef-Package-eth-valkyoth-protocol-0.25.2",
+      "relationshipType": "DEPENDS_ON",
+      "spdxElementId": "SPDXRef-Package-eth-valkyoth-evm-0.10.0"
+    },
+    {
+      "relatedSpdxElement": "SPDXRef-Package-quote-1.0.46",
+      "relationshipType": "DEPENDS_ON",
+      "spdxElementId": "SPDXRef-Package-syn-2.0.118"
+    },
+    {
+      "relatedSpdxElement": "SPDXRef-Package-digest-0.11.3",
+      "relationshipType": "DEPENDS_ON",
+      "spdxElementId": "SPDXRef-Package-hmac-0.13.0"
+    },
+    {
+      "relatedSpdxElement": "SPDXRef-Package-rand--core-0.10.1",
+      "relationshipType": "DEPENDS_ON",
+      "spdxElementId": "SPDXRef-Package-crypto-common-0.2.2"
+    },
+    {
+      "relatedSpdxElement": "SPDXRef-Package-crypto-common-0.2.2",
+      "relationshipType": "DEPENDS_ON",
+      "spdxElementId": "SPDXRef-Package-elliptic-curve-0.14.1"
+    },
+    {
+      "relatedSpdxElement": "SPDXRef-Package-subtle-2.6.1",
+      "relationshipType": "DEPENDS_ON",
+      "spdxElementId": "SPDXRef-Package-ff-0.14.0"
+    },
+    {
+      "relatedSpdxElement": "SPDXRef-Package-rand--core-0.10.1",
+      "relationshipType": "DEPENDS_ON",
+      "spdxElementId": "SPDXRef-Package-signature-3.0.0"
+    },
+    {
+      "relatedSpdxElement": "SPDXRef-Package-eth-valkyoth-signer-0.7.3",
+      "relationshipType": "DEPENDS_ON",
+      "spdxElementId": "SPDXRef-Package-eth-0.52.2"
+    },
+    {
+      "relatedSpdxElement": "SPDXRef-Package-hybrid-array-0.4.13",
+      "relationshipType": "DEPENDS_ON",
+      "spdxElementId": "SPDXRef-Package-wnaf-0.14.0"
+    },
+    {
+      "relatedSpdxElement": "SPDXRef-Package-eth-valkyoth-protocol-0.25.2",
+      "relationshipType": "DEPENDS_ON",
+      "spdxElementId": "SPDXRef-Package-eth-valkyoth-verify-0.23.0"
+    },
+    {
+      "relatedSpdxElement": "SPDXRef-Package-cpufeatures-0.3.0",
+      "relationshipType": "DEPENDS_ON",
+      "spdxElementId": "SPDXRef-Package-sha2-0.11.0"
+    },
+    {
+      "relatedSpdxElement": "SPDXRef-Package-cpubits-0.1.1",
+      "relationshipType": "DEPENDS_ON",
+      "spdxElementId": "SPDXRef-Package-crypto-bigint-0.7.5"
+    },
+    {
+      "relatedSpdxElement": "SPDXRef-Package-k256-0.14.0",
+      "relationshipType": "DEPENDS_ON",
+      "spdxElementId": "SPDXRef-Package-eth-valkyoth-verify-0.23.0"
+    },
+    {
+      "relatedSpdxElement": "SPDXRef-Package-crunchy-0.2.4",
+      "relationshipType": "DEPENDS_ON",
+      "spdxElementId": "SPDXRef-Package-tiny-keccak-2.0.2"
+    },
+    {
+      "relatedSpdxElement": "SPDXRef-Package-der-0.8.1",
+      "relationshipType": "DEPENDS_ON",
+      "spdxElementId": "SPDXRef-Package-ecdsa-0.17.0"
+    },
+    {
+      "relatedSpdxElement": "SPDXRef-Package-subtle-2.6.1",
+      "relationshipType": "DEPENDS_ON",
+      "spdxElementId": "SPDXRef-Package-hybrid-array-0.4.13"
+    },
+    {
+      "relatedSpdxElement": "SPDXRef-Package-rand--core-0.10.1",
+      "relationshipType": "DEPENDS_ON",
+      "spdxElementId": "SPDXRef-Package-crypto-bigint-0.7.5"
+    },
+    {
+      "relatedSpdxElement": "SPDXRef-Package-group-0.14.0",
+      "relationshipType": "DEPENDS_ON",
+      "spdxElementId": "SPDXRef-Package-wnaf-0.14.0"
+    },
+    {
+      "relatedSpdxElement": "SPDXRef-Package-subtle-2.6.1",
+      "relationshipType": "DEPENDS_ON",
       "spdxElementId": "SPDXRef-Package-eth-valkyoth-primitives-0.11.2"
     },
     {
-      "relatedSpdxElement": "SPDXRef-Package-syn-2.0.118",
+      "relatedSpdxElement": "SPDXRef-Package-eth-valkyoth-primitives-0.11.2",
+      "relationshipType": "DEPENDS_ON",
+      "spdxElementId": "SPDXRef-Package-eth-valkyoth-verify-0.23.0"
+    },
+    {
+      "relatedSpdxElement": "SPDXRef-Package-crypto-bigint-0.7.5",
+      "relationshipType": "DEPENDS_ON",
+      "spdxElementId": "SPDXRef-Package-primefield-0.14.0"
+    },
+    {
+      "relatedSpdxElement": "SPDXRef-Package-eth-valkyoth-testkit-0.7.0",
+      "relationshipType": "DEPENDS_ON",
+      "spdxElementId": "SPDXRef-Package-eth-0.52.2"
+    },
+    {
+      "relatedSpdxElement": "SPDXRef-Package-eth-valkyoth-codec-0.19.0",
+      "relationshipType": "DEPENDS_ON",
+      "spdxElementId": "SPDXRef-Package-eth-valkyoth-verify-0.23.0"
+    },
+    {
+      "relatedSpdxElement": "SPDXRef-Package-eth-valkyoth-signer-0.7.3",
+      "relationshipType": "GENERATED_FROM",
+      "spdxElementId": "SPDXRef-File-eth_valkyoth_signer"
+    },
+    {
+      "relatedSpdxElement": "SPDXRef-Package-eth-valkyoth-primitives-0.11.2",
+      "relationshipType": "DEPENDS_ON",
+      "spdxElementId": "SPDXRef-Package-eth-0.52.2"
+    },
+    {
+      "relatedSpdxElement": "SPDXRef-Package-base16ct-1.0.0",
+      "relationshipType": "DEPENDS_ON",
+      "spdxElementId": "SPDXRef-Package-elliptic-curve-0.14.1"
+    },
+    {
+      "relatedSpdxElement": "SPDXRef-Package-ctutils-0.4.2",
+      "relationshipType": "DEPENDS_ON",
+      "spdxElementId": "SPDXRef-Package-sec1-0.8.1"
+    },
+    {
+      "relatedSpdxElement": "SPDXRef-Package-eth-valkyoth-rpc-0.7.0",
+      "relationshipType": "GENERATED_FROM",
+      "spdxElementId": "SPDXRef-File-eth_valkyoth_rpc"
+    },
+    {
+      "relatedSpdxElement": "SPDXRef-Package-eth-valkyoth-hash-0.11.2",
+      "relationshipType": "GENERATED_FROM",
+      "spdxElementId": "SPDXRef-File-eth_valkyoth_hash"
+    },
+    {
+      "relatedSpdxElement": "SPDXRef-Package-eth-valkyoth-codec-0.19.0",
+      "relationshipType": "DEPENDS_ON",
+      "spdxElementId": "SPDXRef-Package-eth-0.52.2"
+    },
+    {
+      "relatedSpdxElement": "SPDXRef-Package-eth-valkyoth-evm-0.10.0",
+      "relationshipType": "GENERATED_FROM",
+      "spdxElementId": "SPDXRef-File-eth_valkyoth_evm"
+    },
+    {
+      "relatedSpdxElement": "SPDXRef-Package-serde-1.0.228",
+      "relationshipType": "DEPENDS_ON",
+      "spdxElementId": "SPDXRef-Package-serde--json-1.0.150"
+    },
+    {
+      "relatedSpdxElement": "SPDXRef-File-eth_valkyoth_evm_core",
+      "relationshipType": "DESCRIBES",
+      "spdxElementId": "SPDXRef-DOCUMENT"
+    },
+    {
+      "relatedSpdxElement": "SPDXRef-Package-subtle-2.6.1",
+      "relationshipType": "DEPENDS_ON",
+      "spdxElementId": "SPDXRef-Package-sec1-0.8.1"
+    },
+    {
+      "relatedSpdxElement": "SPDXRef-File-eth_valkyoth_evm",
+      "relationshipType": "DESCRIBES",
+      "spdxElementId": "SPDXRef-DOCUMENT"
+    },
+    {
+      "relatedSpdxElement": "SPDXRef-Package-ctutils-0.4.2",
+      "relationshipType": "DEPENDS_ON",
+      "spdxElementId": "SPDXRef-Package-crypto-bigint-0.7.5"
+    },
+    {
+      "relatedSpdxElement": "SPDXRef-Package-const-oid-0.10.2",
+      "relationshipType": "DEPENDS_ON",
+      "spdxElementId": "SPDXRef-Package-digest-0.11.3"
+    },
+    {
+      "relatedSpdxElement": "SPDXRef-Package-eth-valkyoth-rpc-0.7.0",
+      "relationshipType": "DEPENDS_ON",
+      "spdxElementId": "SPDXRef-Package-eth-0.52.2"
+    },
+    {
+      "relatedSpdxElement": "SPDXRef-Package-subtle-2.6.1",
+      "relationshipType": "DEPENDS_ON",
+      "spdxElementId": "SPDXRef-Package-elliptic-curve-0.14.1"
+    },
+    {
+      "relatedSpdxElement": "SPDXRef-Package-num-traits-0.2.19",
+      "relationshipType": "DEPENDS_ON",
+      "spdxElementId": "SPDXRef-Package-crypto-bigint-0.7.5"
+    },
+    {
+      "relatedSpdxElement": "SPDXRef-Package-zeroize-1.9.0",
+      "relationshipType": "DEPENDS_ON",
+      "spdxElementId": "SPDXRef-Package-primefield-0.14.0"
+    },
+    {
+      "relatedSpdxElement": "SPDXRef-Package-eth-valkyoth-sanitization-0.7.5",
+      "relationshipType": "GENERATED_FROM",
+      "spdxElementId": "SPDXRef-File-eth_valkyoth_sanitization"
+    },
+    {
+      "relatedSpdxElement": "SPDXRef-Package-digest-0.11.3",
+      "relationshipType": "DEPENDS_ON",
+      "spdxElementId": "SPDXRef-Package-sha2-0.11.0"
+    },
+    {
+      "relatedSpdxElement": "SPDXRef-Package-eth-valkyoth-primitives-0.11.2",
+      "relationshipType": "DEPENDS_ON",
+      "spdxElementId": "SPDXRef-Package-eth-valkyoth-protocol-0.25.2"
+    },
+    {
+      "relatedSpdxElement": "SPDXRef-Package-cfg-if-1.0.4",
+      "relationshipType": "DEPENDS_ON",
+      "spdxElementId": "SPDXRef-Package-sha2-0.11.0"
+    },
+    {
+      "relatedSpdxElement": "SPDXRef-Package-quote-1.0.46",
       "relationshipType": "DEPENDS_ON",
       "spdxElementId": "SPDXRef-Package-eth-valkyoth-derive-0.17.3"
+    },
+    {
+      "relatedSpdxElement": "SPDXRef-Package-eth-valkyoth-primitives-0.11.2",
+      "relationshipType": "GENERATED_FROM",
+      "spdxElementId": "SPDXRef-File-eth_valkyoth_primitives"
+    },
+    {
+      "relatedSpdxElement": "SPDXRef-Package-serde--json-1.0.150",
+      "relationshipType": "DEPENDS_ON",
+      "spdxElementId": "SPDXRef-Package-eth-valkyoth-verify-0.23.0"
+    },
+    {
+      "relatedSpdxElement": "SPDXRef-Package-quote-1.0.46",
+      "relationshipType": "DEPENDS_ON",
+      "spdxElementId": "SPDXRef-Package-serde--derive-1.0.228"
+    },
+    {
+      "relatedSpdxElement": "SPDXRef-Package-rfc6979-0.6.0",
+      "relationshipType": "DEPENDS_ON",
+      "spdxElementId": "SPDXRef-Package-ecdsa-0.17.0"
+    },
+    {
+      "relatedSpdxElement": "SPDXRef-Package-proc-macro2-1.0.106",
+      "relationshipType": "DEPENDS_ON",
+      "spdxElementId": "SPDXRef-Package-quote-1.0.46"
+    },
+    {
+      "relatedSpdxElement": "SPDXRef-Package-wnaf-0.14.0",
+      "relationshipType": "DEPENDS_ON",
+      "spdxElementId": "SPDXRef-Package-k256-0.14.0"
+    },
+    {
+      "relatedSpdxElement": "SPDXRef-Package-elliptic-curve-0.14.1",
+      "relationshipType": "DEPENDS_ON",
+      "spdxElementId": "SPDXRef-Package-ecdsa-0.17.0"
+    },
+    {
+      "relatedSpdxElement": "SPDXRef-Package-primefield-0.14.0",
+      "relationshipType": "DEPENDS_ON",
+      "spdxElementId": "SPDXRef-Package-primeorder-0.14.0"
+    },
+    {
+      "relatedSpdxElement": "SPDXRef-Package-crypto-common-0.2.2",
+      "relationshipType": "DEPENDS_ON",
+      "spdxElementId": "SPDXRef-Package-digest-0.11.3"
     },
     {
       "relatedSpdxElement": "SPDXRef-File-eth_valkyoth_primitives",
@@ -1473,32 +1473,52 @@
     {
       "relatedSpdxElement": "SPDXRef-Package-zeroize-1.9.0",
       "relationshipType": "DEPENDS_ON",
-      "spdxElementId": "SPDXRef-Package-der-0.8.1"
+      "spdxElementId": "SPDXRef-Package-sec1-0.8.1"
     },
     {
-      "relatedSpdxElement": "SPDXRef-Package-eth-valkyoth-primitives-0.11.2",
-      "relationshipType": "GENERATED_FROM",
-      "spdxElementId": "SPDXRef-File-eth_valkyoth_primitives"
+      "relatedSpdxElement": "SPDXRef-Package-digest-0.11.3",
+      "relationshipType": "DEPENDS_ON",
+      "spdxElementId": "SPDXRef-Package-ecdsa-0.17.0"
     },
     {
-      "relatedSpdxElement": "SPDXRef-Package-eth-valkyoth-primitives-0.11.2",
+      "relatedSpdxElement": "SPDXRef-Package-tiny-keccak-2.0.2",
       "relationshipType": "DEPENDS_ON",
       "spdxElementId": "SPDXRef-Package-eth-valkyoth-hash-0.11.2"
     },
     {
-      "relatedSpdxElement": "SPDXRef-File-eth_valkyoth_sanitization",
+      "relatedSpdxElement": "SPDXRef-Package-eth-valkyoth-hash-0.11.2",
+      "relationshipType": "DEPENDS_ON",
+      "spdxElementId": "SPDXRef-Package-eth-valkyoth-protocol-0.25.2"
+    },
+    {
+      "relatedSpdxElement": "SPDXRef-Package-syn-2.0.118",
+      "relationshipType": "DEPENDS_ON",
+      "spdxElementId": "SPDXRef-Package-serde--derive-1.0.228"
+    },
+    {
+      "relatedSpdxElement": "SPDXRef-Package-hybrid-array-0.4.13",
+      "relationshipType": "DEPENDS_ON",
+      "spdxElementId": "SPDXRef-Package-block-buffer-0.12.1"
+    },
+    {
+      "relatedSpdxElement": "SPDXRef-Package-crypto-bigint-0.7.5",
+      "relationshipType": "DEPENDS_ON",
+      "spdxElementId": "SPDXRef-Package-elliptic-curve-0.14.1"
+    },
+    {
+      "relatedSpdxElement": "SPDXRef-File-eth_valkyoth_hash",
       "relationshipType": "DESCRIBES",
       "spdxElementId": "SPDXRef-DOCUMENT"
     },
     {
-      "relatedSpdxElement": "SPDXRef-Package-ctutils-0.4.2",
+      "relatedSpdxElement": "SPDXRef-Package-der-0.8.1",
       "relationshipType": "DEPENDS_ON",
-      "spdxElementId": "SPDXRef-Package-digest-0.11.3"
+      "spdxElementId": "SPDXRef-Package-sec1-0.8.1"
     },
     {
-      "relatedSpdxElement": "SPDXRef-Package-cmov-0.5.4",
+      "relatedSpdxElement": "SPDXRef-Package-rand--core-0.10.1",
       "relationshipType": "DEPENDS_ON",
-      "spdxElementId": "SPDXRef-Package-ctutils-0.4.2"
+      "spdxElementId": "SPDXRef-Package-ff-0.14.0"
     },
     {
       "relatedSpdxElement": "SPDXRef-Package-elliptic-curve-0.14.1",
@@ -1506,9 +1526,204 @@
       "spdxElementId": "SPDXRef-Package-primeorder-0.14.0"
     },
     {
+      "relatedSpdxElement": "SPDXRef-Package-sha2-0.11.0",
+      "relationshipType": "DEPENDS_ON",
+      "spdxElementId": "SPDXRef-Package-k256-0.14.0"
+    },
+    {
+      "relatedSpdxElement": "SPDXRef-Package-hybrid-array-0.4.13",
+      "relationshipType": "DEPENDS_ON",
+      "spdxElementId": "SPDXRef-Package-sec1-0.8.1"
+    },
+    {
+      "relatedSpdxElement": "SPDXRef-Package-serde--core-1.0.228",
+      "relationshipType": "DEPENDS_ON",
+      "spdxElementId": "SPDXRef-Package-serde-1.0.228"
+    },
+    {
+      "relatedSpdxElement": "SPDXRef-Package-digest-0.11.3",
+      "relationshipType": "DEPENDS_ON",
+      "spdxElementId": "SPDXRef-Package-signature-3.0.0"
+    },
+    {
       "relatedSpdxElement": "SPDXRef-Package-ecdsa-0.17.0",
       "relationshipType": "DEPENDS_ON",
       "spdxElementId": "SPDXRef-Package-k256-0.14.0"
+    },
+    {
+      "relatedSpdxElement": "SPDXRef-Package-digest-0.11.3",
+      "relationshipType": "DEPENDS_ON",
+      "spdxElementId": "SPDXRef-Package-elliptic-curve-0.14.1"
+    },
+    {
+      "relatedSpdxElement": "SPDXRef-Package-hybrid-array-0.4.13",
+      "relationshipType": "DEPENDS_ON",
+      "spdxElementId": "SPDXRef-Package-crypto-common-0.2.2"
+    },
+    {
+      "relatedSpdxElement": "SPDXRef-Package-eth-valkyoth-primitives-0.11.2",
+      "relationshipType": "DEPENDS_ON",
+      "spdxElementId": "SPDXRef-Package-eth-valkyoth-hash-0.11.2"
+    },
+    {
+      "relatedSpdxElement": "SPDXRef-Package-eth-valkyoth-primitives-0.11.2",
+      "relationshipType": "DEPENDS_ON",
+      "spdxElementId": "SPDXRef-Package-eth-valkyoth-evm-0.10.0"
+    },
+    {
+      "relatedSpdxElement": "SPDXRef-Package-sanitization-1.2.4",
+      "relationshipType": "DEPENDS_ON",
+      "spdxElementId": "SPDXRef-Package-eth-valkyoth-sanitization-0.7.5"
+    },
+    {
+      "relatedSpdxElement": "SPDXRef-Package-eth-valkyoth-codec-0.19.0",
+      "relationshipType": "DEPENDS_ON",
+      "spdxElementId": "SPDXRef-Package-eth-valkyoth-primitives-0.11.2"
+    },
+    {
+      "relatedSpdxElement": "SPDXRef-Package-sec1-0.8.1",
+      "relationshipType": "DEPENDS_ON",
+      "spdxElementId": "SPDXRef-Package-elliptic-curve-0.14.1"
+    },
+    {
+      "relatedSpdxElement": "SPDXRef-Package-serde--core-1.0.228",
+      "relationshipType": "DEPENDS_ON",
+      "spdxElementId": "SPDXRef-Package-serde--json-1.0.150"
+    },
+    {
+      "relatedSpdxElement": "SPDXRef-Package-eth-valkyoth-codec-0.19.0",
+      "relationshipType": "DEPENDS_ON",
+      "spdxElementId": "SPDXRef-Package-eth-valkyoth-protocol-0.25.2"
+    },
+    {
+      "relatedSpdxElement": "SPDXRef-Package-block-buffer-0.12.1",
+      "relationshipType": "DEPENDS_ON",
+      "spdxElementId": "SPDXRef-Package-digest-0.11.3"
+    },
+    {
+      "relatedSpdxElement": "SPDXRef-Package-eth-valkyoth-testkit-0.7.0",
+      "relationshipType": "GENERATED_FROM",
+      "spdxElementId": "SPDXRef-File-eth_valkyoth_testkit"
+    },
+    {
+      "relatedSpdxElement": "SPDXRef-File-eth_valkyoth_signer",
+      "relationshipType": "DESCRIBES",
+      "spdxElementId": "SPDXRef-DOCUMENT"
+    },
+    {
+      "relatedSpdxElement": "SPDXRef-Package-zeroize-1.9.0",
+      "relationshipType": "DEPENDS_ON",
+      "spdxElementId": "SPDXRef-Package-elliptic-curve-0.14.1"
+    },
+    {
+      "relatedSpdxElement": "SPDXRef-Package-eth-valkyoth-evm-0.10.0",
+      "relationshipType": "DEPENDS_ON",
+      "spdxElementId": "SPDXRef-Package-eth-0.52.2"
+    },
+    {
+      "relatedSpdxElement": "SPDXRef-File-eth",
+      "relationshipType": "DESCRIBES",
+      "spdxElementId": "SPDXRef-DOCUMENT"
+    },
+    {
+      "relatedSpdxElement": "SPDXRef-Package-crypto-common-0.2.2",
+      "relationshipType": "DEPENDS_ON",
+      "spdxElementId": "SPDXRef-Package-primefield-0.14.0"
+    },
+    {
+      "relatedSpdxElement": "SPDXRef-Package-subtle-2.6.1",
+      "relationshipType": "DEPENDS_ON",
+      "spdxElementId": "SPDXRef-Package-crypto-bigint-0.7.5"
+    },
+    {
+      "relatedSpdxElement": "SPDXRef-Package-serde-1.0.228",
+      "relationshipType": "DEPENDS_ON",
+      "spdxElementId": "SPDXRef-Package-eth-valkyoth-verify-0.23.0"
+    },
+    {
+      "relatedSpdxElement": "SPDXRef-Package-signature-3.0.0",
+      "relationshipType": "DEPENDS_ON",
+      "spdxElementId": "SPDXRef-Package-ecdsa-0.17.0"
+    },
+    {
+      "relatedSpdxElement": "SPDXRef-Package-ctutils-0.4.2",
+      "relationshipType": "DEPENDS_ON",
+      "spdxElementId": "SPDXRef-Package-digest-0.11.3"
+    },
+    {
+      "relatedSpdxElement": "SPDXRef-Package-subtle-2.6.1",
+      "relationshipType": "DEPENDS_ON",
+      "spdxElementId": "SPDXRef-Package-ctutils-0.4.2"
+    },
+    {
+      "relatedSpdxElement": "SPDXRef-Package-eth-valkyoth-protocol-0.25.2",
+      "relationshipType": "GENERATED_FROM",
+      "spdxElementId": "SPDXRef-File-eth_valkyoth_protocol"
+    },
+    {
+      "relatedSpdxElement": "SPDXRef-Package-proc-macro2-1.0.106",
+      "relationshipType": "DEPENDS_ON",
+      "spdxElementId": "SPDXRef-Package-eth-valkyoth-derive-0.17.3"
+    },
+    {
+      "relatedSpdxElement": "SPDXRef-Package-cpubits-0.1.1",
+      "relationshipType": "DEPENDS_ON",
+      "spdxElementId": "SPDXRef-Package-k256-0.14.0"
+    },
+    {
+      "relatedSpdxElement": "SPDXRef-Package-eth-valkyoth-verify-0.23.0",
+      "relationshipType": "DEPENDS_ON",
+      "spdxElementId": "SPDXRef-Package-eth-0.52.2"
+    },
+    {
+      "relatedSpdxElement": "SPDXRef-Package-ff-0.14.0",
+      "relationshipType": "DEPENDS_ON",
+      "spdxElementId": "SPDXRef-Package-primefield-0.14.0"
+    },
+    {
+      "relatedSpdxElement": "SPDXRef-Package-primeorder-0.14.0",
+      "relationshipType": "DEPENDS_ON",
+      "spdxElementId": "SPDXRef-Package-k256-0.14.0"
+    },
+    {
+      "relatedSpdxElement": "SPDXRef-File-eth_valkyoth_codec",
+      "relationshipType": "DESCRIBES",
+      "spdxElementId": "SPDXRef-DOCUMENT"
+    },
+    {
+      "relatedSpdxElement": "SPDXRef-Package-eth-valkyoth-derive-0.17.3",
+      "relationshipType": "DEPENDS_ON",
+      "spdxElementId": "SPDXRef-Package-eth-valkyoth-sanitization-0.7.5"
+    },
+    {
+      "relatedSpdxElement": "SPDXRef-Package-eth-valkyoth-hash-0.11.2",
+      "relationshipType": "DEPENDS_ON",
+      "spdxElementId": "SPDXRef-Package-eth-valkyoth-verify-0.23.0"
+    },
+    {
+      "relatedSpdxElement": "SPDXRef-Package-typenum-1.20.1",
+      "relationshipType": "DEPENDS_ON",
+      "spdxElementId": "SPDXRef-Package-hybrid-array-0.4.13"
+    },
+    {
+      "relatedSpdxElement": "SPDXRef-Package-unicode-ident-1.0.24",
+      "relationshipType": "DEPENDS_ON",
+      "spdxElementId": "SPDXRef-Package-syn-2.0.118"
+    },
+    {
+      "relatedSpdxElement": "SPDXRef-Package-group-0.14.0",
+      "relationshipType": "DEPENDS_ON",
+      "spdxElementId": "SPDXRef-Package-elliptic-curve-0.14.1"
+    },
+    {
+      "relatedSpdxElement": "SPDXRef-Package-unicode-ident-1.0.24",
+      "relationshipType": "DEPENDS_ON",
+      "spdxElementId": "SPDXRef-Package-proc-macro2-1.0.106"
+    },
+    {
+      "relatedSpdxElement": "SPDXRef-Package-ff-0.14.0",
+      "relationshipType": "DEPENDS_ON",
+      "spdxElementId": "SPDXRef-Package-group-0.14.0"
     },
     {
       "relatedSpdxElement": "SPDXRef-Package-ff-0.14.0",
@@ -1516,32 +1731,52 @@
       "spdxElementId": "SPDXRef-Package-wnaf-0.14.0"
     },
     {
-      "relatedSpdxElement": "SPDXRef-Package-eth-valkyoth-rpc-0.7.0",
+      "relatedSpdxElement": "SPDXRef-File-eth_valkyoth_sanitization",
+      "relationshipType": "DESCRIBES",
+      "spdxElementId": "SPDXRef-DOCUMENT"
+    },
+    {
+      "relatedSpdxElement": "SPDXRef-Package-syn-2.0.118",
+      "relationshipType": "DEPENDS_ON",
+      "spdxElementId": "SPDXRef-Package-eth-valkyoth-derive-0.17.3"
+    },
+    {
+      "relatedSpdxElement": "SPDXRef-Package-eth-valkyoth-evm-core-0.26.1",
       "relationshipType": "DEPENDS_ON",
       "spdxElementId": "SPDXRef-Package-eth-0.52.2"
     },
     {
       "relatedSpdxElement": "SPDXRef-Package-crypto-bigint-0.7.5",
       "relationshipType": "DEPENDS_ON",
-      "spdxElementId": "SPDXRef-Package-primefield-0.14.0"
+      "spdxElementId": "SPDXRef-Package-rfc6979-0.6.0"
     },
     {
-      "relatedSpdxElement": "SPDXRef-File-eth_valkyoth_evm_core",
+      "relatedSpdxElement": "SPDXRef-Package-zeroize-1.9.0",
+      "relationshipType": "DEPENDS_ON",
+      "spdxElementId": "SPDXRef-Package-sanitization-1.2.4"
+    },
+    {
+      "relatedSpdxElement": "SPDXRef-Package-hmac-0.13.0",
+      "relationshipType": "DEPENDS_ON",
+      "spdxElementId": "SPDXRef-Package-rfc6979-0.6.0"
+    },
+    {
+      "relatedSpdxElement": "SPDXRef-File-eth_valkyoth_rpc",
       "relationshipType": "DESCRIBES",
       "spdxElementId": "SPDXRef-DOCUMENT"
     },
     {
-      "relatedSpdxElement": "SPDXRef-Package-eth-valkyoth-codec-0.19.0",
+      "relatedSpdxElement": "SPDXRef-Package-itoa-1.0.18",
       "relationshipType": "DEPENDS_ON",
-      "spdxElementId": "SPDXRef-Package-eth-0.52.2"
+      "spdxElementId": "SPDXRef-Package-serde--json-1.0.150"
     },
     {
-      "relatedSpdxElement": "SPDXRef-Package-base16ct-1.0.0",
+      "relatedSpdxElement": "SPDXRef-Package-ff-0.14.0",
       "relationshipType": "DEPENDS_ON",
-      "spdxElementId": "SPDXRef-Package-sec1-0.8.1"
+      "spdxElementId": "SPDXRef-Package-elliptic-curve-0.14.1"
     },
     {
-      "relatedSpdxElement": "SPDXRef-Package-typenum-1.20.1",
+      "relatedSpdxElement": "SPDXRef-Package-zeroize-1.9.0",
       "relationshipType": "DEPENDS_ON",
       "spdxElementId": "SPDXRef-Package-hybrid-array-0.4.13"
     },
@@ -1551,209 +1786,14 @@
       "spdxElementId": "SPDXRef-Package-crypto-bigint-0.7.5"
     },
     {
-      "relatedSpdxElement": "SPDXRef-Package-digest-0.11.3",
-      "relationshipType": "DEPENDS_ON",
-      "spdxElementId": "SPDXRef-Package-sha2-0.11.0"
-    },
-    {
-      "relatedSpdxElement": "SPDXRef-Package-hybrid-array-0.4.13",
-      "relationshipType": "DEPENDS_ON",
-      "spdxElementId": "SPDXRef-Package-wnaf-0.14.0"
-    },
-    {
-      "relatedSpdxElement": "SPDXRef-Package-hybrid-array-0.4.13",
-      "relationshipType": "DEPENDS_ON",
-      "spdxElementId": "SPDXRef-Package-block-buffer-0.12.1"
-    },
-    {
-      "relatedSpdxElement": "SPDXRef-Package-syn-2.0.118",
-      "relationshipType": "DEPENDS_ON",
-      "spdxElementId": "SPDXRef-Package-serde--derive-1.0.228"
-    },
-    {
-      "relatedSpdxElement": "SPDXRef-Package-proc-macro2-1.0.106",
-      "relationshipType": "DEPENDS_ON",
-      "spdxElementId": "SPDXRef-Package-quote-1.0.46"
-    },
-    {
-      "relatedSpdxElement": "SPDXRef-Package-digest-0.11.3",
-      "relationshipType": "DEPENDS_ON",
-      "spdxElementId": "SPDXRef-Package-hmac-0.13.0"
-    },
-    {
-      "relatedSpdxElement": "SPDXRef-File-eth_valkyoth_hash",
-      "relationshipType": "DESCRIBES",
-      "spdxElementId": "SPDXRef-DOCUMENT"
-    },
-    {
-      "relatedSpdxElement": "SPDXRef-Package-quote-1.0.46",
-      "relationshipType": "DEPENDS_ON",
-      "spdxElementId": "SPDXRef-Package-serde--derive-1.0.228"
-    },
-    {
       "relatedSpdxElement": "SPDXRef-Package-eth-valkyoth-primitives-0.11.2",
       "relationshipType": "DEPENDS_ON",
-      "spdxElementId": "SPDXRef-Package-eth-valkyoth-verify-0.23.0"
-    },
-    {
-      "relatedSpdxElement": "SPDXRef-Package-eth-valkyoth-evm-core-0.27.0",
-      "relationshipType": "GENERATED_FROM",
-      "spdxElementId": "SPDXRef-File-eth_valkyoth_evm_core"
-    },
-    {
-      "relatedSpdxElement": "SPDXRef-Package-subtle-2.6.1",
-      "relationshipType": "DEPENDS_ON",
-      "spdxElementId": "SPDXRef-Package-ff-0.14.0"
-    },
-    {
-      "relatedSpdxElement": "SPDXRef-Package-ff-0.14.0",
-      "relationshipType": "DEPENDS_ON",
-      "spdxElementId": "SPDXRef-Package-group-0.14.0"
-    },
-    {
-      "relatedSpdxElement": "SPDXRef-Package-subtle-2.6.1",
-      "relationshipType": "DEPENDS_ON",
-      "spdxElementId": "SPDXRef-Package-sec1-0.8.1"
-    },
-    {
-      "relatedSpdxElement": "SPDXRef-Package-eth-valkyoth-protocol-0.25.2",
-      "relationshipType": "GENERATED_FROM",
-      "spdxElementId": "SPDXRef-File-eth_valkyoth_protocol"
-    },
-    {
-      "relatedSpdxElement": "SPDXRef-Package-zmij-1.0.21",
-      "relationshipType": "DEPENDS_ON",
-      "spdxElementId": "SPDXRef-Package-serde--json-1.0.150"
-    },
-    {
-      "relatedSpdxElement": "SPDXRef-Package-serde--core-1.0.228",
-      "relationshipType": "DEPENDS_ON",
-      "spdxElementId": "SPDXRef-Package-serde-1.0.228"
-    },
-    {
-      "relatedSpdxElement": "SPDXRef-Package-signature-3.0.0",
-      "relationshipType": "DEPENDS_ON",
-      "spdxElementId": "SPDXRef-Package-ecdsa-0.17.0"
+      "spdxElementId": "SPDXRef-Package-eth-valkyoth-signer-0.7.3"
     },
     {
       "relatedSpdxElement": "SPDXRef-Package-zeroize-1.9.0",
       "relationshipType": "DEPENDS_ON",
       "spdxElementId": "SPDXRef-Package-crypto-bigint-0.7.5"
-    },
-    {
-      "relatedSpdxElement": "SPDXRef-Package-cpubits-0.1.1",
-      "relationshipType": "DEPENDS_ON",
-      "spdxElementId": "SPDXRef-Package-crypto-bigint-0.7.5"
-    },
-    {
-      "relatedSpdxElement": "SPDXRef-Package-eth-valkyoth-sanitization-0.7.5",
-      "relationshipType": "GENERATED_FROM",
-      "spdxElementId": "SPDXRef-File-eth_valkyoth_sanitization"
-    },
-    {
-      "relatedSpdxElement": "SPDXRef-Package-serde-1.0.228",
-      "relationshipType": "DEPENDS_ON",
-      "spdxElementId": "SPDXRef-Package-eth-valkyoth-verify-0.23.0"
-    },
-    {
-      "relatedSpdxElement": "SPDXRef-Package-eth-valkyoth-evm-core-0.27.0",
-      "relationshipType": "DEPENDS_ON",
-      "spdxElementId": "SPDXRef-Package-eth-0.52.2"
-    },
-    {
-      "relatedSpdxElement": "SPDXRef-Package-eth-valkyoth-primitives-0.11.2",
-      "relationshipType": "DEPENDS_ON",
-      "spdxElementId": "SPDXRef-Package-eth-valkyoth-protocol-0.25.2"
-    },
-    {
-      "relatedSpdxElement": "SPDXRef-Package-rand--core-0.10.1",
-      "relationshipType": "DEPENDS_ON",
-      "spdxElementId": "SPDXRef-Package-crypto-bigint-0.7.5"
-    },
-    {
-      "relatedSpdxElement": "SPDXRef-Package-libc-0.2.186",
-      "relationshipType": "DEPENDS_ON",
-      "spdxElementId": "SPDXRef-Package-cpufeatures-0.3.0"
-    },
-    {
-      "relatedSpdxElement": "SPDXRef-Package-crypto-common-0.2.2",
-      "relationshipType": "DEPENDS_ON",
-      "spdxElementId": "SPDXRef-Package-digest-0.11.3"
-    },
-    {
-      "relatedSpdxElement": "SPDXRef-Package-serde--core-1.0.228",
-      "relationshipType": "DEPENDS_ON",
-      "spdxElementId": "SPDXRef-Package-serde--json-1.0.150"
-    },
-    {
-      "relatedSpdxElement": "SPDXRef-Package-hmac-0.13.0",
-      "relationshipType": "DEPENDS_ON",
-      "spdxElementId": "SPDXRef-Package-rfc6979-0.6.0"
-    },
-    {
-      "relatedSpdxElement": "SPDXRef-Package-eth-valkyoth-testkit-0.7.0",
-      "relationshipType": "GENERATED_FROM",
-      "spdxElementId": "SPDXRef-File-eth_valkyoth_testkit"
-    },
-    {
-      "relatedSpdxElement": "SPDXRef-Package-quote-1.0.46",
-      "relationshipType": "DEPENDS_ON",
-      "spdxElementId": "SPDXRef-Package-eth-valkyoth-derive-0.17.3"
-    },
-    {
-      "relatedSpdxElement": "SPDXRef-Package-rand--core-0.10.1",
-      "relationshipType": "DEPENDS_ON",
-      "spdxElementId": "SPDXRef-Package-group-0.14.0"
-    },
-    {
-      "relatedSpdxElement": "SPDXRef-Package-proc-macro2-1.0.106",
-      "relationshipType": "DEPENDS_ON",
-      "spdxElementId": "SPDXRef-Package-serde--derive-1.0.228"
-    },
-    {
-      "relatedSpdxElement": "SPDXRef-Package-rand--core-0.10.1",
-      "relationshipType": "DEPENDS_ON",
-      "spdxElementId": "SPDXRef-Package-ff-0.14.0"
-    },
-    {
-      "relatedSpdxElement": "SPDXRef-Package-const-oid-0.10.2",
-      "relationshipType": "DEPENDS_ON",
-      "spdxElementId": "SPDXRef-Package-der-0.8.1"
-    },
-    {
-      "relatedSpdxElement": "SPDXRef-Package-der-0.8.1",
-      "relationshipType": "DEPENDS_ON",
-      "spdxElementId": "SPDXRef-Package-sec1-0.8.1"
-    },
-    {
-      "relatedSpdxElement": "SPDXRef-Package-zeroize-1.9.0",
-      "relationshipType": "DEPENDS_ON",
-      "spdxElementId": "SPDXRef-Package-sec1-0.8.1"
-    },
-    {
-      "relatedSpdxElement": "SPDXRef-Package-subtle-2.6.1",
-      "relationshipType": "DEPENDS_ON",
-      "spdxElementId": "SPDXRef-Package-primefield-0.14.0"
-    },
-    {
-      "relatedSpdxElement": "SPDXRef-Package-eth-valkyoth-reth-0.7.0",
-      "relationshipType": "GENERATED_FROM",
-      "spdxElementId": "SPDXRef-File-eth_valkyoth_reth"
-    },
-    {
-      "relatedSpdxElement": "SPDXRef-Package-eth-valkyoth-primitives-0.11.2",
-      "relationshipType": "DEPENDS_ON",
-      "spdxElementId": "SPDXRef-Package-eth-valkyoth-evm-0.10.0"
-    },
-    {
-      "relatedSpdxElement": "SPDXRef-Package-serde--derive-1.0.228",
-      "relationshipType": "DEPENDS_ON",
-      "spdxElementId": "SPDXRef-Package-serde--core-1.0.228"
-    },
-    {
-      "relatedSpdxElement": "SPDXRef-Package-zeroize-1.9.0",
-      "relationshipType": "DEPENDS_ON",
-      "spdxElementId": "SPDXRef-Package-sanitization-1.2.4"
     },
     {
       "relatedSpdxElement": "SPDXRef-Package-wnaf-0.14.0",
@@ -1761,109 +1801,69 @@
       "spdxElementId": "SPDXRef-Package-primeorder-0.14.0"
     },
     {
-      "relatedSpdxElement": "SPDXRef-Package-eth-valkyoth-protocol-0.25.2",
+      "relatedSpdxElement": "SPDXRef-Package-proc-macro2-1.0.106",
       "relationshipType": "DEPENDS_ON",
-      "spdxElementId": "SPDXRef-Package-eth-valkyoth-evm-0.10.0"
+      "spdxElementId": "SPDXRef-Package-serde--derive-1.0.228"
     },
     {
-      "relatedSpdxElement": "SPDXRef-File-eth_valkyoth_codec",
+      "relatedSpdxElement": "SPDXRef-Package-memchr-2.8.2",
+      "relationshipType": "DEPENDS_ON",
+      "spdxElementId": "SPDXRef-Package-serde--json-1.0.150"
+    },
+    {
+      "relatedSpdxElement": "SPDXRef-Package-rand--core-0.10.1",
+      "relationshipType": "DEPENDS_ON",
+      "spdxElementId": "SPDXRef-Package-primefield-0.14.0"
+    },
+    {
+      "relatedSpdxElement": "SPDXRef-Package-const-oid-0.10.2",
+      "relationshipType": "DEPENDS_ON",
+      "spdxElementId": "SPDXRef-Package-der-0.8.1"
+    },
+    {
+      "relatedSpdxElement": "SPDXRef-File-eth_valkyoth_testkit",
       "relationshipType": "DESCRIBES",
       "spdxElementId": "SPDXRef-DOCUMENT"
     },
     {
       "relatedSpdxElement": "SPDXRef-Package-subtle-2.6.1",
       "relationshipType": "DEPENDS_ON",
-      "spdxElementId": "SPDXRef-Package-crypto-bigint-0.7.5"
-    },
-    {
-      "relatedSpdxElement": "SPDXRef-Package-elliptic-curve-0.14.1",
-      "relationshipType": "DEPENDS_ON",
-      "spdxElementId": "SPDXRef-Package-ecdsa-0.17.0"
-    },
-    {
-      "relatedSpdxElement": "SPDXRef-Package-elliptic-curve-0.14.1",
-      "relationshipType": "DEPENDS_ON",
-      "spdxElementId": "SPDXRef-Package-k256-0.14.0"
-    },
-    {
-      "relatedSpdxElement": "SPDXRef-Package-hybrid-array-0.4.13",
-      "relationshipType": "DEPENDS_ON",
-      "spdxElementId": "SPDXRef-Package-crypto-common-0.2.2"
-    },
-    {
-      "relatedSpdxElement": "SPDXRef-Package-ff-0.14.0",
-      "relationshipType": "DEPENDS_ON",
-      "spdxElementId": "SPDXRef-Package-primefield-0.14.0"
-    },
-    {
-      "relatedSpdxElement": "SPDXRef-File-eth_valkyoth_protocol",
-      "relationshipType": "DESCRIBES",
-      "spdxElementId": "SPDXRef-DOCUMENT"
-    },
-    {
-      "relatedSpdxElement": "SPDXRef-Package-cfg-if-1.0.4",
-      "relationshipType": "DEPENDS_ON",
-      "spdxElementId": "SPDXRef-Package-sha2-0.11.0"
-    },
-    {
-      "relatedSpdxElement": "SPDXRef-Package-subtle-2.6.1",
-      "relationshipType": "DEPENDS_ON",
-      "spdxElementId": "SPDXRef-Package-elliptic-curve-0.14.1"
-    },
-    {
-      "relatedSpdxElement": "SPDXRef-Package-ff-0.14.0",
-      "relationshipType": "DEPENDS_ON",
-      "spdxElementId": "SPDXRef-Package-elliptic-curve-0.14.1"
-    },
-    {
-      "relatedSpdxElement": "SPDXRef-Package-eth-valkyoth-verify-0.23.0",
-      "relationshipType": "GENERATED_FROM",
-      "spdxElementId": "SPDXRef-File-eth_valkyoth_verify"
-    },
-    {
-      "relatedSpdxElement": "SPDXRef-Package-eth-valkyoth-verify-0.23.0",
-      "relationshipType": "DEPENDS_ON",
-      "spdxElementId": "SPDXRef-Package-eth-0.52.2"
-    },
-    {
-      "relatedSpdxElement": "SPDXRef-Package-group-0.14.0",
-      "relationshipType": "DEPENDS_ON",
-      "spdxElementId": "SPDXRef-Package-wnaf-0.14.0"
-    },
-    {
-      "relatedSpdxElement": "SPDXRef-Package-eth-valkyoth-protocol-0.25.2",
-      "relationshipType": "DEPENDS_ON",
-      "spdxElementId": "SPDXRef-Package-eth-valkyoth-verify-0.23.0"
-    },
-    {
-      "relatedSpdxElement": "SPDXRef-Package-serde--json-1.0.150",
-      "relationshipType": "DEPENDS_ON",
-      "spdxElementId": "SPDXRef-Package-eth-valkyoth-verify-0.23.0"
-    },
-    {
-      "relatedSpdxElement": "SPDXRef-Package-zeroize-1.9.0",
-      "relationshipType": "DEPENDS_ON",
-      "spdxElementId": "SPDXRef-Package-primefield-0.14.0"
-    },
-    {
-      "relatedSpdxElement": "SPDXRef-Package-num-traits-0.2.19",
-      "relationshipType": "DEPENDS_ON",
-      "spdxElementId": "SPDXRef-Package-crypto-bigint-0.7.5"
-    },
-    {
-      "relatedSpdxElement": "SPDXRef-Package-group-0.14.0",
-      "relationshipType": "DEPENDS_ON",
-      "spdxElementId": "SPDXRef-Package-elliptic-curve-0.14.1"
-    },
-    {
-      "relatedSpdxElement": "SPDXRef-Package-crypto-bigint-0.7.5",
-      "relationshipType": "DEPENDS_ON",
-      "spdxElementId": "SPDXRef-Package-rfc6979-0.6.0"
+      "spdxElementId": "SPDXRef-Package-group-0.14.0"
     },
     {
       "relatedSpdxElement": "SPDXRef-Package-rand--core-0.10.1",
       "relationshipType": "DEPENDS_ON",
       "spdxElementId": "SPDXRef-Package-elliptic-curve-0.14.1"
+    },
+    {
+      "relatedSpdxElement": "SPDXRef-File-eth_valkyoth_reth",
+      "relationshipType": "DESCRIBES",
+      "spdxElementId": "SPDXRef-DOCUMENT"
+    },
+    {
+      "relatedSpdxElement": "SPDXRef-Package-rand--core-0.10.1",
+      "relationshipType": "DEPENDS_ON",
+      "spdxElementId": "SPDXRef-Package-group-0.14.0"
+    },
+    {
+      "relatedSpdxElement": "SPDXRef-Package-zeroize-1.9.0",
+      "relationshipType": "DEPENDS_ON",
+      "spdxElementId": "SPDXRef-Package-der-0.8.1"
+    },
+    {
+      "relatedSpdxElement": "SPDXRef-Package-eth-valkyoth-sanitization-0.7.5",
+      "relationshipType": "DEPENDS_ON",
+      "spdxElementId": "SPDXRef-Package-eth-0.52.2"
+    },
+    {
+      "relatedSpdxElement": "SPDXRef-Package-eth-valkyoth-hash-0.11.2",
+      "relationshipType": "DEPENDS_ON",
+      "spdxElementId": "SPDXRef-Package-eth-0.52.2"
+    },
+    {
+      "relatedSpdxElement": "SPDXRef-Package-proc-macro2-1.0.106",
+      "relationshipType": "DEPENDS_ON",
+      "spdxElementId": "SPDXRef-Package-syn-2.0.118"
     }
   ],
   "spdxVersion": "SPDX-2.3"

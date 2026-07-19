@@ -92,10 +92,10 @@ pub enum EvmCoreError {
     PrecompilePointNotInSubgroup,
     /// The selected precompile needs a cryptographic backend not admitted here.
     PrecompileBackendUnavailable,
-    /// Legacy compatibility variant for the pre-v0.27.0 truncated-PUSH error.
+    /// Legacy compatibility variant for the pre-v0.26.1 truncated-PUSH error.
     ///
     /// Truncated PUSH instructions are valid Ethereum bytecode. Production
-    /// execution paths do not return this variant as of v0.27.0.
+    /// execution paths do not return this variant as of v0.26.1.
     #[doc(hidden)]
     PushImmediateOutOfBounds,
     /// A dynamic jump target is not a valid `JUMPDEST`.

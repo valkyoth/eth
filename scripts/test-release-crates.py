@@ -117,6 +117,34 @@ def test_support_crate_code_changes_reject_release_counter_jump() -> None:
     )
 
 
+def test_support_crate_bugfixes_use_next_patch() -> None:
+    entry = {
+        "previous_version": "0.7.2",
+        "version": "0.7.3",
+        "change": "bugfix",
+        "publish": True,
+        "reason": "test",
+    }
+    release_crates.validate_plan_entry("eth-valkyoth-verify", entry, "0.19.0")
+
+
+def test_support_crate_bugfixes_reject_minor_bumps() -> None:
+    entry = {
+        "previous_version": "0.7.2",
+        "version": "0.8.0",
+        "change": "bugfix",
+        "publish": True,
+        "reason": "test",
+    }
+    assert_fails(
+        "support-crate version must be 0.7.3",
+        release_crates.validate_plan_entry,
+        "eth-valkyoth-verify",
+        entry,
+        "0.19.0",
+    )
+
+
 def test_dependency_only_changes_must_patch_bump() -> None:
     entry = {
         "previous_version": "0.3.0",
@@ -197,6 +225,8 @@ def run_tests() -> None:
         test_facade_code_changes_must_use_milestone_version,
         test_support_crate_code_changes_use_next_independent_minor,
         test_support_crate_code_changes_reject_release_counter_jump,
+        test_support_crate_bugfixes_use_next_patch,
+        test_support_crate_bugfixes_reject_minor_bumps,
         test_dependency_only_changes_must_patch_bump,
         test_unchanged_crates_are_not_published,
         test_metadata_changes_use_milestone_version,

@@ -53,8 +53,8 @@ reason = "No package changes for v0.52.2."
 
 [crates."eth-valkyoth-evm-core"]
 previous_version = "0.26.0"
-version = "0.27.0"
-change = "code"
+version = "0.26.1"
+change = "bugfix"
 publish = true
 reason = "Corrects consensus handling of truncated PUSH immediates, shares instruction advancement with jump-destination analysis, and retains the legacy error variant for facade compatibility."
 
@@ -98,4 +98,4 @@ previous_version = "0.52.1"
 version = "0.52.2"
 change = "code"
 publish = true
-reason = "Updates evm-core to 0.27.0, exposes consensus-correct truncated PUSH execution, and preserves the legacy public error variant for patch compatibility."
+reason = "Updates evm-core to 0.26.1, exposes consensus-correct truncated PUSH execution, and preserves support-crate type identity plus the legacy public error variant for patch compatibility."
