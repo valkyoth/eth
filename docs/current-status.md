@@ -1,6 +1,7 @@
 # Current Status
 
-Release snapshot: `v0.52.2` implementation complete; awaiting pentest.
+Release snapshot: `v0.52.2` release candidate; pentest remediation and clean
+retest complete. Awaiting final GitHub checks before tagging.
 
 This document summarizes what the workspace can do now. The
 [Specification Matrix](SPEC_MATRIX.md) is the source of truth for exact
@@ -113,6 +114,11 @@ with independent Yellow Paper, pinned execution-spec, and Geth source
 comparison, jump-destination invariants, fuzz assertions, and committed seeds.
 The interpreter remains partial; this release does not admit additional
 opcodes or complete state-transition execution.
+
+`eth-valkyoth-evm-core 0.26.1` retains the legacy truncated-PUSH error variant
+and stable category code for API compatibility while no production path
+returns it. Staying on the `0.26` support-crate line preserves type identity
+for compatible facade and direct support-crate dependencies.
 
 The current workspace uses Rust `1.97.1` for the full gate and checks every
 supported Rust toolchain from `1.90.0` through `1.97.0` with

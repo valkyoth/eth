@@ -2665,7 +2665,8 @@ Exit criteria:
 
 ### v0.52.2 - Truncated PUSH Consensus Correction
 
-Status: implementation complete; awaiting pentest.
+Status: release candidate; pentest remediation and clean retest complete,
+awaiting final GitHub checks.
 
 Goal: make `PUSH1..=PUSH32` match Ethereum's zero-padding rule at end of
 bytecode before any broader native-execution claim is admitted.

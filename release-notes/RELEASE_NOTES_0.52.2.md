@@ -1,6 +1,6 @@
 # Release Notes - eth v0.52.2
 
-Status: implementation complete; awaiting pentest.
+Status: release candidate; pentest remediation and clean retest complete.
 
 ## Summary
 
@@ -63,6 +63,18 @@ work builds on the bytecode scanner.
 
 ## Pentest
 
-Pending. The release cannot become tag-ready until the implementation commit
-has an independent pentest, all findings are resolved, the retest passes, and
-the permanent report is stored as `security/pentest/v0.52.2.md`.
+The independent review found one Medium facade SemVer issue. Removing the
+legacy truncated-PUSH error variant could break downstream code during a
+compatible `eth` patch update. The first remediation restored the hidden
+variant and stable error code while keeping it unreachable from production
+execution.
+
+The first retest found a remaining Medium public-dependency type-identity
+issue because the facade patch update moved `eth-valkyoth-evm-core` from the
+`0.26` line to `0.27`. The support crate now publishes as the API-compatible
+bugfix `0.26.1`, allowing Cargo to unify existing direct `^0.26` dependencies
+with the facade's public re-export. Release tooling now enforces exact patch
+increments for support-crate `bugfix` entries.
+
+The final retest is clean. The permanent report is
+`security/pentest/v0.52.2.md` with `Status: PASS`.
