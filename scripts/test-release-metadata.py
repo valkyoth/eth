@@ -48,6 +48,7 @@ def main() -> int:
     assert "! grep -q 'tags:' .github/workflows/release.yml" in validator
     assert "validate-release-readiness.sh" in validator
     assert "fetch-depth: 0" in validator
+    assert "python3 scripts/check_spec_provenance.py" in validator
 
     readiness = (ROOT / "scripts" / "validate-release-readiness.sh").read_text(
         encoding="utf-8"

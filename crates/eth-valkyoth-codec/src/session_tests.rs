@@ -68,6 +68,38 @@ fn failed_multi_counter_charge_is_atomic() -> Result<(), DecodeError> {
 }
 
 #[test]
+fn complete_capacity_check_is_noncommitting() -> Result<(), DecodeError> {
+    let mut planned = DecodeSession::new(policy())?;
+    planned.check_nesting_depth(3)?;
+    planned.account_rlp_reparse(7, 2, 3)?;
+    planned.account_hashes(1, 6)?;
+    planned.account_nibbles(4)?;
+    planned.account_value_bytes(5)?;
+
+    let session = DecodeSession::new(policy())?;
+    let before = session.charges();
+    session.check_remaining_capacity(planned.charges())?;
+    assert_eq!(session.charges(), before);
+    Ok(())
+}
+
+#[test]
+fn failed_complete_capacity_check_is_noncommitting() -> Result<(), DecodeError> {
+    let mut planned = DecodeSession::new(policy())?;
+    planned.account_encoded_bytes(32)?;
+    let mut session = DecodeSession::new(policy())?;
+    session.account_encoded_bytes(1)?;
+    let before = session.charges();
+
+    assert_eq!(
+        session.check_remaining_capacity(planned.charges()),
+        Err(DecodeError::EncodedBytesExceeded)
+    );
+    assert_eq!(session.charges(), before);
+    Ok(())
+}
+
+#[test]
 fn aggregate_work_limit_fails_without_component_commit() -> Result<(), DecodeError> {
     let limits = DecodeLimits::reviewed_policy(1, 1, 1, 1, 1, 1);
     let policy = DecodeSessionPolicy::reviewed_policy(limits, 1, 1, 1, 1, 1, 1, 1)?;

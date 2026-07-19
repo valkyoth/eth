@@ -1010,7 +1010,8 @@ assert_eq!(
 
 Transaction and receipt inclusion proofs can be checked against trusted trie
 roots. Before the first proof-node hash, the verifier admits every supplied
-node under one `DecodeSession`, checks complete hash capacity, and rejects
+node under one `DecodeSession`, performs a conservative dry traversal to check
+every remaining parser, hash, nibble, value, and aggregate-work ceiling, and rejects
 locally noncanonical empty extensions, empty leaves, degenerate branches,
 redundant extension children, and invalid inline/hash thresholds. It derives
 the key as `rlp(transaction_index)`, charges immediately before each

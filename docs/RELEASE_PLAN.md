@@ -2750,7 +2750,9 @@ attacker-controlled node bytes.
 Deliverables:
 
 - Proof preflight for node count, individual encoded length, cumulative bytes,
-  hash count, hash bytes, nibble work, and value/output ceilings;
+  and local syntax, followed by a conservative dry traversal that atomically
+  checks every remaining parser, hash, nibble, value, and aggregate-work
+  ceiling;
 - charge and reject before each Keccak invocation;
 - reject zero-nibble extension paths and every locally detectable redundant
   extension or degenerate branch form required by canonical trie construction;
@@ -2758,7 +2760,9 @@ Deliverables:
 
 Verification:
 
-- Tests proving no hasher call occurs after a failed preflight charge;
+- Tests proving no proof-node hasher call occurs after any failed preflight
+  charge, independently covering encoded bytes, headers, items, hashes,
+  nibbles, values, and aggregate work;
 - canonical/non-canonical trie fixtures and boundary vectors;
 - structure-aware proof fuzzing that constructs valid roots before mutation;
 - complexity assertions for nodes, bytes, nibbles, and hashes.

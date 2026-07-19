@@ -3,6 +3,26 @@ use crate::{DecodeError, DecodeLimits};
 mod policy;
 pub use policy::DecodeSessionPolicy;
 
+/// Opaque accounting snapshot for noncommitting capacity checks.
+///
+/// This value describes work already charged to a session. It is copyable
+/// because it carries no authority to perform work and cannot be constructed
+/// outside this crate.
+#[derive(Clone, Copy, Debug, Eq, PartialEq)]
+pub struct DecodeSessionCharges {
+    encoded_bytes: usize,
+    rlp_headers: usize,
+    items: usize,
+    max_nesting_depth: usize,
+    allocation_capacity: usize,
+    proof_nodes: usize,
+    hashes: usize,
+    hash_bytes: usize,
+    nibbles: usize,
+    value_bytes: usize,
+    total_work: usize,
+}
+
 /// Non-copyable work capability for one untrusted decode operation.
 ///
 /// The type intentionally provides no clone or reset operation. Nested
@@ -123,6 +143,109 @@ impl DecodeSession {
     #[must_use]
     pub const fn total_work(&self) -> usize {
         self.total_work
+    }
+
+    /// Returns an opaque snapshot of every charged work domain.
+    #[must_use]
+    pub const fn charges(&self) -> DecodeSessionCharges {
+        DecodeSessionCharges {
+            encoded_bytes: self.encoded_bytes,
+            rlp_headers: self.rlp_headers,
+            items: self.items,
+            max_nesting_depth: self.max_nesting_depth,
+            allocation_capacity: self.allocation_capacity,
+            proof_nodes: self.proof_nodes,
+            hashes: self.hashes,
+            hash_bytes: self.hash_bytes,
+            nibbles: self.nibbles,
+            value_bytes: self.value_bytes,
+            total_work: self.total_work,
+        }
+    }
+
+    /// Checks whether every charge in `additional` fits without committing.
+    ///
+    /// Nesting depth is a high-water mark rather than a cumulative counter.
+    /// The aggregate check therefore charges only a deeper planned maximum,
+    /// while all other work domains are additive.
+    pub fn check_remaining_capacity(
+        &self,
+        additional: DecodeSessionCharges,
+    ) -> Result<(), DecodeError> {
+        let limits = self.policy.limits();
+        let checks = [
+            checked_counter(
+                self.encoded_bytes,
+                additional.encoded_bytes,
+                self.policy.max_encoded_bytes(),
+                DecodeError::EncodedBytesExceeded,
+            ),
+            checked_counter(
+                self.rlp_headers,
+                additional.rlp_headers,
+                self.policy.max_rlp_headers(),
+                DecodeError::RlpHeaderCountExceeded,
+            ),
+            checked_counter(
+                self.items,
+                additional.items,
+                limits.max_total_items,
+                DecodeError::ItemCountExceeded,
+            ),
+            checked_counter(
+                self.allocation_capacity,
+                additional.allocation_capacity,
+                limits.max_total_allocation,
+                DecodeError::AllocationExceeded,
+            ),
+            checked_counter(
+                self.proof_nodes,
+                additional.proof_nodes,
+                limits.max_proof_nodes,
+                DecodeError::ProofTooLarge,
+            ),
+            checked_counter(
+                self.hashes,
+                additional.hashes,
+                self.policy.max_hashes(),
+                DecodeError::HashCountExceeded,
+            ),
+            checked_counter(
+                self.hash_bytes,
+                additional.hash_bytes,
+                self.policy.max_hash_bytes(),
+                DecodeError::HashBytesExceeded,
+            ),
+            checked_counter(
+                self.nibbles,
+                additional.nibbles,
+                self.policy.max_nibbles(),
+                DecodeError::NibbleCountExceeded,
+            ),
+            checked_counter(
+                self.value_bytes,
+                additional.value_bytes,
+                self.policy.max_value_bytes(),
+                DecodeError::ValueBytesExceeded,
+            ),
+        ];
+        for check in checks {
+            let _ = check?;
+        }
+
+        limits.check_nesting_depth(additional.max_nesting_depth)?;
+        let depth_work = additional
+            .max_nesting_depth
+            .saturating_sub(self.max_nesting_depth);
+        let additive_work = additional
+            .total_work
+            .checked_sub(additional.max_nesting_depth)
+            .ok_or(DecodeError::WorkExceeded)?;
+        let work = additive_work
+            .checked_add(depth_work)
+            .ok_or(DecodeError::WorkExceeded)?;
+        let _ = self.checked_work(work)?;
+        Ok(())
     }
 
     /// Checks an outer input length without resetting or charging the session.

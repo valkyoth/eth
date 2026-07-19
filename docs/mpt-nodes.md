@@ -72,7 +72,7 @@ storage proofs into full JSON-RPC `eth_getProof` semantics.
 Source trail:
 
 - `spec-lock.toml` pins `ethereum/execution-specs` at
-  `26f47861dfbbd6b33d6a050ece5dae0ee4611285`.
+  `4f5c7d19adc916a268b7eadc196756068a325515`.
 - The pinned `src/ethereum/merkle_patricia_trie.py` source describes
   `LeafNode`, `ExtensionNode`, `BranchNode`, hex-prefix compact paths, and the
   hash-or-inline child-reference boundary.

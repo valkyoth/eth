@@ -23,6 +23,7 @@ test -x scripts/test-runtime-dependency-policy.py
 test -x scripts/check_optional_boundary_policy.py
 test -x scripts/test-optional-boundary-policy.py
 test -x scripts/test-release-metadata.py
+test -f scripts/check_spec_provenance.py
 test -f release-crates.toml
 test -f docs/CRATE_VERSION_MATRIX.md
 test -f conformance/execution-fixtures.toml
@@ -220,6 +221,7 @@ if grep -q 'spec_required = true' spec-lock.toml; then
     grep -Eq '^execution_apis_repo = "https://github\.com/ethereum/[A-Za-z0-9_.-]+"$' spec-lock.toml
     grep -Eq '^consensus_specs_repo = "https://github\.com/ethereum/[A-Za-z0-9_.-]+"$' spec-lock.toml
 fi
+python3 scripts/check_spec_provenance.py
 grep -q 'license = "MIT OR Apache-2.0"' Cargo.toml
 grep -q 'repository = "https://github.com/valkyoth/eth"' Cargo.toml
 grep -q 'channel = "1.97.1"' rust-toolchain.toml

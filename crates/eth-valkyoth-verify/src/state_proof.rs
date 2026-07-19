@@ -3,8 +3,8 @@ use eth_valkyoth_hash::{Keccak256, hash_one};
 use eth_valkyoth_primitives::{Address, B256};
 
 use crate::mpt_proof::{
-    MptProofRoot, MptProofVerificationError, compatibility_session, preflight_proof,
-    proof_resource_error, verify_preflighted_key_inclusion,
+    MptProofRoot, MptProofVerificationError, check_preflighted_key_inclusion_capacity,
+    compatibility_session, preflight_proof, proof_resource_error, verify_preflighted_key_inclusion,
 };
 
 /// Ethereum state trie root hash domain.
@@ -174,6 +174,7 @@ where
         .account_hashes(1, address_bytes.len())
         .map_err(proof_resource_error)?;
     let key = hash_one(new_hasher(), &address_bytes).to_bytes();
+    check_preflighted_key_inclusion_capacity(&key, encoded_account, proof_nodes, session)?;
     verify_preflighted_key_inclusion(
         root.into(),
         &key,
@@ -241,6 +242,7 @@ where
         .account_hashes(1, slot_bytes.len())
         .map_err(proof_resource_error)?;
     let key = hash_one(new_hasher(), &slot_bytes).to_bytes();
+    check_preflighted_key_inclusion_capacity(&key, encoded_storage_value, proof_nodes, session)?;
     verify_preflighted_key_inclusion(
         root.into(),
         &key,

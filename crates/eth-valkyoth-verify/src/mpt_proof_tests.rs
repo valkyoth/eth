@@ -17,7 +17,7 @@ const TEST_LIMITS: DecodeLimits = DecodeLimits {
 };
 
 #[derive(Default)]
-struct TestHasher {
+pub(super) struct TestHasher {
     state: [u8; 32],
 }
 
@@ -322,13 +322,13 @@ fn proof_error_categories_distinguish_absent_and_wrong_root() {
     );
 }
 
-fn test_hash(input: &[u8]) -> B256 {
+pub(super) fn test_hash(input: &[u8]) -> B256 {
     let mut hasher = TestHasher::default();
     hasher.update(input);
     hasher.finalize()
 }
 
-fn index_key(index: u64) -> Result<Vec<u8>, &'static str> {
+pub(super) fn index_key(index: u64) -> Result<Vec<u8>, &'static str> {
     let mut output = [0_u8; MAX_RLP_U64_BYTES];
     let len = encode_index_key(index, &mut output).map_err(|_| "index key encodes")?;
     output
@@ -337,7 +337,7 @@ fn index_key(index: u64) -> Result<Vec<u8>, &'static str> {
         .ok_or("index key slice")
 }
 
-fn tx_value() -> Vec<u8> {
+pub(super) fn tx_value() -> Vec<u8> {
     scalar(b"tx")
 }
 
@@ -348,7 +348,7 @@ fn receipt_value() -> Vec<u8> {
     scalar(&payload)
 }
 
-fn leaf_node(key: &[u8], value: &[u8]) -> Vec<u8> {
+pub(super) fn leaf_node(key: &[u8], value: &[u8]) -> Vec<u8> {
     list(&[scalar(&compact_path_leaf(key)), scalar(value)])
 }
 

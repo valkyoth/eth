@@ -30,4 +30,4 @@ pub use rlp::{
     rlp_integer_payload_to_u64, rlp_integer_payload_to_u128, rlp_integer_payload_to_u256_bytes,
     validate_rlp_integer_payload,
 };
-pub use session::{DecodeSession, DecodeSessionPolicy};
+pub use session::{DecodeSession, DecodeSessionCharges, DecodeSessionPolicy};

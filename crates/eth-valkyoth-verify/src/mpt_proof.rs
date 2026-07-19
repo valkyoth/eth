@@ -10,9 +10,11 @@ use crate::mpt::{
 };
 
 mod error;
+mod plan;
 mod preflight;
 mod root;
 
+use plan::plan_remaining_work;
 pub(crate) use preflight::{preflight_proof, proof_resource_error};
 
 pub use error::{MptProofVerificationError, MptProofVerificationErrorCategory};
@@ -161,7 +163,20 @@ where
     H: Keccak256,
 {
     preflight_proof(proof_nodes, value, 0, 0, session)?;
+    check_preflighted_key_inclusion_capacity(key, value, proof_nodes, session)?;
     verify_preflighted_key_inclusion(root, key, value, proof_nodes, session, new_hasher)
+}
+
+pub(crate) fn check_preflighted_key_inclusion_capacity(
+    key: &[u8],
+    value: &[u8],
+    proof_nodes: &[&[u8]],
+    session: &DecodeSession,
+) -> Result<(), MptProofVerificationError> {
+    let planned = plan_remaining_work(key, value, proof_nodes, session)?;
+    session
+        .check_remaining_capacity(planned)
+        .map_err(proof_resource_error)
 }
 
 pub(crate) fn verify_preflighted_key_inclusion<H>(
@@ -444,6 +459,10 @@ pub(crate) fn compatibility_session(
     let policy = DecodeSessionPolicy::compatibility_policy(limits).map_err(proof_resource_error)?;
     DecodeSession::new(policy).map_err(proof_resource_error)
 }
+
+#[cfg(test)]
+#[path = "mpt_proof_budget_tests.rs"]
+mod budget_tests;
 
 #[cfg(test)]
 #[path = "mpt_proof_tests.rs"]

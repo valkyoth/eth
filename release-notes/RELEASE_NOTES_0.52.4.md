@@ -18,11 +18,12 @@ account/storage authority and canonical account decoding are assigned to
 
 - Added compact-path nibble and trie-value byte ceilings to
   `DecodeSessionPolicy` and cumulative counters to `DecodeSession`.
-- Added noncommitting complete hash-capacity preflight; actual hashes remain
-  charged atomically immediately before each backend call.
+- Added an opaque complete-work snapshot and noncommitting capacity check to
+  `DecodeSession`; actual work remains charged immediately before execution.
 - Preflight now checks every proof-node count and encoded length, cumulative
-  hash bytes, expected-value work, and local syntax before the first proof-node
-  Keccak invocation.
+  hash bytes, expected-value work, and local syntax, then performs a
+  conservative dry traversal to check all remaining parser, hash, nibble,
+  value, and aggregate work before the first proof-node Keccak invocation.
 - Added public session-aware transaction, receipt, account, and storage
   inclusion APIs.
 - Rejects zero-nibble extensions, empty leaf values, branches with fewer than
@@ -36,6 +37,8 @@ account/storage authority and canonical account decoding are assigned to
 
 - A malformed trailing node or insufficient complete hash budget causes zero
   proof hasher invocations.
+- Insufficient encoded-byte, header, item, nibble, value, or aggregate-work
+  capacity also causes zero proof-node hasher invocations.
 - Account and storage key hashing is included in the same hash-count and
   hash-byte capacity preflight as proof-node hashing.
 - Preflight parsing and later traversal parsing are both charged because both
@@ -62,7 +65,10 @@ account/storage authority and canonical account decoding are assigned to
   boundary tests.
 - Exact session counter assertions for nodes, hash bytes, hashes, nibbles, and
   values.
-- Hasher-call oracles proving failed preflight cannot invoke the backend.
+- Per-domain hasher-call oracles proving failed preflight cannot invoke the
+  proof-node backend.
+- Release metadata validation proving the documented MPT execution-spec source
+  revision matches `spec-lock.toml`.
 - Structure-aware valid-root/mutation MPT proof fuzzing.
 - Strict workspace and fuzz Clippy, complete workspace tests, supported-Rust
   checks, dependency policy checks, package verification, and the full release
