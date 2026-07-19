@@ -1,7 +1,6 @@
 # Current Status
 
-Release snapshot: `v0.52.1` release candidate; pentest remediation and clean
-retest complete. Awaiting final GitHub checks before tagging.
+Release snapshot: `v0.52.2` implementation complete; awaiting pentest.
 
 This document summarizes what the workspace can do now. The
 [Specification Matrix](SPEC_MATRIX.md) is the source of truth for exact
@@ -49,7 +48,7 @@ Legend:
 | Capability | Status | Current scope |
 | --- | --- | --- |
 | EVM domains | 🟢 Available | Dependency-free word, stack, memory, gas, fork, opcode, program-counter, access-set, and host-state types |
-| Native interpreter | 🟡 Partial | Bounded basic stack, arithmetic, control-flow, memory, and selected state-read execution |
+| Native interpreter | 🟡 Partial | Bounded basic stack, arithmetic, control-flow, memory, selected state-read execution, and consensus-correct truncated PUSH zero-padding |
 | Historical fork rules | 🟡 Partial | Explicit fork identifiers and admitted gas/opcode boundaries; full historical execution remains versioned |
 | Call and create | 🟡 Partial | Stack/memory/static/depth planning and journal policy; nested host execution and commits remain fail closed |
 | Identity, SHA-256, RIPEMD-160 | 🟢 Available | First-party dependency-free execution through charged plans |
@@ -103,19 +102,17 @@ Legend:
 
 ## Current Release
 
-`v0.52.1` adds canonical dependency-free EIP-2537 BLS12-381 field,
-full-width multiplication scalar, point-coordinate, infinity, and all
-`0x0b..=0x11` frame parsers. Point values are wire-valid only: curve membership,
-subgroup validation, mapping, arithmetic, MSM, pairing, and precompile execution
-remain assigned to `v0.52.11..=v0.52.18` after the consensus-correctness and
-resource-boundary releases at `v0.52.2..=v0.52.10`.
+`v0.52.2` corrects `PUSH1..=PUSH32` at code EOF: missing immediate bytes are
+read as trailing zeros and the program counter advances by the complete
+declared width. Execution and jump-destination analysis share the same
+instruction-advance helper, so immediate bytes cannot be interpreted as jump
+targets by one path but data by the other.
 
-The release also zero-initializes EVM memory, makes execution contexts one-shot
-until destructive reset, restores warm/cold tracking after failed stateful
-runs or `REVERT`, and hardens EIP-712 identifier, reserved-name, uniqueness,
-fully unwrapped member-type validation, per-array and cumulative traversal
-bounds, configurable cumulative dynamic-byte hashing limits, cached type-hash,
-and partial-output handling.
+The correction is covered exhaustively across all 528 truncated PUSH forms,
+with independent Yellow Paper, pinned execution-spec, and Geth source
+comparison, jump-destination invariants, fuzz assertions, and committed seeds.
+The interpreter remains partial; this release does not admit additional
+opcodes or complete state-transition execution.
 
 The current workspace uses Rust `1.97.1` for the full gate and checks every
 supported Rust toolchain from `1.90.0` through `1.97.0` with

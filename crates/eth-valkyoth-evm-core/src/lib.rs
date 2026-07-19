@@ -18,6 +18,7 @@ mod bn254_line;
 mod bn254_miller;
 mod bn254_pairing;
 mod bn254_tower;
+mod bytecode;
 mod call;
 mod ecrecover;
 mod error;
@@ -111,6 +112,10 @@ mod execution_semantics_tests;
 #[cfg(test)]
 #[path = "execution_security_tests.rs"]
 mod execution_security_tests;
+
+#[cfg(test)]
+#[path = "truncated_push_tests.rs"]
+mod truncated_push_tests;
 
 #[cfg(test)]
 #[path = "state_tests.rs"]

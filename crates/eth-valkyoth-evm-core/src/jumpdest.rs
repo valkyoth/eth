@@ -1,4 +1,4 @@
-use crate::{EVM_MAX_BYTECODE_LEN, EvmCoreError, EvmOpcode};
+use crate::{EVM_MAX_BYTECODE_LEN, EvmCoreError, EvmOpcode, bytecode::next_instruction_pc};
 
 const JUMPDEST_MAP_WORD_BITS: usize = usize::BITS as usize;
 const JUMPDEST_MAP_WORDS: usize = EVM_MAX_BYTECODE_LEN.div_ceil(JUMPDEST_MAP_WORD_BITS);
@@ -27,17 +27,7 @@ impl JumpdestMap {
             if opcode.byte() == EvmOpcode::JUMPDEST.byte() {
                 map.insert(pc);
             }
-            let width = usize::from(opcode.push_width().unwrap_or(0));
-            let advance = 1usize
-                .checked_add(width)
-                .ok_or(EvmCoreError::ProgramCounterOverflow)?;
-            let next = pc
-                .checked_add(advance)
-                .ok_or(EvmCoreError::ProgramCounterOverflow)?;
-            if width > 0 && next > bytecode.len() {
-                return Err(EvmCoreError::PushImmediateOutOfBounds);
-            }
-            pc = next;
+            pc = next_instruction_pc(pc, opcode)?;
         }
         Ok(map)
     }

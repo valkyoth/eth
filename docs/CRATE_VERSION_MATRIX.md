@@ -1,9 +1,8 @@
 # Crate Version Matrix
 
-Status: `v0.52.1` adds canonical dependency-free EIP-2537 BLS12-381 Fp, Fr,
-Fp2, unrestricted MSM scalar, G1/G2 coordinate, infinity, and complete
-precompile-frame parsing while keeping arithmetic and curve/subgroup validation
-fail closed.
+Status: `v0.52.2` corrects truncated `PUSH1..=PUSH32` consensus semantics by
+right-zero-padding missing immediate bytes at code EOF and sharing declared
+instruction advancement between execution and jump-destination analysis.
 `eth-valkyoth-evm-core` now exposes dependency-free `no_std` stack, memory,
 word, opcode, program-counter, fork, gas, state, error, and bounded
 interpreter domains for basic stack/control-flow bytecode plus explicit host
@@ -54,24 +53,24 @@ but must be republished so immutable crates.io package metadata is corrected.
 workspace manifests before release. The script refuses accidental lockstep
 publication when a crate is marked `unchanged`.
 
-## v0.52.1 Tracking Table
+## v0.52.2 Tracking Table
 
 | Crate | Published | Planned | Change | Publish | Reason |
 | --- | --- | --- | --- | --- | --- |
-| `eth-valkyoth-codec` | `0.19.0` | `0.19.0` | `unchanged` | No | No package changes for v0.52.1. |
-| `eth-valkyoth-primitives` | `0.11.2` | `0.11.2` | `unchanged` | No | No package changes for v0.52.1. |
-| `eth-valkyoth-hash` | `0.11.2` | `0.11.2` | `unchanged` | No | No package changes for v0.52.1. |
-| `eth-valkyoth-protocol` | `0.25.2` | `0.25.2` | `unchanged` | No | No package changes for v0.52.1. |
-| `eth-valkyoth-verify` | `0.22.0` | `0.23.0` | `code` | Yes | Hardens EIP-712 identifiers, fully unwrapped member types, collection, traversal, and dynamic-byte limits, recursive schema/type-hash complexity, and partial encode-data output handling. |
-| `eth-valkyoth-derive` | `0.17.3` | `0.17.3` | `unchanged` | No | No package changes for v0.52.1. |
-| `eth-valkyoth-sanitization` | `0.7.5` | `0.7.5` | `unchanged` | No | No package changes for v0.52.1. |
-| `eth-valkyoth-evm-core` | `0.25.0` | `0.26.0` | `code` | Yes | Adds canonical EIP-2537 wire parsing and hardens EVM memory initialization, one-shot reuse, and failed/reverted access accounting. |
-| `eth-valkyoth-evm` | `0.10.0` | `0.10.0` | `unchanged` | No | No package changes for v0.52.1. |
-| `eth-valkyoth-rpc` | `0.7.0` | `0.7.0` | `unchanged` | No | No package changes for v0.52.1. |
-| `eth-valkyoth-signer` | `0.7.3` | `0.7.3` | `unchanged` | No | No package changes for v0.52.1. |
-| `eth-valkyoth-reth` | `0.7.0` | `0.7.0` | `unchanged` | No | No package changes for v0.52.1. |
-| `eth-valkyoth-testkit` | `0.7.0` | `0.7.0` | `unchanged` | No | No package changes for v0.52.1. |
-| `eth` | `0.52.0` | `0.52.1` | `code` | Yes | Updates `evm-core` to `0.26.0` and `verify` to `0.23.0` for canonical BLS wire domains plus EVM and EIP-712 pentest remediation. |
+| `eth-valkyoth-codec` | `0.19.0` | `0.19.0` | `unchanged` | No | No package changes for v0.52.2. |
+| `eth-valkyoth-primitives` | `0.11.2` | `0.11.2` | `unchanged` | No | No package changes for v0.52.2. |
+| `eth-valkyoth-hash` | `0.11.2` | `0.11.2` | `unchanged` | No | No package changes for v0.52.2. |
+| `eth-valkyoth-protocol` | `0.25.2` | `0.25.2` | `unchanged` | No | No package changes for v0.52.2. |
+| `eth-valkyoth-verify` | `0.23.0` | `0.23.0` | `unchanged` | No | No package changes for v0.52.2. |
+| `eth-valkyoth-derive` | `0.17.3` | `0.17.3` | `unchanged` | No | No package changes for v0.52.2. |
+| `eth-valkyoth-sanitization` | `0.7.5` | `0.7.5` | `unchanged` | No | No package changes for v0.52.2. |
+| `eth-valkyoth-evm-core` | `0.26.0` | `0.27.0` | `code` | Yes | Corrects truncated PUSH consensus handling and shares instruction advancement with jump-destination analysis. |
+| `eth-valkyoth-evm` | `0.10.0` | `0.10.0` | `unchanged` | No | No package changes for v0.52.2. |
+| `eth-valkyoth-rpc` | `0.7.0` | `0.7.0` | `unchanged` | No | No package changes for v0.52.2. |
+| `eth-valkyoth-signer` | `0.7.3` | `0.7.3` | `unchanged` | No | No package changes for v0.52.2. |
+| `eth-valkyoth-reth` | `0.7.0` | `0.7.0` | `unchanged` | No | No package changes for v0.52.2. |
+| `eth-valkyoth-testkit` | `0.7.0` | `0.7.0` | `unchanged` | No | No package changes for v0.52.2. |
+| `eth` | `0.52.1` | `0.52.2` | `code` | Yes | Updates `evm-core` to `0.27.0` and exposes consensus-correct truncated PUSH execution through the facade. |
 
 Update this table and `release-crates.toml` in the same commit whenever a crate
 changes release state.

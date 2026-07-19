@@ -4,6 +4,12 @@ All notable changes to `eth` are documented here.
 
 ## Unreleased
 
+- Corrected `PUSH1..=PUSH32` execution at code EOF to right-zero-pad missing
+  immediate bytes, and made jump-destination analysis use the same declared
+  instruction width.
+- Added exhaustive coverage for all 528 truncated PUSH forms, independent
+  client/specification vectors, jump-analysis invariants, a fuzz target, and
+  committed seeds.
 - Updated the pinned stable toolchain and full release gate to Rust `1.97.1`,
   extended compatibility checks through Rust `1.97.0`, and made the networked
   release tooling fail when the pin is not the latest official stable Rust.

@@ -2,6 +2,7 @@ use crate::{
     EvmAccessSet, EvmCallFramePolicy, EvmCallKind, EvmCallPlan, EvmCoreError, EvmCreateKind,
     EvmCreatePlan, EvmFork, EvmGas, EvmGasMeter, EvmGasSchedule, EvmMemory, EvmMemoryRange,
     EvmOpcode, EvmStack, EvmState, EvmStateContext, EvmWord, ProgramCounter,
+    bytecode::{next_instruction_pc, push_immediate_word},
     call::EvmCallCreatePlan,
     jumpdest::JumpdestMap,
     state_execution::{HostState, NoState, StateExecutionHost},
@@ -227,7 +228,9 @@ impl<'a, const STACK: usize> EvmExecution<'a, STACK> {
                     _ => return Err(EvmCoreError::UnsupportedOpcode),
                 }
             }
-            self.pc = self.next_pc(pc, opcode)?;
+            if opcode.byte() != EvmOpcode::JUMP.byte() && opcode.byte() != EvmOpcode::JUMPI.byte() {
+                self.pc = ProgramCounter::new(next_instruction_pc(pc, opcode)?);
+            }
         }
     }
 
@@ -245,20 +248,6 @@ impl<'a, const STACK: usize> EvmExecution<'a, STACK> {
             gas_used: gas_meter.used(),
             gas_remaining: gas_meter.remaining()?,
         })
-    }
-
-    fn next_pc(&self, pc: usize, opcode: EvmOpcode) -> Result<ProgramCounter, EvmCoreError> {
-        if opcode.byte() == EvmOpcode::JUMP.byte() || opcode.byte() == EvmOpcode::JUMPI.byte() {
-            return Ok(self.pc);
-        }
-        let width = usize::from(opcode.push_width().unwrap_or(0));
-        let advance = 1usize
-            .checked_add(width)
-            .ok_or(EvmCoreError::ProgramCounterOverflow)?;
-        let next = pc
-            .checked_add(advance)
-            .ok_or(EvmCoreError::ProgramCounterOverflow)?;
-        Ok(ProgramCounter::new(next))
     }
 
     fn binary_word(&mut self, op: fn(EvmWord, EvmWord) -> EvmWord) -> Result<(), EvmCoreError> {
@@ -291,40 +280,8 @@ impl<'a, const STACK: usize> EvmExecution<'a, STACK> {
     }
 
     fn push_immediate(&mut self, bytecode: &[u8], opcode: EvmOpcode) -> Result<(), EvmCoreError> {
-        let width = usize::from(
-            opcode
-                .push_width()
-                .ok_or(EvmCoreError::PushImmediateOutOfBounds)?,
-        );
-        let start = self
-            .pc
-            .get()
-            .checked_add(1)
-            .ok_or(EvmCoreError::ProgramCounterOverflow)?;
-        let end = start
-            .checked_add(width)
-            .ok_or(EvmCoreError::ProgramCounterOverflow)?;
-        if end > bytecode.len() {
-            return Err(EvmCoreError::PushImmediateOutOfBounds);
-        }
-        let mut bytes = [0u8; EvmWord::LEN];
-        for offset in 0..width {
-            let source_index = start
-                .checked_add(offset)
-                .ok_or(EvmCoreError::ProgramCounterOverflow)?;
-            let target_index = EvmWord::LEN
-                .checked_sub(width)
-                .and_then(|base| base.checked_add(offset))
-                .ok_or(EvmCoreError::ProgramCounterOverflow)?;
-            let source = bytecode
-                .get(source_index)
-                .ok_or(EvmCoreError::PushImmediateOutOfBounds)?;
-            let target = bytes
-                .get_mut(target_index)
-                .ok_or(EvmCoreError::PushImmediateOutOfBounds)?;
-            *target = *source;
-        }
-        self.stack.push(EvmWord::from_be_bytes(bytes))
+        let value = push_immediate_word(bytecode, self.pc.get(), opcode)?;
+        self.stack.push(value)
     }
 
     fn dup(&mut self, opcode: EvmOpcode) -> Result<(), EvmCoreError> {

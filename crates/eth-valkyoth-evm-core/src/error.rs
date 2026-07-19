@@ -89,8 +89,6 @@ pub enum EvmCoreError {
     PrecompilePointNotInSubgroup,
     /// The selected precompile needs a cryptographic backend not admitted here.
     PrecompileBackendUnavailable,
-    /// A `PUSHn` immediate extends beyond the bytecode input.
-    PushImmediateOutOfBounds,
     /// A dynamic jump target is not a valid `JUMPDEST`.
     InvalidJumpDestination,
     /// A return or revert range is outside the memory view.
@@ -149,7 +147,6 @@ impl EvmCoreError {
             Self::PrecompilePointNotOnCurve => "precompile_point_not_on_curve",
             Self::PrecompilePointNotInSubgroup => "precompile_point_not_in_subgroup",
             Self::PrecompileBackendUnavailable => "precompile_backend_unavailable",
-            Self::PushImmediateOutOfBounds => "push_immediate_out_of_bounds",
             Self::InvalidJumpDestination => "invalid_jump_destination",
             Self::ReturnRangeOutOfBounds => "return_range_out_of_bounds",
             Self::UnsupportedOpcode => "unsupported_opcode",

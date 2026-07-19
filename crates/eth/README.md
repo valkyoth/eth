@@ -32,7 +32,7 @@ proofs, fork-aware validation, and bounded first-party EVM components.
 
 The roadmap extends these foundations into an owned SDK, execution client,
 beacon node, validator client, and integrated Ethereum node while keeping core
-Ethereum behavior first party and independently reviewed. Version `0.52.1` is
+Ethereum behavior first party and independently reviewed. Version `0.52.2` is
 still a library, not a production node, wallet, RPC client, or key store.
 Networking, private-key signing, local key storage, and third-party execution
 backends are not enabled by default.
@@ -41,14 +41,14 @@ backends are not enabled by default.
 
 ```toml
 [dependencies]
-eth = "0.52.1"
+eth = "0.52.2"
 ```
 
 For optional sanitization support:
 
 ```toml
 [dependencies]
-eth = { version = "0.52.1", features = ["sanitization"] }
+eth = { version = "0.52.2", features = ["sanitization"] }
 ```
 
 ## Quick Start
@@ -85,7 +85,7 @@ Legend: 🟢 available for the stated scope, 🟡 implemented but incomplete,
 | EIP-712 typed data | 🟢 Available | Bounded typed encoder and hashing path; optional JSON parser |
 | Headers, receipts, and withdrawals | 🟡 Partial | Canonical syntactic decode and selected hashing; full block/state validity is incomplete |
 | MPT proof verification | 🟢 Available | Transaction, receipt, account, and storage inclusion against caller-trusted roots |
-| Native EVM execution | 🟡 Partial | Bounded basic opcode/state-read interpreter and call/create planning; full state transition is incomplete |
+| Native EVM execution | 🟡 Partial | Bounded basic opcode/state-read interpreter, consensus-correct truncated PUSH handling, and call/create planning; full state transition is incomplete |
 | Native precompiles through BLAKE2F | 🟢 Available | Identity, SHA-256, RIPEMD-160, ModExp, BN254, and BLAKE2F; ECRECOVER uses explicit caller backends |
 | BLS12-381 and KZG | 🟡 Partial | BLS canonical wire/frame parsing and KZG/BLS gas planning; cryptographic execution remains fail closed |
 | Owned SDK, providers, wallets, and contract tooling | 🔴 Planned | Assigned to `v0.53.0..=v0.68.0` and `v0.92.0..=v0.129.0` |
@@ -127,7 +127,7 @@ Optional reviewed software Keccak backend:
 
 ```toml
 [dependencies]
-eth = { version = "0.52.1", features = ["keccak-tiny"] }
+eth = { version = "0.52.2", features = ["keccak-tiny"] }
 ```
 
 ```rust
@@ -141,14 +141,14 @@ Optional reviewed secp256k1 recovery adapter:
 
 ```toml
 [dependencies]
-eth = { version = "0.52.1", features = ["secp256k1-k256"] }
+eth = { version = "0.52.2", features = ["secp256k1-k256"] }
 ```
 
 Optional bounded EVM gas-estimation boundary:
 
 ```toml
 [dependencies]
-eth = { version = "0.52.1", features = ["evm"] }
+eth = { version = "0.52.2", features = ["evm"] }
 ```
 
 ```rust
@@ -253,7 +253,7 @@ Optional native EVM core domains:
 
 ```toml
 [dependencies]
-eth = { version = "0.52.1", features = ["evm-core"] }
+eth = { version = "0.52.2", features = ["evm-core"] }
 ```
 
 State access uses explicit host-state traits and caller-provided fixed-capacity
@@ -1139,7 +1139,7 @@ friendly, and independently testable.
 The minimum supported Rust version is Rust `1.90.0`. New deployments should use
 the pinned stable Rust `1.97.1` until the toolchain policy is updated.
 
-Compatibility evidence for `0.52.1`:
+Compatibility evidence for `0.52.2`:
 
 | Rust | Local Evidence |
 | --- | --- |
@@ -1150,7 +1150,7 @@ Compatibility evidence for `0.52.1`:
 
 ```bash
 scripts/checks.sh
-scripts/release_0_52_1_gate.sh
+scripts/release_0_52_2_gate.sh
 ```
 
 For dependency-policy checks, install `cargo-deny` and `cargo-audit`, then run:

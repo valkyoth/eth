@@ -452,14 +452,7 @@ fn execution_charges_gas_before_stack_side_effects() -> Result<(), EvmCoreError>
 }
 
 #[test]
-fn execution_fails_closed_on_truncated_push_and_step_limit() -> Result<(), EvmCoreError> {
-    let mut truncated_memory = [0u8; 0];
-    let mut truncated_execution = EvmExecution::<16>::try_new(&mut truncated_memory)?;
-    assert_eq!(
-        truncated_execution.run(&[0x61, 0x01], execution_limits()?),
-        Err(EvmCoreError::PushImmediateOutOfBounds)
-    );
-
+fn execution_enforces_step_limit() -> Result<(), EvmCoreError> {
     let mut loop_memory = [0u8; 0];
     let mut loop_execution = EvmExecution::<16>::try_new(&mut loop_memory)?;
     let code = [0x5b, 0x60, 0x00, 0x56];

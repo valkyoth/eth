@@ -34,7 +34,7 @@ Most users should depend on `eth` and enable the optional `evm-core` feature:
 
 ```toml
 [dependencies]
-eth = { version = "0.52.1", features = ["evm-core"] }
+eth = { version = "0.52.2", features = ["evm-core"] }
 ```
 
 This crate executes only the audited bootstrap opcode subset. It exposes
@@ -49,7 +49,10 @@ write protection, return-data ranges, journal checkpoint policy, and a
 fork-aware precompile registry with bounded input/gas planning. Bytecode input
 is capped at the EIP-170 code-size ceiling, precompile input planning is capped
 at a release hard limit, and valid jump destinations are precomputed once per
-run with a fixed-size no-alloc bitset.
+run with a fixed-size no-alloc bitset. Truncated `PUSH1..=PUSH32` immediates
+follow Ethereum consensus semantics: missing trailing bytes are read as zero,
+the program counter advances by the full declared width, and jump analysis
+uses the same instruction boundary.
 The Frontier identity, SHA-256, RIPEMD-160, bounded Byzantium ModExp,
 BN254 add/mul, BN254 pairing frames, and Istanbul BLAKE2F execute through
 first-party dependency-free implementations. ECRECOVER executes through
@@ -72,6 +75,9 @@ assert!(point.is_infinity());
 
 The complete wire contract is documented in
 [`docs/bls12-381-wire-encodings.md`](https://github.com/valkyoth/eth/blob/main/docs/bls12-381-wire-encodings.md).
+The PUSH-at-EOF consensus rule and its independent conformance sources are
+documented in
+[`docs/truncated-push-semantics.md`](https://github.com/valkyoth/eth/blob/main/docs/truncated-push-semantics.md).
 
 ## Security posture
 
