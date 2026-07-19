@@ -4537,6 +4537,53 @@ Exit criteria:
 - `v0.54.0 implementation stop reached. Run pentest for this exact
   commit.`
 
+### v0.54.4 - Session-Bound Traversal API Hardening
+
+Status: planned.
+
+Goal: make it difficult to process untrusted borrowed decode models through an
+unaccounted compatibility iterator by mistake.
+
+Deliverables:
+
+- Audit every first-party transaction, proof, RPC, networking, fixture, and
+  execution consumer of borrowed RLP-backed models and migrate all untrusted
+  paths to the shared `DecodeSession` traversal APIs;
+- introduce a compile-time distinction, session-bound wrapper, or equally
+  strong API boundary so models admitted through session-aware decoding do not
+  silently expose unaccounted traversal as the natural next operation;
+- rename or deprecate compatibility traversal with explicit trusted or
+  `without_session` terminology for access-list entries, storage keys, blob
+  hashes, EIP-7702 authorizations, and inline MPT nodes;
+- preserve an intentional compatibility path for already trusted or
+  independently bounded data without presenting it as safe for untrusted
+  composite work;
+- publish migration guidance mapping every legacy iterator to its charged
+  session-aware replacement.
+
+Verification:
+
+- Repository-wide static/API guards prove authoritative first-party untrusted
+  paths do not call compatibility traversal;
+- compile-fail tests prove session-bound models cannot select an unaccounted
+  traversal without an explicit trust-boundary conversion;
+- exact counter-oracle tests cover repeated and nested access-list, storage-key,
+  blob-hash, authorization, and inline-MPT traversal;
+- fuzzing repeatedly traverses borrowed models and proves all admitted work is
+  conserved by one non-resetting session;
+- documentation, examples, and downstream migration fixtures use the charged
+  APIs for untrusted input.
+
+Exit criteria:
+
+- No first-party untrusted-data path can bypass the shared decode ledger through
+  a legacy iterator.
+- Public compatibility traversal is explicitly named and documented as trusted
+  or independently bounded, while session-admitted models require an explicit
+  charged path or trust-boundary conversion.
+- `v0.54.4 implementation stop reached. Run pentest for this exact
+  commit.`
+
 ### v0.55.0 - Ethereum Text And Serde Interoperability
 
 Status: planned.
