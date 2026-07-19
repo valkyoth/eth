@@ -84,7 +84,7 @@ fn complete_capacity_check_is_noncommitting() -> Result<(), DecodeError> {
 }
 
 #[test]
-fn replay_charges_exclude_already_paid_nesting_work() -> Result<(), DecodeError> {
+fn replay_charges_preserve_depth_without_double_charging_origin() -> Result<(), DecodeError> {
     let mut source = DecodeSession::new(policy())?;
     source.check_nesting_depth(2)?;
     let mut measured = Ok(());
@@ -98,15 +98,20 @@ fn replay_charges_exclude_already_paid_nesting_work() -> Result<(), DecodeError>
     measured?;
     assert_eq!(source.max_nesting_depth(), 3);
     assert_eq!(source.total_work(), 19);
+
+    source.account_charges(replay)?;
+    assert_eq!(source.max_nesting_depth(), 3);
+    assert_eq!(source.total_work(), 35);
+
     let mut future = DecodeSession::new(policy())?;
     future.account_charges(replay)?;
 
     assert_eq!(future.encoded_bytes(), 7);
     assert_eq!(future.rlp_headers(), 2);
     assert_eq!(future.items(), 3);
-    assert_eq!(future.max_nesting_depth(), 0);
+    assert_eq!(future.max_nesting_depth(), 3);
     assert_eq!(future.nibbles(), 4);
-    assert_eq!(future.total_work(), 16);
+    assert_eq!(future.total_work(), 19);
     Ok(())
 }
 

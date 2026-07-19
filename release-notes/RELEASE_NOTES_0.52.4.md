@@ -27,6 +27,8 @@ account/storage authority and canonical account decoding are assigned to
 - Dry-traversal parsing, path comparison, and value comparison now debit the
   caller's operation-wide session; only the opaque future-work check remains
   noncommitting.
+- Opaque replay charges preserve nesting requirements when transferred to a
+  fresh session without double-charging depth on the originating session.
 - Added public session-aware transaction, receipt, account, and storage
   inclusion APIs.
 - Rejects zero-nibble extensions, empty leaf values, branches with fewer than

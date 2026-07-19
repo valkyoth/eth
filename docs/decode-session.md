@@ -55,7 +55,9 @@ MPT proof verification charges syntax preflight, conservative planning, and
 the final verification walk to the caller's session. Planning uses an opaque
 replay-charge description to check that the later walk fits before hashing any
 proof node, but the planning pass itself is never run against a reset side
-ledger.
+ledger. Replay charges retain their observed nesting high-water mark when
+transferred to a fresh session; applying them to the original session does not
+charge that already-established depth twice.
 
 Borrowed models expose charged traversal at every reparse boundary:
 

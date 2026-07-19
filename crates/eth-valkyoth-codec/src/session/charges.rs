@@ -42,8 +42,9 @@ impl DecodeSession {
 
     /// Runs work against this session and returns its repeatable charges.
     ///
-    /// Newly observed nesting depth is excluded because repeating the same
-    /// traversal cannot increase the operation-wide high-water mark again.
+    /// The observed nesting requirement is retained for transfer to another
+    /// session. Applying it to this session charges only a deeper high-water
+    /// mark, so already-established depth is not charged twice.
     pub fn measure_replay_charges(
         &mut self,
         operation: impl FnOnce(&mut Self),
@@ -61,20 +62,24 @@ impl DecodeSession {
             .max_nesting_depth
             .checked_sub(before.max_nesting_depth)
             .ok_or(DecodeError::WorkExceeded)?;
+        let additive_work = difference(self.total_work, before.total_work)?
+            .checked_sub(depth_work)
+            .ok_or(DecodeError::WorkExceeded)?;
+        let replay_work = additive_work
+            .checked_add(self.max_nesting_depth)
+            .ok_or(DecodeError::WorkExceeded)?;
         Ok(DecodeSessionCharges {
             encoded_bytes: difference(self.encoded_bytes, before.encoded_bytes)?,
             rlp_headers: difference(self.rlp_headers, before.rlp_headers)?,
             items: difference(self.items, before.items)?,
-            max_nesting_depth: 0,
+            max_nesting_depth: self.max_nesting_depth,
             allocation_capacity: difference(self.allocation_capacity, before.allocation_capacity)?,
             proof_nodes: difference(self.proof_nodes, before.proof_nodes)?,
             hashes: difference(self.hashes, before.hashes)?,
             hash_bytes: difference(self.hash_bytes, before.hash_bytes)?,
             nibbles: difference(self.nibbles, before.nibbles)?,
             value_bytes: difference(self.value_bytes, before.value_bytes)?,
-            total_work: difference(self.total_work, before.total_work)?
-                .checked_sub(depth_work)
-                .ok_or(DecodeError::WorkExceeded)?,
+            total_work: replay_work,
         })
     }
 
