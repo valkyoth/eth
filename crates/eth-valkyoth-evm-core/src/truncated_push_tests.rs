@@ -83,6 +83,22 @@ fn known_client_truncated_push_vectors_match() -> Result<(), EvmCoreError> {
 }
 
 #[test]
+fn legacy_push_error_is_compatible_but_never_returned() -> Result<(), EvmCoreError> {
+    assert_eq!(
+        EvmCoreError::PushImmediateOutOfBounds.code(),
+        "push_immediate_out_of_bounds"
+    );
+
+    let mut memory = [];
+    let mut execution = EvmExecution::<1>::try_new(&mut memory)?;
+    let report = execution.run(&[0x61, 0x01], limits()?)?;
+
+    assert_eq!(report.status, ExecutionStatus::Stopped);
+    assert_eq!(execution.stack().peek(0)?, EvmWord::from_be_slice(&[1, 0])?);
+    Ok(())
+}
+
+#[test]
 fn jumpdest_analysis_skips_all_truncated_push_payload_bytes() -> Result<(), EvmCoreError> {
     for width in 1..=EvmWord::LEN {
         for available in 0..width {

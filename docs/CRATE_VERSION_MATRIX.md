@@ -64,13 +64,13 @@ publication when a crate is marked `unchanged`.
 | `eth-valkyoth-verify` | `0.23.0` | `0.23.0` | `unchanged` | No | No package changes for v0.52.2. |
 | `eth-valkyoth-derive` | `0.17.3` | `0.17.3` | `unchanged` | No | No package changes for v0.52.2. |
 | `eth-valkyoth-sanitization` | `0.7.5` | `0.7.5` | `unchanged` | No | No package changes for v0.52.2. |
-| `eth-valkyoth-evm-core` | `0.26.0` | `0.27.0` | `code` | Yes | Corrects truncated PUSH consensus handling and shares instruction advancement with jump-destination analysis. |
+| `eth-valkyoth-evm-core` | `0.26.0` | `0.27.0` | `code` | Yes | Corrects truncated PUSH consensus handling, shares instruction advancement with jump-destination analysis, and retains the legacy error variant for facade compatibility. |
 | `eth-valkyoth-evm` | `0.10.0` | `0.10.0` | `unchanged` | No | No package changes for v0.52.2. |
 | `eth-valkyoth-rpc` | `0.7.0` | `0.7.0` | `unchanged` | No | No package changes for v0.52.2. |
 | `eth-valkyoth-signer` | `0.7.3` | `0.7.3` | `unchanged` | No | No package changes for v0.52.2. |
 | `eth-valkyoth-reth` | `0.7.0` | `0.7.0` | `unchanged` | No | No package changes for v0.52.2. |
 | `eth-valkyoth-testkit` | `0.7.0` | `0.7.0` | `unchanged` | No | No package changes for v0.52.2. |
-| `eth` | `0.52.1` | `0.52.2` | `code` | Yes | Updates `evm-core` to `0.27.0` and exposes consensus-correct truncated PUSH execution through the facade. |
+| `eth` | `0.52.1` | `0.52.2` | `code` | Yes | Updates `evm-core` to `0.27.0`, exposes consensus-correct truncated PUSH execution, and preserves the legacy public error variant for patch compatibility. |
 
 Update this table and `release-crates.toml` in the same commit whenever a crate
 changes release state.

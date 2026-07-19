@@ -19,8 +19,9 @@ work builds on the bytecode scanner.
   padding for every PUSH width.
 - Shared checked instruction advancement between the interpreter and
   jump-destination map construction.
-- Removed `EvmCoreError::PushImmediateOutOfBounds`; truncated PUSH is valid
-  Ethereum bytecode, not an execution error.
+- Retained `EvmCoreError::PushImmediateOutOfBounds` as a hidden legacy
+  compatibility variant while ensuring no production execution path returns
+  it; truncated PUSH is valid Ethereum bytecode, not an execution error.
 - Minor-bumped `eth-valkyoth-evm-core` from `0.26.0` to `0.27.0` for the public
   error-domain and consensus-behavior change.
 - Bumped the `eth` facade from `0.52.1` to `0.52.2` and updated its optional
@@ -36,6 +37,9 @@ work builds on the bytecode scanner.
   introduced.
 - A present `JUMPDEST` byte inside a truncated PUSH immediate remains data and
   cannot be selected as a dynamic jump target.
+- The facade patch release preserves the legacy public error variant and its
+  stable category code, avoiding an automatic Cargo update breaking downstream
+  matches or references.
 
 ## Verification
 

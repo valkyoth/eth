@@ -2,6 +2,9 @@ use core::fmt;
 
 /// Deterministic error domain for the first-party EVM core types.
 #[derive(Clone, Copy, Debug, Eq, PartialEq)]
+// The hidden legacy variant preserves patch-release compatibility;
+// `#[non_exhaustive]` would instead break existing exhaustive matches.
+#[allow(clippy::manual_non_exhaustive)]
 pub enum EvmCoreError {
     /// The requested stack capacity is zero.
     StackCapacityZero,
@@ -89,6 +92,12 @@ pub enum EvmCoreError {
     PrecompilePointNotInSubgroup,
     /// The selected precompile needs a cryptographic backend not admitted here.
     PrecompileBackendUnavailable,
+    /// Legacy compatibility variant for the pre-v0.27.0 truncated-PUSH error.
+    ///
+    /// Truncated PUSH instructions are valid Ethereum bytecode. Production
+    /// execution paths do not return this variant as of v0.27.0.
+    #[doc(hidden)]
+    PushImmediateOutOfBounds,
     /// A dynamic jump target is not a valid `JUMPDEST`.
     InvalidJumpDestination,
     /// A return or revert range is outside the memory view.
@@ -147,6 +156,7 @@ impl EvmCoreError {
             Self::PrecompilePointNotOnCurve => "precompile_point_not_on_curve",
             Self::PrecompilePointNotInSubgroup => "precompile_point_not_in_subgroup",
             Self::PrecompileBackendUnavailable => "precompile_backend_unavailable",
+            Self::PushImmediateOutOfBounds => "push_immediate_out_of_bounds",
             Self::InvalidJumpDestination => "invalid_jump_destination",
             Self::ReturnRangeOutOfBounds => "return_range_out_of_bounds",
             Self::UnsupportedOpcode => "unsupported_opcode",

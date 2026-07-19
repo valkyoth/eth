@@ -10,6 +10,9 @@ All notable changes to `eth` are documented here.
 - Added exhaustive coverage for all 528 truncated PUSH forms, independent
   client/specification vectors, jump-analysis invariants, a fuzz target, and
   committed seeds.
+- Remediated the v0.52.2 pentest by retaining the hidden legacy truncated-PUSH
+  error variant and stable code for facade patch-release compatibility while
+  keeping it unreachable from production execution.
 - Updated the pinned stable toolchain and full release gate to Rust `1.97.1`,
   extended compatibility checks through Rust `1.97.0`, and made the networked
   release tooling fail when the pin is not the latest official stable Rust.

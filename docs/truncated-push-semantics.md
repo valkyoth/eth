@@ -48,3 +48,7 @@ seed corpus includes an empty `PUSH32` and a partially present `PUSH2`.
 
 This release corrects only PUSH-at-EOF semantics. It does not expand the
 interpreter's admitted opcode set or claim complete EVM conformance.
+
+`EvmCoreError::PushImmediateOutOfBounds` remains as a hidden legacy API variant
+for facade patch-release compatibility. No production execution or bytecode
+analysis path returns it as of `v0.52.2`.
