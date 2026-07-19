@@ -1,7 +1,7 @@
 [package]
 name = "eth"
-description = "no_std-first Ethereum execution-layer protocol toolkit facade."
-version = "0.52.2"
+description = "Security-first no_std facade for the evolving full Ethereum stack."
+version = "0.52.3"
 edition.workspace = true
 rust-version.workspace = true
 license.workspace = true

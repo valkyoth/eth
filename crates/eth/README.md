@@ -1,6 +1,6 @@
 <p align="center">
-  <b>Security-focused no_std Ethereum toolkit for Rust.</b><br>
-  Current release: bounded execution foundations. Roadmap: first-party execution, consensus, validator, and integrated-node components.
+  <b>Security-first no_std implementation of the complete Ethereum stack in Rust.</b><br>
+  Built in small audited releases with explicit capability gates until the full node, client, and validator stack is production-ready.
 </p>
 
 <div align="center">
@@ -25,15 +25,16 @@
 
 # eth
 
-`eth` is a security-focused, `no_std`-first Ethereum toolkit for Rust. The
-current release provides canonical RLP, typed transactions, signing and
-recovery boundaries, headers, receipts, withdrawals, Merkle Patricia Trie
-proofs, fork-aware validation, and bounded first-party EVM components.
+`eth` is a security-first, `no_std`-first implementation of Ethereum in Rust,
+developed toward a complete first-party execution client, consensus client,
+validator client, SDK, and integrated node. The current release provides
+canonical RLP, typed transactions, signing and recovery boundaries, headers,
+receipts, withdrawals, Merkle Patricia Trie proofs, fork-aware validation, and
+bounded first-party EVM components.
 
-The roadmap extends these foundations into an owned SDK, execution client,
-beacon node, validator client, and integrated Ethereum node while keeping core
-Ethereum behavior first party and independently reviewed. Version `0.52.2` is
-still a library, not a production node, wallet, RPC client, or key store.
+The complete stack is built in small independently reviewed milestones rather
+than claimed ahead of its evidence. Version `0.52.3` is still a library, not a
+production node, wallet, RPC client, or key store.
 Networking, private-key signing, local key storage, and third-party execution
 backends are not enabled by default.
 
@@ -41,14 +42,14 @@ backends are not enabled by default.
 
 ```toml
 [dependencies]
-eth = "0.52.2"
+eth = "0.52.3"
 ```
 
 For optional sanitization support:
 
 ```toml
 [dependencies]
-eth = { version = "0.52.2", features = ["sanitization"] }
+eth = { version = "0.52.3", features = ["sanitization"] }
 ```
 
 ## Quick Start
@@ -127,7 +128,7 @@ Optional reviewed software Keccak backend:
 
 ```toml
 [dependencies]
-eth = { version = "0.52.2", features = ["keccak-tiny"] }
+eth = { version = "0.52.3", features = ["keccak-tiny"] }
 ```
 
 ```rust
@@ -141,14 +142,14 @@ Optional reviewed secp256k1 recovery adapter:
 
 ```toml
 [dependencies]
-eth = { version = "0.52.2", features = ["secp256k1-k256"] }
+eth = { version = "0.52.3", features = ["secp256k1-k256"] }
 ```
 
 Optional bounded EVM gas-estimation boundary:
 
 ```toml
 [dependencies]
-eth = { version = "0.52.2", features = ["evm"] }
+eth = { version = "0.52.3", features = ["evm"] }
 ```
 
 ```rust
@@ -253,7 +254,7 @@ Optional native EVM core domains:
 
 ```toml
 [dependencies]
-eth = { version = "0.52.2", features = ["evm-core"] }
+eth = { version = "0.52.3", features = ["evm-core"] }
 ```
 
 State access uses explicit host-state traits and caller-provided fixed-capacity
@@ -865,6 +866,13 @@ The RLP codec admits canonical byte-string scalars, lists, and Ethereum
 integers with exact consumption. Decoders require explicit limits; encoders are
 buffer-based and do not allocate:
 
+For composite untrusted operations, `DecodeSession` is the operation-wide
+security boundary. It cannot be copied, cloned, or reset, and its reviewed
+policy accumulates encoded bytes, headers, items, nesting, allocation
+capacity, proof nodes, hashes, hash bytes, and total work across nested
+transaction and proof consumers. See the
+[shared decode session contract](https://github.com/valkyoth/eth/blob/main/docs/decode-session.md).
+
 ```rust
 use eth::codec::{
     DecodeLimits, RlpListForm, RlpScalarForm, decode_rlp_list, decode_rlp_scalar, decode_rlp_u64,
@@ -1139,7 +1147,7 @@ friendly, and independently testable.
 The minimum supported Rust version is Rust `1.90.0`. New deployments should use
 the pinned stable Rust `1.97.1` until the toolchain policy is updated.
 
-Compatibility evidence for `0.52.2`:
+Compatibility evidence for `0.52.3`:
 
 | Rust | Local Evidence |
 | --- | --- |

@@ -1,5 +1,5 @@
 use super::*;
-use eth_valkyoth_codec::{DecodeError, DecodeLimits};
+use eth_valkyoth_codec::{DecodeError, DecodeLimits, DecodeSession, DecodeSessionPolicy};
 use eth_valkyoth_primitives::{Address, B256, Gas, Nonce, Wei};
 
 mod blob;
@@ -33,6 +33,22 @@ const ACCESS_LIST_TX: &[u8] = &[
     0x22, 0x22, 0x22, 0x22, 0x22, 0x22, 0x22, 0x22, 0x22, 0x22, 0x22, 0x22, 0x22, 0x22, 0x22, 0x22,
     0x22, 0x22, 0x22, 0x22, 0x22, 0x22, 0x01, 0x01, 0x02,
 ];
+
+#[test]
+fn shared_session_accounts_composite_access_list_decode() -> Result<(), &'static str> {
+    let policy = DecodeSessionPolicy::reviewed_policy(TEST_LIMITS, 1024, 256, 4, 128, 4096);
+    let mut session = policy
+        .and_then(DecodeSession::new)
+        .map_err(|_| "test policy must be valid")?;
+    let decoded = decode_access_list_transaction_in_session(ACCESS_LIST_TX, &mut session);
+
+    assert!(decoded.is_ok());
+    assert!(session.encoded_bytes() > ACCESS_LIST_TX.len());
+    assert!(session.items() > ACCESS_LIST_TRANSACTION_FIELD_COUNT);
+    assert!(session.max_nesting_depth() >= 3);
+    assert_eq!(session.allocation_capacity(), 0);
+    Ok(())
+}
 #[test]
 fn decodes_create_legacy_transaction_as_unvalidated() {
     let result = decode_legacy_transaction(CREATE_TX, TEST_LIMITS);

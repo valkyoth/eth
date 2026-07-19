@@ -105,3 +105,22 @@ where
         .and_then(RlpInteger::to_be_bytes32)
         .map_err(|source| err(field, source))
 }
+
+pub(crate) fn fixed_fields_in_session<'a, const N: usize>(
+    list: RlpList<'a>,
+    session: &mut eth_valkyoth_codec::DecodeSession,
+) -> Result<[Option<RlpItem<'a>>; N], DecodeError> {
+    let mut fields = [None; N];
+    let mut items = list.items();
+    for field in &mut fields {
+        *field = Some(
+            items
+                .next_in_session(session)
+                .ok_or(DecodeError::Malformed)??,
+        );
+    }
+    if items.next_in_session(session).is_some() {
+        return Err(DecodeError::Malformed);
+    }
+    Ok(fields)
+}

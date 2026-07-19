@@ -5,6 +5,9 @@ use eth_valkyoth_primitives::{Address, ChainId, Gas, Nonce, Wei};
 
 use super::{TransactionEnvelope, TransactionEnvelopeError, decode_transaction_envelope};
 
+mod session;
+pub use session::decode_legacy_transaction_in_session;
+
 /// Number of fields in a canonical legacy transaction RLP list.
 pub const LEGACY_TRANSACTION_FIELD_COUNT: usize = 9;
 const ADDRESS_BYTES: usize = 20;

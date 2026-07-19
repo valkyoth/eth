@@ -7,7 +7,11 @@ use super::{
 };
 
 mod item;
+mod session;
 use item::{ParsedItemKind, parse_item};
+pub use session::{
+    RlpListSessionItems, decode_rlp_list_in_session, decode_rlp_list_partial_in_session,
+};
 
 /// Hard cap on RLP list traversal depth regardless of the active decode limits.
 ///

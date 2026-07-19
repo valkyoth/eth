@@ -19,17 +19,19 @@ pub use access_list::{
     AccessListTransactionDecodeError, AccessListTransactionDecodeErrorCategory,
     AccessListTransactionField, AccessListTransactionTo, InvalidSignatureYParity, SignatureYParity,
     UnvalidatedAccessListTransaction, decode_access_list_transaction,
+    decode_access_list_transaction_in_session,
 };
 pub use blob::{
     BLOB_TRANSACTION_FIELD_COUNT, BLOB_TRANSACTION_TYPE, BlobTransactionDecodeError,
     BlobTransactionDecodeErrorCategory, BlobTransactionField, BlobVersionedHashItems,
     BlobVersionedHashes, UnvalidatedBlobTransaction, decode_blob_transaction,
+    decode_blob_transaction_in_session,
 };
 pub use dynamic_fee::{
     DYNAMIC_FEE_TRANSACTION_FIELD_COUNT, DYNAMIC_FEE_TRANSACTION_TYPE,
     DynamicFeeTransactionDecodeError, DynamicFeeTransactionDecodeErrorCategory,
     DynamicFeeTransactionField, DynamicFeeTransactionTo, UnvalidatedDynamicFeeTransaction,
-    decode_dynamic_fee_transaction,
+    decode_dynamic_fee_transaction, decode_dynamic_fee_transaction_in_session,
 };
 pub use encode::{
     TransactionEncodeError, TransactionEncodeErrorCategory, UnvalidatedTransaction,
@@ -43,12 +45,12 @@ pub use envelope::{
     EIP_2718_MAX_TYPED_PREFIX, EIP_2718_RESERVED_PREFIX, EIP_2718_SCALAR_PREFIX_START,
     EIP_2718_TYPED_ZERO_PREFIX, LEGACY_TRANSACTION_PREFIX_START, TransactionEnvelope,
     TransactionEnvelopeError, TransactionEnvelopeErrorCategory, TypedTransactionEnvelope,
-    decode_transaction_envelope,
+    decode_transaction_envelope, decode_transaction_envelope_in_session,
 };
 pub use legacy::{
     LEGACY_TRANSACTION_FIELD_COUNT, LegacyTransactionDecodeError,
     LegacyTransactionDecodeErrorCategory, LegacyTransactionField, LegacyTransactionTo,
-    UnvalidatedLegacyTransaction, decode_legacy_transaction,
+    UnvalidatedLegacyTransaction, decode_legacy_transaction, decode_legacy_transaction_in_session,
 };
 pub use set_code::{
     EIP_7702_DELEGATION_INDICATOR_PREFIX, SET_CODE_AUTHORIZATION_FIELD_COUNT,
@@ -59,7 +61,8 @@ pub use set_code::{
     SetCodeTransactionDecodeError, SetCodeTransactionDecodeErrorCategory, SetCodeTransactionField,
     SetCodeTransactionValidationContext, SetCodeTransactionValidityError,
     SetCodeTransactionValidityErrorCategory, UnvalidatedSetCodeTransaction,
-    ValidSetCodeTransaction, decode_set_code_transaction, validate_set_code_transaction_context,
+    ValidSetCodeTransaction, decode_set_code_transaction, decode_set_code_transaction_in_session,
+    validate_set_code_transaction_context,
 };
 pub use signing::{
     SET_CODE_AUTHORIZATION_MAGIC, encode_access_list_signing_preimage,

@@ -2697,7 +2697,7 @@ Exit criteria:
 
 ### v0.52.3 - Shared Decode Session And Work Ledger
 
-Status: planned.
+Status: implementation complete; independent pentest pending.
 
 Goal: make one non-copyable budget capability account for all work caused by
 one untrusted decode request.

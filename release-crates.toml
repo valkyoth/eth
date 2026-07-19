@@ -1,101 +1,101 @@
 [release]
-version = "0.52.2"
+version = "0.52.3"
 policy = "independent"
 
 [crates."eth-valkyoth-codec"]
 previous_version = "0.19.0"
-version = "0.19.0"
-change = "unchanged"
-publish = false
-reason = "No package changes for v0.52.2."
+version = "0.20.0"
+change = "code"
+publish = true
+reason = "Adds the public non-copyable DecodeSession policy, cumulative work ledger, atomic reparse charging, and session-aware RLP APIs."
 
 [crates."eth-valkyoth-primitives"]
 previous_version = "0.11.2"
-version = "0.11.2"
-change = "unchanged"
-publish = false
-reason = "No package changes for v0.52.2."
+version = "0.11.3"
+change = "dependency"
+publish = true
+reason = "Updates the published codec dependency from 0.19 to 0.20 so public codec error types retain one identity."
 
 [crates."eth-valkyoth-hash"]
 previous_version = "0.11.2"
-version = "0.11.2"
-change = "unchanged"
-publish = false
-reason = "No package changes for v0.52.2."
+version = "0.11.3"
+change = "dependency"
+publish = true
+reason = "Updates the published primitives dependency to 0.11.3."
 
 [crates."eth-valkyoth-protocol"]
 previous_version = "0.25.2"
-version = "0.25.2"
-change = "unchanged"
-publish = false
-reason = "No package changes for v0.52.2."
+version = "0.26.0"
+change = "code"
+publish = true
+reason = "Adds public session-aware envelope and transaction decoders across every supported transaction family and nested substructure."
 
 [crates."eth-valkyoth-verify"]
 previous_version = "0.23.0"
-version = "0.23.0"
-change = "unchanged"
-publish = false
-reason = "No package changes for v0.52.2."
+version = "0.24.0"
+change = "code"
+publish = true
+reason = "Adds public shared-session MPT node and proof-node syntax decoding and updates protocol dependencies."
 
 [crates."eth-valkyoth-derive"]
 previous_version = "0.17.3"
-version = "0.17.3"
-change = "unchanged"
-publish = false
-reason = "No package changes for v0.52.2."
+version = "0.17.4"
+change = "dependency"
+publish = true
+reason = "Updates the published codec and primitives dependency lines used by generated RLP APIs."
 
 [crates."eth-valkyoth-sanitization"]
 previous_version = "0.7.5"
-version = "0.7.5"
-change = "unchanged"
-publish = false
-reason = "No package changes for v0.52.2."
+version = "0.7.6"
+change = "dependency"
+publish = true
+reason = "Updates the optional derive dependency to 0.17.4."
 
 [crates."eth-valkyoth-evm-core"]
-previous_version = "0.26.0"
+previous_version = "0.26.1"
 version = "0.26.1"
-change = "bugfix"
-publish = true
-reason = "Corrects consensus handling of truncated PUSH immediates, shares instruction advancement with jump-destination analysis, and retains the legacy error variant for facade compatibility."
+change = "unchanged"
+publish = false
+reason = "No package changes for v0.52.3."
 
 [crates."eth-valkyoth-evm"]
 previous_version = "0.10.0"
-version = "0.10.0"
-change = "unchanged"
-publish = false
-reason = "No package changes for v0.52.2."
+version = "0.10.1"
+change = "dependency"
+publish = true
+reason = "Updates published codec, primitives, and protocol dependency lines."
 
 [crates."eth-valkyoth-rpc"]
 previous_version = "0.7.0"
 version = "0.7.0"
 change = "unchanged"
 publish = false
-reason = "No package changes for v0.52.2."
+reason = "No package changes for v0.52.3."
 
 [crates."eth-valkyoth-signer"]
 previous_version = "0.7.3"
-version = "0.7.3"
-change = "unchanged"
-publish = false
-reason = "No package changes for v0.52.2."
+version = "0.7.4"
+change = "dependency"
+publish = true
+reason = "Updates the published primitives dependency to 0.11.3."
 
 [crates."eth-valkyoth-reth"]
 previous_version = "0.7.0"
 version = "0.7.0"
 change = "unchanged"
 publish = false
-reason = "No package changes for v0.52.2."
+reason = "No package changes for v0.52.3."
 
 [crates."eth-valkyoth-testkit"]
 previous_version = "0.7.0"
 version = "0.7.0"
 change = "unchanged"
 publish = false
-reason = "No package changes for v0.52.2."
+reason = "No package changes for v0.52.3."
 
 [crates.eth]
-previous_version = "0.52.1"
-version = "0.52.2"
+previous_version = "0.52.2"
+version = "0.52.3"
 change = "code"
 publish = true
-reason = "Updates evm-core to 0.26.1, exposes consensus-correct truncated PUSH execution, and preserves support-crate type identity plus the legacy public error variant for patch compatibility."
+reason = "Exposes operation-wide decode sessions and session-aware transaction and MPT parsing through the facade while clarifying the full Ethereum implementation goal."

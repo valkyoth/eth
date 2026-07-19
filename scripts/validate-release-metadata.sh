@@ -101,6 +101,7 @@ test -f release-notes/RELEASE_NOTES_0.51.0.md
 test -f release-notes/RELEASE_NOTES_0.52.0.md
 test -f release-notes/RELEASE_NOTES_0.52.1.md
 test -f release-notes/RELEASE_NOTES_0.52.2.md
+test -f release-notes/RELEASE_NOTES_0.52.3.md
 test -f security/pentest/v0.40.0.md
 test -f security/pentest/v0.41.0.md
 release_version="$(python3 -c 'import tomllib; print(tomllib.load(open("release-crates.toml", "rb"))["release"]["version"])')"
@@ -181,6 +182,8 @@ test -x scripts/release_0_52_0_gate.sh
 test -x scripts/release_0_52_1_gate.sh
 test -x scripts/release_0_52_2_gate.sh
 grep -q "rustc 1\\\\.97\\\\.1" scripts/release_0_52_2_gate.sh
+test -x scripts/release_0_52_3_gate.sh
+grep -q "rustc 1\\\\.97\\\\.1" scripts/release_0_52_3_gate.sh
 test -x scripts/test-workspace-dependency-policy.py
 test -f docs/spec-source-policy.md
 test -f docs/reference-store.md
@@ -220,4 +223,4 @@ grep -q 'license = "MIT OR Apache-2.0"' Cargo.toml
 grep -q 'repository = "https://github.com/valkyoth/eth"' Cargo.toml
 grep -q 'channel = "1.97.1"' rust-toolchain.toml
 grep -q 'rust-version = "1.90"' Cargo.toml
-grep -q 'valkyoth-eth-upstream-check/0.52.2' scripts/check_ethereum_upstream.py
+grep -q 'valkyoth-eth-upstream-check/0.52.3' scripts/check_ethereum_upstream.py

@@ -10,8 +10,10 @@ use crate::transaction::fields::{
 };
 
 mod error;
+mod session;
 
 pub use error::{BlobTransactionDecodeError, BlobTransactionDecodeErrorCategory};
+pub use session::decode_blob_transaction_in_session;
 
 /// EIP-4844 blob transaction type byte.
 pub const BLOB_TRANSACTION_TYPE: u8 = 0x03;

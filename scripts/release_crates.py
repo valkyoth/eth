@@ -280,7 +280,7 @@ def run_preflight(args: argparse.Namespace) -> None:
         return
 
     version = parse_version(args.version)
-    gate = ROOT / "scripts" / f"release_{version[0]}_{version[1]}_gate.sh"
+    gate = ROOT / "scripts" / f"release_{version[0]}_{version[1]}_{version[2]}_gate.sh"
     if gate.exists():
         run([str(gate.relative_to(ROOT))], dry_run=args.dry_run)
     else:

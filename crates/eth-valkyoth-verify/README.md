@@ -31,7 +31,7 @@ Most users should depend on the facade crate instead:
 
 ```toml
 [dependencies]
-eth = "0.52.1"
+eth = "0.52.3"
 ```
 
 Crates.io: <https://crates.io/crates/eth>
@@ -39,6 +39,10 @@ Crates.io: <https://crates.io/crates/eth>
 This package is published separately so the `eth` workspace can keep small,
 auditable crate boundaries. Treat it as a lower-level building block unless the
 `eth` documentation explicitly says otherwise.
+
+The `0.24.0` release adds shared-session MPT node and proof-node syntax entry
+points. They charge structural and borrowed semantic passes to one ledger;
+complete reject-before-hash proof preflight remains assigned to `eth` `0.52.4`.
 
 The `0.23.0` support-crate release, shipped with `eth` `0.52.1`, rejects
 malformed EIP-712 struct and field identifiers, duplicate borrowed type,

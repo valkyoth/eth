@@ -7,8 +7,8 @@ mod traits;
 mod tests;
 
 use crate::{
-    DecodeAccumulator, DecodeError, DecodeLimits, checked_len_add, require_exact_consumption,
-    require_range_in_bounds,
+    DecodeAccumulator, DecodeError, DecodeLimits, DecodeSession, checked_len_add,
+    require_exact_consumption, require_range_in_bounds,
 };
 
 pub use encode::{
@@ -23,8 +23,9 @@ pub use integer::{
     rlp_integer_payload_to_u128, rlp_integer_payload_to_u256_bytes, validate_rlp_integer_payload,
 };
 pub use list::{
-    MAX_RLP_LIST_TRAVERSAL_DEPTH, RlpItem, RlpList, RlpListForm, RlpListItems, decode_rlp_list,
-    decode_rlp_list_partial,
+    MAX_RLP_LIST_TRAVERSAL_DEPTH, RlpItem, RlpList, RlpListForm, RlpListItems, RlpListSessionItems,
+    decode_rlp_list, decode_rlp_list_in_session, decode_rlp_list_partial,
+    decode_rlp_list_partial_in_session,
 };
 pub use traits::{RlpDecode, RlpDeriveError, RlpEncode, checked_encoded_len_add};
 
@@ -107,6 +108,16 @@ pub fn decode_rlp_scalar<'a>(
     Ok(scalar)
 }
 
+/// Decodes exactly one canonical RLP scalar under a shared work session.
+pub fn decode_rlp_scalar_in_session<'a>(
+    input: &'a [u8],
+    session: &mut DecodeSession,
+) -> Result<RlpScalar<'a>, DecodeError> {
+    let scalar = decode_rlp_scalar_partial_in_session(input, session)?;
+    require_exact_consumption(scalar.encoded_len, input.len())?;
+    Ok(scalar)
+}
+
 /// Decodes one canonical RLP scalar byte string from the start of `input`.
 ///
 /// Warning: this intentionally accepts trailing bytes. Use
@@ -132,6 +143,30 @@ pub fn decode_rlp_scalar_partial<'a>(
         0xb8..=0xbf => decode_long_string(input, prefix),
         SHORT_LIST_OFFSET..=0xff => Err(DecodeError::UnexpectedList),
     }
+}
+
+/// Decodes one canonical RLP scalar while charging a shared work session.
+///
+/// This accepts trailing bytes and charges only the consumed scalar span.
+pub fn decode_rlp_scalar_partial_in_session<'a>(
+    input: &'a [u8],
+    session: &mut DecodeSession,
+) -> Result<RlpScalar<'a>, DecodeError> {
+    session.check_input_len(input.len())?;
+    session.account_items(1)?;
+
+    let prefix = *input.first().ok_or(DecodeError::Malformed)?;
+    let scalar = match prefix {
+        0x00..=0x7f => decode_single_byte(input),
+        SHORT_STRING_OFFSET..=LONG_STRING_OFFSET => decode_short_string(input, prefix),
+        0xb8..=0xbf => decode_long_string(input, prefix),
+        SHORT_LIST_OFFSET..=0xff => Err(DecodeError::UnexpectedList),
+    }?;
+    session.account_encoded_bytes(scalar.encoded_len())?;
+    if scalar.header_len() != 0 {
+        session.account_rlp_headers(1)?;
+    }
+    Ok(scalar)
 }
 
 fn decode_single_byte(input: &[u8]) -> Result<RlpScalar<'_>, DecodeError> {

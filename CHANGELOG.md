@@ -4,6 +4,12 @@ All notable changes to `eth` are documented here.
 
 ## Unreleased
 
+- Added a non-copyable shared decode session with operation-wide byte, header,
+  item, nesting, allocation-capacity, proof, hash, and total-work accounting.
+- Added session-aware RLP, transaction-envelope, legacy/EIP-2930/EIP-1559/
+  EIP-4844/EIP-7702 transaction, nested substructure, and MPT syntax APIs.
+- Extended decode fuzzing and linear-work evidence, added exact independent
+  support-crate versioning, and clarified the complete Ethereum-stack goal.
 - Corrected `PUSH1..=PUSH32` execution at code EOF to right-zero-pad missing
   immediate bytes, and made jump-destination analysis use the same declared
   instruction width.

@@ -13,8 +13,10 @@ use crate::transaction::fields::{
 };
 
 mod error;
+mod session;
 
 pub use error::{DynamicFeeTransactionDecodeError, DynamicFeeTransactionDecodeErrorCategory};
+pub use session::decode_dynamic_fee_transaction_in_session;
 
 /// EIP-1559 dynamic-fee transaction type byte.
 pub const DYNAMIC_FEE_TRANSACTION_TYPE: u8 = 0x02;

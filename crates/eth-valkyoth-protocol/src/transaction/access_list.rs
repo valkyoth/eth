@@ -9,8 +9,11 @@ use crate::transaction::fields::{
 };
 
 mod error;
+mod session;
 
 pub use error::{AccessListTransactionDecodeError, AccessListTransactionDecodeErrorCategory};
+pub(crate) use session::decode_access_list_in_session;
+pub use session::decode_access_list_transaction_in_session;
 
 /// EIP-2930 transaction type byte.
 pub const ACCESS_LIST_TRANSACTION_TYPE: u8 = 0x01;

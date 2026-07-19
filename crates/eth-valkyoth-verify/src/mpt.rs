@@ -1,6 +1,6 @@
 use eth_valkyoth_codec::{
-    DecodeAccumulator, DecodeError, DecodeLimits, RlpItem, RlpList, RlpScalar,
-    decode_rlp_list_partial, require_exact_consumption,
+    DecodeAccumulator, DecodeError, DecodeLimits, DecodeSession, RlpItem, RlpList, RlpScalar,
+    decode_rlp_list_partial, decode_rlp_list_partial_in_session, require_exact_consumption,
 };
 use eth_valkyoth_primitives::B256;
 
@@ -213,6 +213,50 @@ pub fn decode_mpt_proof_nodes<'a>(
     let mut accumulator = limits.accumulator();
     for node in encoded_nodes {
         let _ = decode_mpt_node_with_accumulator(node, &mut accumulator)?;
+    }
+    Ok(MptProofNodes { encoded_nodes })
+}
+
+/// Decodes one canonical MPT node through a shared work session.
+pub fn decode_mpt_node_in_session<'a>(
+    input: &'a [u8],
+    session: &mut DecodeSession,
+) -> Result<MptNode<'a>, MptNodeDecodeError> {
+    session
+        .account_proof_nodes(1)
+        .map_err(|source| field_error(MptNodeField::ProofNode, source))?;
+    let items_before = session.items();
+    let headers_before = session.rlp_headers();
+    let list = decode_rlp_list_partial_in_session(input, session)
+        .map_err(|source| field_error(MptNodeField::Node, source))?;
+    require_exact_consumption(list.encoded_len(), input.len())
+        .map_err(|source| field_error(MptNodeField::Node, source))?;
+
+    // The borrowed semantic model performs a second bounded traversal. Debit
+    // that pass before it starts, using the exact structural visit counts from
+    // the first traversal and the full encoded span as a conservative byte
+    // ceiling.
+    let semantic_items = session
+        .items()
+        .checked_sub(items_before)
+        .ok_or(field_error(MptNodeField::Node, DecodeError::LengthOverflow))?;
+    let semantic_headers = session
+        .rlp_headers()
+        .checked_sub(headers_before)
+        .ok_or(field_error(MptNodeField::Node, DecodeError::LengthOverflow))?;
+    session
+        .account_rlp_reparse(input.len(), semantic_headers, semantic_items)
+        .map_err(|source| field_error(MptNodeField::Node, source))?;
+    decode_mpt_node_from_list(list, MPT_INLINE_REFERENCE_DEPTH_LIMIT)
+}
+
+/// Validates proof-node syntax through one cumulative work session.
+pub fn decode_mpt_proof_nodes_in_session<'a>(
+    encoded_nodes: &'a [&'a [u8]],
+    session: &mut DecodeSession,
+) -> Result<MptProofNodes<'a>, MptNodeDecodeError> {
+    for node in encoded_nodes {
+        let _ = decode_mpt_node_in_session(node, session)?;
     }
     Ok(MptProofNodes { encoded_nodes })
 }

@@ -5,6 +5,7 @@ use std::vec;
 mod encode;
 mod integer;
 mod list;
+mod session;
 
 #[test]
 fn decodes_single_byte_scalar() {

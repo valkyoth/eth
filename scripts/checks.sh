@@ -56,6 +56,13 @@ for package in \
         cargo package -p "$package" --allow-dirty \
             --config 'patch.crates-io.eth-valkyoth-primitives.path="crates/eth-valkyoth-primitives"'
         ;;
+    eth-valkyoth-evm)
+        cargo package -p "$package" --allow-dirty \
+            --config 'patch.crates-io.eth-valkyoth-codec.path="crates/eth-valkyoth-codec"' \
+            --config 'patch.crates-io.eth-valkyoth-primitives.path="crates/eth-valkyoth-primitives"' \
+            --config 'patch.crates-io.eth-valkyoth-hash.path="crates/eth-valkyoth-hash"' \
+            --config 'patch.crates-io.eth-valkyoth-protocol.path="crates/eth-valkyoth-protocol"'
+        ;;
     eth-valkyoth-protocol)
         cargo package -p "$package" --allow-dirty \
             --config 'patch.crates-io.eth-valkyoth-codec.path="crates/eth-valkyoth-codec"' \
@@ -88,6 +95,7 @@ cargo package -p eth --allow-dirty \
     --config 'patch.crates-io.eth-valkyoth-primitives.path="crates/eth-valkyoth-primitives"' \
     --config 'patch.crates-io.eth-valkyoth-hash.path="crates/eth-valkyoth-hash"' \
     --config 'patch.crates-io.eth-valkyoth-protocol.path="crates/eth-valkyoth-protocol"' \
+    --config 'patch.crates-io.eth-valkyoth-derive.path="crates/eth-valkyoth-derive"' \
     --config 'patch.crates-io.eth-valkyoth-evm.path="crates/eth-valkyoth-evm"' \
     --config 'patch.crates-io.eth-valkyoth-evm-core.path="crates/eth-valkyoth-evm-core"' \
     --config 'patch.crates-io.eth-valkyoth-reth.path="crates/eth-valkyoth-reth"' \

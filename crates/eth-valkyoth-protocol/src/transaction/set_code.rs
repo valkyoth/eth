@@ -10,11 +10,13 @@ use crate::transaction::fields::{
 };
 
 mod error;
+mod session;
 mod validity;
 
 pub use error::{
     SetCodeAuthorizationField, SetCodeTransactionDecodeError, SetCodeTransactionDecodeErrorCategory,
 };
+pub use session::decode_set_code_transaction_in_session;
 pub use validity::*;
 
 /// EIP-7702 set-code transaction type byte.

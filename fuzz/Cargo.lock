@@ -208,7 +208,7 @@ dependencies = [
 
 [[package]]
 name = "eth-valkyoth-codec"
-version = "0.19.0"
+version = "0.20.0"
 
 [[package]]
 name = "eth-valkyoth-evm-core"
@@ -216,7 +216,7 @@ version = "0.26.1"
 
 [[package]]
 name = "eth-valkyoth-hash"
-version = "0.11.2"
+version = "0.11.3"
 dependencies = [
  "eth-valkyoth-primitives",
  "tiny-keccak",
@@ -224,7 +224,7 @@ dependencies = [
 
 [[package]]
 name = "eth-valkyoth-primitives"
-version = "0.11.2"
+version = "0.11.3"
 dependencies = [
  "eth-valkyoth-codec",
  "subtle",
@@ -232,7 +232,7 @@ dependencies = [
 
 [[package]]
 name = "eth-valkyoth-protocol"
-version = "0.25.2"
+version = "0.26.0"
 dependencies = [
  "eth-valkyoth-codec",
  "eth-valkyoth-hash",
@@ -241,7 +241,7 @@ dependencies = [
 
 [[package]]
 name = "eth-valkyoth-verify"
-version = "0.23.0"
+version = "0.24.0"
 dependencies = [
  "eth-valkyoth-codec",
  "eth-valkyoth-hash",

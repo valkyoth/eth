@@ -1,7 +1,8 @@
 use core::fmt;
 
 use eth_valkyoth_codec::{
-    DecodeError, DecodeErrorCategory, DecodeLimits, RlpList, decode_rlp_list,
+    DecodeError, DecodeErrorCategory, DecodeLimits, DecodeSession, RlpList, decode_rlp_list,
+    decode_rlp_list_in_session,
 };
 use eth_valkyoth_primitives::TransactionType;
 
@@ -194,6 +195,52 @@ pub fn decode_transaction_envelope<'a>(
         }
         Eip2718Prefix::Legacy => {
             let list = decode_rlp_list(input, limits).map_err(TransactionEnvelopeError::Decode)?;
+            Ok(TransactionEnvelope::Legacy(list))
+        }
+        Eip2718Prefix::Reserved => Err(TransactionEnvelopeError::ReservedPrefix),
+    }
+}
+
+/// Classifies a transaction envelope under one shared decode session.
+///
+/// Typed-envelope classification charges its one-byte type prefix. The typed
+/// payload remains borrowed for the transaction-specific decoder, which must
+/// charge that payload through the same session.
+pub fn decode_transaction_envelope_in_session<'a>(
+    input: &'a [u8],
+    session: &mut DecodeSession,
+) -> Result<TransactionEnvelope<'a>, TransactionEnvelopeError> {
+    session
+        .check_input_len(input.len())
+        .map_err(TransactionEnvelopeError::Decode)?;
+
+    let Some(prefix) = classify_eip2718_prefix(input) else {
+        return Err(TransactionEnvelopeError::EmptyInput);
+    };
+    if !matches!(prefix, Eip2718Prefix::Legacy) {
+        session
+            .account_encoded_bytes(1)
+            .map_err(TransactionEnvelopeError::Decode)?;
+    }
+
+    match prefix {
+        Eip2718Prefix::TypedZero => Err(TransactionEnvelopeError::UnsupportedTransactionType {
+            type_byte: EIP_2718_TYPED_ZERO_PREFIX,
+        }),
+        Eip2718Prefix::Typed { type_byte, payload } => {
+            let transaction_type = TransactionType::try_new_typed(type_byte)
+                .map_err(|_| TransactionEnvelopeError::UnsupportedTransactionType { type_byte })?;
+            Ok(TransactionEnvelope::Typed(TypedTransactionEnvelope {
+                transaction_type,
+                payload,
+            }))
+        }
+        Eip2718Prefix::ScalarPrefix { prefix } => {
+            Err(TransactionEnvelopeError::ScalarPrefix { prefix })
+        }
+        Eip2718Prefix::Legacy => {
+            let list = decode_rlp_list_in_session(input, session)
+                .map_err(TransactionEnvelopeError::Decode)?;
             Ok(TransactionEnvelope::Legacy(list))
         }
         Eip2718Prefix::Reserved => Err(TransactionEnvelopeError::ReservedPrefix),

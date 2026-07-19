@@ -17,6 +17,20 @@ pub(super) struct ParsedItem {
 }
 
 impl ParsedItem {
+    pub(super) const fn header_len(&self) -> usize {
+        self.header_len
+    }
+
+    pub(super) fn structural_scan_bytes(&self, offset: usize) -> Result<usize, DecodeError> {
+        match self.kind {
+            ParsedItemKind::Scalar(_) => self
+                .item_end
+                .checked_sub(offset)
+                .ok_or(DecodeError::LengthOverflow),
+            ParsedItemKind::List(_) => Ok(self.header_len),
+        }
+    }
+
     pub(super) fn into_rlp_item<'a>(
         self,
         input: &'a [u8],

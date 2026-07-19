@@ -3,12 +3,12 @@ extern crate std;
 use std::vec;
 use std::vec::Vec;
 
-use eth_valkyoth_codec::DecodeLimits;
+use eth_valkyoth_codec::{DecodeLimits, DecodeSession, DecodeSessionPolicy};
 
 use super::{
     MPT_BRANCH_CHILD_COUNT, MptCompactPathKind, MptNode, MptNodeDecodeError,
     MptNodeDecodeErrorCategory, MptNodeField, MptNodeReference, decode_mpt_node,
-    decode_mpt_proof_nodes,
+    decode_mpt_node_in_session, decode_mpt_proof_nodes,
 };
 
 const TEST_LIMITS: DecodeLimits = DecodeLimits {
@@ -19,6 +19,23 @@ const TEST_LIMITS: DecodeLimits = DecodeLimits {
     max_proof_nodes: 4,
     max_total_items: 256,
 };
+
+#[test]
+fn shared_session_accounts_proof_parse_and_semantic_pass() -> Result<(), &'static str> {
+    let items: Vec<Vec<u8>> = core::iter::repeat_with(empty).take(17).collect();
+    let node = list(&items)?;
+    let policy = DecodeSessionPolicy::reviewed_policy(TEST_LIMITS, 4096, 1024, 8, 4096, 16_384)
+        .map_err(|_| "session policy must be valid")?;
+    let mut session = DecodeSession::new(policy).map_err(|_| "session must initialize")?;
+
+    decode_mpt_node_in_session(&node, &mut session)
+        .map_err(|_| "MPT node must decode in one session")?;
+    assert_eq!(session.proof_nodes(), 1);
+    assert!(session.encoded_bytes() >= node.len() * 2);
+    assert!(session.items() >= 36);
+    assert_eq!(session.allocation_capacity(), 0);
+    Ok(())
+}
 
 #[test]
 fn decodes_branch_node_with_empty_children() -> Result<(), &'static str> {

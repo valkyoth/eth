@@ -45,7 +45,8 @@ pub use mpt::{
     MPT_HASH_REFERENCE_BYTES, MPT_INLINE_REFERENCE_DEPTH_LIMIT, MPT_MAX_INLINE_REFERENCE_BYTES,
     MptBranchChildren, MptBranchNode, MptCompactPath, MptCompactPathKind, MptExtensionNode,
     MptInlineNode, MptLeafNode, MptNode, MptNodeDecodeError, MptNodeDecodeErrorCategory,
-    MptNodeField, MptNodeReference, MptProofNodes, decode_mpt_node, decode_mpt_proof_nodes,
+    MptNodeField, MptNodeReference, MptProofNodes, decode_mpt_node, decode_mpt_node_in_session,
+    decode_mpt_proof_nodes, decode_mpt_proof_nodes_in_session,
 };
 pub use mpt_proof::{
     MAX_PROOF_WALK_DEPTH, MptProofRoot, MptProofVerificationError,

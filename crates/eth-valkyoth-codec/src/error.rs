@@ -26,6 +26,18 @@ pub enum DecodeError {
     ProofTooLarge,
     /// A decoder visited more items than the active cumulative item budget.
     ItemCountExceeded,
+    /// A decode session scanned more encoded bytes than its work policy permits.
+    EncodedBytesExceeded,
+    /// A decode session visited more RLP headers than its work policy permits.
+    RlpHeaderCountExceeded,
+    /// A decode session requested more hashes than its work policy permits.
+    HashCountExceeded,
+    /// A decode session hashed more bytes than its work policy permits.
+    HashBytesExceeded,
+    /// A decode session exceeded its aggregate work budget.
+    WorkExceeded,
+    /// Decode-session limits have inconsistent cross-limit relationships.
+    InvalidSessionPolicy,
     /// A deployment used an unchanged starter budget policy.
     UnreviewedDeploymentPolicy,
     /// Length or offset arithmetic overflowed.
@@ -50,6 +62,12 @@ impl DecodeError {
             Self::AllocationExceeded => "ETH_CODEC_ALLOCATION_EXCEEDED",
             Self::ProofTooLarge => "ETH_CODEC_PROOF_TOO_LARGE",
             Self::ItemCountExceeded => "ETH_CODEC_ITEM_COUNT_EXCEEDED",
+            Self::EncodedBytesExceeded => "ETH_CODEC_ENCODED_BYTES_EXCEEDED",
+            Self::RlpHeaderCountExceeded => "ETH_CODEC_RLP_HEADER_COUNT_EXCEEDED",
+            Self::HashCountExceeded => "ETH_CODEC_HASH_COUNT_EXCEEDED",
+            Self::HashBytesExceeded => "ETH_CODEC_HASH_BYTES_EXCEEDED",
+            Self::WorkExceeded => "ETH_CODEC_WORK_EXCEEDED",
+            Self::InvalidSessionPolicy => "ETH_CODEC_INVALID_SESSION_POLICY",
             Self::UnreviewedDeploymentPolicy => "ETH_CODEC_UNREVIEWED_DEPLOYMENT_POLICY",
             Self::LengthOverflow => "ETH_CODEC_LENGTH_OVERFLOW",
             Self::OffsetOutOfBounds => "ETH_CODEC_OFFSET_OUT_OF_BOUNDS",
@@ -71,6 +89,12 @@ impl DecodeError {
             Self::AllocationExceeded => "decoder exceeded the active allocation limit",
             Self::ProofTooLarge => "proof exceeds the active proof-node limit",
             Self::ItemCountExceeded => "decoder exceeded the active cumulative item limit",
+            Self::EncodedBytesExceeded => "decoder exceeded the encoded-byte work limit",
+            Self::RlpHeaderCountExceeded => "decoder exceeded the RLP-header work limit",
+            Self::HashCountExceeded => "decoder exceeded the hash-count work limit",
+            Self::HashBytesExceeded => "decoder exceeded the hashed-byte work limit",
+            Self::WorkExceeded => "decoder exceeded the aggregate work limit",
+            Self::InvalidSessionPolicy => "decode-session policy relationships are invalid",
             Self::UnreviewedDeploymentPolicy => {
                 "deployment decode policy must be reviewed and tightened"
             }
@@ -89,6 +113,12 @@ impl DecodeError {
             | Self::AllocationExceeded
             | Self::ProofTooLarge
             | Self::ItemCountExceeded
+            | Self::EncodedBytesExceeded
+            | Self::RlpHeaderCountExceeded
+            | Self::HashCountExceeded
+            | Self::HashBytesExceeded
+            | Self::WorkExceeded
+            | Self::InvalidSessionPolicy
             | Self::UnreviewedDeploymentPolicy => DecodeErrorCategory::ResourceExhaustion,
             Self::TrailingBytes
             | Self::DecoderOverread
@@ -111,6 +141,12 @@ impl DecodeError {
             Self::AllocationExceeded => Some(ResourceError::AllocationBytes),
             Self::ProofTooLarge => Some(ResourceError::ProofNodes),
             Self::ItemCountExceeded => Some(ResourceError::TotalItems),
+            Self::EncodedBytesExceeded => Some(ResourceError::EncodedBytes),
+            Self::RlpHeaderCountExceeded => Some(ResourceError::RlpHeaders),
+            Self::HashCountExceeded => Some(ResourceError::Hashes),
+            Self::HashBytesExceeded => Some(ResourceError::HashBytes),
+            Self::WorkExceeded => Some(ResourceError::TotalWork),
+            Self::InvalidSessionPolicy => Some(ResourceError::SessionPolicy),
             Self::UnreviewedDeploymentPolicy => Some(ResourceError::DeploymentPolicy),
             Self::TrailingBytes
             | Self::DecoderOverread
@@ -158,6 +194,18 @@ pub enum ResourceError {
     ProofNodes,
     /// Cumulative decoded item limit was exceeded.
     TotalItems,
+    /// Cumulative encoded-byte scan limit was exceeded.
+    EncodedBytes,
+    /// Cumulative RLP-header visit limit was exceeded.
+    RlpHeaders,
+    /// Cumulative hash-count limit was exceeded.
+    Hashes,
+    /// Cumulative hashed-byte limit was exceeded.
+    HashBytes,
+    /// Aggregate decode-work limit was exceeded.
+    TotalWork,
+    /// Decode-session policy relationships were invalid.
+    SessionPolicy,
     /// Deployment policy was not reviewed.
     DeploymentPolicy,
 }
@@ -173,6 +221,12 @@ impl ResourceError {
             Self::AllocationBytes => "ETH_RESOURCE_ALLOCATION_BYTES",
             Self::ProofNodes => "ETH_RESOURCE_PROOF_NODES",
             Self::TotalItems => "ETH_RESOURCE_TOTAL_ITEMS",
+            Self::EncodedBytes => "ETH_RESOURCE_ENCODED_BYTES",
+            Self::RlpHeaders => "ETH_RESOURCE_RLP_HEADERS",
+            Self::Hashes => "ETH_RESOURCE_HASHES",
+            Self::HashBytes => "ETH_RESOURCE_HASH_BYTES",
+            Self::TotalWork => "ETH_RESOURCE_TOTAL_WORK",
+            Self::SessionPolicy => "ETH_RESOURCE_SESSION_POLICY",
             Self::DeploymentPolicy => "ETH_RESOURCE_DEPLOYMENT_POLICY",
         }
     }
@@ -187,6 +241,12 @@ impl ResourceError {
             Self::AllocationBytes => "allocation byte budget exceeded",
             Self::ProofNodes => "proof-node budget exceeded",
             Self::TotalItems => "total item budget exceeded",
+            Self::EncodedBytes => "encoded-byte scan budget exceeded",
+            Self::RlpHeaders => "RLP-header visit budget exceeded",
+            Self::Hashes => "hash-count budget exceeded",
+            Self::HashBytes => "hashed-byte budget exceeded",
+            Self::TotalWork => "aggregate decode-work budget exceeded",
+            Self::SessionPolicy => "decode-session policy is inconsistent",
             Self::DeploymentPolicy => "deployment policy review required",
         }
     }

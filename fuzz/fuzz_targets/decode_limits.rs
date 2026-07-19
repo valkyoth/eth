@@ -2,7 +2,7 @@
 
 use core::mem::size_of;
 
-use eth_valkyoth_codec::DecodeLimits;
+use eth_valkyoth_codec::{DecodeLimits, DecodeSession, DecodeSessionPolicy};
 use libfuzzer_sys::fuzz_target;
 
 fuzz_target!(|data: &[u8]| {
@@ -23,6 +23,21 @@ fuzz_target!(|data: &[u8]| {
 
 fn drive_limits(data: &[u8], limits: DecodeLimits) {
     let mut accumulator = limits.accumulator();
+    let policy = match DecodeSessionPolicy::reviewed_policy(
+        limits,
+        usize::MAX,
+        usize::MAX,
+        usize::MAX,
+        usize::MAX,
+        usize::MAX,
+    ) {
+        Ok(policy) => policy,
+        Err(_) => return,
+    };
+    let mut session = match DecodeSession::new(policy) {
+        Ok(session) => session,
+        Err(_) => return,
+    };
 
     let _ = limits.check_input_len(data.len());
     let _ = accumulator.check_input_len(data.len());
@@ -40,6 +55,23 @@ fn drive_limits(data: &[u8], limits: DecodeLimits) {
         let _ = accumulator.check_allocation(value);
         let _ = accumulator.account_proof_nodes(value);
         let _ = accumulator.account_items(value);
+        let _ = session.account_encoded_bytes(value);
+        let _ = session.account_rlp_headers(value);
+        let _ = session.account_items(value);
+        let _ = session.check_nesting_depth(value);
+        let _ = session.account_allocation_capacity(value);
+        let _ = session.account_proof_nodes(value);
+        let _ = session.account_hashes(value, value);
+        let _ = session.account_rlp_reparse(value, value, value);
+
+        assert!(session.encoded_bytes() <= policy.max_encoded_bytes());
+        assert!(session.rlp_headers() <= policy.max_rlp_headers());
+        assert!(session.items() <= limits.max_total_items);
+        assert!(session.allocation_capacity() <= limits.max_total_allocation);
+        assert!(session.proof_nodes() <= limits.max_proof_nodes);
+        assert!(session.hashes() <= policy.max_hashes());
+        assert!(session.hash_bytes() <= policy.max_hash_bytes());
+        assert!(session.total_work() <= policy.max_total_work());
     }
 }
 

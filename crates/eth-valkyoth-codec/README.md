@@ -31,7 +31,7 @@ Most users should depend on the facade crate instead:
 
 ```toml
 [dependencies]
-eth = "0.37"
+eth = "0.52.3"
 ```
 
 Crates.io: <https://crates.io/crates/eth>
@@ -39,6 +39,11 @@ Crates.io: <https://crates.io/crates/eth>
 This package is published separately so the `eth` workspace can keep small,
 auditable crate boundaries. Treat it as a lower-level building block unless the
 `eth` documentation explicitly says otherwise.
+
+The `0.20.0` release adds the non-copyable `DecodeSession` and reviewed
+`DecodeSessionPolicy`. Session-aware RLP APIs conserve one cumulative ledger
+across structural parsing, nested iteration, semantic reparses, proof nodes,
+hash work, and future pre-allocation capacity charges.
 
 The RLP parser surface is covered by the workspace fuzz harness. See the
 project fuzzing guide for target names, committed seed corpus handling, and
