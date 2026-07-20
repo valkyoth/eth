@@ -287,11 +287,11 @@ fn iter_fields(fields: &Fields) -> Vec<&syn::Field> {
 fn type_uses_ident(ty: &Type, ident: &Ident) -> bool {
     match ty {
         Type::Array(ty) => type_uses_ident(&ty.elem, ident),
-        Type::BareFn(ty) => {
+        Type::FnPtr(ty) => {
             ty.inputs
                 .iter()
                 .any(|input| type_uses_ident(&input.ty, ident))
-                || matches!(&ty.output, syn::ReturnType::Type(_, ty) if type_uses_ident(ty, ident))
+                || matches!(&ty.output, syn::ReturnType::Type(_, ty) if type_uses_ident(ty.as_ref(), ident))
         }
         Type::Group(ty) => type_uses_ident(&ty.elem, ident),
         Type::Paren(ty) => type_uses_ident(&ty.elem, ident),
@@ -314,8 +314,11 @@ fn path_uses_ident(path: &Path, ident: &Ident) -> bool {
                     matches!(arg, GenericArgument::Type(ty) if type_uses_ident(ty, ident))
                 }),
                 PathArguments::Parenthesized(arguments) => {
-                    arguments.inputs.iter().any(|ty| type_uses_ident(ty, ident))
-                        || matches!(&arguments.output, syn::ReturnType::Type(_, ty) if type_uses_ident(ty, ident))
+                    arguments
+                        .inputs
+                        .iter()
+                        .any(|argument| type_uses_ident(&argument.ty, ident))
+                        || matches!(&arguments.output, syn::ReturnType::Type(_, ty) if type_uses_ident(ty.as_ref(), ident))
                 }
                 PathArguments::None => false,
             }
@@ -416,5 +419,31 @@ mod tests {
 
         assert!(rendered.contains("T :"));
         assert!(!rendered.contains("Label :"));
+    }
+
+    #[test]
+    fn function_pointer_generics_receive_sanitize_bounds() {
+        let input: DeriveInput = parse_quote! {
+            struct Callback<T> {
+                secret: fn(T) -> T,
+            }
+        };
+
+        let result = expand_secure_sanitize(&input);
+        assert!(result.is_ok());
+        let rendered =
+            result.map_or_else(|_| std::string::String::new(), |output| output.to_string());
+
+        assert!(rendered.contains("T :"));
+    }
+
+    #[test]
+    fn parenthesized_path_generics_are_detected() {
+        let input_bound: syn::TraitBound = parse_quote!(core::ops::Fn(T));
+        let output_bound: syn::TraitBound = parse_quote!(core::ops::Fn() -> T);
+        let ident = Ident::new("T", proc_macro2::Span::call_site());
+
+        assert!(path_uses_ident(&input_bound.path, &ident));
+        assert!(path_uses_ident(&output_bound.path, &ident));
     }
 }
