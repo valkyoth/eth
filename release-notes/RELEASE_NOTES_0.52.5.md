@@ -34,7 +34,7 @@ in the proof kernel, and bounded by the shared `DecodeSession`.
   `libc 0.2.189`, and fuzz-only `cc 1.4.0`.
 - The optional bridge now exposes `sanitization::wipe` and treats selected
   hardening features separately from achieved runtime protection.
-- Deprecated `sanitize_bytes`, `best_effort::sanitize_bytes_best_effort`, and
+- Legacy `sanitize_bytes`, `best_effort::sanitize_bytes_best_effort`, and
   `HARDENED_MODE` compatibility names preserve the `eth 0.52.4` facade API
   throughout this patch release.
 - Generated sanitization derives now implement `DropSafeSanitize`; generated

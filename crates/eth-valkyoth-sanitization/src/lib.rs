@@ -83,23 +83,20 @@ pub const HARDENING_FEATURES_ENABLED: bool = false;
 ///
 /// This compatibility alias does not prove that runtime memory protection
 /// succeeded. Inspect [`ProtectionReport`] for protected containers.
-#[deprecated(
-    since = "0.8.0",
-    note = "use HARDENING_FEATURES_ENABLED and inspect ProtectionReport at runtime"
-)]
 pub const HARDENED_MODE: bool = HARDENING_FEATURES_ENABLED;
 
 /// Sanitizes an ordinary byte slice in place.
-#[deprecated(since = "0.8.0", note = "use wipe::bytes")]
+///
+/// New code should use [`wipe::bytes`].
 pub fn sanitize_bytes(bytes: &mut [u8]) {
     wipe::bytes(bytes);
 }
 
-/// Deprecated compatibility surface for the pre-0.8 best-effort API.
-#[deprecated(since = "0.8.0", note = "use wipe")]
+/// Legacy compatibility surface for the pre-0.8 best-effort API.
 pub mod best_effort {
     /// Sanitizes an ordinary byte slice in place.
-    #[deprecated(since = "0.8.0", note = "use wipe::bytes")]
+    ///
+    /// New code should use [`crate::wipe::bytes`].
     pub fn sanitize_bytes_best_effort(bytes: &mut [u8]) {
         crate::wipe::bytes(bytes);
     }
