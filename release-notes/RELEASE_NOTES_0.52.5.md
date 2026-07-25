@@ -1,6 +1,6 @@
 # Release Notes - eth v0.52.5
 
-Status: implementation complete; pentest required before release.
+Status: release candidate; pentest passed.
 
 ## Summary
 
@@ -58,7 +58,7 @@ in the proof kernel, and bounded by the shared `DecodeSession`.
 - Planning discovers and decodes state values in an isolated future session
   before proof-node hashing. Combined proof and decode charges must fit before
   traversal, and successful decode work commits only after cryptographic
-  verification. Malformed decode work remains charged.
+  traversal returns. Malformed decode work remains charged.
 - Cryptographic traversal must reach the same bytes or absence outcome.
 - The account proof and all storage proofs can share one non-copyable work
   session.
@@ -100,6 +100,7 @@ retain their lower-level independently rooted contract. New untrusted
 
 ## Pentest
 
-Release is blocked until an independent pentest reviews the exact
-implementation commit, all findings are remediated, and a clean retest is
+Independent review and iterative retesting found and closed state-root trust,
+decode-accounting order, and patch-release sanitization compatibility issues.
+No Critical, High, Medium, or Low finding remains. The permanent report is
 recorded at `security/pentest/v0.52.5.md`.
