@@ -11,6 +11,7 @@ use crate::mpt_proof::{
 
 mod account;
 mod error;
+mod planning;
 mod types;
 
 use account::decode_account;
@@ -18,6 +19,7 @@ pub use error::{
     AccountDecodeError, AccountField, StateProofVerificationError,
     StateProofVerificationErrorCategory,
 };
+use planning::{check_state_capacity, commit_state_decode, decode_state_value};
 pub use types::{EthereumAccount, VerifiedAccount, VerifiedStorageValue};
 
 /// Canonical Ethereum root hash for an empty Merkle Patricia trie.
@@ -27,6 +29,14 @@ pub const EMPTY_TRIE_ROOT_BYTES: [u8; 32] = [
 ];
 
 /// Ethereum state trie root hash domain.
+///
+/// # Trust requirement
+///
+/// This root must come from a source independent of the proof being verified,
+/// such as a separately consensus-verified block header. Never derive it from
+/// the proof nodes or an untrusted RPC response that also supplied the proof;
+/// accepting an attacker-controlled root makes membership verification
+/// meaningless.
 #[derive(Clone, Copy, Debug, Eq, PartialEq)]
 pub struct AccountTrieRoot(B256);
 
@@ -34,7 +44,9 @@ impl AccountTrieRoot {
     /// Canonical root of an empty Ethereum account trie.
     pub const EMPTY: Self = Self(B256::from_bytes(EMPTY_TRIE_ROOT_BYTES));
 
-    /// Creates an account trie root from raw hash bytes.
+    /// Creates an account trie root from independently trusted hash bytes.
+    ///
+    /// Do not construct this value from the proof nodes it will authenticate.
     #[must_use]
     pub const fn from_b256(value: B256) -> Self {
         Self(value)
@@ -54,6 +66,10 @@ impl From<AccountTrieRoot> for MptProofRoot {
 }
 
 /// Ethereum storage trie root hash domain.
+///
+/// Independently rooted compatibility APIs require this value to come from
+/// authenticated account state or another source independent of the storage
+/// proof. Prefer [`VerifiedAccount`] composition for untrusted RPC proofs.
 #[derive(Clone, Copy, Debug, Eq, PartialEq)]
 pub struct StorageTrieRoot(B256);
 
@@ -61,7 +77,7 @@ impl StorageTrieRoot {
     /// Canonical root of an empty Ethereum storage trie.
     pub const EMPTY: Self = Self(B256::from_bytes(EMPTY_TRIE_ROOT_BYTES));
 
-    /// Creates a storage trie root from raw hash bytes.
+    /// Creates a storage trie root from independently authenticated hash bytes.
     #[must_use]
     pub const fn from_b256(value: B256) -> Self {
         Self(value)
@@ -154,6 +170,12 @@ impl VerifiedStorageInclusion {
 /// account value that could drift from the authenticated trie value. A present
 /// value is decoded as `[nonce, balance, storageRoot, codeHash]`. The returned
 /// capability is the only authority accepted by composed storage verification.
+///
+/// # Trust requirement
+///
+/// `root` must come from a source independent of `proof_nodes`, normally the
+/// state root of a separately verified block header. Never derive `root` from
+/// the proof or accept both from the same untrusted RPC response.
 pub fn verify_account_proof<H>(
     root: AccountTrieRoot,
     address: Address,
@@ -169,6 +191,9 @@ where
 }
 
 /// Verifies a canonical account proof through one shared work session.
+///
+/// `root` has the same independent trust requirement as
+/// [`verify_account_proof`].
 pub fn verify_account_proof_in_session<H>(
     root: AccountTrieRoot,
     address: Address,
@@ -194,20 +219,20 @@ where
         .map_err(proof_resource_error)?;
     let key = hash_one(new_hasher(), &address_bytes).to_bytes();
     let planned = plan_preflighted_key_value(&key, proof_nodes, session)?;
-    let account = match planned.value {
-        MptProofValue::Present(encoded) => {
-            Some(decode_account(encoded, session).map_err(StateProofVerificationError::Account)?)
-        }
-        MptProofValue::Absent => None,
-    };
-    session
-        .check_remaining_capacity(planned.charges)
-        .map_err(proof_resource_error)?;
-    let verified =
-        verify_preflighted_key_value(root.into(), &key, proof_nodes, session, new_hasher)?;
+    let decoded = decode_state_value(session, |future| match planned.value {
+        MptProofValue::Present(encoded) => decode_account(encoded, future)
+            .map(Some)
+            .map_err(StateProofVerificationError::Account),
+        MptProofValue::Absent => Ok(None),
+    })?;
+    check_state_capacity(session, planned.charges, decoded.charges)?;
+    let verification =
+        verify_preflighted_key_value(root.into(), &key, proof_nodes, session, new_hasher);
+    commit_state_decode(session, decoded.charges)?;
+    let verified = verification?;
     require_same_outcome(planned.value, verified)?;
 
-    Ok(match account {
+    Ok(match decoded.value {
         Some(account) => VerifiedAccount::present(address, root, account),
         None => VerifiedAccount::absent(address, root),
     })
@@ -258,9 +283,9 @@ where
         .map_err(proof_resource_error)?;
     let key = hash_one(new_hasher(), &slot_bytes).to_bytes();
     let planned = plan_preflighted_key_value(&key, proof_nodes, session)?;
-    let value = match planned.value {
+    let decoded = decode_state_value(session, |future| match planned.value {
         MptProofValue::Present(encoded) => {
-            let scalar = decode_rlp_scalar_in_session(encoded, session)
+            let scalar = decode_rlp_scalar_in_session(encoded, future)
                 .map_err(StateProofVerificationError::StorageValue)?;
             let bytes = RlpInteger::try_from_scalar(scalar)
                 .and_then(RlpInteger::to_be_bytes32)
@@ -269,22 +294,22 @@ where
             if value == Wei::ZERO {
                 return Err(StateProofVerificationError::ExplicitZeroStorageValue);
             }
-            Some(value)
+            Ok(Some(value))
         }
-        MptProofValue::Absent => None,
-    };
-    session
-        .check_remaining_capacity(planned.charges)
-        .map_err(proof_resource_error)?;
-    let verified =
-        verify_preflighted_key_value(root.into(), &key, proof_nodes, session, new_hasher)?;
+        MptProofValue::Absent => Ok(None),
+    })?;
+    check_state_capacity(session, planned.charges, decoded.charges)?;
+    let verification =
+        verify_preflighted_key_value(root.into(), &key, proof_nodes, session, new_hasher);
+    commit_state_decode(session, decoded.charges)?;
+    let verified = verification?;
     require_same_outcome(planned.value, verified)?;
 
     Ok(VerifiedStorageValue::new(
         slot,
         root,
-        value.unwrap_or(Wei::ZERO),
-        value.is_some(),
+        decoded.value.unwrap_or(Wei::ZERO),
+        decoded.value.is_some(),
     ))
 }
 
@@ -304,6 +329,9 @@ fn require_same_outcome(
 /// The trie key is `keccak256(address)`, matching Ethereum state tries. The
 /// value is compared byte-for-byte with `encoded_account`; this function does
 /// not decode account nonce, balance, storage root, or code hash fields.
+///
+/// `root` must come from a source independent of `proof_nodes`, normally a
+/// separately verified block header.
 pub fn verify_account_inclusion<H>(
     root: AccountTrieRoot,
     address: Address,
@@ -327,6 +355,9 @@ where
 }
 
 /// Verifies account inclusion through one shared decode/work session.
+///
+/// `root` has the same independent trust requirement as
+/// [`verify_account_inclusion`].
 pub fn verify_account_inclusion_in_session<H>(
     root: AccountTrieRoot,
     address: Address,
@@ -395,6 +426,9 @@ where
 }
 
 /// Verifies storage inclusion through one shared decode/work session.
+///
+/// `root` has the same authenticated-source requirement as
+/// [`verify_storage_inclusion`].
 pub fn verify_storage_inclusion_in_session<H>(
     root: StorageTrieRoot,
     slot: StorageSlotKey,

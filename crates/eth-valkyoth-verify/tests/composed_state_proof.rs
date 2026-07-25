@@ -35,6 +35,9 @@ fn verifies_execution_apis_hive_account_and_storage_proof() -> Result<(), String
             .ok_or_else(|| String::from("account proof"))?,
     )?;
     let account_refs = node_refs(&account_nodes);
+    // Test-only fixture setup: this fixture omits its independently trusted
+    // header root. Production callers must never derive the root from the
+    // untrusted proof nodes that the root is supposed to authenticate.
     let state_root = AccountTrieRoot::from_b256(hash_one(
         TinyKeccak256::default(),
         account_refs

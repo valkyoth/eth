@@ -176,6 +176,53 @@ fn rejects_malformed_account_before_proof_node_hashing() -> Result<(), &'static 
 }
 
 #[test]
+fn stages_state_decode_charges_until_commit() -> Result<(), &'static str> {
+    let encoded = canonical_account(StorageTrieRoot::EMPTY);
+    let mut session = test_session()?;
+    let before = session.charges();
+    let decoded = planning::decode_state_value(&mut session, |future| {
+        decode_account(&encoded, future).map_err(StateProofVerificationError::Account)
+    })
+    .map_err(|_| "planned account decode")?;
+
+    assert_eq!(session.charges(), before);
+    assert_ne!(decoded.charges, before);
+
+    let empty_proof_charges = DecodeSession::new(session.policy())
+        .map_err(|_| "empty proof session")?
+        .charges();
+    planning::check_state_capacity(&session, empty_proof_charges, decoded.charges)
+        .map_err(|_| "combined capacity")?;
+    planning::commit_state_decode(&mut session, decoded.charges)
+        .map_err(|_| "commit state decode")?;
+    assert_eq!(session.charges(), decoded.charges);
+    Ok(())
+}
+
+#[test]
+fn malformed_state_decode_commits_its_bounded_work() -> Result<(), &'static str> {
+    let malformed = list(&[
+        scalar(&[]),
+        scalar(&[]),
+        scalar(&StorageTrieRoot::EMPTY.to_b256().to_bytes()),
+    ]);
+    let mut session = test_session()?;
+    let before = session.charges();
+    let result = planning::decode_state_value(&mut session, |future| {
+        decode_account(&malformed, future).map_err(StateProofVerificationError::Account)
+    });
+
+    assert_eq!(
+        result.map(|_| ()),
+        Err(StateProofVerificationError::Account(
+            AccountDecodeError::FieldCount { found: 3 }
+        ))
+    );
+    assert_ne!(session.charges(), before);
+    Ok(())
+}
+
+#[test]
 fn rejects_noncanonical_account_integer_and_hash_width() {
     let storage_root = StorageTrieRoot::EMPTY;
     let bad_nonce = list(&[

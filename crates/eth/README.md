@@ -1056,6 +1056,10 @@ Composed account and storage proof APIs derive keys as `keccak256(address)` and
 an independent caller-supplied storage root. Account and storage absence are
 successful verified outcomes, and absent storage has canonical value zero:
 
+The `AccountTrieRoot` must come from an independent trust path, normally a
+separately verified block header. Never derive it from the supplied proof nodes
+or accept both root and proof from the same untrusted RPC response.
+
 ```rust
 use eth::codec::DecodeLimits;
 use eth::hash::TinyKeccak256;

@@ -47,6 +47,10 @@ EIP-1186 proof verification. `verify_account_proof` returns a non-forgeable
 capability. Storage absence maps to canonical zero, while an explicitly stored
 zero is rejected. The release includes the pinned Execution APIs Hive
 account-plus-storage fixture and preserves operation-wide decode sessions.
+The `AccountTrieRoot` must come from an independent trust path, normally a
+separately verified block header. Deriving it from the supplied proof nodes, or
+accepting both root and proof from the same untrusted RPC response, does not
+authenticate state.
 
 The previous `0.25.0` release preflights every supplied MPT proof node before hashing,
 charges every actual hash through one shared session, and adds public

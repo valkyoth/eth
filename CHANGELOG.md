@@ -18,6 +18,9 @@ All notable changes to `eth` are documented here.
   explicitly stored zero values.
 - Added the pinned Execution APIs Hive `eth_getProof` fixture, substitution and
   malformed-state tests, and structure-aware composed-proof fuzzing.
+- Documented that state roots must come from an independent trust path and
+  changed composed state parsing to stage decode charges until proof and state
+  work pass one combined capacity check.
 - Added a non-copyable shared decode session with operation-wide byte, header,
   item, nesting, allocation-capacity, proof, hash, and total-work accounting.
 - Added session-aware RLP, transaction-envelope, legacy/EIP-2930/EIP-1559/

@@ -42,6 +42,9 @@ in the proof kernel, and bounded by the shared `DecodeSession`.
 
 - `VerifiedAccount` fields and constructors are private and the capability is
   neither `Clone` nor `Copy`.
+- `AccountTrieRoot` must come from an independent trust path, normally a
+  separately verified block header; proof-derived or co-supplied untrusted
+  roots do not authenticate state.
 - Storage verification obtains its root only from authenticated account state.
 - A valid account proof cannot be combined with storage proven under a
   different root.
@@ -50,8 +53,11 @@ in the proof kernel, and bounded by the shared `DecodeSession`.
 - Account absence authorizes only the canonical empty storage root.
 - Storage path absence is successful zero; an explicitly present zero value is
   rejected as noncanonical Ethereum state.
-- Planning discovers and decodes state values before proof-node hashing.
-  Cryptographic traversal must reach the same bytes or absence outcome.
+- Planning discovers and decodes state values in an isolated future session
+  before proof-node hashing. Combined proof and decode charges must fit before
+  traversal, and successful decode work commits only after cryptographic
+  verification. Malformed decode work remains charged.
+- Cryptographic traversal must reach the same bytes or absence outcome.
 - The account proof and all storage proofs can share one non-copyable work
   session.
 
@@ -72,6 +78,8 @@ retain their lower-level independently rooted contract. New untrusted
 - Malformed field count, integer canonicality, and hash-width rejection.
 - Hasher-call oracle proving malformed account state is rejected before the
   first proof-node hash.
+- Charge-oracle tests proving successful state parsing is noncommitting until
+  admission and malformed parsing still consumes its bounded work.
 - Structure-aware fuzzing of valid composed chains and unrelated storage
   proofs.
 - Strict workspace/fuzz Clippy, all workspace tests, supported-Rust checks,

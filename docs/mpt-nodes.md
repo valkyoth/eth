@@ -57,6 +57,12 @@ decodes exactly four canonical fields:
 be exactly 32 bytes. It returns `VerifiedAccount`, whose private constructors
 prevent callers from inventing storage-root authority.
 
+The `AccountTrieRoot` supplied to account verification must come from a source
+independent of the proof, normally a separately consensus-verified block
+header. Never derive the expected root from the first proof node or accept the
+root and proof from the same untrusted RPC response. An attacker who controls
+both can construct a self-consistent proof for forged state.
+
 `verify_account_storage` accepts `&VerifiedAccount`, not a caller-supplied
 `StorageTrieRoot`. Present accounts authorize only the root embedded in their
 authenticated tuple. Proven account absence authorizes the canonical empty
@@ -70,6 +76,11 @@ validates account or storage bytes before proof-node hashing, then verified
 traversal must reach the same outcome. The public error exposes stable codes
 and categories for malformed input, wrong roots, noncanonical state, and
 internal invariant failures.
+
+State-value parsing runs against an isolated future session. Successful
+planning does not mutate the caller's ledger until combined proof and
+state-decode charges have passed a noncommitting capacity check. Malformed
+state still commits the bounded parsing work it consumed.
 
 Before the first proof-node hash, the verifier checks node count, each encoded
 length, cumulative hash bytes, complete hash capacity, compact-path nibble
