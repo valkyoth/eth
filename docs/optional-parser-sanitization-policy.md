@@ -82,10 +82,13 @@ The `0.8` bridge intentionally follows the breaking `sanitization 2.0`
 contracts:
 
 - direct ordinary-buffer erasure uses `wipe::bytes` or `wipe::array`;
-- the removed `sanitize_bytes_best_effort` name is not emulated;
+- deprecated `sanitize_bytes` and `sanitize_bytes_best_effort` wrappers remain
+  only for `eth 0.52.4` facade source compatibility and delegate to
+  `wipe::bytes`;
 - generated field-wise sanitizers implement `DropSafeSanitize`;
 - generated destructor paths require `DropSafeSanitize + Unpin`;
-- `HARDENING_FEATURES_ENABLED` reports feature selection only.
+- `HARDENING_FEATURES_ENABLED` reports feature selection only, while deprecated
+  `HARDENED_MODE` remains an equivalent compatibility alias.
 
 ## Executable Gate
 

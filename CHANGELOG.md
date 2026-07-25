@@ -9,6 +9,8 @@ All notable changes to `eth` are documented here.
 - Migrated the optional sanitization bridge to the canonical `wipe` API,
   runtime `ProtectionReport` semantics, and the
   `DropSafeSanitize + Unpin` destructor contract.
+- Preserved the `eth 0.52.4` sanitization facade names as deprecated wrappers
+  and added a facade-level compatibility fixture for patch-release SemVer.
 - Added an MSRV-aware direct dependency freshness check to the release gate so
   semver-major updates cannot be hidden by compatibility-only tooling.
 - Added canonical Ethereum account decoding and non-forgeable

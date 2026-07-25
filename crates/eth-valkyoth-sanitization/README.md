@@ -108,3 +108,10 @@ let mut key = [0x42_u8; 32];
 wipe::array(&mut key);
 assert_eq!(key, [0_u8; 32]);
 ```
+
+The deprecated `sanitize_bytes`,
+`best_effort::sanitize_bytes_best_effort`, and `HARDENED_MODE` names remain
+available so the `eth 0.52.5` patch release preserves the public facade exposed
+by `eth 0.52.4`. New code should use `wipe` and
+`HARDENING_FEATURES_ENABLED`; protected containers must still inspect their
+runtime `ProtectionReport`.

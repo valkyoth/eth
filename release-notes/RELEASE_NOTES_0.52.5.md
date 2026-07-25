@@ -32,9 +32,11 @@ in the proof kernel, and bounded by the shared `DecodeSession`.
 - `syn` advances from `3.0.2` to `3.0.3`.
 - Compatible transitive lockfile updates include `glob 0.3.4`,
   `libc 0.2.189`, and fuzz-only `cc 1.4.0`.
-- The optional bridge now exposes `sanitization::wipe`, removes the deleted
-  best-effort API, and treats selected hardening features separately from
-  achieved runtime protection.
+- The optional bridge now exposes `sanitization::wipe` and treats selected
+  hardening features separately from achieved runtime protection.
+- Deprecated `sanitize_bytes`, `best_effort::sanitize_bytes_best_effort`, and
+  `HARDENED_MODE` compatibility names preserve the `eth 0.52.4` facade API
+  throughout this patch release.
 - Generated sanitization derives now implement `DropSafeSanitize`; generated
   drop code requires `DropSafeSanitize + Unpin`.
 
@@ -80,6 +82,8 @@ retain their lower-level independently rooted contract. New untrusted
   first proof-node hash.
 - Charge-oracle tests proving successful state parsing is noncommitting until
   admission and malformed parsing still consumes its bounded work.
+- A facade-level compatibility fixture compiling the complete `eth 0.52.4`
+  sanitization import surface against this patch release.
 - Structure-aware fuzzing of valid composed chains and unrelated storage
   proofs.
 - Strict workspace/fuzz Clippy, all workspace tests, supported-Rust checks,
