@@ -4546,14 +4546,25 @@ Goal: deliver the General Integer Primitives release with this required outcome:
 Deliverables:
 
 - First-party `U256` and `I256`, checked arithmetic, endian conversion, parsing, formatting, and explicit overflow policy.
+- Deliberate minor-release removal of the `0.52.x` sanitization compatibility
+  names `sanitize_bytes`, `best_effort::sanitize_bytes_best_effort`, and
+  `HARDENED_MODE`; retain `wipe` and `HARDENING_FEATURES_ENABLED` as the
+  canonical surface, bump the affected support crate for the breaking API
+  change, and publish migration guidance.
 
 Verification:
 
 - Arithmetic KATs, boundary/property tests, differential checks, fuzzing.
+- Compile fixtures prove the legacy sanitization names are unavailable while
+  canonical wipe and runtime-protection-report workflows remain usable through
+  both `eth-valkyoth-sanitization` and the `eth` facade.
 
 Exit criteria:
 
 - Ethereum-sized integer work no longer depends on transaction-specific `Wei` helpers or external core types.
+- The temporary `0.52.x` sanitization compatibility surface is removed only at
+  this deliberate facade minor boundary, with correct support-crate versioning
+  and documented replacements.
 - `v0.53.0 implementation stop reached. Run pentest for this exact
   commit.`
 
