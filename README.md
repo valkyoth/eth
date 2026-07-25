@@ -33,7 +33,7 @@ receipts, withdrawals, Merkle Patricia Trie proofs, fork-aware validation, and
 bounded first-party EVM components.
 
 The complete stack is built in small independently reviewed milestones rather
-than claimed ahead of its evidence. Version `0.52.4` is still a library, not a
+than claimed ahead of its evidence. Version `0.52.5` is still a library, not a
 production node, wallet, RPC client, or key store.
 Networking, private-key signing, local key storage, and third-party execution
 backends are not enabled by default.
@@ -42,14 +42,14 @@ backends are not enabled by default.
 
 ```toml
 [dependencies]
-eth = "0.52.4"
+eth = "0.52.5"
 ```
 
 For optional sanitization support:
 
 ```toml
 [dependencies]
-eth = { version = "0.52.4", features = ["sanitization"] }
+eth = { version = "0.52.5", features = ["sanitization"] }
 ```
 
 ## Quick Start
@@ -85,7 +85,7 @@ Legend: 🟢 available for the stated scope, 🟡 implemented but incomplete,
 | EIP-7702 set-code transactions | 🟡 Partial | Decode/encode, transaction and authorization signing, recovery, and context validity gate |
 | EIP-712 typed data | 🟢 Available | Bounded typed encoder and hashing path; optional JSON parser |
 | Headers, receipts, and withdrawals | 🟡 Partial | Canonical syntactic decode and selected hashing; full block/state validity is incomplete |
-| MPT proof verification | 🟢 Available | Strict canonical proof preflight and session-metered transaction, receipt, account, and storage inclusion against caller-trusted roots |
+| MPT proof verification | 🟢 Available | Strict preflight, transaction/receipt inclusion, canonical account decoding, account-bound storage authority, and absence/zero semantics |
 | Native EVM execution | 🟡 Partial | Bounded basic opcode/state-read interpreter, consensus-correct truncated PUSH handling, and call/create planning; full state transition is incomplete |
 | Native precompiles through BLAKE2F | 🟢 Available | Identity, SHA-256, RIPEMD-160, ModExp, BN254, and BLAKE2F; ECRECOVER uses explicit caller backends |
 | BLS12-381 and KZG | 🟡 Partial | BLS canonical wire/frame parsing and KZG/BLS gas planning; cryptographic execution remains fail closed |
@@ -128,7 +128,7 @@ Optional reviewed software Keccak backend:
 
 ```toml
 [dependencies]
-eth = { version = "0.52.4", features = ["keccak-tiny"] }
+eth = { version = "0.52.5", features = ["keccak-tiny"] }
 ```
 
 ```rust
@@ -142,14 +142,14 @@ Optional reviewed secp256k1 recovery adapter:
 
 ```toml
 [dependencies]
-eth = { version = "0.52.4", features = ["secp256k1-k256"] }
+eth = { version = "0.52.5", features = ["secp256k1-k256"] }
 ```
 
 Optional bounded EVM gas-estimation boundary:
 
 ```toml
 [dependencies]
-eth = { version = "0.52.4", features = ["evm"] }
+eth = { version = "0.52.5", features = ["evm"] }
 ```
 
 ```rust
@@ -254,7 +254,7 @@ Optional native EVM core domains:
 
 ```toml
 [dependencies]
-eth = { version = "0.52.4", features = ["evm-core"] }
+eth = { version = "0.52.5", features = ["evm-core"] }
 ```
 
 State access uses explicit host-state traits and caller-provided fixed-capacity
@@ -1049,10 +1049,55 @@ let result = verify_transaction_inclusion(
 assert!(result.is_err());
 ```
 
-Account and storage proof APIs derive keys as `keccak256(address)` and
-`keccak256(slot_key)`, then compare the encoded account or storage value
-byte-for-byte. They do not decode account fields, prove that a storage root
-belongs to a specific account, or interpret the storage scalar. See
+Composed account and storage proof APIs derive keys as `keccak256(address)` and
+`keccak256(slot_key)`. `verify_account_proof` decodes the authenticated
+`[nonce, balance, storageRoot, codeHash]` tuple into a non-forgeable
+`VerifiedAccount`; `verify_account_storage` accepts that capability instead of
+an independent caller-supplied storage root. Account and storage absence are
+successful verified outcomes, and absent storage has canonical value zero:
+
+```rust
+use eth::codec::DecodeLimits;
+use eth::hash::TinyKeccak256;
+use eth::primitives::{Address, B256, Wei};
+use eth::verify::{
+    AccountTrieRoot, StorageSlotKey, verify_account_proof, verify_account_storage,
+};
+
+# let limits = DecodeLimits {
+#     max_input_bytes: 512,
+#     max_list_items: 64,
+#     max_nesting_depth: 16,
+#     max_total_allocation: 1024,
+#     max_proof_nodes: 8,
+#     max_total_items: 128,
+# };
+let address = Address::from_bytes([0_u8; 20]);
+let account = verify_account_proof(
+    AccountTrieRoot::EMPTY,
+    address,
+    &[],
+    limits,
+    TinyKeccak256::default,
+);
+if let Ok(account) = account {
+    let slot = StorageSlotKey::from_b256(B256::from_bytes([0_u8; 32]));
+    let storage = verify_account_storage(
+        &account,
+        slot,
+        &[],
+        limits,
+        TinyKeccak256::default,
+    );
+    assert!(storage.is_ok_and(|value| value.value() == Wei::ZERO));
+} else {
+    assert!(false);
+}
+```
+
+The earlier byte-exact independently rooted inclusion APIs remain available
+for compatibility, but composed untrusted `eth_getProof` workflows should use
+the capability APIs. See
 [MPT Nodes](https://github.com/valkyoth/eth/blob/main/docs/mpt-nodes.md).
 
 ## Transaction Envelopes
@@ -1137,7 +1182,7 @@ friendly, and independently testable.
 | `eth-valkyoth-codec` | yes | Bounded exact-consumption wire codec policy. |
 | `eth-valkyoth-hash` | yes | Keccak-256 trait boundary for caller-provided hash implementations. |
 | `eth-valkyoth-protocol` | yes | Fork-aware validation states and protocol context. |
-| `eth-valkyoth-verify` | yes | Verification boundaries for signatures, proofs, replay domains, and EIP-712 typed-data hashing. |
+| `eth-valkyoth-verify` | yes | Verification boundaries for signatures, composed state proofs, replay domains, and EIP-712 typed-data hashing. |
 | `eth-valkyoth-sanitization` | no | Optional bridge to the `sanitization` crate for secret-bearing Ethereum data. |
 | `eth-valkyoth-derive` | no | Optional sanitization and RLP derive macros. |
 | `eth-valkyoth-evm` | no | Explicit no_std EVM execution boundary; no backend admitted yet. |
@@ -1152,7 +1197,7 @@ friendly, and independently testable.
 The minimum supported Rust version is Rust `1.90.0`. New deployments should use
 the pinned stable Rust `1.97.1` until the toolchain policy is updated.
 
-Compatibility evidence for `0.52.4`:
+Compatibility evidence for `0.52.5`:
 
 | Rust | Local Evidence |
 | --- | --- |
@@ -1163,7 +1208,7 @@ Compatibility evidence for `0.52.4`:
 
 ```bash
 scripts/checks.sh
-scripts/release_0_52_4_gate.sh
+scripts/release_0_52_5_gate.sh
 ```
 
 For dependency-policy checks, install `cargo-deny` and `cargo-audit`, then run:

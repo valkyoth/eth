@@ -2779,7 +2779,8 @@ Exit criteria:
 
 ### v0.52.5 - Composed Account And Storage Proofs
 
-Status: planned.
+Status: implementation complete; awaiting pentest on the exact candidate
+commit.
 
 Goal: make storage-proof authority derive cryptographically from the verified
 account value instead of a caller-supplied unrelated storage root.
@@ -2800,6 +2801,17 @@ Verification:
 - negative tests that substitute account values, storage roots, paths, and
   absence claims;
 - property and fuzz tests for composed proof chains and zero semantics.
+
+Implementation evidence:
+
+- the pinned Execution APIs Hive account-plus-storage fixture is verified end
+  to end under one shared `DecodeSession`;
+- focused negative tests cover root substitution, malformed account fields,
+  account absence, storage absence, explicit zero values, and pre-hash account
+  rejection;
+- the structure-aware MPT fuzz target constructs composed account/storage
+  roots, requires successful verification, and rejects an unrelated storage
+  proof.
 
 Exit criteria:
 

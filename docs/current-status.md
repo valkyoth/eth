@@ -1,7 +1,7 @@
 # Current Status
 
-Release snapshot: `v0.52.4` release candidate; pentest remediation and clean
-retest complete; awaiting green GitHub CI and CodeQL before tagging.
+Release snapshot: `v0.52.5` implementation complete; awaiting pentest on the
+exact implementation commit.
 
 This document summarizes what the workspace can do now. The
 [Specification Matrix](SPEC_MATRIX.md) is the source of truth for exact
@@ -41,7 +41,7 @@ Legend:
 | secp256k1 recovery | 🟢 Available | First-party validation boundary plus optional reviewed `k256` adapter |
 | Transaction signing | 🟢 Available | Signing preimages and hashes for legacy, EIP-2930, EIP-1559, EIP-4844, and EIP-7702 |
 | MPT node decoding | 🟢 Available | Strict locally canonical branch, extension, leaf, compact-path, inline-reference, and proof-list parsing with shared-session accounting |
-| MPT inclusion proofs | 🟢 Available | Full-proof preflight and session-metered transaction, receipt, account, and storage inclusion against caller-trusted roots |
+| MPT inclusion proofs | 🟢 Available | Full-proof preflight, transaction/receipt inclusion, canonical account decoding, non-forgeable account authority, account-bound storage verification, and canonical absence/zero semantics |
 | Secret sanitization | 🟢 Optional | Explicit opt-in bridge to the separately published `sanitization` crate |
 
 ## EVM Support
@@ -103,19 +103,19 @@ Legend:
 
 ## Current Release
 
-`v0.52.4` extends the non-copyable `DecodeSession` with compact-path nibble and
-trie-value byte ceilings. Inclusion verification preflights every supplied node
-and performs a conservative dry traversal to check all remaining parser, hash,
-nibble, value, and aggregate work before the first proof-node hash. All
-planning work is debited from the caller's shared session, and each actual
-Keccak invocation is still charged immediately before calling the backend.
+`v0.52.5` decodes authenticated account values as
+`[nonce, balance, storageRoot, codeHash]` and returns `VerifiedAccount`
+capabilities with private constructors. Composed storage verification accepts
+that capability rather than an independent root, so a valid account proof
+cannot authorize storage from another account state. Account absence and
+storage-path absence are successful verified outcomes; absent storage maps to
+zero, and explicitly stored zero is rejected as noncanonical.
 
-MPT decoding now rejects locally detectable noncanonical construction: empty
-extension paths, empty leaf values, branches with fewer than two occupied
-outcomes, extension-to-extension or extension-to-leaf children, inline nodes at
-or above 32 encoded bytes, and hashed children below 32 encoded bytes. Public
-`*_in_session` APIs cover transaction, receipt, account, and storage inclusion.
-Account-to-storage proof composition remains assigned to `v0.52.5`.
+The operation preserves v0.52.4 complete proof preflight and can share one
+`DecodeSession` across the account proof and all requested storage proofs. A
+pinned Execution APIs Hive fixture verifies a real account-plus-storage
+response end to end. The earlier byte-exact independently rooted APIs remain
+available only as lower-level compatibility boundaries.
 
 The current workspace uses Rust `1.97.1` for the full gate and checks every
 supported Rust toolchain from `1.90.0` through `1.97.0` with

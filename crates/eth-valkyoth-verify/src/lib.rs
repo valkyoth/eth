@@ -74,9 +74,13 @@ pub use set_code_authorization::{
     ValidatedSetCodeAuthorization, validate_set_code_authorization_signature_with_backend,
 };
 pub use state_proof::{
-    AccountTrieRoot, StorageSlotKey, StorageTrieRoot, VerifiedAccountInclusion,
-    VerifiedStorageInclusion, verify_account_inclusion, verify_account_inclusion_in_session,
-    verify_storage_inclusion, verify_storage_inclusion_in_session,
+    AccountDecodeError, AccountField, AccountTrieRoot, EMPTY_TRIE_ROOT_BYTES, EthereumAccount,
+    StateProofVerificationError, StateProofVerificationErrorCategory, StorageSlotKey,
+    StorageTrieRoot, VerifiedAccount, VerifiedAccountInclusion, VerifiedStorageInclusion,
+    VerifiedStorageValue, verify_account_inclusion, verify_account_inclusion_in_session,
+    verify_account_proof, verify_account_proof_in_session, verify_account_storage,
+    verify_account_storage_in_session, verify_storage_inclusion,
+    verify_storage_inclusion_in_session,
 };
 pub use transaction_hash::{
     SetCodeAuthorizationSigningHash, TransactionSigningHash, TransactionSigningHashError,

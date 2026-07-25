@@ -1,101 +1,101 @@
 [release]
-version = "0.52.4"
+version = "0.52.5"
 policy = "independent"
 
 [crates."eth-valkyoth-codec"]
-previous_version = "0.20.0"
+previous_version = "0.21.0"
 version = "0.21.0"
-change = "code"
-publish = true
-reason = "Adds explicit trie nibble and value-byte ceilings plus noncommitting hash-capacity preflight to the shared decode session."
+change = "unchanged"
+publish = false
+reason = "No package changes for v0.52.5."
 
 [crates."eth-valkyoth-primitives"]
-previous_version = "0.11.3"
+previous_version = "0.11.4"
 version = "0.11.4"
-change = "dependency"
-publish = true
-reason = "Updates the published codec dependency from 0.20 to 0.21 so public codec error types retain one identity."
+change = "unchanged"
+publish = false
+reason = "No package changes for v0.52.5."
 
 [crates."eth-valkyoth-hash"]
-previous_version = "0.11.3"
+previous_version = "0.11.4"
 version = "0.11.4"
-change = "dependency"
-publish = true
-reason = "Updates the published primitives dependency to 0.11.4."
+change = "unchanged"
+publish = false
+reason = "No package changes for v0.52.5."
 
 [crates."eth-valkyoth-protocol"]
-previous_version = "0.26.0"
+previous_version = "0.26.1"
 version = "0.26.1"
-change = "dependency"
-publish = true
-reason = "Updates the published codec, hash, and primitives dependency lines used by transaction APIs."
+change = "unchanged"
+publish = false
+reason = "No package changes for v0.52.5."
 
 [crates."eth-valkyoth-verify"]
-previous_version = "0.24.0"
-version = "0.25.0"
+previous_version = "0.25.0"
+version = "0.26.0"
 change = "code"
 publish = true
-reason = "Adds proof preflight, strict canonical MPT construction checks, session-aware inclusion APIs, and pre-hash work charging."
+reason = "Adds canonical account decoding, verified account capabilities, account-bound storage verification, and canonical absence and zero semantics."
 
 [crates."eth-valkyoth-derive"]
-previous_version = "0.17.4"
+previous_version = "0.17.5"
 version = "0.17.5"
-change = "dependency"
-publish = true
-reason = "Updates the published codec and primitives development dependency lines used to verify generated RLP APIs."
+change = "unchanged"
+publish = false
+reason = "No package changes for v0.52.5."
 
 [crates."eth-valkyoth-sanitization"]
-previous_version = "0.7.6"
+previous_version = "0.7.7"
 version = "0.7.7"
-change = "dependency"
-publish = true
-reason = "Updates the optional derive dependency to 0.17.5."
+change = "unchanged"
+publish = false
+reason = "No package changes for v0.52.5."
 
 [crates."eth-valkyoth-evm-core"]
 previous_version = "0.26.1"
 version = "0.26.1"
 change = "unchanged"
 publish = false
-reason = "No package changes for v0.52.4."
+reason = "No package changes for v0.52.5."
 
 [crates."eth-valkyoth-evm"]
-previous_version = "0.10.1"
+previous_version = "0.10.2"
 version = "0.10.2"
-change = "dependency"
-publish = true
-reason = "Updates published codec, primitives, and protocol dependency lines for the proof-budget release."
+change = "unchanged"
+publish = false
+reason = "No package changes for v0.52.5."
 
 [crates."eth-valkyoth-rpc"]
 previous_version = "0.7.0"
 version = "0.7.0"
 change = "unchanged"
 publish = false
-reason = "No package changes for v0.52.4."
+reason = "No package changes for v0.52.5."
 
 [crates."eth-valkyoth-signer"]
-previous_version = "0.7.4"
+previous_version = "0.7.5"
 version = "0.7.5"
-change = "dependency"
-publish = true
-reason = "Updates the published primitives dependency to 0.11.4."
+change = "unchanged"
+publish = false
+reason = "No package changes for v0.52.5."
 
 [crates."eth-valkyoth-reth"]
 previous_version = "0.7.0"
 version = "0.7.0"
 change = "unchanged"
 publish = false
-reason = "No package changes for v0.52.4."
+reason = "No package changes for v0.52.5."
 
 [crates."eth-valkyoth-testkit"]
 previous_version = "0.7.0"
 version = "0.7.0"
 change = "unchanged"
 publish = false
-reason = "No package changes for v0.52.4."
+reason = "No package changes for v0.52.5."
 
 [crates.eth]
-previous_version = "0.52.3"
-version = "0.52.4"
+previous_version = "0.52.4"
+version = "0.52.5"
 change = "code"
 publish = true
-reason = "Exposes strict canonical MPT proof preflight and session-aware transaction, receipt, account, and storage inclusion verification."
+reason = "Exposes complete bounded account-to-storage proof composition with canonical account and zero-value semantics."

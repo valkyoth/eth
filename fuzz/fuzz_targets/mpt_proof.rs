@@ -5,8 +5,9 @@ use eth_valkyoth_hash::{TinyKeccak256, hash_one};
 use eth_valkyoth_primitives::{Address, B256};
 use eth_valkyoth_verify::{
     AccountTrieRoot, ReceiptTrieRoot, StorageSlotKey, StorageTrieRoot, TransactionTrieRoot,
-    verify_account_inclusion, verify_receipt_inclusion, verify_storage_inclusion,
-    verify_transaction_inclusion, verify_transaction_inclusion_in_session,
+    verify_account_inclusion, verify_account_proof, verify_account_storage,
+    verify_receipt_inclusion, verify_storage_inclusion, verify_transaction_inclusion,
+    verify_transaction_inclusion_in_session,
 };
 use libfuzzer_sys::fuzz_target;
 use std::vec::Vec;
@@ -22,12 +23,83 @@ const MAX_PROOF_NODE_BYTES: usize = 512;
 
 fuzz_target!(|data: &[u8]| {
     drive_structured_leaf_proof(data);
+    drive_structured_composed_proof(data);
     let Some(input) = ProofInput::parse(data) else {
         return;
     };
     input.drive(DecodeLimits::TEST_FIXTURE);
     input.drive(DecodeLimits::DEPLOYMENT_STARTING_POINT);
 });
+
+fn drive_structured_composed_proof(data: &[u8]) {
+    let Some(selector) = data.first().copied() else {
+        return;
+    };
+    let address = Address::from_bytes(core::array::from_fn(|index| {
+        selector.wrapping_add(u8::try_from(index).unwrap_or(u8::MAX))
+    }));
+    let slot = StorageSlotKey::from_b256(B256::from_bytes(core::array::from_fn(|index| {
+        selector
+            .wrapping_mul(3)
+            .wrapping_add(u8::try_from(index).unwrap_or(u8::MAX))
+    })));
+    let storage_payload = [selector % 0x7f + 1];
+    let storage_value = scalar(&storage_payload);
+    let storage_key = hash_one(TinyKeccak256::default(), &slot.to_b256().to_bytes()).to_bytes();
+    let storage_leaf = secure_leaf(&storage_key, &storage_value);
+    let storage_root =
+        StorageTrieRoot::from_b256(hash_one(TinyKeccak256::default(), &storage_leaf));
+    let account_value = list(&[
+        scalar(&[]),
+        scalar(&storage_payload),
+        scalar(&storage_root.to_b256().to_bytes()),
+        scalar(&hash_one(TinyKeccak256::default(), data).to_bytes()),
+    ]);
+    let account_key = hash_one(TinyKeccak256::default(), &address.to_bytes()).to_bytes();
+    let account_leaf = secure_leaf(&account_key, &account_value);
+    let account_root =
+        AccountTrieRoot::from_b256(hash_one(TinyKeccak256::default(), &account_leaf));
+    let account_proof = [&account_leaf[..]];
+    let account = verify_account_proof(
+        account_root,
+        address,
+        &account_proof,
+        DecodeLimits::TEST_FIXTURE,
+        TinyKeccak256::default,
+    )
+    .expect("constructed account proof");
+    let storage_proof = [&storage_leaf[..]];
+    let verified = verify_account_storage(
+        &account,
+        slot,
+        &storage_proof,
+        DecodeLimits::TEST_FIXTURE,
+        TinyKeccak256::default,
+    )
+    .expect("constructed storage proof");
+    assert!(verified.is_present());
+    assert_eq!(verified.value().to_be_bytes()[31], storage_payload[0]);
+
+    let unrelated_leaf = secure_leaf(&storage_key, &scalar(&[storage_payload[0] ^ 0x80]));
+    let unrelated_proof = [&unrelated_leaf[..]];
+    assert!(
+        verify_account_storage(
+            &account,
+            slot,
+            &unrelated_proof,
+            DecodeLimits::TEST_FIXTURE,
+            TinyKeccak256::default,
+        )
+        .is_err()
+    );
+}
+
+fn secure_leaf(key: &[u8], value: &[u8]) -> Vec<u8> {
+    let mut compact_path = Vec::with_capacity(key.len().saturating_add(1));
+    compact_path.push(2_u8 << 4);
+    compact_path.extend_from_slice(key);
+    list(&[scalar(&compact_path), scalar(value)])
+}
 
 fn drive_structured_leaf_proof(data: &[u8]) {
     let Some(selector) = data.first().copied() else {
@@ -209,6 +281,21 @@ impl<'a> ProofInput<'a> {
             limits,
             TinyKeccak256::default,
         );
+        if let Ok(account) = verify_account_proof(
+            AccountTrieRoot::from_b256(root),
+            Address::from_bytes(self.address),
+            nodes,
+            limits,
+            TinyKeccak256::default,
+        ) {
+            let _ = verify_account_storage(
+                &account,
+                StorageSlotKey::from_b256(B256::from_bytes(self.slot)),
+                nodes,
+                limits,
+                TinyKeccak256::default,
+            );
+        }
         let _ = verify_storage_inclusion(
             StorageTrieRoot::from_b256(root),
             StorageSlotKey::from_b256(B256::from_bytes(self.slot)),
@@ -220,9 +307,7 @@ impl<'a> ProofInput<'a> {
     }
 
     fn proof_nodes(&self) -> &[&'a [u8]] {
-        self.proof_nodes
-            .get(..self.proof_node_count)
-            .unwrap_or(&[])
+        self.proof_nodes.get(..self.proof_node_count).unwrap_or(&[])
     }
 }
 

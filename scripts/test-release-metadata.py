@@ -59,7 +59,7 @@ def main() -> int:
     assert "workflow_dispatch:" in release_workflow
     assert "tags:" not in release_workflow
     assert '"v*"' not in release_workflow
-    assert "actions/checkout@9c091bb21b7c1c1d1991bb908d89e4e9dddfe3e0" in release_workflow
+    assert "actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1" in release_workflow
     assert "fetch-depth: 0" in release_workflow
     assert "Validate release metadata" in release_workflow
     assert "scripts/validate-release-metadata.sh" in release_workflow

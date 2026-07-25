@@ -1,7 +1,7 @@
 # MPT Node Decoding And Inclusion Proofs
 
-Status: v0.52.4 adds strict canonical proof preflight and operation-wide work
-accounting to transaction, receipt, account, and storage inclusion verification.
+Status: v0.52.5 composes canonical account and storage proofs under one
+authenticated authority while preserving v0.52.4 strict preflight accounting.
 
 `eth-valkyoth-verify` exposes `decode_mpt_node` for one canonical RLP trie
 node and `decode_mpt_proof_nodes` for a caller-provided list of encoded proof
@@ -49,6 +49,28 @@ newtypes. They prove byte-exact trie membership only; they do not decode
 account fields, prove that a storage root belongs to a specific account, or
 interpret the included storage scalar.
 
+Those independently rooted functions remain compatibility APIs.
+`verify_account_proof` instead discovers the authenticated trie value and
+decodes exactly four canonical fields:
+`[nonce, balance, storageRoot, codeHash]`. Nonce is bounded to Ethereum's
+64-bit account nonce domain, balance is a canonical U256, and both hashes must
+be exactly 32 bytes. It returns `VerifiedAccount`, whose private constructors
+prevent callers from inventing storage-root authority.
+
+`verify_account_storage` accepts `&VerifiedAccount`, not a caller-supplied
+`StorageTrieRoot`. Present accounts authorize only the root embedded in their
+authenticated tuple. Proven account absence authorizes the canonical empty
+storage root. Storage values are decoded as canonical RLP U256 integers;
+path absence is successful canonical zero, while an explicitly present zero
+is rejected because Ethereum state tries omit zero-valued slots.
+
+The `_in_session` variants let one `eth_getProof` account proof and all of its
+storage proofs share a single non-copyable work ledger. Planning discovers and
+validates account or storage bytes before proof-node hashing, then verified
+traversal must reach the same outcome. The public error exposes stable codes
+and categories for malformed input, wrong roots, noncanonical state, and
+internal invariant failures.
+
 Before the first proof-node hash, the verifier checks node count, each encoded
 length, cumulative hash bytes, complete hash capacity, compact-path nibble
 work, and trie-value work, and syntactically decodes every supplied node. Each
@@ -63,11 +85,12 @@ iterative and additionally capped by `MAX_PROOF_WALK_DEPTH`, independent of
 caller-selected `DecodeLimits`, so large `max_proof_nodes` deployments cannot
 turn proof validation into unbounded native stack growth.
 
-This release verifies strict local trie construction and inclusion only. It
-does not prove that a trusted
-root came from a canonical header, decode or execute the included transaction,
-validate receipt semantics, decode account state, or compose account and
-storage proofs into full JSON-RPC `eth_getProof` semantics.
+This release completes bounded proof-kernel semantics for an already trusted
+state root. It does not prove that the root came from a canonical header,
+decode or execute included transactions, validate receipt semantics, parse the
+JSON-RPC response envelope, or compare RPC-presented duplicate account fields
+against the authenticated account. Provider and header-trust orchestration
+remain separately versioned.
 
 Source trail:
 
@@ -76,3 +99,9 @@ Source trail:
 - The pinned `src/ethereum/merkle_patricia_trie.py` source describes
   `LeafNode`, `ExtensionNode`, `BranchNode`, hex-prefix compact paths, and the
   hash-or-inline child-reference boundary.
+- `spec-lock.toml` pins `ethereum/execution-apis` at
+  `f74de4b86e3b011384808c294c3d71f2854729a2`.
+- The vendored CC0 Hive fixture
+  `crates/eth-valkyoth-verify/tests/fixtures/execution_apis_get_account_proof_with_storage.io`
+  supplies a real account-plus-storage proof generated for execution-client
+  compatibility testing.

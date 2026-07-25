@@ -1,6 +1,4 @@
-use eth_valkyoth_codec::{
-    DecodeError, DecodeLimits, DecodeSession, DecodeSessionPolicy, encode_rlp_integer,
-};
+use eth_valkyoth_codec::{DecodeError, DecodeLimits, DecodeSession, DecodeSessionPolicy};
 use eth_valkyoth_hash::{Keccak256, hash_one};
 use eth_valkyoth_primitives::B256;
 
@@ -10,10 +8,12 @@ use crate::mpt::{
 };
 
 mod error;
+mod key;
 mod plan;
 mod preflight;
 mod root;
 
+use key::{encode_index_key, key_nibble_len};
 use plan::plan_remaining_work;
 pub(crate) use preflight::{preflight_proof, proof_resource_error};
 
@@ -29,6 +29,17 @@ const MAX_RLP_U64_BYTES: usize = 9;
 /// This is independent from [`DecodeLimits::max_proof_nodes`] so deployments
 /// cannot accidentally configure native call-stack growth into proof walking.
 pub const MAX_PROOF_WALK_DEPTH: usize = 128;
+
+#[derive(Clone, Copy, Debug, Eq, PartialEq)]
+pub(crate) enum MptProofValue<'a> {
+    Present(&'a [u8]),
+    Absent,
+}
+
+pub(crate) struct PlannedMptProofValue<'a> {
+    pub(crate) charges: eth_valkyoth_codec::DecodeSessionCharges,
+    pub(crate) value: MptProofValue<'a>,
+}
 
 /// Verifies that `encoded_transaction` is included at `transaction_index`.
 ///
@@ -175,8 +186,20 @@ pub(crate) fn check_preflighted_key_inclusion_capacity(
 ) -> Result<(), MptProofVerificationError> {
     let planned = plan_remaining_work(key, value, proof_nodes, session)?;
     session
-        .check_remaining_capacity(planned)
+        .check_remaining_capacity(planned.charges)
         .map_err(proof_resource_error)
+}
+
+pub(crate) fn plan_preflighted_key_value<'a>(
+    key: &[u8],
+    proof_nodes: &'a [&'a [u8]],
+    session: &mut DecodeSession,
+) -> Result<PlannedMptProofValue<'a>, MptProofVerificationError> {
+    let planned = plan_remaining_work(key, &[], proof_nodes, session)?;
+    Ok(PlannedMptProofValue {
+        charges: planned.charges,
+        value: planned.value,
+    })
 }
 
 pub(crate) fn verify_preflighted_key_inclusion<H>(
@@ -185,16 +208,38 @@ pub(crate) fn verify_preflighted_key_inclusion<H>(
     value: &[u8],
     proof_nodes: &[&[u8]],
     session: &mut DecodeSession,
-    mut new_hasher: impl FnMut() -> H,
+    new_hasher: impl FnMut() -> H,
 ) -> Result<(), MptProofVerificationError>
+where
+    H: Keccak256,
+{
+    match verify_preflighted_key_value(root, key, proof_nodes, session, new_hasher)? {
+        MptProofValue::Present(found) => compare_expected_value(value, session).and_then(|()| {
+            if found == value {
+                Ok(())
+            } else {
+                Err(MptProofVerificationError::ValueMismatch)
+            }
+        }),
+        MptProofValue::Absent => Err(MptProofVerificationError::Absent),
+    }
+}
+
+pub(crate) fn verify_preflighted_key_value<'a, H>(
+    root: MptProofRoot,
+    key: &[u8],
+    proof_nodes: &'a [&'a [u8]],
+    session: &mut DecodeSession,
+    mut new_hasher: impl FnMut() -> H,
+) -> Result<MptProofValue<'a>, MptProofVerificationError>
 where
     H: Keccak256,
 {
     let mut cursor = ProofCursor::new(root, proof_nodes, &mut new_hasher);
     let first = cursor.next_hashed_node(session)?;
-    walk_to_value(first, key, value, &mut cursor, session)?;
+    let value = walk_to_value(first, key, &mut cursor, session)?;
     if cursor.is_consumed() {
-        Ok(())
+        Ok(value)
     } else {
         Err(MptProofVerificationError::TrailingProofNodes)
     }
@@ -203,10 +248,9 @@ where
 fn walk_to_value<'a, H>(
     mut node: MptNode<'a>,
     key: &[u8],
-    expected_value: &[u8],
     cursor: &mut ProofCursor<'a, '_, H>,
     session: &mut DecodeSession,
-) -> Result<(), MptProofVerificationError>
+) -> Result<MptProofValue<'a>, MptProofVerificationError>
 where
     H: Keccak256,
 {
@@ -224,7 +268,8 @@ where
         let reference = match node {
             MptNode::Branch(branch) => {
                 if key_nibble_offset == key_nibble_len(key) {
-                    return compare_value(branch.value(), expected_value, session);
+                    account_found_value(branch.value(), session)?;
+                    return Ok(MptProofValue::Present(branch.value()));
                 }
                 let child_index = key_nibble(key, key_nibble_offset)?;
                 key_nibble_offset = key_nibble_offset.saturating_add(1);
@@ -235,21 +280,30 @@ where
                     .map_err(MptProofVerificationError::MalformedNode)?
             }
             MptNode::Extension(extension) => {
-                let consumed = match_compact_path(extension.path, key, key_nibble_offset, session)?;
+                let Some(consumed) =
+                    match_compact_path(extension.path, key, key_nibble_offset, session)?
+                else {
+                    return Ok(MptProofValue::Absent);
+                };
                 key_nibble_offset = key_nibble_offset.saturating_add(consumed);
                 extension.child
             }
             MptNode::Leaf(leaf) => {
-                let consumed = match_compact_path(leaf.path, key, key_nibble_offset, session)?;
+                let Some(consumed) =
+                    match_compact_path(leaf.path, key, key_nibble_offset, session)?
+                else {
+                    return Ok(MptProofValue::Absent);
+                };
                 if key_nibble_offset.saturating_add(consumed) != key_nibble_len(key) {
-                    return Err(MptProofVerificationError::Absent);
+                    return Ok(MptProofValue::Absent);
                 }
-                return compare_value(leaf.value, expected_value, session);
+                account_found_value(leaf.value, session)?;
+                return Ok(MptProofValue::Present(leaf.value));
             }
         };
 
         node = match reference {
-            MptNodeReference::Empty => return Err(MptProofVerificationError::Absent),
+            MptNodeReference::Empty => return Ok(MptProofValue::Absent),
             MptNodeReference::Hash(expected) => match node {
                 MptNode::Extension(_) => cursor.next_extension_child(expected, session)?,
                 MptNode::Branch(_) | MptNode::Leaf(_) => {
@@ -352,32 +406,14 @@ where
     }
 }
 
-fn encode_index_key(index: u64, output: &mut [u8]) -> Result<usize, MptProofVerificationError> {
-    let bytes = index.to_be_bytes();
-    let payload = if index == 0 {
-        &[][..]
-    } else {
-        let first = bytes
-            .iter()
-            .position(|byte| *byte != 0)
-            .ok_or(MptProofVerificationError::KeyEncode(DecodeError::Malformed))?;
-        bytes
-            .get(first..)
-            .ok_or(MptProofVerificationError::KeyEncode(
-                DecodeError::OffsetOutOfBounds,
-            ))?
-    };
-    encode_rlp_integer(payload, output).map_err(MptProofVerificationError::KeyEncode)
-}
-
 fn match_compact_path(
     path: MptCompactPath<'_>,
     key: &[u8],
     key_nibble_offset: usize,
     session: &mut DecodeSession,
-) -> Result<usize, MptProofVerificationError> {
+) -> Result<Option<usize>, MptProofVerificationError> {
     if !path.is_leaf() && key_nibble_offset == key_nibble_len(key) {
-        return Err(MptProofVerificationError::Absent);
+        return Ok(None);
     }
     let count = path
         .nibble_count()
@@ -386,16 +422,16 @@ fn match_compact_path(
         .account_nibbles(count)
         .map_err(proof_resource_error)?;
     if key_nibble_offset.saturating_add(count) > key_nibble_len(key) {
-        return Err(MptProofVerificationError::Absent);
+        return Ok(None);
     }
     for index in 0..count {
         let expected = compact_path_nibble(path, index)?;
         let actual = key_nibble(key, key_nibble_offset.saturating_add(index))?;
         if expected != actual {
-            return Err(MptProofVerificationError::Absent);
+            return Ok(None);
         }
     }
-    Ok(count)
+    Ok(Some(count))
 }
 
 fn compact_path_nibble(
@@ -430,27 +466,22 @@ fn byte_nibble(bytes: &[u8], nibble_index: usize) -> Result<u8, MptProofVerifica
     }
 }
 
-fn key_nibble_len(key: &[u8]) -> usize {
-    key.len().saturating_mul(2)
+fn account_found_value(
+    found: &[u8],
+    session: &mut DecodeSession,
+) -> Result<(), MptProofVerificationError> {
+    session
+        .account_value_bytes(found.len())
+        .map_err(proof_resource_error)
 }
 
-fn compare_value(
-    found: &[u8],
+fn compare_expected_value(
     expected: &[u8],
     session: &mut DecodeSession,
 ) -> Result<(), MptProofVerificationError> {
-    let compared = found
-        .len()
-        .checked_add(expected.len())
-        .ok_or_else(|| proof_resource_error(DecodeError::ValueBytesExceeded))?;
     session
-        .account_value_bytes(compared)
-        .map_err(proof_resource_error)?;
-    if found == expected {
-        Ok(())
-    } else {
-        Err(MptProofVerificationError::ValueMismatch)
-    }
+        .account_value_bytes(expected.len())
+        .map_err(proof_resource_error)
 }
 
 pub(crate) fn compatibility_session(

@@ -4,6 +4,13 @@ All notable changes to `eth` are documented here.
 
 ## Unreleased
 
+- Added canonical Ethereum account decoding and non-forgeable
+  `VerifiedAccount` capabilities for authenticated inclusion or absence.
+- Added account-bound storage proof verification that derives its root only
+  from authenticated account state, maps proven absence to zero, and rejects
+  explicitly stored zero values.
+- Added the pinned Execution APIs Hive `eth_getProof` fixture, substitution and
+  malformed-state tests, and structure-aware composed-proof fuzzing.
 - Added a non-copyable shared decode session with operation-wide byte, header,
   item, nesting, allocation-capacity, proof, hash, and total-work accounting.
 - Added session-aware RLP, transaction-envelope, legacy/EIP-2930/EIP-1559/

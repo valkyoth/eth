@@ -241,7 +241,7 @@ dependencies = [
 
 [[package]]
 name = "eth-valkyoth-verify"
-version = "0.25.0"
+version = "0.26.0"
 dependencies = [
  "eth-valkyoth-codec",
  "eth-valkyoth-hash",

@@ -46,9 +46,10 @@ pub mod error {
     #[cfg(feature = "eip712-json")]
     pub use eth_valkyoth_verify::Eip712JsonError;
     pub use eth_valkyoth_verify::{
-        Eip712EncodeError, MptNodeDecodeError, MptNodeDecodeErrorCategory,
+        AccountDecodeError, Eip712EncodeError, MptNodeDecodeError, MptNodeDecodeErrorCategory,
         MptProofVerificationError, MptProofVerificationErrorCategory,
         SetCodeAuthorizationValidationError, SetCodeAuthorizationValidationErrorCategory,
+        StateProofVerificationError, StateProofVerificationErrorCategory,
         TransactionSignatureValidationError, TransactionSignatureValidationErrorCategory,
         TransactionSigningHashError, VerifyError, VerifyErrorCategory,
     };

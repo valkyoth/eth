@@ -18,7 +18,7 @@ from pathlib import Path
 
 ROOT = Path(__file__).resolve().parents[1]
 SPEC_LOCK = ROOT / "spec-lock.toml"
-USER_AGENT = "valkyoth-eth-upstream-check/0.52.4 (https://github.com/valkyoth/eth)"
+USER_AGENT = "valkyoth-eth-upstream-check/0.52.5 (https://github.com/valkyoth/eth)"
 CRATES_IO = "https://crates.io/api/v1/crates"
 WORKSPACE_MSRV = "1.90.0"
 ALLOWED_REPO = re.compile(r"^https://github\.com/ethereum/[A-Za-z0-9_.-]+$")
@@ -49,8 +49,8 @@ class SourcePin:
 
 
 CRATE_REVIEWS = (
-    CrateReview("revm", "41.0.0", "1.91.0", "36.0.0"),
-    CrateReview("revm-primitives", "41.0.0", "1.91.0", "22.1.0"),
+    CrateReview("revm", "42.0.1", "1.91.0", "36.0.0"),
+    CrateReview("revm-primitives", "42.0.0", "1.91.0", "22.1.0"),
 )
 
 

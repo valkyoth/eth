@@ -6,23 +6,28 @@ use crate::mpt::{
 };
 
 use super::{
-    MAX_PROOF_WALK_DEPTH, MptProofVerificationError, compact_path_nibble, key_nibble,
-    key_nibble_len, proof_resource_error,
+    MAX_PROOF_WALK_DEPTH, MptProofValue, MptProofVerificationError, compact_path_nibble,
+    key_nibble, key_nibble_len, proof_resource_error,
 };
 
+pub(super) struct PlannedProofValue<'a> {
+    pub(super) charges: DecodeSessionCharges,
+    pub(super) value: MptProofValue<'a>,
+}
+
 /// Computes a conservative, noncryptographic plan for the remaining walk.
-pub(super) fn plan_remaining_work(
+pub(super) fn plan_remaining_work<'a>(
     key: &[u8],
     expected_value: &[u8],
-    proof_nodes: &[&[u8]],
+    proof_nodes: &'a [&'a [u8]],
     session: &mut DecodeSession,
-) -> Result<DecodeSessionCharges, MptProofVerificationError> {
+) -> Result<PlannedProofValue<'a>, MptProofVerificationError> {
     let mut future = DecodeSession::new(session.policy()).map_err(proof_resource_error)?;
     let mut cursor = PlanningCursor::new(proof_nodes);
-    let Some(first) = cursor.next_node(false, false, session, &mut future)? else {
-        return Ok(future.charges());
-    };
-    plan_walk(
+    let first = cursor
+        .next_node(false, false, session, &mut future)?
+        .ok_or(MptProofVerificationError::MissingProofNode)?;
+    let value = plan_walk(
         first,
         key,
         expected_value,
@@ -30,7 +35,10 @@ pub(super) fn plan_remaining_work(
         session,
         &mut future,
     )?;
-    Ok(future.charges())
+    Ok(PlannedProofValue {
+        charges: future.charges(),
+        value,
+    })
 }
 
 fn plan_walk<'a>(
@@ -40,7 +48,7 @@ fn plan_walk<'a>(
     cursor: &mut PlanningCursor<'a>,
     session: &mut DecodeSession,
     future: &mut DecodeSession,
-) -> Result<(), MptProofVerificationError> {
+) -> Result<MptProofValue<'a>, MptProofVerificationError> {
     let mut key_offset = 0usize;
     let mut depth = 0usize;
 
@@ -49,14 +57,14 @@ fn plan_walk<'a>(
             .checked_add(1)
             .ok_or(MptProofVerificationError::ProofTooDeep)?;
         if depth > MAX_PROOF_WALK_DEPTH {
-            return Ok(());
+            return Err(MptProofVerificationError::ProofTooDeep);
         }
 
         let reference = match node {
             MptNode::Branch(branch) => {
                 if key_offset == key_nibble_len(key) {
                     plan_value_comparison(branch.value(), expected_value, session, future)?;
-                    return Ok(());
+                    return Ok(MptProofValue::Present(branch.value()));
                 }
                 let child_index = key_nibble(key, key_offset)?;
                 key_offset = key_offset.saturating_add(1);
@@ -65,14 +73,14 @@ fn plan_walk<'a>(
                     Some(Err(error)) => {
                         return Err(MptProofVerificationError::MalformedNode(error));
                     }
-                    None => return Ok(()),
+                    None => return Ok(MptProofValue::Absent),
                 }
             }
             MptNode::Extension(extension) => {
                 let Some(consumed) =
                     plan_compact_path(extension.path, key, key_offset, session, future)?
                 else {
-                    return Ok(());
+                    return Ok(MptProofValue::Absent);
                 };
                 key_offset = key_offset.saturating_add(consumed);
                 extension.child
@@ -81,23 +89,23 @@ fn plan_walk<'a>(
                 let Some(consumed) =
                     plan_compact_path(leaf.path, key, key_offset, session, future)?
                 else {
-                    return Ok(());
+                    return Ok(MptProofValue::Absent);
                 };
                 if key_offset.saturating_add(consumed) == key_nibble_len(key) {
                     plan_value_comparison(leaf.value, expected_value, session, future)?;
+                    return Ok(MptProofValue::Present(leaf.value));
                 }
-                return Ok(());
+                return Ok(MptProofValue::Absent);
             }
         };
 
         node = match reference {
-            MptNodeReference::Empty => return Ok(()),
+            MptNodeReference::Empty => return Ok(MptProofValue::Absent),
             MptNodeReference::Hash(_) => {
                 let require_branch = matches!(node, MptNode::Extension(_));
-                let Some(next) = cursor.next_node(true, require_branch, session, future)? else {
-                    return Ok(());
-                };
-                next
+                cursor
+                    .next_node(true, require_branch, session, future)?
+                    .ok_or(MptProofVerificationError::MissingProofNode)?
             }
             MptNodeReference::Inline(inline) => plan_inline_node(inline, session, future)?,
         };

@@ -31,7 +31,7 @@ Most users should depend on the facade crate instead:
 
 ```toml
 [dependencies]
-eth = "0.52.4"
+eth = "0.52.5"
 ```
 
 Crates.io: <https://crates.io/crates/eth>
@@ -40,7 +40,15 @@ This package is published separately so the `eth` workspace can keep small,
 auditable crate boundaries. Treat it as a lower-level building block unless the
 `eth` documentation explicitly says otherwise.
 
-The `0.25.0` release preflights every supplied MPT proof node before hashing,
+The `0.26.0` release adds canonical Ethereum account decoding and composed
+EIP-1186 proof verification. `verify_account_proof` returns a non-forgeable
+`VerifiedAccount` capability for authenticated inclusion or absence;
+`verify_account_storage` derives its only accepted storage root from that
+capability. Storage absence maps to canonical zero, while an explicitly stored
+zero is rejected. The release includes the pinned Execution APIs Hive
+account-plus-storage fixture and preserves operation-wide decode sessions.
+
+The previous `0.25.0` release preflights every supplied MPT proof node before hashing,
 charges every actual hash through one shared session, and adds public
 session-aware transaction, receipt, account, and storage inclusion APIs. It
 rejects locally noncanonical empty extensions, empty leaves, degenerate
