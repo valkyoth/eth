@@ -1,7 +1,7 @@
 #![allow(missing_docs)]
 #![cfg(feature = "derive")]
 
-use eth_valkyoth_sanitization::{SecretBytes32, SecureSanitize};
+use eth_valkyoth_sanitization::{DropSafeSanitize, SecretBytes32, SecureSanitize};
 
 #[derive(eth_valkyoth_sanitization::SecureSanitize)]
 struct KeyHolder {
@@ -15,6 +15,13 @@ struct KeyHolder {
 )]
 struct DropHolder {
     key: SecretBytes32,
+}
+
+#[derive(
+    eth_valkyoth_sanitization::SecureSanitize, eth_valkyoth_sanitization::SecureSanitizeOnDrop,
+)]
+struct GenericDropHolder<T: SecureSanitize + Unpin> {
+    key: T,
 }
 
 #[test]
@@ -31,6 +38,15 @@ fn derive_secure_sanitize_clears_struct_fields() {
 }
 
 #[test]
+fn derive_secure_sanitize_attests_drop_contract() {
+    fn require_drop_safe<T: DropSafeSanitize>() {}
+
+    require_drop_safe::<KeyHolder>();
+    require_drop_safe::<DropHolder>();
+    require_drop_safe::<GenericDropHolder<SecretBytes32>>();
+}
+
+#[test]
 fn derive_secure_sanitize_on_drop_compiles() {
     let holder = DropHolder {
         key: SecretBytes32::from_array([0x44_u8; 32]),
@@ -38,4 +54,10 @@ fn derive_secure_sanitize_on_drop_compiles() {
 
     assert!(!holder.key.constant_time_eq(&[0_u8; 32]));
     drop(holder);
+
+    let generic = GenericDropHolder {
+        key: SecretBytes32::from_array([0x55_u8; 32]),
+    };
+    assert!(!generic.key.constant_time_eq(&[0_u8; 32]));
+    drop(generic);
 }

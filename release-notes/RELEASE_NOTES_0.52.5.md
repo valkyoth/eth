@@ -23,6 +23,20 @@ in the proof kernel, and bounded by the shared `DecodeSession`.
 - `verify_account_storage` and `verify_account_storage_in_session`.
 - Canonical empty account/storage trie root constants.
 - Stable composed-proof error codes and categories.
+- An MSRV-aware release-gate check for every direct crates.io dependency,
+  including semver-major releases.
+
+## Dependency Maintenance
+
+- `sanitization` advances from `1.2.5` to `2.0.3`.
+- `syn` advances from `3.0.2` to `3.0.3`.
+- Compatible transitive lockfile updates include `glob 0.3.4`,
+  `libc 0.2.189`, and fuzz-only `cc 1.4.0`.
+- The optional bridge now exposes `sanitization::wipe`, removes the deleted
+  best-effort API, and treats selected hardening features separately from
+  achieved runtime protection.
+- Generated sanitization derives now implement `DropSafeSanitize`; generated
+  drop code requires `DropSafeSanitize + Unpin`.
 
 ## Security Properties
 
@@ -67,8 +81,10 @@ retain their lower-level independently rooted contract. New untrusted
 ## Versioning
 
 - `eth-valkyoth-verify` advances from `0.25.0` to `0.26.0`.
+- `eth-valkyoth-derive` advances from `0.17.5` to `0.18.0`.
+- `eth-valkyoth-sanitization` advances from `0.7.7` to `0.8.0`.
 - `eth` advances from `0.52.4` to `0.52.5`.
-- All other support-crate versions remain unchanged.
+- All remaining support-crate versions remain unchanged.
 
 ## Pentest
 

@@ -31,32 +31,36 @@ Most users should depend on the facade crate instead:
 
 ```toml
 [dependencies]
-eth = "0.52.4"
+eth = "0.52.5"
 ```
 
 Crates.io: <https://crates.io/crates/eth>
 
-This package exists for users who explicitly want best-effort memory
-sanitization for secret-bearing Ethereum data. It depends on
+This package exists for users who explicitly want optimizer-resistant memory
+clearing for secret-bearing Ethereum data. It depends on
 [`sanitization`](https://crates.io/crates/sanitization), so it is not part of
 the default `eth` dependency graph.
 
 ```toml
 [dependencies]
-eth-valkyoth-sanitization = "0.7"
+eth-valkyoth-sanitization = "0.8"
 ```
 
 For derive macros:
 
 ```toml
 [dependencies]
-eth-valkyoth-sanitization = { version = "0.7", features = ["derive"] }
+eth-valkyoth-sanitization = { version = "0.8", features = ["derive"] }
 ```
 
-The sanitization derive macros generate calls to
-`eth_valkyoth_sanitization::SecureSanitize`. They do not replace review of
-secret ownership, copies, logging, paging, swap, crash dumps, or
-compiler/runtime behavior.
+The `0.8` bridge uses `sanitization 2.0.3`. The canonical `wipe` module replaces
+the removed best-effort wipe surface. The sanitization derive macros generate
+calls to `eth_valkyoth_sanitization::SecureSanitize`, implement
+`DropSafeSanitize` for their field-wise sanitizers, and require
+`DropSafeSanitize + Unpin` for generated drop code.
+
+They do not replace review of secret ownership, copies, logging, paging, swap,
+crash dumps, or compiler/runtime behavior.
 
 Enum derives are rejected because Rust does not guarantee inactive variant
 backing bytes are cleared when the active variant changes. Use a struct wrapper
@@ -68,7 +72,7 @@ that match the target:
 ```toml
 [dependencies]
 eth-valkyoth-sanitization = {
-    version = "0.7",
+    version = "0.8",
     features = [
         "hardened-only",
         "memory-lock",
@@ -79,19 +83,28 @@ eth-valkyoth-sanitization = {
 }
 ```
 
-The `hardened-only` feature fails compilation unless the full hardened feature
-set is present. The crate also exposes `HARDENED_MODE` so applications can
-assert the selected feature set in their own startup checks.
+The `hardened-only` feature fails compilation unless the legacy hardening
+feature set is present. `HARDENING_FEATURES_ENABLED` reports only compile-time
+selection; it does not prove that an OS control succeeded.
 
-Applications that handle private keys or seeds should add a hard fail for the
-expected feature set:
+Applications that handle private keys or seeds must inspect the
+`ProtectionReport` returned by protected containers and fail according to
+their deployment policy. A compile-time assertion can still prevent an
+accidental weak feature build:
 
 ```rust
 const _: () = assert!(
-    eth_valkyoth_sanitization::HARDENED_MODE,
+    eth_valkyoth_sanitization::HARDENING_FEATURES_ENABLED,
     "enable memory-lock, multi-pass-clear, cache-flush, and register-scrub"
 );
 ```
 
-Best-effort clearing helpers live under `best_effort` so the weaker guarantee
-is visible at the call site.
+Ordinary owned buffers use the canonical wipe boundary:
+
+```rust
+use eth_valkyoth_sanitization::wipe;
+
+let mut key = [0x42_u8; 32];
+wipe::array(&mut key);
+assert_eq!(key, [0_u8; 32]);
+```

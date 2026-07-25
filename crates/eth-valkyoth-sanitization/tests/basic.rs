@@ -1,6 +1,6 @@
 #![allow(missing_docs)]
 
-use eth_valkyoth_sanitization::{SecretBytes32, SecureSanitize, sanitize_fixed};
+use eth_valkyoth_sanitization::{SecretBytes32, SecureSanitize, sanitize_fixed, wipe};
 
 #[test]
 fn sanitize_fixed_clears_array() {
@@ -21,10 +21,10 @@ fn secret_alias_can_be_sanitized() {
 }
 
 #[test]
-fn best_effort_api_is_namespaced() {
+fn canonical_wipe_api_is_namespaced() {
     let mut bytes = [0x24_u8; 32];
 
-    eth_valkyoth_sanitization::best_effort::sanitize_bytes_best_effort(&mut bytes);
+    wipe::bytes(&mut bytes);
 
     assert_eq!(bytes, [0_u8; 32]);
 }
@@ -38,7 +38,7 @@ fn best_effort_api_is_namespaced() {
 )))]
 fn default_build_is_not_hardened_mode() {
     assert!(!std::hint::black_box(
-        eth_valkyoth_sanitization::HARDENED_MODE
+        eth_valkyoth_sanitization::HARDENING_FEATURES_ENABLED
     ));
 }
 
@@ -49,8 +49,8 @@ fn default_build_is_not_hardened_mode() {
     feature = "cache-flush",
     feature = "register-scrub"
 ))]
-fn all_hardening_features_enable_hardened_mode() {
+fn all_hardening_features_enable_selection_indicator() {
     assert!(std::hint::black_box(
-        eth_valkyoth_sanitization::HARDENED_MODE
+        eth_valkyoth_sanitization::HARDENING_FEATURES_ENABLED
     ));
 }

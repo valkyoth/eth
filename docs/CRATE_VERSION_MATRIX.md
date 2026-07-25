@@ -38,8 +38,8 @@ workspace manifests and refuses accidental lockstep publication.
 | `eth-valkyoth-hash` | `0.11.4` | `0.11.4` | `unchanged` | No | No package changes for v0.52.5. |
 | `eth-valkyoth-protocol` | `0.26.1` | `0.26.1` | `unchanged` | No | No package changes for v0.52.5. |
 | `eth-valkyoth-verify` | `0.25.0` | `0.26.0` | `code` | Yes | Adds canonical account decoding, non-forgeable account authority, composed storage verification, and absence/zero semantics. |
-| `eth-valkyoth-derive` | `0.17.5` | `0.17.5` | `unchanged` | No | No package changes for v0.52.5. |
-| `eth-valkyoth-sanitization` | `0.7.7` | `0.7.7` | `unchanged` | No | No package changes for v0.52.5. |
+| `eth-valkyoth-derive` | `0.17.5` | `0.18.0` | `code` | Yes | Aligns generated sanitization derives with the 2.0 drop-safety contract. |
+| `eth-valkyoth-sanitization` | `0.7.7` | `0.8.0` | `code` | Yes | Migrates to `sanitization 2.0.3`, canonical wipe APIs, and runtime protection reports. |
 | `eth-valkyoth-evm-core` | `0.26.1` | `0.26.1` | `unchanged` | No | No package changes for v0.52.5. |
 | `eth-valkyoth-evm` | `0.10.2` | `0.10.2` | `unchanged` | No | No package changes for v0.52.5. |
 | `eth-valkyoth-rpc` | `0.7.0` | `0.7.0` | `unchanged` | No | No package changes for v0.52.5. |

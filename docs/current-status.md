@@ -42,7 +42,7 @@ Legend:
 | Transaction signing | 🟢 Available | Signing preimages and hashes for legacy, EIP-2930, EIP-1559, EIP-4844, and EIP-7702 |
 | MPT node decoding | 🟢 Available | Strict locally canonical branch, extension, leaf, compact-path, inline-reference, and proof-list parsing with shared-session accounting |
 | MPT inclusion proofs | 🟢 Available | Full-proof preflight, transaction/receipt inclusion, canonical account decoding, non-forgeable account authority, account-bound storage verification, and canonical absence/zero semantics |
-| Secret sanitization | 🟢 Optional | Explicit opt-in bridge to the separately published `sanitization` crate |
+| Secret sanitization | 🟢 Optional | Explicit opt-in bridge to `sanitization 2.0.3`, canonical wiping, drop-safety contracts, and runtime protection reports |
 
 ## EVM Support
 

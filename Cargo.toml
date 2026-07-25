@@ -46,7 +46,7 @@ cast_sign_loss = "deny"
 [workspace.dependencies]
 alloy-rlp = { version = "0.3.16", default-features = false }
 eth-valkyoth-codec = { path = "crates/eth-valkyoth-codec", version = "0.21.0" }
-eth-valkyoth-derive = { path = "crates/eth-valkyoth-derive", version = "0.17.5" }
+eth-valkyoth-derive = { path = "crates/eth-valkyoth-derive", version = "0.18.0" }
 eth-valkyoth-evm = { path = "crates/eth-valkyoth-evm", version = "0.10.2" }
 eth-valkyoth-evm-core = { path = "crates/eth-valkyoth-evm-core", version = "0.26.1" }
 eth-valkyoth-hash = { path = "crates/eth-valkyoth-hash", version = "0.11.4" }
@@ -54,18 +54,18 @@ eth-valkyoth-primitives = { path = "crates/eth-valkyoth-primitives", version = "
 eth-valkyoth-protocol = { path = "crates/eth-valkyoth-protocol", version = "0.26.1" }
 eth-valkyoth-reth = { path = "crates/eth-valkyoth-reth", version = "0.7.0" }
 eth-valkyoth-rpc = { path = "crates/eth-valkyoth-rpc", version = "0.7.0" }
-eth-valkyoth-sanitization = { path = "crates/eth-valkyoth-sanitization", version = "0.7.7" }
+eth-valkyoth-sanitization = { path = "crates/eth-valkyoth-sanitization", version = "0.8.0" }
 eth-valkyoth-signer = { path = "crates/eth-valkyoth-signer", version = "0.7.5" }
 eth-valkyoth-testkit = { path = "crates/eth-valkyoth-testkit", version = "0.7.0" }
 eth-valkyoth-verify = { path = "crates/eth-valkyoth-verify", version = "0.26.0" }
 k256 = { version = "0.14.0", default-features = false, features = ["ecdsa"] }
 proc-macro2 = "1.0.107"
 quote = "1.0.47"
-sanitization = { version = "1.2.5", default-features = false }
+sanitization = "2.0.3"
 serde = "1.0.229"
 serde_json = "1.0.151"
 subtle = { version = "2.6.1", default-features = false, features = ["core_hint_black_box"] }
-syn = { version = "3.0.2", features = ["full"] }
+syn = { version = "3.0.3", features = ["full"] }
 tiny-keccak = { version = "2.0.2", default-features = false, features = ["keccak"] }
 trybuild = "1.0.118"
 

@@ -118,6 +118,12 @@ cargo tools, or GitHub Action pins fail closed. Normal commit CI may omit the
 live query to avoid making every development commit depend on upstream
 availability; the release gate may not omit it.
 
+`scripts/check_latest_crates.py` is the matching mandatory direct-dependency
+check. It reads every workspace and fuzz manifest, compares exact direct
+crates.io versions against the newest stable release compatible with Rust
+`1.90`, and includes semver-major updates. Compatibility-only output from
+`cargo outdated` is not sufficient for a release decision.
+
 Ethereum upstream monitoring is also a maintenance requirement. When the EVM
 or fork-aware protocol surface is active, the planned automation must check the
 latest REVM registry line, official Ethereum hardfork/spec sources, and pinned
@@ -2794,6 +2800,9 @@ Deliverables:
   capability derived from `VerifiedAccount`;
 - canonical account absence, storage absence, and zero-value semantics;
 - a complete bounded `eth_getProof` verification workflow.
+- migration of the optional secret-handling bridge to `sanitization 2.0` with
+  canonical wiping, drop-safety contracts, and runtime protection reporting;
+- an MSRV-aware direct dependency freshness gate that detects major releases.
 
 Verification:
 
@@ -2801,6 +2810,8 @@ Verification:
 - negative tests that substitute account values, storage roots, paths, and
   absence claims;
 - property and fuzz tests for composed proof chains and zero semantics.
+- all direct crates.io dependencies and CI/release tools checked against their
+  latest compatible upstream releases.
 
 Implementation evidence:
 
@@ -2812,11 +2823,15 @@ Implementation evidence:
 - the structure-aware MPT fuzz target constructs composed account/storage
   roots, requires successful verification, and rejects an unrelated storage
   proof.
+- the optional bridge tests exercise canonical wiping and require generated
+  sanitizers to satisfy `DropSafeSanitize`.
 
 Exit criteria:
 
 - A caller cannot combine a valid account proof with storage proven against a
   different trie root.
+- Optional secret handling uses the reviewed `sanitization 2.0` contracts, and
+  release tooling fails closed on stale direct dependencies.
 - `v0.52.5 implementation stop reached. Run pentest for this exact
   commit.`
 

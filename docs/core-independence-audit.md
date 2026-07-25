@@ -63,7 +63,7 @@ feature.
 | --- | --- | --- | --- |
 | `tiny-keccak 2.0.2` | `eth/keccak-tiny -> eth-valkyoth-hash/tiny-keccak` | Optional backend | Keep outside default. Backend admission remains documented in `docs/keccak-boundary.md`; future native Keccak work belongs to the hashing track. |
 | `k256 0.14.0` | `eth/secp256k1-k256 -> eth-valkyoth-verify/secp256k1-k256` | Optional backend | Keep outside default. Backend admission remains documented in `docs/dependency-admission-k256.md` and `docs/signature-backend-boundary.md`. |
-| `sanitization 1.2.4` | `eth/sanitization -> eth-valkyoth-sanitization` | Optional backend | `v0.37.5` documents and gates the optional sanitization bridge path. |
+| `sanitization 2.0.3` | `eth/sanitization -> eth-valkyoth-sanitization` | Optional backend | `v0.52.5` migrates the bridge to canonical wiping, drop-safety contracts, and runtime protection reporting. |
 | `serde 1.0.228` | `eth/eip712-json -> eth-valkyoth-verify/json` | Optional backend | `v0.37.5` documents and gates the optional JSON parser boundary. |
 | `serde_json 1.0.150` | `eth/eip712-json -> eth-valkyoth-verify/json` | Optional backend | `v0.37.5` documents and gates the optional JSON parser boundary plus existing duplicate-key and limit checks. |
 

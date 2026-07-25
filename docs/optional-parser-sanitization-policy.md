@@ -53,10 +53,10 @@ The optional sanitization path is:
 eth/sanitization -> eth-valkyoth-sanitization -> sanitization
 ```
 
-This bridge is for applications that explicitly want best-effort secret
-clearing under the `eth-valkyoth-*` namespace. It is not a guarantee that all
-historical copies are erased. Callers still need to control logs, crash dumps,
-swap, serialization, clones, and signer boundaries.
+This bridge is for applications that explicitly want optimizer-resistant
+volatile clearing under the `eth-valkyoth-*` namespace. It is not a guarantee
+that all historical copies are erased. Callers still need to control logs,
+crash dumps, swap, serialization, clones, and signer boundaries.
 
 Hardening features remain explicit on `eth-valkyoth-sanitization`:
 
@@ -65,10 +65,27 @@ Hardening features remain explicit on `eth-valkyoth-sanitization`:
 - `multi-pass-clear`;
 - `cache-flush`;
 - `register-scrub`;
+- `canary-check`;
+- `random-canary`;
+- `strict-canary-check`;
+- `strict-compare`;
+- `require-fork-exclusion`;
+- `wasm-compat`;
 - `zeroize-interop`.
 
 The `hardened-only` feature remains fail-closed unless the required hardening
-features are also enabled.
+features are also enabled. This is only a compile-time selection check.
+Applications using protected containers must inspect their
+`ProtectionReport`; selected features do not prove that OS controls succeeded.
+
+The `0.8` bridge intentionally follows the breaking `sanitization 2.0`
+contracts:
+
+- direct ordinary-buffer erasure uses `wipe::bytes` or `wipe::array`;
+- the removed `sanitize_bytes_best_effort` name is not emulated;
+- generated field-wise sanitizers implement `DropSafeSanitize`;
+- generated destructor paths require `DropSafeSanitize + Unpin`;
+- `HARDENING_FEATURES_ENABLED` reports feature selection only.
 
 ## Executable Gate
 

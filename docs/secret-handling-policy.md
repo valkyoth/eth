@@ -17,6 +17,10 @@ Rules:
 - Keep sanitization support outside the default `eth` dependency graph.
 - Use `eth-valkyoth-sanitization` for first-party secret byte containers unless
   a security review admits a narrower alternative.
+- Use canonical `wipe` APIs for ordinary owned buffers and require generated
+  destructor paths to satisfy `DropSafeSanitize + Unpin`.
+- Treat hardening features as requested capabilities, not achieved controls;
+  inspect `ProtectionReport` before accepting protected storage.
 - Redact secrets from errors, logs, panic text, metrics, and test output.
 - Document residual limits: zeroization cannot erase historical copies, stack
   spills, registers, swap, core dumps, or privileged memory reads.

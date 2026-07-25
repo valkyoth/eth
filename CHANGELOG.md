@@ -4,6 +4,13 @@ All notable changes to `eth` are documented here.
 
 ## Unreleased
 
+- Updated every direct crates.io dependency and lockfile to the latest release
+  compatible with Rust `1.90`, including `sanitization 2.0.3` and `syn 3.0.3`.
+- Migrated the optional sanitization bridge to the canonical `wipe` API,
+  runtime `ProtectionReport` semantics, and the
+  `DropSafeSanitize + Unpin` destructor contract.
+- Added an MSRV-aware direct dependency freshness check to the release gate so
+  semver-major updates cannot be hidden by compatibility-only tooling.
 - Added canonical Ethereum account decoding and non-forgeable
   `VerifiedAccount` capabilities for authenticated inclusion or absence.
 - Added account-bound storage proof verification that derives its root only

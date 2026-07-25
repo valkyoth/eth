@@ -5,6 +5,7 @@ rustc --version | grep -q '^rustc 1\.97\.1 '
 scripts/checks.sh
 scripts/validate-release-readiness.sh v0.52.5
 scripts/check_latest_tools.sh
+scripts/check_latest_crates.py
 scripts/check_ethereum_upstream.py
 scripts/check_runtime_dependency_policy.py
 scripts/check_optional_boundary_policy.py

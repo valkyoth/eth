@@ -19,6 +19,9 @@ use syn::{
 /// Enums are rejected because Rust does not clear inactive variant backing
 /// bytes when the active variant changes. Use a struct wrapper for secret
 /// material until a verified full-width clear primitive is available.
+///
+/// The generated field-wise implementation also implements
+/// `eth_valkyoth_sanitization::DropSafeSanitize`.
 #[proc_macro_derive(SecureSanitize, attributes(eth_sanitization))]
 pub fn derive_secure_sanitize(input: TokenStream) -> TokenStream {
     let input = parse_macro_input!(input as DeriveInput);
@@ -29,8 +32,9 @@ pub fn derive_secure_sanitize(input: TokenStream) -> TokenStream {
 
 /// Derives `Drop` by calling `SecureSanitize::secure_sanitize`.
 ///
-/// This macro expects the type to implement `SecureSanitize`, normally by also
-/// deriving `SecureSanitize`.
+/// This macro requires `Self: DropSafeSanitize + Unpin`, normally supplied by
+/// also deriving `SecureSanitize`. Generic secret fields must carry
+/// `SecureSanitize + Unpin` bounds on the struct declaration.
 #[proc_macro_derive(SecureSanitizeOnDrop, attributes(eth_sanitization))]
 pub fn derive_secure_sanitize_on_drop(input: TokenStream) -> TokenStream {
     let input = parse_macro_input!(input as DeriveInput);
@@ -75,10 +79,13 @@ fn expand_secure_sanitize(input: &DeriveInput) -> Result<TokenStream2, Error> {
 
     Ok(quote! {
         impl #impl_generics #crate_path::SecureSanitize for #name #ty_generics #where_clause {
+            #[inline]
             fn secure_sanitize(&mut self) {
                 #body
             }
         }
+
+        impl #impl_generics #crate_path::DropSafeSanitize for #name #ty_generics #where_clause {}
     })
 }
 
@@ -105,7 +112,10 @@ fn expand_secure_sanitize_on_drop(input: &DeriveInput) -> Result<TokenStream2, E
 
     Ok(quote! {
         impl #impl_generics Drop for #name #ty_generics #where_clause {
+            #[inline]
             fn drop(&mut self) {
+                fn require_drop_contract<T: ?Sized + #crate_path::DropSafeSanitize + ::core::marker::Unpin>() {}
+                require_drop_contract::<Self>();
                 #crate_path::SecureSanitize::secure_sanitize(self);
             }
         }

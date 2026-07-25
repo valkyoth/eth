@@ -1154,15 +1154,20 @@ For derive macros, depend on the support crate directly:
 
 ```toml
 [dependencies]
-eth-valkyoth-sanitization = { version = "0.7", features = ["derive"] }
+eth-valkyoth-sanitization = { version = "0.8", features = ["derive"] }
 ```
+
+The `0.8` bridge uses `sanitization 2.0`: ordinary buffers are cleared through
+the canonical `wipe` module, generated drop paths require
+`DropSafeSanitize + Unpin`, and native hardening must be confirmed from each
+protected container's runtime `ProtectionReport`.
 
 Public RLP encode/decode derives live in `eth-valkyoth-derive`:
 
 ```toml
 [dependencies]
-eth-valkyoth-derive = "0.17"
-eth-valkyoth-codec = "0.17"
+eth-valkyoth-derive = "0.18"
+eth-valkyoth-codec = "0.21"
 ```
 
 The derive surface is intentionally conservative. It supports reviewed structs
@@ -1208,8 +1213,13 @@ Compatibility evidence for `0.52.5`:
 
 ```bash
 scripts/checks.sh
+scripts/check_latest_crates.py
+scripts/check_latest_tools.sh
 scripts/release_0_52_5_gate.sh
 ```
+
+The two networked freshness checks fail closed when a direct crates.io
+dependency, stable Rust release, Cargo tool, or pinned GitHub Action is stale.
 
 For dependency-policy checks, install `cargo-deny` and `cargo-audit`, then run:
 

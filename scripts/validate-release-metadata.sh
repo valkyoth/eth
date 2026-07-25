@@ -191,6 +191,9 @@ test -x scripts/release_0_52_4_gate.sh
 grep -q "rustc 1\\\\.97\\\\.1" scripts/release_0_52_4_gate.sh
 test -x scripts/release_0_52_5_gate.sh
 grep -q "rustc 1\\\\.97\\\\.1" scripts/release_0_52_5_gate.sh
+test -x scripts/check_latest_crates.py
+test -x scripts/test-check-latest-crates.py
+grep -q "scripts/check_latest_crates.py" scripts/release_0_52_5_gate.sh
 test -x scripts/test-workspace-dependency-policy.py
 test -f docs/spec-source-policy.md
 test -f docs/reference-store.md

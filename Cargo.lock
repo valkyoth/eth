@@ -201,7 +201,7 @@ dependencies = [
 
 [[package]]
 name = "eth-valkyoth-derive"
-version = "0.17.5"
+version = "0.18.0"
 dependencies = [
  "eth-valkyoth-codec",
  "eth-valkyoth-primitives",
@@ -259,7 +259,7 @@ version = "0.7.0"
 
 [[package]]
 name = "eth-valkyoth-sanitization"
-version = "0.7.7"
+version = "0.8.0"
 dependencies = [
  "eth-valkyoth-derive",
  "sanitization",
@@ -301,9 +301,9 @@ dependencies = [
 
 [[package]]
 name = "glob"
-version = "0.3.3"
+version = "0.3.4"
 source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "0cc23270f6e1808e30a928bdc84dea0b9b4136a8bc82338574f23baf47bbd280"
+checksum = "e4eba85ea1d0a966a983acd07deee566e67395d2d96b6fb39e62b5a833f1eb0b"
 
 [[package]]
 name = "group"
@@ -374,9 +374,9 @@ dependencies = [
 
 [[package]]
 name = "libc"
-version = "0.2.186"
+version = "0.2.189"
 source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "68ab91017fe16c622486840e4c83c9a37afeff978bd239b5293d61ece587de66"
+checksum = "3eaf3ede3fee6db1a4c2ee091bf8a8b4dccdc6d17f656fb07896ee72867612f2"
 
 [[package]]
 name = "memchr"
@@ -454,9 +454,9 @@ dependencies = [
 
 [[package]]
 name = "sanitization"
-version = "1.2.5"
+version = "2.0.3"
 source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "c92c75202f3f884d540d83c61b14a9e3787542ced35cd5d7842d075c7475c0b1"
+checksum = "75e43f2762b31232062e8ba7bfbdfcbd33c80c43bf7a306a7e195c3c4f734e0f"
 dependencies = [
  "zeroize",
 ]
@@ -555,9 +555,9 @@ checksum = "13c2bddecc57b384dee18652358fb23172facb8a2c51ccc10d74c157bdea3292"
 
 [[package]]
 name = "syn"
-version = "3.0.2"
+version = "3.0.3"
 source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "a207d6d6a2b7fc470b80443726053f18a2481b7e1eee970597051596567987a3"
+checksum = "53e9bae58849f64dfa4f5d5ae372c8341f7305f82a3868709269343628b659a3"
 dependencies = [
  "proc-macro2",
  "quote",

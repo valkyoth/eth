@@ -31,7 +31,7 @@ Most users should depend on the facade crate instead:
 
 ```toml
 [dependencies]
-eth = "0.52.4"
+eth = "0.52.5"
 ```
 
 Crates.io: <https://crates.io/crates/eth>
@@ -41,10 +41,14 @@ provides sanitization derives and reviewed public RLP derives.
 
 ```toml
 [dependencies]
-eth-valkyoth-sanitization = { version = "0.7", features = ["derive"] }
+eth-valkyoth-sanitization = { version = "0.8", features = ["derive"] }
 ```
 
-The `0.17` series exports `RlpEncode` and `RlpDecode` derives for reviewed
+The `0.18` series aligns sanitization derives with `sanitization 2.0`.
+`SecureSanitize` also implements the field-wise `DropSafeSanitize` contract,
+and `SecureSanitizeOnDrop` requires `DropSafeSanitize + Unpin`.
+
+The crate also exports `RlpEncode` and `RlpDecode` derives for reviewed
 simple structs. Generated decoders require `DecodeLimits`, encode structs as
 RLP lists in Rust declaration order, reject generics/enums/unions, and require
 skipped fields to use `#[eth_rlp(skip, default, reason = "...")]`.

@@ -7,6 +7,7 @@ scripts/check_doc_links.sh
 scripts/check_release_plan.sh
 scripts/test-release-plan.sh
 scripts/test-check-latest-tools.sh
+scripts/test-check-latest-crates.py
 if ! cmp -s README.md crates/eth/README.md; then
     echo "README.md and crates/eth/README.md must remain identical" >&2
     diff -u README.md crates/eth/README.md >&2 || true

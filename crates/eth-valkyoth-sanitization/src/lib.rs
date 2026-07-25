@@ -3,8 +3,8 @@
 //! Optional sanitization bridge for secret-bearing Ethereum data.
 //!
 //! This crate is not part of the default `eth` dependency graph. Use it when an
-//! application explicitly wants the `sanitization` crate's best-effort secret
-//! clearing APIs under the `eth-valkyoth-*` namespace.
+//! application explicitly wants the `sanitization` crate's optimizer-resistant
+//! secret clearing APIs under the `eth-valkyoth-*` namespace.
 //!
 //! Deployment checklist for private-key or seed material:
 //!
@@ -28,37 +28,56 @@ compile_error!(
      multi-pass-clear, cache-flush, and register-scrub"
 );
 
-pub use sanitization::{SecretBytes, SecureSanitize, sanitize_bytes};
+pub use sanitization::{
+    DropSafeSanitize, ProtectionReport, ProtectionRequest, SecretBytes, SecureSanitize, wipe,
+};
+
+#[cfg(all(
+    feature = "memory-lock",
+    any(
+        all(
+            target_os = "linux",
+            any(target_arch = "x86_64", target_arch = "aarch64")
+        ),
+        target_os = "macos",
+        target_os = "ios",
+        target_os = "android",
+        target_os = "windows",
+        target_os = "freebsd",
+        target_os = "openbsd",
+        target_os = "netbsd",
+        target_os = "dragonfly",
+        all(target_arch = "wasm32", feature = "wasm-compat"),
+    )
+))]
+pub use sanitization::LockedSecretBytes;
 
 #[cfg(feature = "derive")]
 pub use eth_valkyoth_derive::{SecureSanitize, SecureSanitizeOnDrop};
 
-/// Whether the memory-clearing bridge was built with the hardened feature set.
+/// Whether the legacy hardening feature set was selected at compile time.
+///
+/// This does not claim that any runtime memory protection succeeded. Inspect
+/// the [`ProtectionReport`] returned by protected containers.
 #[cfg(all(
     feature = "memory-lock",
     feature = "multi-pass-clear",
     feature = "cache-flush",
     feature = "register-scrub"
 ))]
-pub const HARDENED_MODE: bool = true;
+pub const HARDENING_FEATURES_ENABLED: bool = true;
 
-/// Whether the memory-clearing bridge was built with the hardened feature set.
+/// Whether the legacy hardening feature set was selected at compile time.
+///
+/// This does not claim that any runtime memory protection succeeded. Inspect
+/// the [`ProtectionReport`] returned by protected containers.
 #[cfg(not(all(
     feature = "memory-lock",
     feature = "multi-pass-clear",
     feature = "cache-flush",
     feature = "register-scrub"
 )))]
-pub const HARDENED_MODE: bool = false;
-
-/// Best-effort clearing APIs.
-///
-/// These helpers make a best-effort attempt to clear the supplied storage, but
-/// cannot guarantee the compiler has not copied or moved the data earlier.
-/// Prefer [`sanitize_bytes`] when the stronger API applies.
-pub mod best_effort {
-    pub use sanitization::sanitize_bytes_best_effort;
-}
+pub const HARDENING_FEATURES_ENABLED: bool = false;
 
 /// Secret byte storage for 20-byte Ethereum-adjacent values.
 pub type SecretBytes20 = SecretBytes<20>;
@@ -74,5 +93,5 @@ pub type SecretPrivateKey = SecretBytes32;
 
 /// Sanitizes a fixed-size byte array in place.
 pub fn sanitize_fixed<const N: usize>(bytes: &mut [u8; N]) {
-    sanitize_bytes(bytes);
+    wipe::array(bytes);
 }

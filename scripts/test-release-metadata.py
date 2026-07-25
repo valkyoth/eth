@@ -54,6 +54,10 @@ def main() -> int:
         encoding="utf-8"
     )
     assert "scripts/generate-sbom.sh --check" in readiness
+    release_gate = (
+        ROOT / f"scripts/release_{release_version.replace('.', '_')}_gate.sh"
+    ).read_text(encoding="utf-8")
+    assert "scripts/check_latest_crates.py" in release_gate
 
     release_workflow = RELEASE_WORKFLOW.read_text(encoding="utf-8")
     assert "workflow_dispatch:" in release_workflow

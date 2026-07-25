@@ -7,6 +7,9 @@ Rules:
 
 - `scripts/check_latest_tools.sh` must compare the pin with the official Rust
   stable distribution manifest and fail the release gate when it is stale.
+- `scripts/check_latest_crates.py` must compare every exact direct crates.io
+  dependency with the newest stable release compatible with the workspace
+  MSRV, including new major versions.
 - Keep `workspace.package.rust-version` at the supported MSRV.
 - Run compatibility checks for every supported local toolchain before releases.
 - Run the full release gate on the pinned stable toolchain.

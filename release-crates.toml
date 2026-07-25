@@ -39,17 +39,17 @@ reason = "Adds canonical account decoding, verified account capabilities, accoun
 
 [crates."eth-valkyoth-derive"]
 previous_version = "0.17.5"
-version = "0.17.5"
-change = "unchanged"
-publish = false
-reason = "No package changes for v0.52.5."
+version = "0.18.0"
+change = "code"
+publish = true
+reason = "Aligns sanitization derives with the 2.0 DropSafeSanitize and Unpin destructor contract."
 
 [crates."eth-valkyoth-sanitization"]
 previous_version = "0.7.7"
-version = "0.7.7"
-change = "unchanged"
-publish = false
-reason = "No package changes for v0.52.5."
+version = "0.8.0"
+change = "code"
+publish = true
+reason = "Migrates the optional bridge to sanitization 2.0.3 and its canonical wipe and protection-report APIs."
 
 [crates."eth-valkyoth-evm-core"]
 previous_version = "0.26.1"
