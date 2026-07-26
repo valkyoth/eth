@@ -156,6 +156,7 @@ impl<'a> ResolverCursor<'a> {
     fn decode_matching(
         &self,
         expected: B256,
+        is_child: bool,
         require_branch: bool,
         session: &mut DecodeSession,
     ) -> Result<MptNode<'a>, MptProofVerificationError> {
@@ -163,6 +164,13 @@ impl<'a> ResolverCursor<'a> {
             .resolver
             .resolve(expected)
             .ok_or(MptProofVerificationError::MissingProofNode)?;
+        if is_child && encoded.len() < MPT_MAX_INLINE_REFERENCE_BYTES {
+            return Err(MptProofVerificationError::MalformedNode(
+                MptNodeDecodeError::HashedNodeTooShort {
+                    found: encoded.len(),
+                },
+            ));
+        }
         let node = decode_mpt_node_body_in_session(encoded, session)
             .map_err(MptProofVerificationError::MalformedNode)?;
         if require_branch && !matches!(node, MptNode::Branch(_)) {
@@ -179,7 +187,12 @@ impl<'a> ProofNodeCursor<'a> for ResolverCursor<'a> {
         &mut self,
         session: &mut DecodeSession,
     ) -> Result<MptNode<'a>, MptProofVerificationError> {
-        self.decode_matching(self.resolver.anchor().root().to_b256(), false, session)
+        self.decode_matching(
+            self.resolver.anchor().root().to_b256(),
+            false,
+            false,
+            session,
+        )
     }
 
     fn next_child_node(
@@ -187,7 +200,7 @@ impl<'a> ProofNodeCursor<'a> for ResolverCursor<'a> {
         expected: B256,
         session: &mut DecodeSession,
     ) -> Result<MptNode<'a>, MptProofVerificationError> {
-        self.decode_matching(expected, false, session)
+        self.decode_matching(expected, true, false, session)
     }
 
     fn next_extension_child(
@@ -195,6 +208,6 @@ impl<'a> ProofNodeCursor<'a> for ResolverCursor<'a> {
         expected: B256,
         session: &mut DecodeSession,
     ) -> Result<MptNode<'a>, MptProofVerificationError> {
-        self.decode_matching(expected, true, session)
+        self.decode_matching(expected, true, true, session)
     }
 }

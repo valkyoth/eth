@@ -1,4 +1,5 @@
 use super::*;
+use crate::MptNodeDecodeError;
 use eth_valkyoth_codec::{DecodeLimits, DecodeSession, DecodeSessionPolicy};
 use eth_valkyoth_hash::{Keccak256, hash_one};
 use std::cell::Cell;
@@ -67,6 +68,130 @@ fn rejects_missing_shared_child() -> Result<(), MptResolverError> {
         Err(MptResolverError::Proof(
             MptProofVerificationError::MissingProofNode
         ))
+    );
+    Ok(())
+}
+
+#[test]
+fn rejects_short_hash_referenced_child() -> Result<(), MptResolverError> {
+    let value = [0x01_u8];
+    let short_leaf = leaf(0x30, &value);
+    assert!(short_leaf.len() < crate::mpt::MPT_MAX_INLINE_REFERENCE_BYTES);
+    let short_leaf_hash = hash_one(TestHasher::default(), &short_leaf);
+    let root = branch(
+        short_leaf_hash,
+        hash_one(TestHasher::default(), b"unused child"),
+    );
+    let root_hash = hash_one(TestHasher::default(), &root);
+    let anchor = MptSnapshotAnchor::new(MptProofRoot::from_b256(root_hash));
+    let mut entries = vec![node(&root), node(&short_leaf)];
+    entries.sort_by(|left, right| compare_hash(left.hash(), right.hash()));
+    let mut session = test_session()?;
+    let resolver = MptNodeResolver::try_new(
+        anchor,
+        &entries,
+        MptResolverLimits::TEST_FIXTURE,
+        &mut session,
+        TestHasher::default,
+    )?;
+    let queries = [MptBatchQuery::inclusion(&[0x10], &value)];
+
+    assert_eq!(
+        verify_mpt_multiproof(anchor, &resolver, &queries, &mut session),
+        Err(MptResolverError::Proof(
+            MptProofVerificationError::MalformedNode(MptNodeDecodeError::HashedNodeTooShort {
+                found: short_leaf.len(),
+            })
+        ))
+    );
+    Ok(())
+}
+
+#[test]
+fn rejects_hash_mismatch_and_missing_root() -> Result<(), MptResolverError> {
+    let fixture = Fixture::new();
+    let wrong_hash = hash_one(TestHasher::default(), b"incorrect node claim");
+    let mismatched = [MptResolvedNode::new(wrong_hash, &fixture.root)];
+    let mismatch_anchor = MptSnapshotAnchor::new(MptProofRoot::from_b256(wrong_hash));
+    let mut session = test_session()?;
+
+    assert_eq!(
+        MptNodeResolver::try_new(
+            mismatch_anchor,
+            &mismatched,
+            MptResolverLimits::TEST_FIXTURE,
+            &mut session,
+            TestHasher::default,
+        )
+        .map(|_| ()),
+        Err(MptResolverError::HashMismatch)
+    );
+
+    let entries = fixture.entries();
+    let absent_hash = hash_one(TestHasher::default(), b"absent resolver root");
+    let absent_anchor = MptSnapshotAnchor::new(MptProofRoot::from_b256(absent_hash));
+    let mut session = test_session()?;
+    assert_eq!(
+        MptNodeResolver::try_new(
+            absent_anchor,
+            &entries,
+            MptResolverLimits::TEST_FIXTURE,
+            &mut session,
+            TestHasher::default,
+        )
+        .map(|_| ()),
+        Err(MptResolverError::MissingRoot)
+    );
+    Ok(())
+}
+
+#[test]
+fn rejects_node_query_and_zero_limits() -> Result<(), MptResolverError> {
+    assert_eq!(
+        MptResolverLimits::reviewed(0, 1, 1),
+        Err(MptResolverError::InvalidLimits)
+    );
+    assert_eq!(
+        MptResolverLimits::reviewed(1, 0, 1),
+        Err(MptResolverError::InvalidLimits)
+    );
+    assert_eq!(
+        MptResolverLimits::reviewed(1, 1, 0),
+        Err(MptResolverError::InvalidLimits)
+    );
+
+    let fixture = Fixture::new();
+    let entries = fixture.entries();
+    let node_limits = MptResolverLimits::reviewed(1, 2, 128)?;
+    let mut session = test_session()?;
+    assert_eq!(
+        MptNodeResolver::try_new(
+            fixture.anchor,
+            &entries,
+            node_limits,
+            &mut session,
+            TestHasher::default,
+        )
+        .map(|_| ()),
+        Err(MptResolverError::NodeLimitExceeded)
+    );
+
+    let query_limits = MptResolverLimits::reviewed(entries.len(), 1, 128)?;
+    let mut session = test_session()?;
+    let resolver = MptNodeResolver::try_new(
+        fixture.anchor,
+        &entries,
+        query_limits,
+        &mut session,
+        TestHasher::default,
+    )?;
+    let queries = [
+        MptBatchQuery::inclusion(&fixture.first_key, &fixture.first_value),
+        MptBatchQuery::inclusion(&fixture.second_key, &fixture.second_value),
+    ];
+    assert_eq!(
+        verify_mpt_multiproof(fixture.anchor, &resolver, &queries, &mut session),
+        Err(MptResolverError::QueryLimitExceeded)
     );
     Ok(())
 }
