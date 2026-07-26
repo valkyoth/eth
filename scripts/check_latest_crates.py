@@ -11,7 +11,7 @@ import urllib.request
 from pathlib import Path
 
 ROOT = Path(__file__).resolve().parents[1]
-USER_AGENT = "valkyoth-eth-crate-check/0.52.5 (https://github.com/valkyoth/eth)"
+USER_AGENT = "valkyoth-eth-crate-check/0.52.6 (https://github.com/valkyoth/eth)"
 VERSION = re.compile(r"^(\d+)\.(\d+)\.(\d+)$")
 
 

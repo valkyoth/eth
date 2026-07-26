@@ -1,5 +1,5 @@
 [release]
-version = "0.52.5"
+version = "0.52.6"
 policy = "independent"
 
 [crates."eth-valkyoth-codec"]
@@ -7,95 +7,95 @@ previous_version = "0.21.0"
 version = "0.21.0"
 change = "unchanged"
 publish = false
-reason = "No package changes for v0.52.5."
+reason = "No package changes for v0.52.6."
 
 [crates."eth-valkyoth-primitives"]
 previous_version = "0.11.4"
 version = "0.11.4"
 change = "unchanged"
 publish = false
-reason = "No package changes for v0.52.5."
+reason = "No package changes for v0.52.6."
 
 [crates."eth-valkyoth-hash"]
 previous_version = "0.11.4"
 version = "0.11.4"
 change = "unchanged"
 publish = false
-reason = "No package changes for v0.52.5."
+reason = "No package changes for v0.52.6."
 
 [crates."eth-valkyoth-protocol"]
 previous_version = "0.26.1"
 version = "0.26.1"
 change = "unchanged"
 publish = false
-reason = "No package changes for v0.52.5."
+reason = "No package changes for v0.52.6."
 
 [crates."eth-valkyoth-verify"]
-previous_version = "0.25.0"
-version = "0.26.0"
+previous_version = "0.26.0"
+version = "0.27.0"
 change = "code"
 publish = true
-reason = "Adds canonical account decoding, verified account capabilities, account-bound storage verification, and canonical absence and zero semantics."
+reason = "Adds bounded hash-addressed MPT resolution, snapshot-bound multiproof batches, owned deduplicating arenas, and cancellable scheduling."
 
 [crates."eth-valkyoth-derive"]
-previous_version = "0.17.5"
+previous_version = "0.18.0"
 version = "0.18.0"
-change = "code"
-publish = true
-reason = "Aligns sanitization derives with the 2.0 DropSafeSanitize and Unpin destructor contract."
+change = "unchanged"
+publish = false
+reason = "No package changes for v0.52.6."
 
 [crates."eth-valkyoth-sanitization"]
-previous_version = "0.7.7"
+previous_version = "0.8.0"
 version = "0.8.0"
-change = "code"
-publish = true
-reason = "Migrates the optional bridge to sanitization 2.0.3 and its canonical wipe and protection-report APIs."
+change = "unchanged"
+publish = false
+reason = "No package changes for v0.52.6."
 
 [crates."eth-valkyoth-evm-core"]
 previous_version = "0.26.1"
 version = "0.26.1"
 change = "unchanged"
 publish = false
-reason = "No package changes for v0.52.5."
+reason = "No package changes for v0.52.6."
 
 [crates."eth-valkyoth-evm"]
 previous_version = "0.10.2"
 version = "0.10.2"
 change = "unchanged"
 publish = false
-reason = "No package changes for v0.52.5."
+reason = "No package changes for v0.52.6."
 
 [crates."eth-valkyoth-rpc"]
 previous_version = "0.7.0"
 version = "0.7.0"
 change = "unchanged"
 publish = false
-reason = "No package changes for v0.52.5."
+reason = "No package changes for v0.52.6."
 
 [crates."eth-valkyoth-signer"]
 previous_version = "0.7.5"
 version = "0.7.5"
 change = "unchanged"
 publish = false
-reason = "No package changes for v0.52.5."
+reason = "No package changes for v0.52.6."
 
 [crates."eth-valkyoth-reth"]
 previous_version = "0.7.0"
 version = "0.7.0"
 change = "unchanged"
 publish = false
-reason = "No package changes for v0.52.5."
+reason = "No package changes for v0.52.6."
 
 [crates."eth-valkyoth-testkit"]
 previous_version = "0.7.0"
 version = "0.7.0"
 change = "unchanged"
 publish = false
-reason = "No package changes for v0.52.5."
+reason = "No package changes for v0.52.6."
 
 [crates.eth]
-previous_version = "0.52.4"
-version = "0.52.5"
+previous_version = "0.52.5"
+version = "0.52.6"
 change = "code"
 publish = true
-reason = "Exposes complete bounded account-to-storage proof composition with canonical account and zero-value semantics."
+reason = "Exposes bounded snapshot-bound MPT node resolution and multiproof orchestration."

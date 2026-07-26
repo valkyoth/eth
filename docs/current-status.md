@@ -1,6 +1,6 @@
 # Current Status
 
-Release snapshot: `v0.52.5` implementation complete; awaiting pentest on the
+Release snapshot: `v0.52.6` implementation complete; awaiting pentest on the
 exact implementation commit.
 
 This document summarizes what the workspace can do now. The
@@ -41,7 +41,7 @@ Legend:
 | secp256k1 recovery | 🟢 Available | First-party validation boundary plus optional reviewed `k256` adapter |
 | Transaction signing | 🟢 Available | Signing preimages and hashes for legacy, EIP-2930, EIP-1559, EIP-4844, and EIP-7702 |
 | MPT node decoding | 🟢 Available | Strict locally canonical branch, extension, leaf, compact-path, inline-reference, and proof-list parsing with shared-session accounting |
-| MPT inclusion proofs | 🟢 Available | Full-proof preflight, transaction/receipt inclusion, canonical account decoding, non-forgeable account authority, account-bound storage verification, and canonical absence/zero semantics |
+| MPT inclusion proofs | 🟢 Available | Full-proof preflight, hash-addressed snapshot-bound multiproofs, transaction/receipt inclusion, canonical account decoding, account-bound storage verification, and canonical absence/zero semantics |
 | Secret sanitization | 🟢 Optional | Explicit opt-in bridge to `sanitization 2.0.3`, canonical wiping, drop-safety contracts, and runtime protection reports |
 
 ## EVM Support
@@ -102,6 +102,10 @@ Legend:
 | Formal verification | Kani is planned as additional evidence, not a replacement for testing or review |
 
 ## Current Release
+
+`v0.52.6` adds bounded hash-addressed node resolution, immutable snapshot
+anchors, multiproof query/output accounting, and optional owned deduplicating
+arenas with deterministic cancellable scheduling.
 
 `v0.52.5` decodes authenticated account values as
 `[nonce, balance, storageRoot, codeHash]` and returns `VerifiedAccount`

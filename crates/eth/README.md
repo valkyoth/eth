@@ -33,7 +33,7 @@ receipts, withdrawals, Merkle Patricia Trie proofs, fork-aware validation, and
 bounded first-party EVM components.
 
 The complete stack is built in small independently reviewed milestones rather
-than claimed ahead of its evidence. Version `0.52.5` is still a library, not a
+than claimed ahead of its evidence. Version `0.52.6` is still a library, not a
 production node, wallet, RPC client, or key store.
 Networking, private-key signing, local key storage, and third-party execution
 backends are not enabled by default.
@@ -42,14 +42,14 @@ backends are not enabled by default.
 
 ```toml
 [dependencies]
-eth = "0.52.5"
+eth = "0.52.6"
 ```
 
 For optional sanitization support:
 
 ```toml
 [dependencies]
-eth = { version = "0.52.5", features = ["sanitization"] }
+eth = { version = "0.52.6", features = ["sanitization"] }
 ```
 
 ## Quick Start
@@ -128,7 +128,7 @@ Optional reviewed software Keccak backend:
 
 ```toml
 [dependencies]
-eth = { version = "0.52.5", features = ["keccak-tiny"] }
+eth = { version = "0.52.6", features = ["keccak-tiny"] }
 ```
 
 ```rust
@@ -142,14 +142,14 @@ Optional reviewed secp256k1 recovery adapter:
 
 ```toml
 [dependencies]
-eth = { version = "0.52.5", features = ["secp256k1-k256"] }
+eth = { version = "0.52.6", features = ["secp256k1-k256"] }
 ```
 
 Optional bounded EVM gas-estimation boundary:
 
 ```toml
 [dependencies]
-eth = { version = "0.52.5", features = ["evm"] }
+eth = { version = "0.52.6", features = ["evm"] }
 ```
 
 ```rust
@@ -254,7 +254,7 @@ Optional native EVM core domains:
 
 ```toml
 [dependencies]
-eth = { version = "0.52.5", features = ["evm-core"] }
+eth = { version = "0.52.6", features = ["evm-core"] }
 ```
 
 State access uses explicit host-state traits and caller-provided fixed-capacity
@@ -1206,7 +1206,7 @@ friendly, and independently testable.
 The minimum supported Rust version is Rust `1.90.0`. New deployments should use
 the pinned stable Rust `1.97.1` until the toolchain policy is updated.
 
-Compatibility evidence for `0.52.5`:
+Compatibility evidence for `0.52.6`:
 
 | Rust | Local Evidence |
 | --- | --- |
@@ -1219,7 +1219,7 @@ Compatibility evidence for `0.52.5`:
 scripts/checks.sh
 scripts/check_latest_crates.py
 scripts/check_latest_tools.sh
-scripts/release_0_52_5_gate.sh
+scripts/release_0_52_6_gate.sh
 ```
 
 The two networked freshness checks fail closed when a direct crates.io

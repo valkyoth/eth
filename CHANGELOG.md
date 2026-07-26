@@ -4,6 +4,9 @@ All notable changes to `eth` are documented here.
 
 ## Unreleased
 
+- Added bounded hash-addressed MPT resolution, immutable snapshot anchors,
+  multiproof output accounting, optional owned deduplicating arenas, and
+  deterministic cancellable host scheduling.
 - Updated every direct crates.io dependency and lockfile to the latest release
   compatible with Rust `1.90`, including `sanitization 2.0.3` and `syn 3.0.3`.
 - Migrated the optional sanitization bridge to the canonical `wipe` API,

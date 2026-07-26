@@ -4,10 +4,12 @@ use eth_valkyoth_codec::{DecodeLimits, DecodeSession, DecodeSessionPolicy};
 use eth_valkyoth_hash::{TinyKeccak256, hash_one};
 use eth_valkyoth_primitives::{Address, B256};
 use eth_valkyoth_verify::{
-    AccountTrieRoot, ReceiptTrieRoot, StorageSlotKey, StorageTrieRoot, TransactionTrieRoot,
+    AccountTrieRoot, MptBatchQuery, MptNodeResolver, MptProofRoot, MptResolvedNode,
+    MptResolverLimits, MptSnapshotAnchor, ReceiptTrieRoot, StorageSlotKey, StorageTrieRoot,
+    TransactionTrieRoot,
     verify_account_inclusion, verify_account_proof, verify_account_storage,
     verify_receipt_inclusion, verify_storage_inclusion, verify_transaction_inclusion,
-    verify_transaction_inclusion_in_session,
+    verify_mpt_multiproof, verify_transaction_inclusion_in_session,
 };
 use libfuzzer_sys::fuzz_target;
 use std::vec::Vec;
@@ -22,6 +24,7 @@ const MAX_PROOF_NODES: usize = 8;
 const MAX_PROOF_NODE_BYTES: usize = 512;
 
 fuzz_target!(|data: &[u8]| {
+    drive_resolver(data);
     drive_structured_leaf_proof(data);
     drive_structured_composed_proof(data);
     let Some(input) = ProofInput::parse(data) else {
@@ -30,6 +33,39 @@ fuzz_target!(|data: &[u8]| {
     input.drive(DecodeLimits::TEST_FIXTURE);
     input.drive(DecodeLimits::DEPLOYMENT_STARTING_POINT);
 });
+
+fn drive_resolver(data: &[u8]) {
+    let mut entries = data
+        .chunks(64)
+        .take(MAX_PROOF_NODES)
+        .filter(|node| !node.is_empty())
+        .map(|node| {
+            MptResolvedNode::new(hash_one(TinyKeccak256::default(), node), node)
+        })
+        .collect::<Vec<_>>();
+    entries.sort_by(|left, right| {
+        left.hash()
+            .to_bytes()
+            .iter()
+            .cmp(right.hash().to_bytes().iter())
+    });
+    let Some(root) = entries.first().map(|entry| entry.hash()) else {
+        return;
+    };
+    let anchor = MptSnapshotAnchor::new(MptProofRoot::from_b256(root));
+    let mut session = DecodeSession::new(DecodeSessionPolicy::TEST_FIXTURE)
+        .expect("fixture policy is valid");
+    if let Ok(resolver) = MptNodeResolver::try_new(
+        anchor,
+        &entries,
+        MptResolverLimits::TEST_FIXTURE,
+        &mut session,
+        TinyKeccak256::default,
+    ) {
+        let query = [MptBatchQuery::inclusion(data, data)];
+        let _ = verify_mpt_multiproof(anchor, &resolver, &query, &mut session);
+    }
+}
 
 fn drive_structured_composed_proof(data: &[u8]) {
     let Some(selector) = data.first().copied() else {

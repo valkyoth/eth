@@ -2,6 +2,8 @@
 #![forbid(unsafe_code)]
 //! Verification boundaries for Ethereum replay domains, signatures, and proofs.
 
+#[cfg(feature = "alloc")]
+extern crate alloc;
 #[cfg(feature = "std")]
 extern crate std;
 
@@ -12,6 +14,9 @@ mod eip712;
 mod eip712_typed;
 mod mpt;
 mod mpt_proof;
+mod mpt_resolver;
+#[cfg(feature = "alloc")]
+mod mpt_resolver_alloc;
 mod replay;
 mod sender;
 mod set_code_authorization;
@@ -54,6 +59,14 @@ pub use mpt_proof::{
     VerifiedReceiptInclusion, VerifiedTransactionInclusion, verify_receipt_inclusion,
     verify_receipt_inclusion_in_session, verify_transaction_inclusion,
     verify_transaction_inclusion_in_session,
+};
+pub use mpt_resolver::{
+    MptBatchQuery, MptNodeResolver, MptResolvedNode, MptResolverError, MptResolverErrorCategory,
+    MptResolverLimits, MptSnapshotAnchor, VerifiedMptBatch, verify_mpt_multiproof,
+};
+#[cfg(feature = "alloc")]
+pub use mpt_resolver_alloc::{
+    MptArenaError, MptBatchSchedule, MptCancellation, MptOwnedNodeArena, MptScheduleError,
 };
 pub use replay::{
     require_access_list_replay_domain, require_blob_replay_domain,

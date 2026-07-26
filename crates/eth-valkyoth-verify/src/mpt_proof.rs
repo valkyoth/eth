@@ -1,18 +1,19 @@
 use eth_valkyoth_codec::{DecodeError, DecodeLimits, DecodeSession, DecodeSessionPolicy};
-use eth_valkyoth_hash::{Keccak256, hash_one};
+use eth_valkyoth_hash::Keccak256;
+#[cfg(test)]
 use eth_valkyoth_primitives::B256;
 
-use crate::mpt::{
-    MPT_MAX_INLINE_REFERENCE_BYTES, MptCompactPath, MptNode, MptNodeDecodeError, MptNodeReference,
-    decode_mpt_node_body_in_session,
-};
+use crate::mpt::{MptCompactPath, MptNode, MptNodeDecodeError, MptNodeReference};
 
+mod cursor;
 mod error;
 mod key;
 mod plan;
 mod preflight;
 mod root;
 
+pub(crate) use cursor::verify_key_in_resolver;
+use cursor::{ProofCursor, ProofNodeCursor};
 use key::{encode_index_key, key_nibble_len};
 use plan::plan_remaining_work;
 pub(crate) use preflight::{preflight_proof, proof_resource_error};
@@ -245,14 +246,14 @@ where
     }
 }
 
-fn walk_to_value<'a, H>(
+fn walk_to_value<'a, C>(
     mut node: MptNode<'a>,
     key: &[u8],
-    cursor: &mut ProofCursor<'a, '_, H>,
+    cursor: &mut C,
     session: &mut DecodeSession,
 ) -> Result<MptProofValue<'a>, MptProofVerificationError>
 where
-    H: Keccak256,
+    C: ProofNodeCursor<'a>,
 {
     let mut key_nibble_offset = 0usize;
     let mut depth = 0usize;
@@ -314,95 +315,6 @@ where
                 .node_in_session(session)
                 .map_err(MptProofVerificationError::MalformedNode)?,
         };
-    }
-}
-
-struct ProofCursor<'a, 'h, H> {
-    expected_root: MptProofRoot,
-    nodes: &'a [&'a [u8]],
-    index: usize,
-    new_hasher: &'h mut dyn FnMut() -> H,
-}
-
-impl<'a, 'h, H> ProofCursor<'a, 'h, H>
-where
-    H: Keccak256,
-{
-    fn new(
-        expected_root: MptProofRoot,
-        nodes: &'a [&'a [u8]],
-        new_hasher: &'h mut impl FnMut() -> H,
-    ) -> Self {
-        Self {
-            expected_root,
-            nodes,
-            index: 0,
-            new_hasher,
-        }
-    }
-
-    fn next_hashed_node(
-        &mut self,
-        session: &mut DecodeSession,
-    ) -> Result<MptNode<'a>, MptProofVerificationError> {
-        let root = self.expected_root.to_b256();
-        self.next_node_matching(root, false, false, session)
-    }
-
-    fn next_child_node(
-        &mut self,
-        expected: B256,
-        session: &mut DecodeSession,
-    ) -> Result<MptNode<'a>, MptProofVerificationError> {
-        self.next_node_matching(expected, true, false, session)
-    }
-
-    fn next_extension_child(
-        &mut self,
-        expected: B256,
-        session: &mut DecodeSession,
-    ) -> Result<MptNode<'a>, MptProofVerificationError> {
-        self.next_node_matching(expected, true, true, session)
-    }
-
-    fn is_consumed(&self) -> bool {
-        self.index == self.nodes.len()
-    }
-
-    fn next_node_matching(
-        &mut self,
-        expected: B256,
-        is_child: bool,
-        require_branch: bool,
-        session: &mut DecodeSession,
-    ) -> Result<MptNode<'a>, MptProofVerificationError> {
-        let encoded = *self
-            .nodes
-            .get(self.index)
-            .ok_or(MptProofVerificationError::MissingProofNode)?;
-        if is_child && encoded.len() < MPT_MAX_INLINE_REFERENCE_BYTES {
-            return Err(MptProofVerificationError::MalformedNode(
-                MptNodeDecodeError::HashedNodeTooShort {
-                    found: encoded.len(),
-                },
-            ));
-        }
-        let node = decode_mpt_node_body_in_session(encoded, session)
-            .map_err(MptProofVerificationError::MalformedNode)?;
-        if require_branch && !matches!(node, MptNode::Branch(_)) {
-            return Err(MptProofVerificationError::MalformedNode(
-                MptNodeDecodeError::NonCanonicalExtensionChild,
-            ));
-        }
-        session
-            .account_hashes(1, encoded.len())
-            .map_err(proof_resource_error)?;
-        let digest = hash_one((self.new_hasher)(), encoded);
-        if digest != expected {
-            return Err(MptProofVerificationError::WrongRoot);
-        }
-        self.index = self.index.saturating_add(1);
-        Ok(node)
     }
 }
 

@@ -31,7 +31,7 @@ Most users should depend on the facade crate instead:
 
 ```toml
 [dependencies]
-eth = "0.52.5"
+eth = "0.52.6"
 ```
 
 Crates.io: <https://crates.io/crates/eth>
@@ -40,7 +40,11 @@ This package is published separately so the `eth` workspace can keep small,
 auditable crate boundaries. Treat it as a lower-level building block unless the
 `eth` documentation explicitly says otherwise.
 
-The `0.26.0` release adds canonical Ethereum account decoding and composed
+The `0.27.0` release adds a bounded hash-addressed MPT node resolver,
+snapshot-bound multiproof batches, cumulative output accounting, and optional
+owned deduplicating arenas with deterministic cancellable scheduling.
+
+The previous `0.26.0` release adds canonical Ethereum account decoding and composed
 EIP-1186 proof verification. `verify_account_proof` returns a non-forgeable
 `VerifiedAccount` capability for authenticated inclusion or absence;
 `verify_account_storage` derives its only accepted storage root from that
