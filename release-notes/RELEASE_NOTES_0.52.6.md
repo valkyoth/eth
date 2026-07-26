@@ -17,8 +17,9 @@ multiproof orchestration without weakening the allocation-free proof kernel.
 - Canonical empty branch terminals are treated as absence in both planned and
   executed ordered/resolver-backed proof walks.
 - Optional `alloc` `MptOwnedNodeArena` with pre-hash raw-node limits,
-  decode/hash/allocation session preflight, exact-size payload ownership,
-  retained payload-and-metadata accounting, and identical-node deduplication.
+  decode/hash/allocation session preflight, actual payload-capacity and metadata
+  accounting, allocation-free sorting/deduplication, and no infallible shrink
+  path.
 - Deterministic `MptBatchSchedule` and cooperative `MptCancellation`.
 - Shared/reordered, missing, duplicate, unrelated snapshot, output overflow,
   empty-terminal absence, malformed and over-budget pre-hash, deduplication,

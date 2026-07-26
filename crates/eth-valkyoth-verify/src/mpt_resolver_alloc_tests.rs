@@ -36,7 +36,11 @@ fn owned_arena_deduplicates_identical_nodes() -> Result<(), MptArenaError> {
     assert_eq!(arena.node_count(), 1);
     assert_eq!(
         arena.retained_bytes(),
-        core::mem::size_of::<OwnedNode>().saturating_add(node.len())
+        arena
+            .nodes
+            .capacity()
+            .saturating_mul(core::mem::size_of::<OwnedNode>())
+            .saturating_add(node.capacity())
     );
     Ok(())
 }
@@ -142,23 +146,59 @@ fn owned_arena_rejects_complete_hash_budget_before_hashing() -> Result<(), MptAr
 }
 
 #[test]
-fn owned_arena_discards_source_vector_excess_capacity() -> Result<(), MptArenaError> {
+fn owned_arena_accounts_source_vector_excess_capacity() -> Result<(), MptArenaError> {
+    let expected = vec![0xc2, 0x20, 0x01];
+    let mut oversized = Vec::with_capacity(4096);
+    oversized.extend_from_slice(&expected);
+    let payload_capacity = oversized.capacity();
+    let hash = hash_one(RealKeccak::default(), &expected);
+    let anchor = MptSnapshotAnchor::new(crate::MptProofRoot::from_b256(hash));
+    let arena = MptOwnedNodeArena::try_new(
+        anchor,
+        vec![oversized],
+        MptResolverLimits::TEST_FIXTURE,
+        8192,
+        &mut test_session()?,
+        RealKeccak::default,
+    )?;
+
+    let retained = arena.nodes.first().ok_or(MptArenaError::Allocation)?;
+    assert_eq!(retained.encoded.capacity(), payload_capacity);
+    assert_eq!(
+        arena.retained_bytes(),
+        arena
+            .nodes
+            .capacity()
+            .saturating_mul(core::mem::size_of::<OwnedNode>())
+            .saturating_add(payload_capacity)
+    );
+    Ok(())
+}
+
+#[test]
+fn owned_arena_rejects_excess_capacity_before_hashing() -> Result<(), MptArenaError> {
     let expected = vec![0xc2, 0x20, 0x01];
     let mut oversized = Vec::with_capacity(4096);
     oversized.extend_from_slice(&expected);
     let hash = hash_one(RealKeccak::default(), &expected);
     let anchor = MptSnapshotAnchor::new(crate::MptProofRoot::from_b256(hash));
-    let max_retained = core::mem::size_of::<OwnedNode>().saturating_add(expected.len());
-    let arena = MptOwnedNodeArena::try_new(
+    let calls = Cell::new(0_usize);
+    let mut session = test_session()?;
+    let result = MptOwnedNodeArena::try_new(
         anchor,
         vec![oversized],
         MptResolverLimits::TEST_FIXTURE,
-        max_retained,
-        &mut test_session()?,
-        RealKeccak::default,
-    )?;
+        128,
+        &mut session,
+        || {
+            calls.set(calls.get().saturating_add(1));
+            RealKeccak::default()
+        },
+    );
 
-    assert_eq!(arena.retained_bytes(), max_retained);
+    assert!(matches!(result, Err(MptArenaError::RetainedBytesExceeded)));
+    assert_eq!(calls.get(), 0);
+    assert_eq!(session.hashes(), 0);
     Ok(())
 }
 

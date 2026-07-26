@@ -1,4 +1,4 @@
-use alloc::{boxed::Box, vec::Vec};
+use alloc::vec::Vec;
 use core::cmp::Ordering;
 use core::fmt;
 use core::mem::size_of;
@@ -28,7 +28,7 @@ pub struct MptOwnedNodeArena {
 
 struct OwnedNode {
     hash: B256,
-    encoded: Box<[u8]>,
+    encoded: Vec<u8>,
 }
 
 impl MptOwnedNodeArena {
@@ -54,12 +54,21 @@ impl MptOwnedNodeArena {
         if node_count == 0 || node_count > limits.max_nodes() {
             return Err(MptArenaError::NodeLimitExceeded);
         }
-        let payload_bytes = encoded_nodes.iter().try_fold(0_usize, |total, encoded| {
-            total
-                .checked_add(encoded.len())
-                .ok_or(MptArenaError::RetainedBytesExceeded)
-        })?;
-        let retained_upper_bound = retained_memory(node_count, payload_bytes)?;
+        let (payload_bytes, payload_capacity) =
+            encoded_nodes
+                .iter()
+                .try_fold((0_usize, 0_usize), |totals, encoded| {
+                    let bytes = totals
+                        .0
+                        .checked_add(encoded.len())
+                        .ok_or(MptArenaError::RetainedBytesExceeded)?;
+                    let capacity = totals
+                        .1
+                        .checked_add(encoded.capacity())
+                        .ok_or(MptArenaError::RetainedBytesExceeded)?;
+                    Ok((bytes, capacity))
+                })?;
+        let retained_upper_bound = retained_memory(node_count, payload_capacity)?;
         if retained_upper_bound > max_retained_bytes {
             return Err(MptArenaError::RetainedBytesExceeded);
         }
@@ -93,10 +102,10 @@ impl MptOwnedNodeArena {
                 .map_err(arena_resource_error)?;
             nodes.push(OwnedNode {
                 hash: hash_one(new_hasher(), &encoded),
-                encoded: encoded.into_boxed_slice(),
+                encoded,
             });
         }
-        nodes.sort_by(|left, right| compare_hash(left.hash, right.hash));
+        nodes.sort_unstable_by(|left, right| compare_hash(left.hash, right.hash));
 
         for pair in nodes.windows(2) {
             if let [left, right] = pair
@@ -107,10 +116,9 @@ impl MptOwnedNodeArena {
             }
         }
         nodes.dedup_by(|left, right| left.hash == right.hash);
-        nodes.shrink_to_fit();
         let retained_payload = nodes.iter().try_fold(0_usize, |total, node| {
             total
-                .checked_add(node.encoded.len())
+                .checked_add(node.encoded.capacity())
                 .ok_or(MptArenaError::RetainedBytesExceeded)
         })?;
         let retained_bytes = retained_memory(nodes.capacity(), retained_payload)?;

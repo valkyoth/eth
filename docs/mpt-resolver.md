@@ -20,11 +20,13 @@ absence; an empty expected byte slice cannot turn it into an inclusion.
 Under the optional `alloc` feature, `MptOwnedNodeArena` bounds the raw node
 count and complete retained-memory shape before allocation or hashing. It
 decodes every node and preflights the complete hash budget before the first
-hash, stores payloads as exact-size boxed slices, then sorts and deduplicates
-identical entries. Its retained-byte limit covers payload bytes and node-vector
-capacity; allocator bookkeeping overhead is platform-specific and excluded.
-The independent node-count limit also bounds per-allocation overhead. The arena
-exposes only closure-scoped borrowed resolvers.
+hash, then allocation-free sorts and deduplicates identical entries. Its
+retained-byte limit covers each payload vector's actual capacity and the owned
+node vector's capacity; allocator bookkeeping overhead is platform-specific
+and excluded. The independent node-count limit also bounds per-allocation
+overhead. Fallible reservation is used for arena-owned vector growth, and
+construction performs no infallible shrink/reallocation step. The arena exposes
+only closure-scoped borrowed resolvers.
 
 `MptBatchSchedule` produces deterministic bounded ranges and checks a
 cooperative cancellation boundary before each range. Hosts may schedule ranges
