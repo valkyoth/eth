@@ -2871,6 +2871,8 @@ Exit criteria:
   infallible reallocation.
 - The release pentest is recorded, every finding is remediated, and the clean
   retest passes before the final report-only commit and tag.
+- `v0.52.6 implementation stop reached. Run pentest for this exact
+  commit.`
 
 ### v0.52.7 - Execution Admission And Host Capability Split
 
