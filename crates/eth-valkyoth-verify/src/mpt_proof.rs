@@ -269,8 +269,12 @@ where
         let reference = match node {
             MptNode::Branch(branch) => {
                 if key_nibble_offset == key_nibble_len(key) {
-                    account_found_value(branch.value(), session)?;
-                    return Ok(MptProofValue::Present(branch.value()));
+                    let value = branch.value();
+                    if value.is_empty() {
+                        return Ok(MptProofValue::Absent);
+                    }
+                    account_found_value(value, session)?;
+                    return Ok(MptProofValue::Present(value));
                 }
                 let child_index = key_nibble(key, key_nibble_offset)?;
                 key_nibble_offset = key_nibble_offset.saturating_add(1);
@@ -406,6 +410,10 @@ pub(crate) fn compatibility_session(
 #[cfg(test)]
 #[path = "mpt_proof_budget_tests.rs"]
 mod budget_tests;
+
+#[cfg(test)]
+#[path = "mpt_proof_absence_tests.rs"]
+mod absence_tests;
 
 #[cfg(test)]
 #[path = "mpt_proof_tests.rs"]

@@ -1,3 +1,5 @@
+extern crate std;
+
 use super::*;
 use crate::MptNodeDecodeError;
 use eth_valkyoth_codec::{DecodeLimits, DecodeSession, DecodeSessionPolicy};
@@ -68,6 +70,32 @@ fn rejects_missing_shared_child() -> Result<(), MptResolverError> {
         Err(MptResolverError::Proof(
             MptProofVerificationError::MissingProofNode
         ))
+    );
+    Ok(())
+}
+
+#[test]
+fn empty_branch_terminal_is_not_an_inclusion() -> Result<(), MptResolverError> {
+    let root = branch(
+        hash_one(TestHasher::default(), b"left child"),
+        hash_one(TestHasher::default(), b"right child"),
+    );
+    let root_hash = hash_one(TestHasher::default(), &root);
+    let anchor = MptSnapshotAnchor::new(MptProofRoot::from_b256(root_hash));
+    let entries = [MptResolvedNode::new(root_hash, &root)];
+    let mut session = test_session()?;
+    let resolver = MptNodeResolver::try_new(
+        anchor,
+        &entries,
+        MptResolverLimits::TEST_FIXTURE,
+        &mut session,
+        TestHasher::default,
+    )?;
+    let queries = [MptBatchQuery::inclusion(&[], &[])];
+
+    assert_eq!(
+        verify_mpt_multiproof(anchor, &resolver, &queries, &mut session),
+        Err(MptResolverError::Proof(MptProofVerificationError::Absent))
     );
     Ok(())
 }

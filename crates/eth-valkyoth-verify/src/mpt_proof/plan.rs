@@ -63,8 +63,12 @@ fn plan_walk<'a>(
         let reference = match node {
             MptNode::Branch(branch) => {
                 if key_offset == key_nibble_len(key) {
-                    plan_value_comparison(branch.value(), expected_value, session, future)?;
-                    return Ok(MptProofValue::Present(branch.value()));
+                    let value = branch.value();
+                    if value.is_empty() {
+                        return Ok(MptProofValue::Absent);
+                    }
+                    plan_value_comparison(value, expected_value, session, future)?;
+                    return Ok(MptProofValue::Present(value));
                 }
                 let child_index = key_nibble(key, key_offset)?;
                 key_offset = key_offset.saturating_add(1);

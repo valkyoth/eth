@@ -352,7 +352,7 @@ pub(super) fn leaf_node(key: &[u8], value: &[u8]) -> Vec<u8> {
     list(&[scalar(&compact_path_leaf(key)), scalar(value)])
 }
 
-fn leaf_node_from_nibbles(nibbles: &[u8], value: &[u8]) -> Vec<u8> {
+pub(super) fn leaf_node_from_nibbles(nibbles: &[u8], value: &[u8]) -> Vec<u8> {
     list(&[scalar(&compact_path_leaf_nibbles(nibbles)), scalar(value)])
 }
 
@@ -360,7 +360,7 @@ fn extension_node_hash(nibble: u8, child_hash: &[u8; 32]) -> Vec<u8> {
     list(&[scalar(&[0x10 | (nibble & 0x0f)]), scalar(child_hash)])
 }
 
-fn branch_node(child_nibble: u8, child: Vec<u8>, value: Vec<u8>) -> Vec<u8> {
+pub(super) fn branch_node(child_nibble: u8, child: Vec<u8>, value: Vec<u8>) -> Vec<u8> {
     let mut items = Vec::new();
     for index in 0..16 {
         if index == usize::from(child_nibble) {
@@ -422,7 +422,7 @@ fn key_nibbles(path: &[u8]) -> Vec<u8> {
     out
 }
 
-fn scalar(payload: &[u8]) -> Vec<u8> {
+pub(super) fn scalar(payload: &[u8]) -> Vec<u8> {
     if let [byte] = payload
         && *byte < 0x80
     {
@@ -434,7 +434,7 @@ fn scalar(payload: &[u8]) -> Vec<u8> {
     output
 }
 
-fn list(items: &[Vec<u8>]) -> Vec<u8> {
+pub(super) fn list(items: &[Vec<u8>]) -> Vec<u8> {
     let payload_len = items.iter().map(Vec::len).sum();
     let mut output = Vec::new();
     append_header(0xc0, payload_len, &mut output);

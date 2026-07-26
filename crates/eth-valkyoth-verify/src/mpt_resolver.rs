@@ -88,6 +88,11 @@ impl MptResolverLimits {
             max_output_bytes,
         })
     }
+
+    #[cfg(feature = "alloc")]
+    pub(crate) const fn max_nodes(self) -> usize {
+        self.max_nodes
+    }
 }
 
 /// Borrowed, bounded, hash-addressed MPT node resolver.

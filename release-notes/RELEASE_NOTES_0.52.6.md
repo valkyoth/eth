@@ -14,11 +14,15 @@ multiproof orchestration without weakening the allocation-free proof kernel.
 - `MptSnapshotAnchor` binding every resolver batch to one trusted root.
 - `MptBatchQuery` and `verify_mpt_multiproof` with query and cumulative output
   byte limits.
-- Optional `alloc` `MptOwnedNodeArena` with retained-byte limits and identical
-  node deduplication.
+- Canonical empty branch terminals are treated as absence in both planned and
+  executed ordered/resolver-backed proof walks.
+- Optional `alloc` `MptOwnedNodeArena` with pre-hash raw-node limits,
+  decode/hash/allocation session preflight, exact-size payload ownership,
+  retained payload-and-metadata accounting, and identical-node deduplication.
 - Deterministic `MptBatchSchedule` and cooperative `MptCancellation`.
 - Shared/reordered, missing, duplicate, unrelated snapshot, output overflow,
-  malformed pre-hash, deduplication, and cancellation tests.
+  empty-terminal absence, malformed and over-budget pre-hash, deduplication,
+  retained-capacity, and cancellation tests.
 - Resolver fuzz admission and traversal coverage.
 
 ## Security Properties
