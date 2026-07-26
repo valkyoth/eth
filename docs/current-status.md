@@ -1,7 +1,7 @@
 # Current Status
 
-Release snapshot: `v0.52.6` implementation complete; awaiting pentest on the
-exact implementation commit.
+Release snapshot: `v0.52.6` release candidate; pentest findings are remediated
+and the clean retest passed. Tagging awaits green GitHub CI and CodeQL.
 
 This document summarizes what the workspace can do now. The
 [Specification Matrix](SPEC_MATRIX.md) is the source of truth for exact
@@ -105,7 +105,10 @@ Legend:
 
 `v0.52.6` adds bounded hash-addressed node resolution, immutable snapshot
 anchors, multiproof query/output accounting, and optional owned deduplicating
-arenas with deterministic cancellable scheduling.
+arenas with deterministic cancellable scheduling. Resolver traversal preserves
+canonical short-child and empty-branch semantics from ordered proofs. Arena
+admission bounds raw input, complete hash work, and retained capacities before
+use and avoids infallible reallocation under attacker-controlled pressure.
 
 `v0.52.5` decodes authenticated account values as
 `[nonce, balance, storageRoot, codeHash]` and returns `VerifiedAccount`

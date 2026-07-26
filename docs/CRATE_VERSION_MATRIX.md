@@ -1,7 +1,7 @@
 # Crate Version Matrix
 
-Status: `v0.52.6` adds bounded hash-addressed MPT resolution and snapshot-bound
-multiproof orchestration. Only the verify support crate and facade change.
+Status: `v0.52.6` release candidate; pentest findings are remediated and the
+clean retest passed. Only the verify support crate and facade change.
 
 `eth` uses independent crate versions. The facade crate remains the main user
 entry point, but support crates are published only when their own package or

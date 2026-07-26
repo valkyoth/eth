@@ -1,6 +1,6 @@
 # Release Notes - eth v0.52.6
 
-Status: implementation complete; pentest required before release.
+Status: release candidate; pentest passed.
 
 ## Summary
 
@@ -30,10 +30,16 @@ multiproof orchestration without weakening the allocation-free proof kernel.
 
 - All encoded nodes are locally canonical before attacker bytes reach Keccak.
 - Claimed hashes are verified once at resolver admission.
+- Hash-addressed short children are rejected when canonical RLP requires an
+  inline reference, matching the ordered-proof kernel.
+- Empty branch terminals always prove absence, including through hashed and
+  inline resolver children.
 - Snapshot mismatch fails before traversal.
 - Sorted unique entries provide logarithmic lookup without allocation.
 - Node, query, hash-work, decode-work, retained-byte, and verified-output limits
   are explicit.
+- Owned arenas reject raw node-count and retained-capacity overflow before
+  hashing, use fallible reservation, and perform no infallible shrink step.
 - Host scheduling does not alter deterministic merge order or consensus proof
   semantics.
 
@@ -45,5 +51,8 @@ multiproof orchestration without weakening the allocation-free proof kernel.
 
 ## Pentest
 
-The permanent exact-commit report will be recorded at
-`security/pentest/v0.52.6.md` before tagging.
+Independent review and iterative retesting found and closed canonical
+short-child parity, empty branch inclusion, resolver error-path coverage, raw
+arena admission, retained-capacity accounting, and infallible allocation-path
+issues. No Critical, High, Medium, or Low finding remains. The permanent
+exact-commit report is recorded at `security/pentest/v0.52.6.md`.

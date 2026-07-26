@@ -2785,8 +2785,7 @@ Exit criteria:
 
 ### v0.52.5 - Composed Account And Storage Proofs
 
-Status: implementation complete; awaiting pentest on the exact candidate
-commit.
+Status: tagged as `v0.52.5`.
 
 Goal: make storage-proof authority derive cryptographically from the verified
 account value instead of a caller-supplied unrelated storage root.
@@ -2837,8 +2836,8 @@ Exit criteria:
 
 ### v0.52.6 - MPT Resolver Multiproof And Snapshot Orchestration
 
-Status: implementation complete; awaiting pentest on the exact implementation
-commit.
+Status: implementation complete; pentest findings remediated; clean retest
+passed. Awaiting green GitHub CI and CodeQL before tagging.
 
 Goal: retain the allocation-free proof kernel while providing a bounded
 orchestration layer suitable for live synchronization.
@@ -2857,14 +2856,21 @@ Verification:
 - Multiproof fixtures with shared, reordered, missing, duplicate, and
   unrelated nodes;
 - snapshot-mixing and cache-poisoning negative tests;
-- bounded parallelism, cancellation, and deterministic-result tests.
+- bounded parallelism, cancellation, and deterministic-result tests;
+- canonical short-child hash-reference and empty-branch absence parity tests;
+- direct coverage for missing roots, hash mismatches, invalid limits, node
+  limits, query limits, and retained-capacity rejection before hashing;
+- external pentest and clean retest on the exact implementation lineage.
 
 Exit criteria:
 
 - Live proof consumers can resolve and deduplicate nodes without weakening
   root binding, deterministic verification, or `no_std` kernel portability.
-- `v0.52.6 implementation stop reached. Run pentest for this exact
-  commit.`
+- Resolver and owned-arena admission reject non-canonical proof semantics and
+  over-budget raw or retained input before attacker-controlled hashing or
+  infallible reallocation.
+- The release pentest is recorded, every finding is remediated, and the clean
+  retest passes before the final report-only commit and tag.
 
 ### v0.52.7 - Execution Admission And Host Capability Split
 
