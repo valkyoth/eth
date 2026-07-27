@@ -10,6 +10,8 @@ extern crate std;
 mod access;
 #[cfg(feature = "alloc")]
 mod access_node;
+#[cfg(feature = "alloc")]
+mod access_radix;
 mod advanced_precompile;
 mod blake2f;
 mod bls12_frame;
@@ -54,7 +56,7 @@ pub use access::{
     EvmAccessProfile, EvmAccessSet, EvmAccessStatus, EvmAccessTracker, EvmEmbeddedAccessTracker,
 };
 #[cfg(feature = "alloc")]
-pub use access_node::EvmNodeAccessTracker;
+pub use access_node::{EvmNodeAccessCheckpoint, EvmNodeAccessTracker};
 pub use blake2f::{EVM_BLAKE2F_INPUT_BYTES, EVM_BLAKE2F_OUTPUT_BYTES};
 pub use bls12_frame::{
     EVM_BLS12381_G1_MSM_ITEM_BYTES, EVM_BLS12381_G2_MSM_ITEM_BYTES,

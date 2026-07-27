@@ -9,7 +9,7 @@ use crate::{
 fn node_and_embedded_profiles_have_identical_warmth_semantics() -> Result<(), EvmCoreError> {
     let mut embedded = EvmEmbeddedAccessTracker::<64, 64>::try_new()?;
     let mut node = EvmNodeAccessTracker::try_new(64, 64)?;
-    assert_eq!(node.profile(), EvmAccessProfile::NodeLogarithmic);
+    assert_eq!(node.profile(), EvmAccessProfile::NodeFixedWidthRadix);
 
     for value in sequence() {
         let address = address(value);
@@ -26,7 +26,7 @@ fn node_and_embedded_profiles_have_identical_warmth_semantics() -> Result<(), Ev
 }
 
 #[test]
-fn sorted_and_reverse_inputs_remain_logarithmically_balanced() -> Result<(), EvmCoreError> {
+fn sorted_and_reverse_inputs_remain_within_key_width() -> Result<(), EvmCoreError> {
     const ITEMS: usize = 4_096;
     let mut ascending = EvmNodeAccessTracker::try_new(ITEMS, ITEMS)?;
     let mut descending = EvmNodeAccessTracker::try_new(ITEMS, ITEMS)?;
@@ -39,13 +39,12 @@ fn sorted_and_reverse_inputs_remain_logarithmically_balanced() -> Result<(), Evm
         let _ = descending.warm_storage(address(reverse), EvmWord::from_usize(reverse))?;
     }
 
-    let bound = avl_height_bound(ITEMS)?;
-    let (ascending_addresses, ascending_storage) = ascending.tree_heights()?;
-    let (descending_addresses, descending_storage) = descending.tree_heights()?;
-    assert!(ascending_addresses <= bound);
-    assert!(ascending_storage <= bound);
-    assert!(descending_addresses <= bound);
-    assert!(descending_storage <= bound);
+    let (ascending_addresses, ascending_storage) = ascending.max_lookup_depths()?;
+    let (descending_addresses, descending_storage) = descending.max_lookup_depths()?;
+    assert!(ascending_addresses <= 161);
+    assert!(ascending_storage <= 417);
+    assert!(descending_addresses <= 161);
+    assert!(descending_storage <= 417);
     Ok(())
 }
 
@@ -72,7 +71,7 @@ fn node_capacity_failure_is_atomic() -> Result<(), EvmCoreError> {
 }
 
 #[test]
-fn rollback_rebuilds_exact_pre_attempt_state() -> Result<(), EvmCoreError> {
+fn rollback_restores_exact_pre_attempt_state() -> Result<(), EvmCoreError> {
     let mut tracker = EvmNodeAccessTracker::try_new(32, 32)?;
     let retained_address = address(9);
     let retained_key = EvmWord::from_usize(9);
@@ -105,6 +104,33 @@ fn node_nested_checkpoint_revert_is_lifo() -> Result<(), EvmCoreError> {
     assert_eq!(tracker.warm_address(address(1))?, EvmAccessStatus::Warm);
     assert_eq!(tracker.warm_address(address(2))?, EvmAccessStatus::Cold);
     tracker.commit(outer)?;
+    Ok(())
+}
+
+#[test]
+fn repeated_empty_and_single_insert_reverts_preserve_large_outer_state() -> Result<(), EvmCoreError>
+{
+    const RETAINED: usize = 2_048;
+    const REVERTS: usize = 128;
+    let mut tracker = EvmNodeAccessTracker::try_new(RETAINED.saturating_add(1), 1)?;
+    for value in 0..RETAINED {
+        let _ = tracker.warm_address(address(value))?;
+    }
+
+    for _ in 0..REVERTS {
+        let empty = tracker.checkpoint()?;
+        tracker.revert(empty)?;
+
+        let one_insert = tracker.checkpoint()?;
+        let _ = tracker.warm_address(address(RETAINED))?;
+        tracker.revert(one_insert)?;
+    }
+
+    assert_eq!(tracker.address_len(), RETAINED);
+    assert_eq!(
+        tracker.warm_address(address(RETAINED))?,
+        EvmAccessStatus::Cold
+    );
     Ok(())
 }
 
@@ -190,20 +216,4 @@ fn address(value: usize) -> EvmAddress {
         *output = *source;
     }
     EvmAddress::from_bytes(bytes)
-}
-
-fn avl_height_bound(items: usize) -> Result<usize, EvmCoreError> {
-    let mut power = 1usize;
-    let mut logarithm = 0usize;
-    while power < items.saturating_add(1) {
-        power = power
-            .checked_mul(2)
-            .ok_or(EvmCoreError::StateAccessTrackerCorrupt)?;
-        logarithm = logarithm
-            .checked_add(1)
-            .ok_or(EvmCoreError::StateAccessTrackerCorrupt)?;
-    }
-    logarithm
-        .checked_mul(2)
-        .ok_or(EvmCoreError::StateAccessTrackerCorrupt)
 }

@@ -98,10 +98,11 @@ documented in
   costs.
 - `EvmEmbeddedAccessTracker` is an explicit fixed-capacity, linear-scan,
   allocation-free profile. The optional `alloc` feature adds
-  `EvmNodeAccessTracker`, which pre-reserves bounded AVL tables at construction
-  and provides worst-case `O(log n)` membership and insertion without later
-  allocation. Both implement nested LIFO EIP-2929 scope rollback; the node
-  profile erases removed keys on rollback, reset, and drop.
+  `EvmNodeAccessTracker`, which pre-reserves bounded compressed-radix indexes
+  and undo storage at construction. Lookup and insertion are bounded by fixed
+  Ethereum key width without later allocation. Both implement nested LIFO
+  EIP-2929 scope rollback; node rollback touches only post-checkpoint
+  insertions and erases removed keys on rollback, reset, and drop.
 - Frontier through Istanbul use explicit flat historical state-read pricing for
   the currently executable subset; Berlin and later use warm/cold state-access
   gas.

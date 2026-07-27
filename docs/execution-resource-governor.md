@@ -1,6 +1,6 @@
 # Execution Resource Governor
 
-Status: `v0.53.0` implementation complete; awaiting pentest.
+Status: `v0.53.0` implementation complete; awaiting clean retest.
 
 ## Purpose
 
@@ -22,12 +22,14 @@ addresses or `S` storage slots per operation. It exists for explicitly small
 embedded profiles.
 
 `EvmNodeAccessTracker` is available behind `alloc`. Construction fallibly
-pre-reserves the complete configured address and storage capacity. Its AVL
-indexes perform worst-case `O(log n)` comparisons and rotations and do not
-allocate while warming accesses. Reset is `O(n)` and retains only the bounded
-constructor allocation. Reset, rollback, and drop erase key bytes through the
-audited optional sanitization bridge. Rollback is `O(n log n)` and performs no
-allocation.
+pre-reserves the complete configured address, storage, radix-node, and undo
+capacity. Its compressed binary radix indexes perform lookup and insertion in
+`O(w)`, where `w` is fixed at 160 bits for addresses and 416 bits for
+address/storage keys. No allocation occurs while warming accesses. Reset is
+`O(n)` and retains only the bounded constructor allocation. Reset, rollback,
+and drop erase key bytes through the audited optional sanitization bridge.
+Rollback is `O(k)` for the `k` unique insertions made after the checkpoint and
+does not inspect or rebuild retained outer-scope entries.
 
 Both profiles enforce gas-derived hard ceilings. `warm_storage` is atomic: a
 capacity failure cannot add only the address or only the slot. LIFO scope
@@ -75,7 +77,9 @@ Release evidence includes:
 
 - differential operation streams across both access profiles;
 - sorted and reverse-order distinct address/storage insertion with a checked
-  logarithmic tree-height bound;
+  fixed key-width lookup-depth bound;
+- repeated empty and one-insertion child reverts over a populated outer scope,
+  plus structural undo tests proving retained nodes are not rebuilt;
 - atomic capacity, exact rollback, commit, reset, cancellation, retained
   allocation, and generation tests;
 - `fuzz/fuzz_targets/access_tracker.rs`;

@@ -8,7 +8,7 @@ pub type EmbeddedAccessTracker<const ADDRESSES: usize, const STORAGE: usize> =
     EvmEmbeddedAccessTracker<ADDRESSES, STORAGE>;
 
 #[cfg(feature = "alloc")]
-/// Pre-reserved logarithmic access tracker for node-scale execution.
+/// Pre-reserved fixed-width radix access tracker for node-scale execution.
 pub type NodeAccessTracker = eth_valkyoth_evm_core::EvmNodeAccessTracker;
 
 fn map_status(status: EvmAccessStatus) -> AccessStatus {
@@ -70,7 +70,7 @@ impl<const ADDRESSES: usize, const STORAGE: usize> AccessTracker
 
 #[cfg(feature = "alloc")]
 impl AccessTracker for eth_valkyoth_evm_core::EvmNodeAccessTracker {
-    type Checkpoint = eth_valkyoth_evm_core::EvmAccessCheckpoint;
+    type Checkpoint = eth_valkyoth_evm_core::EvmNodeAccessCheckpoint;
 
     fn reset_transaction(&mut self) -> Result<(), HostCapabilityError> {
         self.reset_transaction()

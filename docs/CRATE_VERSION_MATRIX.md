@@ -39,7 +39,7 @@ workspace manifests and refuses accidental lockstep publication.
 | `eth-valkyoth-verify` | `0.27.0` | `0.27.0` | `unchanged` | No | No package changes. |
 | `eth-valkyoth-derive` | `0.18.0` | `0.18.0` | `unchanged` | No | No package changes. |
 | `eth-valkyoth-sanitization` | `0.8.0` | `0.8.0` | `unchanged` | No | No package changes. |
-| `eth-valkyoth-evm-core` | `0.26.1` | `0.27.0` | `code` | Yes | Adds injectable embedded and pre-reserved logarithmic access trackers with atomic capacity and attempt rollback. |
+| `eth-valkyoth-evm-core` | `0.26.1` | `0.27.0` | `code` | Yes | Adds injectable embedded and pre-reserved fixed-width-radix access trackers with atomic capacity and mutation-proportional rollback. |
 | `eth-valkyoth-evm` | `0.11.0` | `0.12.0` | `code` | Yes | Adds core tracker host adapters and a bounded transaction execution governor with hierarchical work tokens. |
 | `eth-valkyoth-rpc` | `0.7.0` | `0.7.0` | `unchanged` | No | No package changes. |
 | `eth-valkyoth-signer` | `0.7.5` | `0.7.5` | `unchanged` | No | No package changes. |

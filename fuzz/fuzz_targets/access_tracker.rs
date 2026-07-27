@@ -33,7 +33,7 @@ fuzz_target!(|data: &[u8]| {
         let Ok(slot) = <[u8; EvmWord::LEN]>::try_from(slot_bytes) else {
             continue;
         };
-        match selector % 4 {
+        match selector % 6 {
             0 => assert_eq!(
                 embedded.warm_address(EvmAddress::from_bytes(address)),
                 node.warm_address(EvmAddress::from_bytes(address))
@@ -49,12 +49,54 @@ fuzz_target!(|data: &[u8]| {
                 )
             ),
             2 => finish_and_restart(&mut embedded, &mut node, EvmAccessAttempt::Commit),
-            _ => finish_and_restart(&mut embedded, &mut node, EvmAccessAttempt::Rollback),
+            3 => finish_and_restart(&mut embedded, &mut node, EvmAccessAttempt::Rollback),
+            4 => nested_scope(
+                &mut embedded,
+                &mut node,
+                EvmAddress::from_bytes(address),
+                EvmWord::from_be_bytes(slot),
+                EvmAccessAttempt::Commit,
+            ),
+            _ => nested_scope(
+                &mut embedded,
+                &mut node,
+                EvmAddress::from_bytes(address),
+                EvmWord::from_be_bytes(slot),
+                EvmAccessAttempt::Rollback,
+            ),
         }
         assert_eq!(embedded.address_len(), node.address_len());
         assert_eq!(embedded.storage_len(), node.storage_len());
     }
 });
+
+fn nested_scope(
+    embedded: &mut EvmEmbeddedAccessTracker<CAPACITY, CAPACITY>,
+    node: &mut EvmNodeAccessTracker,
+    address: EvmAddress,
+    slot: EvmWord,
+    outcome: EvmAccessAttempt,
+) {
+    let (Ok(embedded_checkpoint), Ok(node_checkpoint)) =
+        (embedded.checkpoint(), node.checkpoint())
+    else {
+        return;
+    };
+    assert_eq!(
+        embedded.warm_storage(address, slot),
+        node.warm_storage(address, slot)
+    );
+    match outcome {
+        EvmAccessAttempt::Commit => assert_eq!(
+            embedded.commit(embedded_checkpoint),
+            node.commit(node_checkpoint)
+        ),
+        EvmAccessAttempt::Rollback => assert_eq!(
+            embedded.revert(embedded_checkpoint),
+            node.revert(node_checkpoint)
+        ),
+    }
+}
 
 fn finish_and_restart(
     embedded: &mut EvmEmbeddedAccessTracker<CAPACITY, CAPACITY>,

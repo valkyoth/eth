@@ -5,8 +5,8 @@ All notable changes to `eth` are documented here.
 ## Unreleased
 
 - Started v0.53.0 with an injectable access-tracker contract, an explicit
-  allocation-free embedded profile, and a pre-reserved AVL-backed node profile
-  with worst-case logarithmic membership and insertion.
+  allocation-free embedded profile, and a pre-reserved compressed-radix node
+  profile with lookup and insertion bounded by fixed Ethereum key width.
 - Added atomic access capacity enforcement, nested LIFO scope rollback,
   sanitizing allocation-retaining reset, adversarial sorted/reverse
   benchmarks, and differential embedded/node fuzz coverage.
@@ -23,6 +23,9 @@ All notable changes to `eth` are documented here.
   revert, separating cumulative and high-water governor APIs, bounding work
   authority, admitting Prague's initialized warm addresses, and wiping
   allocator-backed tracker keys on rollback, reset, and drop.
+- Remediated the third v0.53.0 pentest by replacing full retained-tree rollback
+  rebuilds with a bounded append-only radix index and one undo record per
+  insertion; rollback now touches only mutations made after its checkpoint.
 - Completed the v0.52.7 external pentest and clean retest after remediating
   every reported execution-host lifecycle and GitHub workflow supply-chain
   finding.

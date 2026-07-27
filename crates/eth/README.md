@@ -87,7 +87,7 @@ Legend: 🟢 available for the stated scope, 🟡 implemented but incomplete,
 | Headers, receipts, and withdrawals | 🟡 Partial | Canonical syntactic decode and selected hashing; full block/state validity is incomplete |
 | MPT proof verification | 🟢 Available | Strict preflight, transaction/receipt inclusion, canonical account decoding, account-bound storage authority, and absence/zero semantics |
 | Execution admission | 🟢 Available | Non-forgeable classified, canonical, fork-bound, and execution-ready transaction typestates |
-| EVM host capabilities | 🟢 Available | Separate state-view, journal, block, crypto, inspector, and bounded-arena contracts plus embedded-linear/node-logarithmic access profiles and transaction resource governors |
+| EVM host capabilities | 🟢 Available | Separate state-view, journal, block, crypto, inspector, and bounded-arena contracts plus embedded-linear/fixed-width-radix node access profiles and transaction resource governors |
 | Native EVM execution | 🟡 Partial | Bounded basic opcode/state-read interpreter, consensus-correct truncated PUSH handling, and call/create planning; full state transition is incomplete |
 | Native precompiles through BLAKE2F | 🟢 Available | Identity, SHA-256, RIPEMD-160, ModExp, BN254, and BLAKE2F; ECRECOVER uses explicit caller backends |
 | BLS12-381 and KZG | 🟡 Partial | BLS canonical wire/frame parsing and KZG/BLS gas planning; cryptographic execution remains fail closed |
@@ -112,7 +112,7 @@ for the remaining implementation sequence.
 | --- | --- | --- |
 | `std` | no | Enables `std` support in admitted core crates. |
 | `evm` | no | Explicit no_std EVM execution environment, snapshot, result, and bounded gas-estimation boundary. |
-| `evm-node` | no | Enables the pre-reserved logarithmic node access tracker through the EVM boundary. |
+| `evm-node` | no | Enables the pre-reserved fixed-width-radix node access tracker through the EVM boundary. |
 | `evm-core` | no | Dependency-free native EVM core domains, gas-metered basic opcode execution, explicit bounded state-access traits, and precompile planning. |
 | `evm-core-node` | no | Enables allocator-backed node access tracking in the native EVM core. |
 | `rpc` | no | Future explicit RPC trust-policy boundary. |
@@ -279,9 +279,10 @@ eth = { version = "0.53.0", features = ["evm-core"] }
 
 State access uses explicit host-state traits and an injected access tracker.
 The default `evm-core` feature provides an allocation-free fixed-array embedded
-profile. `evm-core-node` adds a pre-reserved AVL-backed profile with
-worst-case `O(log n)` membership and insertion and no allocation after
-construction. The `evm` crate also exposes validated transaction resource
+profile. `evm-core-node` adds pre-reserved compressed-radix indexes and bounded
+undo storage. Lookup and insertion are bounded by fixed Ethereum key width,
+rollback touches only post-checkpoint insertions, and no allocation occurs
+after construction. The `evm` crate also exposes validated transaction resource
 limits, destructive reset, monotonic resource charging, and conserved
 hierarchical work tokens. Frontier through Istanbul use explicit flat
 historical state-read pricing for the currently executable subset; Berlin and

@@ -1,19 +1,19 @@
 # Release Notes - eth v0.53.0
 
-Status: implementation complete; awaiting pentest.
+Status: implementation complete; awaiting clean retest.
 
 ## Summary
 
 This release removes hardwired linear warm-access tracking from native state
-execution, adds a bounded logarithmic node profile, and introduces explicit
-transaction execution-resource authority.
+execution, adds a bounded fixed-width radix node profile, and introduces
+explicit transaction execution-resource authority.
 
 ## Added
 
-- `EvmAccessTracker` with explicit embedded-linear and node-logarithmic
+- `EvmAccessTracker` with explicit embedded-linear and node-fixed-width-radix
   profiles.
-- Pre-reserved AVL address/storage tables with no allocation after
-  construction and worst-case `O(log n)` operations.
+- Pre-reserved compressed-radix address/storage indexes and bounded undo
+  journals with no allocation after construction.
 - Nested LIFO scope commit/rollback, atomic address+slot insertion,
   Prague-aware gas-derived hard ceilings, and sanitizing
   allocation-retaining transaction reset.
@@ -53,6 +53,9 @@ transaction execution-resource authority.
 - Abstract work authority is capped at the reviewed one-million-step ceiling.
 - Node tracker rollback, reset, and drop erase retained address and storage-key
   bytes through `eth-valkyoth-sanitization`.
+- Node tracker lookup and insertion are bounded by the 160-bit address or
+  416-bit address/storage key width. Rollback touches only unique insertions
+  made after its checkpoint and never rebuilds retained outer-scope indexes.
 
 The governor is an explicit capability. Integrators must route governed host
 operations through it; the complete node operational binding remains assigned
@@ -67,10 +70,11 @@ to `v0.65.0`.
 
 ## Pentest
 
-Two external review rounds reported seven findings: the initial two Low
-findings plus one High, three Medium, and one Low finding covering child-scope
-warmth rollback, resource accounting, work authority, initialized warmth, and
-retained key erasure. All are remediated. Tagging remains blocked until the
-exact remediation commit passes clean retest, release-gate validation, and
-green GitHub CI/CodeQL. The final report will be stored at
+Three external review rounds reported eight findings: the initial two Low
+findings, then one High, three Medium, and one Low finding, followed by one
+High rollback-complexity finding. They cover child-scope warmth rollback,
+resource accounting, work authority, initialized warmth, retained key erasure,
+and retained-index rebuild amplification. All are remediated. Tagging remains
+blocked until the exact remediation commit passes clean retest, release-gate
+validation, and green GitHub CI/CodeQL. The final report will be stored at
 `security/pentest/v0.53.0.md`.

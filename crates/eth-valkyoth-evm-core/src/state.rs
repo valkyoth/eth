@@ -39,6 +39,11 @@ impl EvmAddress {
     }
 
     #[cfg(feature = "alloc")]
+    pub(crate) const fn as_bytes(&self) -> &[u8; Self::LEN] {
+        &self.0
+    }
+
+    #[cfg(feature = "alloc")]
     pub(crate) fn wipe(&mut self) {
         eth_valkyoth_sanitization::wipe::array(&mut self.0);
     }

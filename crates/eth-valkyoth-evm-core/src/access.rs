@@ -65,8 +65,8 @@ pub struct EvmAccessCheckpoint {
 pub enum EvmAccessProfile {
     /// Allocation-free arrays with linear membership checks.
     EmbeddedLinear,
-    /// Pre-reserved AVL tables with logarithmic membership and insertion.
-    NodeLogarithmic,
+    /// Pre-reserved compressed-radix indexes with fixed-width lookup bounds.
+    NodeFixedWidthRadix,
 }
 
 /// Injectable transaction-global EIP-2929 warmth tracker.

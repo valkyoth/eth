@@ -50,7 +50,7 @@ Legend:
 | --- | --- | --- |
 | EVM domains | 🟢 Available | Dependency-free word, stack, memory, gas, fork, opcode, program-counter, injectable access-tracker, and host-state types |
 | Execution admission | 🟢 Available | Non-forgeable classified, canonical, fork-bound, and execution-ready transaction typestates; unknown and empty typed envelopes fail closed |
-| Host capabilities | 🟢 Available | Separate state-view, journal, block, access, crypto, inspector, and resettable bounded-arena contracts; embedded-linear and optional node-logarithmic trackers; explicit transaction resource governor |
+| Host capabilities | 🟢 Available | Separate state-view, journal, block, access, crypto, inspector, and resettable bounded-arena contracts; embedded-linear and optional fixed-width-radix node trackers; explicit transaction resource governor |
 | Native interpreter | 🟡 Partial | Bounded basic stack, arithmetic, control-flow, memory, selected state-read execution, and consensus-correct truncated PUSH zero-padding |
 | Historical fork rules | 🟡 Partial | Explicit fork identifiers and admitted gas/opcode boundaries; full historical execution remains versioned |
 | Call and create | 🟡 Partial | Stack/memory/static/depth planning and journal policy; nested host execution and commits remain fail closed |
@@ -107,11 +107,12 @@ Legend:
 
 `v0.53.0` replaces the hardwired linear warm-access set with an injectable
 tracker contract. The default embedded profile remains allocation-free and
-fixed-capacity. The optional node profile pre-reserves bounded AVL tables,
-performs no allocation after construction, and provides worst-case `O(log n)`
-membership and insertion. Capacity failures are atomic, failed/reverted root
-attempts restore exact warmth, and transaction reset retains only the
-constructor-bounded allocation.
+fixed-capacity. The optional node profile pre-reserves bounded compressed-radix
+indexes and undo storage, performs no allocation after construction, and
+bounds lookup and insertion by fixed Ethereum key width. Rollback touches only
+post-checkpoint insertions rather than rebuilding retained outer state.
+Capacity failures are atomic, failed/reverted root attempts restore exact
+warmth, and transaction reset retains only the constructor-bounded allocation.
 
 The EVM boundary exposes validated per-transaction ceilings for warm access,
 journals, checkpoints, frames, memory, reusable arenas, caches, and abstract

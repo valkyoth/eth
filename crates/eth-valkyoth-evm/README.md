@@ -44,7 +44,7 @@ auditable crate boundaries. Treat it as a lower-level building block unless the
 The `0.12.0` support-crate release, shipped with `eth` `0.53.0`, adds:
 
 - direct host adapters for the allocation-free embedded and optional
-  pre-reserved logarithmic node access trackers;
+  pre-reserved fixed-width-radix node access trackers;
 - validated transaction ceilings for warm access, journals, checkpoints,
   frames, memory, reusable arenas, caches, and abstract work;
 - destructive governor reset, monotonic fail-closed charging, and non-copyable

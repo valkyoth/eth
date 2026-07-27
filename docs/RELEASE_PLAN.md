@@ -2954,8 +2954,9 @@ while preserving a bounded `no_alloc` implementation for embedded users.
 
 Deliverables:
 
-- An injectable `AccessTracker` with deterministic bounded node tables and a
-  documented worst-case operation cost;
+- An injectable `AccessTracker` with deterministic pre-reserved compressed
+  radix indexes, bounded undo storage, and documented fixed-key-width lookup,
+  insertion, and mutation-proportional rollback costs;
 - nested LIFO warmth checkpoints aligned with journal child scopes;
 - retain fixed-array tracking only as an explicit embedded profile;
 - transaction-scoped reset and capacity enforcement for access sets, journals,
@@ -2970,6 +2971,8 @@ Verification:
 
 - Adversarial distinct-address and storage-slot benchmarks;
 - differential warmth semantics across embedded and node trackers;
+- repeated zero-change and one-insertion child reverts over populated outer
+  scopes, proving rollback does not rebuild retained index state;
 - capacity, nested rollback, partial-finalization poisoning, reset,
   cancellation, retained-memory sanitization, and accounting-mode tests.
 
@@ -2977,6 +2980,8 @@ Exit criteria:
 
 - Adversarial access patterns cannot turn valid gas-bounded execution into an
   undocumented quadratic host workload.
+- Child rollback work is proportional only to unique insertions after that
+  checkpoint, independent of retained outer-scope access-set size.
 - Reverted child scopes cannot retain discounted access state, accounting mode
   cannot be selected incorrectly, and every configured authority has a
   reviewed hard ceiling.
