@@ -25,6 +25,9 @@ Checkout owner/repository spelling must be canonical lowercase so
 case-insensitive repository addressing cannot evade freshness checks. Docker
 actions, job containers, and service containers must use explicit
 `@sha256:<64-hex>` image digests; mutable tags and expressions fail closed.
+Workflow discovery enumerates every regular `.yml` and `.yaml` file directly
+under `.github/workflows`, including dot-prefixed filenames, for both semantic
+validation and checkout annotation checks.
 
 ## Dependency Admission
 

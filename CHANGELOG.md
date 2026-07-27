@@ -4,6 +4,9 @@ All notable changes to `eth` are documented here.
 
 ## Unreleased
 
+- Closed the v0.52.7 dot-prefixed workflow discovery bypass in both semantic
+  Action validation and checkout annotation scanning, with explicit hidden
+  `.yml` and `.yaml` regression fixtures.
 - Remediated three more v0.52.7 findings by poisoning transaction resets and
   root capability mutations across errors/unwinding, rejecting noncanonical
   checkout casing, and requiring immutable Docker/container image digests.

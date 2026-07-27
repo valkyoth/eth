@@ -2898,7 +2898,8 @@ Deliverables:
   root journal, access, crypto, or arena mutation;
 - semantic YAML validation of every GitHub Action `uses` key, including flow
   mappings and reusable workflows, canonical checkout identity, and
-  digest-only Docker actions, job containers, and services.
+  digest-only Docker actions, job containers, and services, including
+  dot-prefixed `.yml` and `.yaml` workflow files.
 
 Verification:
 
@@ -2919,7 +2920,8 @@ Verification:
 - semantic Action-pin fixtures covering block/flow syntax, quoted keys and
   values, both workflow extensions, reusable workflows, local and Docker
   actions, expressions, malformed values, spoofed checkout comments,
-  noncanonical checkout casing, and mutable action/job/service images;
+  noncanonical checkout casing, mutable action/job/service images, and normal
+  or dot-prefixed workflow filenames;
 - deep-call and memory-expansion tests proving EVM exceptions replace host
   recursion or bounds errors.
 
@@ -2930,7 +2932,8 @@ Exit criteria:
   independently substituted.
 - No ordinary return, error, or panic unwind can leave an unfinished child
   lifecycle reusable, and no YAML spelling or comment can bypass immutable,
-  current Action pins.
+  current Action pins; every regular workflow file is checked regardless of a
+  leading dot in its filename.
 - Partial transaction resets and failed or unwound root mutations cannot
   remain execution-usable, and every executable container reference is
   content-addressed.

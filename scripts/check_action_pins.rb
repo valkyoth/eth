@@ -7,7 +7,11 @@ SHA = /\A[0-9a-fA-F]{40}\z/
 SHA256_IMAGE = /\A[^\s@]+@sha256:[0-9a-fA-F]{64}\z/
 
 def workflow_files(directory)
-  Dir.glob(File.join(directory, "*.{yml,yaml}")).sort
+  Dir.children(directory)
+    .select { |name| [".yml", ".yaml"].include?(File.extname(name)) }
+    .map { |name| File.join(directory, name) }
+    .select { |path| File.file?(path) }
+    .sort
 end
 
 def walk(value, path, checkouts)

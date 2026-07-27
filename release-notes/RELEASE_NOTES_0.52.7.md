@@ -51,6 +51,8 @@ auditable capabilities.
 - Checkout identity must use canonical lowercase spelling, while Docker
   actions, job containers, and service containers require immutable SHA-256
   image digests.
+- Semantic Action validation and checkout annotation scanning enumerate
+  dot-prefixed as well as ordinary `.yml` and `.yaml` workflow files.
 
 ## Security Properties
 
@@ -98,5 +100,8 @@ third follow-up reported two Medium findings covering guard arming before
 backend calls and comment-based checkout freshness. All findings are
 remediated. A fourth follow-up reported three Medium findings covering
 transaction/root-mutation unwinding, checkout casing, and mutable container
-references; all three are remediated. Tagging remains blocked until a clean
-retest and permanent exact-commit report at `security/pentest/v0.52.7.md`.
+references; all three are remediated. A fifth follow-up reported one Medium
+dot-prefixed workflow discovery bypass; both enumerators and their regression
+fixtures now cover hidden workflow filenames. Tagging remains blocked until a
+clean retest and permanent exact-commit report at
+`security/pentest/v0.52.7.md`.

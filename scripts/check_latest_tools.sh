@@ -77,11 +77,13 @@ check_cargo_tool_version() {
 }
 
 workflow_files() {
-    for workflow in "$workflow_dir"/*.yml "$workflow_dir"/*.yaml; do
-        if [ -f "$workflow" ]; then
-            printf '%s\n' "$workflow"
-        fi
-    done
+    find "$workflow_dir" \
+        -mindepth 1 \
+        -maxdepth 1 \
+        -type f \
+        \( -name '*.yml' -o -name '*.yaml' \) \
+        -print |
+        LC_ALL=C sort
 }
 
 checkout_uses() {

@@ -71,11 +71,105 @@ cat >"$workflow_dir/release.yml" <<'EOF'
 steps:
   - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
 EOF
+cat >"$workflow_dir/normal.yml" <<'EOF'
+steps:
+  - uses: valkyoth/normal-action@1234567890abcdef1234567890abcdef12345678
+EOF
+cat >"$workflow_dir/normal.yaml" <<'EOF'
+steps:
+  - uses: docker://example/normal@sha256:dddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddd
+EOF
 RUST_TOOLCHAIN_FILE="$toolchain_file" \
 RUST_STABLE_MANIFEST_URL="file://$manifest_file" \
 GITHUB_WORKFLOW_DIR="$workflow_dir" \
 CHECK_LATEST_TOOLS_ACTION_PINS_ONLY=1 \
     scripts/check_latest_tools.sh
+
+cat >"$workflow_dir/.hidden.yml" <<'EOF'
+steps:
+  - uses: attacker/example@main
+EOF
+if RUST_TOOLCHAIN_FILE="$toolchain_file" \
+    RUST_STABLE_MANIFEST_URL="file://$manifest_file" \
+    GITHUB_WORKFLOW_DIR="$workflow_dir" \
+    CHECK_LATEST_TOOLS_ACTION_PINS_ONLY=1 \
+    scripts/check_latest_tools.sh >/dev/null 2>&1; then
+    echo "unpinned action in hidden .yml workflow was accepted" >&2
+    exit 1
+fi
+rm "$workflow_dir/.hidden.yml"
+
+cat >"$workflow_dir/.hidden.yaml" <<'EOF'
+steps:
+  - uses: docker://attacker/image:latest
+EOF
+if RUST_TOOLCHAIN_FILE="$toolchain_file" \
+    RUST_STABLE_MANIFEST_URL="file://$manifest_file" \
+    GITHUB_WORKFLOW_DIR="$workflow_dir" \
+    CHECK_LATEST_TOOLS_ACTION_PINS_ONLY=1 \
+    scripts/check_latest_tools.sh >/dev/null 2>&1; then
+    echo "mutable Docker action in hidden .yaml workflow was accepted" >&2
+    exit 1
+fi
+rm "$workflow_dir/.hidden.yaml"
+
+cat >"$workflow_dir/.hidden.yaml" <<'EOF'
+jobs:
+  build:
+    container: attacker/build:latest
+    steps: []
+EOF
+if RUST_TOOLCHAIN_FILE="$toolchain_file" \
+    RUST_STABLE_MANIFEST_URL="file://$manifest_file" \
+    GITHUB_WORKFLOW_DIR="$workflow_dir" \
+    CHECK_LATEST_TOOLS_ACTION_PINS_ONLY=1 \
+    scripts/check_latest_tools.sh >/dev/null 2>&1; then
+    echo "mutable job container in hidden .yaml workflow was accepted" >&2
+    exit 1
+fi
+rm "$workflow_dir/.hidden.yaml"
+
+cat >"$workflow_dir/.hidden.yaml" <<'EOF'
+jobs:
+  build:
+    services:
+      database:
+        image: attacker/database:latest
+    steps: []
+EOF
+if RUST_TOOLCHAIN_FILE="$toolchain_file" \
+    RUST_STABLE_MANIFEST_URL="file://$manifest_file" \
+    GITHUB_WORKFLOW_DIR="$workflow_dir" \
+    CHECK_LATEST_TOOLS_ACTION_PINS_ONLY=1 \
+    scripts/check_latest_tools.sh >/dev/null 2>&1; then
+    echo "mutable service container in hidden .yaml workflow was accepted" >&2
+    exit 1
+fi
+rm "$workflow_dir/.hidden.yaml"
+
+cat >"$workflow_dir/.hidden.yml" <<'EOF'
+steps:
+  - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1
+EOF
+if RUST_TOOLCHAIN_FILE="$toolchain_file" \
+    RUST_STABLE_MANIFEST_URL="file://$manifest_file" \
+    GITHUB_WORKFLOW_DIR="$workflow_dir" \
+    CHECK_LATEST_TOOLS_ACTION_PINS_ONLY=1 \
+    scripts/check_latest_tools.sh >/dev/null 2>&1; then
+    echo "unannotated checkout in hidden workflow was accepted" >&2
+    exit 1
+fi
+
+cat >"$workflow_dir/.hidden.yml" <<'EOF'
+steps:
+  - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+EOF
+RUST_TOOLCHAIN_FILE="$toolchain_file" \
+RUST_STABLE_MANIFEST_URL="file://$manifest_file" \
+GITHUB_WORKFLOW_DIR="$workflow_dir" \
+CHECK_LATEST_TOOLS_ACTION_PINS_ONLY=1 \
+    scripts/check_latest_tools.sh
+rm "$workflow_dir/.hidden.yml"
 
 cat >"$workflow_dir/release.yml" <<'EOF'
 steps:
