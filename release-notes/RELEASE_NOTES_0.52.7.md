@@ -40,11 +40,17 @@ auditable capabilities.
   execution with exact-depth/LIFO checks and fail-closed RAII host poisoning,
   armed before checkpoint creation and covering every journal/arena call plus
   child execution before finalization.
+- Transaction reset is pessimistically poisoned until journal, access, and
+  arena resets all complete; every direct mutable root capability is guarded
+  against backend error and unwind.
 - The live tooling freshness gate now audits Action refs across every workflow
   through semantic YAML traversal, including flow mappings and reusable
   workflows, and verifies every checkout use against the latest tag and exact
   upstream commit using the parsed value rather than comments; it also checks
   the active cargo-fuzz CLI release.
+- Checkout identity must use canonical lowercase spelling, while Docker
+  actions, job containers, and service containers require immutable SHA-256
+  image digests.
 
 ## Security Properties
 
@@ -90,5 +96,7 @@ accounting, and inspector control flow. A second follow-up reported two Medium
 findings covering unwind poisoning and flow-style YAML Action-pin bypasses. A
 third follow-up reported two Medium findings covering guard arming before
 backend calls and comment-based checkout freshness. All findings are
-remediated. Tagging remains blocked until a clean retest and permanent
-exact-commit report at `security/pentest/v0.52.7.md`.
+remediated. A fourth follow-up reported three Medium findings covering
+transaction/root-mutation unwinding, checkout casing, and mutable container
+references; all three are remediated. Tagging remains blocked until a clean
+retest and permanent exact-commit report at `security/pentest/v0.52.7.md`.

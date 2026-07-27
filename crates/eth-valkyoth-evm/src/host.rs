@@ -4,6 +4,7 @@ use crate::{
     ExecutionEnvironment, ExecutionRequest, SnapshotAccount, StateView,
     arena::{IterativeCallFrame, TransactionArena},
     host_error::{BeginChildError, ChildFinalizeAction, ChildLifecycleError, HostCapabilityError},
+    host_scope::{PoisonScope, PoisonScopeHost},
 };
 
 /// Warm/cold result from a transaction-global access tracker.
@@ -158,41 +159,10 @@ impl<T> ChildExecution<T> {
     }
 }
 
-trait ChildScopeHost {
-    fn poison_child_scope(&mut self);
-}
-
-struct ChildScope<'scope, H: ChildScopeHost> {
-    host: &'scope mut H,
-    finalized: bool,
-}
-
-impl<'scope, H: ChildScopeHost> ChildScope<'scope, H> {
-    fn new(host: &'scope mut H) -> Self {
-        Self {
-            host,
-            finalized: false,
-        }
-    }
-
-    fn host(&mut self) -> &mut H {
-        self.host
-    }
-
-    fn finish(mut self) {
-        self.finalized = true;
-    }
-}
-
-impl<H: ChildScopeHost> Drop for ChildScope<'_, H> {
-    fn drop(&mut self) {
-        if !self.finalized {
-            self.host.poison_child_scope();
-        }
-    }
-}
-
 /// Request-bound bundle of powers available to an execution machine.
+///
+/// Any mutable backend error or unwind poisons the host because partial
+/// backend effects cannot be proven absent through these trait contracts.
 pub struct ExecutionHost<'host, 'transaction, J, A, C, R>
 where
     J: StateJournal,
@@ -262,22 +232,20 @@ where
 
     /// Destructively starts one transaction-local host lifecycle.
     ///
-    /// The returned event is safe to dispatch only after this method returns.
+    /// The host remains poisoned after any incomplete reset. The returned
+    /// event is safe to dispatch only after this method returns.
     pub fn begin_transaction(&mut self) -> Result<InspectorEvent, HostCapabilityError> {
         self.ensure_usable()?;
+        self.poisoned = true;
+        self.transaction_started = false;
         if self.arena.frame_depth() != 0 {
-            return self.poison(HostCapabilityError::HostPoisoned);
+            return Err(HostCapabilityError::HostPoisoned);
         }
-        if let Err(error) = self.journal.reset_transaction() {
-            return self.poison(error);
-        }
-        if let Err(error) = self.access.reset_transaction() {
-            return self.poison(error);
-        }
-        if let Err(error) = self.arena.reset_transaction() {
-            return self.poison(error);
-        }
+        self.journal.reset_transaction()?;
+        self.access.reset_transaction()?;
+        self.arena.reset_transaction()?;
         self.transaction_started = true;
+        self.poisoned = false;
         Ok(InspectorEvent::TransactionStarted)
     }
 
@@ -299,7 +267,7 @@ where
         if !self.transaction_started {
             return Err(ChildLifecycleError::TransactionNotStarted);
         }
-        let mut scope = ChildScope::new(self);
+        let mut scope = PoisonScope::new(self);
         let checkpoint = match scope.host().journal.checkpoint() {
             Ok(checkpoint) => checkpoint,
             Err(error) => {
@@ -412,14 +380,12 @@ where
         slot: B256,
         value: B256,
     ) -> Result<(), HostCapabilityError> {
-        self.ensure_started()?;
-        self.journal.set_storage(address, slot, value)
+        self.with_mutation(|host| host.journal.set_storage(address, slot, value))
     }
 
     /// Warms one address for the complete transaction.
     pub fn warm_address(&mut self, address: Address) -> Result<AccessStatus, HostCapabilityError> {
-        self.ensure_started()?;
-        self.access.warm_address(address)
+        self.with_mutation(|host| host.access.warm_address(address))
     }
 
     /// Warms one address/slot pair for the complete transaction.
@@ -428,14 +394,12 @@ where
         address: Address,
         slot: B256,
     ) -> Result<AccessStatus, HostCapabilityError> {
-        self.ensure_started()?;
-        self.access.warm_storage(address, slot)
+        self.with_mutation(|host| host.access.warm_storage(address, slot))
     }
 
     /// Computes Keccak-256 through the reviewed request-bound provider.
     pub fn keccak256(&mut self, input: &[u8]) -> Result<B256, HostCapabilityError> {
-        self.ensure_started()?;
-        self.crypto.keccak256(input)
+        self.with_mutation(|host| host.crypto.keccak256(input))
     }
 
     /// Recovers one address through the reviewed request-bound provider.
@@ -444,14 +408,12 @@ where
         digest: B256,
         signature: &[u8; 65],
     ) -> Result<Address, HostCapabilityError> {
-        self.ensure_started()?;
-        self.crypto.recover_address(digest, signature)
+        self.with_mutation(|host| host.crypto.recover_address(digest, signature))
     }
 
     /// Expands zero-initialized transaction memory within the arena bound.
     pub fn reserve_memory(&mut self, required_len: usize) -> Result<(), HostCapabilityError> {
-        self.ensure_started()?;
-        self.arena.reserve_memory(required_len)
+        self.with_mutation(|host| host.arena.reserve_memory(required_len))
     }
 
     /// Current iterative frame depth for deterministic execution scheduling.
@@ -475,20 +437,27 @@ where
         Ok(())
     }
 
-    fn poison<T>(&mut self, error: HostCapabilityError) -> Result<T, HostCapabilityError> {
-        self.poisoned = true;
-        Err(error)
+    fn with_mutation<T>(
+        &mut self,
+        mutate: impl FnOnce(&mut Self) -> Result<T, HostCapabilityError>,
+    ) -> Result<T, HostCapabilityError> {
+        self.ensure_started()?;
+        let mut scope = PoisonScope::new(self);
+        let output = mutate(scope.host())?;
+        scope.finish();
+        Ok(output)
     }
 }
 
-impl<J, A, C, R> ChildScopeHost for ExecutionHost<'_, '_, J, A, C, R>
+impl<J, A, C, R> PoisonScopeHost for ExecutionHost<'_, '_, J, A, C, R>
 where
     J: StateJournal,
     A: AccessTracker,
     C: CryptoProvider,
     R: TransactionArena,
 {
-    fn poison_child_scope(&mut self) {
+    fn poison_scope(&mut self) {
         self.poisoned = true;
+        self.transaction_started = false;
     }
 }

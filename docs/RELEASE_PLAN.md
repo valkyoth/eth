@@ -2894,8 +2894,11 @@ Deliverables:
   resettable transaction arenas;
 - fail-closed host poisoning after partial lifecycle transitions or unwinding
   from an unfinished child;
+- pessimistic poisoning across destructive transaction reset and every direct
+  root journal, access, crypto, or arena mutation;
 - semantic YAML validation of every GitHub Action `uses` key, including flow
-  mappings and reusable workflows.
+  mappings and reusable workflows, canonical checkout identity, and
+  digest-only Docker actions, job containers, and services.
 
 Verification:
 
@@ -2910,10 +2913,13 @@ Verification:
 - panic-unwind tests at checkpoint, frame entry, rejection rollback,
   commit/revert, frame exit, and child execution proving unfinished child
   scopes poison the host and block every subsequent mutable capability;
+- second-reset panic matrices for journal, access tracker, and arena plus root
+  mutation panic matrices for storage, warmth, hashing, recovery, and memory;
 - conserved legacy classification and canonical-reparse accounting;
 - semantic Action-pin fixtures covering block/flow syntax, quoted keys and
   values, both workflow extensions, reusable workflows, local and Docker
-  actions, expressions, malformed values, and spoofed checkout comments;
+  actions, expressions, malformed values, spoofed checkout comments,
+  noncanonical checkout casing, and mutable action/job/service images;
 - deep-call and memory-expansion tests proving EVM exceptions replace host
   recursion or bounds errors.
 
@@ -2925,6 +2931,9 @@ Exit criteria:
 - No ordinary return, error, or panic unwind can leave an unfinished child
   lifecycle reusable, and no YAML spelling or comment can bypass immutable,
   current Action pins.
+- Partial transaction resets and failed or unwound root mutations cannot
+  remain execution-usable, and every executable container reference is
+  content-addressed.
 - `v0.52.7 implementation stop reached. Run pentest for this exact
   commit.`
 

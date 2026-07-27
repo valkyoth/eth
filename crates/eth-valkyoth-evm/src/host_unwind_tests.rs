@@ -8,14 +8,17 @@ use super::*;
 #[derive(Clone, Copy, Debug, Eq, PartialEq)]
 enum JournalUnwind {
     None,
+    Reset,
     Checkpoint,
     Commit,
     Revert,
+    SetStorage,
 }
 
 struct UnwindingJournal {
     inner: TestJournal,
     point: JournalUnwind,
+    reset_calls: usize,
 }
 
 impl UnwindingJournal {
@@ -31,6 +34,10 @@ impl StateJournal for UnwindingJournal {
     type Checkpoint = JournalCheckpoint;
 
     fn reset_transaction(&mut self) -> Result<(), HostCapabilityError> {
+        self.reset_calls = self.reset_calls.saturating_add(1);
+        if self.point == JournalUnwind::Reset && self.reset_calls > 1 {
+            resume_unwind(Box::new("journal reset unwind"));
+        }
         self.inner.reset_transaction()
     }
 
@@ -64,6 +71,7 @@ impl StateJournal for UnwindingJournal {
         slot: B256,
         value: B256,
     ) -> Result<(), HostCapabilityError> {
+        self.unwind_at(JournalUnwind::SetStorage);
         self.inner.set_storage(address, slot, value)
     }
 }
@@ -71,6 +79,8 @@ impl StateJournal for UnwindingJournal {
 #[derive(Clone, Copy, Debug, Eq, PartialEq)]
 enum ArenaBehavior {
     Normal,
+    ResetUnwind,
+    ReserveUnwind,
     EnterUnwind,
     EnterRejection,
     LeaveUnwind,
@@ -79,15 +89,23 @@ enum ArenaBehavior {
 struct UnwindingArena {
     behavior: ArenaBehavior,
     frame: Option<IterativeCallFrame>,
+    reset_calls: usize,
 }
 
 impl TransactionArena for UnwindingArena {
     fn reset_transaction(&mut self) -> Result<(), HostCapabilityError> {
+        self.reset_calls = self.reset_calls.saturating_add(1);
+        if self.behavior == ArenaBehavior::ResetUnwind && self.reset_calls > 1 {
+            resume_unwind(Box::new("arena reset unwind"));
+        }
         self.frame = None;
         Ok(())
     }
 
     fn reserve_memory(&mut self, _required_len: usize) -> Result<(), HostCapabilityError> {
+        if self.behavior == ArenaBehavior::ReserveUnwind {
+            resume_unwind(Box::new("arena reserve unwind"));
+        }
         Ok(())
     }
 
@@ -95,7 +113,10 @@ impl TransactionArena for UnwindingArena {
         match self.behavior {
             ArenaBehavior::EnterUnwind => resume_unwind(Box::new("arena enter unwind")),
             ArenaBehavior::EnterRejection => Err(HostCapabilityError::CallDepthExceeded),
-            ArenaBehavior::Normal | ArenaBehavior::LeaveUnwind => {
+            ArenaBehavior::Normal
+            | ArenaBehavior::ResetUnwind
+            | ArenaBehavior::ReserveUnwind
+            | ArenaBehavior::LeaveUnwind => {
                 self.frame = Some(frame);
                 Ok(1)
             }
@@ -205,10 +226,12 @@ fn every_child_backend_unwind_poisons_host() {
         let mut journal = UnwindingJournal {
             inner: TestJournal::default(),
             point: journal_point,
+            reset_calls: 0,
         };
         let mut arena = UnwindingArena {
             behavior: arena_behavior,
             frame: None,
+            reset_calls: 0,
         };
         let mut access = TestAccess::default();
         let mut crypto = TestCrypto;
@@ -235,3 +258,6 @@ fn every_child_backend_unwind_poisons_host() {
         );
     }
 }
+
+#[path = "host_root_unwind_tests.rs"]
+mod root_tests;

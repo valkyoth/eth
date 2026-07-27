@@ -109,10 +109,15 @@ jobs:
   reusable:
     uses: valkyoth/example/.github/workflows/check.yml@1234567890abcdef1234567890abcdef12345678
   checks:
+    container:
+      image: example/build@sha256:bbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbb
+    services:
+      database:
+        image: example/database@sha256:cccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccc
     steps:
       - { uses: "valkyoth/flow-action@abcdef1234567890abcdef1234567890abcdef12" }
       - { "uses": './local-action' }
-      - uses: docker://example/image:latest
+      - uses: docker://example/image@sha256:aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa
 EOF
 cat >"$workflow_dir/extra.yaml" <<'EOF'
 steps:
@@ -162,6 +167,64 @@ if RUST_TOOLCHAIN_FILE="$toolchain_file" \
     CHECK_LATEST_TOOLS_ACTION_PINS_ONLY=1 \
     scripts/check_latest_tools.sh >/dev/null 2>&1; then
     echo "non-string action reference was accepted" >&2
+    exit 1
+fi
+
+cat >"$workflow_dir/extra.yaml" <<'EOF'
+steps:
+  - uses: Actions/Checkout@abcdef1234567890abcdef1234567890abcdef12
+EOF
+if RUST_TOOLCHAIN_FILE="$toolchain_file" \
+    RUST_STABLE_MANIFEST_URL="file://$manifest_file" \
+    GITHUB_WORKFLOW_DIR="$workflow_dir" \
+    CHECK_LATEST_TOOLS_ACTION_PINS_ONLY=1 \
+    scripts/check_latest_tools.sh >/dev/null 2>&1; then
+    echo "noncanonical checkout casing was accepted" >&2
+    exit 1
+fi
+
+cat >"$workflow_dir/extra.yaml" <<'EOF'
+steps:
+  - uses: docker://example/image:latest
+EOF
+if RUST_TOOLCHAIN_FILE="$toolchain_file" \
+    RUST_STABLE_MANIFEST_URL="file://$manifest_file" \
+    GITHUB_WORKFLOW_DIR="$workflow_dir" \
+    CHECK_LATEST_TOOLS_ACTION_PINS_ONLY=1 \
+    scripts/check_latest_tools.sh >/dev/null 2>&1; then
+    echo "mutable Docker action tag was accepted" >&2
+    exit 1
+fi
+
+cat >"$workflow_dir/extra.yaml" <<'EOF'
+jobs:
+  build:
+    container: example/build:latest
+    steps: []
+EOF
+if RUST_TOOLCHAIN_FILE="$toolchain_file" \
+    RUST_STABLE_MANIFEST_URL="file://$manifest_file" \
+    GITHUB_WORKFLOW_DIR="$workflow_dir" \
+    CHECK_LATEST_TOOLS_ACTION_PINS_ONLY=1 \
+    scripts/check_latest_tools.sh >/dev/null 2>&1; then
+    echo "mutable job container tag was accepted" >&2
+    exit 1
+fi
+
+cat >"$workflow_dir/extra.yaml" <<'EOF'
+jobs:
+  build:
+    services:
+      database:
+        image: example/database:latest
+    steps: []
+EOF
+if RUST_TOOLCHAIN_FILE="$toolchain_file" \
+    RUST_STABLE_MANIFEST_URL="file://$manifest_file" \
+    GITHUB_WORKFLOW_DIR="$workflow_dir" \
+    CHECK_LATEST_TOOLS_ACTION_PINS_ONLY=1 \
+    scripts/check_latest_tools.sh >/dev/null 2>&1; then
+    echo "mutable service container tag was accepted" >&2
     exit 1
 fi
 

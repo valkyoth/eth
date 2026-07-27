@@ -13,6 +13,7 @@ mod environment;
 mod gas_estimation;
 mod host;
 mod host_error;
+mod host_scope;
 mod result;
 mod snapshot;
 

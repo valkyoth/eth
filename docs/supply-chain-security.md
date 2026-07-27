@@ -21,6 +21,10 @@ expression-based remote references, and unsupported YAML aliases.
 Checkout freshness compares the parsed `uses` value directly with the
 upstream release SHA. Semver comments are separately linted and cross-checked
 as non-authoritative annotation metadata.
+Checkout owner/repository spelling must be canonical lowercase so
+case-insensitive repository addressing cannot evade freshness checks. Docker
+actions, job containers, and service containers must use explicit
+`@sha256:<64-hex>` image digests; mutable tags and expressions fail closed.
 
 ## Dependency Admission
 

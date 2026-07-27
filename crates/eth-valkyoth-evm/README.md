@@ -56,6 +56,8 @@ The `0.11.0` support-crate release, shipped with `eth` `0.52.7`, provides:
 - closure-scoped LIFO child execution, RAII host poisoning across every
   journal/arena unwind or partial finalization, and post-transition inspector
   events;
+- fail-closed poisoning across destructive transaction resets and every
+  direct root-level journal, access, crypto, or arena mutation;
 - `BeginChildError` preserving frame rejection and journal-cleanup failures;
 - allocation-free resettable borrowed memory and iterative frame storage;
 - bounded gas-estimation policy and deterministic termination ceilings.

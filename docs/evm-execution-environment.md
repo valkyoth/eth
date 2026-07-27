@@ -80,6 +80,8 @@ counts above policy and estimates above the selected cap.
 - Child checkpoints never escape `with_child`, nested finalization is LIFO,
   and a guard armed before checkpoint creation poisons the host on partial
   finalization or unwinding from any child lifecycle backend call.
+- Transaction reset is pessimistically poisoned until every component clears,
+  and direct root mutations remain poisoned after backend error or unwind.
 - Inspector callbacks occur only after immutable transition events are
   returned to the caller.
 - Child frame rejection preserves its arena error, and a simultaneous journal

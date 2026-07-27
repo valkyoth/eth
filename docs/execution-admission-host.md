@@ -88,6 +88,13 @@ the host if checkpoint creation, frame entry, rejection rollback,
 commit/revert, frame exit, or child execution unwinds before successful
 finalization. A poisoned host rejects all later mutable capability operations.
 
+`begin_transaction` clears its started state and pessimistically poisons the
+host before checking frame depth or resetting the journal, access tracker, and
+arena. It restores usability only after all three resets complete. Direct
+root-level storage, warmth, cryptographic, and arena mutations use the same
+RAII poison scope: a backend error or unwind makes the host permanently
+unusable.
+
 Transaction and child methods return immutable `InspectorEvent` evidence only
 after critical transitions complete. Inspectors are not invoked while a
 checkpoint or frame is in an externally unrecoverable intermediate state.
@@ -124,6 +131,10 @@ The release includes:
 - panic-unwind coverage at every journal/arena lifecycle call and inside child
   execution, proving an unfinished child poisons the host and blocks
   subsequent mutable capabilities;
+- repeated-transaction reset panic coverage for the journal, access tracker,
+  and arena;
+- direct root-mutation panic coverage for storage, address/slot warmth,
+  Keccak, recovery, and memory reservation;
 - frame-capacity rejection tests with successful and failed journal cleanup;
 - post-transition inspector dispatch coverage;
 - legacy classification/reparse accounting under one decode ledger;

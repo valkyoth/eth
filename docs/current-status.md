@@ -112,8 +112,8 @@ decode and active-fork/chain checks to an execution-ready transaction.
 and environment from the request, keeps journal/access/crypto/arena powers
 private, makes its associated journal authoritative for current storage,
 scopes nested children to LIFO closures, arms poisoning before checkpoint
-creation for every partial finalization or panic unwind, and returns inspector
-events only after transitions complete.
+creation and transaction reset, guards every direct root mutation, and returns
+inspector events only after transitions complete.
 This milestone does not claim sender recovery, intrinsic-gas, account-state,
 fee, blob/KZG, authorization, or complete consensus validity.
 

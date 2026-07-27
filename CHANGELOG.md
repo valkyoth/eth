@@ -4,6 +4,9 @@ All notable changes to `eth` are documented here.
 
 ## Unreleased
 
+- Remediated three more v0.52.7 findings by poisoning transaction resets and
+  root capability mutations across errors/unwinding, rejecting noncanonical
+  checkout casing, and requiring immutable Docker/container image digests.
 - Closed two further v0.52.7 retest findings by arming child-scope poisoning
   before checkpoint creation and deriving checkout freshness exclusively from
   semantic YAML values rather than comments.
