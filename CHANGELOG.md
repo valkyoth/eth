@@ -4,6 +4,18 @@ All notable changes to `eth` are documented here.
 
 ## Unreleased
 
+- Started v0.53.0 with an injectable access-tracker contract, an explicit
+  allocation-free embedded profile, and a pre-reserved AVL-backed node profile
+  with worst-case logarithmic membership and insertion.
+- Added atomic access capacity enforcement, exact root-attempt rollback,
+  allocation-retaining reset, adversarial sorted/reverse benchmarks, and
+  differential embedded/node fuzz coverage.
+- Added validated transaction limits for access sets, journals, checkpoints,
+  frames, memory, reusable arenas, caches, and abstract work, plus destructive
+  reset and conserved non-copyable hierarchical work tokens.
+- Refreshed the non-admission review against `revm 42.0.1` and
+  `revm-primitives 42.0.0`; the latest line exceeds the Rust `1.90` floor and
+  no external execution backend entered the dependency graph.
 - Completed the v0.52.7 external pentest and clean retest after remediating
   every reported execution-host lifecycle and GitHub workflow supply-chain
   finding.

@@ -2,9 +2,14 @@
 #![forbid(unsafe_code)]
 //! Dependency-free `no_std` EVM core domains for `eth`.
 
+#[cfg(feature = "alloc")]
+extern crate alloc;
 #[cfg(feature = "std")]
 extern crate std;
 
+mod access;
+#[cfg(feature = "alloc")]
+mod access_node;
 mod advanced_precompile;
 mod blake2f;
 mod bls12_frame;
@@ -44,6 +49,12 @@ mod state;
 mod state_execution;
 mod word;
 
+pub use access::{
+    EVM_MAX_WARM_ADDRESSES, EVM_MAX_WARM_STORAGE_SLOTS, EvmAccessAttempt, EvmAccessProfile,
+    EvmAccessSet, EvmAccessStatus, EvmAccessTracker, EvmEmbeddedAccessTracker,
+};
+#[cfg(feature = "alloc")]
+pub use access_node::EvmNodeAccessTracker;
 pub use blake2f::{EVM_BLAKE2F_INPUT_BYTES, EVM_BLAKE2F_OUTPUT_BYTES};
 pub use bls12_frame::{
     EVM_BLS12381_G1_MSM_ITEM_BYTES, EVM_BLS12381_G2_MSM_ITEM_BYTES,
@@ -98,7 +109,7 @@ pub use precompile::{
 };
 pub use program_counter::ProgramCounter;
 pub use stack::{EVM_STACK_LIMIT, EvmStack};
-pub use state::{EvmAccessSet, EvmAccessStatus, EvmAccount, EvmAddress, EvmState, EvmStateContext};
+pub use state::{EvmAccount, EvmAddress, EvmState, EvmStateContext};
 pub use word::EvmWord;
 
 #[cfg(test)]
@@ -120,6 +131,14 @@ mod truncated_push_tests;
 #[cfg(test)]
 #[path = "state_tests.rs"]
 mod state_tests;
+
+#[cfg(test)]
+#[path = "access_tests.rs"]
+mod access_tests;
+
+#[cfg(all(test, feature = "alloc"))]
+#[path = "access_node_tests.rs"]
+mod access_node_tests;
 
 #[cfg(test)]
 #[path = "historical_gas_tests.rs"]

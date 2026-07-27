@@ -34,13 +34,13 @@ Most users should depend on `eth` and enable the optional `evm-core` feature:
 
 ```toml
 [dependencies]
-eth = { version = "0.52.2", features = ["evm-core"] }
+eth = { version = "0.53.0", features = ["evm-core"] }
 ```
 
 This crate executes only the audited bootstrap opcode subset. It exposes
 bounded types for EVM words, stacks, memory, program counters, opcode
 classification, fork identifiers, deterministic core errors, explicit
-host-state traits, fixed-capacity warm/cold access tracking, historical fork
+host-state traits, injectable warm/cold access tracking, historical fork
 identifiers, opcode-introduction metadata, and a no-alloc interpreter for stack
 arithmetic, bitwise/comparison, stack manipulation, dynamic jumps,
 return/revert shells, state reads, `EXTCODECOPY`, and a fail-closed `SSTORE`
@@ -89,13 +89,16 @@ documented in
 - Caller-provided EVM memory is zero-initialized on construction. Execution
   contexts are one-shot until an explicit destructive `reset`, preventing
   stack, memory, or program-counter reuse across requests.
-- State access is available only through explicit host-state traits and
-  caller-provided fixed-capacity warm/cold access sets.
+- State access is available only through explicit host-state traits and an
+  injected access tracker.
 - Failed and reverted stateful runs restore the caller's warm/cold access
   checkpoint so retries and reverted scopes cannot inherit discounted access
   costs.
-- Warm/cold access sets are linear-scan, allocation-free structures; choose
-  capacities that are bounded relative to the gas limit and deployment policy.
+- `EvmEmbeddedAccessTracker` is an explicit fixed-capacity, linear-scan,
+  allocation-free profile. The optional `alloc` feature adds
+  `EvmNodeAccessTracker`, which pre-reserves bounded AVL tables at construction
+  and provides worst-case `O(log n)` membership and insertion without later
+  allocation.
 - Frontier through Istanbul use explicit flat historical state-read pricing for
   the currently executable subset; Berlin and later use warm/cold state-access
   gas.

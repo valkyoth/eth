@@ -1,7 +1,7 @@
 use crate::{
-    EvmAccessSet, EvmCallFramePolicy, EvmCallKind, EvmCallPlan, EvmCoreError, EvmCreateKind,
-    EvmCreatePlan, EvmFork, EvmGas, EvmGasMeter, EvmGasSchedule, EvmMemory, EvmMemoryRange,
-    EvmOpcode, EvmStack, EvmState, EvmStateContext, EvmWord, ProgramCounter,
+    EvmAccessAttempt, EvmAccessTracker, EvmCallFramePolicy, EvmCallKind, EvmCallPlan, EvmCoreError,
+    EvmCreateKind, EvmCreatePlan, EvmFork, EvmGas, EvmGasMeter, EvmGasSchedule, EvmMemory,
+    EvmMemoryRange, EvmOpcode, EvmStack, EvmState, EvmStateContext, EvmWord, ProgramCounter,
     bytecode::{next_instruction_pc, push_immediate_word},
     call::EvmCallCreatePlan,
     jumpdest::JumpdestMap,
@@ -140,16 +140,16 @@ impl<'a, const STACK: usize> EvmExecution<'a, STACK> {
     ///
     /// Failed runs restore the caller's warm/cold access set. The execution
     /// object still requires [`Self::reset`] before another invocation.
-    pub fn run_with_state<const ADDRESSES: usize, const STORAGE: usize, S: EvmState>(
+    pub fn run_with_state<S: EvmState, A: EvmAccessTracker>(
         &mut self,
         bytecode: &[u8],
         limits: ExecutionLimits,
         context: EvmStateContext,
         state: &mut S,
-        accesses: &mut EvmAccessSet<ADDRESSES, STORAGE>,
+        accesses: &mut A,
     ) -> Result<ExecutionReport, EvmCoreError> {
         self.begin_run()?;
-        let access_checkpoint = accesses.checkpoint();
+        accesses.begin_attempt()?;
         let mut host = HostState {
             context,
             state,
@@ -160,9 +160,12 @@ impl<'a, const STACK: usize> EvmExecution<'a, STACK> {
             Err(_) => true,
             Ok(report) => matches!(report.status, ExecutionStatus::Reverted { .. }),
         };
-        if should_restore {
-            host.accesses.restore(access_checkpoint);
-        }
+        let outcome = if should_restore {
+            EvmAccessAttempt::Rollback
+        } else {
+            EvmAccessAttempt::Commit
+        };
+        host.accesses.finish_attempt(outcome)?;
         result
     }
 

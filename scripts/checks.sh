@@ -60,6 +60,7 @@ for package in \
     eth-valkyoth-evm)
         cargo package -p "$package" --allow-dirty \
             --config 'patch.crates-io.eth-valkyoth-codec.path="crates/eth-valkyoth-codec"' \
+            --config 'patch.crates-io.eth-valkyoth-evm-core.path="crates/eth-valkyoth-evm-core"' \
             --config 'patch.crates-io.eth-valkyoth-primitives.path="crates/eth-valkyoth-primitives"' \
             --config 'patch.crates-io.eth-valkyoth-hash.path="crates/eth-valkyoth-hash"' \
             --config 'patch.crates-io.eth-valkyoth-protocol.path="crates/eth-valkyoth-protocol"'

@@ -33,7 +33,7 @@ receipts, withdrawals, Merkle Patricia Trie proofs, fork-aware validation, and
 bounded first-party EVM components.
 
 The complete stack is built in small independently reviewed milestones rather
-than claimed ahead of its evidence. Version `0.52.7` is still a library, not a
+than claimed ahead of its evidence. Version `0.53.0` is still a library, not a
 production node, wallet, RPC client, or key store.
 Networking, private-key signing, local key storage, and third-party execution
 backends are not enabled by default.
@@ -42,14 +42,14 @@ backends are not enabled by default.
 
 ```toml
 [dependencies]
-eth = "0.52.7"
+eth = "0.53.0"
 ```
 
 For optional sanitization support:
 
 ```toml
 [dependencies]
-eth = { version = "0.52.7", features = ["sanitization"] }
+eth = { version = "0.53.0", features = ["sanitization"] }
 ```
 
 ## Quick Start
@@ -87,7 +87,7 @@ Legend: 🟢 available for the stated scope, 🟡 implemented but incomplete,
 | Headers, receipts, and withdrawals | 🟡 Partial | Canonical syntactic decode and selected hashing; full block/state validity is incomplete |
 | MPT proof verification | 🟢 Available | Strict preflight, transaction/receipt inclusion, canonical account decoding, account-bound storage authority, and absence/zero semantics |
 | Execution admission | 🟢 Available | Non-forgeable classified, canonical, fork-bound, and execution-ready transaction typestates |
-| EVM host capabilities | 🟢 Available | Separate state-view, journal, block, access, crypto, inspector, and bounded-arena contracts |
+| EVM host capabilities | 🟢 Available | Separate state-view, journal, block, crypto, inspector, and bounded-arena contracts plus embedded-linear/node-logarithmic access profiles and transaction resource governors |
 | Native EVM execution | 🟡 Partial | Bounded basic opcode/state-read interpreter, consensus-correct truncated PUSH handling, and call/create planning; full state transition is incomplete |
 | Native precompiles through BLAKE2F | 🟢 Available | Identity, SHA-256, RIPEMD-160, ModExp, BN254, and BLAKE2F; ECRECOVER uses explicit caller backends |
 | BLS12-381 and KZG | 🟡 Partial | BLS canonical wire/frame parsing and KZG/BLS gas planning; cryptographic execution remains fail closed |
@@ -112,7 +112,9 @@ for the remaining implementation sequence.
 | --- | --- | --- |
 | `std` | no | Enables `std` support in admitted core crates. |
 | `evm` | no | Explicit no_std EVM execution environment, snapshot, result, and bounded gas-estimation boundary. |
+| `evm-node` | no | Enables the pre-reserved logarithmic node access tracker through the EVM boundary. |
 | `evm-core` | no | Dependency-free native EVM core domains, gas-metered basic opcode execution, explicit bounded state-access traits, and precompile planning. |
+| `evm-core-node` | no | Enables allocator-backed node access tracking in the native EVM core. |
 | `rpc` | no | Future explicit RPC trust-policy boundary. |
 | `eip712-json` | no | Enables the optional `std` JSON-RPC EIP-712 typed-data parser boundary. |
 | `keccak-tiny` | no | Enables the optional reviewed `tiny-keccak` software backend. |
@@ -130,7 +132,7 @@ Optional reviewed software Keccak backend:
 
 ```toml
 [dependencies]
-eth = { version = "0.52.7", features = ["keccak-tiny"] }
+eth = { version = "0.53.0", features = ["keccak-tiny"] }
 ```
 
 ```rust
@@ -144,14 +146,14 @@ Optional reviewed secp256k1 recovery adapter:
 
 ```toml
 [dependencies]
-eth = { version = "0.52.7", features = ["secp256k1-k256"] }
+eth = { version = "0.53.0", features = ["secp256k1-k256"] }
 ```
 
 Optional bounded EVM gas-estimation boundary:
 
 ```toml
 [dependencies]
-eth = { version = "0.52.7", features = ["evm"] }
+eth = { version = "0.53.0", features = ["evm"] }
 ```
 
 ```rust
@@ -272,13 +274,18 @@ Optional native EVM core domains:
 
 ```toml
 [dependencies]
-eth = { version = "0.52.7", features = ["evm-core"] }
+eth = { version = "0.53.0", features = ["evm-core"] }
 ```
 
-State access uses explicit host-state traits and caller-provided fixed-capacity
-warm/cold access sets. Frontier through Istanbul use explicit flat historical
-state-read pricing for the currently executable subset; Berlin and later use
-warm/cold access accounting. See the
+State access uses explicit host-state traits and an injected access tracker.
+The default `evm-core` feature provides an allocation-free fixed-array embedded
+profile. `evm-core-node` adds a pre-reserved AVL-backed profile with
+worst-case `O(log n)` membership and insertion and no allocation after
+construction. The `evm` crate also exposes validated transaction resource
+limits, destructive reset, monotonic resource charging, and conserved
+hierarchical work tokens. Frontier through Istanbul use explicit flat
+historical state-read pricing for the currently executable subset; Berlin and
+later use warm/cold access accounting. See the
 [native EVM fork matrix](https://github.com/valkyoth/eth/blob/main/docs/evm-fork-matrix.md)
 for the current fork and opcode support matrix.
 
@@ -1224,7 +1231,7 @@ friendly, and independently testable.
 The minimum supported Rust version is Rust `1.90.0`. New deployments should use
 the pinned stable Rust `1.97.1` until the toolchain policy is updated.
 
-Compatibility evidence for `0.52.7`:
+Compatibility evidence for `0.53.0`:
 
 | Rust | Local Evidence |
 | --- | --- |
@@ -1237,7 +1244,7 @@ Compatibility evidence for `0.52.7`:
 scripts/checks.sh
 scripts/check_latest_crates.py
 scripts/check_latest_tools.sh
-scripts/release_0_52_7_gate.sh
+scripts/release_0_53_0_gate.sh
 ```
 
 The two networked freshness checks fail closed when a direct crates.io

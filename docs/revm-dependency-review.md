@@ -7,8 +7,8 @@ non-admitted.
 
 REVM is not part of the `eth` dependency graph in v0.41.0.
 
-The review was refreshed on 2026-07-25. It must be refreshed before
-2026-10-25, or before any REVM/external execution backend is admitted,
+The review was refreshed on 2026-07-27. It must be refreshed before
+2026-10-27, or before any REVM/external execution backend is admitted,
 whichever is sooner. First-party boundary-only work in `eth-valkyoth-evm` does
 not admit REVM. The review checked the latest registry line and the newest line
 compatible with the workspace's Rust `1.90.0` floor:

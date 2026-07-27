@@ -1,7 +1,7 @@
 # Current Status
 
-Release snapshot: `v0.52.7` release candidate; pentest findings are remediated
-and the clean retest passed. Tagging awaits green GitHub CI and CodeQL.
+Release snapshot: `v0.53.0` implementation complete; pentest is required
+before release finalization.
 
 This document summarizes what the workspace can do now. The
 [Specification Matrix](SPEC_MATRIX.md) is the source of truth for exact
@@ -48,9 +48,9 @@ Legend:
 
 | Capability | Status | Current scope |
 | --- | --- | --- |
-| EVM domains | 🟢 Available | Dependency-free word, stack, memory, gas, fork, opcode, program-counter, access-set, and host-state types |
+| EVM domains | 🟢 Available | Dependency-free word, stack, memory, gas, fork, opcode, program-counter, injectable access-tracker, and host-state types |
 | Execution admission | 🟢 Available | Non-forgeable classified, canonical, fork-bound, and execution-ready transaction typestates; unknown and empty typed envelopes fail closed |
-| Host capabilities | 🟢 Available | Separate state-view, journal, block, access, crypto, inspector, and resettable bounded-arena contracts |
+| Host capabilities | 🟢 Available | Separate state-view, journal, block, access, crypto, inspector, and resettable bounded-arena contracts; embedded-linear and optional node-logarithmic trackers; explicit transaction resource governor |
 | Native interpreter | 🟡 Partial | Bounded basic stack, arithmetic, control-flow, memory, selected state-read execution, and consensus-correct truncated PUSH zero-padding |
 | Historical fork rules | 🟡 Partial | Explicit fork identifiers and admitted gas/opcode boundaries; full historical execution remains versioned |
 | Call and create | 🟡 Partial | Stack/memory/static/depth planning and journal policy; nested host execution and commits remain fail closed |
@@ -105,7 +105,20 @@ Legend:
 
 ## Current Release
 
-`v0.52.7` replaces shell-level execution admission with a non-forgeable
+`v0.53.0` replaces the hardwired linear warm-access set with an injectable
+tracker contract. The default embedded profile remains allocation-free and
+fixed-capacity. The optional node profile pre-reserves bounded AVL tables,
+performs no allocation after construction, and provides worst-case `O(log n)`
+membership and insertion. Capacity failures are atomic, failed/reverted root
+attempts restore exact warmth, and transaction reset retains only the
+constructor-bounded allocation.
+
+The EVM boundary exposes validated per-transaction ceilings for warm access,
+journals, checkpoints, frames, memory, reusable arenas, caches, and abstract
+work. Its governor requires destructive reset, never refunds failed or
+cancelled work, and delegates authority through non-copyable child tokens.
+
+`v0.52.7` replaced shell-level execution admission with a non-forgeable
 promotion chain from classified envelope through canonical type-specific
 decode and active-fork/chain checks to an execution-ready transaction.
 `ExecutionRequest` accepts only that final token. `ExecutionHost` derives state

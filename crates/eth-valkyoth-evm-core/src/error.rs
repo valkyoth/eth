@@ -44,6 +44,16 @@ pub enum EvmCoreError {
     StateAccessListTooSmall,
     /// The host state access list capacity was exhausted.
     StateAccessListFull,
+    /// The configured access capacity exceeds the gas-derived hard ceiling.
+    StateAccessCapacityTooLarge,
+    /// The node access tracker could not reserve its bounded tables.
+    StateAccessAllocationFailed,
+    /// An access-tracker structural invariant was violated.
+    StateAccessTrackerCorrupt,
+    /// A root access-tracking attempt is already active.
+    StateAccessAttemptAlreadyActive,
+    /// No root access-tracking attempt is active.
+    StateAccessAttemptMissing,
     /// A host account read failed.
     StateAccountReadFailed,
     /// A host storage read failed.
@@ -132,6 +142,11 @@ impl EvmCoreError {
             Self::GasOverflow => "gas_overflow",
             Self::StateAccessListTooSmall => "state_access_list_too_small",
             Self::StateAccessListFull => "state_access_list_full",
+            Self::StateAccessCapacityTooLarge => "state_access_capacity_too_large",
+            Self::StateAccessAllocationFailed => "state_access_allocation_failed",
+            Self::StateAccessTrackerCorrupt => "state_access_tracker_corrupt",
+            Self::StateAccessAttemptAlreadyActive => "state_access_attempt_already_active",
+            Self::StateAccessAttemptMissing => "state_access_attempt_missing",
             Self::StateAccountReadFailed => "state_account_read_failed",
             Self::StateStorageReadFailed => "state_storage_read_failed",
             Self::StateCodeReadFailed => "state_code_read_failed",

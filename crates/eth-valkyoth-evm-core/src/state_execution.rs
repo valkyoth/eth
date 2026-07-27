@@ -1,6 +1,6 @@
 use crate::{
-    EVM_MAX_BYTECODE_LEN, EvmAccessSet, EvmAccessStatus, EvmAddress, EvmCoreError, EvmExecution,
-    EvmGasMeter, EvmGasSchedule, EvmOpcode, EvmState, EvmStateContext, EvmWord,
+    EVM_MAX_BYTECODE_LEN, EvmAccessStatus, EvmAccessTracker, EvmAddress, EvmCoreError,
+    EvmExecution, EvmGasMeter, EvmGasSchedule, EvmOpcode, EvmState, EvmStateContext, EvmWord,
 };
 
 pub(crate) trait StateExecutionHost {
@@ -27,15 +27,13 @@ impl StateExecutionHost for NoState {
     }
 }
 
-pub(crate) struct HostState<'a, const ADDRESSES: usize, const STORAGE: usize, S: EvmState> {
+pub(crate) struct HostState<'a, S: EvmState, A: EvmAccessTracker> {
     pub(crate) context: EvmStateContext,
     pub(crate) state: &'a mut S,
-    pub(crate) accesses: &'a mut EvmAccessSet<ADDRESSES, STORAGE>,
+    pub(crate) accesses: &'a mut A,
 }
 
-impl<const ADDRESSES: usize, const STORAGE: usize, S: EvmState> StateExecutionHost
-    for HostState<'_, ADDRESSES, STORAGE, S>
-{
+impl<S: EvmState, A: EvmAccessTracker> StateExecutionHost for HostState<'_, S, A> {
     fn execute_state_opcode<const STACK: usize>(
         &mut self,
         execution: &mut EvmExecution<'_, STACK>,
@@ -56,12 +54,12 @@ impl<const ADDRESSES: usize, const STORAGE: usize, S: EvmState> StateExecutionHo
     }
 }
 
-fn charge_account_access<const ADDRESSES: usize, const STORAGE: usize, S: EvmState>(
+fn charge_account_access<S: EvmState, A: EvmAccessTracker>(
     address: EvmAddress,
     opcode: EvmOpcode,
     schedule: EvmGasSchedule,
     gas_meter: &mut EvmGasMeter,
-    host: &mut HostState<'_, ADDRESSES, STORAGE, S>,
+    host: &mut HostState<'_, S, A>,
 ) -> Result<(), EvmCoreError> {
     let warm = if schedule.tracks_warm_cold_state_access() {
         host.accesses.warm_address(address)? == EvmAccessStatus::Warm
@@ -79,11 +77,11 @@ fn map_account_error(error: EvmCoreError) -> EvmCoreError {
     }
 }
 
-fn balance<const STACK: usize, const ADDRESSES: usize, const STORAGE: usize, S: EvmState>(
+fn balance<const STACK: usize, S: EvmState, A: EvmAccessTracker>(
     execution: &mut EvmExecution<'_, STACK>,
     schedule: EvmGasSchedule,
     gas_meter: &mut EvmGasMeter,
-    host: &mut HostState<'_, ADDRESSES, STORAGE, S>,
+    host: &mut HostState<'_, S, A>,
 ) -> Result<(), EvmCoreError> {
     let address = EvmAddress::from_word(execution.stack().peek(0)?);
     charge_account_access(address, EvmOpcode::BALANCE, schedule, gas_meter, host)?;
@@ -92,11 +90,11 @@ fn balance<const STACK: usize, const ADDRESSES: usize, const STORAGE: usize, S: 
     execution.stack_mut().push(account.balance)
 }
 
-fn extcodesize<const STACK: usize, const ADDRESSES: usize, const STORAGE: usize, S: EvmState>(
+fn extcodesize<const STACK: usize, S: EvmState, A: EvmAccessTracker>(
     execution: &mut EvmExecution<'_, STACK>,
     schedule: EvmGasSchedule,
     gas_meter: &mut EvmGasMeter,
-    host: &mut HostState<'_, ADDRESSES, STORAGE, S>,
+    host: &mut HostState<'_, S, A>,
 ) -> Result<(), EvmCoreError> {
     let address = EvmAddress::from_word(execution.stack().peek(0)?);
     charge_account_access(address, EvmOpcode::EXTCODESIZE, schedule, gas_meter, host)?;
@@ -107,11 +105,11 @@ fn extcodesize<const STACK: usize, const ADDRESSES: usize, const STORAGE: usize,
         .push(EvmWord::from_usize(account.code_len))
 }
 
-fn extcodehash<const STACK: usize, const ADDRESSES: usize, const STORAGE: usize, S: EvmState>(
+fn extcodehash<const STACK: usize, S: EvmState, A: EvmAccessTracker>(
     execution: &mut EvmExecution<'_, STACK>,
     schedule: EvmGasSchedule,
     gas_meter: &mut EvmGasMeter,
-    host: &mut HostState<'_, ADDRESSES, STORAGE, S>,
+    host: &mut HostState<'_, S, A>,
 ) -> Result<(), EvmCoreError> {
     let address = EvmAddress::from_word(execution.stack().peek(0)?);
     charge_account_access(address, EvmOpcode::EXTCODEHASH, schedule, gas_meter, host)?;
@@ -124,11 +122,11 @@ fn extcodehash<const STACK: usize, const ADDRESSES: usize, const STORAGE: usize,
     })
 }
 
-fn extcodecopy<const STACK: usize, const ADDRESSES: usize, const STORAGE: usize, S: EvmState>(
+fn extcodecopy<const STACK: usize, S: EvmState, A: EvmAccessTracker>(
     execution: &mut EvmExecution<'_, STACK>,
     schedule: EvmGasSchedule,
     gas_meter: &mut EvmGasMeter,
-    host: &mut HostState<'_, ADDRESSES, STORAGE, S>,
+    host: &mut HostState<'_, S, A>,
 ) -> Result<(), EvmCoreError> {
     let address = EvmAddress::from_word(execution.stack().peek(0)?);
     let len = execution.stack().peek(3)?.to_usize()?;
@@ -166,11 +164,11 @@ fn extcodecopy<const STACK: usize, const ADDRESSES: usize, const STORAGE: usize,
     Ok(())
 }
 
-fn selfbalance<const STACK: usize, const ADDRESSES: usize, const STORAGE: usize, S: EvmState>(
+fn selfbalance<const STACK: usize, S: EvmState, A: EvmAccessTracker>(
     execution: &mut EvmExecution<'_, STACK>,
     schedule: EvmGasSchedule,
     gas_meter: &mut EvmGasMeter,
-    host: &mut HostState<'_, ADDRESSES, STORAGE, S>,
+    host: &mut HostState<'_, S, A>,
 ) -> Result<(), EvmCoreError> {
     gas_meter.charge(schedule.selfbalance_cost())?;
     let account = host
@@ -180,11 +178,11 @@ fn selfbalance<const STACK: usize, const ADDRESSES: usize, const STORAGE: usize,
     execution.stack_mut().push(account.balance)
 }
 
-fn sload<const STACK: usize, const ADDRESSES: usize, const STORAGE: usize, S: EvmState>(
+fn sload<const STACK: usize, S: EvmState, A: EvmAccessTracker>(
     execution: &mut EvmExecution<'_, STACK>,
     schedule: EvmGasSchedule,
     gas_meter: &mut EvmGasMeter,
-    host: &mut HostState<'_, ADDRESSES, STORAGE, S>,
+    host: &mut HostState<'_, S, A>,
 ) -> Result<(), EvmCoreError> {
     let key = execution.stack().peek(0)?;
     let warm = if schedule.tracks_warm_cold_state_access() {
@@ -201,11 +199,11 @@ fn sload<const STACK: usize, const ADDRESSES: usize, const STORAGE: usize, S: Ev
     execution.stack_mut().push(value)
 }
 
-fn sstore_shell<const STACK: usize, const ADDRESSES: usize, const STORAGE: usize, S: EvmState>(
+fn sstore_shell<const STACK: usize, S: EvmState, A: EvmAccessTracker>(
     execution: &mut EvmExecution<'_, STACK>,
     schedule: EvmGasSchedule,
     gas_meter: &mut EvmGasMeter,
-    host: &mut HostState<'_, ADDRESSES, STORAGE, S>,
+    host: &mut HostState<'_, S, A>,
 ) -> Result<(), EvmCoreError> {
     let key = execution.stack().peek(0)?;
     let _value = execution.stack().peek(1)?;

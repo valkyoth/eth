@@ -120,8 +120,10 @@ The first production value is:
   first-party dependency-free EIP-152 BLAKE2F execution and the optimized
   BN254 final-exponentiation remediation; `v0.52.0` fixes the remaining
   KZG/BLS frame, output, gas, conformance, and backend-admission contracts;
-  `v0.52.1` defines BLS12-381 wire domains, `v0.52.2..=v0.52.7` and
-  `v0.53.0..=v0.55.0` close consensus/resource/precompile gaps, while
+  `v0.52.1` defines BLS12-381 wire domains, `v0.52.2..=v0.52.7` close
+  consensus/proof/admission gaps, `v0.53.0` adds injectable embedded and
+  logarithmic node access tracking plus transaction resource authority, and
+  `v0.54.0..=v0.55.0` close precompile-contract and ModExp gaps, while
   `v0.56.0..=v0.63.0` build first-party
   BLS12-381 execution, `v0.64.0..=v0.66.0` freeze architecture,
   resource-governor, and cryptographic-provider contracts, and

@@ -27,7 +27,8 @@ pub mod error {
     pub use eth_valkyoth_codec::{DecodeError, DecodeErrorCategory, ResourceError, RlpDeriveError};
     #[cfg(feature = "evm")]
     pub use eth_valkyoth_evm::{
-        ExecutionEnvironmentError, ExecutionError, GasEstimationError, SnapshotError,
+        ExecutionEnvironmentError, ExecutionError, ExecutionGovernorError, GasEstimationError,
+        SnapshotError,
     };
     #[cfg(feature = "evm-core")]
     pub use eth_valkyoth_evm_core::EvmCoreError;

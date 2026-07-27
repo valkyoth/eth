@@ -7,16 +7,21 @@ extern crate std;
 #[cfg(all(test, not(feature = "std")))]
 extern crate std;
 
+mod access;
 mod admission;
 mod arena;
 mod environment;
 mod gas_estimation;
+mod governor;
 mod host;
 mod host_error;
 mod host_scope;
 mod result;
 mod snapshot;
 
+pub use access::EmbeddedAccessTracker;
+#[cfg(feature = "alloc")]
+pub use access::NodeAccessTracker;
 pub use admission::{
     CanonicalTransaction, CanonicallyDecodedTransaction, ClassifiedEnvelope,
     ExecutionAdmissionError, ExecutionAdmissionFailure, ExecutionReadyTransaction,
@@ -32,6 +37,10 @@ pub use gas_estimation::{
     GasEstimationStatus, GasEstimationTermination, MAX_GAS_ESTIMATION_ATTEMPTS,
     MAX_GAS_ESTIMATION_BACKEND_STEPS, MAX_GAS_ESTIMATION_GAS_CAP,
     MAX_GAS_ESTIMATION_TIMEOUT_MILLIS,
+};
+pub use governor::{
+    ExecutionGovernor, ExecutionGovernorError, ExecutionResource, ExecutionResourceLimits,
+    ExecutionResourceRequest, ExecutionWorkToken,
 };
 pub use host::{
     AccessStatus, AccessTracker, ChildDecision, ChildExecution, CryptoProvider, ExecutionHost,
@@ -74,16 +83,16 @@ pub struct RevmDependencyReview {
 /// narrower `revm-primitives` crate were both checked and rejected because
 /// their current transitive graph fails the repository dependency policy.
 ///
-/// Reviewed 2026-07-05. Re-review is required before 2026-10-05 or before any
-/// `eth-valkyoth-evm` feature work, whichever is sooner.
+/// Reviewed 2026-07-27. Re-review is required before 2026-10-27 or before any
+/// external execution backend is admitted, whichever is sooner.
 pub const REVM_DEPENDENCY_REVIEW: RevmDependencyReview = RevmDependencyReview {
-    reviewed_on: "2026-07-05",
-    re_review_before: "2026-10-05",
-    latest_revm_version: "41.0.0",
+    reviewed_on: "2026-07-27",
+    re_review_before: "2026-10-27",
+    latest_revm_version: "42.0.1",
     latest_revm_rust_version: "1.91.0",
     newest_msrv_compatible_revm_version: "36.0.0",
     admitted: false,
-    reason: "current REVM graph fails cargo-deny duplicate-version and unmaintained-advisory policy",
+    reason: "latest REVM requires Rust 1.91; compatible line fails dependency policy",
 };
 
 /// Returns the reviewed REVM dependency admission result.
@@ -107,6 +116,14 @@ mod host_tests;
 #[cfg(test)]
 #[path = "arena_tests.rs"]
 mod arena_tests;
+
+#[cfg(test)]
+#[path = "access_tests.rs"]
+mod access_tests;
+
+#[cfg(test)]
+#[path = "governor_tests.rs"]
+mod governor_tests;
 
 #[cfg(test)]
 #[path = "test_fixtures.rs"]

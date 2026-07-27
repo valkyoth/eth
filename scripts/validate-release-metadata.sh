@@ -108,6 +108,7 @@ test -f release-notes/RELEASE_NOTES_0.52.4.md
 test -f release-notes/RELEASE_NOTES_0.52.5.md
 test -f release-notes/RELEASE_NOTES_0.52.6.md
 test -f release-notes/RELEASE_NOTES_0.52.7.md
+test -f release-notes/RELEASE_NOTES_0.53.0.md
 test -f security/pentest/v0.40.0.md
 test -f security/pentest/v0.41.0.md
 release_version="$(python3 -c 'import tomllib; print(tomllib.load(open("release-crates.toml", "rb"))["release"]["version"])')"
@@ -198,6 +199,8 @@ test -x scripts/release_0_52_6_gate.sh
 grep -q "rustc 1\\\\.97\\\\.1" scripts/release_0_52_6_gate.sh
 test -x scripts/release_0_52_7_gate.sh
 grep -q "rustc 1\\\\.97\\\\.1" scripts/release_0_52_7_gate.sh
+test -x scripts/release_0_53_0_gate.sh
+grep -q "rustc 1\\\\.97\\\\.1" scripts/release_0_53_0_gate.sh
 test -x scripts/check_latest_crates.py
 test -x scripts/test-check-latest-crates.py
 grep -q "scripts/check_latest_crates.py" scripts/release_0_52_5_gate.sh
@@ -220,6 +223,7 @@ test -f docs/bn254-pairing-economics.md
 test -f docs/advanced-precompile-backends.md
 test -f docs/bls12-381-wire-encodings.md
 test -f docs/truncated-push-semantics.md
+test -f docs/execution-resource-governor.md
 test -f docs/current-status.md
 grep -q 'execution_specs_repo' spec-lock.toml
 grep -q 'local_reference_store_env' spec-lock.toml
@@ -242,4 +246,4 @@ grep -q 'license = "MIT OR Apache-2.0"' Cargo.toml
 grep -q 'repository = "https://github.com/valkyoth/eth"' Cargo.toml
 grep -q 'channel = "1.97.1"' rust-toolchain.toml
 grep -q 'rust-version = "1.90"' Cargo.toml
-grep -q 'valkyoth-eth-upstream-check/0.52.7' scripts/check_ethereum_upstream.py
+grep -q 'valkyoth-eth-upstream-check/0.53.0' scripts/check_ethereum_upstream.py

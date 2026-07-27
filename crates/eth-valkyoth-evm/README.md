@@ -32,7 +32,7 @@ Most users should depend on the facade crate:
 
 ```toml
 [dependencies]
-eth = { version = "0.52.7", features = ["evm"] }
+eth = { version = "0.53.0", features = ["evm"] }
 ```
 
 Crates.io: <https://crates.io/crates/eth>
@@ -41,7 +41,17 @@ This package is published separately so the `eth` workspace can keep small,
 auditable crate boundaries. Treat it as a lower-level building block unless the
 `eth` documentation explicitly says otherwise.
 
-The `0.11.0` support-crate release, shipped with `eth` `0.52.7`, provides:
+The `0.12.0` support-crate release, shipped with `eth` `0.53.0`, adds:
+
+- direct host adapters for the allocation-free embedded and optional
+  pre-reserved logarithmic node access trackers;
+- validated transaction ceilings for warm access, journals, checkpoints,
+  frames, memory, reusable arenas, caches, and abstract work;
+- destructive governor reset, monotonic fail-closed charging, and non-copyable
+  hierarchical work tokens that cannot create child authority;
+- deterministic capacity, cancellation, delegation, and reset tests.
+
+It retains the `0.11.0` execution-admission and host-capability foundation:
 
 - `ClassifiedEnvelope -> CanonicallyDecodedTransaction ->
   ForkValidatedTransaction -> ExecutionReadyTransaction` promotion;
