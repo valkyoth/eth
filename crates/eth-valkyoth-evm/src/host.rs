@@ -299,36 +299,35 @@ where
         if !self.transaction_started {
             return Err(ChildLifecycleError::TransactionNotStarted);
         }
-        let checkpoint = match self.journal.checkpoint() {
+        let mut scope = ChildScope::new(self);
+        let checkpoint = match scope.host().journal.checkpoint() {
             Ok(checkpoint) => checkpoint,
             Err(error) => {
-                self.poisoned = true;
                 return Err(ChildLifecycleError::Begin(
                     BeginChildError::CheckpointFailed(error),
                 ));
             }
         };
-        let depth = match self.arena.enter_frame(frame) {
+        let depth = match scope.host().arena.enter_frame(frame) {
             Ok(depth) => depth,
             Err(frame_error) => {
-                return match self.journal.revert(checkpoint) {
-                    Ok(()) => Err(ChildLifecycleError::Begin(BeginChildError::FrameRejected {
-                        frame_error,
-                    })),
-                    Err(revert_error) => {
-                        self.poisoned = true;
-                        Err(ChildLifecycleError::Begin(
-                            BeginChildError::FrameRejectedAndJournalRevertFailed {
-                                frame_error,
-                                revert_error,
-                            },
-                        ))
+                return match scope.host().journal.revert(checkpoint) {
+                    Ok(()) => {
+                        scope.finish();
+                        Err(ChildLifecycleError::Begin(BeginChildError::FrameRejected {
+                            frame_error,
+                        }))
                     }
+                    Err(revert_error) => Err(ChildLifecycleError::Begin(
+                        BeginChildError::FrameRejectedAndJournalRevertFailed {
+                            frame_error,
+                            revert_error,
+                        },
+                    )),
                 };
             }
         };
 
-        let mut scope = ChildScope::new(self);
         let decision = execute(scope.host());
         if scope.host().poisoned {
             return Err(ChildLifecycleError::HostPoisoned);

@@ -96,6 +96,14 @@ $(workflow_files)
 EOF
 }
 
+checkout_ref_shas() {
+    checkout_uses | sed 's/.*@//' | LC_ALL=C sort
+}
+
+checkout_annotation_shas() {
+    checkout_pin_lines | awk '{ print $1 }' | LC_ALL=C sort
+}
+
 check_checkout_pin_format() {
     checkout_count="$(checkout_uses | wc -l | tr -d ' ')"
     parsed_count="$(checkout_pin_lines | wc -l | tr -d ' ')"
@@ -106,7 +114,14 @@ check_checkout_pin_format() {
     fi
 
     if [ "$checkout_count" -ne "$parsed_count" ]; then
-        echo "every actions/checkout use must be pinned to a full SHA with a semver tag comment" >&2
+        echo "actions/checkout SHA annotations must be complete" >&2
+        exit 1
+    fi
+
+    semantic_shas="$(checkout_ref_shas)"
+    annotation_shas="$(checkout_annotation_shas)"
+    if [ "$semantic_shas" != "$annotation_shas" ]; then
+        echo "every actions/checkout annotation must match its semantic YAML SHA" >&2
         exit 1
     fi
 }
@@ -148,14 +163,19 @@ check_checkout_action() {
         exit 1
     fi
 
-    while IFS=' ' read -r pinned_sha pinned_tag; do
-        if [ "$pinned_tag" != "$latest_tag" ]; then
-            echo "actions/checkout is not latest: pinned ${pinned_tag}, latest ${latest_tag}" >&2
+    while IFS= read -r checkout; do
+        pinned_sha="${checkout##*@}"
+        if [ "$pinned_sha" != "$latest_sha" ]; then
+            echo "actions/checkout is not current: pinned ${pinned_sha}, latest ${latest_sha}" >&2
             exit 1
         fi
+    done <<EOF
+$(checkout_uses)
+EOF
 
-        if [ "$pinned_sha" != "$latest_sha" ]; then
-            echo "actions/checkout ${latest_tag} SHA mismatch: pinned ${pinned_sha}, latest ${latest_sha}" >&2
+    while IFS=' ' read -r _pinned_sha pinned_tag; do
+        if [ "$pinned_tag" != "$latest_tag" ]; then
+            echo "actions/checkout annotation is not latest: pinned ${pinned_tag}, latest ${latest_tag}" >&2
             exit 1
         fi
     done <<EOF

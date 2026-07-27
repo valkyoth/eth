@@ -4,6 +4,9 @@ All notable changes to `eth` are documented here.
 
 ## Unreleased
 
+- Closed two further v0.52.7 retest findings by arming child-scope poisoning
+  before checkpoint creation and deriving checkout freshness exclusively from
+  semantic YAML values rather than comments.
 - Remediated two additional v0.52.7 findings by poisoning unfinished child
   scopes during panic unwinding and replacing line-oriented GitHub Action
   detection with recursive semantic YAML validation.

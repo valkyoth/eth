@@ -2907,12 +2907,13 @@ Verification:
 - frame-rejection cleanup tests preserving both the arena rejection and any
   journal rollback failure;
 - partial-finalization poisoning and post-transition inspector dispatch tests;
-- panic-unwind tests proving unfinished child scopes poison the host and block
-  every subsequent mutable capability;
+- panic-unwind tests at checkpoint, frame entry, rejection rollback,
+  commit/revert, frame exit, and child execution proving unfinished child
+  scopes poison the host and block every subsequent mutable capability;
 - conserved legacy classification and canonical-reparse accounting;
 - semantic Action-pin fixtures covering block/flow syntax, quoted keys and
   values, both workflow extensions, reusable workflows, local and Docker
-  actions, expressions, and malformed values;
+  actions, expressions, malformed values, and spoofed checkout comments;
 - deep-call and memory-expansion tests proving EVM exceptions replace host
   recursion or bounds errors.
 
@@ -2922,7 +2923,8 @@ Exit criteria:
   host whose state/environment provenance and private capabilities cannot be
   independently substituted.
 - No ordinary return, error, or panic unwind can leave an unfinished child
-  lifecycle reusable, and no YAML spelling can bypass immutable Action pins.
+  lifecycle reusable, and no YAML spelling or comment can bypass immutable,
+  current Action pins.
 - `v0.52.7 implementation stop reached. Run pentest for this exact
   commit.`
 

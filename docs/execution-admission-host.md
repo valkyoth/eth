@@ -83,9 +83,10 @@ execution in a closure, so nested children must finalize in LIFO order. It
 validates the exact frame depth before consuming the checkpoint and poisons
 the host after any partial or inconsistent journal/arena finalization. If
 frame admission and journal rollback both fail, `BeginChildError` retains both
-errors. A private RAII scope also poisons the host if child execution panics
-or otherwise unwinds before successful finalization. A poisoned host rejects
-all later mutable capability operations.
+errors. A private RAII scope is armed before checkpoint creation and poisons
+the host if checkpoint creation, frame entry, rejection rollback,
+commit/revert, frame exit, or child execution unwinds before successful
+finalization. A poisoned host rejects all later mutable capability operations.
 
 Transaction and child methods return immutable `InspectorEvent` evidence only
 after critical transitions complete. Inspectors are not invoked while a
@@ -120,8 +121,9 @@ The release includes:
 - nested child finalization proving journal checkpoints complete in LIFO order;
 - journal-authoritative current-storage coverage after a write;
 - poisoned-host coverage after partial journal finalization;
-- panic-unwind coverage proving an unfinished child poisons the host and
-  blocks subsequent mutable capabilities;
+- panic-unwind coverage at every journal/arena lifecycle call and inside child
+  execution, proving an unfinished child poisons the host and blocks
+  subsequent mutable capabilities;
 - frame-capacity rejection tests with successful and failed journal cleanup;
 - post-transition inspector dispatch coverage;
 - legacy classification/reparse accounting under one decode ledger;

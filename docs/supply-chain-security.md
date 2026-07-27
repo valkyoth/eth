@@ -18,6 +18,9 @@ class of problem.
 Action-pin validation uses Ruby's standard-library YAML parser and fails
 closed on malformed documents, non-string `uses` values, mutable or
 expression-based remote references, and unsupported YAML aliases.
+Checkout freshness compares the parsed `uses` value directly with the
+upstream release SHA. Semver comments are separately linted and cross-checked
+as non-authoritative annotation metadata.
 
 ## Dependency Admission
 

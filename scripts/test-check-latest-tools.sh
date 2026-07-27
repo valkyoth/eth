@@ -91,6 +91,20 @@ if RUST_TOOLCHAIN_FILE="$toolchain_file" \
 fi
 
 cat >"$workflow_dir/release.yml" <<'EOF'
+steps:
+  - uses: actions/checkout@0000000000000000000000000000000000000000
+# uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+EOF
+if RUST_TOOLCHAIN_FILE="$toolchain_file" \
+    RUST_STABLE_MANIFEST_URL="file://$manifest_file" \
+    GITHUB_WORKFLOW_DIR="$workflow_dir" \
+    CHECK_LATEST_TOOLS_ACTION_PINS_ONLY=1 \
+    scripts/check_latest_tools.sh >/dev/null 2>&1; then
+    echo "spoofed checkout annotation was accepted" >&2
+    exit 1
+fi
+
+cat >"$workflow_dir/release.yml" <<'EOF'
 jobs:
   reusable:
     uses: valkyoth/example/.github/workflows/check.yml@1234567890abcdef1234567890abcdef12345678

@@ -53,8 +53,9 @@ The `0.11.0` support-crate release, shipped with `eth` `0.52.7`, provides:
   `AccessTracker`, `CryptoProvider`, and `TransactionArena` capabilities;
 - journal-authoritative current storage associated with the request's exact
   immutable `StateView`;
-- closure-scoped LIFO child execution, RAII host poisoning after unwinding or
-  partial finalization, and post-transition inspector events;
+- closure-scoped LIFO child execution, RAII host poisoning across every
+  journal/arena unwind or partial finalization, and post-transition inspector
+  events;
 - `BeginChildError` preserving frame rejection and journal-cleanup failures;
 - allocation-free resettable borrowed memory and iterative frame storage;
 - bounded gas-estimation policy and deterministic termination ceilings.

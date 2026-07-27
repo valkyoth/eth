@@ -38,11 +38,13 @@ auditable capabilities.
   current-storage reads.
 - Child checkpoint tokens are replaced by closure-scoped `with_child`
   execution with exact-depth/LIFO checks and fail-closed RAII host poisoning,
-  including panic unwinding before finalization.
+  armed before checkpoint creation and covering every journal/arena call plus
+  child execution before finalization.
 - The live tooling freshness gate now audits Action refs across every workflow
   through semantic YAML traversal, including flow mappings and reusable
   workflows, and verifies every checkout use against the latest tag and exact
-  upstream commit; it also checks the active cargo-fuzz CLI release.
+  upstream commit using the parsed value rather than comments; it also checks
+  the active cargo-fuzz CLI release.
 
 ## Security Properties
 
@@ -85,6 +87,8 @@ The first independent review reported two Low findings, both remediated. A
 follow-up review reported three High and two Medium findings covering child
 lifecycle atomicity, request provenance, stale current storage, classification
 accounting, and inspector control flow. A second follow-up reported two Medium
-findings covering unwind poisoning and flow-style YAML Action-pin bypasses.
-All findings are remediated. Tagging remains blocked until a clean retest and
-permanent exact-commit report at `security/pentest/v0.52.7.md`.
+findings covering unwind poisoning and flow-style YAML Action-pin bypasses. A
+third follow-up reported two Medium findings covering guard arming before
+backend calls and comment-based checkout freshness. All findings are
+remediated. Tagging remains blocked until a clean retest and permanent
+exact-commit report at `security/pentest/v0.52.7.md`.
