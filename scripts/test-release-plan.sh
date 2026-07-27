@@ -36,6 +36,18 @@ expect_failure() {
     fi
 }
 
+valid_patch="$tmp_dir/valid-patch.md"
+sed \
+    -e 's/v0\.1\.0/v0.1.1/g' \
+    -e '/^Status:/a\
+Patch rationale: compatibility-preserving remediation only.' \
+    "$valid" >"$valid_patch"
+scripts/check_release_plan.sh "$valid_patch" >/dev/null
+
+missing_patch_rationale="$tmp_dir/missing-patch-rationale.md"
+sed '/^Patch rationale:/d' "$valid_patch" >"$missing_patch_rationale"
+expect_failure "$missing_patch_rationale"
+
 missing_goal="$tmp_dir/missing-goal.md"
 sed '/^Goal:/d' "$valid" >"$missing_goal"
 expect_failure "$missing_goal"
@@ -62,5 +74,10 @@ duplicate="$tmp_dir/duplicate.md"
 cp "$valid" "$duplicate"
 sed -n '1,$p' "$valid" >>"$duplicate"
 expect_failure "$duplicate"
+
+nonmonotonic="$tmp_dir/nonmonotonic.md"
+cp "$valid" "$nonmonotonic"
+sed 's/v0\.1\.0/v0.0.9/g' "$valid" >>"$nonmonotonic"
+expect_failure "$nonmonotonic"
 
 echo "release plan checker tests passed"

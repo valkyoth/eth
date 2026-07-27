@@ -120,11 +120,12 @@ The first production value is:
   first-party dependency-free EIP-152 BLAKE2F execution and the optimized
   BN254 final-exponentiation remediation; `v0.52.0` fixes the remaining
   KZG/BLS frame, output, gas, conformance, and backend-admission contracts;
-  `v0.52.1` defines BLS12-381 wire domains, `v0.52.2..=v0.52.10` close
-  consensus/resource/precompile gaps, `v0.52.11..=v0.52.18` build first-party
-  BLS12-381 execution, `v0.52.19..=v0.52.21` freeze architecture,
+  `v0.52.1` defines BLS12-381 wire domains, `v0.52.2..=v0.52.7` and
+  `v0.53.0..=v0.55.0` close consensus/resource/precompile gaps, while
+  `v0.56.0..=v0.63.0` build first-party
+  BLS12-381 execution, `v0.64.0..=v0.66.0` freeze architecture,
   resource-governor, and cryptographic-provider contracts, and
-  `v0.52.22..=v0.52.37` implement/audit first-party core crypto plus shared
+  `v0.67.0..=v0.82.0` implement/audit first-party core crypto plus shared
   cross-format accounting, session-safe clocks, atomically reserved bounded
   object/peer evidence, early secp proof, signing/transport separation,
   non-forgeable constant-size validation contexts, authority-tagged
@@ -136,7 +137,7 @@ The first production value is:
   boundaries through async/resource lifecycle completion, exact runtime-mode
   dispatch with physical-capacity-class resource charging, and fail-closed
   generation retirement; and
-  `v0.77.0` through `v0.81.0` build first-party KZG/blob verification before
+  `v0.107.0` through `v0.111.0` build first-party KZG/blob verification before
   later releases claim complete affected-fork execution.
 - `eth-valkyoth-sdk`: optional owned models, prelude, builders, and high-level
   workflows over the focused core crates.

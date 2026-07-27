@@ -67,27 +67,27 @@ Legend:
 
 | Capability | Status | Current scope |
 | --- | --- | --- |
-| Owned SDK models and interoperability | 🔴 Planned | Assigned to `v0.53.0..=v0.68.0` |
-| Complete execution and tracing | 🔴 Planned | Assigned to `v0.69.0..=v0.91.0` |
-| Typed providers and transaction lifecycle | 🔴 Planned | Assigned to `v0.92.0..=v0.108.0` |
-| Signers, wallets, and account abstraction | 🔴 Planned | Assigned to `v0.109.0..=v0.119.0` |
-| ABI, contracts, and application standards | 🔴 Planned | Assigned to `v0.120.0..=v0.129.0` |
-| Storage, canonical chain, and runtime | 🔴 Planned | Assigned to `v0.130.0..=v0.140.0` |
-| Consensus primitives, Engine API, and light client | 🔴 Planned | Assigned to `v0.141.0..=v0.153.0` |
-| DevP2P, RLPx, txpool, and sync | 🔴 Planned | Assigned to `v0.154.0..=v0.164.0` |
-| Witnesses, stateless execution, and commitment evolution | 🔴 Planned | Assigned to `v0.165.0..=v0.174.0` |
-| Foundation assurance and compatibility | 🔴 Planned | Assigned to `v0.175.0..=v0.188.0` |
-| Full beacon node, consensus networking, sync, deposits, and production APIs | 🔴 Planned | Assigned to `v0.189.0..=v0.234.0` |
-| Slashing protection, validator keys, duties, and external custody | 🔴 Planned | Assigned to `v0.235.0..=v0.248.0` |
-| Builder and relay integration | 🔴 Planned | Assigned to `v0.249.0..=v0.250.0`; relay communication is beacon-node owned |
-| Consensus safety services, operations, and production executables | 🔴 Planned | Assigned to `v0.251.0..=v0.257.0` |
-| Consensus assurance and product baseline | 🔴 Planned | Assigned to `v0.258.0..=v0.274.0`; this is not the final 1.0 gate |
-| First-party core cryptography and historical PoW | 🔴 Planned | Keccak-256, secp256k1, ECDSA/ECDH, and transport/keystore primitives are assigned to `v0.52.22..=v0.52.26`; full-stack crypto revalidation is `v0.275.0..=v0.278.0`, followed by Ethash and genesis-to-Merge validation at `v0.279.0..=v0.281.0` |
-| Standalone production execution client | 🔴 Planned | Database backend, staged sync, payload builder, Engine/RPC servers, networking operations, binary, tooling, and controls are assigned to `v0.282.0..=v0.291.0` |
-| Execution-client production assurance | 🔴 Planned | Hive/RPC compatibility, independent consensus-client interoperability, public sync, performance, audit, and remediation are assigned to `v0.292.0..=v0.297.0` |
-| Integrated Ethereum node product | 🔴 Planned | Full-node orchestration, devnets, mixed-client tests, long-running operation, recovery, guides, audit, and remediation are assigned to `v0.298.0..=v0.305.0` |
-| Final 1.0 production admission | 🔴 Planned | Acceptance, complete API/crate freeze, release rehearsal, promotion, and candidate admission are assigned to `v0.306.0..=v0.310.0` plus exact candidate `v1.0.0-rc.N` |
-| Reth and ecosystem integration | 🔴 Planned | Optional conversion/reference adapters are assigned to `v0.67.0`; no external implementation becomes the first-party core |
+| Owned SDK models and interoperability | 🔴 Planned | Assigned to `v0.83.0..=v0.98.0` |
+| Complete execution and tracing | 🔴 Planned | Assigned to `v0.99.0..=v0.121.0` |
+| Typed providers and transaction lifecycle | 🔴 Planned | Assigned to `v0.122.0..=v0.138.0` |
+| Signers, wallets, and account abstraction | 🔴 Planned | Assigned to `v0.139.0..=v0.149.0` |
+| ABI, contracts, and application standards | 🔴 Planned | Assigned to `v0.150.0..=v0.159.0` |
+| Storage, canonical chain, and runtime | 🔴 Planned | Assigned to `v0.160.0..=v0.170.0` |
+| Consensus primitives, Engine API, and light client | 🔴 Planned | Assigned to `v0.171.0..=v0.183.0` |
+| DevP2P, RLPx, txpool, and sync | 🔴 Planned | Assigned to `v0.184.0..=v0.194.0` |
+| Witnesses, stateless execution, and commitment evolution | 🔴 Planned | Assigned to `v0.195.0..=v0.204.0` |
+| Foundation assurance and compatibility | 🔴 Planned | Assigned to `v0.205.0..=v0.218.0` |
+| Full beacon node, consensus networking, sync, deposits, and production APIs | 🔴 Planned | Assigned to `v0.219.0..=v0.264.0` |
+| Slashing protection, validator keys, duties, and external custody | 🔴 Planned | Assigned to `v0.265.0..=v0.278.0` |
+| Builder and relay integration | 🔴 Planned | Assigned to `v0.279.0..=v0.280.0`; relay communication is beacon-node owned |
+| Consensus safety services, operations, and production executables | 🔴 Planned | Assigned to `v0.281.0..=v0.287.0` |
+| Consensus assurance and product baseline | 🔴 Planned | Assigned to `v0.288.0..=v0.304.0`; this is not the final 1.0 gate |
+| First-party core cryptography and historical PoW | 🔴 Planned | Keccak-256, secp256k1, ECDSA/ECDH, and transport/keystore primitives are assigned to `v0.67.0..=v0.71.0`; full-stack crypto revalidation is `v0.305.0..=v0.308.0`, followed by Ethash and genesis-to-Merge validation at `v0.309.0..=v0.311.0` |
+| Standalone production execution client | 🔴 Planned | Database backend, staged sync, payload builder, Engine/RPC servers, networking operations, binary, tooling, and controls are assigned to `v0.312.0..=v0.321.0` |
+| Execution-client production assurance | 🔴 Planned | Hive/RPC compatibility, independent consensus-client interoperability, public sync, performance, audit, and remediation are assigned to `v0.322.0..=v0.327.0` |
+| Integrated Ethereum node product | 🔴 Planned | Full-node orchestration, devnets, mixed-client tests, long-running operation, recovery, guides, audit, and remediation are assigned to `v0.328.0..=v0.335.0` |
+| Final 1.0 production admission | 🔴 Planned | Acceptance, complete API/crate freeze, release rehearsal, promotion, and candidate admission are assigned to `v0.336.0..=v0.340.0` plus exact candidate `v1.0.0-rc.N` |
+| Reth and ecosystem integration | 🔴 Planned | Optional conversion/reference adapters are assigned to `v0.97.0`; no external implementation becomes the first-party core |
 
 ## Security And Release Baseline
 

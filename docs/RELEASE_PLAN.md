@@ -57,6 +57,9 @@ these explicit sections:
 
 - `Status`: whether the release is planned, in implementation, awaiting
   pentest, or ready to tag;
+- `Patch rationale`: required between `Status` and `Goal` for every planned
+  `v0.x.y` milestone where `y != 0`, explaining why the work is
+  compatibility-preserving and does not require a new minor release;
 - `Goal`: the single outcome the release exists to achieve;
 - `Deliverables`: the bounded implementation and documentation work included
   in that version;
@@ -217,112 +220,112 @@ relevant dependency point.
 | End-to-end decoded transaction signature validation was implied by typestates but not scheduled. | Added `v0.23.0 - Full Transaction Signature Validation`. |
 | Set-code typed transactions were listed as missing without a version. | Added `v0.24.0 - Set-Code Transaction Decode`. |
 | EIP-7702 set-code signing, authorization signatures, empty-list rejection, and fork/account-state validation were deferred by the syntactic decoder. | Added `v0.24.1 - Set-Code Signing And Authorization Validation` and `v0.24.2 - Set-Code Transaction Validity Gate`. |
-| EIP-7702 validity gates did not explicitly schedule consensus state application and delegated-code execution. | Expanded `v0.74.0 - State Transition And Journaling` to require ordered authorization processing, persistent delegation writes, authority nonce/refund accounting, one-hop delegated-code resolution, and official EIP-7702 state-transition evidence. |
+| EIP-7702 validity gates did not explicitly schedule consensus state application and delegated-code execution. | Expanded `v0.104.0 - State Transition And Journaling` to require ordered authorization processing, persistent delegation writes, authority nonce/refund accounting, one-hop delegated-code resolution, and official EIP-7702 state-transition evidence. |
 | Public RLP derives had only an evaluation/prototype milestone. | Added `v0.25.0 - Public RLP Derives`. |
 | Full EIP-712 `encodeType`/`encodeData`/`hashStruct` support was missing from the roadmap. | Added `v0.26.0 - EIP-712 Typed-Data Encoder`. |
 | EIP-712 JSON-RPC typed-data parsing was deferred from the no-JSON typed encoder without a visible patch milestone. | Added `v0.26.1 - EIP-712 JSON Typed-Data Parser Boundary`. |
 | A first-party optional software Keccak backend was deferred without a versioned admission point. | Added `v0.27.0 - Optional Keccak Backend Admission`. |
-| Formal verification evidence was not scheduled. | Added `v0.177.0` through `v0.179.2`, including `v0.178.1` cryptographic arithmetic proofs, for Kani, Miri, sanitizers, protocol/concurrency model checking, side-channel review, and bounded invariant evidence as extra assurance, not replacements for fuzzing, conformance tests, pentest, or audit. |
-| ABI encoding, Engine API, SSZ, and DevP2P/RLPx were marked deferred. | Added explicit ABI/contract releases `v0.120.0..=v0.129.0`, consensus/Engine releases `v0.141.0..=v0.153.0`, and networking releases `v0.154.0..=v0.164.0`. |
-| ENS and common ERC/application standards were not scheduled. | Added `v0.127.0..=v0.129.0` for common standards, ENS, permit, interface helpers, and contract-tooling fuzz/DX gates. |
-| Node-level sync, txpool, mining/validator boundaries, and observability were not scheduled. | Added storage/client releases `v0.130.0..=v0.140.0`, networking/sync releases `v0.154.0..=v0.164.0`, and operational-runtime release `v0.139.0`. |
+| Formal verification evidence was not scheduled. | Added `v0.207.0` through `v0.209.2`, including `v0.208.1` cryptographic arithmetic proofs, for Kani, Miri, sanitizers, protocol/concurrency model checking, side-channel review, and bounded invariant evidence as extra assurance, not replacements for fuzzing, conformance tests, pentest, or audit. |
+| ABI encoding, Engine API, SSZ, and DevP2P/RLPx were marked deferred. | Added explicit ABI/contract releases `v0.150.0..=v0.159.0`, consensus/Engine releases `v0.171.0..=v0.183.0`, and networking releases `v0.184.0..=v0.194.0`. |
+| ENS and common ERC/application standards were not scheduled. | Added `v0.157.0..=v0.159.0` for common standards, ENS, permit, interface helpers, and contract-tooling fuzz/DX gates. |
+| Node-level sync, txpool, mining/validator boundaries, and observability were not scheduled. | Added storage/client releases `v0.160.0..=v0.170.0`, networking/sync releases `v0.184.0..=v0.194.0`, and operational-runtime release `v0.169.0`. |
 | REVM dependency admission failed the existing dependency policy. | Added `v0.37.1 - REVM Dependency Recheck` before execution work may continue. |
-| Native audited EVM execution was not explicitly versioned; REVM could look like the long-term core. | Added the first-party engine, correctness, resource-boundary, precompile, core-crypto, and shared-capability sequence at `v0.40.0..=v0.52.32`, then complete execution, state transition, conformance, tracing, and simulation at `v0.69.0..=v0.91.0`. |
+| Native audited EVM execution was not explicitly versioned; REVM could look like the long-term core. | Added the first-party engine, correctness, resource-boundary, precompile, core-crypto, and shared-capability sequence at `v0.40.0..=v0.77.0`, then complete execution, state transition, conformance, tracing, and simulation at `v0.99.0..=v0.121.0`. |
 | Default verification previously depended directly on `k256` and used direct `sha3` test wrappers, which conflicted with the long-term first-party-core goal. | Added `v0.37.2` and `v0.37.3` to audit core dependencies, move cryptographic implementation crates behind explicit boundaries/features, and document any accepted cryptographic backend plan. |
 | `subtle`, `alloy-rlp`, dev `serde_json`, optional `serde`/`serde_json`, and optional `sanitization` need explicit long-term dependency classifications before execution grows. | Added `v0.37.4` and `v0.37.5` so constant-time helpers, reference oracles, JSON parser support, and sanitization bridges remain deliberate dependency choices. |
 | `v0.45.0` deliberately admits cryptographic precompiles as fail-closed descriptors without concrete execution backends. | Added `v0.46.0` through `v0.52.0` for SHA-256, RIPEMD-160, ECRECOVER, ModExp, BN254, BLAKE2F, KZG/BLS backend planning, conformance vectors, fuzzing, dependency review, and pentest gates before state-test claims depend on them. |
-| Native opcodes alone do not make full Ethereum execution support; genesis, full block validity, trie-root construction, state transition integration, blob/KZG validation, EOF, and full execution fixtures were not versioned before RPC work. | Added `v0.69.0..=v0.88.0` for full execution, KZG, EOF, current-fork maintenance, fixtures, differential evidence, and performance gates. |
+| Native opcodes alone do not make full Ethereum execution support; genesis, full block validity, trie-root construction, state transition integration, blob/KZG validation, EOF, and full execution fixtures were not versioned before RPC work. | Added `v0.99.0..=v0.118.0` for full execution, KZG, EOF, current-fork maintenance, fixtures, differential evidence, and performance gates. |
 | The native EVM state-access pass intentionally fails closed for pre-London forks until historical gas/opcode rules are implemented. | Added `v0.43.1 - Native EVM Historical Fork Matrix` and `v0.43.2 - Native EVM Pre-Berlin State Gas Schedules` before calls/create build on state access. |
-| Rich protocol values were borrowed views only, leaving no owned SDK model. | Added `v0.53.0..=v0.59.0` for general integer/byte primitives, owned transaction/block/state models, and lossless ref/owned/validated conversions. |
-| Protocol typestates did not carry transaction payloads or evidence. | Added `v0.62.0 - Payload-Bound Transaction Typestates`. |
-| Protocol and native EVM crates exposed disconnected address, word, gas, state, and result domains. | Added `v0.64.0` and `v0.65.0` for shared execution domains and native-core integration before state transition. |
-| Fork selection relied on fragmented enums and ordinal chronology. | Added `v0.63.0 - Fork Rules And Chain Specification 2.0` with identity, activation, capability, and parameter separation. |
-| Provider transports and end-to-end transaction workflows were not concretely planned. | Added `v0.92.0..=v0.108.0` for typed RPC methods, HTTP/WS/IPC/EIP-1193 transports, provider layers, transaction builders/fillers, simulation, signing, broadcasting, watching, replacement, and live-node tests. |
-| Wallet, key-management, contract-signature, multisig, and account-abstraction ecosystems were missing. | Added `v0.109.0..=v0.119.0` for local/remote/hardware signers, keystores, HD wallets, ERC-1271, Safe, ERC-4337, paymasters, session keys, and EIP-7702 delegated workflows. |
-| Database, canonical-chain, fork-choice, crash consistency, pruning, history expiry, and runtime supervision were not planned concretely. | Added `v0.130.0..=v0.140.0` for persistent stores, atomic batches, migrations, snapshots, pruning/archive modes, canonical reorgs, head tracking, invalidation, supervision, and performance gates. |
-| Consensus light-client work lacked bootstrap, weak subjectivity, aggregate signatures, committee rotation, scoring, persistence, and execution-proof binding. | Added `v0.146.0..=v0.151.0` for a complete light-client security model and official end-to-end vectors. |
-| Peer management, request scheduling, bans, bounded multi-peer sync, and historical-data acquisition were absent. | Added `v0.158.0..=v0.164.0` for peer services, request schedulers, txpool, sync, Portal/history acquisition, and builder/validator boundaries. |
-| EVM tracing, state overrides, call traces, state diffs, and debug/trace models were missing. | Added `v0.89.0..=v0.91.0` for inspector hooks, trace models, deterministic simulation, and RPC trace interoperability. |
-| Witnesses, stateless execution, commitment-scheme agility, Verkle/binary trees, and state/history evolution were not versioned. | Added `v0.165.0..=v0.174.0` for proof-format abstraction, witnesses, stateless execution, future commitments, state-expiry policy, zk-proof boundaries, and fork-maintenance automation. |
-| SDK compatibility and documentation drift were not release-blocking. | Added `v0.66.0`, `v0.180.0`, and `v0.181.0` for feature truthfulness, generated dependency snippets, semver/feature/serde compatibility gates, and task-oriented documentation. |
-| Consensus types, Engine boundaries, and a light client did not amount to a full beacon node. | Added `v0.189.0..=v0.234.0` for consensus architecture, complete transition and fork choice, storage, networking, sync, Engine coordination, PeerDAS, historical deposits/genesis, beacon orchestration, block production, and server/validator APIs. |
-| PeerDAS state, storage, networking, and sync consumers were scheduled before the cell/KZG/reconstruction core. | Moved the first-party PeerDAS core to `v0.193.0`; all DA consumers now follow it, and `v0.265.0` audits the implementation and acceleration boundaries. |
-| Historical deposit-contract tracking, deposit trees, eth1 voting, and genesis construction were missing. | Added `v0.228.0` and `v0.229.0` before beacon-node orchestration. |
-| Block-production ownership was split ambiguously between beacon and validator clients. | Added beacon-owned, embeddable unsigned production at `v0.233.0`; `v0.234.0` exposes it, and `v0.241.0` limits the validator client to independent checks, slashing authorization, signing, and publication. |
-| Live validator duties preceded slashing protection and the signer. | Reordered `v0.235.0..=v0.244.0` so the slashing kernel, transactional database, EIP-3076, key foundation, and signer all precede duty scheduling and every signature-producing duty. |
-| Validator key generation and deposit artifacts lacked EIP-2333/EIP-2334 and withdrawal-key separation. | Added `v0.238.0` for key derivation, strict key roles, offline withdrawal credentials, and deposit-data generation/verification. |
-| Keymanager, remote signing, and HSM/hardware custody were conflated. | Split operator Keymanager control, outbound remote signing/slashing authority, and signer-to-HSM/KMS custody into `v0.245.0..=v0.247.0`; added threshold/DVT coordination at `v0.248.0`. |
-| Builder relay integration and safe local-builder fallback were only a boundary decision. | Added `v0.249.0` and `v0.250.0` for Builder API workflows, relay multiplexing, bid/reveal validation, local fallback, withholding defenses, and protocol-native PBS evolution. |
-| Optional network slashing detection, distributed signing, validator analytics, and connectivity diagnostics were absent. | Added `v0.248.0`, `v0.251.0`, `v0.252.0`, and `v0.253.0` with explicit trust and resource boundaries. |
-| Production beacon-node and validator-client executables, packaging, data directories, signals, exit codes, upgrades, and rollback were not explicit. | Added separate binary and packaging milestones at `v0.254.0` and `v0.255.0`. |
-| A Lighthouse/Prysm-class claim lacked deterministic simulation, mandatory Hive suites, broad client matrices, and quantitative long-testnet/performance gates. | Added `v0.257.0..=v0.262.0`, including the numeric acceptance contract at `v0.258.0`. |
-| Later SSZ, BLS, PeerDAS, erasure-coding, and acceleration implementations were not covered by an implementation-level core audit. | Added `v0.265.0` and expanded the integration audits at `v0.266.0..=v0.269.0`. |
-| The final unchanged-candidate claim ignored manifest, lockfile, SBOM, and checksum changes required by a `1.0.0` version promotion. | Added an RC-aware tooling foundation at `v0.272.0..=v0.273.0`, then assigned the final rehearsal, admission, and explicit `v1.0.0-rc.1` exact-candidate flow to `v0.308.0..=v0.310.0`; the stable tag must point to the unchanged approved RC commit. |
-| Builder and relay ownership remained ambiguous after local block production moved into the beacon node. | `v0.233.0` now exposes only a fail-closed blinded-production hook before builder admission; `v0.249.0` and `v0.250.0` place relay communication in the beacon node while the validator client submits preferences and independently validates and signs blinded blocks. |
-| Proposer planning incorrectly implied separate sidecar signatures. | `v0.241.0` now requires one beacon-block proposer signature and constructs sidecars carrying the corresponding signed block header, matching pinned Deneb/Fulu honest-validator rules. |
-| RC prose did not yet define package-version/tag mismatch handling, prerelease paths, repeated candidates, gate naming, or exact archive publication. | `v0.272.0..=v0.273.0`, `v0.308.0..=v0.310.0`, and `v1.0.0-rc.1` now require distinct package and candidate identifiers, prerelease-aware tooling/tests, RC-specific gates, exact approved archive upload, and repeated `rc.N` handling. |
-| The RC could be read as forcing every independently versioned support crate to `1.0.0`. | `v0.271.0` records the preliminary crate classification and `v0.307.0` makes the binding promotion decision; only `eth` and deliberately approved products are promoted, while support crates keep independent versions and exact reviewed dependency bindings where needed. |
-| Companion status/spec documents retained obsolete consensus ranges. | The planning pass updates `docs/current-status.md` and `docs/SPEC_MATRIX.md` through `v0.310.0` and `v1.0.0-rc.N`. |
-| Quantitative gates used undefined "client-attributable" failure labels. | `v0.258.0` now requires a machine-enforced attribution taxonomy, predeclared fault windows, conservative ambiguous-event handling, independent approval, and fallback-specific responsibility rules. |
-| The final API freeze and production release candidate occurred before full consensus-client abstractions existed. | Reclassified `v0.182.0..=v0.188.0` as foundation stabilization and `v0.271.0..=v0.274.0` as an interim foundation/consensus baseline; the complete freeze, rehearsal, promotion, and candidate admission now occur at `v0.306.0..=v0.310.0` plus `v1.0.0-rc.1`. |
-| Core transaction, EVM, and execution-network paths still depended on optional Keccak-256 and secp256k1 implementations without a first-party replacement milestone. | Moved first-party Keccak-256, secp256k1 arithmetic, ECDSA/recovery/ECDH, symmetric transport/keystore primitives, integration, and initial audit forward to `v0.52.22..=v0.52.26`; `v0.275.0..=v0.278.0` now revalidate the completed full-stack consumer set instead of introducing core crypto late. |
-| Historical execution support did not explicitly implement Ethash seal verification, historical difficulty, ommers, rewards, and irregular pre-Merge transitions. | Added `v0.279.0..=v0.281.0` for Ethash, complete pre-Merge consensus rules, and a genesis-to-Merge historical execution gate. |
-| The roadmap described execution libraries and runtime traits but did not yet produce a complete independently runnable execution client. | Added `v0.282.0..=v0.291.0` for a reviewed production database backend, staged sync and healing, local payload building, authenticated Engine server, inbound execution RPC/GraphQL surfaces, operational discovery, an execution-node binary, recovery tools, and production controls. |
-| Execution assurance focused on fixtures and the beacon node consuming other execution clients, not on independent consensus clients driving the first-party execution client. | Added `v0.292.0..=v0.297.0` for execution Hive/RPC compatibility, multi-consensus-client Engine interoperability, public-network sync/follow evidence, performance, independent audit, and remediation. |
-| Execution and consensus networking milestones could be read as delegating Ethereum semantics to generic networking crates. | Tightened `v0.154.0..=v0.159.0` and `v0.215.0..=v0.220.0`: generic socket, runtime, and reviewed cryptographic adapters may remain optional infrastructure, but Ethereum codecs, validation, fork compatibility, scoring, resource policy, and protocol state machines are first-party. |
-| Separate execution, beacon, and validator binaries did not yet provide an integrated node product, reproducible devnet, or final mixed-client system evidence. | Added `v0.298.0..=v0.305.0` for integrated node orchestration, private-network tooling, mixed-client matrices, long-running integrated tests, performance/recovery, operator guides, full-stack audit, and remediation. |
-| The 1.0 admission gate occurred before the newly identified execution-client and integrated-node product work. | Moved final quantitative admission, API/crate freeze, exact release rehearsal, version promotion, and candidate admission to `v0.306.0..=v0.310.0` plus `v1.0.0-rc.N`. |
+| Rich protocol values were borrowed views only, leaving no owned SDK model. | Added `v0.83.0..=v0.89.0` for general integer/byte primitives, owned transaction/block/state models, and lossless ref/owned/validated conversions. |
+| Protocol typestates did not carry transaction payloads or evidence. | Added `v0.92.0 - Payload-Bound Transaction Typestates`. |
+| Protocol and native EVM crates exposed disconnected address, word, gas, state, and result domains. | Added `v0.94.0` and `v0.95.0` for shared execution domains and native-core integration before state transition. |
+| Fork selection relied on fragmented enums and ordinal chronology. | Added `v0.93.0 - Fork Rules And Chain Specification 2.0` with identity, activation, capability, and parameter separation. |
+| Provider transports and end-to-end transaction workflows were not concretely planned. | Added `v0.122.0..=v0.138.0` for typed RPC methods, HTTP/WS/IPC/EIP-1193 transports, provider layers, transaction builders/fillers, simulation, signing, broadcasting, watching, replacement, and live-node tests. |
+| Wallet, key-management, contract-signature, multisig, and account-abstraction ecosystems were missing. | Added `v0.139.0..=v0.149.0` for local/remote/hardware signers, keystores, HD wallets, ERC-1271, Safe, ERC-4337, paymasters, session keys, and EIP-7702 delegated workflows. |
+| Database, canonical-chain, fork-choice, crash consistency, pruning, history expiry, and runtime supervision were not planned concretely. | Added `v0.160.0..=v0.170.0` for persistent stores, atomic batches, migrations, snapshots, pruning/archive modes, canonical reorgs, head tracking, invalidation, supervision, and performance gates. |
+| Consensus light-client work lacked bootstrap, weak subjectivity, aggregate signatures, committee rotation, scoring, persistence, and execution-proof binding. | Added `v0.176.0..=v0.181.0` for a complete light-client security model and official end-to-end vectors. |
+| Peer management, request scheduling, bans, bounded multi-peer sync, and historical-data acquisition were absent. | Added `v0.188.0..=v0.194.0` for peer services, request schedulers, txpool, sync, Portal/history acquisition, and builder/validator boundaries. |
+| EVM tracing, state overrides, call traces, state diffs, and debug/trace models were missing. | Added `v0.119.0..=v0.121.0` for inspector hooks, trace models, deterministic simulation, and RPC trace interoperability. |
+| Witnesses, stateless execution, commitment-scheme agility, Verkle/binary trees, and state/history evolution were not versioned. | Added `v0.195.0..=v0.204.0` for proof-format abstraction, witnesses, stateless execution, future commitments, state-expiry policy, zk-proof boundaries, and fork-maintenance automation. |
+| SDK compatibility and documentation drift were not release-blocking. | Added `v0.96.0`, `v0.210.0`, and `v0.211.0` for feature truthfulness, generated dependency snippets, semver/feature/serde compatibility gates, and task-oriented documentation. |
+| Consensus types, Engine boundaries, and a light client did not amount to a full beacon node. | Added `v0.219.0..=v0.264.0` for consensus architecture, complete transition and fork choice, storage, networking, sync, Engine coordination, PeerDAS, historical deposits/genesis, beacon orchestration, block production, and server/validator APIs. |
+| PeerDAS state, storage, networking, and sync consumers were scheduled before the cell/KZG/reconstruction core. | Moved the first-party PeerDAS core to `v0.223.0`; all DA consumers now follow it, and `v0.295.0` audits the implementation and acceleration boundaries. |
+| Historical deposit-contract tracking, deposit trees, eth1 voting, and genesis construction were missing. | Added `v0.258.0` and `v0.259.0` before beacon-node orchestration. |
+| Block-production ownership was split ambiguously between beacon and validator clients. | Added beacon-owned, embeddable unsigned production at `v0.263.0`; `v0.264.0` exposes it, and `v0.271.0` limits the validator client to independent checks, slashing authorization, signing, and publication. |
+| Live validator duties preceded slashing protection and the signer. | Reordered `v0.265.0..=v0.274.0` so the slashing kernel, transactional database, EIP-3076, key foundation, and signer all precede duty scheduling and every signature-producing duty. |
+| Validator key generation and deposit artifacts lacked EIP-2333/EIP-2334 and withdrawal-key separation. | Added `v0.268.0` for key derivation, strict key roles, offline withdrawal credentials, and deposit-data generation/verification. |
+| Keymanager, remote signing, and HSM/hardware custody were conflated. | Split operator Keymanager control, outbound remote signing/slashing authority, and signer-to-HSM/KMS custody into `v0.275.0..=v0.277.0`; added threshold/DVT coordination at `v0.278.0`. |
+| Builder relay integration and safe local-builder fallback were only a boundary decision. | Added `v0.279.0` and `v0.280.0` for Builder API workflows, relay multiplexing, bid/reveal validation, local fallback, withholding defenses, and protocol-native PBS evolution. |
+| Optional network slashing detection, distributed signing, validator analytics, and connectivity diagnostics were absent. | Added `v0.278.0`, `v0.281.0`, `v0.282.0`, and `v0.283.0` with explicit trust and resource boundaries. |
+| Production beacon-node and validator-client executables, packaging, data directories, signals, exit codes, upgrades, and rollback were not explicit. | Added separate binary and packaging milestones at `v0.284.0` and `v0.285.0`. |
+| A Lighthouse/Prysm-class claim lacked deterministic simulation, mandatory Hive suites, broad client matrices, and quantitative long-testnet/performance gates. | Added `v0.287.0..=v0.292.0`, including the numeric acceptance contract at `v0.288.0`. |
+| Later SSZ, BLS, PeerDAS, erasure-coding, and acceleration implementations were not covered by an implementation-level core audit. | Added `v0.295.0` and expanded the integration audits at `v0.296.0..=v0.299.0`. |
+| The final unchanged-candidate claim ignored manifest, lockfile, SBOM, and checksum changes required by a `1.0.0` version promotion. | Added an RC-aware tooling foundation at `v0.302.0..=v0.303.0`, then assigned the final rehearsal, admission, and explicit `v1.0.0-rc.1` exact-candidate flow to `v0.338.0..=v0.340.0`; the stable tag must point to the unchanged approved RC commit. |
+| Builder and relay ownership remained ambiguous after local block production moved into the beacon node. | `v0.263.0` now exposes only a fail-closed blinded-production hook before builder admission; `v0.279.0` and `v0.280.0` place relay communication in the beacon node while the validator client submits preferences and independently validates and signs blinded blocks. |
+| Proposer planning incorrectly implied separate sidecar signatures. | `v0.271.0` now requires one beacon-block proposer signature and constructs sidecars carrying the corresponding signed block header, matching pinned Deneb/Fulu honest-validator rules. |
+| RC prose did not yet define package-version/tag mismatch handling, prerelease paths, repeated candidates, gate naming, or exact archive publication. | `v0.302.0..=v0.303.0`, `v0.338.0..=v0.340.0`, and `v1.0.0-rc.1` now require distinct package and candidate identifiers, prerelease-aware tooling/tests, RC-specific gates, exact approved archive upload, and repeated `rc.N` handling. |
+| The RC could be read as forcing every independently versioned support crate to `1.0.0`. | `v0.301.0` records the preliminary crate classification and `v0.337.0` makes the binding promotion decision; only `eth` and deliberately approved products are promoted, while support crates keep independent versions and exact reviewed dependency bindings where needed. |
+| Companion status/spec documents retained obsolete consensus ranges. | The planning pass updates `docs/current-status.md` and `docs/SPEC_MATRIX.md` through `v0.340.0` and `v1.0.0-rc.N`. |
+| Quantitative gates used undefined "client-attributable" failure labels. | `v0.288.0` now requires a machine-enforced attribution taxonomy, predeclared fault windows, conservative ambiguous-event handling, independent approval, and fallback-specific responsibility rules. |
+| The final API freeze and production release candidate occurred before full consensus-client abstractions existed. | Reclassified `v0.212.0..=v0.218.0` as foundation stabilization and `v0.301.0..=v0.304.0` as an interim foundation/consensus baseline; the complete freeze, rehearsal, promotion, and candidate admission now occur at `v0.336.0..=v0.340.0` plus `v1.0.0-rc.1`. |
+| Core transaction, EVM, and execution-network paths still depended on optional Keccak-256 and secp256k1 implementations without a first-party replacement milestone. | Moved first-party Keccak-256, secp256k1 arithmetic, ECDSA/recovery/ECDH, symmetric transport/keystore primitives, integration, and initial audit forward to `v0.67.0..=v0.71.0`; `v0.305.0..=v0.308.0` now revalidate the completed full-stack consumer set instead of introducing core crypto late. |
+| Historical execution support did not explicitly implement Ethash seal verification, historical difficulty, ommers, rewards, and irregular pre-Merge transitions. | Added `v0.309.0..=v0.311.0` for Ethash, complete pre-Merge consensus rules, and a genesis-to-Merge historical execution gate. |
+| The roadmap described execution libraries and runtime traits but did not yet produce a complete independently runnable execution client. | Added `v0.312.0..=v0.321.0` for a reviewed production database backend, staged sync and healing, local payload building, authenticated Engine server, inbound execution RPC/GraphQL surfaces, operational discovery, an execution-node binary, recovery tools, and production controls. |
+| Execution assurance focused on fixtures and the beacon node consuming other execution clients, not on independent consensus clients driving the first-party execution client. | Added `v0.322.0..=v0.327.0` for execution Hive/RPC compatibility, multi-consensus-client Engine interoperability, public-network sync/follow evidence, performance, independent audit, and remediation. |
+| Execution and consensus networking milestones could be read as delegating Ethereum semantics to generic networking crates. | Tightened `v0.184.0..=v0.189.0` and `v0.245.0..=v0.250.0`: generic socket, runtime, and reviewed cryptographic adapters may remain optional infrastructure, but Ethereum codecs, validation, fork compatibility, scoring, resource policy, and protocol state machines are first-party. |
+| Separate execution, beacon, and validator binaries did not yet provide an integrated node product, reproducible devnet, or final mixed-client system evidence. | Added `v0.328.0..=v0.335.0` for integrated node orchestration, private-network tooling, mixed-client matrices, long-running integrated tests, performance/recovery, operator guides, full-stack audit, and remediation. |
+| The 1.0 admission gate occurred before the newly identified execution-client and integrated-node product work. | Moved final quantitative admission, API/crate freeze, exact release rehearsal, version promotion, and candidate admission to `v0.336.0..=v0.340.0` plus `v1.0.0-rc.N`. |
 | Truncated `PUSHn` bytecode was rejected instead of zero-padded, causing consensus divergence. | Added `v0.52.2 - Truncated PUSH Consensus Correction` before broader native execution. |
 | Decode budgets reset across nested RLP iterators, transaction stages, proofs, and ownership conversion. | Added `v0.52.3 - Shared Decode Session And Work Ledger` with one non-copyable operation-wide ledger and complexity oracles. |
 | MPT proof nodes were hashed before proof-size accounting and locally non-canonical trie forms remained admissible. | Added `v0.52.4 - MPT Proof Preflight And Strict Canonicality`. |
 | Account and storage proofs were independently rooted and therefore not cryptographically composed. | Added `v0.52.5 - Composed Account And Storage Proofs` with a non-forgeable `VerifiedAccount` capability. |
 | Live proof consumers lacked hash-keyed resolution, multiproof deduplication, immutable snapshot binding, and bounded orchestration. | Added `v0.52.6 - MPT Resolver Multiproof And Snapshot Orchestration`. |
 | Opaque classified EIP-2718 envelopes could be confused with executable transactions, and EVM host powers were monolithic. | Added `v0.52.7 - Execution Admission And Host Capability Split`. |
-| Fixed linear warm-access arrays become quadratic under adversarial node-scale workloads. | Added `v0.52.8 - Bounded Access Tracking And Execution Governor`, retaining the fixed-array implementation only as an explicit embedded profile. |
-| Precompile plans lacked non-forgeable charged authorization, precise CALL outcomes, and gas-derived work/output contracts. | Added `v0.52.9 - Metered Precompile Outcome Contract`. |
-| ModExp rejected protocol-valid operands above 64 bytes and a fixed global input ceiling could become a private consensus rule. | Added `v0.52.10 - Consensus-Complete ModExp`; advanced BLS milestones moved to `v0.52.11..=v0.52.18`. |
-| Architecture, shared resource governance, and cryptographic backend contracts needed to stabilize before broad SDK and node work. | Added `v0.52.19..=v0.52.21` for dependency/capability invariants, hierarchical budgets, and cryptographic substrate contracts. |
-| RPC methods, provider trust, multi-call anchors, transaction lifecycle, and signer boundaries needed stronger type-directed requirements. | Expanded `v0.92.0`, `v0.93.0`, `v0.98.0`, `v0.100.0`, `v0.104.0`, `v0.109.0`, and `v0.110.0`. |
-| Durable storage behavior and fault recovery were scheduled too late to validate abstractions before synchronization. | Added `v0.130.1 - Production Storage Pilot` and `v0.134.1 - Persistent Fault And Recovery Gate`. |
-| End-to-end Engine integration first appeared too late in the roadmap. | Added `v0.144.1 - Early Engine Vertical Devnet`, an expanding in-process/authenticated adapter-equivalence lane reused by later milestones. |
-| Execution and consensus networking risked sharing peer semantics, while txpool and sync requirements lacked several adversarial policies. | Strengthened `v0.154.0..=v0.162.0` with separate protocol planes, hierarchical resource capabilities, policy/consensus separation, EIP-7702/blob/reorg behavior, backpressured stages, and snapshot-bound composed proofs. |
-| Fuzzing lacked deep valid structures and work oracles; protocol/concurrency and side-channel assurance were incomplete. | Added `v0.176.1`, `v0.179.1`, and `v0.179.2` for structure-aware continuous fuzzing, complexity oracles, mutation/regression policy, TLA+/Quint/Apalache and Loom models, secret-path testing, and public gas-to-cycles evidence. |
-| Shared decode accounting covered RLP/MPT but not SSZ, JSON, ABI, Snappy, SSZ-Snappy, Req/Resp, or GossipSub. | Added `v0.52.27 - Cross-Format Decode Work Accounting` and bound the concrete format milestones at `v0.92.0`, `v0.121.0..=v0.122.0`, `v0.141.0`, `v0.154.0`, `v0.157.0`, and `v0.217.0..=v0.219.0` to its parent ledger. |
-| Core cryptographic implementations were scheduled after wallets and networking, and AES-CTR/HMAC/ECIES/KDF boundaries were unnamed. | Added `v0.52.22..=v0.52.26` before Phase 9; local signing and RLPx now consume already admitted first-party or explicitly audited primitives. |
-| Current-fork system operations and execution requests were hidden inside broad transition milestones. | Added `v0.74.1 - System Operations And Execution Requests` for EIP-4788, EIP-2935, EIP-6110, EIP-7002, EIP-7251, EIP-7685, ordering, rollback, persistence, Engine encoding, and header binding. |
-| Resource cancellation could conflate consumed work, reservations, and replenishing rate limits. | Expanded `v0.52.20` with distinct non-refundable work, releasable reservations, policy-replenished rates, cross-thread conservation, double-release prevention, and deterministic consensus work units. |
-| Node-scale execution lacked snapshot-bound cache/prefetch and deterministic speculative parallelism milestones. | Added `v0.88.1 - Snapshot-Bound Execution Caches And Prefetch` and `v0.88.2 - Deterministic Speculative Parallel Execution`. |
-| KZG/BLS batch verification did not state coefficient, transcript, entropy, cache, isolation, or latency soundness. | Expanded `v0.79.0`, `v0.192.0`, and `v0.193.0` with fail-closed context-complete batch contracts. |
-| Differential execution did not enumerate all compared consensus outputs or require sufficiently diverse clients. | Expanded `v0.88.0` to compare status, halts, gas/refunds, logs/bloom, receipts and all roots, account/code changes, diffs, and traces against official fixtures plus Geth, Besu, and Nethermind. |
-| Engine, scheduling, backpressure, and txpool models were planned only after implementations. | Added design-time executable models to `v0.52.20`, `v0.143.0..=v0.144.0`, `v0.154.0..=v0.159.0`, and `v0.160.0`, while retaining `v0.179.1` as the integrated formal gate. |
-| Security-relevant caches lacked one global identity and validation-level invariant. | Expanded `v0.52.19`, `v0.88.1`, and `v0.218.0` with chain/genesis, fork, snapshot/root, object, and validation-domain identity plus atomic reorg/fork invalidation. |
-| Snap was planned mainly as a consumer rather than a bounded snapshot-pinned serving protocol. | Expanded `v0.157.0` with range/proof construction, serving budgets, fairness, snapshot cancellation, and mixed-snapshot rejection. |
-| ModExp length handling and shared time semantics needed explicit wide-integer and clock-domain contracts. | Expanded `v0.52.10` with 256-bit length preservation and virtual padding; added `v0.52.28 - Shared Clock And Time-Evidence Contract`. |
-| Local resource, timeout, dependency, storage, or backend failures could be confused with consensus invalidity. | Added `v0.52.29 - Validation Outcomes, Object Invalidity And Peer Evidence` and required its non-forgeable evidence in block import, Engine, sync, txpool, peer scoring, gossip, and negative caches. |
-| Expected policy refusal, unsupported capabilities, duplicate objects, and deferred processing could be misclassified as either local failure or protocol invalidity. | Expanded `v0.52.29` with explicit non-action outcomes: they cannot create object-invalidity evidence, while separately evidenced repeated quota abuse may create peer-policy evidence without poisoning the object. |
-| Object invalidity and peer protocol/policy violations were conflated, contradicting later peer-scoring requirements. | Expanded `v0.52.29`, `v0.158.0..=v0.161.0`, and `v0.218.0..=v0.220.0` with disjoint evidence types, identities, consumers, and cache authority. |
-| A failed cryptographic batch could incorrectly identify every member or every contributing peer as invalid. | Added the non-attributable `BatchContainsInvalid` outcome to `v0.52.29` and expanded `v0.79.0`, `v0.192.0`, and `v0.193.0` with bounded individual isolation before member-specific invalidity or punishment. |
-| Invalidity evidence did not explicitly bind auxiliary objects such as blob sidecars, PeerDAS data, KZG domains, Engine bundles, and Snap ranges. | Expanded `v0.52.29` with auxiliary-object identities and substitution tests so one invalid component cannot poison a valid sibling or containing block. |
-| Deterministic ECDSA was ordered before its RFC 6979 HMAC-SHA256 dependency and lacked complete nonce/fault requirements. | Expanded and renamed `v0.52.24 - First-Party HMAC ECDSA Recovery And ECDH`; `v0.52.25` now consumes its admitted HMAC implementation. |
-| First-party secp256k1 arithmetic proofs were scheduled after local signer and network-identity consumers. | Added `v0.52.30 - Early secp256k1 Arithmetic Proof Gate` before those consumers; `v0.178.1` retains the broader cross-primitive consolidation and extension gate. |
-| Generic signer and key abstractions could permit secp256k1 execution or transport material to cross into BLS consensus duties. | Added `v0.52.31 - Signing And Transport Capability Separation` and expanded `v0.109.0`, `v0.110.0`, `v0.155.0`, `v0.238.0`, and `v0.239.0` with sealed scheme-specific signing capabilities, a separate non-signing transport identity capability, opaque tagged custody types, withdrawal-key separation, and compile-fail cross-capability tests. |
-| Deployment resource policy could accidentally narrow protocol-valid object limits and create local consensus divergence. | Added `v0.52.32 - Contextual Protocol, Wire And Operational Limit Domains` and expanded `v0.63.0`, `v0.139.0`, networking consumers, and consensus Req/Resp with immutable per-object contexts, advertised static envelopes, dynamic candidate-derived work, protocol-versioned wire limits, readiness withdrawal, and local-only exhaustion outcomes. |
-| An immutable validation context could still be forged if callers could construct, deserialize, or substitute its fork and limit fields. | Expanded `v0.52.32`, `v0.62.0`, `v0.63.0`, `v0.73.0`, and `v0.134.0` with private context fields, sealed rules-engine constructors, verified parent/genesis authority, rules/limits digests, derived child contexts, and corrupted-storage tests. |
-| Invalidity and peer evidence could itself amplify memory, persistence, serialization, logging, or diagnostic output. | Expanded `v0.52.29`, `v0.134.0`, `v0.136.0`, `v0.158.0`, `v0.218.0`, `v0.253.0`, and `v0.258.0` with evidence budgets, compact witnesses, bounded counters/windows, retention, redaction, and fail-local construction semantics. |
-| Proof limits did not distinguish consensus-embedded proofs from Snap/MPT wire proofs and RPC/provider policy. | Expanded `v0.52.32`, `v0.92.0`, `v0.100.0`, `v0.157.0`, and `v0.165.0` with authority-tagged proof limits and cross-domain non-substitution tests. |
-| Peer-observation windows lacked restart/session and rollback-safe time semantics. | Expanded `v0.52.28`, `v0.52.29`, `v0.158.0`, and `v0.220.0` with monotonic in-session windows, boot/session identity, carefully defined UTC persistence, and rollback/stale-source expiry tests. |
-| Evidence-budget exhaustion after proving invalidity could erase the authoritative result. | Expanded `v0.52.29`, `v0.72.0`, `v0.73.0`, `v0.136.0`, `v0.143.0`, and `v0.218.0` with pre-validation fixed `EvidenceSlot` reservation, infallible allocation-free minimal evidence, and optional cache/diagnostic/persistence attachments that cannot change the immediate result. |
-| Nested and batch validators could independently reserve, reset, duplicate, or lose evidence capacity. | Added `v0.52.33 - Hierarchical Evidence Capability Composition` and expanded `v0.72.0`, `v0.73.0`, `v0.74.0..=v0.74.1`, `v0.79.0`, `v0.134.0`, `v0.136.0`, `v0.177.0`, `v0.179.1`, `v0.192.0`, `v0.193.0`, and `v0.218.0` with linear parent/child reservations, bounded batch cardinality, exactly-once lifecycle rules, committed-record recovery, Kani conservation proofs, and Loom concurrency checks. |
-| Evidence collection cardinality and optional sink access could be left implicit, allowing diagnostics to affect validity or consume slot authority. | Added `v0.52.34 - Evidence Collection Modes And Immutable Sink Access` and expanded `v0.52.32`, `v0.72.0`, `v0.73.0`, `v0.79.0`, `v0.134.0`, `v0.136.0`, `v0.143.0`, `v0.177.0`, `v0.192.0`, `v0.193.0`, and `v0.218.0` with explicit `FirstInvalid`, `CollectUpTo<N>`, and `BatchIsolateUpTo<N>` operational modes, validity invariance, immutable evidence borrowing, and one final slot-ownership transition. |
-| Evidence safety machinery could impose valid-path allocation, contention, hashing, sink work, code-size growth, or public API complexity. | Added `v0.52.35 - Evidence Hot-Path And API Containment Gate` and expanded `v0.52.19`, `v0.52.33..=v0.52.34`, `v0.72.0`, `v0.73.0`, `v0.79.0`, `v0.88.0`, `v0.140.0`, `v0.176.0`, `v0.180.0`, `v0.192.0`, `v0.193.0`, `v0.218.0`, `v0.258.0`, and `v0.262.0` with allocation-free uncontended valid paths, parent arenas/index handles, amortized reservation, admitted cardinalities, internal machinery, stable non-generic outcomes, evidence-disabled internal baselines, and release-blocking overhead/size thresholds. |
-| Evidence arenas lacked an explicit capacity, reuse, transfer, and structurally equivalent benchmark-baseline contract. | Added `v0.52.36 - Evidence Arena Capacity And Benchmark Integrity` and expanded `v0.52.20`, `v0.52.33..=v0.52.35`, `v0.73.0`, `v0.74.0`, `v0.88.2`, `v0.139.0`, `v0.175.0`, `v0.176.0`, `v0.177.0`, `v0.179.1`, `v0.180.0`, and `v0.218.0` with capability-backed simultaneous-work sizing, local backpressure/exhaustion, ABA-safe handles, audited stack placement, reference-safe transfer/cancellation, optional benchmark-justified pools, non-generic public mode dispatch, and optimizer-resistant equivalent baselines. |
-| Invalid-path baselines, benchmark timing/instrumentation, runtime cardinality-class mapping, and generation-wrap behavior remained ambiguous. | Added `v0.52.37 - Evidence Benchmark Measurement And Dispatch Closure` and expanded `v0.52.34..=v0.52.36`, `v0.176.0`, `v0.177.0`, `v0.180.0`, `v0.258.0`, and `v0.262.0` with valid-only disabled baselines, invalid semantic projections/minimal-evidence baselines, protocol-versus-evidence counters, lifecycle-complete timing with untimed setup/result work, uninstrumented production thresholds, separate non-perturbing conformance instrumentation, exact requested-limit enforcement over upward internal capacity classes, physical-class resource charging, and fail-closed generation retirement. |
-| Validation contexts could remain non-forgeable yet accidentally retain recursive ancestry or unstable process-local identities. | Expanded `v0.52.32`, `v0.63.0`, `v0.73.0`, `v0.74.0`, `v0.88.1`, and `v0.134.0` with bounded parent handles, borrowed child contexts, deterministic lease release, canonical versioned encoding, domain-separated cryptographic digests, and constant-size/stability tests. |
-| First-party cryptographic arithmetic needed explicit machine-checked implementation evidence beyond the early secp gate. | Added `v0.178.1 - Kani Cryptographic Arithmetic Proofs` for limbs, reduction, conversion, inversion, square roots, point exceptions, scalar multiplication, and canonical serialization across the broader cryptographic core. |
-| Provider JSON-RPC, HTTP, WebSocket, and IPC boundaries lacked several canonicality, redirect, rebinding, proxy, credential, and local-peer controls. | Expanded `v0.92.0` and `v0.94.0..=v0.97.0` with canonical quantity/bytes/ID rules, decoded-byte charging, redirect/origin/DNS/proxy/credential policy, Unix ownership/symlink checks, and Windows pipe ACL/identity checks. |
-| Txpool entries were not explicitly revalidated across heads, forks, fees, restarts, account/delegation state, and blob-sidecar lifecycle. | Expanded `v0.160.0`; persisted/local/protected status never bypasses fresh consensus validation. |
-| Negative and bad-block caches needed stricter evidence, identity, invalidation, retention, and anti-flood rules. | Expanded `v0.52.29`, `v0.136.0..=v0.137.0`, `v0.161.0`, and `v0.218.0`; only `ObjectInvalidityEvidence` may enter object-negative caches, while peer evidence remains separate. |
-| Speculative parallel execution did not enumerate all implicit transaction and block dependencies. | Expanded `v0.88.2` with nonce/balance, coinbase, creation/code, SELFDESTRUCT, EIP-7702, transient/original/warm state, system request, precompile environment, receipt/log/gas/order dependencies, and sequential fee-delta commit. |
+| Fixed linear warm-access arrays become quadratic under adversarial node-scale workloads. | Added `v0.53.0 - Bounded Access Tracking And Execution Governor`, retaining the fixed-array implementation only as an explicit embedded profile. |
+| Precompile plans lacked non-forgeable charged authorization, precise CALL outcomes, and gas-derived work/output contracts. | Added `v0.54.0 - Metered Precompile Outcome Contract`. |
+| ModExp rejected protocol-valid operands above 64 bytes and a fixed global input ceiling could become a private consensus rule. | Added `v0.55.0 - Consensus-Complete ModExp`; advanced BLS milestones moved to `v0.56.0..=v0.63.0`. |
+| Architecture, shared resource governance, and cryptographic backend contracts needed to stabilize before broad SDK and node work. | Added `v0.64.0..=v0.66.0` for dependency/capability invariants, hierarchical budgets, and cryptographic substrate contracts. |
+| RPC methods, provider trust, multi-call anchors, transaction lifecycle, and signer boundaries needed stronger type-directed requirements. | Expanded `v0.122.0`, `v0.123.0`, `v0.128.0`, `v0.130.0`, `v0.134.0`, `v0.139.0`, and `v0.140.0`. |
+| Durable storage behavior and fault recovery were scheduled too late to validate abstractions before synchronization. | Added `v0.160.1 - Production Storage Pilot` and `v0.164.1 - Persistent Fault And Recovery Gate`. |
+| End-to-end Engine integration first appeared too late in the roadmap. | Added `v0.174.1 - Early Engine Vertical Devnet`, an expanding in-process/authenticated adapter-equivalence lane reused by later milestones. |
+| Execution and consensus networking risked sharing peer semantics, while txpool and sync requirements lacked several adversarial policies. | Strengthened `v0.184.0..=v0.192.0` with separate protocol planes, hierarchical resource capabilities, policy/consensus separation, EIP-7702/blob/reorg behavior, backpressured stages, and snapshot-bound composed proofs. |
+| Fuzzing lacked deep valid structures and work oracles; protocol/concurrency and side-channel assurance were incomplete. | Added `v0.206.1`, `v0.209.1`, and `v0.209.2` for structure-aware continuous fuzzing, complexity oracles, mutation/regression policy, TLA+/Quint/Apalache and Loom models, secret-path testing, and public gas-to-cycles evidence. |
+| Shared decode accounting covered RLP/MPT but not SSZ, JSON, ABI, Snappy, SSZ-Snappy, Req/Resp, or GossipSub. | Added `v0.72.0 - Cross-Format Decode Work Accounting` and bound the concrete format milestones at `v0.122.0`, `v0.151.0..=v0.152.0`, `v0.171.0`, `v0.184.0`, `v0.187.0`, and `v0.247.0..=v0.249.0` to its parent ledger. |
+| Core cryptographic implementations were scheduled after wallets and networking, and AES-CTR/HMAC/ECIES/KDF boundaries were unnamed. | Added `v0.67.0..=v0.71.0` before Phase 9; local signing and RLPx now consume already admitted first-party or explicitly audited primitives. |
+| Current-fork system operations and execution requests were hidden inside broad transition milestones. | Added `v0.104.1 - System Operations And Execution Requests` for EIP-4788, EIP-2935, EIP-6110, EIP-7002, EIP-7251, EIP-7685, ordering, rollback, persistence, Engine encoding, and header binding. |
+| Resource cancellation could conflate consumed work, reservations, and replenishing rate limits. | Expanded `v0.65.0` with distinct non-refundable work, releasable reservations, policy-replenished rates, cross-thread conservation, double-release prevention, and deterministic consensus work units. |
+| Node-scale execution lacked snapshot-bound cache/prefetch and deterministic speculative parallelism milestones. | Added `v0.118.1 - Snapshot-Bound Execution Caches And Prefetch` and `v0.118.2 - Deterministic Speculative Parallel Execution`. |
+| KZG/BLS batch verification did not state coefficient, transcript, entropy, cache, isolation, or latency soundness. | Expanded `v0.109.0`, `v0.222.0`, and `v0.223.0` with fail-closed context-complete batch contracts. |
+| Differential execution did not enumerate all compared consensus outputs or require sufficiently diverse clients. | Expanded `v0.118.0` to compare status, halts, gas/refunds, logs/bloom, receipts and all roots, account/code changes, diffs, and traces against official fixtures plus Geth, Besu, and Nethermind. |
+| Engine, scheduling, backpressure, and txpool models were planned only after implementations. | Added design-time executable models to `v0.65.0`, `v0.173.0..=v0.174.0`, `v0.184.0..=v0.189.0`, and `v0.190.0`, while retaining `v0.209.1` as the integrated formal gate. |
+| Security-relevant caches lacked one global identity and validation-level invariant. | Expanded `v0.64.0`, `v0.118.1`, and `v0.248.0` with chain/genesis, fork, snapshot/root, object, and validation-domain identity plus atomic reorg/fork invalidation. |
+| Snap was planned mainly as a consumer rather than a bounded snapshot-pinned serving protocol. | Expanded `v0.187.0` with range/proof construction, serving budgets, fairness, snapshot cancellation, and mixed-snapshot rejection. |
+| ModExp length handling and shared time semantics needed explicit wide-integer and clock-domain contracts. | Expanded `v0.55.0` with 256-bit length preservation and virtual padding; added `v0.73.0 - Shared Clock And Time-Evidence Contract`. |
+| Local resource, timeout, dependency, storage, or backend failures could be confused with consensus invalidity. | Added `v0.74.0 - Validation Outcomes, Object Invalidity And Peer Evidence` and required its non-forgeable evidence in block import, Engine, sync, txpool, peer scoring, gossip, and negative caches. |
+| Expected policy refusal, unsupported capabilities, duplicate objects, and deferred processing could be misclassified as either local failure or protocol invalidity. | Expanded `v0.74.0` with explicit non-action outcomes: they cannot create object-invalidity evidence, while separately evidenced repeated quota abuse may create peer-policy evidence without poisoning the object. |
+| Object invalidity and peer protocol/policy violations were conflated, contradicting later peer-scoring requirements. | Expanded `v0.74.0`, `v0.188.0..=v0.191.0`, and `v0.248.0..=v0.250.0` with disjoint evidence types, identities, consumers, and cache authority. |
+| A failed cryptographic batch could incorrectly identify every member or every contributing peer as invalid. | Added the non-attributable `BatchContainsInvalid` outcome to `v0.74.0` and expanded `v0.109.0`, `v0.222.0`, and `v0.223.0` with bounded individual isolation before member-specific invalidity or punishment. |
+| Invalidity evidence did not explicitly bind auxiliary objects such as blob sidecars, PeerDAS data, KZG domains, Engine bundles, and Snap ranges. | Expanded `v0.74.0` with auxiliary-object identities and substitution tests so one invalid component cannot poison a valid sibling or containing block. |
+| Deterministic ECDSA was ordered before its RFC 6979 HMAC-SHA256 dependency and lacked complete nonce/fault requirements. | Expanded and renamed `v0.69.0 - First-Party HMAC ECDSA Recovery And ECDH`; `v0.70.0` now consumes its admitted HMAC implementation. |
+| First-party secp256k1 arithmetic proofs were scheduled after local signer and network-identity consumers. | Added `v0.75.0 - Early secp256k1 Arithmetic Proof Gate` before those consumers; `v0.208.1` retains the broader cross-primitive consolidation and extension gate. |
+| Generic signer and key abstractions could permit secp256k1 execution or transport material to cross into BLS consensus duties. | Added `v0.76.0 - Signing And Transport Capability Separation` and expanded `v0.139.0`, `v0.140.0`, `v0.185.0`, `v0.268.0`, and `v0.269.0` with sealed scheme-specific signing capabilities, a separate non-signing transport identity capability, opaque tagged custody types, withdrawal-key separation, and compile-fail cross-capability tests. |
+| Deployment resource policy could accidentally narrow protocol-valid object limits and create local consensus divergence. | Added `v0.77.0 - Contextual Protocol, Wire And Operational Limit Domains` and expanded `v0.93.0`, `v0.169.0`, networking consumers, and consensus Req/Resp with immutable per-object contexts, advertised static envelopes, dynamic candidate-derived work, protocol-versioned wire limits, readiness withdrawal, and local-only exhaustion outcomes. |
+| An immutable validation context could still be forged if callers could construct, deserialize, or substitute its fork and limit fields. | Expanded `v0.77.0`, `v0.92.0`, `v0.93.0`, `v0.103.0`, and `v0.164.0` with private context fields, sealed rules-engine constructors, verified parent/genesis authority, rules/limits digests, derived child contexts, and corrupted-storage tests. |
+| Invalidity and peer evidence could itself amplify memory, persistence, serialization, logging, or diagnostic output. | Expanded `v0.74.0`, `v0.164.0`, `v0.166.0`, `v0.188.0`, `v0.248.0`, `v0.283.0`, and `v0.288.0` with evidence budgets, compact witnesses, bounded counters/windows, retention, redaction, and fail-local construction semantics. |
+| Proof limits did not distinguish consensus-embedded proofs from Snap/MPT wire proofs and RPC/provider policy. | Expanded `v0.77.0`, `v0.122.0`, `v0.130.0`, `v0.187.0`, and `v0.195.0` with authority-tagged proof limits and cross-domain non-substitution tests. |
+| Peer-observation windows lacked restart/session and rollback-safe time semantics. | Expanded `v0.73.0`, `v0.74.0`, `v0.188.0`, and `v0.250.0` with monotonic in-session windows, boot/session identity, carefully defined UTC persistence, and rollback/stale-source expiry tests. |
+| Evidence-budget exhaustion after proving invalidity could erase the authoritative result. | Expanded `v0.74.0`, `v0.102.0`, `v0.103.0`, `v0.166.0`, `v0.173.0`, and `v0.248.0` with pre-validation fixed `EvidenceSlot` reservation, infallible allocation-free minimal evidence, and optional cache/diagnostic/persistence attachments that cannot change the immediate result. |
+| Nested and batch validators could independently reserve, reset, duplicate, or lose evidence capacity. | Added `v0.78.0 - Hierarchical Evidence Capability Composition` and expanded `v0.102.0`, `v0.103.0`, `v0.104.0..=v0.104.1`, `v0.109.0`, `v0.164.0`, `v0.166.0`, `v0.207.0`, `v0.209.1`, `v0.222.0`, `v0.223.0`, and `v0.248.0` with linear parent/child reservations, bounded batch cardinality, exactly-once lifecycle rules, committed-record recovery, Kani conservation proofs, and Loom concurrency checks. |
+| Evidence collection cardinality and optional sink access could be left implicit, allowing diagnostics to affect validity or consume slot authority. | Added `v0.79.0 - Evidence Collection Modes And Immutable Sink Access` and expanded `v0.77.0`, `v0.102.0`, `v0.103.0`, `v0.109.0`, `v0.164.0`, `v0.166.0`, `v0.173.0`, `v0.207.0`, `v0.222.0`, `v0.223.0`, and `v0.248.0` with explicit `FirstInvalid`, `CollectUpTo<N>`, and `BatchIsolateUpTo<N>` operational modes, validity invariance, immutable evidence borrowing, and one final slot-ownership transition. |
+| Evidence safety machinery could impose valid-path allocation, contention, hashing, sink work, code-size growth, or public API complexity. | Added `v0.80.0 - Evidence Hot-Path And API Containment Gate` and expanded `v0.64.0`, `v0.78.0..=v0.79.0`, `v0.102.0`, `v0.103.0`, `v0.109.0`, `v0.118.0`, `v0.170.0`, `v0.206.0`, `v0.210.0`, `v0.222.0`, `v0.223.0`, `v0.248.0`, `v0.288.0`, and `v0.292.0` with allocation-free uncontended valid paths, parent arenas/index handles, amortized reservation, admitted cardinalities, internal machinery, stable non-generic outcomes, evidence-disabled internal baselines, and release-blocking overhead/size thresholds. |
+| Evidence arenas lacked an explicit capacity, reuse, transfer, and structurally equivalent benchmark-baseline contract. | Added `v0.81.0 - Evidence Arena Capacity And Benchmark Integrity` and expanded `v0.65.0`, `v0.78.0..=v0.80.0`, `v0.103.0`, `v0.104.0`, `v0.118.2`, `v0.169.0`, `v0.205.0`, `v0.206.0`, `v0.207.0`, `v0.209.1`, `v0.210.0`, and `v0.248.0` with capability-backed simultaneous-work sizing, local backpressure/exhaustion, ABA-safe handles, audited stack placement, reference-safe transfer/cancellation, optional benchmark-justified pools, non-generic public mode dispatch, and optimizer-resistant equivalent baselines. |
+| Invalid-path baselines, benchmark timing/instrumentation, runtime cardinality-class mapping, and generation-wrap behavior remained ambiguous. | Added `v0.82.0 - Evidence Benchmark Measurement And Dispatch Closure` and expanded `v0.79.0..=v0.81.0`, `v0.206.0`, `v0.207.0`, `v0.210.0`, `v0.288.0`, and `v0.292.0` with valid-only disabled baselines, invalid semantic projections/minimal-evidence baselines, protocol-versus-evidence counters, lifecycle-complete timing with untimed setup/result work, uninstrumented production thresholds, separate non-perturbing conformance instrumentation, exact requested-limit enforcement over upward internal capacity classes, physical-class resource charging, and fail-closed generation retirement. |
+| Validation contexts could remain non-forgeable yet accidentally retain recursive ancestry or unstable process-local identities. | Expanded `v0.77.0`, `v0.93.0`, `v0.103.0`, `v0.104.0`, `v0.118.1`, and `v0.164.0` with bounded parent handles, borrowed child contexts, deterministic lease release, canonical versioned encoding, domain-separated cryptographic digests, and constant-size/stability tests. |
+| First-party cryptographic arithmetic needed explicit machine-checked implementation evidence beyond the early secp gate. | Added `v0.208.1 - Kani Cryptographic Arithmetic Proofs` for limbs, reduction, conversion, inversion, square roots, point exceptions, scalar multiplication, and canonical serialization across the broader cryptographic core. |
+| Provider JSON-RPC, HTTP, WebSocket, and IPC boundaries lacked several canonicality, redirect, rebinding, proxy, credential, and local-peer controls. | Expanded `v0.122.0` and `v0.124.0..=v0.127.0` with canonical quantity/bytes/ID rules, decoded-byte charging, redirect/origin/DNS/proxy/credential policy, Unix ownership/symlink checks, and Windows pipe ACL/identity checks. |
+| Txpool entries were not explicitly revalidated across heads, forks, fees, restarts, account/delegation state, and blob-sidecar lifecycle. | Expanded `v0.190.0`; persisted/local/protected status never bypasses fresh consensus validation. |
+| Negative and bad-block caches needed stricter evidence, identity, invalidation, retention, and anti-flood rules. | Expanded `v0.74.0`, `v0.166.0..=v0.167.0`, `v0.191.0`, and `v0.248.0`; only `ObjectInvalidityEvidence` may enter object-negative caches, while peer evidence remains separate. |
+| Speculative parallel execution did not enumerate all implicit transaction and block dependencies. | Expanded `v0.118.2` with nonce/balance, coinbase, creation/code, SELFDESTRUCT, EIP-7702, transient/original/warm state, system request, precompile environment, receipt/log/gas/order dependencies, and sequential fee-delta commit. |
 
 ## Phase 0: Repository And Release Discipline
 
@@ -2942,7 +2945,7 @@ Exit criteria:
 - `v0.52.7 implementation stop reached. Run pentest for this exact
   commit.`
 
-### v0.52.8 - Bounded Access Tracking And Execution Governor
+### v0.53.0 - Bounded Access Tracking And Execution Governor
 
 Status: planned.
 
@@ -2969,10 +2972,10 @@ Exit criteria:
 
 - Adversarial access patterns cannot turn valid gas-bounded execution into an
   undocumented quadratic host workload.
-- `v0.52.8 implementation stop reached. Run pentest for this exact
+- `v0.53.0 implementation stop reached. Run pentest for this exact
   commit.`
 
-### v0.52.9 - Metered Precompile Outcome Contract
+### v0.54.0 - Metered Precompile Outcome Contract
 
 Status: planned.
 
@@ -3001,10 +3004,10 @@ Exit criteria:
 
 - No expensive precompile work runs without charged authorization, and CALL
   semantics receive one precise outcome without repeating work.
-- `v0.52.9 implementation stop reached. Run pentest for this exact
+- `v0.54.0 implementation stop reached. Run pentest for this exact
   commit.`
 
-### v0.52.10 - Consensus-Complete ModExp
+### v0.55.0 - Consensus-Complete ModExp
 
 Status: planned.
 
@@ -3037,12 +3040,12 @@ Exit criteria:
 
 - Every ModExp call allowed by the claimed fork is either executed correctly
   or fails only for an Ethereum-defined reason, never a private 64-byte cap.
-- `v0.52.10 implementation stop reached. Run pentest for this exact
+- `v0.55.0 implementation stop reached. Run pentest for this exact
   commit.`
 
 ## Phase 8B: Advanced BLS12-381 Precompiles
 
-### v0.52.11 - BLS12-381 G1 Arithmetic And Addition
+### v0.56.0 - BLS12-381 G1 Arithmetic And Addition
 
 Status: planned.
 
@@ -3077,10 +3080,10 @@ Exit criteria:
 - Address `0x0b` produces only canonical EIP-2537 G1 results after exact gas
   charging, and does not reject valid on-curve points solely for subgroup
   membership.
-- `v0.52.11 implementation stop reached. Run pentest for this exact
+- `v0.56.0 implementation stop reached. Run pentest for this exact
   commit.`
 
-### v0.52.12 - BLS12-381 Fp2, G2, And Addition
+### v0.57.0 - BLS12-381 Fp2, G2, And Addition
 
 Status: planned.
 
@@ -3112,10 +3115,10 @@ Exit criteria:
 - Address `0x0d` is executable with canonical EIP-2537 behavior, while valid
   on-curve non-subgroup points remain accepted by addition as required.
 - The Fp2/G2 conventions needed by pairing are documented and vector-backed.
-- `v0.52.12 implementation stop reached. Run pentest for this exact
+- `v0.57.0 implementation stop reached. Run pentest for this exact
   commit.`
 
-### v0.52.13 - BLS12-381 Subgroup Validation
+### v0.58.0 - BLS12-381 Subgroup Validation
 
 Status: planned.
 
@@ -3149,10 +3152,10 @@ Exit criteria:
 
 - No MSM or pairing path can consume an unvalidated subgroup point, and no
   addition path rejects a point for a subgroup rule that EIP-2537 omits.
-- `v0.52.13 implementation stop reached. Run pentest for this exact
+- `v0.58.0 implementation stop reached. Run pentest for this exact
   commit.`
 
-### v0.52.14 - BLS12-381 Multiscalar Multiplication
+### v0.59.0 - BLS12-381 Multiscalar Multiplication
 
 Status: planned.
 
@@ -3188,10 +3191,10 @@ Exit criteria:
 - Addresses `0x0c` and `0x0e` return canonical subgroup points for every
   admitted non-empty frame, with execution cost and scratch use bounded by the
   same input count used for gas planning.
-- `v0.52.14 implementation stop reached. Run pentest for this exact
+- `v0.59.0 implementation stop reached. Run pentest for this exact
   commit.`
 
-### v0.52.15 - BLS12-381 Map-To-Curve
+### v0.60.0 - BLS12-381 Map-To-Curve
 
 Status: planned.
 
@@ -3224,10 +3227,10 @@ Exit criteria:
 - Addresses `0x10` and `0x11` are executable and vector-backed, with no
   ambiguity between field-to-curve mapping and a higher-level hash-to-curve
   protocol.
-- `v0.52.15 implementation stop reached. Run pentest for this exact
+- `v0.60.0 implementation stop reached. Run pentest for this exact
   commit.`
 
-### v0.52.16 - BLS12-381 Pairing Foundation
+### v0.61.0 - BLS12-381 Pairing Foundation
 
 Status: planned.
 
@@ -3261,10 +3264,10 @@ Exit criteria:
 - Pairing arithmetic is complete, deterministic, fixed-bound, and
   independently vector-backed, but non-empty `0x0f` still returns backend
   unavailable until result admission is separately reviewed.
-- `v0.52.16 implementation stop reached. Run pentest for this exact
+- `v0.61.0 implementation stop reached. Run pentest for this exact
   commit.`
 
-### v0.52.17 - BLS12-381 Pairing Execution
+### v0.62.0 - BLS12-381 Pairing Execution
 
 Status: planned.
 
@@ -3280,7 +3283,7 @@ Deliverables:
 - explicit precompile-error outcome contract so the future CALL dispatcher can
   burn all supplied call gas as required by EIP-2537;
 - output-unchanged behavior on charge failure and malformed input;
-- bounded batch accumulation reusing the `v0.52.16` arithmetic exactly once per
+- bounded batch accumulation reusing the `v0.61.0` arithmetic exactly once per
   tuple.
 
 Verification:
@@ -3297,10 +3300,10 @@ Exit criteria:
 - Address `0x0f` returns a consensus-compatible canonical result for every
   admitted frame, and exposes enough error classification for dispatcher-level
   all-gas burning without repeating cryptographic work.
-- `v0.52.17 implementation stop reached. Run pentest for this exact
+- `v0.62.0 implementation stop reached. Run pentest for this exact
   commit.`
 
-### v0.52.18 - Prague Advanced-Precompile Admission
+### v0.63.0 - Prague Advanced-Precompile Admission
 
 Status: planned.
 
@@ -3336,10 +3339,10 @@ Exit criteria:
   and a clean pentest.
 - Any remaining CALL-dispatch or state-transition integration is assigned to a
   named later release rather than implied by this admission.
-- `v0.52.18 implementation stop reached. Run pentest for this exact
+- `v0.63.0 implementation stop reached. Run pentest for this exact
   commit.`
 
-### v0.52.19 - Architecture Invariant Gate
+### v0.64.0 - Architecture Invariant Gate
 
 Status: planned.
 
@@ -3387,10 +3390,10 @@ Exit criteria:
 
 - Later convenience, runtime, database, network, or hardware integrations
   cannot acquire consensus authority through dependency or feature drift.
-- `v0.52.19 implementation stop reached. Run pentest for this exact
+- `v0.64.0 implementation stop reached. Run pentest for this exact
   commit.`
 
-### v0.52.20 - Hierarchical Resource Governor Contract
+### v0.65.0 - Hierarchical Resource Governor Contract
 
 Status: planned.
 
@@ -3416,7 +3419,7 @@ Deliverables:
 - prohibit wall-clock CPU time as a consensus-admission input; deterministic
   work units govern validity while wall time governs scheduling and peer policy;
 - resource exhaustion, cancellation, timeout, and unavailable schedulers map
-  to retryable local outcomes defined at `v0.52.29`, never protocol invalidity;
+  to retryable local outcomes defined at `v0.74.0`, never protocol invalidity;
 - `no_std` accounting traits plus optional runtime schedulers that cannot mint
   or bypass consensus work authorization.
 
@@ -3433,10 +3436,10 @@ Exit criteria:
 
 - Every later untrusted boundary can consume a shared hierarchical budget
   instead of resetting an unrelated local counter.
-- `v0.52.20 implementation stop reached. Run pentest for this exact
+- `v0.65.0 implementation stop reached. Run pentest for this exact
   commit.`
 
-### v0.52.21 - Cryptographic Substrate Contract Freeze
+### v0.66.0 - Cryptographic Substrate Contract Freeze
 
 Status: planned.
 
@@ -3467,10 +3470,10 @@ Exit criteria:
 - Higher layers depend on stable auditable cryptographic capabilities, not a
   concrete third-party implementation or an impossible absolute-erasure
   promise.
-- `v0.52.21 implementation stop reached. Run pentest for this exact
+- `v0.66.0 implementation stop reached. Run pentest for this exact
   commit.`
 
-### v0.52.22 - First-Party Keccak-256 Core
+### v0.67.0 - First-Party Keccak-256 Core
 
 Status: planned.
 
@@ -3481,7 +3484,7 @@ Deliverables:
 
 - Dependency-free Keccak-f[1600] and Keccak-256 absorb/finalize, streaming,
   fixed-output, `no_std`, no-allocation implementation;
-- compatibility with the frozen `v0.52.21` provider contract;
+- compatibility with the frozen `v0.66.0` provider contract;
 - explicit separation from SHA3-256 and reviewed state-clearing behavior for
   secret-bearing callers;
 - external implementations retained only as optional differential/reference
@@ -3500,10 +3503,10 @@ Exit criteria:
 
 - Every existing production hashing path can select a first-party Keccak-256
   backend before higher-level consumers are implemented.
-- `v0.52.22 implementation stop reached. Run pentest for this exact
+- `v0.67.0 implementation stop reached. Run pentest for this exact
   commit.`
 
-### v0.52.23 - First-Party secp256k1 Arithmetic
+### v0.68.0 - First-Party secp256k1 Arithmetic
 
 Status: planned.
 
@@ -3528,10 +3531,10 @@ Exit criteria:
 
 - Ethereum secp256k1 domains have a first-party arithmetic foundation before
   any production signer or network identity depends on them.
-- `v0.52.23 implementation stop reached. Run pentest for this exact
+- `v0.68.0 implementation stop reached. Run pentest for this exact
   commit.`
 
-### v0.52.24 - First-Party HMAC ECDSA Recovery And ECDH
+### v0.69.0 - First-Party HMAC ECDSA Recovery And ECDH
 
 Status: planned.
 
@@ -3569,10 +3572,10 @@ Exit criteria:
 
 - All Ethereum-required secp256k1 operations have a first-party path before
   wallet and networking implementation begins.
-- `v0.52.24 implementation stop reached. Run pentest for this exact
+- `v0.69.0 implementation stop reached. Run pentest for this exact
   commit.`
 
-### v0.52.25 - Symmetric Transport And Keystore Cryptography
+### v0.70.0 - Symmetric Transport And Keystore Cryptography
 
 Status: planned.
 
@@ -3582,7 +3585,7 @@ by RLPx and Web3 keystores before those consumers are built.
 Deliverables:
 
 - First-party or separately audited AES-CTR capability and reuse of the
-  admitted HMAC-SHA256 implementation from `v0.52.24`;
+  admitted HMAC-SHA256 implementation from `v0.69.0`;
 - exact RLPx ECIES, KDF, MAC, key schedule, and transcript behavior;
 - Web3 keystore cipher, MAC, PBKDF/scrypt parameter, and password-handling
   contracts;
@@ -3601,10 +3604,10 @@ Exit criteria:
 
 - RLPx and keystore milestones have no unnamed cryptographic dependency or
   ambiguous trust boundary.
-- `v0.52.25 implementation stop reached. Run pentest for this exact
+- `v0.70.0 implementation stop reached. Run pentest for this exact
   commit.`
 
-### v0.52.26 - Early Core Cryptography Integration And Audit
+### v0.71.0 - Early Core Cryptography Integration And Audit
 
 Status: planned.
 
@@ -3633,10 +3636,10 @@ Exit criteria:
 
 - Later signers and networking use an already admitted first-party core rather
   than being migrated from a temporary backend near release.
-- `v0.52.26 implementation stop reached. Run pentest for this exact
+- `v0.71.0 implementation stop reached. Run pentest for this exact
   commit.`
 
-### v0.52.27 - Cross-Format Decode Work Accounting
+### v0.72.0 - Cross-Format Decode Work Accounting
 
 Status: planned.
 
@@ -3667,10 +3670,10 @@ Exit criteria:
 
 - Every planned wire format has one defined route into operation-wide resource
   accounting before its parser is implemented.
-- `v0.52.27 implementation stop reached. Run pentest for this exact
+- `v0.72.0 implementation stop reached. Run pentest for this exact
   commit.`
 
-### v0.52.28 - Shared Clock And Time-Evidence Contract
+### v0.73.0 - Shared Clock And Time-Evidence Contract
 
 Status: planned.
 
@@ -3706,10 +3709,10 @@ Exit criteria:
 
 - No deadline, slot, peer, or signer safety path silently mixes monotonic and
   wall time or treats an external source as authority.
-- `v0.52.28 implementation stop reached. Run pentest for this exact
+- `v0.73.0 implementation stop reached. Run pentest for this exact
   commit.`
 
-### v0.52.29 - Validation Outcomes, Object Invalidity And Peer Evidence
+### v0.74.0 - Validation Outcomes, Object Invalidity And Peer Evidence
 
 Status: planned.
 
@@ -3747,7 +3750,7 @@ Deliverables:
   malformed objects require a separately reserved object store and are never
   retained implicitly as evidence;
 - peer-policy evidence uses bounded counters and windows rather than event
-  vectors, with time/session identity supplied by `v0.52.28`;
+  vectors, with time/session identity supplied by `v0.73.0`;
 - diagnostic excerpts, detailed witnesses, traces, serialization,
   persistence, and cache insertion are optional attachments after minimal
   evidence exists; their exhaustion/failure is reported separately and cannot
@@ -3840,10 +3843,10 @@ Exit criteria:
   evidence, and evidence itself cannot become an unbounded storage, memory,
   serialization, logging, or privacy channel; once authoritative validation
   starts, enough capacity already exists to preserve any minimal invalid result.
-- `v0.52.29 implementation stop reached. Run pentest for this exact
+- `v0.74.0 implementation stop reached. Run pentest for this exact
   commit.`
 
-### v0.52.30 - Early secp256k1 Arithmetic Proof Gate
+### v0.75.0 - Early secp256k1 Arithmetic Proof Gate
 
 Status: planned.
 
@@ -3860,25 +3863,25 @@ Deliverables:
   ECDH;
 - explicit assumptions and unproved full-width domains paired with vector,
   property, differential, fuzz, side-channel, and audit evidence;
-- reusable proof patterns fed into the broader `v0.178.1` crypto proof gate.
+- reusable proof patterns fed into the broader `v0.208.1` crypto proof gate.
 
 Verification:
 
 - Pinned Kani report and independently reviewed mathematical model;
 - seeded carry, reduction, exceptional-point, scalar-multiplication, and
   non-canonical serialization defects detected by the harnesses;
-- exact first-party code paths from `v0.52.23..=v0.52.24` are proven rather
+- exact first-party code paths from `v0.68.0..=v0.69.0` are proven rather
   than separate toy implementations.
 
 Exit criteria:
 
-- The first secret-bearing execution signer at `v0.110.0` and RLPx identity at
-  `v0.155.0` do not rely only on vectors, fuzzing, and audit for core secp
+- The first secret-bearing execution signer at `v0.140.0` and RLPx identity at
+  `v0.185.0` do not rely only on vectors, fuzzing, and audit for core secp
   arithmetic invariants.
-- `v0.52.30 implementation stop reached. Run pentest for this exact
+- `v0.75.0 implementation stop reached. Run pentest for this exact
   commit.`
 
-### v0.52.31 - Signing And Transport Capability Separation
+### v0.76.0 - Signing And Transport Capability Separation
 
 Status: planned.
 
@@ -3922,10 +3925,10 @@ Exit criteria:
 
 - Algorithm and key-role confusion is structurally impossible before any
   signer implementation or validator duty is admitted.
-- `v0.52.31 implementation stop reached. Run pentest for this exact
+- `v0.76.0 implementation stop reached. Run pentest for this exact
   commit.`
 
-### v0.52.32 - Contextual Protocol, Wire And Operational Limit Domains
+### v0.77.0 - Contextual Protocol, Wire And Operational Limit Domains
 
 Status: planned.
 
@@ -4040,10 +4043,10 @@ Exit criteria:
   without manufacturing invalidity, and no caller can forge consensus
   authority by constructing a context or crossing limit domains; context size
   and identity remain bounded, non-recursive, canonical, and stable.
-- `v0.52.32 implementation stop reached. Run pentest for this exact
+- `v0.77.0 implementation stop reached. Run pentest for this exact
   commit.`
 
-### v0.52.33 - Hierarchical Evidence Capability Composition
+### v0.78.0 - Hierarchical Evidence Capability Composition
 
 Status: planned.
 
@@ -4055,7 +4058,7 @@ Deliverables:
 - private, non-`Copy`, non-`Clone` `ReservedEvidenceSlot` and
   `FilledEvidenceSlot` typestates with exactly-once fill and one final
   return/commit/release ownership transition; optional attachments only borrow
-  immutable evidence as refined by `v0.52.34`;
+  immutable evidence as refined by `v0.79.0`;
 - RAII releases unused reservations during ordinary return, cancellation,
   unwinding, deferred processing, and local failure without permitting double
   release, use after return, or reuse of a filled slot;
@@ -4093,14 +4096,14 @@ Deliverables:
   are linear index handles with reservation amortized across nested validation;
 - arena capacity derives from maximum simultaneous authorized validation work
   and the evidence mode, never attacker-controlled object or transaction count,
-  and consumes `v0.52.20` memory/worker reservations before use;
+  and consumes `v0.65.0` memory/worker reservations before use;
 - index reuse is protected by scoped borrowing or generation-tagged handles;
   cancellation/transfer cannot release a slot while a validator still borrows
   it, and exhaustion serializes, backpressures, or returns a retryable local
   outcome rather than object invalidity;
 - large arenas are caller-supplied or externally allocated; stack placement is
   allowed only below a platform-audited ceiling;
-- per-worker pools are optional and implemented only if `v0.52.35` benchmarks
+- per-worker pools are optional and implemented only if `v0.80.0` benchmarks
   justify them; any admitted pool requires explicit ownership, reset,
   generation, and cross-worker transfer rules and cannot hide stale-slot reuse.
 
@@ -4129,20 +4132,20 @@ Verification:
   persistence, and cache side effect;
 - deterministic recovery-model fixtures proving only committed filled records
   become authoritative evidence, with process-kill backend coverage assigned
-  to `v0.134.0` and `v0.136.0`;
+  to `v0.164.0` and `v0.166.0`;
 - bounded reference state-machine and deterministic concurrency tests plus
-  stable harness interfaces consumed by the Kani proofs at `v0.177.0` and Loom
-  exploration at `v0.179.1`.
+  stable harness interfaces consumed by the Kani proofs at `v0.207.0` and Loom
+  exploration at `v0.209.1`.
 
 Exit criteria:
 
 - Evidence capacity cannot be created, duplicated, reset, leaked, or attributed
   without a filled slot; nested and batch validation preserve bounded cardinality
   and object identity, and recovery recognizes only committed filled evidence.
-- `v0.52.33 implementation stop reached. Run pentest for this exact
+- `v0.78.0 implementation stop reached. Run pentest for this exact
   commit.`
 
-### v0.52.34 - Evidence Collection Modes And Immutable Sink Access
+### v0.79.0 - Evidence Collection Modes And Immutable Sink Access
 
 Status: planned.
 
@@ -4157,7 +4160,7 @@ Deliverables:
   with validated nonzero cardinality plus one public non-generic bounded mode/
   configuration value; orchestration cannot instantiate arbitrary `N`;
 - `FirstInvalid` is the default consensus-validation mode and reserves only
-  the `v0.52.33` child and parent records required to reject the object;
+  the `v0.78.0` child and parent records required to reject the object;
 - `CollectUpTo<N>` is an operational diagnostic mode: collection stops at `N`,
   exhaustion or sink failure is reported separately, and the first established
   validity result and authoritative evidence remain unchanged;
@@ -4221,7 +4224,7 @@ Verification:
   diagnostics followed by exactly one final ownership transition;
 - property and compile-fail tests proving a second authoritative record cannot
   reuse the first record's slot or immutable evidence view;
-- Kani-ready mode/slot reference model consumed by `v0.177.0`.
+- Kani-ready mode/slot reference model consumed by `v0.207.0`.
 
 Exit criteria:
 
@@ -4229,10 +4232,10 @@ Exit criteria:
   count is operationally bounded, optional sinks can observe but never consume
   authority, and each authoritative object record corresponds to one separately
   reserved and exactly-once-finalized slot.
-- `v0.52.34 implementation stop reached. Run pentest for this exact
+- `v0.79.0 implementation stop reached. Run pentest for this exact
   commit.`
 
-### v0.52.35 - Evidence Hot-Path And API Containment Gate
+### v0.80.0 - Evidence Hot-Path And API Containment Gate
 
 Status: planned.
 
@@ -4242,7 +4245,7 @@ public SDK.
 
 Deliverables:
 
-- production implementations of the `v0.52.33` caller-owned standalone slot,
+- production implementations of the `v0.78.0` caller-owned standalone slot,
   block-owned bounded arena, linear child index handle, and amortized nested
   reservation; per-worker pools are implemented only if measured contention/
   throughput evidence justifies their added lifecycle complexity;
@@ -4342,10 +4345,10 @@ Exit criteria:
   invocation; public APIs expose stable validation outcomes rather than
   evidence machinery, and all feature/mode combinations preserve consensus
   behavior and the `no_std` kernel boundary.
-- `v0.52.35 implementation stop reached. Run pentest for this exact
+- `v0.80.0 implementation stop reached. Run pentest for this exact
   commit.`
 
-### v0.52.36 - Evidence Arena Capacity And Benchmark Integrity
+### v0.81.0 - Evidence Arena Capacity And Benchmark Integrity
 
 Status: planned.
 
@@ -4359,7 +4362,7 @@ Deliverables:
   validation work authorized by sealed worker/memory capabilities and the
   selected evidence mode, never raw attacker-controlled object, transaction,
   proof, cell, column, or message counts;
-- arena construction consumes `v0.52.20` memory and worker reservations before
+- arena construction consumes `v0.65.0` memory and worker reservations before
   exposing handles; partial reservation rolls back atomically and cannot begin
   authoritative validation;
 - exhaustion has only operational outcomes: serialize work, apply bounded
@@ -4378,7 +4381,7 @@ Deliverables:
   platform stack ceiling; stack placement is admitted only by audited size and
   target-specific stack evidence;
 - per-worker pools remain absent by default and are implemented only after
-  `v0.52.35` measurements show a material threshold benefit that outweighs
+  `v0.80.0` measurements show a material threshold benefit that outweighs
   synchronization, generation, reset, memory-retention, and transfer costs;
 - any admitted pool has bounded retained memory, explicit owner/worker identity,
   generation/reset on reuse, deterministic drain/drop, and no implicit cross-
@@ -4389,7 +4392,7 @@ Deliverables:
 - an optimizer-resistant paired benchmark contract: identical input, context,
   validator, schedule, work accounting, and output consumption, replacing only
   evidence reservation/fill/finalization operations on valid paths;
-- invalid paths compare the `v0.52.37` semantic projection and minimal-evidence
+- invalid paths compare the `v0.82.0` semantic projection and minimal-evidence
   baseline rather than requiring a fully disabled run to synthesize an
   impossible byte-identical `ObjectInvalidityEvidence`;
 - paired runs assert equal valid outcomes or invalid semantic projections and
@@ -4411,8 +4414,8 @@ Verification:
 - stale index, generation retirement/wrap, ABA, double reuse, use-after-release,
   live-borrow cancellation, timeout/unwind, and cross-worker transfer races;
 - Loom models for allocate/borrow/fill/cancel/transfer/release/reset and Kani-
-  ready capacity/conservation state models consumed at `v0.177.0` and
-  `v0.179.1`;
+  ready capacity/conservation state models consumed at `v0.207.0` and
+  `v0.209.1`;
 - platform stack-ceiling checks, large-arena external-storage tests, retained-
   memory bounds, and deterministic pool drain/drop tests when pools are admitted;
 - A/B harness source/IR or equivalent structural checks proving only evidence
@@ -4433,10 +4436,10 @@ Exit criteria:
   live handles cannot observe reused storage, exhaustion stays local, optional
   pools exist only with evidence, and benchmark deltas isolate evidence work
   without weakening authoritative absolute production thresholds.
-- `v0.52.36 implementation stop reached. Run pentest for this exact
+- `v0.81.0 implementation stop reached. Run pentest for this exact
   commit.`
 
-### v0.52.37 - Evidence Benchmark Measurement And Dispatch Closure
+### v0.82.0 - Evidence Benchmark Measurement And Dispatch Closure
 
 Status: planned.
 
@@ -4519,7 +4522,7 @@ Verification:
   validation when the capacity-32 memory/worker reservation is unavailable;
 - generation-at-maximum, retirement, stale-handle, ABA, concurrent borrow,
   cancellation, transfer, persistence/restart, and retryable-local-outcome tests;
-- Kani-ready dispatch and generation state models consumed at `v0.177.0`.
+- Kani-ready dispatch and generation state models consumed at `v0.207.0`.
 
 Exit criteria:
 
@@ -4529,7 +4532,7 @@ Exit criteria:
   runtime mode dispatch charges its physical class without exceeding the exact
   requested operational limit, and generation identity can never wrap or
   resurrect.
-- `v0.52.37 implementation stop reached. Run pentest for this exact
+- `v0.82.0 implementation stop reached. Run pentest for this exact
   commit.`
 
 ## Roadmap Expansion From The 2026 Gap Analysis
@@ -4537,7 +4540,7 @@ Exit criteria:
 The releases below replace the earlier narrow integration roadmap. They assign
 every gap identified by the July 2026 completeness reviews to a version instead
 of leaving work as an unversioned deferral. The roadmap may extend beyond
-`v0.310.0` when new official Ethereum work or a newly discovered completeness
+`v0.340.0` when new official Ethereum work or a newly discovered completeness
 gap requires another small pass. Reaching a high `0.x` version is preferable
 to compressing security-sensitive work into oversized releases.
 
@@ -4558,6 +4561,20 @@ Every release below inherits these gates:
 Real public API or behavior changes use a new `0.x.0` release. A `0.x.y`
 release is reserved for narrow remediation, forced dependency propagation, or
 release-process maintenance that does not hide a breaking public change.
+Every planned `0.x.y` milestone must include an explicit `Patch rationale:`
+before its goal. The release-plan checker rejects missing rationales and
+non-increasing `0.x` milestones. If implementation or pentest review discovers
+that a planned patch changes public compatibility or Ethereum behavior, that
+milestone must be promoted to the next unused `0.x.0` release and every later
+unpublished milestone renumbered before release.
+
+The post-`v0.52.7` roadmap was renumbered before implementation:
+
+- former `v0.52.8..=v0.52.37` became `v0.53.0..=v0.82.0`;
+- former `v0.53.0..=v0.310.0` became `v0.83.0..=v0.340.0`, preserving
+  deliberately planned patch suffixes;
+- published `v0.52.0..=v0.52.7`, their reports, release notes, and tags remain
+  unchanged.
 
 Roadmap source review date: 2026-07-17. Active fork names and requirements must
 come from pinned official sources, not memory:
@@ -4580,7 +4597,7 @@ come from pinned official sources, not memory:
 
 ## Phase 9: Owned SDK And Shared Domain Foundation
 
-### v0.53.0 - General Integer Primitives
+### v0.83.0 - General Integer Primitives
 
 Status: planned.
 
@@ -4608,10 +4625,10 @@ Exit criteria:
 - The temporary `0.52.x` sanitization compatibility surface is removed only at
   this deliberate facade minor boundary, with correct support-crate versioning
   and documented replacements.
-- `v0.53.0 implementation stop reached. Run pentest for this exact
+- `v0.83.0 implementation stop reached. Run pentest for this exact
   commit.`
 
-### v0.54.0 - Bytes And Hash Domains
+### v0.84.0 - Bytes And Hash Domains
 
 Status: planned.
 
@@ -4628,12 +4645,16 @@ Verification:
 Exit criteria:
 
 - Raw byte arrays and generic `B256` are not the only public representation for semantically distinct domains.
-- `v0.54.0 implementation stop reached. Run pentest for this exact
+- `v0.84.0 implementation stop reached. Run pentest for this exact
   commit.`
 
-### v0.54.4 - Session-Bound Traversal API Hardening
+### v0.84.4 - Session-Bound Traversal API Hardening
 
 Status: planned.
+
+Patch rationale: compatibility-preserving hardening of the borrowed traversal
+surface established by `v0.84.0`; any required breaking API change promotes
+this milestone to the next unused minor release before implementation.
 
 Goal: make it difficult to process untrusted borrowed decode models through an
 unaccounted compatibility iterator by mistake.
@@ -4675,10 +4696,10 @@ Exit criteria:
 - Public compatibility traversal is explicitly named and documented as trusted
   or independently bounded, while session-admitted models require an explicit
   charged path or trust-boundary conversion.
-- `v0.54.4 implementation stop reached. Run pentest for this exact
+- `v0.84.4 implementation stop reached. Run pentest for this exact
   commit.`
 
-### v0.55.0 - Ethereum Text And Serde Interoperability
+### v0.85.0 - Ethereum Text And Serde Interoperability
 
 Status: planned.
 
@@ -4695,10 +4716,10 @@ Verification:
 Exit criteria:
 
 - Common Ethereum wire and display forms round-trip canonically without weakening the default graph.
-- `v0.55.0 implementation stop reached. Run pentest for this exact
+- `v0.85.0 implementation stop reached. Run pentest for this exact
   commit.`
 
-### v0.56.0 - Owned Transaction Models
+### v0.86.0 - Owned Transaction Models
 
 Status: planned.
 
@@ -4715,10 +4736,10 @@ Verification:
 Exit criteria:
 
 - Applications can retain and mutate complete transactions without keeping input buffers alive.
-- `v0.56.0 implementation stop reached. Run pentest for this exact
+- `v0.86.0 implementation stop reached. Run pentest for this exact
   commit.`
 
-### v0.57.0 - Owned Block And Receipt Models
+### v0.87.0 - Owned Block And Receipt Models
 
 Status: planned.
 
@@ -4735,10 +4756,10 @@ Verification:
 Exit criteria:
 
 - Full execution payload data has stable owned SDK models.
-- `v0.57.0 implementation stop reached. Run pentest for this exact
+- `v0.87.0 implementation stop reached. Run pentest for this exact
   commit.`
 
-### v0.58.0 - Owned State And Execution Models
+### v0.88.0 - Owned State And Execution Models
 
 Status: planned.
 
@@ -4755,10 +4776,10 @@ Verification:
 Exit criteria:
 
 - State and execution APIs no longer require disconnected adapter-only models.
-- `v0.58.0 implementation stop reached. Run pentest for this exact
+- `v0.88.0 implementation stop reached. Run pentest for this exact
   commit.`
 
-### v0.59.0 - Lossless Model Conversion Matrix
+### v0.89.0 - Lossless Model Conversion Matrix
 
 Status: planned.
 
@@ -4775,10 +4796,10 @@ Verification:
 Exit criteria:
 
 - Every supported representation change is explicit, testable, and documented as lossless or intentionally lossy.
-- `v0.59.0 implementation stop reached. Run pentest for this exact
+- `v0.89.0 implementation stop reached. Run pentest for this exact
   commit.`
 
-### v0.60.0 - Bounded Allocation Convenience
+### v0.90.0 - Bounded Allocation Convenience
 
 Status: planned.
 
@@ -4795,10 +4816,10 @@ Verification:
 Exit criteria:
 
 - Ergonomic allocation support does not weaken bounded resource or atomic-output guarantees.
-- `v0.60.0 implementation stop reached. Run pentest for this exact
+- `v0.90.0 implementation stop reached. Run pentest for this exact
   commit.`
 
-### v0.61.0 - Decode Policies And Error Context
+### v0.91.0 - Decode Policies And Error Context
 
 Status: planned.
 
@@ -4809,7 +4830,7 @@ Deliverables:
 - Named deployment policy builders plus structured, bounded field/index/
   offset/source error context without secret leakage or diagnostic-output
   amplification;
-- error paths and excerpts consume the `v0.52.29` evidence/diagnostic budget
+- error paths and excerpts consume the `v0.74.0` evidence/diagnostic budget
   when promoted into persistent or public evidence.
 
 Verification:
@@ -4820,10 +4841,10 @@ Verification:
 Exit criteria:
 
 - Integrators can select reviewed policies and diagnose failures without parsing strings.
-- `v0.61.0 implementation stop reached. Run pentest for this exact
+- `v0.91.0 implementation stop reached. Run pentest for this exact
   commit.`
 
-### v0.62.0 - Payload-Bound Typestates
+### v0.92.0 - Payload-Bound Typestates
 
 Status: planned.
 
@@ -4833,7 +4854,7 @@ Deliverables:
 
 - Transaction/block payloads travel with canonicality, fork, signature, proof,
   execution evidence, and the non-forgeable rules-engine context capability
-  from `v0.52.32`; constructors remain proof-gated;
+  from `v0.77.0`; constructors remain proof-gated;
 - no typestate accepts a caller-built or deserialized authoritative
   `ValidationContext`.
 
@@ -4845,10 +4866,10 @@ Verification:
 Exit criteria:
 
 - Validation state cannot become detached from the exact payload it proves.
-- `v0.62.0 implementation stop reached. Run pentest for this exact
+- `v0.92.0 implementation stop reached. Run pentest for this exact
   commit.`
 
-### v0.63.0 - Chain Specification And Fork Rules 2.0
+### v0.93.0 - Chain Specification And Fork Rules 2.0
 
 Status: planned.
 
@@ -4860,7 +4881,7 @@ Deliverables:
   system hooks, and complete historical/custom-chain configuration;
 - validate configuration into a non-forgeable trusted `ChainSpec` capability;
 - the sealed rules engine is the only constructor of immutable per-object
-  `ValidationContext` values required by `v0.52.32`, accepting only trusted
+  `ValidationContext` values required by `v0.77.0`, accepting only trusted
   chain specification, `VerifiedParent` or `GenesisContext`, candidate
   header/envelope, and implementation version;
 - issue and verify parent identity/evidence plus the rules/limits digest, and
@@ -4882,10 +4903,10 @@ Verification:
 Exit criteria:
 
 - Consensus behavior never depends on enum ordinal ordering or a hardcoded mainnet chronology.
-- `v0.63.0 implementation stop reached. Run pentest for this exact
+- `v0.93.0 implementation stop reached. Run pentest for this exact
   commit.`
 
-### v0.64.0 - Shared Protocol And Execution Domains
+### v0.94.0 - Shared Protocol And Execution Domains
 
 Status: planned.
 
@@ -4902,10 +4923,10 @@ Verification:
 Exit criteria:
 
 - Equivalent protocol and EVM concepts no longer drift behind parallel types.
-- `v0.64.0 implementation stop reached. Run pentest for this exact
+- `v0.94.0 implementation stop reached. Run pentest for this exact
   commit.`
 
-### v0.65.0 - Native EVM Core Integration
+### v0.95.0 - Native EVM Core Integration
 
 Status: planned.
 
@@ -4922,10 +4943,10 @@ Verification:
 Exit criteria:
 
 - The optional execution facade is a real first-party path, not a disconnected descriptor layer.
-- `v0.65.0 implementation stop reached. Run pentest for this exact
+- `v0.95.0 implementation stop reached. Run pentest for this exact
   commit.`
 
-### v0.66.0 - Facade Prelude And Feature Truth
+### v0.96.0 - Facade Prelude And Feature Truth
 
 Status: planned.
 
@@ -4942,10 +4963,10 @@ Verification:
 Exit criteria:
 
 - Public discovery is simple and no feature name implies functionality it does not provide.
-- `v0.66.0 implementation stop reached. Run pentest for this exact
+- `v0.96.0 implementation stop reached. Run pentest for this exact
   commit.`
 
-### v0.67.0 - Ecosystem Conversion Adapters
+### v0.97.0 - Ecosystem Conversion Adapters
 
 Status: planned.
 
@@ -4962,10 +4983,10 @@ Verification:
 Exit criteria:
 
 - Interoperability is available without making third-party core models authoritative.
-- `v0.67.0 implementation stop reached. Run pentest for this exact
+- `v0.97.0 implementation stop reached. Run pentest for this exact
   commit.`
 
-### v0.68.0 - Owned SDK Hardening
+### v0.98.0 - Owned SDK Hardening
 
 Status: planned.
 
@@ -4982,12 +5003,12 @@ Verification:
 Exit criteria:
 
 - The owned SDK foundation is stable enough for execution, providers, wallets, and storage to build upon.
-- `v0.68.0 implementation stop reached. Run pentest for this exact
+- `v0.98.0 implementation stop reached. Run pentest for this exact
   commit.`
 
 ## Phase 10: Complete First-Party Execution
 
-### v0.69.0 - Official State-Test Admission
+### v0.99.0 - Official State-Test Admission
 
 Status: planned.
 
@@ -5004,10 +5025,10 @@ Verification:
 Exit criteria:
 
 - Native execution claims are backed by official state-test evidence.
-- `v0.69.0 implementation stop reached. Run pentest for this exact
+- `v0.99.0 implementation stop reached. Run pentest for this exact
   commit.`
 
-### v0.70.0 - Native EVM Audit Hardening
+### v0.100.0 - Native EVM Audit Hardening
 
 Status: planned.
 
@@ -5024,10 +5045,10 @@ Verification:
 Exit criteria:
 
 - Deeper state transition work rests on an independently reviewed engine.
-- `v0.70.0 implementation stop reached. Run pentest for this exact
+- `v0.100.0 implementation stop reached. Run pentest for this exact
   commit.`
 
-### v0.71.0 - Genesis And Chain Configuration
+### v0.101.0 - Genesis And Chain Configuration
 
 Status: planned.
 
@@ -5044,10 +5065,10 @@ Verification:
 Exit criteria:
 
 - A chain can be initialized from explicit configuration without external core logic.
-- `v0.71.0 implementation stop reached. Run pentest for this exact
+- `v0.101.0 implementation stop reached. Run pentest for this exact
   commit.`
 
-### v0.72.0 - Semantic Transaction Validity
+### v0.102.0 - Semantic Transaction Validity
 
 Status: planned.
 
@@ -5060,14 +5081,14 @@ Deliverables:
 - consume only a sealed transaction child context derived from the containing
   block context; RPC or caller-supplied fork/limit structures have no
   consensus authority;
-- reserve a `v0.52.29` minimal `EvidenceSlot` before authoritative semantic
+- reserve a `v0.74.0` minimal `EvidenceSlot` before authoritative semantic
   validation; reservation failure returns local exhaustion before checks begin
   and every invalid path fills the slot allocation-free;
-- follow `v0.52.33`: standalone transaction validation reserves its own slot,
+- follow `v0.78.0`: standalone transaction validation reserves its own slot,
   while block-embedded validation accepts only a block-derived child
   reservation and produces equivalent transaction evidence without resetting
   the parent budget;
-- use `v0.52.34` `FirstInvalid` for authoritative consensus entry points;
+- use `v0.79.0` `FirstInvalid` for authoritative consensus entry points;
   diagnostic collection may gather more bounded evidence but cannot change the
   transaction result or first authoritative record.
 
@@ -5079,7 +5100,7 @@ Verification:
 - standalone-versus-embedded equivalence and parent-budget conservation tests;
 - cross-mode validity/first-evidence equivalence and diagnostic-sink failure
   tests;
-- valid-transaction benchmarks with and without the internal `v0.52.35`
+- valid-transaction benchmarks with and without the internal `v0.80.0`
   evidence baseline across transaction types and evidence modes, enforcing no
   allocation, diagnostic hashing/serialization, contention, clone, or sink
   invocation on the valid `FirstInvalid` path.
@@ -5087,10 +5108,10 @@ Verification:
 Exit criteria:
 
 - Decoded transactions can be proven consensus-valid for a stated chain context.
-- `v0.72.0 implementation stop reached. Run pentest for this exact
+- `v0.102.0 implementation stop reached. Run pentest for this exact
   commit.`
 
-### v0.73.0 - Header And Block Validity
+### v0.103.0 - Header And Block Validity
 
 Status: planned.
 
@@ -5100,26 +5121,26 @@ Deliverables:
 
 - Parent linkage, gas/base fee, difficulty/TTD, timestamps, ommers,
   withdrawals, blob gas, requests, roots, and fork-field validation;
-- consume one immutable `v0.52.32` `ValidationContext` per candidate, so
+- consume one immutable `v0.77.0` `ValidationContext` per candidate, so
   canonical, side-branch, historical, and out-of-order blocks can use distinct
   fork rules concurrently;
 - reject contexts not issued by the sealed rules engine or whose parent
   evidence, candidate identity, validation version, or rules/limits digest no
   longer matches;
-- reserve a `v0.52.29` minimal `EvidenceSlot` before authoritative header/block
+- reserve a `v0.74.0` minimal `EvidenceSlot` before authoritative header/block
   checks, so every invalid path has infallible allocation-free evidence;
-- reserve the complete `v0.52.33` parent/child evidence cardinality required by
+- reserve the complete `v0.78.0` parent/child evidence cardinality required by
   the selected block-validation mode before nested authoritative checks; child
   validators consume derived reservations, and simultaneous transaction- and
   block-specific evidence requires an explicit two-entry reservation;
-- authoritative import uses `v0.52.34` `FirstInvalid`; explicitly requested
+- authoritative import uses `v0.79.0` `FirstInvalid`; explicitly requested
   operational diagnostics may use bounded `CollectUpTo<N>` without changing
   block validity, first evidence, Engine outcome, or bad-block authority;
-- derive `v0.52.36` arena capacity from simultaneous authorized block/
+- derive `v0.81.0` arena capacity from simultaneous authorized block/
   transaction work and evidence mode rather than block transaction count;
   arena exhaustion serializes/backpressures or returns a retryable local
   outcome;
-- every failure is classified through `v0.52.29`; only complete
+- every failure is classified through `v0.74.0`; only complete
   `ObjectInvalidityEvidence` can permanently reject the block.
 
 Verification:
@@ -5135,17 +5156,17 @@ Verification:
   and first authoritative evidence;
 - valid block-envelope benchmarks across transaction counts and worker
   configurations, proving one amortized arena reservation, constant child
-  bookkeeping, and the `v0.52.35` overhead thresholds;
+  bookkeeping, and the `v0.80.0` overhead thresholds;
 - attacker-count-independent arena sizing, capability exhaustion, stale-handle,
   cancellation/transfer, and local-backpressure tests.
 
 Exit criteria:
 
 - Headers and block envelopes can be validated against parent and chain state.
-- `v0.73.0 implementation stop reached. Run pentest for this exact
+- `v0.103.0 implementation stop reached. Run pentest for this exact
   commit.`
 
-### v0.74.0 - State Transition And Journaling
+### v0.104.0 - State Transition And Journaling
 
 Status: planned.
 
@@ -5162,10 +5183,10 @@ Deliverables:
   recursively owning caller contexts; final-scope drop releases leases and
   arenas deterministically.
 - Transaction, proof, precompile, and system-operation scopes consume only
-  `v0.52.33` parent-authorized evidence reservations; rollback, cancellation,
+  `v0.78.0` parent-authorized evidence reservations; rollback, cancellation,
   local failure, and successful completion release unused child reservations
   exactly once without resetting block-wide accounting.
-- evidence-arena child borrows and generation handles follow `v0.52.36` so
+- evidence-arena child borrows and generation handles follow `v0.81.0` so
   journal rollback, nested calls, cancellation, and worker transfer cannot
   release/reuse storage while a scope still references it.
 - Implement complete EIP-7702 state application: process authorization tuples
@@ -5202,12 +5223,16 @@ Exit criteria:
 - A complete block transition can be computed first party.
 - EIP-7702 transactions apply and execute delegation semantics completely
   rather than stopping at decode, signature, or context-validity proof.
-- `v0.74.0 implementation stop reached. Run pentest for this exact
+- `v0.104.0 implementation stop reached. Run pentest for this exact
   commit.`
 
-### v0.74.1 - System Operations And Execution Requests
+### v0.104.1 - System Operations And Execution Requests
 
 Status: planned.
+
+Patch rationale: additive completion of the `v0.104.0` state-transition
+boundary using its existing public contracts; any incompatible contract or
+validity change requires promotion before implementation.
 
 Goal: implement every consensus-critical system operation and execution
 request with explicit block-order, rollback, persistence, and header binding.
@@ -5223,7 +5248,7 @@ Deliverables:
   validation, rollback, and state-persistence rules;
 - Engine payload encoding and execution-header/request-root binding.
 - system-operation and execution-request validation consumes explicit
-  `v0.52.33` block-derived child reservations and cannot independently mint or
+  `v0.78.0` block-derived child reservations and cannot independently mint or
   reset evidence capacity.
 
 Verification:
@@ -5242,10 +5267,10 @@ Exit criteria:
 
 - Current-fork system calls and requests are complete named transition stages,
   not an implied part of generic system-operation prose.
-- `v0.74.1 implementation stop reached. Run pentest for this exact
+- `v0.104.1 implementation stop reached. Run pentest for this exact
   commit.`
 
-### v0.75.0 - Receipts Logs Bloom And Withdrawals
+### v0.105.0 - Receipts Logs Bloom And Withdrawals
 
 Status: planned.
 
@@ -5262,10 +5287,10 @@ Verification:
 Exit criteria:
 
 - Post-execution outputs match consensus serialization and accounting rules.
-- `v0.75.0 implementation stop reached. Run pentest for this exact
+- `v0.105.0 implementation stop reached. Run pentest for this exact
   commit.`
 
-### v0.76.0 - Trie Construction And Root Computation
+### v0.106.0 - Trie Construction And Root Computation
 
 Status: planned.
 
@@ -5282,10 +5307,10 @@ Verification:
 Exit criteria:
 
 - The crate computes all execution-layer Merkle Patricia roots it validates.
-- `v0.76.0 implementation stop reached. Run pentest for this exact
+- `v0.106.0 implementation stop reached. Run pentest for this exact
   commit.`
 
-### v0.77.0 - KZG Trusted Setup Boundary
+### v0.107.0 - KZG Trusted Setup Boundary
 
 Status: planned.
 
@@ -5302,10 +5327,10 @@ Verification:
 Exit criteria:
 
 - No blob proof runs against implicit or unverified setup material.
-- `v0.77.0 implementation stop reached. Run pentest for this exact
+- `v0.107.0 implementation stop reached. Run pentest for this exact
   commit.`
 
-### v0.78.0 - KZG Field And Polynomial Core
+### v0.108.0 - KZG Field And Polynomial Core
 
 Status: planned.
 
@@ -5322,10 +5347,10 @@ Verification:
 Exit criteria:
 
 - KZG arithmetic foundations are first party and independently verified.
-- `v0.78.0 implementation stop reached. Run pentest for this exact
+- `v0.108.0 implementation stop reached. Run pentest for this exact
   commit.`
 
-### v0.79.0 - KZG Commitments And Proofs
+### v0.109.0 - KZG Commitments And Proofs
 
 Status: planned.
 
@@ -5339,14 +5364,14 @@ Deliverables:
   domain-separated transcript covering every statement and fork/domain input;
 - fail-closed entropy/transcript handling, bounded batch-failure isolation, and
   prohibition of attacker-controlled or cross-batch coefficient reuse;
-- batch failure returns `v0.52.29` `BatchContainsInvalid`; member-specific
+- batch failure returns `v0.74.0` `BatchContainsInvalid`; member-specific
   object invalidity requires successful bounded individual isolation, while
   local isolation failure remains retryable and non-attributable;
-- follow `v0.52.33`: reserve one batch-result slot plus an explicit configured
+- follow `v0.78.0`: reserve one batch-result slot plus an explicit configured
   maximum of member child slots before isolation; evidence cardinality is
   independent of batch size, isolation stops locally at capacity, and only
   filled member slots permit caching or attribution;
-- expose bounded isolation only through `v0.52.34`
+- expose bounded isolation only through `v0.79.0`
   `BatchIsolateUpTo<N>`; members beyond `N` remain unattributed, and changing
   `N` cannot change the batch's cryptographic validity result;
 - cache identities include complete message, setup, domain, fork, and
@@ -5360,16 +5385,16 @@ Verification:
   cardinality tests;
 - cross-`N` result invariance and beyond-limit non-attribution tests;
 - high-contention batch verification/isolation benchmarks against the internal
-  `v0.52.35` evidence-disabled baseline, with allocation, contention, retained-
+  `v0.80.0` evidence-disabled baseline, with allocation, contention, retained-
   memory, and evidence-overhead thresholds.
 
 Exit criteria:
 
 - Blob commitments and proofs are cryptographically executable, not descriptors.
-- `v0.79.0 implementation stop reached. Run pentest for this exact
+- `v0.109.0 implementation stop reached. Run pentest for this exact
   commit.`
 
-### v0.80.0 - Point-Evaluation Precompile Execution
+### v0.110.0 - Point-Evaluation Precompile Execution
 
 Status: planned.
 
@@ -5386,10 +5411,10 @@ Verification:
 Exit criteria:
 
 - The precompile is consensus-compatible for all claimed forks.
-- `v0.80.0 implementation stop reached. Run pentest for this exact
+- `v0.110.0 implementation stop reached. Run pentest for this exact
   commit.`
 
-### v0.81.0 - Blob Transaction And Block Integration
+### v0.111.0 - Blob Transaction And Block Integration
 
 Status: planned.
 
@@ -5406,10 +5431,10 @@ Verification:
 Exit criteria:
 
 - EIP-4844 validity is complete from transaction through block transition.
-- `v0.81.0 implementation stop reached. Run pentest for this exact
+- `v0.111.0 implementation stop reached. Run pentest for this exact
   commit.`
 
-### v0.82.0 - EOF Format And Static Validation
+### v0.112.0 - EOF Format And Static Validation
 
 Status: planned.
 
@@ -5426,10 +5451,10 @@ Verification:
 Exit criteria:
 
 - EOF bytecode is admitted only after complete static validation.
-- `v0.82.0 implementation stop reached. Run pentest for this exact
+- `v0.112.0 implementation stop reached. Run pentest for this exact
   commit.`
 
-### v0.83.0 - EOF Control Flow And Execution
+### v0.113.0 - EOF Control Flow And Execution
 
 Status: planned.
 
@@ -5446,10 +5471,10 @@ Verification:
 Exit criteria:
 
 - Valid EOF containers execute with fork-correct semantics.
-- `v0.83.0 implementation stop reached. Run pentest for this exact
+- `v0.113.0 implementation stop reached. Run pentest for this exact
   commit.`
 
-### v0.84.0 - EOF Creation And State Transition
+### v0.114.0 - EOF Creation And State Transition
 
 Status: planned.
 
@@ -5466,10 +5491,10 @@ Verification:
 Exit criteria:
 
 - EOF is complete at transaction and block level for claimed forks.
-- `v0.84.0 implementation stop reached. Run pentest for this exact
+- `v0.114.0 implementation stop reached. Run pentest for this exact
   commit.`
 
-### v0.85.0 - Current Fork Manifest Admission
+### v0.115.0 - Current Fork Manifest Admission
 
 Status: planned.
 
@@ -5486,10 +5511,10 @@ Verification:
 Exit criteria:
 
 - Every current fork claim maps to pinned rules and fixtures rather than a hand-maintained name list.
-- `v0.85.0 implementation stop reached. Run pentest for this exact
+- `v0.115.0 implementation stop reached. Run pentest for this exact
   commit.`
 
-### v0.86.0 - Current Fork Execution Changes
+### v0.116.0 - Current Fork Execution Changes
 
 Status: planned.
 
@@ -5506,10 +5531,10 @@ Verification:
 Exit criteria:
 
 - No current execution-fork rule remains a descriptor or silent unsupported path.
-- `v0.86.0 implementation stop reached. Run pentest for this exact
+- `v0.116.0 implementation stop reached. Run pentest for this exact
   commit.`
 
-### v0.87.0 - Complete Execution Fixture Gate
+### v0.117.0 - Complete Execution Fixture Gate
 
 Status: planned.
 
@@ -5526,10 +5551,10 @@ Verification:
 Exit criteria:
 
 - All claimed historical and current execution behavior has fixture evidence.
-- `v0.87.0 implementation stop reached. Run pentest for this exact
+- `v0.117.0 implementation stop reached. Run pentest for this exact
   commit.`
 
-### v0.88.0 - Execution Differential And Performance Gate
+### v0.118.0 - Execution Differential And Performance Gate
 
 Status: planned.
 
@@ -5546,7 +5571,7 @@ Deliverables:
   but do not count as the only independent implementations;
 - establish CPU, memory, stack, deterministic work, and gas benchmarks;
 - benchmark complete valid blocks across empty, small, typical, high-count,
-  and maximum admitted work profiles against the internal `v0.52.35`
+  and maximum admitted work profiles against the internal `v0.80.0`
   evidence-disabled baseline, enforcing reservation, allocation, contention,
   clone, code-size, peak/retained-memory, and overhead thresholds.
 
@@ -5560,12 +5585,16 @@ Verification:
 Exit criteria:
 
 - The first-party engine is correct and operationally bounded enough for higher layers.
-- `v0.88.0 implementation stop reached. Run pentest for this exact
+- `v0.118.0 implementation stop reached. Run pentest for this exact
   commit.`
 
-### v0.88.1 - Snapshot-Bound Execution Caches And Prefetch
+### v0.118.1 - Snapshot-Bound Execution Caches And Prefetch
 
 Status: planned.
+
+Patch rationale: optional compatibility-preserving acceleration follow-up to
+the `v0.118.0` execution performance gate; cache behavior cannot alter validity
+or the stable execution contract.
 
 Goal: add node-scale state and code acceleration without allowing cache
 identity, staleness, or prefetched trust to affect validity.
@@ -5596,12 +5625,16 @@ Exit criteria:
 
 - Caching and prefetch improve throughput without creating a path for stale or
   weakly validated data to influence consensus execution.
-- `v0.88.1 implementation stop reached. Run pentest for this exact
+- `v0.118.1 implementation stop reached. Run pentest for this exact
   commit.`
 
-### v0.88.2 - Deterministic Speculative Parallel Execution
+### v0.118.2 - Deterministic Speculative Parallel Execution
 
 Status: planned.
+
+Patch rationale: optional internal execution acceleration in the `v0.118.x`
+performance line; sequential semantics and the public execution result remain
+unchanged.
 
 Goal: make parallel transaction execution an optional optimization that is
 provably equivalent to sequential block order.
@@ -5611,8 +5644,8 @@ Deliverables:
 - Snapshot-bound speculative execution with explicit read/write sets;
 - deterministic conflict detection, sequential-order validation and commit,
   bounded worker/memory reservations, cancellation, and cache integration;
-- evidence arenas consume the same `v0.52.20` worker/memory capability tree,
-  use `v0.52.36` generation-safe transfer handles where work crosses workers,
+- evidence arenas consume the same `v0.65.0` worker/memory capability tree,
+  use `v0.81.0` generation-safe transfer handles where work crosses workers,
   and backpressure/fall back sequentially before arena exhaustion can affect
   validity;
 - automatic deterministic fallback to sequential execution on conflict,
@@ -5643,10 +5676,10 @@ Exit criteria:
 
 - Every admitted parallel result matches sequential execution exactly, and
   every uncertain case falls back without changing consensus behavior.
-- `v0.88.2 implementation stop reached. Run pentest for this exact
+- `v0.118.2 implementation stop reached. Run pentest for this exact
   commit.`
 
-### v0.89.0 - Inspector And Hook Framework
+### v0.119.0 - Inspector And Hook Framework
 
 Status: planned.
 
@@ -5663,10 +5696,10 @@ Verification:
 Exit criteria:
 
 - Tooling can observe execution without changing consensus results.
-- `v0.89.0 implementation stop reached. Run pentest for this exact
+- `v0.119.0 implementation stop reached. Run pentest for this exact
   commit.`
 
-### v0.90.0 - Trace And State-Diff Models
+### v0.120.0 - Trace And State-Diff Models
 
 Status: planned.
 
@@ -5683,10 +5716,10 @@ Verification:
 Exit criteria:
 
 - Execution evidence is usable by debuggers and analysis tools.
-- `v0.90.0 implementation stop reached. Run pentest for this exact
+- `v0.120.0 implementation stop reached. Run pentest for this exact
   commit.`
 
-### v0.91.0 - Deterministic Simulation And Overrides
+### v0.121.0 - Deterministic Simulation And Overrides
 
 Status: planned.
 
@@ -5703,12 +5736,12 @@ Verification:
 Exit criteria:
 
 - Transactions and bundles can be simulated safely before signing or broadcast.
-- `v0.91.0 implementation stop reached. Run pentest for this exact
+- `v0.121.0 implementation stop reached. Run pentest for this exact
   commit.`
 
 ## Phase 11: Providers And Transaction Lifecycle
 
-### v0.92.0 - Typed RPC Method Surface
+### v0.122.0 - Typed RPC Method Surface
 
 Status: planned.
 
@@ -5723,7 +5756,7 @@ Deliverables:
 - method response and proof-size ceilings are provider/RPC
   `OperationalLimits`; exceeding them refuses that operation without declaring
   the underlying account, block, trie data, or cryptographic proof invalid;
-- JSON request/response parsing consumes the `v0.52.27` parent ledger, rejects
+- JSON request/response parsing consumes the `v0.72.0` parent ledger, rejects
   duplicate object keys, and bounds structural depth, node count, strings,
   arrays, allocations, and output in addition to raw bytes;
 - canonical JSON-RPC quantity parsing rejects leading zeroes except `0x0`,
@@ -5746,10 +5779,10 @@ Verification:
 Exit criteria:
 
 - Callers no longer assemble core RPC methods from untyped JSON values.
-- `v0.92.0 implementation stop reached. Run pentest for this exact
+- `v0.122.0 implementation stop reached. Run pentest for this exact
   commit.`
 
-### v0.93.0 - Runtime-Neutral Transport Traits
+### v0.123.0 - Runtime-Neutral Transport Traits
 
 Status: planned.
 
@@ -5771,10 +5804,10 @@ Verification:
 Exit criteria:
 
 - Provider logic is independent of HTTP stack and async runtime choice.
-- `v0.93.0 implementation stop reached. Run pentest for this exact
+- `v0.123.0 implementation stop reached. Run pentest for this exact
   commit.`
 
-### v0.94.0 - HTTP Provider
+### v0.124.0 - HTTP Provider
 
 Status: planned.
 
@@ -5799,10 +5832,10 @@ Verification:
 Exit criteria:
 
 - A production HTTP provider exists without entering the default graph.
-- `v0.94.0 implementation stop reached. Run pentest for this exact
+- `v0.124.0 implementation stop reached. Run pentest for this exact
   commit.`
 
-### v0.95.0 - WebSocket Provider
+### v0.125.0 - WebSocket Provider
 
 Status: planned.
 
@@ -5822,10 +5855,10 @@ Verification:
 Exit criteria:
 
 - Long-lived subscriptions fail explicitly and cannot grow memory without bound.
-- `v0.95.0 implementation stop reached. Run pentest for this exact
+- `v0.125.0 implementation stop reached. Run pentest for this exact
   commit.`
 
-### v0.96.0 - IPC Custom And EIP-1193 Transports
+### v0.126.0 - IPC Custom And EIP-1193 Transports
 
 Status: planned.
 
@@ -5846,10 +5879,10 @@ Verification:
 Exit criteria:
 
 - Desktop, mobile, browser, and embedded integrators can supply an appropriate transport.
-- `v0.96.0 implementation stop reached. Run pentest for this exact
+- `v0.126.0 implementation stop reached. Run pentest for this exact
   commit.`
 
-### v0.97.0 - RPC IDs Batching And Cancellation
+### v0.127.0 - RPC IDs Batching And Cancellation
 
 Status: planned.
 
@@ -5868,10 +5901,10 @@ Verification:
 Exit criteria:
 
 - Concurrent and batched calls cannot be confused or left unbounded.
-- `v0.97.0 implementation stop reached. Run pentest for this exact
+- `v0.127.0 implementation stop reached. Run pentest for this exact
   commit.`
 
-### v0.98.0 - Method Validation And Block Consistency
+### v0.128.0 - Method Validation And Block Consistency
 
 Status: planned.
 
@@ -5892,10 +5925,10 @@ Verification:
 Exit criteria:
 
 - Typed RPC data is structurally and contextually checked before promotion.
-- `v0.98.0 implementation stop reached. Run pentest for this exact
+- `v0.128.0 implementation stop reached. Run pentest for this exact
   commit.`
 
-### v0.99.0 - Provider Middleware
+### v0.129.0 - Provider Middleware
 
 Status: planned.
 
@@ -5912,10 +5945,10 @@ Verification:
 Exit criteria:
 
 - Operational policy is composable without hidden retries or data leakage.
-- `v0.99.0 implementation stop reached. Run pentest for this exact
+- `v0.129.0 implementation stop reached. Run pentest for this exact
   commit.`
 
-### v0.100.0 - Quorum Verified And Traced Providers
+### v0.130.0 - Quorum Verified And Traced Providers
 
 Status: planned.
 
@@ -5943,10 +5976,10 @@ Verification:
 Exit criteria:
 
 - Trust policy changes the return type and evidence, not only a boolean setting.
-- `v0.100.0 implementation stop reached. Run pentest for this exact
+- `v0.130.0 implementation stop reached. Run pentest for this exact
   commit.`
 
-### v0.101.0 - Transaction Request Builders
+### v0.131.0 - Transaction Request Builders
 
 Status: planned.
 
@@ -5963,10 +5996,10 @@ Verification:
 Exit criteria:
 
 - Invalid field combinations are rejected before RPC or signing.
-- `v0.101.0 implementation stop reached. Run pentest for this exact
+- `v0.131.0 implementation stop reached. Run pentest for this exact
   commit.`
 
-### v0.102.0 - Transaction Fillers
+### v0.132.0 - Transaction Fillers
 
 Status: planned.
 
@@ -5983,10 +6016,10 @@ Verification:
 Exit criteria:
 
 - Automatic filling is observable, bounded, and never silently overwrites user intent.
-- `v0.102.0 implementation stop reached. Run pentest for this exact
+- `v0.132.0 implementation stop reached. Run pentest for this exact
   commit.`
 
-### v0.103.0 - Blob Sidecars And Fee Markets
+### v0.133.0 - Blob Sidecars And Fee Markets
 
 Status: planned.
 
@@ -6003,10 +6036,10 @@ Verification:
 Exit criteria:
 
 - Blob transactions can be prepared end to end with first-party validation.
-- `v0.103.0 implementation stop reached. Run pentest for this exact
+- `v0.133.0 implementation stop reached. Run pentest for this exact
   commit.`
 
-### v0.104.0 - Build Simulate Sign Broadcast Workflow
+### v0.134.0 - Build Simulate Sign Broadcast Workflow
 
 Status: planned.
 
@@ -6026,10 +6059,10 @@ Verification:
 Exit criteria:
 
 - The common transaction lifecycle is available without bypassing validation evidence.
-- `v0.104.0 implementation stop reached. Run pentest for this exact
+- `v0.134.0 implementation stop reached. Run pentest for this exact
   commit.`
 
-### v0.105.0 - Pending Transaction Watcher
+### v0.135.0 - Pending Transaction Watcher
 
 Status: planned.
 
@@ -6046,10 +6079,10 @@ Verification:
 Exit criteria:
 
 - A broadcast transaction reaches a final, replaced, dropped, or timed-out terminal state explicitly.
-- `v0.105.0 implementation stop reached. Run pentest for this exact
+- `v0.135.0 implementation stop reached. Run pentest for this exact
   commit.`
 
-### v0.106.0 - Replacement Cancellation And Drop Recovery
+### v0.136.0 - Replacement Cancellation And Drop Recovery
 
 Status: planned.
 
@@ -6066,10 +6099,10 @@ Verification:
 Exit criteria:
 
 - Stuck transactions can be managed without unsafe nonce assumptions.
-- `v0.106.0 implementation stop reached. Run pentest for this exact
+- `v0.136.0 implementation stop reached. Run pentest for this exact
   commit.`
 
-### v0.107.0 - Offline Signing Packages
+### v0.137.0 - Offline Signing Packages
 
 Status: planned.
 
@@ -6086,10 +6119,10 @@ Verification:
 Exit criteria:
 
 - Air-gapped and remote signers can participate without trusting provider serialization.
-- `v0.107.0 implementation stop reached. Run pentest for this exact
+- `v0.137.0 implementation stop reached. Run pentest for this exact
   commit.`
 
-### v0.108.0 - Live Node Integration Matrix
+### v0.138.0 - Live Node Integration Matrix
 
 Status: planned.
 
@@ -6106,12 +6139,12 @@ Verification:
 Exit criteria:
 
 - Provider and lifecycle claims pass against real nodes, not only mocks.
-- `v0.108.0 implementation stop reached. Run pentest for this exact
+- `v0.138.0 implementation stop reached. Run pentest for this exact
   commit.`
 
 ## Phase 12: Signers Wallets And Account Abstraction
 
-### v0.109.0 - Signer Interface 2.0
+### v0.139.0 - Signer Interface 2.0
 
 Status: planned.
 
@@ -6119,7 +6152,7 @@ Goal: deliver the Signer Interface 2.0 release with this required outcome: Every
 
 Deliverables:
 
-- Runtime-neutral capability contracts consuming the sealed `v0.52.31`
+- Runtime-neutral capability contracts consuming the sealed `v0.76.0`
   scheme separation: execution requests for transactions, EIP-712 data,
   personal messages, and EIP-7702 authorizations remain distinct from BLS
   consensus-duty requests;
@@ -6137,10 +6170,10 @@ Verification:
 Exit criteria:
 
 - Every signing request states exactly what domain and policy is being authorized.
-- `v0.109.0 implementation stop reached. Run pentest for this exact
+- `v0.139.0 implementation stop reached. Run pentest for this exact
   commit.`
 
-### v0.110.0 - Local Secret Signer
+### v0.140.0 - Local Secret Signer
 
 Status: planned.
 
@@ -6148,8 +6181,8 @@ Goal: deliver the Local Secret Signer release with this required outcome: Local 
 
 Deliverables:
 
-- Optional local signer using the already admitted `v0.52.23..=v0.52.26`
-  first-party secp256k1/ECDSA path and `v0.52.30` proof evidence as an
+- Optional local signer using the already admitted `v0.68.0..=v0.71.0`
+  first-party secp256k1/ECDSA path and `v0.75.0` proof evidence as an
   `ExecutionSigner` only, in a separate opt-in crate or isolated worker,
   with locked/sanitized opaque secret ownership, deterministic signatures, and
   explicit export prohibition;
@@ -6166,10 +6199,10 @@ Verification:
 Exit criteria:
 
 - Local signing is usable but remains opt-in and security-reviewed.
-- `v0.110.0 implementation stop reached. Run pentest for this exact
+- `v0.140.0 implementation stop reached. Run pentest for this exact
   commit.`
 
-### v0.111.0 - Encrypted Keystore
+### v0.141.0 - Encrypted Keystore
 
 Status: planned.
 
@@ -6186,10 +6219,10 @@ Verification:
 Exit criteria:
 
 - Keystore handling is compatible and cannot silently admit unsafe cost settings.
-- `v0.111.0 implementation stop reached. Run pentest for this exact
+- `v0.141.0 implementation stop reached. Run pentest for this exact
   commit.`
 
-### v0.112.0 - BIP-39 Mnemonics
+### v0.142.0 - BIP-39 Mnemonics
 
 Status: planned.
 
@@ -6206,10 +6239,10 @@ Verification:
 Exit criteria:
 
 - Mnemonic workflows are standards-compatible and explicitly secret-bearing.
-- `v0.112.0 implementation stop reached. Run pentest for this exact
+- `v0.142.0 implementation stop reached. Run pentest for this exact
   commit.`
 
-### v0.113.0 - BIP-32 And BIP-44 Derivation
+### v0.143.0 - BIP-32 And BIP-44 Derivation
 
 Status: planned.
 
@@ -6226,10 +6259,10 @@ Verification:
 Exit criteria:
 
 - HD Ethereum accounts can be derived without external wallet-core logic.
-- `v0.113.0 implementation stop reached. Run pentest for this exact
+- `v0.143.0 implementation stop reached. Run pentest for this exact
   commit.`
 
-### v0.114.0 - Remote Hardware HSM And KMS Signers
+### v0.144.0 - Remote Hardware HSM And KMS Signers
 
 Status: planned.
 
@@ -6246,10 +6279,10 @@ Verification:
 Exit criteria:
 
 - External key custody integrates through one auditable signer boundary.
-- `v0.114.0 implementation stop reached. Run pentest for this exact
+- `v0.144.0 implementation stop reached. Run pentest for this exact
   commit.`
 
-### v0.115.0 - Signing Policy ERC-1271 And Multisig
+### v0.145.0 - Signing Policy ERC-1271 And Multisig
 
 Status: planned.
 
@@ -6266,10 +6299,10 @@ Verification:
 Exit criteria:
 
 - Contract and policy authorization are first-class, not forced into EOA assumptions.
-- `v0.115.0 implementation stop reached. Run pentest for this exact
+- `v0.145.0 implementation stop reached. Run pentest for this exact
   commit.`
 
-### v0.116.0 - Safe Workflows
+### v0.146.0 - Safe Workflows
 
 Status: planned.
 
@@ -6286,10 +6319,10 @@ Verification:
 Exit criteria:
 
 - Common multisig transactions can be built, reviewed, signed, and followed end to end.
-- `v0.116.0 implementation stop reached. Run pentest for this exact
+- `v0.146.0 implementation stop reached. Run pentest for this exact
   commit.`
 
-### v0.117.0 - ERC-4337 Core
+### v0.147.0 - ERC-4337 Core
 
 Status: planned.
 
@@ -6306,10 +6339,10 @@ Verification:
 Exit criteria:
 
 - User operations have complete typed and cryptographic foundations.
-- `v0.117.0 implementation stop reached. Run pentest for this exact
+- `v0.147.0 implementation stop reached. Run pentest for this exact
   commit.`
 
-### v0.118.0 - Bundler EntryPoint And Paymasters
+### v0.148.0 - Bundler EntryPoint And Paymasters
 
 Status: planned.
 
@@ -6326,10 +6359,10 @@ Verification:
 Exit criteria:
 
 - ERC-4337 works end to end with explicit third-party trust boundaries.
-- `v0.118.0 implementation stop reached. Run pentest for this exact
+- `v0.148.0 implementation stop reached. Run pentest for this exact
   commit.`
 
-### v0.119.0 - Session Keys And Delegated Accounts
+### v0.149.0 - Session Keys And Delegated Accounts
 
 Status: planned.
 
@@ -6346,12 +6379,12 @@ Verification:
 Exit criteria:
 
 - Delegated authorization is usable without weakening base signature and policy guarantees.
-- `v0.119.0 implementation stop reached. Run pentest for this exact
+- `v0.149.0 implementation stop reached. Run pentest for this exact
   commit.`
 
 ## Phase 13: ABI Contracts And Application Standards
 
-### v0.120.0 - ABI Type System
+### v0.150.0 - ABI Type System
 
 Status: planned.
 
@@ -6368,10 +6401,10 @@ Verification:
 Exit criteria:
 
 - All standard ABI type shapes are represented without untyped strings.
-- `v0.120.0 implementation stop reached. Run pentest for this exact
+- `v0.150.0 implementation stop reached. Run pentest for this exact
   commit.`
 
-### v0.121.0 - ABI Encode Decode
+### v0.151.0 - ABI Encode Decode
 
 Status: planned.
 
@@ -6381,7 +6414,7 @@ Deliverables:
 
 - First-party head/tail encoding and strict decoding with offset, overlap,
   padding, depth, count, string/byte, allocation, and output checks;
-- ABI decoding consumes the `v0.52.27` parent work ledger and charges every
+- ABI decoding consumes the `v0.72.0` parent work ledger and charges every
   offset traversal and structural node before following or allocating it.
 
 Verification:
@@ -6392,10 +6425,10 @@ Verification:
 Exit criteria:
 
 - ABI values encode/decode canonically under explicit resource limits.
-- `v0.121.0 implementation stop reached. Run pentest for this exact
+- `v0.151.0 implementation stop reached. Run pentest for this exact
   commit.`
 
-### v0.122.0 - Artifact And Metadata Ingestion
+### v0.152.0 - Artifact And Metadata Ingestion
 
 Status: planned.
 
@@ -6405,7 +6438,7 @@ Deliverables:
 
 - Bounded duplicate-key-rejecting JSON ingestion for ABI, bytecode, deployed
   bytecode, link references, compiler metadata, and source maps through the
-  `v0.52.27` structural and allocation ledger.
+  `v0.72.0` structural and allocation ledger.
 
 Verification:
 
@@ -6414,10 +6447,10 @@ Verification:
 Exit criteria:
 
 - Common build artifacts enter the SDK through validated owned models.
-- `v0.122.0 implementation stop reached. Run pentest for this exact
+- `v0.152.0 implementation stop reached. Run pentest for this exact
   commit.`
 
-### v0.123.0 - Contract Macros And Code Generation
+### v0.153.0 - Contract Macros And Code Generation
 
 Status: planned.
 
@@ -6434,10 +6467,10 @@ Verification:
 Exit criteria:
 
 - Users can obtain typed bindings without hand-written field glue.
-- `v0.123.0 implementation stop reached. Run pentest for this exact
+- `v0.153.0 implementation stop reached. Run pentest for this exact
   commit.`
 
-### v0.124.0 - Deployment And Linking
+### v0.154.0 - Deployment And Linking
 
 Status: planned.
 
@@ -6454,10 +6487,10 @@ Verification:
 Exit criteria:
 
 - Contracts and libraries can be deployed through the validated transaction lifecycle.
-- `v0.124.0 implementation stop reached. Run pentest for this exact
+- `v0.154.0 implementation stop reached. Run pentest for this exact
   commit.`
 
-### v0.125.0 - Events Filters And Reorg Streams
+### v0.155.0 - Events Filters And Reorg Streams
 
 Status: planned.
 
@@ -6474,10 +6507,10 @@ Verification:
 Exit criteria:
 
 - Event consumers can resume and handle reorganizations correctly.
-- `v0.125.0 implementation stop reached. Run pentest for this exact
+- `v0.155.0 implementation stop reached. Run pentest for this exact
   commit.`
 
-### v0.126.0 - Errors Multicall And Overrides
+### v0.156.0 - Errors Multicall And Overrides
 
 Status: planned.
 
@@ -6494,10 +6527,10 @@ Verification:
 Exit criteria:
 
 - Common read/simulation workflows are typed and diagnostically complete.
-- `v0.126.0 implementation stop reached. Run pentest for this exact
+- `v0.156.0 implementation stop reached. Run pentest for this exact
   commit.`
 
-### v0.127.0 - Token And NFT Standards
+### v0.157.0 - Token And NFT Standards
 
 Status: planned.
 
@@ -6514,10 +6547,10 @@ Verification:
 Exit criteria:
 
 - Common asset interactions are available without assuming compliant return behavior.
-- `v0.127.0 implementation stop reached. Run pentest for this exact
+- `v0.157.0 implementation stop reached. Run pentest for this exact
   commit.`
 
-### v0.128.0 - ENS Permit And Signature Standards
+### v0.158.0 - ENS Permit And Signature Standards
 
 Status: planned.
 
@@ -6534,10 +6567,10 @@ Verification:
 Exit criteria:
 
 - Naming and permit workflows are first-class and domain-safe.
-- `v0.128.0 implementation stop reached. Run pentest for this exact
+- `v0.158.0 implementation stop reached. Run pentest for this exact
   commit.`
 
-### v0.129.0 - Contract Tooling Hardening
+### v0.159.0 - Contract Tooling Hardening
 
 Status: planned.
 
@@ -6554,12 +6587,12 @@ Verification:
 Exit criteria:
 
 - Contract tooling is stable enough for production SDK use.
-- `v0.129.0 implementation stop reached. Run pentest for this exact
+- `v0.159.0 implementation stop reached. Run pentest for this exact
   commit.`
 
 ## Phase 14: Storage Canonical Chain And Client Runtime
 
-### v0.130.0 - Database Traits And Schema
+### v0.160.0 - Database Traits And Schema
 
 Status: planned.
 
@@ -6576,19 +6609,23 @@ Verification:
 Exit criteria:
 
 - Higher layers depend on a first-party storage contract, not one database API.
-- `v0.130.0 implementation stop reached. Run pentest for this exact
+- `v0.160.0 implementation stop reached. Run pentest for this exact
   commit.`
 
-### v0.130.1 - Production Storage Pilot
+### v0.160.1 - Production Storage Pilot
 
 Status: planned.
+
+Patch rationale: optional backend validation of the already frozen `v0.160.0`
+storage contract; the pilot cannot change the core contract or default
+dependency graph.
 
 Goal: exercise the storage contract against durable production behavior before
 mass synchronization and node-scale state are built on it.
 
 Deliverables:
 
-- One optional reviewed durable backend pilot implementing the `v0.130.0`
+- One optional reviewed durable backend pilot implementing the `v0.160.0`
   contract without entering the default `no_std` graph;
 - atomic batches, snapshots, restart recovery, schema versioning, bounded
   caches, checksums, and state-healing probes;
@@ -6606,10 +6643,10 @@ Exit criteria:
 
 - Storage abstractions have survived real durability and recovery behavior
   before full sync can amplify a flawed contract.
-- `v0.130.1 implementation stop reached. Run pentest for this exact
+- `v0.160.1 implementation stop reached. Run pentest for this exact
   commit.`
 
-### v0.131.0 - Chain Content Stores
+### v0.161.0 - Chain Content Stores
 
 Status: planned.
 
@@ -6626,10 +6663,10 @@ Verification:
 Exit criteria:
 
 - Canonical chain content can be retained and queried consistently.
-- `v0.131.0 implementation stop reached. Run pentest for this exact
+- `v0.161.0 implementation stop reached. Run pentest for this exact
   commit.`
 
-### v0.132.0 - State Trie Flat State And Indexes
+### v0.162.0 - State Trie Flat State And Indexes
 
 Status: planned.
 
@@ -6646,10 +6683,10 @@ Verification:
 Exit criteria:
 
 - Persisted state representations have explicit consistency invariants.
-- `v0.132.0 implementation stop reached. Run pentest for this exact
+- `v0.162.0 implementation stop reached. Run pentest for this exact
   commit.`
 
-### v0.133.0 - Atomic Batches And Crash Consistency
+### v0.163.0 - Atomic Batches And Crash Consistency
 
 Status: planned.
 
@@ -6666,10 +6703,10 @@ Verification:
 Exit criteria:
 
 - A committed block is either fully durable or detectably absent.
-- `v0.133.0 implementation stop reached. Run pentest for this exact
+- `v0.163.0 implementation stop reached. Run pentest for this exact
   commit.`
 
-### v0.134.0 - Migrations Snapshots And Cache Policy
+### v0.164.0 - Migrations Snapshots And Cache Policy
 
 Status: planned.
 
@@ -6680,17 +6717,17 @@ Deliverables:
 - Forward migrations, rollback limits, snapshot import/export, cache sizing/
   eviction, and schema compatibility reports;
 - persisted validation contexts are non-authoritative digest/hint records and
-  must be rederived through the `v0.63.0` rules engine before use;
+  must be rederived through the `v0.93.0` rules engine before use;
 - stored rules/limits/context digests use canonical versioned encodings and
   domain-separated cryptographic hashes; process-local hash/layout/pointer
   identities are rejected and expired snapshot/arena handles are never stored;
-- persistent invalidity and peer evidence obeys the `v0.52.29` entry-size,
+- persistent invalidity and peer evidence obeys the `v0.74.0` entry-size,
   witness, observation, serialization, and retention budgets; full malformed
   objects require a separately bounded object store;
-- evidence persistence follows `v0.52.33`: only atomically committed filled
+- evidence persistence follows `v0.78.0`: only atomically committed filled
   records are authoritative, while reserved/derived/abandoned lifecycle state
   is non-authoritative and discarded during recovery;
-- cache, migration, snapshot, and persistence adapters follow `v0.52.34` by
+- cache, migration, snapshot, and persistence adapters follow `v0.79.0` by
   borrowing immutable evidence views; no sink owns or clones slot authority,
   and sink failure cannot prevent the final return/commit transition.
 
@@ -6708,12 +6745,16 @@ Verification:
 Exit criteria:
 
 - Storage upgrades and restores are reproducible and fail closed.
-- `v0.134.0 implementation stop reached. Run pentest for this exact
+- `v0.164.0 implementation stop reached. Run pentest for this exact
   commit.`
 
-### v0.134.1 - Persistent Fault And Recovery Gate
+### v0.164.1 - Persistent Fault And Recovery Gate
 
 Status: planned.
+
+Patch rationale: assurance and fault-injection follow-up for the `v0.164.0`
+persistence behavior; it adds evidence and gates without changing public
+storage compatibility.
 
 Goal: make crash consistency, corruption recovery, reorg replay, migration,
 and rollback evidence mandatory before network synchronization.
@@ -6738,10 +6779,10 @@ Exit criteria:
 
 - A process kill or recoverable corruption at any reviewed write boundary has
   a deterministic detected outcome and tested recovery path.
-- `v0.134.1 implementation stop reached. Run pentest for this exact
+- `v0.164.1 implementation stop reached. Run pentest for this exact
   commit.`
 
-### v0.135.0 - Pruning Archive And History Expiry
+### v0.165.0 - Pruning Archive And History Expiry
 
 Status: planned.
 
@@ -6758,10 +6799,10 @@ Verification:
 Exit criteria:
 
 - Operators know exactly which historical guarantees each mode provides.
-- `v0.135.0 implementation stop reached. Run pentest for this exact
+- `v0.165.0 implementation stop reached. Run pentest for this exact
   commit.`
 
-### v0.136.0 - Canonical Import And Reorg
+### v0.166.0 - Canonical Import And Reorg
 
 Status: planned.
 
@@ -6771,7 +6812,7 @@ Deliverables:
 
 - Block import pipeline, validation stages, total-difficulty/fork-choice
   inputs, canonical indexes, unwind, and re-execution;
-- every stage preserves `v0.52.29` outcome/evidence, and only proven
+- every stage preserves `v0.74.0` outcome/evidence, and only proven
   `ObjectInvalidityEvidence` enters persistent bad-block state;
 - bounded negative-cache identity, invalidation, retention, and anti-flood
   rules are transactional with canonical import/reorg changes;
@@ -6780,10 +6821,10 @@ Deliverables:
   records rather than implicit full malformed objects;
 - failure to serialize or insert optional persistent/cache attachments never
   changes the immediate minimal `ProtocolInvalid` result returned by import;
-- import stages consume one `v0.52.33` hierarchical reservation tree, and
+- import stages consume one `v0.78.0` hierarchical reservation tree, and
   durable writes expose only committed filled leaves rather than reservation
   bookkeeping;
-- bad-block/cache/persistence/logging consumers borrow the `v0.52.34`
+- bad-block/cache/persistence/logging consumers borrow the `v0.79.0`
   immutable evidence record and cannot consume slot authority; only the final
   import outcome performs its one ownership transition.
 
@@ -6802,10 +6843,10 @@ Verification:
 Exit criteria:
 
 - Canonical chain changes preserve state and index consistency.
-- `v0.136.0 implementation stop reached. Run pentest for this exact
+- `v0.166.0 implementation stop reached. Run pentest for this exact
   commit.`
 
-### v0.137.0 - Heads Fork Choice And Orphans
+### v0.167.0 - Heads Fork Choice And Orphans
 
 Status: planned.
 
@@ -6814,7 +6855,7 @@ Goal: deliver the Heads Fork Choice And Orphans release with this required outco
 Deliverables:
 
 - Unsafe/safe/finalized heads, orphan queues, ancestry checks, invalid
-  ancestors backed by `v0.52.29` `ObjectInvalidityEvidence`, checkpoint
+  ancestors backed by `v0.74.0` `ObjectInvalidityEvidence`, checkpoint
   constraints, and chain events; unknown/local-failure ancestry remains
   unresolved rather than invalid.
 
@@ -6825,10 +6866,10 @@ Verification:
 Exit criteria:
 
 - Head state is explicit and cannot advance through invalid ancestry.
-- `v0.137.0 implementation stop reached. Run pentest for this exact
+- `v0.167.0 implementation stop reached. Run pentest for this exact
   commit.`
 
-### v0.138.0 - Payload Orchestration And Invalidation
+### v0.168.0 - Payload Orchestration And Invalidation
 
 Status: planned.
 
@@ -6845,10 +6886,10 @@ Verification:
 Exit criteria:
 
 - Payload work terminates consistently under reorgs and invalid blocks.
-- `v0.138.0 implementation stop reached. Run pentest for this exact
+- `v0.168.0 implementation stop reached. Run pentest for this exact
   commit.`
 
-### v0.139.0 - Operational Client Runtime
+### v0.169.0 - Operational Client Runtime
 
 Status: planned.
 
@@ -6863,9 +6904,9 @@ Deliverables:
   entering an explicit non-validating/light mode;
 - publish the production static/dynamic resource envelope and withdraw
   validation readiness on physical exhaustion until capacity is restored;
-- runtime resource faults preserve `v0.52.29` local outcomes and cannot poison
+- runtime resource faults preserve `v0.74.0` local outcomes and cannot poison
   validation state;
-- evidence arenas use `v0.52.36` capability-backed simultaneous-work sizing;
+- evidence arenas use `v0.81.0` capability-backed simultaneous-work sizing;
   runtime scheduling serializes/backpressures or withdraws readiness on
   exhaustion and admits per-worker pools only when benchmark evidence and
   explicit lifecycle configuration exist.
@@ -6881,10 +6922,10 @@ Verification:
 Exit criteria:
 
 - Node-adjacent services have a coherent lifecycle and observable failure model.
-- `v0.139.0 implementation stop reached. Run pentest for this exact
+- `v0.169.0 implementation stop reached. Run pentest for this exact
   commit.`
 
-### v0.140.0 - Storage And Client Performance Gate
+### v0.170.0 - Storage And Client Performance Gate
 
 Status: planned.
 
@@ -6894,7 +6935,7 @@ Deliverables:
 
 - Benchmark import, state access, roots, reorgs, snapshots, pruning, memory,
   disk amplification, and startup recovery;
-- carry the `v0.52.35` evidence-overhead baseline through valid canonical
+- carry the `v0.80.0` evidence-overhead baseline through valid canonical
   import, reorg validation, bad-object handling, persistence/cache sinks, stack,
   context/arena size, and retained-memory measurements.
 
@@ -6907,12 +6948,12 @@ Verification:
 Exit criteria:
 
 - Storage/client foundations meet documented correctness and operational budgets.
-- `v0.140.0 implementation stop reached. Run pentest for this exact
+- `v0.170.0 implementation stop reached. Run pentest for this exact
   commit.`
 
 ## Phase 15: Consensus Engine And Light Client
 
-### v0.141.0 - SSZ Foundational Codec And Merkleization
+### v0.171.0 - SSZ Foundational Codec And Merkleization
 
 Status: planned.
 
@@ -6923,14 +6964,14 @@ cached, full-client surface.
 Deliverables:
 
 - First-party basic and composite SSZ type rules;
-- bounded canonical encode/decode consuming the `v0.52.27` parent ledger;
+- bounded canonical encode/decode consuming the `v0.72.0` parent ledger;
 - charged offset traversal, container/list/vector elements, bitlists,
   bitvectors, allocation capacity, hashes, Merkleization work, and output;
 - offset validation and reject-before-allocation/hash behavior;
 - generalized indices;
 - baseline Merkleization, branches, and hash-tree roots;
 - explicit exclusions for incremental mutation, cached trees, and
-  multiproofs assigned to `v0.191.0`.
+  multiproofs assigned to `v0.221.0`.
 
 Verification:
 
@@ -6946,11 +6987,11 @@ Exit criteria:
 
 - Immutable consensus objects can be encoded, decoded, rooted, and proven
   without external SSZ core logic, while mutable production operations remain
-  explicitly assigned to `v0.191.0`.
-- `v0.141.0 implementation stop reached. Run pentest for this exact
+  explicitly assigned to `v0.221.0`.
+- `v0.171.0 implementation stop reached. Run pentest for this exact
   commit.`
 
-### v0.142.0 - Beacon Types And Fork Domains
+### v0.172.0 - Beacon Types And Fork Domains
 
 Status: planned.
 
@@ -6967,10 +7008,10 @@ Verification:
 Exit criteria:
 
 - Consensus data has complete owned/borrowed/fork-aware models.
-- `v0.142.0 implementation stop reached. Run pentest for this exact
+- `v0.172.0 implementation stop reached. Run pentest for this exact
   commit.`
 
-### v0.143.0 - Engine API Types And Validation
+### v0.173.0 - Engine API Types And Validation
 
 Status: planned.
 
@@ -6980,13 +7021,13 @@ Deliverables:
 
 - All pinned Engine API versions, payload attributes, execution status, capabilities, transition configuration, and strict validation.
 - Engine `INVALID` and `latestValidHash` are constructible only from
-  `v0.52.29` `ObjectInvalidityEvidence`; syncing, missing dependencies,
+  `v0.74.0` `ObjectInvalidityEvidence`; syncing, missing dependencies,
   resource exhaustion, cancellation, backend/storage errors, and internal
   faults map to non-invalid statuses/errors.
 - authoritative payload validation reserves minimal evidence first; once
   `INVALID` is established, failure of diagnostics, tracing, persistence, or
   negative-cache insertion cannot downgrade or erase that response.
-- Engine consensus validation uses `v0.52.34` `FirstInvalid`; diagnostic,
+- Engine consensus validation uses `v0.79.0` `FirstInvalid`; diagnostic,
   tracing, persistence, and cache consumers only borrow immutable evidence and
   cannot consume slot authority or alter `INVALID`/`latestValidHash`.
 - Small typed semantic surface for capability negotiation, `newPayload`,
@@ -7010,10 +7051,10 @@ Verification:
 Exit criteria:
 
 - Engine messages are fully typed and version/fork checked.
-- `v0.143.0 implementation stop reached. Run pentest for this exact
+- `v0.173.0 implementation stop reached. Run pentest for this exact
   commit.`
 
-### v0.144.0 - Engine Transport And Protocol Boundary
+### v0.174.0 - Engine Transport And Protocol Boundary
 
 Status: planned.
 
@@ -7026,10 +7067,10 @@ Deliverables:
 - authenticated transport adapter;
 - request/response sequencing primitives;
 - idempotency, cancellation, timeout, and error mapping;
-- conformance to the `v0.143.0` sequencing model across in-process and
+- conformance to the `v0.173.0` sequencing model across in-process and
   authenticated transport paths;
 - explicit statement that beacon fork-choice and payload orchestration belong
-  to the Beacon Engine Coordinator at `v0.226.0`.
+  to the Beacon Engine Coordinator at `v0.256.0`.
 
 Verification:
 
@@ -7043,12 +7084,16 @@ Exit criteria:
 - Engine messages can travel through an authenticated, runtime-neutral
   boundary in either embedding direction without assigning beacon-node
   coordination ownership to this layer.
-- `v0.144.0 implementation stop reached. Run pentest for this exact
+- `v0.174.0 implementation stop reached. Run pentest for this exact
   commit.`
 
-### v0.144.1 - Early Engine Vertical Devnet
+### v0.174.1 - Early Engine Vertical Devnet
 
 Status: planned.
+
+Patch rationale: integration-evidence follow-up to the `v0.174.0` Engine
+contract; the devnet must consume that contract unchanged or the milestone is
+promoted.
 
 Goal: establish an expanding end-to-end EL/Engine/CL path before late product
 integration hides incompatible assumptions.
@@ -7075,10 +7120,10 @@ Exit criteria:
 
 - The project has a continuously growing vertical interoperability path rather
   than waiting until integrated-node milestones for first composition.
-- `v0.144.1 implementation stop reached. Run pentest for this exact
+- `v0.174.1 implementation stop reached. Run pentest for this exact
   commit.`
 
-### v0.145.0 - Beacon API Provider Client
+### v0.175.0 - Beacon API Provider Client
 
 Status: planned.
 
@@ -7092,10 +7137,10 @@ Deliverables:
 - pagination and version negotiation;
 - finality, blob, and data-column responses;
 - bounded transport policy;
-- duplicate-key-rejecting Beacon JSON parsing through the `v0.52.27` parent
+- duplicate-key-rejecting Beacon JSON parsing through the `v0.72.0` parent
   ledger with structural depth/node, string, array, allocation, and output
   accounting;
-- explicit server-side ownership assigned to `v0.232.0`.
+- explicit server-side ownership assigned to `v0.262.0`.
 
 Verification:
 
@@ -7110,10 +7155,10 @@ Exit criteria:
 - Consensus data can be acquired through a production typed provider
   boundary, while serving the Beacon API remains a distinct beacon-node
   responsibility.
-- `v0.145.0 implementation stop reached. Run pentest for this exact
+- `v0.175.0 implementation stop reached. Run pentest for this exact
   commit.`
 
-### v0.146.0 - Light Client Bootstrap And Weak Subjectivity
+### v0.176.0 - Light Client Bootstrap And Weak Subjectivity
 
 Status: planned.
 
@@ -7123,7 +7168,7 @@ Deliverables:
 
 - Trusted checkpoint/bootstrap validation, fork/genesis binding,
   weak-subjectivity periods, stale-checkpoint rejection, and clock policy using
-  the monotonic/UTC/evidence domains from `v0.52.28`.
+  the monotonic/UTC/evidence domains from `v0.73.0`.
 
 Verification:
 
@@ -7132,10 +7177,10 @@ Verification:
 Exit criteria:
 
 - A light client starts only from explicit, valid trust roots.
-- `v0.146.0 implementation stop reached. Run pentest for this exact
+- `v0.176.0 implementation stop reached. Run pentest for this exact
   commit.`
 
-### v0.147.0 - BLS Sync Committee Verification
+### v0.177.0 - BLS Sync Committee Verification
 
 Status: planned.
 
@@ -7152,10 +7197,10 @@ Verification:
 Exit criteria:
 
 - Sync committee attestations are cryptographically verified first party or through an audited explicit backend.
-- `v0.147.0 implementation stop reached. Run pentest for this exact
+- `v0.177.0 implementation stop reached. Run pentest for this exact
   commit.`
 
-### v0.148.0 - Committee Rotation And Persistence
+### v0.178.0 - Committee Rotation And Persistence
 
 Status: planned.
 
@@ -7172,10 +7217,10 @@ Verification:
 Exit criteria:
 
 - Trust state survives rotation and restart without accepting stale committees.
-- `v0.148.0 implementation stop reached. Run pentest for this exact
+- `v0.178.0 implementation stop reached. Run pentest for this exact
   commit.`
 
-### v0.149.0 - Finality Optimistic Scoring And Misbehavior
+### v0.179.0 - Finality Optimistic Scoring And Misbehavior
 
 Status: planned.
 
@@ -7192,10 +7237,10 @@ Verification:
 Exit criteria:
 
 - Update selection and finality are deterministic under conflicting inputs.
-- `v0.149.0 implementation stop reached. Run pentest for this exact
+- `v0.179.0 implementation stop reached. Run pentest for this exact
   commit.`
 
-### v0.150.0 - Execution Proof Binding
+### v0.180.0 - Execution Proof Binding
 
 Status: planned.
 
@@ -7212,10 +7257,10 @@ Verification:
 Exit criteria:
 
 - Verified RPC/state evidence can anchor to a light-client trust root.
-- `v0.150.0 implementation stop reached. Run pentest for this exact
+- `v0.180.0 implementation stop reached. Run pentest for this exact
   commit.`
 
-### v0.151.0 - Checkpoint Recovery And Multi-Source Acquisition
+### v0.181.0 - Checkpoint Recovery And Multi-Source Acquisition
 
 Status: planned.
 
@@ -7232,10 +7277,10 @@ Verification:
 Exit criteria:
 
 - Light-client operation can recover without silently replacing its trust root.
-- `v0.151.0 implementation stop reached. Run pentest for this exact
+- `v0.181.0 implementation stop reached. Run pentest for this exact
   commit.`
 
-### v0.152.0 - Complete Light-Client Conformance
+### v0.182.0 - Complete Light-Client Conformance
 
 Status: planned.
 
@@ -7252,10 +7297,10 @@ Verification:
 Exit criteria:
 
 - Complete light-client claims are fixture-backed and operationally documented.
-- `v0.152.0 implementation stop reached. Run pentest for this exact
+- `v0.182.0 implementation stop reached. Run pentest for this exact
   commit.`
 
-### v0.153.0 - PeerDAS Threat Model And Admission Plan
+### v0.183.0 - PeerDAS Threat Model And Admission Plan
 
 Status: planned.
 
@@ -7269,7 +7314,7 @@ Deliverables:
 - custody policy;
 - cryptographic and trusted-setup requirements;
 - CPU, memory, bandwidth, and retention ceilings;
-- versioned implementation assignments beginning at `v0.193.0`;
+- versioned implementation assignments beginning at `v0.223.0`;
 - fail-closed rules that prevent this planning release from implying an
   executable PeerDAS implementation.
 
@@ -7283,13 +7328,13 @@ Exit criteria:
 
 - PeerDAS implementation cannot begin with ambiguous trust, cryptographic,
   custody, networking, or resource boundaries, and no consumer can claim
-  support before the `v0.193.0` core exists.
-- `v0.153.0 implementation stop reached. Run pentest for this exact
+  support before the `v0.223.0` core exists.
+- `v0.183.0 implementation stop reached. Run pentest for this exact
   commit.`
 
 ## Phase 16: Networking Txpool And Synchronization
 
-### v0.154.0 - Networking Threat And Dependency Gate
+### v0.184.0 - Networking Threat And Dependency Gate
 
 Status: planned.
 
@@ -7300,7 +7345,7 @@ Deliverables:
 - Protocol threat model, crypto/transport dependency review, identity/key
   policy, resource ceilings, and wire-spec locks;
 - assign every protocol/version pair an explicit `WireLimits` profile from
-  `v0.52.32` and every sanction path an evidence type from `v0.52.29`;
+  `v0.77.0` and every sanction path an evidence type from `v0.74.0`;
 - first-party ownership rule for discovery, RLPx, `eth`, `snap`, request
   scheduling, peer scoring, and validation state machines;
 - reviewed optional socket, runtime, and cryptographic adapters only when they
@@ -7310,8 +7355,8 @@ Deliverables:
   allowed, but identity, scoring, banning, compatibility, and peer state are
   not collapsed into one generic Ethereum peer abstraction;
 - bind every connection, peer, protocol, and request to child capabilities
-  from the `v0.52.20` resource governor;
-- admit Snappy and SSZ-Snappy only through `v0.52.27` compressed-byte,
+  from the `v0.65.0` resource governor;
+- admit Snappy and SSZ-Snappy only through `v0.72.0` compressed-byte,
   decompressed-byte, ratio, allocation, structural-work, and output budgets;
 - design-time models for retry/backpressure and peer scheduling must exist
   before live request scheduling.
@@ -7324,10 +7369,10 @@ Verification:
 Exit criteria:
 
 - No live peer code lands before trust and resource boundaries are approved.
-- `v0.154.0 implementation stop reached. Run pentest for this exact
+- `v0.184.0 implementation stop reached. Run pentest for this exact
   commit.`
 
-### v0.155.0 - Discovery And RLPx
+### v0.185.0 - Discovery And RLPx
 
 Status: planned.
 
@@ -7338,9 +7383,9 @@ Deliverables:
 - First-party Discovery v4/v5 as admitted, ENR, EIP-1459 DNS discovery, node
   records, handshakes, framing, capability negotiation, encryption/MAC state
   machines, and replay protections;
-- use the admitted `v0.52.23..=v0.52.25` secp256k1, ECDH, AES-CTR,
+- use the admitted `v0.68.0..=v0.70.0` secp256k1, ECDH, AES-CTR,
   HMAC-SHA256, ECIES/KDF, and transcript contracts rather than unnamed crypto;
-- consume only the non-signing `TransportIdentity` capability from `v0.52.31`;
+- consume only the non-signing `TransportIdentity` capability from `v0.76.0`;
   node/transport keys cannot satisfy `ExecutionSigner` or sign transactions,
   messages, EIP-712 data, or EIP-7702 authorizations;
 - bootnode, static-peer, trusted-peer, node-key, listen-address, NAT, and
@@ -7354,10 +7399,10 @@ Verification:
 Exit criteria:
 
 - Peers can be discovered and authenticated through bounded first-party protocol logic.
-- `v0.155.0 implementation stop reached. Run pentest for this exact
+- `v0.185.0 implementation stop reached. Run pentest for this exact
   commit.`
 
-### v0.156.0 - Eth Protocol Messages
+### v0.186.0 - Eth Protocol Messages
 
 Status: planned.
 
@@ -7378,10 +7423,10 @@ Verification:
 Exit criteria:
 
 - Execution chain data can be exchanged through typed wire messages.
-- `v0.156.0 implementation stop reached. Run pentest for this exact
+- `v0.186.0 implementation stop reached. Run pentest for this exact
   commit.`
 
-### v0.157.0 - Snap Protocol
+### v0.187.0 - Snap Protocol
 
 Status: planned.
 
@@ -7401,7 +7446,7 @@ Deliverables:
 - serving-side database-read, proof-generation, compression, allocation,
   bandwidth, and output budgets plus fair scheduling against local sync;
 - cancellation when a serving snapshot becomes unavailable;
-- all compressed and decompressed work consumes the `v0.52.27` parent ledger.
+- all compressed and decompressed work consumes the `v0.72.0` parent ledger.
 
 Verification:
 
@@ -7413,10 +7458,10 @@ Verification:
 Exit criteria:
 
 - Snapshot data is validated before storage or state promotion.
-- `v0.157.0 implementation stop reached. Run pentest for this exact
+- `v0.187.0 implementation stop reached. Run pentest for this exact
   commit.`
 
-### v0.158.0 - Peer Service
+### v0.188.0 - Peer Service
 
 Status: planned.
 
@@ -7430,10 +7475,10 @@ Deliverables:
 - hierarchical resource capabilities and peer accountability for malformed,
   wasteful, timed-out, and inconsistent work;
 - bounded evidence counters/windows and compact witnesses consume
-  `v0.52.29` budgets; peer histories cannot grow per-event vectors;
+  `v0.74.0` budgets; peer histories cannot grow per-event vectors;
 - rate windows and in-process sanctions use monotonic time, persisted records
-  carry `v0.52.28` boot/session identity, and UTC rollback cannot extend bans;
-- penalties and bans require `v0.52.29` object-invalidity evidence composed
+  carry `v0.73.0` boot/session identity, and UTC rollback cannot extend bans;
+- penalties and bans require `v0.74.0` object-invalidity evidence composed
   with an authenticated peer-delivery observation, peer-protocol evidence, or
   peer-policy evidence; local validation failures never accuse the supplying
   peer and peer evidence never enters object-negative caches.
@@ -7447,10 +7492,10 @@ Verification:
 Exit criteria:
 
 - Peer selection and isolation are explicit and bounded.
-- `v0.158.0 implementation stop reached. Run pentest for this exact
+- `v0.188.0 implementation stop reached. Run pentest for this exact
   commit.`
 
-### v0.159.0 - Request Scheduler And Backpressure
+### v0.189.0 - Request Scheduler And Backpressure
 
 Status: planned.
 
@@ -7463,7 +7508,7 @@ Deliverables:
   bandwidth limits, and evidence-bound invalid-response penalties;
 - cancellation propagates when fork choice invalidates work and refunds only
   reservations whose resources were released, never consumed work;
-- executable retry/backpressure and fairness models refined from `v0.154.0`.
+- executable retry/backpressure and fairness models refined from `v0.184.0`.
 
 Verification:
 
@@ -7473,10 +7518,10 @@ Verification:
 Exit criteria:
 
 - Network work cannot create unbounded queues or retry amplification.
-- `v0.159.0 implementation stop reached. Run pentest for this exact
+- `v0.189.0 implementation stop reached. Run pentest for this exact
   commit.`
 
-### v0.160.0 - Transaction Pool
+### v0.190.0 - Transaction Pool
 
 Status: planned.
 
@@ -7498,7 +7543,7 @@ Deliverables:
   change, blob-sidecar arrival/expiry, and EIP-7702 authority-state change;
 - persisted admission evidence is historical only; local/protected status can
   affect eviction/propagation policy but never exempt consensus revalidation;
-- only `v0.52.29` object-invalidity evidence permits permanent transaction
+- only `v0.74.0` object-invalidity evidence permits permanent transaction
   rejection or bad-transaction caching; peer sanctions additionally require
   an authenticated delivery observation or peer protocol/policy evidence, and
   local failures remain retryable.
@@ -7512,10 +7557,10 @@ Verification:
 Exit criteria:
 
 - Pending transaction policy is deterministic and resource bounded.
-- `v0.160.0 implementation stop reached. Run pentest for this exact
+- `v0.190.0 implementation stop reached. Run pentest for this exact
   commit.`
 
-### v0.161.0 - Sync Orchestration
+### v0.191.0 - Sync Orchestration
 
 Status: planned.
 
@@ -7527,7 +7572,7 @@ Deliverables:
   with bounded queues and shared resource capabilities;
 - durable checkpoints, bad-block caches, peer accountability, progress
   persistence, invalidation, restart, and strategy selection;
-- bad-block and invalid-proof caches accept only `v0.52.29`
+- bad-block and invalid-proof caches accept only `v0.74.0`
   `ObjectInvalidityEvidence` and follow its identity, invalidation, retention,
   and anti-flood rules; peer evidence remains in separately scoped peer state;
 - immediate cancellation of obsolete work when fork choice changes.
@@ -7539,10 +7584,10 @@ Verification:
 Exit criteria:
 
 - Sync progresses or fails with explicit recoverable state.
-- `v0.161.0 implementation stop reached. Run pentest for this exact
+- `v0.191.0 implementation stop reached. Run pentest for this exact
   commit.`
 
-### v0.162.0 - Multi-Peer Full And Snap Sync
+### v0.192.0 - Multi-Peer Full And Snap Sync
 
 Status: planned.
 
@@ -7563,10 +7608,10 @@ Verification:
 Exit criteria:
 
 - A node can reach verified canonical state without trusting one peer.
-- `v0.162.0 implementation stop reached. Run pentest for this exact
+- `v0.192.0 implementation stop reached. Run pentest for this exact
   commit.`
 
-### v0.163.0 - Portal And Historical Data Acquisition
+### v0.193.0 - Portal And Historical Data Acquisition
 
 Status: planned.
 
@@ -7583,10 +7628,10 @@ Verification:
 Exit criteria:
 
 - Expired historical data has an explicit verified acquisition path.
-- `v0.163.0 implementation stop reached. Run pentest for this exact
+- `v0.193.0 implementation stop reached. Run pentest for this exact
   commit.`
 
-### v0.164.0 - Builder Validator And Network Hardening
+### v0.194.0 - Builder Validator And Network Hardening
 
 Status: planned.
 
@@ -7603,12 +7648,12 @@ Verification:
 Exit criteria:
 
 - Networking, sync, and node-adjacent boundaries are production candidates.
-- `v0.164.0 implementation stop reached. Run pentest for this exact
+- `v0.194.0 implementation stop reached. Run pentest for this exact
   commit.`
 
 ## Phase 17: Statelessness Commitment Evolution And Future Forks
 
-### v0.165.0 - Proof Format Abstraction
+### v0.195.0 - Proof Format Abstraction
 
 Status: planned.
 
@@ -7635,10 +7680,10 @@ Verification:
 Exit criteria:
 
 - MPT is no longer hardwired into every proof consumer.
-- `v0.165.0 implementation stop reached. Run pentest for this exact
+- `v0.195.0 implementation stop reached. Run pentest for this exact
   commit.`
 
-### v0.166.0 - Execution Witness Model
+### v0.196.0 - Execution Witness Model
 
 Status: planned.
 
@@ -7655,10 +7700,10 @@ Verification:
 Exit criteria:
 
 - State dependencies of execution can be represented explicitly.
-- `v0.166.0 implementation stop reached. Run pentest for this exact
+- `v0.196.0 implementation stop reached. Run pentest for this exact
   commit.`
 
-### v0.167.0 - MPT Witness Construction And Verification
+### v0.197.0 - MPT Witness Construction And Verification
 
 Status: planned.
 
@@ -7675,10 +7720,10 @@ Verification:
 Exit criteria:
 
 - MPT-backed execution inputs can be proven complete.
-- `v0.167.0 implementation stop reached. Run pentest for this exact
+- `v0.197.0 implementation stop reached. Run pentest for this exact
   commit.`
 
-### v0.168.0 - Stateless Execution
+### v0.198.0 - Stateless Execution
 
 Status: planned.
 
@@ -7695,10 +7740,10 @@ Verification:
 Exit criteria:
 
 - Claimed execution can run without a full local state database.
-- `v0.168.0 implementation stop reached. Run pentest for this exact
+- `v0.198.0 implementation stop reached. Run pentest for this exact
   commit.`
 
-### v0.169.0 - Verkle Or Successor Commitment Boundary
+### v0.199.0 - Verkle Or Successor Commitment Boundary
 
 Status: planned.
 
@@ -7715,10 +7760,10 @@ Verification:
 Exit criteria:
 
 - Future state commitments fit the shared proof model without pretending unfinished cryptography is implemented.
-- `v0.169.0 implementation stop reached. Run pentest for this exact
+- `v0.199.0 implementation stop reached. Run pentest for this exact
   commit.`
 
-### v0.170.0 - Successor Commitment Backend
+### v0.200.0 - Successor Commitment Backend
 
 Status: planned.
 
@@ -7735,10 +7780,10 @@ Verification:
 Exit criteria:
 
 - The selected successor proof scheme is cryptographically executable.
-- `v0.170.0 implementation stop reached. Run pentest for this exact
+- `v0.200.0 implementation stop reached. Run pentest for this exact
   commit.`
 
-### v0.171.0 - Successor Witness And State Integration
+### v0.201.0 - Successor Witness And State Integration
 
 Status: planned.
 
@@ -7755,10 +7800,10 @@ Verification:
 Exit criteria:
 
 - Historical MPT and successor states coexist with explicit fork rules.
-- `v0.171.0 implementation stop reached. Run pentest for this exact
+- `v0.201.0 implementation stop reached. Run pentest for this exact
   commit.`
 
-### v0.172.0 - State Expiry And Address Evolution
+### v0.202.0 - State Expiry And Address Evolution
 
 Status: planned.
 
@@ -7775,10 +7820,10 @@ Verification:
 Exit criteria:
 
 - State-lifecycle evolution is implemented when specified, not left as an architectural surprise.
-- `v0.172.0 implementation stop reached. Run pentest for this exact
+- `v0.202.0 implementation stop reached. Run pentest for this exact
   commit.`
 
-### v0.173.0 - ZK Execution Proof Boundary
+### v0.203.0 - ZK Execution Proof Boundary
 
 Status: planned.
 
@@ -7795,10 +7840,10 @@ Verification:
 Exit criteria:
 
 - ZK proof systems can integrate without becoming an implicit consensus dependency.
-- `v0.173.0 implementation stop reached. Run pentest for this exact
+- `v0.203.0 implementation stop reached. Run pentest for this exact
   commit.`
 
-### v0.174.0 - Future Fork Automation
+### v0.204.0 - Future Fork Automation
 
 Status: planned.
 
@@ -7810,7 +7855,7 @@ Deliverables:
   manifests, and require a named maintenance release for every adopted change;
 - maintain an emergency security lane and fork-readiness lane independently of
   the next feature milestone;
-- expand the early `v0.144.1` vertical devnet whenever an adopted fork changes
+- expand the early `v0.174.1` vertical devnet whenever an adopted fork changes
   execution, Engine, consensus, networking, storage, or validator behavior.
 
 Verification:
@@ -7820,12 +7865,12 @@ Verification:
 Exit criteria:
 
 - New hard forks cannot silently outrun the support matrix.
-- `v0.174.0 implementation stop reached. Run pentest for this exact
+- `v0.204.0 implementation stop reached. Run pentest for this exact
   commit.`
 
 ## Phase 18: Foundation Assurance Before Full Consensus Client
 
-### v0.175.0 - Platform And Target Matrix
+### v0.205.0 - Platform And Target Matrix
 
 Status: planned.
 
@@ -7835,7 +7880,7 @@ Deliverables:
 
 - Linux, Windows, BSD, macOS, Android, iOS, WASM where applicable, big/little-
   endian review, and Aesynx-readiness constraints;
-- target-specific stack ceilings for `v0.52.36` slot/index/arena placement,
+- target-specific stack ceilings for `v0.81.0` slot/index/arena placement,
   requiring caller/external storage above each audited bound.
 
 Verification:
@@ -7847,10 +7892,10 @@ Verification:
 Exit criteria:
 
 - Every promised platform has repeatable evidence or an explicit limitation.
-- `v0.175.0 implementation stop reached. Run pentest for this exact
+- `v0.205.0 implementation stop reached. Run pentest for this exact
   commit.`
 
-### v0.176.0 - Whole-System Performance Program
+### v0.206.0 - Whole-System Performance Program
 
 Status: planned.
 
@@ -7860,7 +7905,7 @@ Deliverables:
 
 - Benchmarks and budgets for codec, crypto, EVM, proofs, providers, storage,
   sync, ABI, wallets, and end-to-end workflows;
-- integrate every `v0.52.35` evidence benchmark: valid transactions, complete
+- integrate every `v0.80.0` evidence benchmark: valid transactions, complete
   blocks across transaction counts, gossip across worker counts, high-
   contention batches, `FirstInvalid`, admitted diagnostic modes, stack/context/
   reservation/code sizes, allocation/lock/atomic/clone/sink counts, and peak/
@@ -7868,11 +7913,11 @@ Deliverables:
 - preserve an internal benchmark-only evidence-disabled baseline and fail on
   relative or absolute threshold regressions; production features can never
   disable evidence authority;
-- enforce `v0.52.36` paired-run integrity: identical input/context/schedule/
+- enforce `v0.81.0` paired-run integrity: identical input/context/schedule/
   validator/work counters/output consumption, only evidence operations
   replaced on valid paths, and separate evidence-attributable versus total
   allocation reports;
-- enforce `v0.52.37` invalid semantic projections/minimal-evidence baselines,
+- enforce `v0.82.0` invalid semantic projections/minimal-evidence baselines,
   protocol-versus-evidence operation counters, untimed setup/result hashing/
   equality/barrier preparation, uninstrumented production thresholds, and
   separate non-perturbing instrumented conformance runs;
@@ -7891,12 +7936,15 @@ Verification:
 Exit criteria:
 
 - Performance and DoS budgets are release-blocking rather than anecdotal.
-- `v0.176.0 implementation stop reached. Run pentest for this exact
+- `v0.206.0 implementation stop reached. Run pentest for this exact
   commit.`
 
-### v0.176.1 - Structure-Aware Fuzz And Complexity Oracles
+### v0.206.1 - Structure-Aware Fuzz And Complexity Oracles
 
 Status: planned.
+
+Patch rationale: test-only assurance expansion after `v0.206.0`; it changes
+fuzz generators and release evidence, not public APIs or Ethereum behavior.
 
 Goal: test valid deep behavior and enforce work bounds, not merely compile
 fuzz targets or reject random bytes at the first root mismatch.
@@ -7922,10 +7970,10 @@ Exit criteria:
 
 - Fuzzing reaches authenticated deep paths and fails releases on excess work,
   not only on panics or incorrect return values.
-- `v0.176.1 implementation stop reached. Run pentest for this exact
+- `v0.206.1 implementation stop reached. Run pentest for this exact
   commit.`
 
-### v0.177.0 - Kani Codec Primitive And Typestate Proofs
+### v0.207.0 - Kani Codec Primitive And Typestate Proofs
 
 Status: planned.
 
@@ -7934,19 +7982,19 @@ Goal: deliver the Kani Codec Primitive And Typestate Proofs release with this re
 Deliverables:
 
 - Bounded proofs for arithmetic, canonical decoding, budget accounting, writers,
-  conversions, impossible typestate transitions, and the `v0.52.33` evidence-
+  conversions, impossible typestate transitions, and the `v0.78.0` evidence-
   slot state machine;
 - slot-conservation proofs across reserve, derive, fill, return, and release,
   including one-entry/two-entry parent-child composition and bounded batch
   cardinality;
-- `v0.52.34` mode proofs showing collection-limit changes preserve validity and
+- `v0.79.0` mode proofs showing collection-limit changes preserve validity and
   first evidence, immutable sink borrows cannot transition authority, and each
   additional authoritative record consumes a distinct slot;
-- `v0.52.36` capacity/handle proofs showing attacker counts cannot size arenas,
+- `v0.81.0` capacity/handle proofs showing attacker counts cannot size arenas,
   partial capability reservation conserves resources, stale generations cannot
   access reused slots, and live borrows prevent release/reset within documented
   bounds;
-- `v0.52.37` dispatch/generation proofs showing upward internal class mapping
+- `v0.82.0` dispatch/generation proofs showing upward internal class mapping
   enforces the exact requested stop, rejected values cannot begin validation,
   and maximum-generation identities retire rather than wrap.
 
@@ -7965,10 +8013,10 @@ Verification:
 Exit criteria:
 
 - Selected foundational invariants have machine-checked evidence in addition to tests.
-- `v0.177.0 implementation stop reached. Run pentest for this exact
+- `v0.207.0 implementation stop reached. Run pentest for this exact
   commit.`
 
-### v0.178.0 - Kani EVM Trie And State Proofs
+### v0.208.0 - Kani EVM Trie And State Proofs
 
 Status: planned.
 
@@ -7985,18 +8033,21 @@ Verification:
 Exit criteria:
 
 - Selected consensus-critical execution invariants have machine-checked evidence.
-- `v0.178.0 implementation stop reached. Run pentest for this exact
+- `v0.208.0 implementation stop reached. Run pentest for this exact
   commit.`
 
-### v0.178.1 - Kani Cryptographic Arithmetic Proofs
+### v0.208.1 - Kani Cryptographic Arithmetic Proofs
 
 Status: planned.
+
+Patch rationale: proof-only assurance expansion after `v0.208.0`; it verifies
+existing arithmetic implementations without changing their public contracts.
 
 Goal: add machine-checked implementation evidence for the highest-risk
 first-party field, scalar, curve, signature, and pairing arithmetic.
 
 This release consolidates and extends the early secp256k1 subset admitted at
-`v0.52.30`; it does not defer secret-bearing secp proof evidence until here.
+`v0.75.0`; it does not defer secret-bearing secp proof evidence until here.
 
 Deliverables:
 
@@ -8015,7 +8066,7 @@ Verification:
 
 - Pinned Kani harnesses and reproducible reports for Keccak/secp256k1, BN254,
   BLS12-381, KZG, and related fixed-width helpers as applicable;
-- compatibility and coverage checks proving the `v0.52.30` harnesses remain
+- compatibility and coverage checks proving the `v0.75.0` harnesses remain
   attached to the production secp implementation;
 - seeded carry, reduction, exceptional-point, and serialization defects caught
   by the proof suite;
@@ -8027,10 +8078,10 @@ Exit criteria:
 - Critical arithmetic implementation invariants have explicit machine-checked
   evidence, and every unproved full-width claim has documented differential,
   property, vector, fuzz, and audit coverage.
-- `v0.178.1 implementation stop reached. Run pentest for this exact
+- `v0.208.1 implementation stop reached. Run pentest for this exact
   commit.`
 
-### v0.179.0 - Miri Sanitizers And Undefined-Behavior Gate
+### v0.209.0 - Miri Sanitizers And Undefined-Behavior Gate
 
 Status: planned.
 
@@ -8047,12 +8098,15 @@ Verification:
 Exit criteria:
 
 - Dynamic memory/UB evidence complements the first-party unsafe-code ban.
-- `v0.179.0 implementation stop reached. Run pentest for this exact
+- `v0.209.0 implementation stop reached. Run pentest for this exact
   commit.`
 
-### v0.179.1 - Protocol And Concurrency Model Checking
+### v0.209.1 - Protocol And Concurrency Model Checking
 
 Status: planned.
+
+Patch rationale: model-checking evidence for the contracts frozen in
+`v0.209.0`; no public API or protocol behavior is introduced by this pass.
 
 Goal: complement Rust-level bounded proofs with explicit distributed and
 concurrent state-machine models.
@@ -8064,7 +8118,7 @@ Deliverables:
 - Loom models for request IDs, schedulers, txpool coordination, resource-token
   conservation, hierarchical evidence-slot derivation/fill/return/release, and
   slashing-database concurrency;
-- `v0.52.36` arena models for capability reservation, scoped/generation handle
+- `v0.81.0` arena models for capability reservation, scoped/generation handle
   reuse, live borrows, cancellation, timeout, cross-worker transfer, reset,
   drain, and optional pool ownership;
 - trace-to-test adapters that turn model counterexamples into deterministic
@@ -8084,12 +8138,16 @@ Exit criteria:
 
 - Critical protocol and concurrency claims have explicit machine-checked
   state models in addition to implementation tests.
-- `v0.179.1 implementation stop reached. Run pentest for this exact
+- `v0.209.1 implementation stop reached. Run pentest for this exact
   commit.`
 
-### v0.179.2 - Side-Channel And Gas-To-Cycles Assurance
+### v0.209.2 - Side-Channel And Gas-To-Cycles Assurance
 
 Status: planned.
+
+Patch rationale: assurance-only continuation of the `v0.209.x` proof line;
+timing and gas-to-cycle evidence may block admission but cannot redefine public
+or consensus behavior.
 
 Goal: apply the correct assurance model separately to secrets and public
 consensus computation.
@@ -8116,10 +8174,10 @@ Exit criteria:
 
 - Secret paths have fixed-work/constant-time evidence, while public paths have
   enforceable worst-case work per charged gas.
-- `v0.179.2 implementation stop reached. Run pentest for this exact
+- `v0.209.2 implementation stop reached. Run pentest for this exact
   commit.`
 
-### v0.180.0 - Compatibility And Semver Gate
+### v0.210.0 - Compatibility And Semver Gate
 
 Status: planned.
 
@@ -8129,14 +8187,14 @@ Deliverables:
 
 - cargo-semver-checks, feature powerset, minimal/default/all-feature graphs,
   README dependency versions, serde/text snapshots, and MSRV/stable checks;
-- public API guards from `v0.52.35`: stable validation outcome shapes, no
+- public API guards from `v0.80.0`: stable validation outcome shapes, no
   internal evidence lifetime/slot/arena/sink/worker-pool exposure, no arbitrary
   cardinality monomorphization, and no feature- or mode-dependent consensus
   behavior or return type;
-- enforce the `v0.52.36` public non-generic validated mode/configuration value
+- enforce the `v0.81.0` public non-generic validated mode/configuration value
   and private admitted-implementation dispatch; benchmark-disabled baselines
   cannot appear in production features or public APIs;
-- enforce `v0.52.37` zero/above-maximum rejection, upward internal capacity-
+- enforce `v0.82.0` zero/above-maximum rejection, upward internal capacity-
   class mapping with exact requested stop, stable mode-independent
   `ValidationOutcome<T, E>`, and private benchmark semantic projections;
 - code-size and monomorphization budgets for every admitted collection mode and
@@ -8153,10 +8211,10 @@ Verification:
 Exit criteria:
 
 - Accidental breaking or stale publication metadata blocks release.
-- `v0.180.0 implementation stop reached. Run pentest for this exact
+- `v0.210.0 implementation stop reached. Run pentest for this exact
   commit.`
 
-### v0.181.0 - Task-Oriented Documentation
+### v0.211.0 - Task-Oriented Documentation
 
 Status: planned.
 
@@ -8173,10 +8231,10 @@ Verification:
 Exit criteria:
 
 - Public functionality is discoverable without reading internal source.
-- `v0.181.0 implementation stop reached. Run pentest for this exact
+- `v0.211.0 implementation stop reached. Run pentest for this exact
   commit.`
 
-### v0.182.0 - Core SDK API Stability Baseline
+### v0.212.0 - Core SDK API Stability Baseline
 
 Status: planned.
 
@@ -8193,10 +8251,10 @@ Verification:
 Exit criteria:
 
 - Later consensus-client work builds on deliberate foundation contracts without pretending the complete 1.0 API is frozen.
-- `v0.182.0 implementation stop reached. Run pentest for this exact
+- `v0.212.0 implementation stop reached. Run pentest for this exact
   commit.`
 
-### v0.183.0 - Core Cryptography And Codec Audit
+### v0.213.0 - Core Cryptography And Codec Audit
 
 Status: planned.
 
@@ -8213,10 +8271,10 @@ Verification:
 Exit criteria:
 
 - No unresolved critical/high core finding remains.
-- `v0.183.0 implementation stop reached. Run pentest for this exact
+- `v0.213.0 implementation stop reached. Run pentest for this exact
   commit.`
 
-### v0.184.0 - Execution Storage And Light-Client Audit
+### v0.214.0 - Execution Storage And Light-Client Audit
 
 Status: planned.
 
@@ -8233,10 +8291,10 @@ Verification:
 Exit criteria:
 
 - No unresolved critical/high finding remains in the execution/client foundation or light-client scope.
-- `v0.184.0 implementation stop reached. Run pentest for this exact
+- `v0.214.0 implementation stop reached. Run pentest for this exact
   commit.`
 
-### v0.185.0 - Provider Wallet And Contract Audit
+### v0.215.0 - Provider Wallet And Contract Audit
 
 Status: planned.
 
@@ -8253,10 +8311,10 @@ Verification:
 Exit criteria:
 
 - No unresolved critical/high SDK or key-management finding remains.
-- `v0.185.0 implementation stop reached. Run pentest for this exact
+- `v0.215.0 implementation stop reached. Run pentest for this exact
   commit.`
 
-### v0.186.0 - Execution Networking Sync And Runtime Audit
+### v0.216.0 - Execution Networking Sync And Runtime Audit
 
 Status: planned.
 
@@ -8273,10 +8331,10 @@ Verification:
 Exit criteria:
 
 - No unresolved critical/high finding remains in the execution-network or runtime foundation.
-- `v0.186.0 implementation stop reached. Run pentest for this exact
+- `v0.216.0 implementation stop reached. Run pentest for this exact
   commit.`
 
-### v0.187.0 - Foundation Remediation Release
+### v0.217.0 - Foundation Remediation Release
 
 Status: planned.
 
@@ -8293,10 +8351,10 @@ Verification:
 Exit criteria:
 
 - The SDK, execution, storage, light-client, and execution-network foundation is ready to host the full consensus client.
-- `v0.187.0 implementation stop reached. Run pentest for this exact
+- `v0.217.0 implementation stop reached. Run pentest for this exact
   commit.`
 
-### v0.188.0 - Full-Stack Foundation Integration Baseline
+### v0.218.0 - Full-Stack Foundation Integration Baseline
 
 Status: planned.
 
@@ -8313,7 +8371,7 @@ Verification:
 Exit criteria:
 
 - Full beacon-node and validator work starts from a reviewed integrated foundation rather than an assumed 1.0 candidate.
-- `v0.188.0 implementation stop reached. Run pentest for this exact
+- `v0.218.0 implementation stop reached. Run pentest for this exact
   commit.`
 
 ## Phase 19: Full Consensus Client Foundation
@@ -8335,7 +8393,7 @@ Consensus-client source review date: 2026-07-16:
 - <https://ethereum.github.io/consensus-specs/sync/optimistic/>
 - <https://ethereum.github.io/consensus-specs/fulu/validator/>
 
-### v0.189.0 - Consensus Client Architecture And Threat Model
+### v0.219.0 - Consensus Client Architecture And Threat Model
 
 Status: planned.
 
@@ -8352,10 +8410,10 @@ Verification:
 Exit criteria:
 
 - No consensus-client implementation begins with ambiguous ownership, trust, or persistence boundaries.
-- `v0.189.0 implementation stop reached. Run pentest for this exact
+- `v0.219.0 implementation stop reached. Run pentest for this exact
   commit.`
 
-### v0.190.0 - Consensus Configuration And Fork Registry
+### v0.220.0 - Consensus Configuration And Fork Registry
 
 Status: planned.
 
@@ -8372,14 +8430,14 @@ Verification:
 Exit criteria:
 
 - Consensus behavior is source-generated and fork-modular rather than spread through optional-field conditionals.
-- `v0.190.0 implementation stop reached. Run pentest for this exact
+- `v0.220.0 implementation stop reached. Run pentest for this exact
   commit.`
 
-### v0.191.0 - Complete SSZ Client Surface
+### v0.221.0 - Complete SSZ Client Surface
 
 Status: planned.
 
-Goal: extend the immutable `v0.141.0` SSZ foundation into the complete mutable,
+Goal: extend the immutable `v0.171.0` SSZ foundation into the complete mutable,
 cached, proof-capable surface required by production beacon state and
 networking.
 
@@ -8394,9 +8452,9 @@ Deliverables:
   index, and validation-level identity;
 - bounded transactional mutation APIs;
 - all decoding, offset traversal, bitlist/list work, hashing, Merkleization,
-  mutation, allocation, and proof output consume `v0.52.27` child ledgers;
+  mutation, allocation, and proof output consume `v0.72.0` child ledgers;
 - compatibility with the canonical encoding and baseline roots from
-  `v0.141.0`.
+  `v0.171.0`.
 
 Verification:
 
@@ -8404,17 +8462,17 @@ Verification:
 - incremental-versus-full-root differential tests;
 - cache invalidation and mutation rollback tests;
 - malformed-offset and proof fuzzing;
-- compatibility tests against `v0.141.0` encodings and roots.
+- compatibility tests against `v0.171.0` encodings and roots.
 
 Exit criteria:
 
 - Beacon state and network objects can use first-party SSZ without missing
   production mutation, caching, container, or proof operations, and without
   redefining the foundational codec.
-- `v0.191.0 implementation stop reached. Run pentest for this exact
+- `v0.221.0 implementation stop reached. Run pentest for this exact
   commit.`
 
-### v0.192.0 - BLS Signing Aggregation And Batch Verification
+### v0.222.0 - BLS Signing Aggregation And Batch Verification
 
 Status: planned.
 
@@ -8431,14 +8489,14 @@ Deliverables:
 - entropy/transcript failure fails closed, coefficient reuse across contexts is
   prohibited, and bounded batch-failure isolation cannot become an unbounded
   fallback attack;
-- failed mixed-source batches return `v0.52.29` `BatchContainsInvalid` and
+- failed mixed-source batches return `v0.74.0` `BatchContainsInvalid` and
   never identify or penalize members/peers until bounded individual
   verification establishes member-specific object-invalidity evidence;
-- follow `v0.52.33`: reserve one batch slot and a configured batch-size-
+- follow `v0.78.0`: reserve one batch slot and a configured batch-size-
   independent maximum of member slots before isolation; capacity exhaustion
   stops isolation locally, and only filled member slots authorize caching or
   attribution;
-- member isolation uses `v0.52.34` `BatchIsolateUpTo<N>` and treats `N` only
+- member isolation uses `v0.79.0` `BatchIsolateUpTo<N>` and treats `N` only
   as an operational attribution/work limit; members beyond it remain
   unattributed without changing aggregate verification validity;
 - bounded verification-queue latency and maximum batch age so attackers cannot
@@ -8453,16 +8511,16 @@ Verification:
   timing review;
 - cross-`N` aggregate-result invariance and beyond-limit non-attribution tests;
 - high-contention verification/isolation benchmarks across batch sizes and
-  worker counts against the `v0.52.35` baseline, including allocation, global-
+  worker counts against the `v0.80.0` baseline, including allocation, global-
   contention, stack, arena, and retained-memory thresholds.
 
 Exit criteria:
 
 - Consensus and validator paths have a complete first-party BLS surface, not verification-only light-client hooks.
-- `v0.192.0 implementation stop reached. Run pentest for this exact
+- `v0.222.0 implementation stop reached. Run pentest for this exact
   commit.`
 
-### v0.193.0 - PeerDAS Cell And Reconstruction Core
+### v0.223.0 - PeerDAS Cell And Reconstruction Core
 
 Status: planned.
 
@@ -8479,13 +8537,13 @@ Deliverables:
 - batch verification;
 - sound nonzero coefficient/transcript generation, fail-closed entropy,
   context-complete cache identities, and bounded failure isolation;
-- mixed-source batch failures return `v0.52.29` `BatchContainsInvalid`; local
+- mixed-source batch failures return `v0.74.0` `BatchContainsInvalid`; local
   isolation failures remain local and member/peer attribution requires
   individual object-invalidity evidence;
-- `v0.52.33` batch reservations bound the number of member evidence records
+- `v0.78.0` batch reservations bound the number of member evidence records
   independently of cell/column count and prohibit cache or peer attribution
   for members whose child slots were not filled;
-- `v0.52.34` `BatchIsolateUpTo<N>` bounds attribution work and leaves cells or
+- `v0.79.0` `BatchIsolateUpTo<N>` bounds attribution work and leaves cells or
   columns beyond `N` unattributed without changing the batch result;
 - bounded reusable workspaces;
 - explicit acceleration/backend boundaries;
@@ -8502,7 +8560,7 @@ Verification:
   cardinality tests;
 - cross-`N` validity invariance and beyond-limit non-attribution tests;
 - high-contention cell/column verification and isolation benchmarks against the
-  `v0.52.35` evidence-disabled baseline, including allocation, contention,
+  `v0.80.0` evidence-disabled baseline, including allocation, contention,
   arena, stack, and retained-memory thresholds;
 - default-graph and backend-admission checks.
 
@@ -8510,10 +8568,10 @@ Exit criteria:
 
 - Data columns can be created, verified, and reconstructed first party before
   any downstream milestone treats PeerDAS evidence as actionable.
-- `v0.193.0 implementation stop reached. Run pentest for this exact
+- `v0.223.0 implementation stop reached. Run pentest for this exact
   commit.`
 
-### v0.194.0 - Committees Shuffling Domains And Signing Roots
+### v0.224.0 - Committees Shuffling Domains And Signing Roots
 
 Status: planned.
 
@@ -8530,12 +8588,12 @@ Verification:
 Exit criteria:
 
 - Every duty and signature domain is derived from pinned consensus rules.
-- `v0.194.0 implementation stop reached. Run pentest for this exact
+- `v0.224.0 implementation stop reached. Run pentest for this exact
   commit.`
 
 ## Phase 20: Complete Beacon State Transition
 
-### v0.195.0 - Beacon Transition Shell And Per-Slot Processing
+### v0.225.0 - Beacon Transition Shell And Per-Slot Processing
 
 Status: planned.
 
@@ -8552,10 +8610,10 @@ Verification:
 Exit criteria:
 
 - Per-slot processing is complete and failed transitions cannot partially mutate caller-visible state.
-- `v0.195.0 implementation stop reached. Run pentest for this exact
+- `v0.225.0 implementation stop reached. Run pentest for this exact
   commit.`
 
-### v0.196.0 - Epoch Registry And Balance Processing
+### v0.226.0 - Epoch Registry And Balance Processing
 
 Status: planned.
 
@@ -8572,10 +8630,10 @@ Verification:
 Exit criteria:
 
 - Epoch-wide validator and balance bookkeeping matches the specification.
-- `v0.196.0 implementation stop reached. Run pentest for this exact
+- `v0.226.0 implementation stop reached. Run pentest for this exact
   commit.`
 
-### v0.197.0 - Activation Exit Churn Withdrawal And Consolidation
+### v0.227.0 - Activation Exit Churn Withdrawal And Consolidation
 
 Status: planned.
 
@@ -8592,10 +8650,10 @@ Verification:
 Exit criteria:
 
 - The full validator lifecycle is state-transition complete.
-- `v0.197.0 implementation stop reached. Run pentest for this exact
+- `v0.227.0 implementation stop reached. Run pentest for this exact
   commit.`
 
-### v0.198.0 - Rewards Penalties Participation And Inactivity
+### v0.228.0 - Rewards Penalties Participation And Inactivity
 
 Status: planned.
 
@@ -8612,10 +8670,10 @@ Verification:
 Exit criteria:
 
 - Balance outcomes match official vectors across normal and non-finalizing periods.
-- `v0.198.0 implementation stop reached. Run pentest for this exact
+- `v0.228.0 implementation stop reached. Run pentest for this exact
   commit.`
 
-### v0.199.0 - Deposits Slashings And Credential Operations
+### v0.229.0 - Deposits Slashings And Credential Operations
 
 Status: planned.
 
@@ -8632,10 +8690,10 @@ Verification:
 Exit criteria:
 
 - Every consensus operation that changes validator state is implemented and checked.
-- `v0.199.0 implementation stop reached. Run pentest for this exact
+- `v0.229.0 implementation stop reached. Run pentest for this exact
   commit.`
 
-### v0.200.0 - Attestations Sync Committees And Block Operations
+### v0.230.0 - Attestations Sync Committees And Block Operations
 
 Status: planned.
 
@@ -8652,10 +8710,10 @@ Verification:
 Exit criteria:
 
 - Beacon blocks can process all stable-fork consensus operations.
-- `v0.200.0 implementation stop reached. Run pentest for this exact
+- `v0.230.0 implementation stop reached. Run pentest for this exact
   commit.`
 
-### v0.201.0 - Execution Payload And Request Processing
+### v0.231.0 - Execution Payload And Request Processing
 
 Status: planned.
 
@@ -8672,10 +8730,10 @@ Verification:
 Exit criteria:
 
 - Consensus transition is correctly bound to execution validity and current request types.
-- `v0.201.0 implementation stop reached. Run pentest for this exact
+- `v0.231.0 implementation stop reached. Run pentest for this exact
   commit.`
 
-### v0.202.0 - Data Availability State Transition
+### v0.232.0 - Data Availability State Transition
 
 Status: planned.
 
@@ -8692,10 +8750,10 @@ Verification:
 Exit criteria:
 
 - Consensus transition does not accept data-dependent blocks without the required availability evidence.
-- `v0.202.0 implementation stop reached. Run pentest for this exact
+- `v0.232.0 implementation stop reached. Run pentest for this exact
   commit.`
 
-### v0.203.0 - Explicit Consensus Fork Upgrades
+### v0.233.0 - Explicit Consensus Fork Upgrades
 
 Status: planned.
 
@@ -8712,10 +8770,10 @@ Verification:
 Exit criteria:
 
 - Every supported fork transition is explicit, tested, and free of implicit optional-field reinterpretation.
-- `v0.203.0 implementation stop reached. Run pentest for this exact
+- `v0.233.0 implementation stop reached. Run pentest for this exact
   commit.`
 
-### v0.204.0 - Complete State-Transition Vector Gate
+### v0.234.0 - Complete State-Transition Vector Gate
 
 Status: planned.
 
@@ -8732,12 +8790,12 @@ Verification:
 Exit criteria:
 
 - The complete beacon state transition is fixture-backed for every claimed stable fork.
-- `v0.204.0 implementation stop reached. Run pentest for this exact
+- `v0.234.0 implementation stop reached. Run pentest for this exact
   commit.`
 
 ## Phase 21: Production Consensus Fork Choice And Beacon Chain
 
-### v0.205.0 - Transactional Fork-Choice Store
+### v0.235.0 - Transactional Fork-Choice Store
 
 Status: planned.
 
@@ -8754,10 +8812,10 @@ Verification:
 Exit criteria:
 
 - Fork-choice updates are transactional as required by the specification.
-- `v0.205.0 implementation stop reached. Run pentest for this exact
+- `v0.235.0 implementation stop reached. Run pentest for this exact
   commit.`
 
-### v0.206.0 - LMD-GHOST And Latest Messages
+### v0.236.0 - LMD-GHOST And Latest Messages
 
 Status: planned.
 
@@ -8774,10 +8832,10 @@ Verification:
 Exit criteria:
 
 - Head computation matches LMD-GHOST under competing branches and votes.
-- `v0.206.0 implementation stop reached. Run pentest for this exact
+- `v0.236.0 implementation stop reached. Run pentest for this exact
   commit.`
 
-### v0.207.0 - Casper FFG Proposer Boost And Reorg Policy
+### v0.237.0 - Casper FFG Proposer Boost And Reorg Policy
 
 Status: planned.
 
@@ -8794,10 +8852,10 @@ Verification:
 Exit criteria:
 
 - Finality and proposer policies match pinned stable-fork rules.
-- `v0.207.0 implementation stop reached. Run pentest for this exact
+- `v0.237.0 implementation stop reached. Run pentest for this exact
   commit.`
 
-### v0.208.0 - Optimistic Execution And Invalidation
+### v0.238.0 - Optimistic Execution And Invalidation
 
 Status: planned.
 
@@ -8814,10 +8872,10 @@ Verification:
 Exit criteria:
 
 - Execution-invalid ancestry cannot remain canonical or authorize validator duties.
-- `v0.208.0 implementation stop reached. Run pentest for this exact
+- `v0.238.0 implementation stop reached. Run pentest for this exact
   commit.`
 
-### v0.209.0 - Fork-Choice Persistence And Recovery
+### v0.239.0 - Fork-Choice Persistence And Recovery
 
 Status: planned.
 
@@ -8834,10 +8892,10 @@ Verification:
 Exit criteria:
 
 - Restarted fork choice returns the same safe/finalized/head state or fails closed.
-- `v0.209.0 implementation stop reached. Run pentest for this exact
+- `v0.239.0 implementation stop reached. Run pentest for this exact
   commit.`
 
-### v0.210.0 - Beacon Operation Pools
+### v0.240.0 - Beacon Operation Pools
 
 Status: planned.
 
@@ -8854,10 +8912,10 @@ Verification:
 Exit criteria:
 
 - Block production has complete, bounded, reorg-aware operation sources.
-- `v0.210.0 implementation stop reached. Run pentest for this exact
+- `v0.240.0 implementation stop reached. Run pentest for this exact
   commit.`
 
-### v0.211.0 - Hot And Finalized Beacon Storage
+### v0.241.0 - Hot And Finalized Beacon Storage
 
 Status: planned.
 
@@ -8874,10 +8932,10 @@ Verification:
 Exit criteria:
 
 - Beacon blocks and states survive restart and finalization atomically.
-- `v0.211.0 implementation stop reached. Run pentest for this exact
+- `v0.241.0 implementation stop reached. Run pentest for this exact
   commit.`
 
-### v0.212.0 - State Snapshots And Reconstruction
+### v0.242.0 - State Snapshots And Reconstruction
 
 Status: planned.
 
@@ -8894,10 +8952,10 @@ Verification:
 Exit criteria:
 
 - Required historical states can be reconstructed within documented resource bounds.
-- `v0.212.0 implementation stop reached. Run pentest for this exact
+- `v0.242.0 implementation stop reached. Run pentest for this exact
   commit.`
 
-### v0.213.0 - Sidecar Custody Pruning And Retention
+### v0.243.0 - Sidecar Custody Pruning And Retention
 
 Status: planned.
 
@@ -8914,10 +8972,10 @@ Verification:
 Exit criteria:
 
 - Data availability obligations persist correctly across restarts and pruning.
-- `v0.213.0 implementation stop reached. Run pentest for this exact
+- `v0.243.0 implementation stop reached. Run pentest for this exact
   commit.`
 
-### v0.214.0 - Beacon Database Migration And Repair
+### v0.244.0 - Beacon Database Migration And Repair
 
 Status: planned.
 
@@ -8934,7 +8992,7 @@ Verification:
 Exit criteria:
 
 - Beacon storage upgrades and repairs are reproducible and fail closed.
-- `v0.214.0 implementation stop reached. Run pentest for this exact
+- `v0.244.0 implementation stop reached. Run pentest for this exact
   commit.`
 
 ## Phase 22: Consensus Networking And Synchronization
@@ -8943,7 +9001,7 @@ Consensus networking is separate from execution-layer DevP2P/RLPx. It uses the
 transport and protocols required by the pinned consensus P2P specification and
 must remain behind explicit optional features.
 
-### v0.215.0 - Consensus Networking Threat And Dependency Gate
+### v0.245.0 - Consensus Networking Threat And Dependency Gate
 
 Status: planned.
 
@@ -8966,10 +9024,10 @@ Verification:
 Exit criteria:
 
 - No live consensus networking lands before its dependencies and abuse controls are approved.
-- `v0.215.0 implementation stop reached. Run pentest for this exact
+- `v0.245.0 implementation stop reached. Run pentest for this exact
   commit.`
 
-### v0.216.0 - Discv5 ENR And Secure Transport
+### v0.246.0 - Discv5 ENR And Secure Transport
 
 Status: planned.
 
@@ -8991,10 +9049,10 @@ Verification:
 Exit criteria:
 
 - Consensus peers can be discovered and authenticated with current fork/custody metadata.
-- `v0.216.0 implementation stop reached. Run pentest for this exact
+- `v0.246.0 implementation stop reached. Run pentest for this exact
   commit.`
 
-### v0.217.0 - GossipSub Topics And Subnet Management
+### v0.247.0 - GossipSub Topics And Subnet Management
 
 Status: planned.
 
@@ -9009,7 +9067,7 @@ Deliverables:
   separate from consensus-object validation contexts and local mesh policy;
 - GossipSub payload and SSZ-Snappy decoding consume compressed/decompressed,
   ratio, structural, signature, allocation, and output budgets from
-  `v0.52.27` before promotion.
+  `v0.72.0` before promotion.
 
 Verification:
 
@@ -9019,10 +9077,10 @@ Verification:
 Exit criteria:
 
 - The node joins and leaves every required gossip domain at the correct time.
-- `v0.217.0 implementation stop reached. Run pentest for this exact
+- `v0.247.0 implementation stop reached. Run pentest for this exact
   commit.`
 
-### v0.218.0 - Staged Gossip Validation And Seen Caches
+### v0.248.0 - Staged Gossip Validation And Seen Caches
 
 Status: planned.
 
@@ -9034,7 +9092,7 @@ Deliverables:
   duplicate suppression, seen caches, invalid-message penalties, and no partial
   promotion;
 - object-invalid GossipSub `REJECT` and object-negative caches require
-  `v0.52.29` `ObjectInvalidityEvidence`; peer penalties additionally admit
+  `v0.74.0` `ObjectInvalidityEvidence`; peer penalties additionally admit
   peer-protocol or peer-policy evidence bound to the peer and observation
   window, never as proof that the gossip object is invalid;
 - one duplicate remains `Duplicate`/ignore, while repeated announced-quota
@@ -9043,19 +9101,19 @@ Deliverables:
   faults remain ignore/defer/retry outcomes;
 - seen/deferred caches follow the global chain/fork/root/object/validation-level
   identity invariant and never mix untrusted with verified entries;
-- invalid-message and peer evidence consumes bounded `v0.52.29` entry,
+- invalid-message and peer evidence consumes bounded `v0.74.0` entry,
   observation, witness, serialization, and retention budgets before cache or
   scoring mutation;
 - every authoritative object-validation stage reserves minimal invalidity
   evidence before execution; seen-cache, negative-cache, scoring, logging, or
   persistence failure cannot erase an immediate object-invalid result;
 - nested gossip decode/signature/state/fork-choice checks share one
-  `v0.52.33` parent-authorized reservation tree; a child cannot mint capacity,
+  `v0.78.0` parent-authorized reservation tree; a child cannot mint capacity,
   and only filled child evidence can enter caches or peer attribution;
-- authoritative gossip validation uses `v0.52.34` `FirstInvalid`; bounded
+- authoritative gossip validation uses `v0.79.0` `FirstInvalid`; bounded
   operational diagnostics and member isolation cannot change accept/reject/
   ignore validity, and scoring/cache/logging sinks only borrow evidence;
-- worker arenas follow `v0.52.36`: capacity derives from authorized concurrent
+- worker arenas follow `v0.81.0`: capacity derives from authorized concurrent
   validation and mode, queue pressure triggers bounded backpressure/local
   outcomes, and generation-safe handles prevent cancellation/transfer reuse.
 
@@ -9071,7 +9129,7 @@ Verification:
 - cross-mode GossipSub result invariance, beyond-limit non-attribution, sink-
   failure, and final-slot-ownership tests;
 - valid gossip benchmarks across worker counts, topics, and scheduling seeds
-  against the `v0.52.35` evidence-disabled baseline, proving no optional sink,
+  against the `v0.80.0` evidence-disabled baseline, proving no optional sink,
   allocation, parent/context clone, global mutex, or globally contended per-
   child atomic operation on the common path;
 - arena-capability pressure, attacker message-count independence, stale-handle/
@@ -9080,10 +9138,10 @@ Verification:
 Exit criteria:
 
 - Gossip reaches pools or fork choice only after all required validation stages pass.
-- `v0.218.0 implementation stop reached. Run pentest for this exact
+- `v0.248.0 implementation stop reached. Run pentest for this exact
   commit.`
 
-### v0.219.0 - Consensus Req Resp Protocols
+### v0.249.0 - Consensus Req Resp Protocols
 
 Status: planned.
 
@@ -9097,7 +9155,7 @@ Deliverables:
 - negotiated `WireLimits<ReqResp, Version>` profiles separated from consensus
   object validity and local serving willingness;
 - each chunk consumes compressed/decompressed bytes, ratio, framing,
-  structural, allocation, hash, and output work from `v0.52.27` before
+  structural, allocation, hash, and output work from `v0.72.0` before
   decompression or ownership conversion.
 
 Verification:
@@ -9109,10 +9167,10 @@ Verification:
 Exit criteria:
 
 - Required sync and serving protocols are complete and bounded.
-- `v0.219.0 implementation stop reached. Run pentest for this exact
+- `v0.249.0 implementation stop reached. Run pentest for this exact
   commit.`
 
-### v0.220.0 - Consensus Peer Scoring And Backpressure
+### v0.250.0 - Consensus Peer Scoring And Backpressure
 
 Status: planned.
 
@@ -9122,13 +9180,13 @@ Deliverables:
 
 - Peer reputation, topic scores, custody-response scoring, bans, diversity,
   request budgets, rate limits, fair queues, clock disparity through
-  `v0.52.28` evidence, and eclipse defenses;
+  `v0.73.0` evidence, and eclipse defenses;
 - monotonic peer windows and in-process sanctions, boot/session-bound persisted
   observations, and rollback-safe UTC expiry that cannot extend bans or revive
   expired evidence;
 - all score changes and sanctions consume object evidence composed with an
   authenticated delivery observation, peer-protocol evidence, or peer-policy
-  evidence from `v0.52.29`; duplicate or policy outcomes alone cannot
+  evidence from `v0.74.0`; duplicate or policy outcomes alone cannot
   manufacture peer evidence.
 
 Verification:
@@ -9142,10 +9200,10 @@ Verification:
 Exit criteria:
 
 - Malicious or slow peers cannot create unbounded work or dominate peer selection.
-- `v0.220.0 implementation stop reached. Run pentest for this exact
+- `v0.250.0 implementation stop reached. Run pentest for this exact
   commit.`
 
-### v0.221.0 - Checkpoint And Weak-Subjectivity Sync
+### v0.251.0 - Checkpoint And Weak-Subjectivity Sync
 
 Status: planned.
 
@@ -9162,10 +9220,10 @@ Verification:
 Exit criteria:
 
 - Checkpoint sync either reaches the required anchor or terminates as a critical safety failure.
-- `v0.221.0 implementation stop reached. Run pentest for this exact
+- `v0.251.0 implementation stop reached. Run pentest for this exact
   commit.`
 
-### v0.222.0 - Head And Range Sync
+### v0.252.0 - Head And Range Sync
 
 Status: planned.
 
@@ -9182,10 +9240,10 @@ Verification:
 Exit criteria:
 
 - A node reaches current head under bounded resources and adversarial peers.
-- `v0.222.0 implementation stop reached. Run pentest for this exact
+- `v0.252.0 implementation stop reached. Run pentest for this exact
   commit.`
 
-### v0.223.0 - Finalized Backfill And State Reconstruction
+### v0.253.0 - Finalized Backfill And State Reconstruction
 
 Status: planned.
 
@@ -9202,10 +9260,10 @@ Verification:
 Exit criteria:
 
 - Historical data and states are reconstructed without weakening checkpoint trust.
-- `v0.223.0 implementation stop reached. Run pentest for this exact
+- `v0.253.0 implementation stop reached. Run pentest for this exact
   commit.`
 
-### v0.224.0 - Optimistic Sync And Execution Recovery
+### v0.254.0 - Optimistic Sync And Execution Recovery
 
 Status: planned.
 
@@ -9222,10 +9280,10 @@ Verification:
 Exit criteria:
 
 - Optimistic progress cannot authorize duties and recovers correctly when execution rejects payloads.
-- `v0.224.0 implementation stop reached. Run pentest for this exact
+- `v0.254.0 implementation stop reached. Run pentest for this exact
   commit.`
 
-### v0.225.0 - PeerDAS Sync Custody And Backfill
+### v0.255.0 - PeerDAS Sync Custody And Backfill
 
 Status: planned.
 
@@ -9242,22 +9300,22 @@ Verification:
 Exit criteria:
 
 - Node and attached-validator custody obligations are met before availability-dependent acceptance or duties.
-- `v0.225.0 implementation stop reached. Run pentest for this exact
+- `v0.255.0 implementation stop reached. Run pentest for this exact
   commit.`
 
 ## Phase 23: Engine Coordination Data Availability And Beacon Service
 
-### v0.226.0 - Beacon Engine Coordinator
+### v0.256.0 - Beacon Engine Coordinator
 
 Status: planned.
 
-Goal: build on the `v0.144.0` authenticated protocol/transport boundary and
+Goal: build on the `v0.174.0` authenticated protocol/transport boundary and
 own beacon-node fork-choice, payload-building, and execution-status
 coordination policy.
 
 Deliverables:
 
-- Reuse the authenticated Engine transport from `v0.144.0`;
+- Reuse the authenticated Engine transport from `v0.174.0`;
 - capability negotiation;
 - all supported `newPayload`, `forkchoiceUpdated`, and `getPayload` versions;
 - payload-attribute construction;
@@ -9274,7 +9332,7 @@ Verification:
 - Execution-apis fixtures;
 - at least two independent execution-client integrations;
 - authentication, timeout, invalid-payload, and sequencing tests;
-- checks proving transport concerns remain in `v0.144.0`;
+- checks proving transport concerns remain in `v0.174.0`;
 - adapter-equivalence, duplicate/reorder, restart, split-brain, and durable
   idempotency tests.
 
@@ -9283,10 +9341,10 @@ Exit criteria:
 - The beacon node can coordinate every claimed fork with an execution client
   through the previously admitted authenticated boundary without duplicating
   transport or JWT ownership.
-- `v0.226.0 implementation stop reached. Run pentest for this exact
+- `v0.256.0 implementation stop reached. Run pentest for this exact
   commit.`
 
-### v0.227.0 - Multi-Execution-Client Failover
+### v0.257.0 - Multi-Execution-Client Failover
 
 Status: planned.
 
@@ -9303,10 +9361,10 @@ Verification:
 Exit criteria:
 
 - Execution failover is explicit and cannot silently mix incompatible payload state.
-- `v0.227.0 implementation stop reached. Run pentest for this exact
+- `v0.257.0 implementation stop reached. Run pentest for this exact
   commit.`
 
-### v0.228.0 - Deposit Contract Tracking And Deposit Tree
+### v0.258.0 - Deposit Contract Tracking And Deposit Tree
 
 Status: planned.
 
@@ -9334,10 +9392,10 @@ Exit criteria:
 
 - The beacon service can derive a canonical, restart-safe deposit tree from
   execution history without trusting unordered or reorged logs.
-- `v0.228.0 implementation stop reached. Run pentest for this exact
+- `v0.258.0 implementation stop reached. Run pentest for this exact
   commit.`
 
-### v0.229.0 - Genesis Construction Eth1 Voting And Genesis Sync
+### v0.259.0 - Genesis Construction Eth1 Voting And Genesis Sync
 
 Status: planned.
 
@@ -9366,10 +9424,10 @@ Exit criteria:
 
 - A beacon node can follow historical deposit voting or build and synchronize
   a new network genesis without external consensus core logic.
-- `v0.229.0 implementation stop reached. Run pentest for this exact
+- `v0.259.0 implementation stop reached. Run pentest for this exact
   commit.`
 
-### v0.230.0 - Availability Tracking And Block Admission
+### v0.260.0 - Availability Tracking And Block Admission
 
 Status: planned.
 
@@ -9386,10 +9444,10 @@ Verification:
 Exit criteria:
 
 - A block becomes fully available only from sufficient verified evidence under the active fork rules.
-- `v0.230.0 implementation stop reached. Run pentest for this exact
+- `v0.260.0 implementation stop reached. Run pentest for this exact
   commit.`
 
-### v0.231.0 - Beacon Node Orchestration
+### v0.261.0 - Beacon Node Orchestration
 
 Status: planned.
 
@@ -9406,10 +9464,10 @@ Verification:
 Exit criteria:
 
 - The focused crates operate as one coherent beacon node with explicit terminal states.
-- `v0.231.0 implementation stop reached. Run pentest for this exact
+- `v0.261.0 implementation stop reached. Run pentest for this exact
   commit.`
 
-### v0.232.0 - Beacon Node REST And Event APIs
+### v0.262.0 - Beacon Node REST And Event APIs
 
 Status: planned.
 
@@ -9421,7 +9479,7 @@ Deliverables:
   config/spec, blocks/states, pools, light-client, debug, authentication, TLS,
   and rate limits;
 - JSON parsing rejects duplicate keys and both JSON/SSZ routes consume the
-  `v0.52.27` structural, allocation, hash, and output budgets before work;
+  `v0.72.0` structural, allocation, hash, and output budgets before work;
 - server responses, event queues, and serialization are bounded by request and
   connection child resources.
 
@@ -9433,10 +9491,10 @@ Verification:
 Exit criteria:
 
 - External tooling can operate the beacon node through complete versioned server APIs.
-- `v0.232.0 implementation stop reached. Run pentest for this exact
+- `v0.262.0 implementation stop reached. Run pentest for this exact
   commit.`
 
-### v0.233.0 - Beacon Block Production Service
+### v0.263.0 - Beacon Block Production Service
 
 Status: planned.
 
@@ -9456,7 +9514,7 @@ Deliverables:
 - fork-aware fee recipient, gas limit, graffiti, and deadline policy;
 - unsigned local-block production API;
 - blinded-block request and response types plus a fail-closed provider hook;
-- no live Builder API or relay communication before `v0.249.0`.
+- no live Builder API or relay communication before `v0.279.0`.
 
 Verification:
 
@@ -9465,17 +9523,17 @@ Verification:
 - reorg, timeout, invalid-payload, pool-conflict, and deadline tests;
 - checks proving no validator secret or signature enters this service;
 - tests proving the blinded hook cannot contact a relay or fabricate a bid
-  before a backend is admitted at `v0.249.0`.
+  before a backend is admitted at `v0.279.0`.
 
 Exit criteria:
 
 - The beacon node can produce a complete unsigned local block for every
   claimed fork and exposes only a fail-closed blinded-production hook until
-  `v0.249.0`, while signing authorization remains outside the service.
-- `v0.233.0 implementation stop reached. Run pentest for this exact
+  `v0.279.0`, while signing authorization remains outside the service.
+- `v0.263.0 implementation stop reached. Run pentest for this exact
   commit.`
 
-### v0.234.0 - Validator API And Production Boundary
+### v0.264.0 - Validator API And Production Boundary
 
 Status: planned.
 
@@ -9490,7 +9548,7 @@ Deliverables:
   recipient, liveness, subscriptions, and optimistic/sync safety status;
 - API evidence binding responses to head, fork, genesis, slot, and execution
   status;
-- explicit separation from the `v0.233.0` production service.
+- explicit separation from the `v0.263.0` production service.
 
 Verification:
 
@@ -9505,12 +9563,12 @@ Exit criteria:
 - A validator client can obtain unsigned duty material and publish signed
   results through a complete safety-aware API without becoming the block
   production service.
-- `v0.234.0 implementation stop reached. Run pentest for this exact
+- `v0.264.0 implementation stop reached. Run pentest for this exact
   commit.`
 
 ## Phase 24: Slashing Protection And Validator Key Foundation
 
-### v0.235.0 - Slashing Protection Model And Invariants
+### v0.265.0 - Slashing Protection Model And Invariants
 
 Status: planned.
 
@@ -9527,10 +9585,10 @@ Verification:
 Exit criteria:
 
 - Slashability decisions are a small first-party security kernel with explicit invariants.
-- `v0.235.0 implementation stop reached. Run pentest for this exact
+- `v0.265.0 implementation stop reached. Run pentest for this exact
   commit.`
 
-### v0.236.0 - Transactional Slashing Database
+### v0.266.0 - Transactional Slashing Database
 
 Status: planned.
 
@@ -9547,10 +9605,10 @@ Verification:
 Exit criteria:
 
 - A signature cannot escape before its slashing record is durably committed.
-- `v0.236.0 implementation stop reached. Run pentest for this exact
+- `v0.266.0 implementation stop reached. Run pentest for this exact
   commit.`
 
-### v0.237.0 - EIP-3076 Interchange And Safety Recovery
+### v0.267.0 - EIP-3076 Interchange And Safety Recovery
 
 Status: planned.
 
@@ -9567,10 +9625,10 @@ Verification:
 Exit criteria:
 
 - Validator histories move between clients without permitting previously slashable signatures.
-- `v0.237.0 implementation stop reached. Run pentest for this exact
+- `v0.267.0 implementation stop reached. Run pentest for this exact
   commit.`
 
-### v0.238.0 - Validator Key Foundation And Deposit Data
+### v0.268.0 - Validator Key Foundation And Deposit Data
 
 Status: planned.
 
@@ -9584,7 +9642,7 @@ Deliverables:
 - cryptographically secure entropy requirements and deterministic test seams;
 - validator signing-key and withdrawal-key role types;
 - scheme-tagged opaque key IDs, BLS public keys/signatures, EIP-2335 keystores,
-  and custody handles conforming to `v0.52.31`;
+  and custody handles conforming to `v0.76.0`;
 - withdrawal credentials for BLS and execution-address modes;
 - offline withdrawal-key workflow;
 - deposit message, deposit-data root, signature, and JSON artifact generation;
@@ -9604,20 +9662,20 @@ Exit criteria:
 - Validator signing keys, withdrawal authority, derivation paths, and deposit
   artifacts are first-party, verifiable, and cannot be silently substituted
   across roles.
-- `v0.238.0 implementation stop reached. Run pentest for this exact
+- `v0.268.0 implementation stop reached. Run pentest for this exact
   commit.`
 
-### v0.239.0 - Validator Signer And Local Keystores
+### v0.269.0 - Validator Signer And Local Keystores
 
 Status: planned.
 
 Goal: isolate local signing behind final domain and slashing authorization,
-using the key roles and derivation rules established at `v0.238.0`.
+using the key roles and derivation rules established at `v0.268.0`.
 
 Deliverables:
 
 - Consensus-domain signing packages;
-- implement only the BLS12-381 `ConsensusSigner` capability from `v0.52.31`;
+- implement only the BLS12-381 `ConsensusSigner` capability from `v0.76.0`;
 - EIP-2335 keystore import/export and password policy;
 - locked and sanitized key memory;
 - final fork, genesis, domain, signing-root, and duty-context validation;
@@ -9640,12 +9698,12 @@ Exit criteria:
 
 - Local validator signing is isolated, domain-safe, coupled to durable
   slashing protection, and incapable of consuming withdrawal authority.
-- `v0.239.0 implementation stop reached. Run pentest for this exact
+- `v0.269.0 implementation stop reached. Run pentest for this exact
   commit.`
 
 ## Phase 25: Complete Validator Client Duties
 
-### v0.240.0 - Validator Duty Scheduler And Safety State
+### v0.270.0 - Validator Duty Scheduler And Safety State
 
 Status: planned.
 
@@ -9653,7 +9711,7 @@ Goal: deliver the Validator Duty Scheduler And Safety State release with this re
 
 Deliverables:
 
-- Drift-aware slot clock built on `v0.52.28`, duty lookahead/cache, reorg
+- Drift-aware slot clock built on `v0.73.0`, duty lookahead/cache, reorg
   refresh, multi-beacon-node quorum/failover, doppelganger detection, and
   optimistic/unsafe refusal; external time evidence cannot override slashing or
   duty-safety decisions.
@@ -9665,10 +9723,10 @@ Verification:
 Exit criteria:
 
 - No duty reaches signing unless timing, chain, quorum, and safety preconditions hold.
-- `v0.240.0 implementation stop reached. Run pentest for this exact
+- `v0.270.0 implementation stop reached. Run pentest for this exact
   commit.`
 
-### v0.241.0 - Proposer Duties Signing And Publication
+### v0.271.0 - Proposer Duties Signing And Publication
 
 Status: planned.
 
@@ -9679,7 +9737,7 @@ Deliverables:
 
 - RANDAO reveal signing;
 - proposer preparation and configuration submission;
-- unsigned local/blinded block requests from `v0.233.0`;
+- unsigned local/blinded block requests from `v0.263.0`;
 - independent slot, parent, fork, fee-recipient, gas-limit, execution-status,
   and data-availability context checks;
 - transactional slashing authorization;
@@ -9703,10 +9761,10 @@ Exit criteria:
 - The validator client can safely sign and publish complete proposer duties
   for claimed forks while parent selection, operation packing, Engine calls,
   and DA construction remain beacon-node responsibilities.
-- `v0.241.0 implementation stop reached. Run pentest for this exact
+- `v0.271.0 implementation stop reached. Run pentest for this exact
   commit.`
 
-### v0.242.0 - Attester And Aggregator Duties
+### v0.272.0 - Attester And Aggregator Duties
 
 Status: planned.
 
@@ -9726,11 +9784,11 @@ Verification:
 Exit criteria:
 
 - Attestation and aggregation duties are complete and slash-safe through the
-  already admitted `v0.235.0` and `v0.236.0` kernel and database.
-- `v0.242.0 implementation stop reached. Run pentest for this exact
+  already admitted `v0.265.0` and `v0.266.0` kernel and database.
+- `v0.272.0 implementation stop reached. Run pentest for this exact
   commit.`
 
-### v0.243.0 - Sync Committee Duties
+### v0.273.0 - Sync Committee Duties
 
 Status: planned.
 
@@ -9749,10 +9807,10 @@ Verification:
 Exit criteria:
 
 - Sync-committee participation is complete and refuses unsafe chain views.
-- `v0.243.0 implementation stop reached. Run pentest for this exact
+- `v0.273.0 implementation stop reached. Run pentest for this exact
   commit.`
 
-### v0.244.0 - Validator Lifecycle Requests And Operations
+### v0.274.0 - Validator Lifecycle Requests And Operations
 
 Status: planned.
 
@@ -9761,7 +9819,7 @@ Goal: deliver the Validator Lifecycle Requests And Operations release with this 
 Deliverables:
 
 - Voluntary exits, BLS-to-execution changes, consolidation/lifecycle requests,
-  deposit-data import from `v0.238.0`, fee/graffiti config, key enable/disable,
+  deposit-data import from `v0.268.0`, fee/graffiti config, key enable/disable,
   authorization checks, and audit records.
 
 Verification:
@@ -9771,12 +9829,12 @@ Verification:
 Exit criteria:
 
 - Operators can manage validator lifecycle without bypassing signer or slashing policy.
-- `v0.244.0 implementation stop reached. Run pentest for this exact
+- `v0.274.0 implementation stop reached. Run pentest for this exact
   commit.`
 
 ## Phase 26: External And Distributed Validator Key Custody
 
-### v0.245.0 - Keymanager Operator API
+### v0.275.0 - Keymanager Operator API
 
 Status: planned.
 
@@ -9803,10 +9861,10 @@ Exit criteria:
 
 - Operators can manage validator-client key registrations through the official
   API without obtaining signing authority or bypassing slashing policy.
-- `v0.245.0 implementation stop reached. Run pentest for this exact
+- `v0.275.0 implementation stop reached. Run pentest for this exact
   commit.`
 
-### v0.246.0 - Remote Signer Protocol And Slashing Authority
+### v0.276.0 - Remote Signer Protocol And Slashing Authority
 
 Status: planned.
 
@@ -9836,10 +9894,10 @@ Exit criteria:
 
 - Remote signing cannot create ambiguous slashing authority, duplicate
   authorization, or a path around final signer-domain validation.
-- `v0.246.0 implementation stop reached. Run pentest for this exact
+- `v0.276.0 implementation stop reached. Run pentest for this exact
   commit.`
 
-### v0.247.0 - HSM KMS And Hardware Custody Adapters
+### v0.277.0 - HSM KMS And Hardware Custody Adapters
 
 Status: planned.
 
@@ -9866,10 +9924,10 @@ Exit criteria:
 
 - A custody backend can hold validator keys without becoming slashing policy,
   domain policy, or validator-client control logic.
-- `v0.247.0 implementation stop reached. Run pentest for this exact
+- `v0.277.0 implementation stop reached. Run pentest for this exact
   commit.`
 
-### v0.248.0 - Threshold DVT And Distributed Slashing Coordination
+### v0.278.0 - Threshold DVT And Distributed Slashing Coordination
 
 Status: planned.
 
@@ -9897,12 +9955,12 @@ Exit criteria:
 
 - Distributed signing preserves the same domain, duty, and record-before-
   release guarantees as the local signer.
-- `v0.248.0 implementation stop reached. Run pentest for this exact
+- `v0.278.0 implementation stop reached. Run pentest for this exact
   commit.`
 
 ## Phase 27: Builder And MEV Integration
 
-### v0.249.0 - Builder API And Blinded Proposals
+### v0.279.0 - Builder API And Blinded Proposals
 
 Status: planned.
 
@@ -9911,7 +9969,7 @@ production service without giving the validator client direct relay access.
 
 Deliverables:
 
-- Beacon-node-owned relay client integrated behind the `v0.233.0` production
+- Beacon-node-owned relay client integrated behind the `v0.263.0` production
   hook;
 - validator registration and preference submission from validator client to
   beacon node;
@@ -9937,10 +9995,10 @@ Exit criteria:
 - A validator can use one reviewed relay through the beacon node without
   trusting the bid, reveal, or unsigned blinded block blindly and without the
   validator client directly contacting the relay.
-- `v0.249.0 implementation stop reached. Run pentest for this exact
+- `v0.279.0 implementation stop reached. Run pentest for this exact
   commit.`
 
-### v0.250.0 - Relay Multiplexing Local Fallback And PBS Evolution
+### v0.280.0 - Relay Multiplexing Local Fallback And PBS Evolution
 
 Status: planned.
 
@@ -9971,12 +10029,12 @@ Exit criteria:
 - External builders cannot prevent a safe local proposal when a viable local
   payload exists, and relay interaction remains a beacon-node production
   responsibility.
-- `v0.250.0 implementation stop reached. Run pentest for this exact
+- `v0.280.0 implementation stop reached. Run pentest for this exact
   commit.`
 
 ## Phase 28: Consensus Safety Operations And Executables
 
-### v0.251.0 - Optional Slasher Service
+### v0.281.0 - Optional Slasher Service
 
 Status: planned.
 
@@ -10004,10 +10062,10 @@ Exit criteria:
 
 - The node can optionally detect and publish valid slashing evidence without
   making network observation a prerequisite for safe local signing.
-- `v0.251.0 implementation stop reached. Run pentest for this exact
+- `v0.281.0 implementation stop reached. Run pentest for this exact
   commit.`
 
-### v0.252.0 - Consensus Connectivity And NAT Diagnostics
+### v0.282.0 - Consensus Connectivity And NAT Diagnostics
 
 Status: planned.
 
@@ -10035,10 +10093,10 @@ Exit criteria:
 
 - Operators can distinguish local configuration, NAT, subnet, custody, and
   hostile-peer failures without disabling security controls.
-- `v0.252.0 implementation stop reached. Run pentest for this exact
+- `v0.282.0 implementation stop reached. Run pentest for this exact
   commit.`
 
-### v0.253.0 - Consensus Operations Monitoring And Analytics
+### v0.283.0 - Consensus Operations Monitoring And Analytics
 
 Status: planned.
 
@@ -10058,7 +10116,7 @@ Deliverables:
 - privacy/redaction policy for validator identifiers and endpoints;
 - all evidence/log/trace rendering uses stable reason codes and bounded
   diagnostics while redacting peer addresses, credentials, transaction privacy
-  data, and secret-adjacent fields required by `v0.52.29`.
+  data, and secret-adjacent fields required by `v0.74.0`.
 
 Verification:
 
@@ -10072,10 +10130,10 @@ Exit criteria:
 
 - Beacon and validator services can be operated, monitored, and performance-
   analyzed without hidden state, secret leakage, or unbounded metric labels.
-- `v0.253.0 implementation stop reached. Run pentest for this exact
+- `v0.283.0 implementation stop reached. Run pentest for this exact
   commit.`
 
-### v0.254.0 - Beacon Node Executable And Packaging
+### v0.284.0 - Beacon Node Executable And Packaging
 
 Status: planned.
 
@@ -10105,10 +10163,10 @@ Exit criteria:
 
 - Operators can install, configure, run, stop, upgrade, roll back, and diagnose
   a production beacon-node binary through stable documented interfaces.
-- `v0.254.0 implementation stop reached. Run pentest for this exact
+- `v0.284.0 implementation stop reached. Run pentest for this exact
   commit.`
 
-### v0.255.0 - Validator Client Executable And Packaging
+### v0.285.0 - Validator Client Executable And Packaging
 
 Status: planned.
 
@@ -10139,10 +10197,10 @@ Exit criteria:
 
 - Operators can run a production validator-client binary that cannot silently
   bypass signer, chain, slashing, or duty-safety policy.
-- `v0.255.0 implementation stop reached. Run pentest for this exact
+- `v0.285.0 implementation stop reached. Run pentest for this exact
   commit.`
 
-### v0.256.0 - Database Inspection Migration And Recovery Tools
+### v0.286.0 - Database Inspection Migration And Recovery Tools
 
 Status: planned.
 
@@ -10159,10 +10217,10 @@ Verification:
 Exit criteria:
 
 - Operators can diagnose and recover storage without ad hoc database mutation.
-- `v0.256.0 implementation stop reached. Run pentest for this exact
+- `v0.286.0 implementation stop reached. Run pentest for this exact
   commit.`
 
-### v0.257.0 - Deterministic Consensus Simulator
+### v0.287.0 - Deterministic Consensus Simulator
 
 Status: planned.
 
@@ -10183,12 +10241,12 @@ Verification:
 Exit criteria:
 
 - Consensus and validator regressions can be reproduced without an external testnet.
-- `v0.257.0 implementation stop reached. Run pentest for this exact
+- `v0.287.0 implementation stop reached. Run pentest for this exact
   commit.`
 
 ## Phase 29: Full Consensus Assurance And Product Baseline
 
-### v0.258.0 - Production Acceptance Matrix And Quantitative Budgets
+### v0.288.0 - Production Acceptance Matrix And Quantitative Budgets
 
 Status: planned.
 
@@ -10232,11 +10290,11 @@ Deliverables:
 - numeric mainnet-scale CPU, RAM, stack, disk-growth, disk-I/O, bandwidth,
   API-latency, duty-latency, and startup/recovery budgets on a reproducible
   reference hardware profile;
-- numeric `v0.52.35` evidence-overhead, reservation/arena/context/code-size,
+- numeric `v0.80.0` evidence-overhead, reservation/arena/context/code-size,
   allocation, contention, and retained-memory ceilings for execution,
   consensus, gossip, batch, and validator workloads, including a policy for
   evidence-disabled internal baseline measurements;
-- `v0.52.37` measurement policy making uninstrumented absolute production
+- `v0.82.0` measurement policy making uninstrumented absolute production
   thresholds authoritative, restricting full-disable comparisons to valid
   paths, and requiring invalid semantic projections/minimal-evidence baselines,
   untimed setup/result work, and separate non-perturbing instrumentation;
@@ -10266,10 +10324,10 @@ Exit criteria:
 
 - Every remaining interoperability, longevity, performance, and release gate
   has a numeric pass/fail condition and an identified evidence artifact.
-- `v0.258.0 implementation stop reached. Run pentest for this exact
+- `v0.288.0 implementation stop reached. Run pentest for this exact
   commit.`
 
-### v0.259.0 - Hive And Multi-Consensus-Client Interoperability
+### v0.289.0 - Hive And Multi-Consensus-Client Interoperability
 
 Status: planned.
 
@@ -10277,7 +10335,7 @@ Goal: deliver the Hive And Multi-Consensus-Client Interoperability release with 
 
 Deliverables:
 
-- Run every required Ethereum Hive consensus suite named by `v0.258.0`;
+- Run every required Ethereum Hive consensus suite named by `v0.288.0`;
 - consensus P2P, API, state-transition, sync, builder, and validator scenarios;
 - compatibility with the full named independent consensus-client matrix;
 - explicit issue ownership and waiver prohibition for unexplained failures.
@@ -10291,10 +10349,10 @@ Verification:
 Exit criteria:
 
 - The beacon node interoperates with the broader consensus-client ecosystem.
-- `v0.259.0 implementation stop reached. Run pentest for this exact
+- `v0.289.0 implementation stop reached. Run pentest for this exact
   commit.`
 
-### v0.260.0 - Multi-Execution-Client Interoperability
+### v0.290.0 - Multi-Execution-Client Interoperability
 
 Status: planned.
 
@@ -10303,7 +10361,7 @@ Goal: deliver the Multi-Execution-Client Interoperability release with this requ
 Deliverables:
 
 - Full Engine workflows against the complete execution-client matrix fixed at
-  `v0.258.0`, including payload invalidation, failover, disagreement, reorg,
+  `v0.288.0`, including payload invalidation, failover, disagreement, reorg,
   blobs/data columns, and restart recovery.
 
 Verification:
@@ -10315,10 +10373,10 @@ Verification:
 Exit criteria:
 
 - Beacon correctness is not coupled to one execution-client implementation.
-- `v0.260.0 implementation stop reached. Run pentest for this exact
+- `v0.290.0 implementation stop reached. Run pentest for this exact
   commit.`
 
-### v0.261.0 - Long-Running Validator Testnet
+### v0.291.0 - Long-Running Validator Testnet
 
 Status: planned.
 
@@ -10326,7 +10384,7 @@ Goal: deliver the Long-Running Validator Testnet release with this required outc
 
 Deliverables:
 
-- At least the `v0.258.0` minimum 30-day, 4-node, 4,096-validator sustained
+- At least the `v0.288.0` minimum 30-day, 4-node, 4,096-validator sustained
   testnet with proposals, attestations, sync duties, reorgs, inactivity,
   restarts, key movement, builders, DA faults, and execution-client diversity.
 
@@ -10342,10 +10400,10 @@ Verification:
 Exit criteria:
 
 - The complete beacon-node and validator stack demonstrates stable operation under realistic faults.
-- `v0.261.0 implementation stop reached. Run pentest for this exact
+- `v0.291.0 implementation stop reached. Run pentest for this exact
   commit.`
 
-### v0.262.0 - Consensus Client Performance Gate
+### v0.292.0 - Consensus Client Performance Gate
 
 Status: planned.
 
@@ -10353,7 +10411,7 @@ Goal: deliver the Consensus Client Performance Gate release with this required o
 
 Deliverables:
 
-- Enforce the numeric `v0.258.0` budgets for SSZ roots, BLS batches,
+- Enforce the numeric `v0.288.0` budgets for SSZ roots, BLS batches,
   transition/epoch processing, fork choice, pools, storage, networking, sync,
   DA, validator duties, slashing DB, APIs, startup, and recovery;
 - enforce evidence hot-path budgets across valid consensus objects, gossip
@@ -10366,7 +10424,7 @@ Verification:
 - mainnet-scale load tests;
 - evidence-enabled/evidence-disabled comparisons with valid-path
   allocation/lock/atomic/clone/sink instrumentation;
-- `v0.52.37` uninstrumented production runs, invalid semantic-projection/
+- `v0.82.0` uninstrumented production runs, invalid semantic-projection/
   minimal-evidence comparisons, untimed setup/result work, and separate
   instrumentation conformance runs;
 - threshold validator;
@@ -10375,10 +10433,10 @@ Verification:
 Exit criteria:
 
 - Mainnet-scale consensus workloads meet documented CPU, memory, disk, network, and timing budgets.
-- `v0.262.0 implementation stop reached. Run pentest for this exact
+- `v0.292.0 implementation stop reached. Run pentest for this exact
   commit.`
 
-### v0.263.0 - Kani State Transition And Fork-Choice Proofs
+### v0.293.0 - Kani State Transition And Fork-Choice Proofs
 
 Status: planned.
 
@@ -10395,10 +10453,10 @@ Verification:
 Exit criteria:
 
 - Selected consensus-state and fork-choice safety invariants have machine-checked evidence.
-- `v0.263.0 implementation stop reached. Run pentest for this exact
+- `v0.293.0 implementation stop reached. Run pentest for this exact
   commit.`
 
-### v0.264.0 - Kani Slashing And Duty-Safety Proofs
+### v0.294.0 - Kani Slashing And Duty-Safety Proofs
 
 Status: planned.
 
@@ -10415,10 +10473,10 @@ Verification:
 Exit criteria:
 
 - Selected validator and slashing invariants have machine-checked evidence.
-- `v0.264.0 implementation stop reached. Run pentest for this exact
+- `v0.294.0 implementation stop reached. Run pentest for this exact
   commit.`
 
-### v0.265.0 - SSZ BLS PeerDAS And Acceleration Audit
+### v0.295.0 - SSZ BLS PeerDAS And Acceleration Audit
 
 Status: planned.
 
@@ -10449,10 +10507,10 @@ Exit criteria:
 - No unresolved critical or high finding remains in first-party SSZ, BLS,
   PeerDAS cryptography, erasure coding, trusted setup, or acceleration
   boundaries.
-- `v0.265.0 implementation stop reached. Run pentest for this exact
+- `v0.295.0 implementation stop reached. Run pentest for this exact
   commit.`
 
-### v0.266.0 - State Transition And Fork-Choice Audit
+### v0.296.0 - State Transition And Fork-Choice Audit
 
 Status: planned.
 
@@ -10463,7 +10521,7 @@ Deliverables:
 - Independent audit of fork upgrades, per-slot/epoch transition, deposit and
   genesis services, fork choice, optimistic execution, operation pools,
   Engine evidence consumption, and persistence, using the implementation audit
-  from `v0.265.0` as a prerequisite.
+  from `v0.295.0` as a prerequisite.
 
 Verification:
 
@@ -10472,10 +10530,10 @@ Verification:
 Exit criteria:
 
 - No unresolved critical/high transition or fork-choice finding remains.
-- `v0.266.0 implementation stop reached. Run pentest for this exact
+- `v0.296.0 implementation stop reached. Run pentest for this exact
   commit.`
 
-### v0.267.0 - Consensus Network Sync And DA Audit
+### v0.297.0 - Consensus Network Sync And DA Audit
 
 Status: planned.
 
@@ -10487,7 +10545,7 @@ Deliverables:
   validation, scoring, ReqResp, sync, weak subjectivity, PeerDAS consumers,
   custody, availability, slasher ingestion, and DoS controls;
 - integration review proving every PeerDAS consumer validates through the
-  `v0.193.0` core audited at `v0.265.0`.
+  `v0.223.0` core audited at `v0.295.0`.
 
 Verification:
 
@@ -10496,10 +10554,10 @@ Verification:
 Exit criteria:
 
 - No unresolved critical/high network, sync, or data-availability finding remains.
-- `v0.267.0 implementation stop reached. Run pentest for this exact
+- `v0.297.0 implementation stop reached. Run pentest for this exact
   commit.`
 
-### v0.268.0 - Validator Slashing Keymanager And Builder Audit
+### v0.298.0 - Validator Slashing Keymanager And Builder Audit
 
 Status: planned.
 
@@ -10519,10 +10577,10 @@ Verification:
 Exit criteria:
 
 - No unresolved critical/high signing, slashing, key-custody, or builder finding remains.
-- `v0.268.0 implementation stop reached. Run pentest for this exact
+- `v0.298.0 implementation stop reached. Run pentest for this exact
   commit.`
 
-### v0.269.0 - Beacon Storage API And Operations Audit
+### v0.299.0 - Beacon Storage API And Operations Audit
 
 Status: planned.
 
@@ -10542,10 +10600,10 @@ Verification:
 Exit criteria:
 
 - No unresolved critical/high storage, API, or operational finding remains.
-- `v0.269.0 implementation stop reached. Run pentest for this exact
+- `v0.299.0 implementation stop reached. Run pentest for this exact
   commit.`
 
-### v0.270.0 - Complete Consensus Remediation
+### v0.300.0 - Complete Consensus Remediation
 
 Status: planned.
 
@@ -10562,10 +10620,10 @@ Verification:
 Exit criteria:
 
 - The entire beacon-node and validator finding register is closed or explicitly accepted.
-- `v0.270.0 implementation stop reached. Run pentest for this exact
+- `v0.300.0 implementation stop reached. Run pentest for this exact
   commit.`
 
-### v0.271.0 - Foundation And Consensus API Stability Baseline
+### v0.301.0 - Foundation And Consensus API Stability Baseline
 
 Status: planned.
 
@@ -10577,8 +10635,8 @@ Deliverables:
 - Classify every publishable crate as a future `1.0` product, independently
   versioned support crate, optional backend/adapter, or internal crate;
 - stabilize the foundation, beacon, validator, slashing, and builder contracts
-  completed through `v0.270.0`;
-- publish the APIs that remain intentionally open for `v0.275.0..=v0.305.0`;
+  completed through `v0.300.0`;
+- publish the APIs that remain intentionally open for `v0.305.0..=v0.335.0`;
 - preserve independent support-crate versions and strict public dependency
   compatibility.
 
@@ -10592,10 +10650,10 @@ Exit criteria:
 
 - The completed foundation and consensus surfaces have a reviewable stability
   baseline, and every remaining pre-1.0 API area is named.
-- `v0.271.0 implementation stop reached. Run pentest for this exact
+- `v0.301.0 implementation stop reached. Run pentest for this exact
   commit.`
 
-### v0.272.0 - RC-Aware Release Tooling Foundation
+### v0.302.0 - RC-Aware Release Tooling Foundation
 
 Status: planned.
 
@@ -10621,10 +10679,10 @@ Exit criteria:
 
 - Release tooling can represent repeated RCs without confusing a package
   version with a candidate tag.
-- `v0.272.0 implementation stop reached. Run pentest for this exact
+- `v0.302.0 implementation stop reached. Run pentest for this exact
   commit.`
 
-### v0.273.0 - Exact Archive Publication Prototype
+### v0.303.0 - Exact Archive Publication Prototype
 
 Status: planned.
 
@@ -10650,10 +10708,10 @@ Exit criteria:
 
 - Exact approved `.crate` archives can be identified and submitted without
   invoking Cargo packaging again.
-- `v0.273.0 implementation stop reached. Run pentest for this exact
+- `v0.303.0 implementation stop reached. Run pentest for this exact
   commit.`
 
-### v0.274.0 - Consensus Product Baseline Gate
+### v0.304.0 - Consensus Product Baseline Gate
 
 Status: planned.
 
@@ -10666,7 +10724,7 @@ Deliverables:
   performance, formal, audit, remediation, platform, and packaging evidence;
 - publish the foundation/consensus support and stability baseline;
 - prove every remaining execution-client and integrated-node gap is assigned
-  to `v0.275.0..=v0.310.0`;
+  to `v0.305.0..=v0.340.0`;
 - make no production-candidate or final API-freeze claim.
 
 Verification:
@@ -10679,18 +10737,18 @@ Exit criteria:
 
 - Foundation, beacon-node, and validator-client work has a closed baseline,
   and 1.0 remains blocked on the explicit later product milestones.
-- `v0.274.0 implementation stop reached. Run pentest for this exact
+- `v0.304.0 implementation stop reached. Run pentest for this exact
   commit.`
 
 ## Phase 30: Full-Stack Core Cryptography Revalidation
 
 The first-party Keccak-256, secp256k1, ECDSA, ECDH, and required symmetric
 transport/keystore primitives are implemented and initially audited at
-`v0.52.22..=v0.52.26`. This late phase revalidates those foundations after all
+`v0.67.0..=v0.71.0`. This late phase revalidates those foundations after all
 execution, wallet, networking, consensus, validator, and storage consumers
 exist; it does not postpone their initial implementation.
 
-### v0.275.0 - Core Cryptography Consumer Inventory
+### v0.305.0 - Core Cryptography Consumer Inventory
 
 Status: planned.
 
@@ -10715,10 +10773,10 @@ Exit criteria:
 
 - The complete product has no hidden cryptographic implementation or provider
   bypass.
-- `v0.275.0 implementation stop reached. Run pentest for this exact
+- `v0.305.0 implementation stop reached. Run pentest for this exact
   commit.`
 
-### v0.276.0 - Core Crypto Side-Channel And Acceleration Revalidation
+### v0.306.0 - Core Crypto Side-Channel And Acceleration Revalidation
 
 Status: planned.
 
@@ -10743,10 +10801,10 @@ Exit criteria:
 
 - Final production builds preserve the admitted cryptographic security
   properties across every supported backend and target.
-- `v0.276.0 implementation stop reached. Run pentest for this exact
+- `v0.306.0 implementation stop reached. Run pentest for this exact
   commit.`
 
-### v0.277.0 - Cryptographic Cache Transcript And Batch Audit
+### v0.307.0 - Cryptographic Cache Transcript And Batch Audit
 
 Status: planned.
 
@@ -10772,10 +10830,10 @@ Exit criteria:
 
 - No final cryptographic batch or cache can accept evidence from an incomplete
   or different security context.
-- `v0.277.0 implementation stop reached. Run pentest for this exact
+- `v0.307.0 implementation stop reached. Run pentest for this exact
   commit.`
 
-### v0.278.0 - Core Cryptography Production Readmission
+### v0.308.0 - Core Cryptography Production Readmission
 
 Status: planned.
 
@@ -10784,7 +10842,7 @@ production paths before historical and executable product completion.
 
 Deliverables:
 
-- Resolve the `v0.275.0..=v0.277.0` inventory, side-channel, acceleration,
+- Resolve the `v0.305.0..=v0.307.0` inventory, side-channel, acceleration,
   transcript, batching, cache, dependency, and domain findings;
 - rerun all KAT, differential, fuzz, timing, fault, platform, feature, and
   consumer integration evidence;
@@ -10800,12 +10858,12 @@ Exit criteria:
 
 - The early first-party cryptographic core remains correct and secure in the
   complete production system.
-- `v0.278.0 implementation stop reached. Run pentest for this exact
+- `v0.308.0 implementation stop reached. Run pentest for this exact
   commit.`
 
 ## Phase 31: Historical Proof-Of-Work Execution
 
-### v0.279.0 - Ethash Hashimoto Cache And Dataset
+### v0.309.0 - Ethash Hashimoto Cache And Dataset
 
 Status: planned.
 
@@ -10829,10 +10887,10 @@ Exit criteria:
 
 - Historical proof-of-work headers can be cryptographically verified without
   another client.
-- `v0.279.0 implementation stop reached. Run pentest for this exact
+- `v0.309.0 implementation stop reached. Run pentest for this exact
   commit.`
 
-### v0.280.0 - Historical PoW Difficulty Ommers And Rewards
+### v0.310.0 - Historical PoW Difficulty Ommers And Rewards
 
 Status: planned.
 
@@ -10856,10 +10914,10 @@ Exit criteria:
 
 - Pre-Merge blocks are validated and applied with their historical consensus
   rules, not only EVM gas rules.
-- `v0.280.0 implementation stop reached. Run pentest for this exact
+- `v0.310.0 implementation stop reached. Run pentest for this exact
   commit.`
 
-### v0.281.0 - Genesis-To-Merge Historical Execution Gate
+### v0.311.0 - Genesis-To-Merge Historical Execution Gate
 
 Status: planned.
 
@@ -10884,12 +10942,12 @@ Exit criteria:
 
 - Historical execution claims cover the complete pre-Merge chain through the
   first post-Merge block.
-- `v0.281.0 implementation stop reached. Run pentest for this exact
+- `v0.311.0 implementation stop reached. Run pentest for this exact
   commit.`
 
 ## Phase 32: Production Execution Client Product
 
-### v0.282.0 - Production Database Backend Admission
+### v0.312.0 - Production Database Backend Admission
 
 Status: planned.
 
@@ -10898,7 +10956,7 @@ mainnet execution node.
 
 Deliverables:
 
-- Optional production database adapter implementing the `v0.130.0` contract;
+- Optional production database adapter implementing the `v0.160.0` contract;
 - atomic batches, snapshots, iterators, checksums, corruption detection,
   backup/restore, migration, and read-only modes;
 - version and capability negotiation so alternative backends remain possible;
@@ -10915,10 +10973,10 @@ Exit criteria:
 
 - Storage traits have a production backend with measured durability and
   recovery behavior.
-- `v0.282.0 implementation stop reached. Run pentest for this exact
+- `v0.312.0 implementation stop reached. Run pentest for this exact
   commit.`
 
-### v0.283.0 - Execution Stage Pipeline Unwind And State Healing
+### v0.313.0 - Execution Stage Pipeline Unwind And State Healing
 
 Status: planned.
 
@@ -10946,10 +11004,10 @@ Exit criteria:
 
 - Sync can progress, unwind, heal, restart, and enter live follow mode without
   ad hoc orchestration.
-- `v0.283.0 implementation stop reached. Run pentest for this exact
+- `v0.313.0 implementation stop reached. Run pentest for this exact
   commit.`
 
-### v0.284.0 - Local Execution Payload Builder
+### v0.314.0 - Local Execution Payload Builder
 
 Status: planned.
 
@@ -10976,10 +11034,10 @@ Exit criteria:
 
 - The first-party execution client can build every locally supported payload
   required by a consensus client.
-- `v0.284.0 implementation stop reached. Run pentest for this exact
+- `v0.314.0 implementation stop reached. Run pentest for this exact
   commit.`
 
-### v0.285.0 - Authenticated Engine API Server
+### v0.315.0 - Authenticated Engine API Server
 
 Status: planned.
 
@@ -10993,7 +11051,7 @@ Deliverables:
   allowlist, isolated listener, and redacted audit records;
 - strict sequencing, payload status, `latestValidHash`, idempotency, timeout,
   cancellation, and restart behavior;
-- integration with `v0.283.0` and `v0.284.0`.
+- integration with `v0.313.0` and `v0.314.0`.
 
 Verification:
 
@@ -11006,10 +11064,10 @@ Exit criteria:
 
 - A consensus client can drive the first-party execution client through the
   complete authenticated Engine API.
-- `v0.285.0 implementation stop reached. Run pentest for this exact
+- `v0.315.0 implementation stop reached. Run pentest for this exact
   commit.`
 
-### v0.286.0 - Public Execution JSON-RPC Server
+### v0.316.0 - Public Execution JSON-RPC Server
 
 Status: planned.
 
@@ -11035,10 +11093,10 @@ Exit criteria:
 
 - External users and tooling can use the node through a standard bounded
   execution JSON-RPC server.
-- `v0.286.0 implementation stop reached. Run pentest for this exact
+- `v0.316.0 implementation stop reached. Run pentest for this exact
   commit.`
 
-### v0.287.0 - Filters Subscriptions GraphQL And Client APIs
+### v0.317.0 - Filters Subscriptions GraphQL And Client APIs
 
 Status: planned.
 
@@ -11066,10 +11124,10 @@ Exit criteria:
 
 - Standard queries, filters, subscriptions, GraphQL, and operator APIs are
   complete without weakening default node security.
-- `v0.287.0 implementation stop reached. Run pentest for this exact
+- `v0.317.0 implementation stop reached. Run pentest for this exact
   commit.`
 
-### v0.288.0 - Execution Discovery DNS And Peer Operations
+### v0.318.0 - Execution Discovery DNS And Peer Operations
 
 Status: planned.
 
@@ -11096,10 +11154,10 @@ Exit criteria:
 
 - The execution client can discover, connect, serve, and synchronize on public
   Ethereum networks with explicit peer policy.
-- `v0.288.0 implementation stop reached. Run pentest for this exact
+- `v0.318.0 implementation stop reached. Run pentest for this exact
   commit.`
 
-### v0.289.0 - Execution Node Executable And Packaging
+### v0.319.0 - Execution Node Executable And Packaging
 
 Status: planned.
 
@@ -11125,10 +11183,10 @@ Exit criteria:
 
 - Operators and downstream builders can run or embed a complete first-party
   execution client.
-- `v0.289.0 implementation stop reached. Run pentest for this exact
+- `v0.319.0 implementation stop reached. Run pentest for this exact
   commit.`
 
-### v0.290.0 - Execution Database Chain And Snapshot Tools
+### v0.320.0 - Execution Database Chain And Snapshot Tools
 
 Status: planned.
 
@@ -11153,10 +11211,10 @@ Exit criteria:
 
 - Operators can inspect, move, recover, and verify execution data through
   supported tooling.
-- `v0.290.0 implementation stop reached. Run pentest for this exact
+- `v0.320.0 implementation stop reached. Run pentest for this exact
   commit.`
 
-### v0.291.0 - Execution Operations Security And Resource Controls
+### v0.321.0 - Execution Operations Security And Resource Controls
 
 Status: planned.
 
@@ -11182,12 +11240,12 @@ Exit criteria:
 
 - The execution node is operable under defined resource budgets without
   silent data loss or unsafe fallback.
-- `v0.291.0 implementation stop reached. Run pentest for this exact
+- `v0.321.0 implementation stop reached. Run pentest for this exact
   commit.`
 
 ## Phase 33: Complete Execution Client Assurance
 
-### v0.292.0 - Execution Hive And RPC Compatibility
+### v0.322.0 - Execution Hive And RPC Compatibility
 
 Status: planned.
 
@@ -11210,10 +11268,10 @@ Exit criteria:
 
 - The first-party execution client passes the required public compatibility
   suites.
-- `v0.292.0 implementation stop reached. Run pentest for this exact
+- `v0.322.0 implementation stop reached. Run pentest for this exact
   commit.`
 
-### v0.293.0 - Execution Engine Multi-Consensus-Client Interoperability
+### v0.323.0 - Execution Engine Multi-Consensus-Client Interoperability
 
 Status: planned.
 
@@ -11237,10 +11295,10 @@ Exit criteria:
 
 - Independent consensus clients can safely drive the first-party execution
   client.
-- `v0.293.0 implementation stop reached. Run pentest for this exact
+- `v0.323.0 implementation stop reached. Run pentest for this exact
   commit.`
 
-### v0.294.0 - Mainnet And Testnet Sync Follow Gate
+### v0.324.0 - Mainnet And Testnet Sync Follow Gate
 
 Status: planned.
 
@@ -11265,10 +11323,10 @@ Exit criteria:
 
 - The execution node can synchronize and remain canonical on supported public
   networks.
-- `v0.294.0 implementation stop reached. Run pentest for this exact
+- `v0.324.0 implementation stop reached. Run pentest for this exact
   commit.`
 
-### v0.295.0 - Execution Client Performance Gate
+### v0.325.0 - Execution Client Performance Gate
 
 Status: planned.
 
@@ -11290,10 +11348,10 @@ Verification:
 Exit criteria:
 
 - The complete execution client meets documented production resource budgets.
-- `v0.295.0 implementation stop reached. Run pentest for this exact
+- `v0.325.0 implementation stop reached. Run pentest for this exact
   commit.`
 
-### v0.296.0 - Complete Execution Client Audit
+### v0.326.0 - Complete Execution Client Audit
 
 Status: planned.
 
@@ -11317,10 +11375,10 @@ Exit criteria:
 
 - Every execution-client finding is recorded with an owner and remediation
   version.
-- `v0.296.0 implementation stop reached. Run pentest for this exact
+- `v0.326.0 implementation stop reached. Run pentest for this exact
   commit.`
 
-### v0.297.0 - Complete Execution Client Remediation
+### v0.327.0 - Complete Execution Client Remediation
 
 Status: planned.
 
@@ -11343,12 +11401,12 @@ Exit criteria:
 
 - The standalone execution client is a production candidate before integrated
   node work begins.
-- `v0.297.0 implementation stop reached. Run pentest for this exact
+- `v0.327.0 implementation stop reached. Run pentest for this exact
   commit.`
 
 ## Phase 34: Integrated Ethereum Node Product
 
-### v0.298.0 - First-Party Integrated Node Orchestration
+### v0.328.0 - First-Party Integrated Node Orchestration
 
 Status: planned.
 
@@ -11374,10 +11432,10 @@ Exit criteria:
 
 - Operators can run a complete first-party Ethereum full node through one
   supported orchestration surface.
-- `v0.298.0 implementation stop reached. Run pentest for this exact
+- `v0.328.0 implementation stop reached. Run pentest for this exact
   commit.`
 
-### v0.299.0 - Private Devnet And Custom Network Tooling
+### v0.329.0 - Private Devnet And Custom Network Tooling
 
 Status: planned.
 
@@ -11402,10 +11460,10 @@ Exit criteria:
 
 - Developers can reproduce a complete Ethereum network without hand-assembling
   incompatible EL/CL configuration.
-- `v0.299.0 implementation stop reached. Run pentest for this exact
+- `v0.329.0 implementation stop reached. Run pentest for this exact
   commit.`
 
-### v0.300.0 - Mixed First-Party And Independent Client Matrix
+### v0.330.0 - Mixed First-Party And Independent Client Matrix
 
 Status: planned.
 
@@ -11429,10 +11487,10 @@ Exit criteria:
 
 - Downstream users can adopt individual `eth` client components without
   requiring the entire first-party stack.
-- `v0.300.0 implementation stop reached. Run pentest for this exact
+- `v0.330.0 implementation stop reached. Run pentest for this exact
   commit.`
 
-### v0.301.0 - Long-Running Integrated Ethereum Testnet
+### v0.331.0 - Long-Running Integrated Ethereum Testnet
 
 Status: planned.
 
@@ -11446,7 +11504,7 @@ Deliverables:
   columns, builders, pruning, sync, and validator lifecycle operations;
 - planned reorg, partition, clock, disk, restart, execution invalidation,
   builder withholding, DA loss, and key-movement faults;
-- deterministic attribution through the `v0.258.0` taxonomy.
+- deterministic attribution through the `v0.288.0` taxonomy.
 
 Verification:
 
@@ -11458,10 +11516,10 @@ Exit criteria:
 
 - The integrated stack remains correct and recoverable under realistic
   sustained operation.
-- `v0.301.0 implementation stop reached. Run pentest for this exact
+- `v0.331.0 implementation stop reached. Run pentest for this exact
   commit.`
 
-### v0.302.0 - Integrated Node Performance And Failure Recovery
+### v0.332.0 - Integrated Node Performance And Failure Recovery
 
 Status: planned.
 
@@ -11486,10 +11544,10 @@ Exit criteria:
 
 - The complete node meets numeric resource and recovery targets under
   cross-layer failures.
-- `v0.302.0 implementation stop reached. Run pentest for this exact
+- `v0.332.0 implementation stop reached. Run pentest for this exact
   commit.`
 
-### v0.303.0 - Operator Installation Upgrade And Incident Guides
+### v0.333.0 - Operator Installation Upgrade And Incident Guides
 
 Status: planned.
 
@@ -11515,10 +11573,10 @@ Exit criteria:
 
 - A new operator or client builder can deploy, upgrade, diagnose, and recover
   the supported products from maintained documentation.
-- `v0.303.0 implementation stop reached. Run pentest for this exact
+- `v0.333.0 implementation stop reached. Run pentest for this exact
   commit.`
 
-### v0.304.0 - Complete Full-Stack Security Audit
+### v0.334.0 - Complete Full-Stack Security Audit
 
 Status: planned.
 
@@ -11541,10 +11599,10 @@ Verification:
 Exit criteria:
 
 - Every full-stack finding is recorded before final production admission.
-- `v0.304.0 implementation stop reached. Run pentest for this exact
+- `v0.334.0 implementation stop reached. Run pentest for this exact
   commit.`
 
-### v0.305.0 - Complete Full-Stack Remediation
+### v0.335.0 - Complete Full-Stack Remediation
 
 Status: planned.
 
@@ -11568,12 +11626,12 @@ Exit criteria:
 
 - No known implementation or operational blocker remains before final
   production admission.
-- `v0.305.0 implementation stop reached. Run pentest for this exact
+- `v0.335.0 implementation stop reached. Run pentest for this exact
   commit.`
 
 ## Phase 35: Final Production Admission
 
-### v0.306.0 - Final Production Acceptance Matrix
+### v0.336.0 - Final Production Acceptance Matrix
 
 Status: planned.
 
@@ -11600,10 +11658,10 @@ Exit criteria:
 
 - Every production claim has a numeric or otherwise objective release-blocking
   criterion.
-- `v0.306.0 implementation stop reached. Run pentest for this exact
+- `v0.336.0 implementation stop reached. Run pentest for this exact
   commit.`
 
-### v0.307.0 - Complete Public API And Crate Stability Freeze
+### v0.337.0 - Complete Public API And Crate Stability Freeze
 
 Status: planned.
 
@@ -11628,10 +11686,10 @@ Verification:
 Exit criteria:
 
 - No foundational or product API invention remains before 1.0.
-- `v0.307.0 implementation stop reached. Run pentest for this exact
+- `v0.337.0 implementation stop reached. Run pentest for this exact
   commit.`
 
-### v0.308.0 - Final Release Evidence Dry Run
+### v0.338.0 - Final Release Evidence Dry Run
 
 Status: planned.
 
@@ -11658,10 +11716,10 @@ Exit criteria:
 
 - The complete 1.0 evidence and upgrade process has been exercised without
   changing an approved artifact.
-- `v0.308.0 implementation stop reached. Run pentest for this exact
+- `v0.338.0 implementation stop reached. Run pentest for this exact
   commit.`
 
-### v0.309.0 - Version-Only 1.0 Promotion Rehearsal
+### v0.339.0 - Version-Only 1.0 Promotion Rehearsal
 
 Status: planned.
 
@@ -11674,9 +11732,9 @@ Deliverables:
   SBOM, checksums, provenance, packages, binaries, and images for `1.0.0`;
 - keep `release.version = "1.0.0"` separate from
   `candidate_tag = "v1.0.0-rc.1"`;
-- promote only products approved at `v0.307.0`;
+- promote only products approved at `v0.337.0`;
 - preserve independent support-crate versions;
-- use the audited exact-archive uploader from `v0.273.0`.
+- use the audited exact-archive uploader from `v0.303.0`.
 
 Verification:
 
@@ -11689,10 +11747,10 @@ Exit criteria:
 
 - The project can produce the exact `1.0.0` candidate through a constrained
   version-only promotion.
-- `v0.309.0 implementation stop reached. Run pentest for this exact
+- `v0.339.0 implementation stop reached. Run pentest for this exact
   commit.`
 
-### v0.310.0 - Production Candidate Admission Gate
+### v0.340.0 - Production Candidate Admission Gate
 
 Status: planned.
 
@@ -11706,7 +11764,7 @@ Deliverables:
   packaging, and release gate;
 - publish final support, stability, migration, artifact, and checksum
   manifests;
-- authorize only the rehearsed `v0.309.0` version-promotion operation;
+- authorize only the rehearsed `v0.339.0` version-promotion operation;
 - invalidate admission on any implementation or unrelated metadata change.
 
 Verification:
@@ -11714,13 +11772,13 @@ Verification:
 - Exact implementation-candidate pentest and clean retest;
 - green CI and CodeQL;
 - reproducible packages, binaries, images, and exact archive checks;
-- final `v0.306.0` acceptance-policy pass.
+- final `v0.336.0` acceptance-policy pass.
 
 Exit criteria:
 
 - The only permitted next change is the audited version-only promotion commit
   tagged as `v1.0.0-rc.1`.
-- `v0.310.0 implementation stop reached. Run pentest for this exact
+- `v0.340.0 implementation stop reached. Run pentest for this exact
   commit.`
 
 ## v1.0.0-rc.1 - Exact Production Candidate
@@ -11732,7 +11790,7 @@ and use it unchanged for the final stable tag.
 
 Deliverables:
 
-- Apply only the version-promotion changes rehearsed at `v0.309.0`;
+- Apply only the version-promotion changes rehearsed at `v0.339.0`;
 - set `eth` and only the deliberately stabilized public products to their
   approved `1.0.0` versions;
 - preserve every other support crate's independently reviewed version;
@@ -11756,7 +11814,7 @@ Verification:
 - exact archive offline verification and uploader dry run;
 - independent support-crate version-policy verification;
 - semantic package diff proving only approved version metadata differs from
-  `v0.310.0`;
+  `v0.340.0`;
 - repeat as `v1.0.0-rc.N` from a newly reviewed commit if any change is needed.
 
 Exit criteria:

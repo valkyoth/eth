@@ -45,6 +45,13 @@ function finish_release( normalized, required) {
     } else if (!exit_content) {
         problem("Exit criteria section must not be empty")
     }
+    if (status_is_planned && version_major == 0 && version_patch != 0) {
+        if (patch_rationale_count != 1) {
+            problem("planned 0.x.y patch milestones must contain exactly one Patch rationale section")
+        } else if (!patch_rationale_content) {
+            problem("Patch rationale section must not be empty")
+        }
+    }
 
     normalized = exit_text
     gsub(/`/, "", normalized)
@@ -63,8 +70,43 @@ function reset_release() {
     status_count = goal_count = deliverables_count = verification_count = exit_count = 0
     status_content = 0
     goal_content = deliverables_content = verification_content = exit_content = 0
+    patch_rationale_count = patch_rationale_content = status_is_planned = 0
     exit_text = ""
     section_order = 0
+}
+
+function parse_release_version(raw, normalized, parts, count, is_later) {
+    normalized = raw
+    sub(/^v/, "", normalized)
+    sub(/-.*/, "", normalized)
+    count = split(normalized, parts, ".")
+    if (count != 3 ||
+        parts[1] !~ /^[0-9]+$/ ||
+        parts[2] !~ /^[0-9]+$/ ||
+        parts[3] !~ /^[0-9]+$/) {
+        problem("release heading must contain a numeric semantic version")
+        version_major = version_minor = version_patch = -1
+        return
+    }
+
+    version_major = parts[1] + 0
+    version_minor = parts[2] + 0
+    version_patch = parts[3] + 0
+
+    if (version_major != 0) {
+        return
+    }
+
+    is_later = !have_previous_zero ||
+        version_minor > previous_zero_minor ||
+        (version_minor == previous_zero_minor &&
+         version_patch > previous_zero_patch)
+    if (!is_later) {
+        problem("0.x release milestones must be strictly increasing")
+    }
+    previous_zero_minor = version_minor
+    previous_zero_patch = version_patch
+    have_previous_zero = 1
 }
 
 /^#{2,3} v[^ ]+ - / {
@@ -72,6 +114,7 @@ function reset_release() {
     version = $2
     start = NR
     reset_release()
+    parse_release_version(version)
     if (seen[version]++) {
         problem("duplicate release heading")
     }
@@ -97,7 +140,19 @@ version != "" && /^Status:/ {
     section_line = $0
     sub(/^Status:[[:space:]]*/, "", section_line)
     if (section_line != "") status_content = 1
+    if (section_line ~ /^planned([.;]|$)/) status_is_planned = 1
     section = ""
+    next
+}
+version != "" && /^Patch rationale:/ {
+    if (status_count != 1 || section_order != 0) {
+        problem("Patch rationale must appear once after Status and before Goal")
+    }
+    patch_rationale_count++
+    section_line = $0
+    sub(/^Patch rationale:[[:space:]]*/, "", section_line)
+    if (section_line != "") patch_rationale_content = 1
+    section = "patch_rationale"
     next
 }
 version != "" && /^Goal:/ {
@@ -145,6 +200,7 @@ version != "" && /^Exit criteria:/ {
 }
 
 version != "" && $0 !~ /^[[:space:]]*$/ {
+    if (section == "patch_rationale") patch_rationale_content = 1
     if (section == "goal") goal_content = 1
     if (section == "deliverables") deliverables_content = 1
     if (section == "verification") verification_content = 1

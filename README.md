@@ -91,13 +91,13 @@ Legend: 🟢 available for the stated scope, 🟡 implemented but incomplete,
 | Native EVM execution | 🟡 Partial | Bounded basic opcode/state-read interpreter, consensus-correct truncated PUSH handling, and call/create planning; full state transition is incomplete |
 | Native precompiles through BLAKE2F | 🟢 Available | Identity, SHA-256, RIPEMD-160, ModExp, BN254, and BLAKE2F; ECRECOVER uses explicit caller backends |
 | BLS12-381 and KZG | 🟡 Partial | BLS canonical wire/frame parsing and KZG/BLS gas planning; cryptographic execution remains fail closed |
-| Owned SDK, providers, wallets, and contract tooling | 🔴 Planned | Assigned to `v0.53.0..=v0.68.0` and `v0.92.0..=v0.129.0` |
-| Complete execution, storage, and execution-client product | 🔴 Planned | Assigned to `v0.69.0..=v0.91.0`, `v0.130.0..=v0.140.0`, and `v0.282.0..=v0.297.0` |
-| Consensus, beacon node, and validator client | 🔴 Planned | Foundations start at `v0.141.0`; complete implementation and assurance continue through `v0.274.0` |
-| Ethereum networking, transaction pool, and synchronization | 🔴 Planned | Execution and consensus networking are assigned across `v0.154.0..=v0.164.0`, `v0.215.0..=v0.225.0`, and `v0.288.0` |
-| First-party core cryptography and historical proof of work | 🔴 Planned | Keccak-256, secp256k1, ECDSA/ECDH, and transport/keystore primitives are assigned to `v0.52.22..=v0.52.26`; full-stack crypto revalidation is `v0.275.0..=v0.278.0`, followed by Ethash and genesis-to-Merge validation at `v0.279.0..=v0.281.0` |
-| Integrated Ethereum node | 🔴 Planned | Orchestration, mixed-client testing, long-running operation, audit, and remediation are assigned to `v0.298.0..=v0.305.0` |
-| Production admission | 🔴 Planned | Final acceptance and stability gates are assigned to `v0.306.0..=v0.310.0` before an exact `v1.0.0-rc.N` candidate |
+| Owned SDK, providers, wallets, and contract tooling | 🔴 Planned | Assigned to `v0.83.0..=v0.98.0` and `v0.122.0..=v0.159.0` |
+| Complete execution, storage, and execution-client product | 🔴 Planned | Assigned to `v0.99.0..=v0.121.0`, `v0.160.0..=v0.170.0`, and `v0.312.0..=v0.327.0` |
+| Consensus, beacon node, and validator client | 🔴 Planned | Foundations start at `v0.171.0`; complete implementation and assurance continue through `v0.304.0` |
+| Ethereum networking, transaction pool, and synchronization | 🔴 Planned | Execution and consensus networking are assigned across `v0.184.0..=v0.194.0`, `v0.245.0..=v0.255.0`, and `v0.318.0` |
+| First-party core cryptography and historical proof of work | 🔴 Planned | Keccak-256, secp256k1, ECDSA/ECDH, and transport/keystore primitives are assigned to `v0.67.0..=v0.71.0`; full-stack crypto revalidation is `v0.305.0..=v0.308.0`, followed by Ethash and genesis-to-Merge validation at `v0.309.0..=v0.311.0` |
+| Integrated Ethereum node | 🔴 Planned | Orchestration, mixed-client testing, long-running operation, audit, and remediation are assigned to `v0.328.0..=v0.335.0` |
+| Production admission | 🔴 Planned | Final acceptance and stability gates are assigned to `v0.336.0..=v0.340.0` before an exact `v1.0.0-rc.N` candidate |
 
 See [Current Status](https://github.com/valkyoth/eth/blob/main/docs/current-status.md)
 for the detailed release snapshot,
