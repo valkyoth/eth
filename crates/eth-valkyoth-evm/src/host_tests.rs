@@ -247,10 +247,10 @@ fn nested_child_lifecycles_finalize_in_lifo_order() {
 
         let outer = host.with_child(frame(patterned_address()), |host| {
             let inner = host.with_child(frame(zero_address()), |_| ChildDecision::Commit(()));
-            assert!(inner.is_ok(), "{inner:?}");
+            assert!(inner.is_ok());
             ChildDecision::Commit(())
         });
-        assert!(outer.is_ok(), "{outer:?}");
+        assert!(outer.is_ok());
     }
     assert_eq!(
         journal.finalized.get(..journal.finalized_len),
@@ -353,7 +353,7 @@ fn inspector_dispatch_occurs_only_after_child_finalization() {
     let mut host = ExecutionHost::new(&request, &mut journal, &mut access, &mut crypto, &mut arena);
     assert!(host.begin_transaction().is_ok());
     let child = host.with_child(frame(zero_address()), |_| ChildDecision::Commit(()));
-    assert!(child.is_ok(), "{child:?}");
+    assert!(child.is_ok());
     assert_eq!(inspector.last, None);
     if let Ok(child) = child {
         assert_eq!(host.frame_depth(), 0);

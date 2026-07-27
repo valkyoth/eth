@@ -28,12 +28,12 @@ fn rejects_empty_and_unknown_typed_envelopes_before_canonical_decode() {
 #[test]
 fn malformed_payload_cannot_promote_and_returns_candidate() {
     let classified = ClassifiedEnvelope::decode(&[0x02, 0xc0], policy());
-    assert!(classified.is_ok(), "{classified:?}");
+    assert!(classified.is_ok());
     let Some(classified) = classified.ok() else {
         return;
     };
     let promoted = classified.try_into_canonical();
-    assert!(promoted.is_err(), "{promoted:?}");
+    assert!(promoted.is_err());
     let Some(failure) = promoted.err() else {
         return;
     };
@@ -54,7 +54,7 @@ fn legacy_classification_and_canonical_reparse_share_one_ledger() {
         return;
     };
     let classified = ClassifiedEnvelope::decode(&transaction, policy());
-    assert!(classified.is_ok(), "{classified:?}");
+    assert!(classified.is_ok());
     let Some(classified) = classified.ok() else {
         return;
     };
@@ -62,7 +62,7 @@ fn legacy_classification_and_canonical_reparse_share_one_ledger() {
     assert_eq!(classification_work, transaction.len());
 
     let canonical = classified.try_into_canonical();
-    assert!(canonical.is_ok(), "{canonical:?}");
+    assert!(canonical.is_ok());
     let Some(canonical) = canonical.ok() else {
         return;
     };
@@ -103,12 +103,12 @@ fn signed_chain_must_match_execution_environment() {
         return;
     };
     let canonical = canonical(&transaction);
-    assert!(canonical.is_some(), "{canonical:?}");
+    assert!(canonical.is_some());
     let Some(canonical) = canonical else {
         return;
     };
     let environment = environment(Hardfork::London, ChainId::new(2));
-    assert!(environment.is_some(), "{environment:?}");
+    assert!(environment.is_some());
     let Some(environment) = environment else {
         return;
     };

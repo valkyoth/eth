@@ -26,7 +26,7 @@ fn child_revert_restores_state_and_scope_warmth() {
             assert_eq!(host.set_storage(address, slot, changed), Ok(()));
             ChildDecision::Revert(())
         });
-        assert!(child.is_ok(), "{child:?}");
+        assert!(child.is_ok());
         if let Ok(child) = child {
             for event in child.events() {
                 inspector.observe(*event);
@@ -64,12 +64,12 @@ fn nested_revert_restores_only_inner_scope_warmth() {
             assert_eq!(host.warm_address(inner_address), Ok(AccessStatus::Cold));
             ChildDecision::Revert(())
         });
-        assert!(inner.is_ok(), "{inner:?}");
+        assert!(inner.is_ok());
         assert_eq!(host.warm_address(outer_address), Ok(AccessStatus::Warm));
         assert_eq!(host.warm_address(inner_address), Ok(AccessStatus::Cold));
         ChildDecision::Commit(())
     });
-    assert!(outer.is_ok(), "{outer:?}");
+    assert!(outer.is_ok());
 }
 
 #[test]

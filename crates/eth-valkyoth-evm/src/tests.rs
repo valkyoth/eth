@@ -115,7 +115,7 @@ fn transaction_admission_binds_raw_bytes_to_canonical_fields() {
         return;
     };
     let transaction = execution_ready(&raw, environment);
-    assert!(transaction.is_some(), "{transaction:?}");
+    assert!(transaction.is_some());
     let Some(transaction) = transaction else {
         return;
     };
@@ -131,7 +131,7 @@ fn transaction_admission_binds_raw_bytes_to_canonical_fields() {
 #[test]
 fn request_report_binds_environment_transaction_and_snapshot() {
     let environment_result = ExecutionEnvironment::try_new(validation_context(), block_context());
-    assert!(environment_result.is_ok(), "{environment_result:?}");
+    assert!(environment_result.is_ok());
     let environment = match environment_result {
         Ok(environment) => environment,
         Err(_) => return,
@@ -267,20 +267,20 @@ fn gas_estimation_policy_rejects_limits_above_release_ceilings() {
 #[test]
 fn gas_estimation_rejects_cap_above_block_limit() {
     let execution = execution_request();
-    assert!(execution.is_some(), "{execution:?}");
+    assert!(execution.is_some());
     let execution = match execution {
         Some(execution) => execution,
         None => return,
     };
     let policy = gas_policy(30_000_001);
-    assert!(policy.is_some(), "{policy:?}");
+    assert!(policy.is_some());
     let policy = match policy {
         Some(policy) => policy,
         None => return,
     };
 
     let rejected = GasEstimationRequest::try_new(execution, policy);
-    assert!(rejected.is_err(), "{rejected:?}");
+    assert!(rejected.is_err());
     if let Err(error) = rejected {
         assert_eq!(error, GasEstimationError::GasCapExceedsBlockLimit);
     }
@@ -289,19 +289,19 @@ fn gas_estimation_rejects_cap_above_block_limit() {
 #[test]
 fn gas_estimation_report_enforces_attempt_and_gas_caps() {
     let execution = execution_request();
-    assert!(execution.is_some(), "{execution:?}");
+    assert!(execution.is_some());
     let execution = match execution {
         Some(execution) => execution,
         None => return,
     };
     let policy = gas_policy(50_000);
-    assert!(policy.is_some(), "{policy:?}");
+    assert!(policy.is_some());
     let policy = match policy {
         Some(policy) => policy,
         None => return,
     };
     let request_result = GasEstimationRequest::try_new(execution, policy);
-    assert!(request_result.is_ok(), "{request_result:?}");
+    assert!(request_result.is_ok());
     let request = match request_result {
         Ok(request) => request,
         Err(_) => return,
@@ -331,7 +331,7 @@ fn gas_estimation_report_enforces_attempt_and_gas_caps() {
 #[test]
 fn gas_estimation_report_binds_policy_execution_and_result() {
     let execution = execution_request();
-    assert!(execution.is_some(), "{execution:?}");
+    assert!(execution.is_some());
     let execution = match execution {
         Some(execution) => execution,
         None => return,
@@ -343,13 +343,13 @@ fn gas_estimation_report_binds_policy_execution_and_result() {
             timeout_millis: 500,
         },
     );
-    assert!(policy.is_ok(), "{policy:?}");
+    assert!(policy.is_ok());
     let policy = match policy {
         Ok(policy) => policy,
         Err(_) => return,
     };
     let request_result = GasEstimationRequest::try_new(execution, policy);
-    assert!(request_result.is_ok(), "{request_result:?}");
+    assert!(request_result.is_ok());
     let request = match request_result {
         Ok(request) => request,
         Err(_) => return,
@@ -362,7 +362,7 @@ fn gas_estimation_report_binds_policy_execution_and_result() {
         3,
         Some(Gas::new(42_000)),
     );
-    assert!(report.is_ok(), "{report:?}");
+    assert!(report.is_ok());
     let report = match report {
         Ok(report) => report,
         Err(_) => return,
@@ -406,7 +406,7 @@ fn block_context() -> BlockExecutionContext {
 
 fn execution_request() -> Option<ExecutionRequest<'static, TestSnapshot>> {
     let environment_result = ExecutionEnvironment::try_new(validation_context(), block_context());
-    assert!(environment_result.is_ok(), "{environment_result:?}");
+    assert!(environment_result.is_ok());
     let environment = match environment_result {
         Ok(environment) => environment,
         Err(_) => return None,
@@ -439,6 +439,6 @@ fn gas_policy(gas_cap: u64) -> Option<GasEstimationPolicy> {
             max_backend_steps: 128,
         },
     );
-    assert!(policy.is_ok(), "{policy:?}");
+    assert!(policy.is_ok());
     policy.ok()
 }
