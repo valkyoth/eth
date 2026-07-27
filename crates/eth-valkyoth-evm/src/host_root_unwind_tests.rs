@@ -4,6 +4,9 @@ use super::*;
 enum AccessUnwind {
     None,
     Reset,
+    Checkpoint,
+    Commit,
+    Revert,
     WarmAddress,
     WarmStorage,
 }
@@ -15,12 +18,35 @@ struct UnwindingAccess {
 }
 
 impl AccessTracker for UnwindingAccess {
+    type Checkpoint = TestAccessCheckpoint;
+
     fn reset_transaction(&mut self) -> Result<(), HostCapabilityError> {
         self.reset_calls = self.reset_calls.saturating_add(1);
         if self.point == AccessUnwind::Reset && self.reset_calls > 1 {
             resume_unwind(Box::new("access reset unwind"));
         }
         self.inner.reset_transaction()
+    }
+
+    fn checkpoint(&mut self) -> Result<Self::Checkpoint, HostCapabilityError> {
+        if self.point == AccessUnwind::Checkpoint {
+            resume_unwind(Box::new("access checkpoint unwind"));
+        }
+        self.inner.checkpoint()
+    }
+
+    fn commit(&mut self, checkpoint: Self::Checkpoint) -> Result<(), HostCapabilityError> {
+        if self.point == AccessUnwind::Commit {
+            resume_unwind(Box::new("access commit unwind"));
+        }
+        self.inner.commit(checkpoint)
+    }
+
+    fn revert(&mut self, checkpoint: Self::Checkpoint) -> Result<(), HostCapabilityError> {
+        if self.point == AccessUnwind::Revert {
+            resume_unwind(Box::new("access revert unwind"));
+        }
+        self.inner.revert(checkpoint)
     }
 
     fn warm_address(&mut self, address: Address) -> Result<AccessStatus, HostCapabilityError> {

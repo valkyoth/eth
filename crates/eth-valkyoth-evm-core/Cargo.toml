@@ -1,6 +1,6 @@
 [package]
 name = "eth-valkyoth-evm-core"
-description = "Dependency-free no_std Ethereum EVM core domains for eth."
+description = "Default dependency-free no_std Ethereum EVM core domains for eth."
 version = "0.27.0"
 edition.workspace = true
 rust-version.workspace = true
@@ -11,11 +11,12 @@ readme = "README.md"
 
 [features]
 default = []
-alloc = []
+alloc = ["dep:eth-valkyoth-sanitization"]
 std = ["alloc"]
 testing = []
 
 [dependencies]
+eth-valkyoth-sanitization = { workspace = true, optional = true }
 
 [lints]
 workspace = true

@@ -1,7 +1,9 @@
 use core::fmt;
 
 use crate::{MAX_ITERATIVE_CALL_FRAMES, MAX_TRANSACTION_MEMORY_BYTES};
-use eth_valkyoth_evm_core::{EVM_MAX_WARM_ADDRESSES, EVM_MAX_WARM_STORAGE_SLOTS};
+use eth_valkyoth_evm_core::{
+    EVM_MAX_STEP_LIMIT, EVM_MAX_WARM_ADDRESSES, EVM_MAX_WARM_STORAGE_SLOTS,
+};
 
 /// Maximum transaction-local journal entries admitted by the bootstrap policy.
 pub const MAX_TRANSACTION_JOURNAL_ENTRIES: usize = 10_000_000;
@@ -11,6 +13,10 @@ pub const MAX_TRANSACTION_JOURNAL_CHECKPOINTS: usize = MAX_ITERATIVE_CALL_FRAMES
 pub const MAX_REUSABLE_ARENA_BYTES: usize = 67_108_864;
 /// Maximum transaction-local cache entries admitted by the bootstrap policy.
 pub const MAX_TRANSACTION_CACHE_ENTRIES: usize = 1_000_000;
+/// Maximum abstract work units, where one unit is one scheduled EVM step.
+pub const MAX_EXECUTION_WORK_UNITS: u64 = 1_000_000;
+
+const _: () = assert!(EVM_MAX_STEP_LIMIT == 1_000_000);
 
 /// Requested execution-resource limits validated at a deployment boundary.
 #[derive(Clone, Copy, Debug, Eq, PartialEq)]
@@ -66,6 +72,7 @@ impl ExecutionResourceLimits {
             || request.memory_bytes > MAX_TRANSACTION_MEMORY_BYTES
             || request.reusable_arena_bytes > MAX_REUSABLE_ARENA_BYTES
             || request.cache_entries > MAX_TRANSACTION_CACHE_ENTRIES
+            || request.work_units > MAX_EXECUTION_WORK_UNITS
         {
             return Err(ExecutionGovernorError::LimitTooLarge);
         }
@@ -99,6 +106,54 @@ pub enum ExecutionResource {
     ReusableArenaByte,
     /// Cache entries retained.
     CacheEntry,
+}
+
+/// Resource whose distinct admissions accumulate for the transaction.
+#[derive(Clone, Copy, Debug, Eq, PartialEq)]
+pub enum CumulativeExecutionResource {
+    /// Distinct warm addresses.
+    WarmAddress,
+    /// Distinct warm storage slots.
+    WarmStorageSlot,
+    /// Journal entries created.
+    JournalEntry,
+}
+
+impl CumulativeExecutionResource {
+    const fn resource(self) -> ExecutionResource {
+        match self {
+            Self::WarmAddress => ExecutionResource::WarmAddress,
+            Self::WarmStorageSlot => ExecutionResource::WarmStorageSlot,
+            Self::JournalEntry => ExecutionResource::JournalEntry,
+        }
+    }
+}
+
+/// Reusable resource recorded by its transaction high-water requirement.
+#[derive(Clone, Copy, Debug, Eq, PartialEq)]
+pub enum HighWaterExecutionResource {
+    /// Simultaneous journal checkpoint depth.
+    JournalCheckpoint,
+    /// Simultaneous iterative frame depth.
+    Frame,
+    /// Visible EVM memory bytes.
+    MemoryByte,
+    /// Reusable arena bytes retained.
+    ReusableArenaByte,
+    /// Cache entries retained.
+    CacheEntry,
+}
+
+impl HighWaterExecutionResource {
+    const fn resource(self) -> ExecutionResource {
+        match self {
+            Self::JournalCheckpoint => ExecutionResource::JournalCheckpoint,
+            Self::Frame => ExecutionResource::Frame,
+            Self::MemoryByte => ExecutionResource::MemoryByte,
+            Self::ReusableArenaByte => ExecutionResource::ReusableArenaByte,
+            Self::CacheEntry => ExecutionResource::CacheEntry,
+        }
+    }
 }
 
 /// Bounded transaction-local execution-resource governor.
@@ -191,7 +246,7 @@ impl ExecutionGovernor {
     /// Charges one resource class; failed and cancelled work is not refunded.
     pub fn charge(
         &mut self,
-        resource: ExecutionResource,
+        resource: CumulativeExecutionResource,
         amount: usize,
     ) -> Result<(), ExecutionGovernorError> {
         if amount == 0 {
@@ -200,6 +255,7 @@ impl ExecutionGovernor {
         if !self.transaction_started {
             return Err(ExecutionGovernorError::TransactionNotStarted);
         }
+        let resource = resource.resource();
         let next = self
             .used
             .get(resource)
@@ -219,7 +275,7 @@ impl ExecutionGovernor {
     /// the transaction's recorded high-water mark.
     pub fn observe_capacity(
         &mut self,
-        resource: ExecutionResource,
+        resource: HighWaterExecutionResource,
         required: usize,
     ) -> Result<(), ExecutionGovernorError> {
         if required == 0 {
@@ -228,6 +284,7 @@ impl ExecutionGovernor {
         if !self.transaction_started {
             return Err(ExecutionGovernorError::TransactionNotStarted);
         }
+        let resource = resource.resource();
         if required > self.limit(resource) {
             return Err(ExecutionGovernorError::ResourceExhausted(resource));
         }
@@ -376,7 +433,7 @@ impl std::error::Error for ExecutionGovernorError {}
 mod tests {
     use super::{
         ExecutionGovernor, ExecutionGovernorError, ExecutionResource, ExecutionResourceLimits,
-        ExecutionResourceRequest,
+        ExecutionResourceRequest, HighWaterExecutionResource,
     };
 
     #[test]
@@ -397,7 +454,10 @@ mod tests {
         };
         let mut governor = ExecutionGovernor::new(limits);
         assert_eq!(governor.reset_transaction(), Ok(()));
-        assert_eq!(governor.charge(ExecutionResource::Frame, 1), Ok(()));
+        assert_eq!(
+            governor.observe_capacity(HighWaterExecutionResource::Frame, 1),
+            Ok(())
+        );
         let Ok(_token) = governor.issue_work(1) else {
             return;
         };

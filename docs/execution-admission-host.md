@@ -63,7 +63,8 @@ The host owns separate private powers:
 - `StateView`: immutable snapshot identity, accounts, and original storage;
 - `StateJournal`: an associated exact `StateView`, authoritative current
   storage, reset, private child checkpoints, commit/revert, and writes;
-- `AccessTracker`: transaction-global address and slot warmth;
+- `AccessTracker`: transaction-wide address and slot warmth with nested scope
+  checkpoints;
 - `CryptoProvider`: reviewed Keccak and recovery operations;
 - `Inspector`: external observation of post-transition immutable events;
 - `TransactionArena`: destructively resettable memory and iterative frames.
@@ -74,9 +75,10 @@ private, and the journal's associated view type must match the request view.
 `StateSnapshot` remains as a compatibility read interface for immutable base
 state, while current storage can only be read through `StateJournal`.
 
-`ExecutionHost` intentionally gives `AccessTracker` no child checkpoint.
-EIP-2929 warmth therefore survives child failure and revert, while state
-changes remain controlled by `StateJournal` checkpoints.
+`ExecutionHost` checkpoints `AccessTracker` beside `StateJournal` for every
+child. A reverted child restores both sets to their pre-entry state as required
+by EIP-2929, while warmth charged before child entry remains transaction-wide.
+Any partial checkpoint cleanup or finalization poisons the host.
 
 `ExecutionHost::with_child` keeps checkpoint tokens private and scopes child
 execution in a closure, so nested children must finalize in LIFO order. It
@@ -124,10 +126,11 @@ The release includes:
 - canonical transaction fixtures for all five admitted transaction domains;
 - fork/type activation and signed-chain mismatch matrices;
 - empty and unknown typed-envelope rejection;
-- a nested child-revert test proving state rolls back while warmth survives;
+- nested child-revert tests proving state and scope-local warmth roll back
+  while outer warmth survives;
 - nested child finalization proving journal checkpoints complete in LIFO order;
 - journal-authoritative current-storage coverage after a write;
-- poisoned-host coverage after partial journal finalization;
+- poisoned-host coverage after partial journal or access finalization;
 - panic-unwind coverage at every journal/arena lifecycle call and inside child
   execution, proving an unfinished child poisons the host and blocks
   subsequent mutable capabilities;

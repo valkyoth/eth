@@ -2893,8 +2893,8 @@ Deliverables:
 - request-bound private `StateJournal`, `AccessTracker`, `CryptoProvider`, and
   `TransactionArena` capabilities plus post-transition `Inspector` events;
 - immutable original storage, journal-authoritative current storage,
-  transaction-global warmth, closure-scoped iterative call frames, and
-  resettable transaction arenas;
+  transaction-wide warmth with scope rollback, closure-scoped iterative call
+  frames, and resettable transaction arenas;
 - fail-closed host poisoning after partial lifecycle transitions or unwinding
   from an unfinished child;
 - pessimistic poisoning across destructive transaction reset and every direct
@@ -2908,8 +2908,8 @@ Verification:
 
 - Compile-fail tests preventing shell envelopes from reaching execution;
 - fork/type admission matrices and unknown-type negative tests;
-- nested-call rollback tests proving warmth survives child revert while state
-  does not;
+- nested-call rollback tests proving state and scope-local warmth revert while
+  pre-entry warmth survives;
 - nested LIFO finalization and journal-authoritative post-write storage tests;
 - frame-rejection cleanup tests preserving both the arena rejection and any
   journal rollback failure;
@@ -2956,22 +2956,30 @@ Deliverables:
 
 - An injectable `AccessTracker` with deterministic bounded node tables and a
   documented worst-case operation cost;
+- nested LIFO warmth checkpoints aligned with journal child scopes;
 - retain fixed-array tracking only as an explicit embedded profile;
 - transaction-scoped reset and capacity enforcement for access sets, journals,
   frames, memory, reusable arenas, and caches;
-- hierarchical execution work tokens compatible with the later node resource
-  governor.
+- type-separated cumulative and high-water accounting plus bounded
+  hierarchical execution work tokens compatible with the later node resource
+  governor;
+- Prague-aware total warm-address capacity and optimizer-resistant erasure of
+  allocator-backed address/slot keys on rollback, reset, and drop.
 
 Verification:
 
 - Adversarial distinct-address and storage-slot benchmarks;
 - differential warmth semantics across embedded and node trackers;
-- capacity, rollback, reset, cancellation, and retained-memory tests.
+- capacity, nested rollback, partial-finalization poisoning, reset,
+  cancellation, retained-memory sanitization, and accounting-mode tests.
 
 Exit criteria:
 
 - Adversarial access patterns cannot turn valid gas-bounded execution into an
   undocumented quadratic host workload.
+- Reverted child scopes cannot retain discounted access state, accounting mode
+  cannot be selected incorrectly, and every configured authority has a
+  reviewed hard ceiling.
 - `v0.53.0 implementation stop reached. Run pentest for this exact
   commit.`
 

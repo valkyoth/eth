@@ -14,8 +14,9 @@ transaction execution-resource authority.
   profiles.
 - Pre-reserved AVL address/storage tables with no allocation after
   construction and worst-case `O(log n)` operations.
-- Root attempt commit/rollback, atomic address+slot insertion, gas-derived hard
-  ceilings, and allocation-retaining transaction reset.
+- Nested LIFO scope commit/rollback, atomic address+slot insertion,
+  Prague-aware gas-derived hard ceilings, and sanitizing
+  allocation-retaining transaction reset.
 - EVM host adapters for both tracker profiles.
 - `ExecutionResourceLimits`, `ExecutionGovernor`, and non-copyable
   `ExecutionWorkToken` capabilities.
@@ -39,15 +40,19 @@ transaction execution-resource authority.
 - Constructor-time fallible reservation fixes the retained allocation bound
   before untrusted execution begins.
 - Capacity failure cannot leave half of an address/storage pair warm.
-- Failed and reverted root attempts cannot leak warmth into a retry.
-- Governor use before destructive reset fails closed; reusable capacity uses a
-  high-water observation rather than cumulative-call accounting.
+- Failed and reverted scopes cannot leak newly warmed entries into their
+  parent or a retry.
+- Governor use before destructive reset fails closed; cumulative and reusable
+  high-water resources use distinct public types.
 - Failed or cancelled work remains charged, and child delegation cannot create
   additional authority.
 - Gas-derived tracker ceilings use exact floor division with compile-time and
   runtime drift checks.
 - Generation exhaustion is validated before destructive reset mutates any
   budget state.
+- Abstract work authority is capped at the reviewed one-million-step ceiling.
+- Node tracker rollback, reset, and drop erase retained address and storage-key
+  bytes through `eth-valkyoth-sanitization`.
 
 The governor is an explicit capability. Integrators must route governed host
 operations through it; the complete node operational binding remains assigned
@@ -62,9 +67,10 @@ to `v0.65.0`.
 
 ## Pentest
 
-The initial external review reported two Low findings covering off-by-one
-gas-derived tracker ceilings and non-atomic generation-exhaustion reset. Both
-are remediated. Tagging remains blocked until the exact remediation commit
-passes clean retest, release-gate validation, and green GitHub CI/CodeQL. The
-final report will be stored at
+Two external review rounds reported seven findings: the initial two Low
+findings plus one High, three Medium, and one Low finding covering child-scope
+warmth rollback, resource accounting, work authority, initialized warmth, and
+retained key erasure. All are remediated. Tagging remains blocked until the
+exact remediation commit passes clean retest, release-gate validation, and
+green GitHub CI/CodeQL. The final report will be stored at
 `security/pentest/v0.53.0.md`.

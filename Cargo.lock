@@ -225,6 +225,9 @@ dependencies = [
 [[package]]
 name = "eth-valkyoth-evm-core"
 version = "0.27.0"
+dependencies = [
+ "eth-valkyoth-sanitization",
+]
 
 [[package]]
 name = "eth-valkyoth-hash"

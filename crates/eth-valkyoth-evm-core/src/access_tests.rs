@@ -55,13 +55,28 @@ fn gas_derived_hard_ceilings_are_nonzero() {
         assert!(EVM_MAX_WARM_STORAGE_SLOTS > EVM_MAX_WARM_ADDRESSES);
     }
     assert_eq!(
-        usize::try_from(EVM_MAX_GAS_LIMIT / 2_400),
+        usize::try_from((EVM_MAX_GAS_LIMIT - 21_000) / 2_400 + 20),
         Ok(EVM_MAX_WARM_ADDRESSES)
     );
     assert_eq!(
         usize::try_from(EVM_MAX_GAS_LIMIT / 1_900),
         Ok(EVM_MAX_WARM_STORAGE_SLOTS)
     );
+}
+
+#[test]
+fn nested_checkpoint_revert_restores_only_inner_warmth() -> Result<(), EvmCoreError> {
+    let mut tracker = EvmEmbeddedAccessTracker::<4, 4>::try_new()?;
+    let outer = tracker.checkpoint()?;
+    assert_eq!(tracker.warm_address(address(1))?, EvmAccessStatus::Cold);
+    let inner = tracker.checkpoint()?;
+    assert_eq!(tracker.warm_address(address(2))?, EvmAccessStatus::Cold);
+
+    tracker.revert(inner)?;
+    assert_eq!(tracker.warm_address(address(1))?, EvmAccessStatus::Warm);
+    assert_eq!(tracker.warm_address(address(2))?, EvmAccessStatus::Cold);
+    tracker.commit(outer)?;
+    Ok(())
 }
 
 fn address(value: u8) -> EvmAddress {

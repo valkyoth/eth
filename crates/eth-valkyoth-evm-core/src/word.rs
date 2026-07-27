@@ -69,6 +69,11 @@ impl EvmWord {
         &self.0
     }
 
+    #[cfg(feature = "alloc")]
+    pub(crate) fn wipe(&mut self) {
+        eth_valkyoth_sanitization::wipe::array(&mut self.0);
+    }
+
     /// Returns whether the word is zero.
     #[must_use]
     pub fn is_zero(self) -> bool {

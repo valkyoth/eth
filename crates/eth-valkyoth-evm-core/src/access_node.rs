@@ -2,14 +2,31 @@ use alloc::vec::Vec;
 use core::cmp::Ordering;
 
 use crate::{
-    EVM_MAX_WARM_ADDRESSES, EVM_MAX_WARM_STORAGE_SLOTS, EvmAccessAttempt, EvmAccessProfile,
-    EvmAccessStatus, EvmAccessTracker, EvmAddress, EvmCoreError, EvmWord,
+    EVM_MAX_WARM_ADDRESSES, EVM_MAX_WARM_STORAGE_SLOTS, EvmAccessAttempt, EvmAccessCheckpoint,
+    EvmAccessProfile, EvmAccessStatus, EvmAccessTracker, EvmAddress, EvmCoreError, EvmWord,
 };
 
 #[derive(Clone, Copy, Debug, Eq, Ord, PartialEq, PartialOrd)]
 struct StorageKey {
     address: EvmAddress,
     key: EvmWord,
+}
+
+trait AccessKey: Copy + Ord {
+    fn wipe(&mut self);
+}
+
+impl AccessKey for EvmAddress {
+    fn wipe(&mut self) {
+        EvmAddress::wipe(self);
+    }
+}
+
+impl AccessKey for StorageKey {
+    fn wipe(&mut self) {
+        EvmAddress::wipe(&mut self.address);
+        EvmWord::wipe(&mut self.key);
+    }
 }
 
 #[derive(Clone, Copy, Debug, Eq, PartialEq)]
@@ -32,13 +49,13 @@ impl<K> Node<K> {
 }
 
 #[derive(Debug, Eq, PartialEq)]
-struct AvlSet<K> {
+struct AvlSet<K: AccessKey> {
     nodes: Vec<Node<K>>,
     root: Option<usize>,
     limit: usize,
 }
 
-impl<K: Copy + Ord> AvlSet<K> {
+impl<K: AccessKey> AvlSet<K> {
     fn try_new(limit: usize, hard_limit: usize) -> Result<Self, EvmCoreError> {
         if limit == 0 {
             return Err(EvmCoreError::StateAccessListTooSmall);
@@ -113,6 +130,9 @@ impl<K: Copy + Ord> AvlSet<K> {
     }
 
     fn clear(&mut self) {
+        for node in &mut self.nodes {
+            node.key.wipe();
+        }
         self.nodes.clear();
         self.root = None;
     }
@@ -120,6 +140,9 @@ impl<K: Copy + Ord> AvlSet<K> {
     fn restore_len(&mut self, len: usize) -> Result<(), EvmCoreError> {
         if len > self.nodes.len() {
             return Err(EvmCoreError::StateAccessTrackerCorrupt);
+        }
+        for node in self.nodes.iter_mut().skip(len) {
+            node.key.wipe();
         }
         self.nodes.truncate(len);
         self.root = None;
@@ -249,10 +272,10 @@ impl<K: Copy + Ord> AvlSet<K> {
     }
 }
 
-#[derive(Clone, Copy, Debug, Eq, PartialEq)]
-struct NodeCheckpoint {
-    address_len: usize,
-    storage_len: usize,
+impl<K: AccessKey> Drop for AvlSet<K> {
+    fn drop(&mut self) {
+        self.clear();
+    }
 }
 
 /// Pre-reserved AVL-backed tracker for node-scale execution.
@@ -260,13 +283,15 @@ struct NodeCheckpoint {
 /// Construction performs all allocation. Warm-address and warm-storage
 /// operations allocate nothing afterward and take worst-case `O(log n)`
 /// comparisons and rotations. `reset_transaction` is `O(n)` and retains the
-/// original bounded allocation. Root rollback rebuilds the pre-attempt AVL
-/// indexes in `O(n log n)` without allocating.
+/// original bounded allocation. Rollback rebuilds the checkpointed AVL indexes
+/// in `O(n log n)` without allocating.
 #[derive(Debug, Eq, PartialEq)]
 pub struct EvmNodeAccessTracker {
     addresses: AvlSet<EvmAddress>,
     storage: AvlSet<StorageKey>,
-    attempt: Option<NodeCheckpoint>,
+    attempt: Option<EvmAccessCheckpoint>,
+    generation: u64,
+    checkpoint_depth: usize,
 }
 
 impl EvmNodeAccessTracker {
@@ -276,6 +301,8 @@ impl EvmNodeAccessTracker {
             addresses: AvlSet::try_new(address_capacity, EVM_MAX_WARM_ADDRESSES)?,
             storage: AvlSet::try_new(storage_capacity, EVM_MAX_WARM_STORAGE_SLOTS)?,
             attempt: None,
+            generation: 0,
+            checkpoint_depth: 0,
         })
     }
 
@@ -323,9 +350,21 @@ impl EvmNodeAccessTracker {
     ) -> Result<EvmAccessStatus, EvmCoreError> {
         <Self as EvmAccessTracker>::warm_storage(self, address, key)
     }
+
+    fn validate_checkpoint(&self, checkpoint: &EvmAccessCheckpoint) -> Result<(), EvmCoreError> {
+        if checkpoint.generation != self.generation
+            || checkpoint.depth == 0
+            || checkpoint.depth != self.checkpoint_depth
+        {
+            return Err(EvmCoreError::StateAccessAttemptMissing);
+        }
+        Ok(())
+    }
 }
 
 impl EvmAccessTracker for EvmNodeAccessTracker {
+    type Checkpoint = EvmAccessCheckpoint;
+
     fn profile(&self) -> EvmAccessProfile {
         EvmAccessProfile::NodeLogarithmic
     }
@@ -339,9 +378,44 @@ impl EvmAccessTracker for EvmNodeAccessTracker {
     }
 
     fn reset_transaction(&mut self) -> Result<(), EvmCoreError> {
+        let generation = self
+            .generation
+            .checked_add(1)
+            .ok_or(EvmCoreError::StateAccessTrackerCorrupt)?;
         self.addresses.clear();
         self.storage.clear();
         self.attempt = None;
+        self.checkpoint_depth = 0;
+        self.generation = generation;
+        Ok(())
+    }
+
+    fn checkpoint(&mut self) -> Result<Self::Checkpoint, EvmCoreError> {
+        let depth = self
+            .checkpoint_depth
+            .checked_add(1)
+            .ok_or(EvmCoreError::StateAccessTrackerCorrupt)?;
+        let checkpoint = EvmAccessCheckpoint {
+            address_len: self.addresses.len(),
+            storage_len: self.storage.len(),
+            generation: self.generation,
+            depth,
+        };
+        self.checkpoint_depth = depth;
+        Ok(checkpoint)
+    }
+
+    fn commit(&mut self, checkpoint: Self::Checkpoint) -> Result<(), EvmCoreError> {
+        self.validate_checkpoint(&checkpoint)?;
+        self.checkpoint_depth = self.checkpoint_depth.saturating_sub(1);
+        Ok(())
+    }
+
+    fn revert(&mut self, checkpoint: Self::Checkpoint) -> Result<(), EvmCoreError> {
+        self.validate_checkpoint(&checkpoint)?;
+        self.addresses.restore_len(checkpoint.address_len)?;
+        self.storage.restore_len(checkpoint.storage_len)?;
+        self.checkpoint_depth = self.checkpoint_depth.saturating_sub(1);
         Ok(())
     }
 
@@ -349,10 +423,7 @@ impl EvmAccessTracker for EvmNodeAccessTracker {
         if self.attempt.is_some() {
             return Err(EvmCoreError::StateAccessAttemptAlreadyActive);
         }
-        self.attempt = Some(NodeCheckpoint {
-            address_len: self.addresses.len(),
-            storage_len: self.storage.len(),
-        });
+        self.attempt = Some(self.checkpoint()?);
         Ok(())
     }
 
@@ -361,11 +432,10 @@ impl EvmAccessTracker for EvmNodeAccessTracker {
             .attempt
             .take()
             .ok_or(EvmCoreError::StateAccessAttemptMissing)?;
-        if outcome == EvmAccessAttempt::Rollback {
-            self.addresses.restore_len(checkpoint.address_len)?;
-            self.storage.restore_len(checkpoint.storage_len)?;
+        match outcome {
+            EvmAccessAttempt::Commit => self.commit(checkpoint),
+            EvmAccessAttempt::Rollback => self.revert(checkpoint),
         }
-        Ok(())
     }
 
     fn warm_address(&mut self, address: EvmAddress) -> Result<EvmAccessStatus, EvmCoreError> {
@@ -394,3 +464,7 @@ impl EvmAccessTracker for EvmNodeAccessTracker {
         Ok(EvmAccessStatus::Cold)
     }
 }
+
+#[cfg(test)]
+#[path = "access_node_wipe_tests.rs"]
+mod wipe_tests;

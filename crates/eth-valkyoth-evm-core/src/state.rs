@@ -38,6 +38,11 @@ impl EvmAddress {
         self.0
     }
 
+    #[cfg(feature = "alloc")]
+    pub(crate) fn wipe(&mut self) {
+        eth_valkyoth_sanitization::wipe::array(&mut self.0);
+    }
+
     /// Converts this address to a left-padded EVM word.
     #[must_use]
     pub fn to_word(self) -> EvmWord {

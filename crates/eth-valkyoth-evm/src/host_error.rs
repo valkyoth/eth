@@ -77,6 +77,16 @@ impl std::error::Error for HostCapabilityError {}
 pub enum BeginChildError {
     /// The journal could not create the child checkpoint.
     CheckpointFailed(HostCapabilityError),
+    /// Access checkpoint creation failed after the journal checkpoint.
+    ///
+    /// Access consistency cannot be proven after a mutable backend error, so
+    /// the host is poisoned even when journal cleanup succeeds.
+    AccessCheckpointFailed {
+        /// Access-tracker checkpoint error.
+        error: HostCapabilityError,
+        /// Journal cleanup error, when cleanup also failed.
+        journal_revert_error: Option<HostCapabilityError>,
+    },
     /// The frame was rejected and the fresh checkpoint was reverted.
     FrameRejected {
         /// Arena error that rejected the frame.
@@ -86,11 +96,13 @@ pub enum BeginChildError {
     ///
     /// Journal consistency is unknown after this error. The host must not
     /// continue or retry the transaction.
-    FrameRejectedAndJournalRevertFailed {
+    FrameRejectedAndCleanupFailed {
         /// Arena error that rejected the frame.
         frame_error: HostCapabilityError,
-        /// Journal error that prevented checkpoint cleanup.
-        revert_error: HostCapabilityError,
+        /// Access-tracker cleanup error, when access rollback failed.
+        access_revert_error: Option<HostCapabilityError>,
+        /// Journal cleanup error, when journal rollback failed.
+        journal_revert_error: Option<HostCapabilityError>,
     },
 }
 
@@ -102,8 +114,9 @@ impl BeginChildError {
             Self::CheckpointFailed(error) | Self::FrameRejected { frame_error: error } => {
                 error.code()
             }
-            Self::FrameRejectedAndJournalRevertFailed { .. } => {
-                "ETH_EVM_HOST_FRAME_REJECTED_JOURNAL_REVERT_FAILED"
+            Self::AccessCheckpointFailed { .. } => "ETH_EVM_HOST_ACCESS_CHECKPOINT_FAILED",
+            Self::FrameRejectedAndCleanupFailed { .. } => {
+                "ETH_EVM_HOST_FRAME_REJECTED_CLEANUP_FAILED"
             }
         }
     }
@@ -113,9 +126,12 @@ impl BeginChildError {
     pub const fn message(self) -> &'static str {
         match self {
             Self::CheckpointFailed(_) => "execution child checkpoint creation failed",
+            Self::AccessCheckpointFailed { .. } => {
+                "execution child access checkpoint creation failed"
+            }
             Self::FrameRejected { .. } => "execution child frame was rejected",
-            Self::FrameRejectedAndJournalRevertFailed { .. } => {
-                "execution child frame was rejected and journal cleanup failed"
+            Self::FrameRejectedAndCleanupFailed { .. } => {
+                "execution child frame was rejected and capability cleanup failed"
             }
         }
     }
@@ -156,12 +172,14 @@ pub enum ChildLifecycleError {
         /// Observed active frame count.
         found: usize,
     },
-    /// The journal consumed its checkpoint but could not finalize it.
-    JournalConsistencyUnknown {
+    /// Journal or access finalization failed after child execution.
+    CapabilityConsistencyUnknown {
         /// Requested finalization action.
         action: ChildFinalizeAction,
-        /// Journal failure.
-        error: HostCapabilityError,
+        /// Journal failure, when journal finalization failed.
+        journal_error: Option<HostCapabilityError>,
+        /// Access failure, when access finalization failed.
+        access_error: Option<HostCapabilityError>,
     },
     /// The journal finalized but the arena could not remove the matching frame.
     ArenaConsistencyUnknown {
@@ -186,8 +204,8 @@ impl ChildLifecycleError {
             Self::TransactionNotStarted => "ETH_EVM_HOST_TRANSACTION_NOT_STARTED",
             Self::Begin(error) => error.code(),
             Self::FrameDepthMismatch { .. } => "ETH_EVM_HOST_CHILD_DEPTH_MISMATCH",
-            Self::JournalConsistencyUnknown { .. } => {
-                "ETH_EVM_HOST_CHILD_JOURNAL_CONSISTENCY_UNKNOWN"
+            Self::CapabilityConsistencyUnknown { .. } => {
+                "ETH_EVM_HOST_CHILD_CAPABILITY_CONSISTENCY_UNKNOWN"
             }
             Self::ArenaConsistencyUnknown { .. } => "ETH_EVM_HOST_CHILD_ARENA_CONSISTENCY_UNKNOWN",
             Self::FrameMismatch { .. } => "ETH_EVM_HOST_CHILD_FRAME_MISMATCH",
@@ -204,8 +222,8 @@ impl ChildLifecycleError {
             Self::FrameDepthMismatch { .. } => {
                 "execution child nesting did not restore the expected depth"
             }
-            Self::JournalConsistencyUnknown { .. } => {
-                "execution child journal consistency is unknown"
+            Self::CapabilityConsistencyUnknown { .. } => {
+                "execution child capability consistency is unknown"
             }
             Self::ArenaConsistencyUnknown { .. } => "execution child arena consistency is unknown",
             Self::FrameMismatch { .. } => "execution child removed a different iterative frame",

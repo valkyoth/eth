@@ -50,8 +50,8 @@ mod state_execution;
 mod word;
 
 pub use access::{
-    EVM_MAX_WARM_ADDRESSES, EVM_MAX_WARM_STORAGE_SLOTS, EvmAccessAttempt, EvmAccessProfile,
-    EvmAccessSet, EvmAccessStatus, EvmAccessTracker, EvmEmbeddedAccessTracker,
+    EVM_MAX_WARM_ADDRESSES, EVM_MAX_WARM_STORAGE_SLOTS, EvmAccessAttempt, EvmAccessCheckpoint,
+    EvmAccessProfile, EvmAccessSet, EvmAccessStatus, EvmAccessTracker, EvmEmbeddedAccessTracker,
 };
 #[cfg(feature = "alloc")]
 pub use access_node::EvmNodeAccessTracker;

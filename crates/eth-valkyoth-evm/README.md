@@ -49,6 +49,8 @@ The `0.12.0` support-crate release, shipped with `eth` `0.53.0`, adds:
   frames, memory, reusable arenas, caches, and abstract work;
 - destructive governor reset, monotonic fail-closed charging, and non-copyable
   hierarchical work tokens that cannot create child authority;
+- type-separated cumulative/high-water resource APIs, bounded abstract work,
+  and nested EIP-2929 access rollback aligned with journal checkpoints;
 - deterministic capacity, cancellation, delegation, and reset tests.
 
 It retains the `0.11.0` execution-admission and host-capability foundation:

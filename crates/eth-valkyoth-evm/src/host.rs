@@ -1,127 +1,12 @@
 use eth_valkyoth_primitives::{Address, B256};
 
 use crate::{
-    ExecutionEnvironment, ExecutionRequest, SnapshotAccount, StateView,
+    AccessStatus, AccessTracker, CryptoProvider, ExecutionEnvironment, ExecutionRequest,
+    InspectorEvent, SnapshotAccount, StateJournal, StateView,
     arena::{IterativeCallFrame, TransactionArena},
     host_error::{BeginChildError, ChildFinalizeAction, ChildLifecycleError, HostCapabilityError},
     host_scope::{PoisonScope, PoisonScopeHost},
 };
-
-/// Warm/cold result from a transaction-global access tracker.
-#[derive(Clone, Copy, Debug, Eq, PartialEq)]
-pub enum AccessStatus {
-    /// Address or slot was already warm.
-    Warm,
-    /// Address or slot was cold and is now warm.
-    Cold,
-}
-
-/// Journaled state mutations with explicit child checkpoints.
-pub trait StateJournal {
-    /// Exact immutable state-view type compatible with this journal.
-    type View: StateView + ?Sized;
-    /// Non-forgeable implementation-defined checkpoint token.
-    type Checkpoint;
-
-    /// Clears transaction-local mutation state.
-    fn reset_transaction(&mut self) -> Result<(), HostCapabilityError>;
-
-    /// Starts one child-call checkpoint.
-    fn checkpoint(&mut self) -> Result<Self::Checkpoint, HostCapabilityError>;
-
-    /// Commits the active child checkpoint.
-    fn commit(&mut self, checkpoint: Self::Checkpoint) -> Result<(), HostCapabilityError>;
-
-    /// Reverts the active child checkpoint.
-    fn revert(&mut self, checkpoint: Self::Checkpoint) -> Result<(), HostCapabilityError>;
-
-    /// Reads one slot from the current journal overlay or immutable base.
-    fn current_storage(
-        &self,
-        base: &Self::View,
-        address: Address,
-        slot: B256,
-    ) -> Result<B256, HostCapabilityError>;
-
-    /// Writes one storage slot into the current journal view.
-    fn set_storage(
-        &mut self,
-        address: Address,
-        slot: B256,
-        value: B256,
-    ) -> Result<(), HostCapabilityError>;
-}
-
-/// Transaction-global EIP-2929-style warmth tracking.
-///
-/// No child-checkpoint operation exists: warmth survives child failure and
-/// revert for the remainder of the transaction.
-pub trait AccessTracker {
-    /// Clears all transaction-global warmth.
-    fn reset_transaction(&mut self) -> Result<(), HostCapabilityError>;
-
-    /// Warms an address and reports its previous state.
-    fn warm_address(&mut self, address: Address) -> Result<AccessStatus, HostCapabilityError>;
-
-    /// Warms an address/storage pair and reports its previous state.
-    fn warm_storage(
-        &mut self,
-        address: Address,
-        slot: B256,
-    ) -> Result<AccessStatus, HostCapabilityError>;
-}
-
-/// Cryptographic powers supplied to execution by a reviewed backend.
-pub trait CryptoProvider {
-    /// Computes Ethereum Keccak-256.
-    fn keccak256(&mut self, input: &[u8]) -> Result<B256, HostCapabilityError>;
-
-    /// Recovers an Ethereum address from a digest and 65-byte signature.
-    fn recover_address(
-        &mut self,
-        digest: B256,
-        signature: &[u8; 65],
-    ) -> Result<Address, HostCapabilityError>;
-}
-
-/// Immutable execution event exposed to observation-only inspectors.
-#[non_exhaustive]
-#[derive(Clone, Copy, Debug, Eq, PartialEq)]
-pub enum InspectorEvent {
-    /// Transaction-local host state was reset.
-    TransactionStarted,
-    /// A child frame started.
-    ChildStarted {
-        /// Active frame count after entry; the first nested frame reports one.
-        depth: usize,
-    },
-    /// A child frame committed.
-    ChildCommitted {
-        /// Active frame count before exit; the first nested frame reports one.
-        depth: usize,
-    },
-    /// A child frame reverted.
-    ChildReverted {
-        /// Active frame count before exit; the first nested frame reports one.
-        depth: usize,
-    },
-}
-
-/// Observation-only execution hook.
-///
-/// Inspectors return no consensus decision and receive no mutable state.
-pub trait Inspector {
-    /// Observes one immutable lifecycle event.
-    fn observe(&mut self, event: InspectorEvent);
-}
-
-/// Inspector implementation for hosts that do not need observation.
-#[derive(Clone, Copy, Debug, Default, Eq, PartialEq)]
-pub struct NoInspector;
-
-impl Inspector for NoInspector {
-    fn observe(&mut self, _event: InspectorEvent) {}
-}
 
 /// Finalization selected by one closure-scoped child execution.
 #[derive(Clone, Copy, Debug, Eq, PartialEq)]
@@ -276,23 +161,36 @@ where
                 ));
             }
         };
+        let access_checkpoint = match scope.host().access.checkpoint() {
+            Ok(checkpoint) => checkpoint,
+            Err(error) => {
+                let journal_revert_error = scope.host().journal.revert(checkpoint).err();
+                return Err(ChildLifecycleError::Begin(
+                    BeginChildError::AccessCheckpointFailed {
+                        error,
+                        journal_revert_error,
+                    },
+                ));
+            }
+        };
         let depth = match scope.host().arena.enter_frame(frame) {
             Ok(depth) => depth,
             Err(frame_error) => {
-                return match scope.host().journal.revert(checkpoint) {
-                    Ok(()) => {
-                        scope.finish();
-                        Err(ChildLifecycleError::Begin(BeginChildError::FrameRejected {
-                            frame_error,
-                        }))
-                    }
-                    Err(revert_error) => Err(ChildLifecycleError::Begin(
-                        BeginChildError::FrameRejectedAndJournalRevertFailed {
-                            frame_error,
-                            revert_error,
-                        },
-                    )),
-                };
+                let access_revert_error = scope.host().access.revert(access_checkpoint).err();
+                let journal_revert_error = scope.host().journal.revert(checkpoint).err();
+                if access_revert_error.is_none() && journal_revert_error.is_none() {
+                    scope.finish();
+                    return Err(ChildLifecycleError::Begin(BeginChildError::FrameRejected {
+                        frame_error,
+                    }));
+                }
+                return Err(ChildLifecycleError::Begin(
+                    BeginChildError::FrameRejectedAndCleanupFailed {
+                        frame_error,
+                        access_revert_error,
+                        journal_revert_error,
+                    },
+                ));
             }
         };
 
@@ -316,8 +214,16 @@ where
             ChildFinalizeAction::Commit => scope.host().journal.commit(checkpoint),
             ChildFinalizeAction::Revert => scope.host().journal.revert(checkpoint),
         };
-        if let Err(error) = journal_result {
-            return Err(ChildLifecycleError::JournalConsistencyUnknown { action, error });
+        let access_result = match action {
+            ChildFinalizeAction::Commit => scope.host().access.commit(access_checkpoint),
+            ChildFinalizeAction::Revert => scope.host().access.revert(access_checkpoint),
+        };
+        if journal_result.is_err() || access_result.is_err() {
+            return Err(ChildLifecycleError::CapabilityConsistencyUnknown {
+                action,
+                journal_error: journal_result.err(),
+                access_error: access_result.err(),
+            });
         }
 
         let removed = match scope.host().arena.leave_frame() {

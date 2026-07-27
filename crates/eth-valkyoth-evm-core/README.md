@@ -1,5 +1,5 @@
 <p align="center">
-  <b>dependency-free no_std EVM core domains for eth.</b><br>
+  <b>default dependency-free no_std EVM core domains for eth.</b><br>
   Explicit domains, bounded decode policy, first-party EVM work, and security-gated release evidence.
 </p>
 
@@ -26,9 +26,11 @@
 # eth-valkyoth-evm-core
 
 `eth-valkyoth-evm-core` is an internal support crate for
-[`eth`](https://crates.io/crates/eth). It provides the dependency-free,
-`no_std` EVM core domains used while the first-party audited EVM engine is
-built in small release passes.
+[`eth`](https://crates.io/crates/eth). Its default profile provides
+dependency-free, `no_std` EVM core domains while the first-party audited EVM
+engine is built in small release passes. The optional allocator-backed node
+tracker uses the project's audited sanitization bridge to erase retained
+access metadata.
 
 Most users should depend on `eth` and enable the optional `evm-core` feature:
 
@@ -98,7 +100,8 @@ documented in
   allocation-free profile. The optional `alloc` feature adds
   `EvmNodeAccessTracker`, which pre-reserves bounded AVL tables at construction
   and provides worst-case `O(log n)` membership and insertion without later
-  allocation.
+  allocation. Both implement nested LIFO EIP-2929 scope rollback; the node
+  profile erases removed keys on rollback, reset, and drop.
 - Frontier through Istanbul use explicit flat historical state-read pricing for
   the currently executable subset; Berlin and later use warm/cold state-access
   gas.

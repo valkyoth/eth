@@ -14,6 +14,7 @@ mod environment;
 mod gas_estimation;
 mod governor;
 mod host;
+mod host_capability;
 mod host_error;
 mod host_scope;
 mod result;
@@ -39,12 +40,14 @@ pub use gas_estimation::{
     MAX_GAS_ESTIMATION_TIMEOUT_MILLIS,
 };
 pub use governor::{
-    ExecutionGovernor, ExecutionGovernorError, ExecutionResource, ExecutionResourceLimits,
-    ExecutionResourceRequest, ExecutionWorkToken,
+    CumulativeExecutionResource, ExecutionGovernor, ExecutionGovernorError, ExecutionResource,
+    ExecutionResourceLimits, ExecutionResourceRequest, ExecutionWorkToken,
+    HighWaterExecutionResource, MAX_EXECUTION_WORK_UNITS,
 };
-pub use host::{
-    AccessStatus, AccessTracker, ChildDecision, ChildExecution, CryptoProvider, ExecutionHost,
-    Inspector, InspectorEvent, NoInspector, StateJournal,
+pub use host::{ChildDecision, ChildExecution, ExecutionHost};
+pub use host_capability::{
+    AccessStatus, AccessTracker, CryptoProvider, Inspector, InspectorEvent, NoInspector,
+    StateJournal,
 };
 pub use host_error::{
     BeginChildError, ChildFinalizeAction, ChildLifecycleError, HostCapabilityError,

@@ -94,6 +94,21 @@ fn rollback_rebuilds_exact_pre_attempt_state() -> Result<(), EvmCoreError> {
 }
 
 #[test]
+fn node_nested_checkpoint_revert_is_lifo() -> Result<(), EvmCoreError> {
+    let mut tracker = EvmNodeAccessTracker::try_new(8, 8)?;
+    let outer = tracker.checkpoint()?;
+    let _ = tracker.warm_address(address(1))?;
+    let inner = tracker.checkpoint()?;
+    let _ = tracker.warm_storage(address(2), EvmWord::from_usize(2))?;
+
+    tracker.revert(inner)?;
+    assert_eq!(tracker.warm_address(address(1))?, EvmAccessStatus::Warm);
+    assert_eq!(tracker.warm_address(address(2))?, EvmAccessStatus::Cold);
+    tracker.commit(outer)?;
+    Ok(())
+}
+
+#[test]
 fn reset_retains_only_the_bounded_initial_allocation() -> Result<(), EvmCoreError> {
     let mut tracker = EvmNodeAccessTracker::try_new(32, 64)?;
     let initial = tracker.allocation_capacities();

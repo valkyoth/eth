@@ -104,12 +104,48 @@ impl StateJournal for TestJournal {
 struct TestAccess {
     address: Option<Address>,
     slot: Option<(Address, B256)>,
+    fail_checkpoint: bool,
+    fail_commit: bool,
+    fail_revert: bool,
+}
+
+struct TestAccessCheckpoint {
+    address: Option<Address>,
+    slot: Option<(Address, B256)>,
 }
 
 impl AccessTracker for TestAccess {
+    type Checkpoint = TestAccessCheckpoint;
+
     fn reset_transaction(&mut self) -> Result<(), HostCapabilityError> {
         self.address = None;
         self.slot = None;
+        Ok(())
+    }
+
+    fn checkpoint(&mut self) -> Result<Self::Checkpoint, HostCapabilityError> {
+        if self.fail_checkpoint {
+            return Err(HostCapabilityError::AccessTrackingFailed);
+        }
+        Ok(TestAccessCheckpoint {
+            address: self.address,
+            slot: self.slot,
+        })
+    }
+
+    fn commit(&mut self, _checkpoint: Self::Checkpoint) -> Result<(), HostCapabilityError> {
+        if self.fail_commit {
+            return Err(HostCapabilityError::AccessTrackingFailed);
+        }
+        Ok(())
+    }
+
+    fn revert(&mut self, checkpoint: Self::Checkpoint) -> Result<(), HostCapabilityError> {
+        if self.fail_revert {
+            return Err(HostCapabilityError::AccessTrackingFailed);
+        }
+        self.address = checkpoint.address;
+        self.slot = checkpoint.slot;
         Ok(())
     }
 
@@ -195,55 +231,6 @@ macro_rules! request_fixture {
 }
 
 #[test]
-fn child_revert_restores_state_but_preserves_transaction_warmth() {
-    request_fixture!(raw, snapshot, request);
-    let address = patterned_address();
-    let slot = patterned_hash(1);
-    let changed = patterned_hash(2);
-    let mut memory = [0u8; 64];
-    let Some(mut arena) = BorrowedTransactionArena::<4>::try_new(&mut memory).ok() else {
-        return;
-    };
-    let mut journal = TestJournal::default();
-    let mut access = TestAccess::default();
-    let mut crypto = TestCrypto;
-    let mut inspector = TestInspector::default();
-
-    {
-        let mut host =
-            ExecutionHost::new(&request, &mut journal, &mut access, &mut crypto, &mut arena);
-        let started = host.begin_transaction();
-        assert_eq!(started, Ok(InspectorEvent::TransactionStarted));
-        inspector.observe(started.unwrap_or(InspectorEvent::TransactionStarted));
-        let child = host.with_child(
-            IterativeCallFrame {
-                address,
-                is_static: false,
-            },
-            |host| {
-                assert_eq!(host.warm_storage(address, slot), Ok(AccessStatus::Cold));
-                assert_eq!(host.set_storage(address, slot, changed), Ok(()));
-                ChildDecision::Revert(())
-            },
-        );
-        assert!(child.is_ok(), "{child:?}");
-        if let Ok(child) = child {
-            for event in child.events() {
-                inspector.observe(*event);
-            }
-        }
-    }
-
-    assert_eq!(journal.value, None);
-    assert_eq!(access.warm_storage(address, slot), Ok(AccessStatus::Warm));
-    assert_eq!(
-        inspector.last,
-        Some(InspectorEvent::ChildReverted { depth: 1 })
-    );
-    assert_eq!(snapshot.snapshot_id(), request.snapshot().snapshot_id());
-}
-
-#[test]
 fn nested_child_lifecycles_finalize_in_lifo_order() {
     request_fixture!(raw, snapshot, request);
     let mut memory = [0u8; 8];
@@ -312,9 +299,10 @@ fn journal_finalization_failure_poisons_host_without_popping_frame() {
     let result = host.with_child(frame(zero_address()), |_| ChildDecision::Commit(()));
     assert_eq!(
         result,
-        Err(ChildLifecycleError::JournalConsistencyUnknown {
+        Err(ChildLifecycleError::CapabilityConsistencyUnknown {
             action: ChildFinalizeAction::Commit,
-            error: HostCapabilityError::JournalFailed,
+            journal_error: Some(HostCapabilityError::JournalFailed),
+            access_error: None,
         })
     );
     assert!(host.is_poisoned());
@@ -341,9 +329,10 @@ fn rejected_frame_preserves_cleanup_failure_and_poisons_host() {
     assert_eq!(
         result,
         Err(ChildLifecycleError::Begin(
-            BeginChildError::FrameRejectedAndJournalRevertFailed {
+            BeginChildError::FrameRejectedAndCleanupFailed {
                 frame_error: HostCapabilityError::CallDepthExceeded,
-                revert_error: HostCapabilityError::JournalFailed,
+                access_revert_error: None,
+                journal_revert_error: Some(HostCapabilityError::JournalFailed),
             }
         ))
     );
@@ -429,6 +418,8 @@ fn frame(address: Address) -> IterativeCallFrame {
     }
 }
 
+#[path = "host_checkpoint_tests.rs"]
+mod checkpoint_tests;
 #[path = "host_unwind_tests.rs"]
 mod unwind_tests;
 

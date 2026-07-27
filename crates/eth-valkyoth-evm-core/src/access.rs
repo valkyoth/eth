@@ -2,14 +2,19 @@ use crate::{EvmAddress, EvmCoreError, EvmWord};
 
 const EIP2930_ADDRESS_GAS: u64 = 2_400;
 const EIP2930_STORAGE_KEY_GAS: u64 = 1_900;
-const MAX_WARM_ADDRESSES_U64: u64 = crate::EVM_MAX_GAS_LIMIT / EIP2930_ADDRESS_GAS;
+const TRANSACTION_BASE_GAS: u64 = 21_000;
+const PRAGUE_INITIAL_WARM_ADDRESSES: u64 = 20;
+const MAX_PAID_WARM_ADDRESSES_U64: u64 =
+    (crate::EVM_MAX_GAS_LIMIT - TRANSACTION_BASE_GAS) / EIP2930_ADDRESS_GAS;
+const MAX_WARM_ADDRESSES_U64: u64 = MAX_PAID_WARM_ADDRESSES_U64 + PRAGUE_INITIAL_WARM_ADDRESSES;
 const MAX_WARM_STORAGE_SLOTS_U64: u64 = crate::EVM_MAX_GAS_LIMIT / EIP2930_STORAGE_KEY_GAS;
 
 /// Maximum warmed addresses admitted by the bootstrap execution policy.
 ///
-/// The ceiling covers the maximum number of EIP-2930 address entries that can
-/// fit under [`crate::EVM_MAX_GAS_LIMIT`] at 2,400 intrinsic gas each.
-pub const EVM_MAX_WARM_ADDRESSES: usize = 416_666;
+/// This covers the maximum paid EIP-2930 address entries after base
+/// transaction gas plus sender, destination/create address, coinbase, and the
+/// 17 precompiles active through Prague. Fork-specific policy may use less.
+pub const EVM_MAX_WARM_ADDRESSES: usize = 416_677;
 
 /// Maximum warmed storage slots admitted by the bootstrap execution policy.
 ///
@@ -18,9 +23,13 @@ pub const EVM_MAX_WARM_ADDRESSES: usize = 416_666;
 pub const EVM_MAX_WARM_STORAGE_SLOTS: usize = 526_315;
 
 const _: () = {
-    assert!(MAX_WARM_ADDRESSES_U64 == 416_666);
+    assert!(MAX_PAID_WARM_ADDRESSES_U64 == 416_657);
+    assert!(MAX_WARM_ADDRESSES_U64 == 416_677);
     assert!(MAX_WARM_STORAGE_SLOTS_U64 == 526_315);
-    assert!(MAX_WARM_ADDRESSES_U64 * EIP2930_ADDRESS_GAS <= crate::EVM_MAX_GAS_LIMIT);
+    assert!(
+        MAX_PAID_WARM_ADDRESSES_U64 * EIP2930_ADDRESS_GAS + TRANSACTION_BASE_GAS
+            <= crate::EVM_MAX_GAS_LIMIT
+    );
     assert!(MAX_WARM_STORAGE_SLOTS_U64 * EIP2930_STORAGE_KEY_GAS <= crate::EVM_MAX_GAS_LIMIT);
 };
 
@@ -33,13 +42,22 @@ pub enum EvmAccessStatus {
     Cold,
 }
 
-/// Root execution-attempt disposition.
+/// Execution-attempt disposition.
 #[derive(Clone, Copy, Debug, Eq, PartialEq)]
 pub enum EvmAccessAttempt {
     /// Preserve warmth added by the successful attempt.
     Commit,
     /// Restore the exact warmth present before the attempt.
     Rollback,
+}
+
+/// Opaque LIFO checkpoint for one access-tracker scope.
+#[derive(Debug, Eq, PartialEq)]
+pub struct EvmAccessCheckpoint {
+    pub(crate) address_len: usize,
+    pub(crate) storage_len: usize,
+    pub(crate) generation: u64,
+    pub(crate) depth: usize,
 }
 
 /// Complexity profile of an access-tracker implementation.
@@ -54,10 +72,13 @@ pub enum EvmAccessProfile {
 /// Injectable transaction-global EIP-2929 warmth tracker.
 ///
 /// Implementations must make `warm_storage` atomic: if either the address or
-/// storage capacity is unavailable, neither entry may be added. Root attempt
-/// rollback is distinct from child-call revert because EIP-2929 warmth remains
-/// transaction-global across child reverts.
+/// storage capacity is unavailable, neither entry may be added. Checkpoints
+/// are nested and LIFO because an EIP-2929 scope revert restores warmth to the
+/// exact state present before that scope was entered.
 pub trait EvmAccessTracker {
+    /// Non-forgeable implementation-defined checkpoint token.
+    type Checkpoint;
+
     /// Returns the implementation's documented complexity profile.
     fn profile(&self) -> EvmAccessProfile;
 
@@ -70,7 +91,16 @@ pub trait EvmAccessTracker {
     /// Destructively clears all transaction warmth and active attempt state.
     fn reset_transaction(&mut self) -> Result<(), EvmCoreError>;
 
-    /// Starts one non-nested root execution attempt.
+    /// Starts one nested warmth checkpoint.
+    fn checkpoint(&mut self) -> Result<Self::Checkpoint, EvmCoreError>;
+
+    /// Commits the active warmth checkpoint.
+    fn commit(&mut self, checkpoint: Self::Checkpoint) -> Result<(), EvmCoreError>;
+
+    /// Reverts the active warmth checkpoint.
+    fn revert(&mut self, checkpoint: Self::Checkpoint) -> Result<(), EvmCoreError>;
+
+    /// Starts one root execution attempt.
     fn begin_attempt(&mut self) -> Result<(), EvmCoreError>;
 
     /// Commits or rolls back the active root attempt.
@@ -104,13 +134,15 @@ struct AccessCheckpoint {
 /// Membership costs at most `ADDRESSES` address comparisons or `STORAGE`
 /// storage comparisons per operation. Node deployments should use
 /// [`crate::EvmNodeAccessTracker`] instead.
-#[derive(Clone, Copy, Debug, Eq, PartialEq)]
+#[derive(Debug, Eq, PartialEq)]
 pub struct EvmEmbeddedAccessTracker<const ADDRESSES: usize, const STORAGE: usize> {
     addresses: [EvmAddress; ADDRESSES],
     address_len: usize,
     storage: [StorageSlotAccess; STORAGE],
     storage_len: usize,
-    attempt: Option<AccessCheckpoint>,
+    attempt: Option<EvmAccessCheckpoint>,
+    generation: u64,
+    checkpoint_depth: usize,
 }
 
 impl<const ADDRESSES: usize, const STORAGE: usize> EvmEmbeddedAccessTracker<ADDRESSES, STORAGE> {
@@ -131,18 +163,20 @@ impl<const ADDRESSES: usize, const STORAGE: usize> EvmEmbeddedAccessTracker<ADDR
             }; STORAGE],
             storage_len: 0,
             attempt: None,
+            generation: 0,
+            checkpoint_depth: 0,
         })
     }
 
     /// Returns the number of warmed addresses.
     #[must_use]
-    pub const fn address_len(self) -> usize {
+    pub const fn address_len(&self) -> usize {
         self.address_len
     }
 
     /// Returns the number of warmed storage slots.
     #[must_use]
-    pub const fn storage_len(self) -> usize {
+    pub const fn storage_len(&self) -> usize {
         self.storage_len
     }
 
@@ -192,11 +226,23 @@ impl<const ADDRESSES: usize, const STORAGE: usize> EvmEmbeddedAccessTracker<ADDR
         self.storage_len = checkpoint.storage_len;
         Ok(())
     }
+
+    fn validate_checkpoint(&self, checkpoint: &EvmAccessCheckpoint) -> Result<(), EvmCoreError> {
+        if checkpoint.generation != self.generation
+            || checkpoint.depth == 0
+            || checkpoint.depth != self.checkpoint_depth
+        {
+            return Err(EvmCoreError::StateAccessAttemptMissing);
+        }
+        Ok(())
+    }
 }
 
 impl<const ADDRESSES: usize, const STORAGE: usize> EvmAccessTracker
     for EvmEmbeddedAccessTracker<ADDRESSES, STORAGE>
 {
+    type Checkpoint = EvmAccessCheckpoint;
+
     fn profile(&self) -> EvmAccessProfile {
         EvmAccessProfile::EmbeddedLinear
     }
@@ -210,11 +256,48 @@ impl<const ADDRESSES: usize, const STORAGE: usize> EvmAccessTracker
     }
 
     fn reset_transaction(&mut self) -> Result<(), EvmCoreError> {
+        let generation = self
+            .generation
+            .checked_add(1)
+            .ok_or(EvmCoreError::StateAccessTrackerCorrupt)?;
         self.restore(AccessCheckpoint {
             address_len: 0,
             storage_len: 0,
         })?;
         self.attempt = None;
+        self.checkpoint_depth = 0;
+        self.generation = generation;
+        Ok(())
+    }
+
+    fn checkpoint(&mut self) -> Result<Self::Checkpoint, EvmCoreError> {
+        let depth = self
+            .checkpoint_depth
+            .checked_add(1)
+            .ok_or(EvmCoreError::StateAccessTrackerCorrupt)?;
+        let checkpoint = EvmAccessCheckpoint {
+            address_len: self.address_len,
+            storage_len: self.storage_len,
+            generation: self.generation,
+            depth,
+        };
+        self.checkpoint_depth = depth;
+        Ok(checkpoint)
+    }
+
+    fn commit(&mut self, checkpoint: Self::Checkpoint) -> Result<(), EvmCoreError> {
+        self.validate_checkpoint(&checkpoint)?;
+        self.checkpoint_depth = self.checkpoint_depth.saturating_sub(1);
+        Ok(())
+    }
+
+    fn revert(&mut self, checkpoint: Self::Checkpoint) -> Result<(), EvmCoreError> {
+        self.validate_checkpoint(&checkpoint)?;
+        self.restore(AccessCheckpoint {
+            address_len: checkpoint.address_len,
+            storage_len: checkpoint.storage_len,
+        })?;
+        self.checkpoint_depth = self.checkpoint_depth.saturating_sub(1);
         Ok(())
     }
 
@@ -222,10 +305,7 @@ impl<const ADDRESSES: usize, const STORAGE: usize> EvmAccessTracker
         if self.attempt.is_some() {
             return Err(EvmCoreError::StateAccessAttemptAlreadyActive);
         }
-        self.attempt = Some(AccessCheckpoint {
-            address_len: self.address_len,
-            storage_len: self.storage_len,
-        });
+        self.attempt = Some(self.checkpoint()?);
         Ok(())
     }
 
@@ -234,10 +314,10 @@ impl<const ADDRESSES: usize, const STORAGE: usize> EvmAccessTracker
             .attempt
             .take()
             .ok_or(EvmCoreError::StateAccessAttemptMissing)?;
-        if outcome == EvmAccessAttempt::Rollback {
-            self.restore(checkpoint)?;
+        match outcome {
+            EvmAccessAttempt::Commit => self.commit(checkpoint),
+            EvmAccessAttempt::Rollback => self.revert(checkpoint),
         }
-        Ok(())
     }
 
     fn warm_address(&mut self, address: EvmAddress) -> Result<EvmAccessStatus, EvmCoreError> {

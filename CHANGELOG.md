@@ -7,18 +7,22 @@ All notable changes to `eth` are documented here.
 - Started v0.53.0 with an injectable access-tracker contract, an explicit
   allocation-free embedded profile, and a pre-reserved AVL-backed node profile
   with worst-case logarithmic membership and insertion.
-- Added atomic access capacity enforcement, exact root-attempt rollback,
-  allocation-retaining reset, adversarial sorted/reverse benchmarks, and
-  differential embedded/node fuzz coverage.
+- Added atomic access capacity enforcement, nested LIFO scope rollback,
+  sanitizing allocation-retaining reset, adversarial sorted/reverse
+  benchmarks, and differential embedded/node fuzz coverage.
 - Added validated transaction limits for access sets, journals, checkpoints,
   frames, memory, reusable arenas, caches, and abstract work, plus destructive
   reset and conserved non-copyable hierarchical work tokens.
 - Refreshed the non-admission review against `revm 42.0.1` and
   `revm-primitives 42.0.0`; the latest line exceeds the Rust `1.90` floor and
   no external execution backend entered the dependency graph.
-- Remediated the initial v0.53.0 pentest by flooring both gas-derived access
-  ceilings with drift assertions and making governor generation exhaustion
-  leave all prior transaction budget state unchanged.
+- Remediated the first v0.53.0 pentest by flooring gas-derived access ceilings
+  with drift assertions and making governor generation exhaustion leave all
+  prior transaction budget state unchanged.
+- Remediated the second v0.53.0 pentest by restoring child-scope warmth on
+  revert, separating cumulative and high-water governor APIs, bounding work
+  authority, admitting Prague's initialized warm addresses, and wiping
+  allocator-backed tracker keys on rollback, reset, and drop.
 - Completed the v0.52.7 external pentest and clean retest after remediating
   every reported execution-host lifecycle and GitHub workflow supply-chain
   finding.
@@ -54,8 +58,8 @@ All notable changes to `eth` are documented here.
   cryptography, observation-only inspection, and resettable bounded memory and
   iterative-frame arenas.
 - Added compile-fail admission coverage, fork/type and unknown-envelope tests,
-  child-revert warmth invariants, explicit frame/memory bound tests, and an
-  execution-admission fuzz target.
+  child-revert warmth restoration invariants, explicit frame/memory bound
+  tests, and an execution-admission fuzz target.
 - Added bounded hash-addressed MPT resolution, immutable snapshot anchors,
   multiproof output accounting, optional owned deduplicating arenas, and
   deterministic cancellable host scheduling.

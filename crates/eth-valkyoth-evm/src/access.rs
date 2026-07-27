@@ -29,8 +29,25 @@ fn map_slot(slot: B256) -> EvmWord {
 impl<const ADDRESSES: usize, const STORAGE: usize> AccessTracker
     for EvmEmbeddedAccessTracker<ADDRESSES, STORAGE>
 {
+    type Checkpoint = eth_valkyoth_evm_core::EvmAccessCheckpoint;
+
     fn reset_transaction(&mut self) -> Result<(), HostCapabilityError> {
         self.reset_transaction()
+            .map_err(|_| HostCapabilityError::AccessTrackingFailed)
+    }
+
+    fn checkpoint(&mut self) -> Result<Self::Checkpoint, HostCapabilityError> {
+        eth_valkyoth_evm_core::EvmAccessTracker::checkpoint(self)
+            .map_err(|_| HostCapabilityError::AccessTrackingFailed)
+    }
+
+    fn commit(&mut self, checkpoint: Self::Checkpoint) -> Result<(), HostCapabilityError> {
+        eth_valkyoth_evm_core::EvmAccessTracker::commit(self, checkpoint)
+            .map_err(|_| HostCapabilityError::AccessTrackingFailed)
+    }
+
+    fn revert(&mut self, checkpoint: Self::Checkpoint) -> Result<(), HostCapabilityError> {
+        eth_valkyoth_evm_core::EvmAccessTracker::revert(self, checkpoint)
             .map_err(|_| HostCapabilityError::AccessTrackingFailed)
     }
 
@@ -53,8 +70,25 @@ impl<const ADDRESSES: usize, const STORAGE: usize> AccessTracker
 
 #[cfg(feature = "alloc")]
 impl AccessTracker for eth_valkyoth_evm_core::EvmNodeAccessTracker {
+    type Checkpoint = eth_valkyoth_evm_core::EvmAccessCheckpoint;
+
     fn reset_transaction(&mut self) -> Result<(), HostCapabilityError> {
         self.reset_transaction()
+            .map_err(|_| HostCapabilityError::AccessTrackingFailed)
+    }
+
+    fn checkpoint(&mut self) -> Result<Self::Checkpoint, HostCapabilityError> {
+        eth_valkyoth_evm_core::EvmAccessTracker::checkpoint(self)
+            .map_err(|_| HostCapabilityError::AccessTrackingFailed)
+    }
+
+    fn commit(&mut self, checkpoint: Self::Checkpoint) -> Result<(), HostCapabilityError> {
+        eth_valkyoth_evm_core::EvmAccessTracker::commit(self, checkpoint)
+            .map_err(|_| HostCapabilityError::AccessTrackingFailed)
+    }
+
+    fn revert(&mut self, checkpoint: Self::Checkpoint) -> Result<(), HostCapabilityError> {
+        eth_valkyoth_evm_core::EvmAccessTracker::revert(self, checkpoint)
             .map_err(|_| HostCapabilityError::AccessTrackingFailed)
     }
 

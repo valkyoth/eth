@@ -25,13 +25,16 @@ embedded profiles.
 pre-reserves the complete configured address and storage capacity. Its AVL
 indexes perform worst-case `O(log n)` comparisons and rotations and do not
 allocate while warming accesses. Reset is `O(n)` and retains only the bounded
-constructor allocation. Root-attempt rollback is `O(n log n)` and performs no
+constructor allocation. Reset, rollback, and drop erase key bytes through the
+audited optional sanitization bridge. Rollback is `O(n log n)` and performs no
 allocation.
 
 Both profiles enforce gas-derived hard ceilings. `warm_storage` is atomic: a
-capacity failure cannot add only the address or only the slot. Child-call
-reverts preserve EIP-2929 transaction warmth; failed or reverted root attempts
-restore the exact pre-attempt state.
+capacity failure cannot add only the address or only the slot. LIFO scope
+checkpoints preserve pre-entry warmth but remove every address and slot first
+warmed inside a reverted scope, as required by EIP-2929. The global address
+ceiling includes paid EIP-2930 entries plus Prague's maximum initialized warm
+set; deployments may select a lower fork-specific capacity.
 
 ## Governor Contract
 
@@ -45,11 +48,17 @@ reviewed ceilings for:
 - abstract execution work.
 
 `ExecutionGovernor::reset_transaction` is mandatory before accounting.
-`charge` records cumulative work such as distinct admitted entries.
-`observe_capacity` records a simultaneous or retained high-water requirement
-for reusable frames, checkpoint depth, memory, arenas, and caches. Both are
-checked before mutation and atomic on exhaustion. Accounting is monotonic for
-the transaction: failed or cancelled work is not refunded.
+`charge` accepts only `CumulativeExecutionResource` and records distinct
+addresses, slots, and journal entries. `observe_capacity` accepts only
+`HighWaterExecutionResource` and records simultaneous or retained frame,
+checkpoint, memory, arena, and cache requirements. The type split prevents an
+integration from applying reusable high-water accounting to cumulative work.
+Both paths are checked before mutation and atomic on exhaustion.
+
+One work unit represents one scheduled interpreter or backend step.
+`MAX_EXECUTION_WORK_UNITS` matches the reviewed one-million-step interpreter
+ceiling. Integrations must charge multi-step operations by a reviewed upper
+bound and may configure a lower deployment limit.
 
 `ExecutionWorkToken` is non-copyable and has no public constructor. A parent
 may delegate no more units than it owns. Delegation subtracts from the parent,

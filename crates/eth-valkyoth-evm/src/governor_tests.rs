@@ -1,6 +1,7 @@
 use crate::{
-    ExecutionGovernor, ExecutionGovernorError, ExecutionResource, ExecutionResourceLimits,
-    ExecutionResourceRequest,
+    CumulativeExecutionResource, ExecutionGovernor, ExecutionGovernorError, ExecutionResource,
+    ExecutionResourceLimits, ExecutionResourceRequest, HighWaterExecutionResource,
+    MAX_EXECUTION_WORK_UNITS,
 };
 
 fn limits() -> Option<ExecutionResourceLimits> {
@@ -25,24 +26,67 @@ fn every_resource_is_bounded_and_failure_is_atomic() {
     };
     let mut governor = ExecutionGovernor::new(limits);
     assert_eq!(governor.reset_transaction(), Ok(()));
-    let resources = [
-        (ExecutionResource::WarmAddress, 2),
-        (ExecutionResource::WarmStorageSlot, 3),
-        (ExecutionResource::JournalEntry, 4),
-        (ExecutionResource::JournalCheckpoint, 2),
-        (ExecutionResource::Frame, 2),
-        (ExecutionResource::MemoryByte, 64),
-        (ExecutionResource::ReusableArenaByte, 128),
-        (ExecutionResource::CacheEntry, 8),
+    let cumulative = [
+        (
+            CumulativeExecutionResource::WarmAddress,
+            ExecutionResource::WarmAddress,
+            2,
+        ),
+        (
+            CumulativeExecutionResource::WarmStorageSlot,
+            ExecutionResource::WarmStorageSlot,
+            3,
+        ),
+        (
+            CumulativeExecutionResource::JournalEntry,
+            ExecutionResource::JournalEntry,
+            4,
+        ),
     ];
 
-    for (resource, limit) in resources {
+    for (resource, reported, limit) in cumulative {
         assert_eq!(governor.charge(resource, limit), Ok(()));
         assert_eq!(
             governor.charge(resource, 1),
-            Err(ExecutionGovernorError::ResourceExhausted(resource))
+            Err(ExecutionGovernorError::ResourceExhausted(reported))
         );
-        assert_eq!(governor.used(resource), limit);
+        assert_eq!(governor.used(reported), limit);
+    }
+
+    let high_water = [
+        (
+            HighWaterExecutionResource::JournalCheckpoint,
+            ExecutionResource::JournalCheckpoint,
+            2,
+        ),
+        (
+            HighWaterExecutionResource::Frame,
+            ExecutionResource::Frame,
+            2,
+        ),
+        (
+            HighWaterExecutionResource::MemoryByte,
+            ExecutionResource::MemoryByte,
+            64,
+        ),
+        (
+            HighWaterExecutionResource::ReusableArenaByte,
+            ExecutionResource::ReusableArenaByte,
+            128,
+        ),
+        (
+            HighWaterExecutionResource::CacheEntry,
+            ExecutionResource::CacheEntry,
+            8,
+        ),
+    ];
+    for (resource, reported, limit) in high_water {
+        assert_eq!(governor.observe_capacity(resource, limit), Ok(()));
+        assert_eq!(
+            governor.observe_capacity(resource, limit.saturating_add(1)),
+            Err(ExecutionGovernorError::ResourceExhausted(reported))
+        );
+        assert_eq!(governor.used(reported), limit);
     }
 }
 
@@ -82,16 +126,16 @@ fn reusable_capacity_records_high_water_instead_of_cumulative_calls() {
     let mut governor = ExecutionGovernor::new(limits);
     assert_eq!(governor.reset_transaction(), Ok(()));
     assert_eq!(
-        governor.observe_capacity(ExecutionResource::Frame, 2),
+        governor.observe_capacity(HighWaterExecutionResource::Frame, 2),
         Ok(())
     );
     assert_eq!(
-        governor.observe_capacity(ExecutionResource::Frame, 1),
+        governor.observe_capacity(HighWaterExecutionResource::Frame, 1),
         Ok(())
     );
     assert_eq!(governor.used(ExecutionResource::Frame), 2);
     assert_eq!(
-        governor.observe_capacity(ExecutionResource::Frame, 3),
+        governor.observe_capacity(HighWaterExecutionResource::Frame, 3),
         Err(ExecutionGovernorError::ResourceExhausted(
             ExecutionResource::Frame
         ))
@@ -106,7 +150,10 @@ fn destructive_reset_clears_usage_and_invalidates_generation_identity() {
     };
     let mut governor = ExecutionGovernor::new(limits);
     assert_eq!(governor.reset_transaction(), Ok(()));
-    assert_eq!(governor.charge(ExecutionResource::CacheEntry, 7), Ok(()));
+    assert_eq!(
+        governor.observe_capacity(HighWaterExecutionResource::CacheEntry, 7),
+        Ok(())
+    );
     let Ok(before) = governor.issue_work(4) else {
         return;
     };
@@ -134,11 +181,11 @@ fn invalid_limits_and_zero_charges_fail_closed() {
 
     let mut governor = ExecutionGovernor::new(limits);
     assert_eq!(
-        governor.charge(ExecutionResource::Frame, 0),
+        governor.observe_capacity(HighWaterExecutionResource::Frame, 0),
         Err(ExecutionGovernorError::ZeroCharge)
     );
     assert_eq!(
-        governor.charge(ExecutionResource::Frame, 1),
+        governor.observe_capacity(HighWaterExecutionResource::Frame, 1),
         Err(ExecutionGovernorError::TransactionNotStarted)
     );
     assert_eq!(
@@ -148,5 +195,12 @@ fn invalid_limits_and_zero_charges_fail_closed() {
     assert_eq!(
         governor.issue_work(1),
         Err(ExecutionGovernorError::TransactionNotStarted)
+    );
+
+    request.frames = 1;
+    request.work_units = MAX_EXECUTION_WORK_UNITS.saturating_add(1);
+    assert_eq!(
+        ExecutionResourceLimits::try_new(request),
+        Err(ExecutionGovernorError::LimitTooLarge)
     );
 }
