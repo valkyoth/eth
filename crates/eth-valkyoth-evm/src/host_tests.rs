@@ -4,10 +4,10 @@ use eth_valkyoth_primitives::{
 use eth_valkyoth_protocol::{ForkActivation, ForkSpec, Hardfork, ValidationContext};
 
 use crate::{
-    AccessStatus, AccessTracker, BlockExecutionContext, BorrowedTransactionArena, CryptoProvider,
-    ExecutionEnvironment, ExecutionHost, HostCapabilityError, Inspector, InspectorEvent,
-    IterativeCallFrame, SnapshotAccount, SnapshotError, StateJournal, StateSnapshot,
-    TransactionArena,
+    AccessStatus, AccessTracker, BeginChildError, BlockExecutionContext, BorrowedTransactionArena,
+    CryptoProvider, ExecutionEnvironment, ExecutionHost, HostCapabilityError, Inspector,
+    InspectorEvent, IterativeCallFrame, SnapshotAccount, SnapshotError, StateJournal,
+    StateSnapshot, TransactionArena,
 };
 
 #[derive(Clone, Copy, Debug)]
@@ -17,11 +17,17 @@ struct JournalCheckpoint {
 
 struct TestJournal {
     value: B256,
+    fail_revert: bool,
+    revert_attempts: usize,
 }
 
 impl Default for TestJournal {
     fn default() -> Self {
-        Self { value: zero_hash() }
+        Self {
+            value: zero_hash(),
+            fail_revert: false,
+            revert_attempts: 0,
+        }
     }
 }
 
@@ -42,6 +48,10 @@ impl StateJournal for TestJournal {
     }
 
     fn revert(&mut self, checkpoint: Self::Checkpoint) -> Result<(), HostCapabilityError> {
+        self.revert_attempts = self.revert_attempts.saturating_add(1);
+        if self.fail_revert {
+            return Err(HostCapabilityError::JournalFailed);
+        }
         self.value = checkpoint.value;
         Ok(())
     }
@@ -249,6 +259,75 @@ fn invalid_frame_profiles_fail_closed() {
         BorrowedTransactionArena::<0>::try_new(&mut memory),
         Err(HostCapabilityError::InvalidFrameCapacity)
     );
+}
+
+#[test]
+fn rejected_child_frame_preserves_primary_error_after_successful_cleanup() {
+    let result = begin_child_at_capacity(false);
+    assert!(result.is_some(), "{result:?}");
+    let Some((error, revert_attempts)) = result else {
+        return;
+    };
+    assert_eq!(
+        error,
+        BeginChildError::FrameRejected {
+            frame_error: HostCapabilityError::CallDepthExceeded,
+        }
+    );
+    assert_eq!(revert_attempts, 1);
+}
+
+#[test]
+fn rejected_child_frame_reports_both_frame_and_cleanup_failures() {
+    let result = begin_child_at_capacity(true);
+    assert!(result.is_some(), "{result:?}");
+    let Some((error, revert_attempts)) = result else {
+        return;
+    };
+    assert_eq!(
+        error,
+        BeginChildError::FrameRejectedAndJournalRevertFailed {
+            frame_error: HostCapabilityError::CallDepthExceeded,
+            revert_error: HostCapabilityError::JournalFailed,
+        }
+    );
+    assert_eq!(
+        error.code(),
+        "ETH_EVM_HOST_FRAME_REJECTED_JOURNAL_REVERT_FAILED"
+    );
+    assert_eq!(revert_attempts, 1);
+}
+
+fn begin_child_at_capacity(fail_revert: bool) -> Option<(BeginChildError, usize)> {
+    let mut memory = [0u8; 1];
+    let mut arena = BorrowedTransactionArena::<1>::try_new(&mut memory).ok()?;
+    let frame = IterativeCallFrame {
+        address: zero_address(),
+        is_static: false,
+    };
+    arena.enter_frame(frame).ok()?;
+    let mut journal = TestJournal {
+        fail_revert,
+        ..TestJournal::default()
+    };
+    let mut access = TestAccess::default();
+    let mut crypto = TestCrypto;
+    let mut inspector = TestInspector::default();
+    let snapshot = TestSnapshot;
+    let environment = environment()?;
+    let error = {
+        let mut host = ExecutionHost {
+            state: &snapshot,
+            journal: &mut journal,
+            block: &environment,
+            access: &mut access,
+            crypto: &mut crypto,
+            inspector: &mut inspector,
+            arena: &mut arena,
+        };
+        host.begin_child(frame).err()?
+    };
+    Some((error, journal.revert_attempts))
 }
 
 fn zero_address() -> Address {

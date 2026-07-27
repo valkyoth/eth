@@ -1,6 +1,6 @@
 # Release Notes - eth v0.52.7
 
-Status: implementation complete; awaiting pentest.
+Status: pentest findings remediated; awaiting clean retest.
 
 ## Summary
 
@@ -22,6 +22,9 @@ auditable capabilities.
 - Allocation-free `BorrowedTransactionArena` with destructive reset,
   iterative frames, and explicit memory/depth failures.
 - Compile-fail, fork matrix, rollback/warmth, arena-bound, and fuzz coverage.
+- `BeginChildError` distinguishes checkpoint failure, frame rejection after
+  successful cleanup, and simultaneous frame rejection plus journal rollback
+  failure while retaining both underlying errors.
 
 ## Changed
 
@@ -42,6 +45,10 @@ auditable capabilities.
 - Host recursion and unbounded transaction-memory growth are not admitted.
 - Inspectors observe immutable lifecycle events and cannot return consensus
   decisions.
+- Inspector depth is documented as a one-based active child-frame count.
+- A frame-capacity failure cannot shadow a simultaneous journal cleanup
+  failure; callers receive a distinct fatal consistency error with both
+  causes.
 
 The fork-validation typestate is intentionally limited. Sender recovery,
 intrinsic gas, nonce/account state, balances, fees, blob/KZG rules, EIP-7702
@@ -58,6 +65,8 @@ assigned to `v0.63.0`.
 
 ## Pentest
 
-Tagging is blocked until independent review, remediation of every finding, a
-clean retest, and a permanent exact-commit report at
+The initial independent review reported two Low findings: child-frame rejection
+could be shadowed by a rollback failure, and inspector depth documentation
+incorrectly called a one-based count zero-based. Both are remediated. Tagging
+remains blocked until a clean retest and permanent exact-commit report at
 `security/pentest/v0.52.7.md`.

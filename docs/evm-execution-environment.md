@@ -76,5 +76,8 @@ counts above policy and estimates above the selected cap.
   identity remain explicit audit evidence.
 - Host state, journal, access, cryptographic, inspection, and arena powers are
   separate contracts.
+- Child frame rejection preserves its arena error, and a simultaneous journal
+  cleanup failure is reported as a distinct fatal consistency error carrying
+  both causes.
 - Complete transaction validity and complete execution remain assigned to
   later versioned milestones.

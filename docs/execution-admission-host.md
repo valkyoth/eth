@@ -1,7 +1,7 @@
 # Execution Admission And Host Capabilities
 
-Status: `v0.52.7` implementation complete; awaiting pentest of the exact
-implementation-stop commit.
+Status: `v0.52.7` pentest findings remediated; awaiting clean retest of the
+exact remediation commit.
 
 This document defines the transaction and host boundary that every later
 first-party execution machine must consume. It does not claim complete
@@ -73,6 +73,15 @@ storage because it has no journal overlay.
 EIP-2929 warmth therefore survives child failure and revert, while state
 changes remain controlled by `StateJournal` checkpoints.
 
+`ExecutionHost::begin_child` reports checkpoint creation, frame rejection, and
+frame-rejection cleanup separately through `BeginChildError`. If frame
+admission and journal rollback both fail, the error retains both
+`HostCapabilityError` values and marks journal consistency as unknown. A
+caller must abort rather than retry that transaction.
+
+Inspector child-event depth is the count of active child frames. The first
+nested frame reports one on entry, commit, and revert.
+
 ## Bounds And Failure
 
 `BorrowedTransactionArena`:
@@ -97,6 +106,7 @@ The release includes:
 - fork/type activation and signed-chain mismatch matrices;
 - empty and unknown typed-envelope rejection;
 - a nested child-revert test proving state rolls back while warmth survives;
+- frame-capacity rejection tests with successful and failed journal cleanup;
 - iterative depth and memory-capacity failure tests;
 - an execution-admission fuzz target with committed seeds;
 - `no_std`, strict Clippy, workspace, MSRV, and release-gate coverage.

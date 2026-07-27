@@ -51,6 +51,7 @@ The `0.11.0` support-crate release, shipped with `eth` `0.52.7`, provides:
 - `ExecutionRequest` construction only from the non-forgeable final token;
 - separate `StateView`, `StateJournal`, `BlockEnvironment`, `AccessTracker`,
   `CryptoProvider`, optional `Inspector`, and `TransactionArena` contracts;
+- `BeginChildError` preserving frame rejection and journal-cleanup failures;
 - allocation-free resettable borrowed memory and iterative frame storage;
 - bounded gas-estimation policy and deterministic termination ceilings.
 

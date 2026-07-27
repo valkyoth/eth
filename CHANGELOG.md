@@ -4,6 +4,9 @@ All notable changes to `eth` are documented here.
 
 ## Unreleased
 
+- Remediated the v0.52.7 pentest by preserving both child-frame rejection and
+  journal-cleanup failures in a dedicated `BeginChildError`, and corrected
+  inspector depth documentation to describe its one-based active-frame count.
 - Added non-forgeable execution admission typestates that promote a classified
   envelope through complete type-specific canonical decode and active-fork/
   signed-chain checks before `ExecutionRequest` can be constructed.

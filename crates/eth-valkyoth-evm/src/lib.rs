@@ -11,6 +11,7 @@ mod admission;
 mod environment;
 mod gas_estimation;
 mod host;
+mod host_error;
 mod result;
 mod snapshot;
 
@@ -28,10 +29,11 @@ pub use gas_estimation::{
 };
 pub use host::{
     AccessStatus, AccessTracker, BlockEnvironment, BorrowedTransactionArena, ChildCheckpoint,
-    CryptoProvider, ExecutionHost, HostCapabilityError, Inspector, InspectorEvent,
-    IterativeCallFrame, MAX_ITERATIVE_CALL_FRAMES, MAX_TRANSACTION_MEMORY_BYTES, NoInspector,
-    StateJournal, TransactionArena,
+    CryptoProvider, ExecutionHost, Inspector, InspectorEvent, IterativeCallFrame,
+    MAX_ITERATIVE_CALL_FRAMES, MAX_TRANSACTION_MEMORY_BYTES, NoInspector, StateJournal,
+    TransactionArena,
 };
+pub use host_error::{BeginChildError, HostCapabilityError};
 pub use result::{
     ExecutionError, ExecutionReport, ExecutionRequest, ExecutionResult, ExecutionStatus,
 };

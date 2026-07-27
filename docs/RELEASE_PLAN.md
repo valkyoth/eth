@@ -2875,8 +2875,8 @@ Exit criteria:
 
 ### v0.52.7 - Execution Admission And Host Capability Split
 
-Status: implementation complete; awaiting pentest of the exact implementation
-stop commit.
+Status: pentest findings remediated; awaiting clean retest of the exact
+remediation commit.
 
 Goal: prevent an opaque EIP-2718 classification result from becoming
 executable and separate execution host responsibilities into auditable
@@ -2898,6 +2898,8 @@ Verification:
 - fork/type admission matrices and unknown-type negative tests;
 - nested-call rollback tests proving warmth survives child revert while state
   does not;
+- frame-rejection cleanup tests preserving both the arena rejection and any
+  journal rollback failure;
 - deep-call and memory-expansion tests proving EVM exceptions replace host
   recursion or bounds errors.
 
