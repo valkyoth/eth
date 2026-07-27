@@ -4,6 +4,11 @@ All notable changes to `eth` are documented here.
 
 ## Unreleased
 
+- Remediated five v0.52.7 execution-host findings by request-binding private
+  capabilities, making journals authoritative for current storage, replacing
+  escapable child tokens with poisoned LIFO closure lifecycles, moving
+  inspector dispatch after transitions, and charging legacy classification to
+  the conserved decode session.
 - Expanded the live tooling freshness gate to inspect every GitHub Actions
   workflow, require full-SHA checkout pins with version annotations, and reject
   a stale or mismatched checkout pin in any workflow; cargo-fuzz is now covered

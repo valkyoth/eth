@@ -40,7 +40,7 @@ workspace manifests and refuses accidental lockstep publication.
 | `eth-valkyoth-derive` | `0.18.0` | `0.18.0` | `unchanged` | No | No package changes. |
 | `eth-valkyoth-sanitization` | `0.8.0` | `0.8.0` | `unchanged` | No | No package changes. |
 | `eth-valkyoth-evm-core` | `0.26.1` | `0.26.1` | `unchanged` | No | No package changes. |
-| `eth-valkyoth-evm` | `0.10.2` | `0.11.0` | `code` | Yes | Adds non-forgeable execution admission typestates and explicit host capability contracts. |
+| `eth-valkyoth-evm` | `0.10.2` | `0.11.0` | `code` | Yes | Adds request-bound execution admission and pentest-remediated atomic host capability contracts. |
 | `eth-valkyoth-rpc` | `0.7.0` | `0.7.0` | `unchanged` | No | No package changes. |
 | `eth-valkyoth-signer` | `0.7.5` | `0.7.5` | `unchanged` | No | No package changes. |
 | `eth-valkyoth-reth` | `0.7.0` | `0.7.0` | `unchanged` | No | No package changes. |

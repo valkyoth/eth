@@ -1,0 +1,19 @@
+error[E0451]: fields `request`, `journal`, `access`, `crypto`, `arena`, `poisoned` and `transaction_started` of struct `ExecutionHost` are private
+  --> tests/ui/execution_host_fields.rs:18:9
+   |
+17 |     let _ = ExecutionHost {
+   |             ------------- in this type
+18 |         request,
+   |         ^^^^^^^ private field
+19 |         journal,
+   |         ^^^^^^^ private field
+20 |         access,
+   |         ^^^^^^ private field
+21 |         crypto,
+   |         ^^^^^^ private field
+22 |         arena,
+   |         ^^^^^ private field
+23 |         poisoned: false,
+   |         ^^^^^^^^ private field
+24 |         transaction_started: true,
+   |         ^^^^^^^^^^^^^^^^^^^ private field

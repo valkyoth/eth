@@ -28,13 +28,17 @@ transaction.
 `ClassifiedEnvelope::decode`:
 
 - constructs one non-copyable `DecodeSession`;
+- classifies legacy RLP through that same session rather than an unaccounted
+  compatibility parser;
 - rejects an empty typed payload;
 - rejects typed domains without a first-party canonical decoder;
 - retains the exact raw bytes and classified envelope.
 
 `try_into_canonical` runs the complete transaction-type decoder for legacy,
-EIP-2930, EIP-1559, EIP-4844, or EIP-7702 under the conserved session. A
-failure returns the original candidate token and a stable error.
+EIP-2930, EIP-1559, EIP-4844, or EIP-7702 under the conserved session. Legacy
+classification and its required canonical reparse are both charged, so
+deployment policy must budget both passes. A failure returns the original
+candidate token and a stable error.
 
 `try_into_fork_validated` checks:
 
@@ -54,33 +58,38 @@ before state transition execution.
 
 ## Host Capability Split
 
-The host exposes separate powers:
+The host owns separate private powers:
 
-- `StateView`: immutable snapshot identity, accounts, original storage, and
-  current storage;
-- `StateJournal`: reset, child checkpoints, commit/revert, and writes;
-- `BlockEnvironment`: immutable admitted fork and block context;
+- `StateView`: immutable snapshot identity, accounts, and original storage;
+- `StateJournal`: an associated exact `StateView`, authoritative current
+  storage, reset, private child checkpoints, commit/revert, and writes;
 - `AccessTracker`: transaction-global address and slot warmth;
 - `CryptoProvider`: reviewed Keccak and recovery operations;
-- `Inspector`: observation-only lifecycle events with no consensus decision;
+- `Inspector`: external observation of post-transition immutable events;
 - `TransactionArena`: destructively resettable memory and iterative frames.
 
-`StateSnapshot` remains as a compatibility read interface. Its blanket
-`StateView` implementation returns the same value for original and current
-storage because it has no journal overlay.
+`ExecutionHost::new` requires an `ExecutionRequest` and derives its state and
+environment exclusively from that admitted request. Capability fields are
+private, and the journal's associated view type must match the request view.
+`StateSnapshot` remains as a compatibility read interface for immutable base
+state, while current storage can only be read through `StateJournal`.
 
 `ExecutionHost` intentionally gives `AccessTracker` no child checkpoint.
 EIP-2929 warmth therefore survives child failure and revert, while state
 changes remain controlled by `StateJournal` checkpoints.
 
-`ExecutionHost::begin_child` reports checkpoint creation, frame rejection, and
-frame-rejection cleanup separately through `BeginChildError`. If frame
-admission and journal rollback both fail, the error retains both
-`HostCapabilityError` values and marks journal consistency as unknown. A
-caller must abort rather than retry that transaction.
+`ExecutionHost::with_child` keeps checkpoint tokens private and scopes child
+execution in a closure, so nested children must finalize in LIFO order. It
+validates the exact frame depth before consuming the checkpoint and poisons
+the host after any partial or inconsistent journal/arena finalization. If
+frame admission and journal rollback both fail, `BeginChildError` retains both
+errors. A poisoned host rejects all later mutable capability operations.
 
-Inspector child-event depth is the count of active child frames. The first
-nested frame reports one on entry, commit, and revert.
+Transaction and child methods return immutable `InspectorEvent` evidence only
+after critical transitions complete. Inspectors are not invoked while a
+checkpoint or frame is in an externally unrecoverable intermediate state.
+Child-event depth is the count of active child frames; the first nested frame
+reports one on entry, commit, and revert.
 
 ## Bounds And Failure
 
@@ -106,7 +115,12 @@ The release includes:
 - fork/type activation and signed-chain mismatch matrices;
 - empty and unknown typed-envelope rejection;
 - a nested child-revert test proving state rolls back while warmth survives;
+- nested child finalization proving journal checkpoints complete in LIFO order;
+- journal-authoritative current-storage coverage after a write;
+- poisoned-host coverage after partial journal finalization;
 - frame-capacity rejection tests with successful and failed journal cleanup;
+- post-transition inspector dispatch coverage;
+- legacy classification/reparse accounting under one decode ledger;
 - iterative depth and memory-capacity failure tests;
 - an execution-admission fuzz target with committed seeds;
 - `no_std`, strict Clippy, workspace, MSRV, and release-gate coverage.

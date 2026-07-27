@@ -27,9 +27,8 @@ pub trait StateSnapshot {
 
 /// Snapshot-pure state reads required by execution.
 ///
-/// Every method borrows immutably. Implementations must keep
-/// [`Self::original_storage`] fixed at transaction-start state while
-/// [`Self::current_storage`] reflects the selected journal view.
+/// Every method borrows immutably. Current journaled storage is deliberately
+/// excluded and must be read through [`crate::StateJournal`].
 pub trait StateView {
     /// Stable identity for the selected state snapshot.
     fn snapshot_id(&self) -> B256;
@@ -39,9 +38,6 @@ pub trait StateView {
 
     /// Storage value at the start of the transaction.
     fn original_storage(&self, address: Address, slot: B256) -> Result<B256, SnapshotError>;
-
-    /// Storage value in the current journaled view.
-    fn current_storage(&self, address: Address, slot: B256) -> Result<B256, SnapshotError>;
 }
 
 impl<T: StateSnapshot + ?Sized> StateView for T {
@@ -54,10 +50,6 @@ impl<T: StateSnapshot + ?Sized> StateView for T {
     }
 
     fn original_storage(&self, address: Address, slot: B256) -> Result<B256, SnapshotError> {
-        StateSnapshot::storage(self, address, slot)
-    }
-
-    fn current_storage(&self, address: Address, slot: B256) -> Result<B256, SnapshotError> {
         StateSnapshot::storage(self, address, slot)
     }
 }

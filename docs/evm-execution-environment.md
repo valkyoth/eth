@@ -18,8 +18,8 @@ An execution request binds:
 - `ExecutionReadyTransaction`: exact bytes that passed classification,
   type-specific canonical decoding, transaction-type activation, and signed
   chain binding;
-- `StateView`: caller-provided immutable account and original/current storage
-  view with a stable snapshot identifier.
+- `StateView`: caller-provided immutable account and original-storage view
+  with a stable snapshot identifier.
 
 The environment constructor rejects inactive fork contexts and mismatched
 chain ID, block number, or timestamp. `ExecutionRequest::new` cannot accept an
@@ -31,12 +31,12 @@ opaque `TransactionEnvelope` or `ClassifiedEnvelope`.
 
 - `snapshot_id()` returns the caller-reviewed state identity;
 - `account(address)` returns account nonce, balance, and code hash;
-- `original_storage(address, slot)` returns the transaction-start value;
-- `current_storage(address, slot)` returns the current read value.
+- `original_storage(address, slot)` returns the transaction-start value.
 
-`StateSnapshot` remains as a compatibility trait. Its blanket `StateView`
-implementation uses `storage` for both original and current values because it
-has no journal overlay.
+`StateSnapshot` remains as a compatibility trait and supplies immutable base
+state through its blanket `StateView` implementation. `StateJournal` is
+associated with one exact view type and is authoritative for current storage,
+so a compatibility snapshot cannot silently return stale post-write values.
 
 The traits do not prescribe databases, caches, RPC, proofs, or witness
 formats. Every execution attempt can still report which state identity it
@@ -74,8 +74,13 @@ counts above policy and estimates above the selected cap.
 - Transaction admission uses a single conserved bounded decode session.
 - The active environment, transaction type, transaction hash, and snapshot
   identity remain explicit audit evidence.
-- Host state, journal, access, cryptographic, inspection, and arena powers are
-  separate contracts.
+- `ExecutionHost` is constructed from one admitted request; state and
+  environment cannot be supplied independently from its report provenance.
+- Host journal, access, cryptographic, and arena powers are private contracts.
+- Child checkpoints never escape `with_child`, nested finalization is LIFO,
+  and partial finalization poisons the host.
+- Inspector callbacks occur only after immutable transition events are
+  returned to the caller.
 - Child frame rejection preserves its arena error, and a simultaneous journal
   cleanup failure is reported as a distinct fatal consistency error carrying
   both causes.

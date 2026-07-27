@@ -1,14 +1,10 @@
 use eth_valkyoth_primitives::{Address, B256};
 
 use crate::{
-    ExecutionEnvironment, StateView,
-    host_error::{BeginChildError, HostCapabilityError},
+    ExecutionEnvironment, ExecutionRequest, SnapshotAccount, StateView,
+    arena::{IterativeCallFrame, TransactionArena},
+    host_error::{BeginChildError, ChildFinalizeAction, ChildLifecycleError, HostCapabilityError},
 };
-
-/// Maximum iterative call-frame capacity admitted by the EVM.
-pub const MAX_ITERATIVE_CALL_FRAMES: usize = 1024;
-/// Maximum borrowed transaction-memory capacity in this release.
-pub const MAX_TRANSACTION_MEMORY_BYTES: usize = 16_777_216;
 
 /// Warm/cold result from a transaction-global access tracker.
 #[derive(Clone, Copy, Debug, Eq, PartialEq)]
@@ -19,20 +15,10 @@ pub enum AccessStatus {
     Cold,
 }
 
-/// Block and fork data visible to execution.
-pub trait BlockEnvironment {
-    /// Returns the immutable environment selected during admission.
-    fn execution_environment(&self) -> ExecutionEnvironment;
-}
-
-impl BlockEnvironment for ExecutionEnvironment {
-    fn execution_environment(&self) -> ExecutionEnvironment {
-        *self
-    }
-}
-
 /// Journaled state mutations with explicit child checkpoints.
 pub trait StateJournal {
+    /// Exact immutable state-view type compatible with this journal.
+    type View: StateView + ?Sized;
     /// Non-forgeable implementation-defined checkpoint token.
     type Checkpoint;
 
@@ -47,6 +33,14 @@ pub trait StateJournal {
 
     /// Reverts the active child checkpoint.
     fn revert(&mut self, checkpoint: Self::Checkpoint) -> Result<(), HostCapabilityError>;
+
+    /// Reads one slot from the current journal overlay or immutable base.
+    fn current_storage(
+        &self,
+        base: &Self::View,
+        address: Address,
+        slot: B256,
+    ) -> Result<B256, HostCapabilityError>;
 
     /// Writes one storage slot into the current journal view.
     fn set_storage(
@@ -128,227 +122,330 @@ impl Inspector for NoInspector {
     fn observe(&mut self, _event: InspectorEvent) {}
 }
 
-/// One iterative EVM call-frame descriptor.
+/// Finalization selected by one closure-scoped child execution.
 #[derive(Clone, Copy, Debug, Eq, PartialEq)]
-pub struct IterativeCallFrame {
-    /// Executing account.
-    pub address: Address,
-    /// Whether state-changing operations are forbidden.
-    pub is_static: bool,
+pub enum ChildDecision<T> {
+    /// Keep child journal changes.
+    Commit(T),
+    /// Roll back child journal changes.
+    Revert(T),
 }
 
-/// Resettable bounded transaction arena contract.
-pub trait TransactionArena {
-    /// Destructively clears transaction-local memory and frames.
-    fn reset_transaction(&mut self) -> Result<(), HostCapabilityError>;
-
-    /// Makes `required_len` zero-initialized memory bytes visible.
-    fn reserve_memory(&mut self, required_len: usize) -> Result<(), HostCapabilityError>;
-
-    /// Enters one iterative child frame.
-    fn enter_frame(&mut self, frame: IterativeCallFrame) -> Result<usize, HostCapabilityError>;
-
-    /// Leaves the active iterative child frame.
-    fn leave_frame(&mut self) -> Result<IterativeCallFrame, HostCapabilityError>;
-
-    /// Current iterative frame depth.
-    fn frame_depth(&self) -> usize;
-}
-
-/// Allocation-free borrowed transaction arena.
+/// Completed child output and immutable post-transition observation events.
 #[derive(Debug, Eq, PartialEq)]
-pub struct BorrowedTransactionArena<'a, const FRAMES: usize> {
-    memory: &'a mut [u8],
-    memory_len: usize,
-    frames: [Option<IterativeCallFrame>; FRAMES],
-    frame_len: usize,
+pub struct ChildExecution<T> {
+    output: T,
+    events: [InspectorEvent; 2],
 }
 
-impl<'a, const FRAMES: usize> BorrowedTransactionArena<'a, FRAMES> {
-    /// Creates and clears a bounded arena.
-    pub fn try_new(memory: &'a mut [u8]) -> Result<Self, HostCapabilityError> {
-        if FRAMES == 0 || FRAMES > MAX_ITERATIVE_CALL_FRAMES {
-            return Err(HostCapabilityError::InvalidFrameCapacity);
+impl<T> ChildExecution<T> {
+    /// Result returned by the child execution closure.
+    #[must_use]
+    pub const fn output(&self) -> &T {
+        &self.output
+    }
+
+    /// Events that may be dispatched after all critical transitions completed.
+    #[must_use]
+    pub const fn events(&self) -> &[InspectorEvent; 2] {
+        &self.events
+    }
+
+    /// Consumes the evidence wrapper and returns the child output.
+    #[must_use]
+    pub fn into_output(self) -> T {
+        self.output
+    }
+}
+
+/// Request-bound bundle of powers available to an execution machine.
+pub struct ExecutionHost<'host, 'transaction, J, A, C, R>
+where
+    J: StateJournal,
+    A: AccessTracker,
+    C: CryptoProvider,
+    R: TransactionArena,
+{
+    request: &'host ExecutionRequest<'transaction, J::View>,
+    journal: &'host mut J,
+    access: &'host mut A,
+    crypto: &'host mut C,
+    arena: &'host mut R,
+    poisoned: bool,
+    transaction_started: bool,
+}
+
+impl<'host, 'transaction, J, A, C, R> ExecutionHost<'host, 'transaction, J, A, C, R>
+where
+    J: StateJournal,
+    A: AccessTracker,
+    C: CryptoProvider,
+    R: TransactionArena,
+{
+    /// Binds all mutable host capabilities to one admitted execution request.
+    #[must_use]
+    pub fn new(
+        request: &'host ExecutionRequest<'transaction, J::View>,
+        journal: &'host mut J,
+        access: &'host mut A,
+        crypto: &'host mut C,
+        arena: &'host mut R,
+    ) -> Self {
+        Self {
+            request,
+            journal,
+            access,
+            crypto,
+            arena,
+            poisoned: false,
+            transaction_started: false,
         }
-        if memory.len() > MAX_TRANSACTION_MEMORY_BYTES {
-            return Err(HostCapabilityError::MemoryCapacityExceeded);
+    }
+
+    /// Exact admitted request that owns this host lifecycle.
+    #[must_use]
+    pub const fn request(&self) -> &ExecutionRequest<'transaction, J::View> {
+        self.request
+    }
+
+    /// Immutable state view selected by the admitted request.
+    #[must_use]
+    pub const fn state(&self) -> &J::View {
+        self.request.state()
+    }
+
+    /// Immutable environment selected during transaction admission.
+    #[must_use]
+    pub const fn environment(&self) -> ExecutionEnvironment {
+        self.request.environment()
+    }
+
+    /// Whether an earlier partial transition made host consistency unknown.
+    #[must_use]
+    pub const fn is_poisoned(&self) -> bool {
+        self.poisoned
+    }
+
+    /// Destructively starts one transaction-local host lifecycle.
+    ///
+    /// The returned event is safe to dispatch only after this method returns.
+    pub fn begin_transaction(&mut self) -> Result<InspectorEvent, HostCapabilityError> {
+        self.ensure_usable()?;
+        if self.arena.frame_depth() != 0 {
+            return self.poison(HostCapabilityError::HostPoisoned);
         }
-        memory.fill(0);
-        Ok(Self {
-            memory,
-            memory_len: 0,
-            frames: [None; FRAMES],
-            frame_len: 0,
+        if let Err(error) = self.journal.reset_transaction() {
+            return self.poison(error);
+        }
+        if let Err(error) = self.access.reset_transaction() {
+            return self.poison(error);
+        }
+        if let Err(error) = self.arena.reset_transaction() {
+            return self.poison(error);
+        }
+        self.transaction_started = true;
+        Ok(InspectorEvent::TransactionStarted)
+    }
+
+    /// Executes and finalizes one child without exposing a checkpoint token.
+    ///
+    /// Nested calls use this method recursively through the closure. The outer
+    /// lifecycle cannot finalize until every inner lifecycle has completed.
+    pub fn with_child<T, F>(
+        &mut self,
+        frame: IterativeCallFrame,
+        execute: F,
+    ) -> Result<ChildExecution<T>, ChildLifecycleError>
+    where
+        F: FnOnce(&mut Self) -> ChildDecision<T>,
+    {
+        if self.poisoned {
+            return Err(ChildLifecycleError::HostPoisoned);
+        }
+        if !self.transaction_started {
+            return Err(ChildLifecycleError::TransactionNotStarted);
+        }
+        let checkpoint = match self.journal.checkpoint() {
+            Ok(checkpoint) => checkpoint,
+            Err(error) => {
+                self.poisoned = true;
+                return Err(ChildLifecycleError::Begin(
+                    BeginChildError::CheckpointFailed(error),
+                ));
+            }
+        };
+        let depth = match self.arena.enter_frame(frame) {
+            Ok(depth) => depth,
+            Err(frame_error) => {
+                return match self.journal.revert(checkpoint) {
+                    Ok(()) => Err(ChildLifecycleError::Begin(BeginChildError::FrameRejected {
+                        frame_error,
+                    })),
+                    Err(revert_error) => {
+                        self.poisoned = true;
+                        Err(ChildLifecycleError::Begin(
+                            BeginChildError::FrameRejectedAndJournalRevertFailed {
+                                frame_error,
+                                revert_error,
+                            },
+                        ))
+                    }
+                };
+            }
+        };
+
+        let decision = execute(self);
+        if self.poisoned {
+            return Err(ChildLifecycleError::HostPoisoned);
+        }
+        let found_depth = self.arena.frame_depth();
+        if found_depth != depth {
+            self.poisoned = true;
+            return Err(ChildLifecycleError::FrameDepthMismatch {
+                expected: depth,
+                found: found_depth,
+            });
+        }
+
+        let (action, output) = match decision {
+            ChildDecision::Commit(output) => (ChildFinalizeAction::Commit, output),
+            ChildDecision::Revert(output) => (ChildFinalizeAction::Revert, output),
+        };
+        let journal_result = match action {
+            ChildFinalizeAction::Commit => self.journal.commit(checkpoint),
+            ChildFinalizeAction::Revert => self.journal.revert(checkpoint),
+        };
+        if let Err(error) = journal_result {
+            self.poisoned = true;
+            return Err(ChildLifecycleError::JournalConsistencyUnknown { action, error });
+        }
+
+        let removed = match self.arena.leave_frame() {
+            Ok(removed) => removed,
+            Err(error) => {
+                self.poisoned = true;
+                return Err(ChildLifecycleError::ArenaConsistencyUnknown { action, error });
+            }
+        };
+        if removed != frame {
+            self.poisoned = true;
+            return Err(ChildLifecycleError::FrameMismatch { action });
+        }
+        let finished = match action {
+            ChildFinalizeAction::Commit => InspectorEvent::ChildCommitted { depth },
+            ChildFinalizeAction::Revert => InspectorEvent::ChildReverted { depth },
+        };
+        Ok(ChildExecution {
+            output,
+            events: [InspectorEvent::ChildStarted { depth }, finished],
         })
     }
 
-    /// Currently visible transaction memory.
+    /// Reads one account from the request-bound immutable view.
+    pub fn account(
+        &self,
+        address: Address,
+    ) -> Result<Option<SnapshotAccount>, HostCapabilityError> {
+        self.ensure_usable()?;
+        self.state()
+            .account(address)
+            .map_err(|_| HostCapabilityError::StateReadFailed)
+    }
+
+    /// Reads transaction-start storage from the request-bound immutable view.
+    pub fn original_storage(
+        &self,
+        address: Address,
+        slot: B256,
+    ) -> Result<B256, HostCapabilityError> {
+        self.ensure_usable()?;
+        self.state()
+            .original_storage(address, slot)
+            .map_err(|_| HostCapabilityError::StateReadFailed)
+    }
+
+    /// Reads current storage through the journal associated with this view.
+    pub fn current_storage(
+        &self,
+        address: Address,
+        slot: B256,
+    ) -> Result<B256, HostCapabilityError> {
+        self.ensure_started()?;
+        self.journal.current_storage(self.state(), address, slot)
+    }
+
+    /// Writes current storage through the private request-bound journal.
+    pub fn set_storage(
+        &mut self,
+        address: Address,
+        slot: B256,
+        value: B256,
+    ) -> Result<(), HostCapabilityError> {
+        self.ensure_started()?;
+        self.journal.set_storage(address, slot, value)
+    }
+
+    /// Warms one address for the complete transaction.
+    pub fn warm_address(&mut self, address: Address) -> Result<AccessStatus, HostCapabilityError> {
+        self.ensure_started()?;
+        self.access.warm_address(address)
+    }
+
+    /// Warms one address/slot pair for the complete transaction.
+    pub fn warm_storage(
+        &mut self,
+        address: Address,
+        slot: B256,
+    ) -> Result<AccessStatus, HostCapabilityError> {
+        self.ensure_started()?;
+        self.access.warm_storage(address, slot)
+    }
+
+    /// Computes Keccak-256 through the reviewed request-bound provider.
+    pub fn keccak256(&mut self, input: &[u8]) -> Result<B256, HostCapabilityError> {
+        self.ensure_started()?;
+        self.crypto.keccak256(input)
+    }
+
+    /// Recovers one address through the reviewed request-bound provider.
+    pub fn recover_address(
+        &mut self,
+        digest: B256,
+        signature: &[u8; 65],
+    ) -> Result<Address, HostCapabilityError> {
+        self.ensure_started()?;
+        self.crypto.recover_address(digest, signature)
+    }
+
+    /// Expands zero-initialized transaction memory within the arena bound.
+    pub fn reserve_memory(&mut self, required_len: usize) -> Result<(), HostCapabilityError> {
+        self.ensure_started()?;
+        self.arena.reserve_memory(required_len)
+    }
+
+    /// Current iterative frame depth for deterministic execution scheduling.
     #[must_use]
-    pub fn memory(&self) -> &[u8] {
-        self.memory.get(..self.memory_len).unwrap_or(&[])
-    }
-}
-
-impl<const FRAMES: usize> TransactionArena for BorrowedTransactionArena<'_, FRAMES> {
-    fn reset_transaction(&mut self) -> Result<(), HostCapabilityError> {
-        self.memory.fill(0);
-        self.memory_len = 0;
-        self.frames.fill(None);
-        self.frame_len = 0;
-        Ok(())
+    pub fn frame_depth(&self) -> usize {
+        self.arena.frame_depth()
     }
 
-    fn reserve_memory(&mut self, required_len: usize) -> Result<(), HostCapabilityError> {
-        if required_len > self.memory.len() {
-            return Err(HostCapabilityError::MemoryCapacityExceeded);
-        }
-        if required_len > self.memory_len {
-            let extension = self
-                .memory
-                .get_mut(self.memory_len..required_len)
-                .ok_or(HostCapabilityError::MemoryCapacityExceeded)?;
-            extension.fill(0);
-            self.memory_len = required_len;
+    fn ensure_usable(&self) -> Result<(), HostCapabilityError> {
+        if self.poisoned {
+            return Err(HostCapabilityError::HostPoisoned);
         }
         Ok(())
     }
 
-    fn enter_frame(&mut self, frame: IterativeCallFrame) -> Result<usize, HostCapabilityError> {
-        let slot = self
-            .frames
-            .get_mut(self.frame_len)
-            .ok_or(HostCapabilityError::CallDepthExceeded)?;
-        *slot = Some(frame);
-        self.frame_len = self
-            .frame_len
-            .checked_add(1)
-            .ok_or(HostCapabilityError::CallDepthExceeded)?;
-        Ok(self.frame_len)
-    }
-
-    fn leave_frame(&mut self) -> Result<IterativeCallFrame, HostCapabilityError> {
-        let index = self
-            .frame_len
-            .checked_sub(1)
-            .ok_or(HostCapabilityError::CallFrameMissing)?;
-        let frame = self
-            .frames
-            .get_mut(index)
-            .and_then(Option::take)
-            .ok_or(HostCapabilityError::CallFrameMissing)?;
-        self.frame_len = index;
-        Ok(frame)
-    }
-
-    fn frame_depth(&self) -> usize {
-        self.frame_len
-    }
-}
-
-/// Child-call token binding journal and iterative-frame state.
-#[derive(Debug)]
-pub struct ChildCheckpoint<C> {
-    journal: C,
-    depth: usize,
-}
-
-/// Explicit bundle of powers available to an execution machine.
-pub struct ExecutionHost<'a, V, J, B, A, C, I, R>
-where
-    V: StateView + ?Sized,
-    J: StateJournal,
-    B: BlockEnvironment + ?Sized,
-    A: AccessTracker,
-    C: CryptoProvider,
-    I: Inspector,
-    R: TransactionArena,
-{
-    /// Snapshot-pure state reads.
-    pub state: &'a V,
-    /// Journaled state writes.
-    pub journal: &'a mut J,
-    /// Immutable block and fork context.
-    pub block: &'a B,
-    /// Transaction-global warmth.
-    pub access: &'a mut A,
-    /// Reviewed cryptographic operations.
-    pub crypto: &'a mut C,
-    /// Observation-only hooks.
-    pub inspector: &'a mut I,
-    /// Resettable memory and iterative frames.
-    pub arena: &'a mut R,
-}
-
-impl<V, J, B, A, C, I, R> ExecutionHost<'_, V, J, B, A, C, I, R>
-where
-    V: StateView + ?Sized,
-    J: StateJournal,
-    B: BlockEnvironment + ?Sized,
-    A: AccessTracker,
-    C: CryptoProvider,
-    I: Inspector,
-    R: TransactionArena,
-{
-    /// Destructively starts one transaction-local host lifecycle.
-    pub fn begin_transaction(&mut self) -> Result<(), HostCapabilityError> {
-        self.journal.reset_transaction()?;
-        self.access.reset_transaction()?;
-        self.arena.reset_transaction()?;
-        self.inspector.observe(InspectorEvent::TransactionStarted);
-        Ok(())
-    }
-
-    /// Starts one iterative child frame and journal checkpoint.
-    pub fn begin_child(
-        &mut self,
-        frame: IterativeCallFrame,
-    ) -> Result<ChildCheckpoint<J::Checkpoint>, BeginChildError> {
-        let checkpoint = self
-            .journal
-            .checkpoint()
-            .map_err(BeginChildError::CheckpointFailed)?;
-        match self.arena.enter_frame(frame) {
-            Ok(depth) => {
-                self.inspector
-                    .observe(InspectorEvent::ChildStarted { depth });
-                Ok(ChildCheckpoint {
-                    journal: checkpoint,
-                    depth,
-                })
-            }
-            Err(frame_error) => match self.journal.revert(checkpoint) {
-                Ok(()) => Err(BeginChildError::FrameRejected { frame_error }),
-                Err(revert_error) => Err(BeginChildError::FrameRejectedAndJournalRevertFailed {
-                    frame_error,
-                    revert_error,
-                }),
-            },
+    fn ensure_started(&self) -> Result<(), HostCapabilityError> {
+        self.ensure_usable()?;
+        if !self.transaction_started {
+            return Err(HostCapabilityError::TransactionNotStarted);
         }
-    }
-
-    /// Commits one child journal while retaining transaction-global warmth.
-    pub fn commit_child(
-        &mut self,
-        checkpoint: ChildCheckpoint<J::Checkpoint>,
-    ) -> Result<(), HostCapabilityError> {
-        self.journal.commit(checkpoint.journal)?;
-        let _ = self.arena.leave_frame()?;
-        self.inspector.observe(InspectorEvent::ChildCommitted {
-            depth: checkpoint.depth,
-        });
         Ok(())
     }
 
-    /// Reverts one child journal while retaining transaction-global warmth.
-    pub fn revert_child(
-        &mut self,
-        checkpoint: ChildCheckpoint<J::Checkpoint>,
-    ) -> Result<(), HostCapabilityError> {
-        self.journal.revert(checkpoint.journal)?;
-        let _ = self.arena.leave_frame()?;
-        self.inspector.observe(InspectorEvent::ChildReverted {
-            depth: checkpoint.depth,
-        });
-        Ok(())
+    fn poison<T>(&mut self, error: HostCapabilityError) -> Result<T, HostCapabilityError> {
+        self.poisoned = true;
+        Err(error)
     }
 }

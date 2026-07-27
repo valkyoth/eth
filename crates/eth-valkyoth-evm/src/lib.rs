@@ -8,6 +8,7 @@ extern crate std;
 extern crate std;
 
 mod admission;
+mod arena;
 mod environment;
 mod gas_estimation;
 mod host;
@@ -20,6 +21,10 @@ pub use admission::{
     ExecutionAdmissionError, ExecutionAdmissionFailure, ExecutionReadyTransaction,
     ForkValidatedTransaction,
 };
+pub use arena::{
+    BorrowedTransactionArena, IterativeCallFrame, MAX_ITERATIVE_CALL_FRAMES,
+    MAX_TRANSACTION_MEMORY_BYTES, TransactionArena,
+};
 pub use environment::{BlockExecutionContext, ExecutionEnvironment, ExecutionEnvironmentError};
 pub use gas_estimation::{
     GasEstimationError, GasEstimationPolicy, GasEstimationReport, GasEstimationRequest,
@@ -28,12 +33,12 @@ pub use gas_estimation::{
     MAX_GAS_ESTIMATION_TIMEOUT_MILLIS,
 };
 pub use host::{
-    AccessStatus, AccessTracker, BlockEnvironment, BorrowedTransactionArena, ChildCheckpoint,
-    CryptoProvider, ExecutionHost, Inspector, InspectorEvent, IterativeCallFrame,
-    MAX_ITERATIVE_CALL_FRAMES, MAX_TRANSACTION_MEMORY_BYTES, NoInspector, StateJournal,
-    TransactionArena,
+    AccessStatus, AccessTracker, ChildDecision, ChildExecution, CryptoProvider, ExecutionHost,
+    Inspector, InspectorEvent, NoInspector, StateJournal,
 };
-pub use host_error::{BeginChildError, HostCapabilityError};
+pub use host_error::{
+    BeginChildError, ChildFinalizeAction, ChildLifecycleError, HostCapabilityError,
+};
 pub use result::{
     ExecutionError, ExecutionReport, ExecutionRequest, ExecutionResult, ExecutionStatus,
 };
@@ -97,6 +102,10 @@ mod admission_tests;
 #[cfg(test)]
 #[path = "host_tests.rs"]
 mod host_tests;
+
+#[cfg(test)]
+#[path = "arena_tests.rs"]
+mod arena_tests;
 
 #[cfg(test)]
 #[path = "test_fixtures.rs"]

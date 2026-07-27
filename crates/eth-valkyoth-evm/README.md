@@ -49,8 +49,12 @@ The `0.11.0` support-crate release, shipped with `eth` `0.52.7`, provides:
 - type-specific canonical decoding under one conserved `DecodeSession`;
 - active-fork and signed-chain checks before execution-ready promotion;
 - `ExecutionRequest` construction only from the non-forgeable final token;
-- separate `StateView`, `StateJournal`, `BlockEnvironment`, `AccessTracker`,
-  `CryptoProvider`, optional `Inspector`, and `TransactionArena` contracts;
+- a request-bound `ExecutionHost` with private `StateJournal`,
+  `AccessTracker`, `CryptoProvider`, and `TransactionArena` capabilities;
+- journal-authoritative current storage associated with the request's exact
+  immutable `StateView`;
+- closure-scoped LIFO child execution, fail-closed host poisoning after
+  partial finalization, and post-transition inspector events;
 - `BeginChildError` preserving frame rejection and journal-cleanup failures;
 - allocation-free resettable borrowed memory and iterative frame storage;
 - bounded gas-estimation policy and deterministic termination ceilings.
@@ -60,5 +64,6 @@ recovery, intrinsic gas, nonce/account state, balance, fee, blob/KZG,
 authorization, and other state-dependent consensus rules remain mandatory
 later gates.
 
-The compatibility `StateSnapshot` trait remains available and implements
-`StateView` automatically. No complete execution backend is admitted yet.
+The compatibility `StateSnapshot` trait remains available and implements the
+immutable `StateView` automatically. Current storage must be supplied by its
+associated journal. No complete execution backend is admitted yet.

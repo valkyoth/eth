@@ -49,6 +49,27 @@ fn malformed_payload_cannot_promote_and_returns_candidate() {
 }
 
 #[test]
+fn legacy_classification_and_canonical_reparse_share_one_ledger() {
+    let Some(transaction) = legacy_transaction() else {
+        return;
+    };
+    let classified = ClassifiedEnvelope::decode(&transaction, policy());
+    assert!(classified.is_ok(), "{classified:?}");
+    let Some(classified) = classified.ok() else {
+        return;
+    };
+    let classification_work = classified.decode_session().encoded_bytes();
+    assert_eq!(classification_work, transaction.len());
+
+    let canonical = classified.try_into_canonical();
+    assert!(canonical.is_ok(), "{canonical:?}");
+    let Some(canonical) = canonical.ok() else {
+        return;
+    };
+    assert!(canonical.decode_session().encoded_bytes() > classification_work);
+}
+
+#[test]
 fn fork_type_matrix_fails_closed() {
     let Some(legacy) = legacy_transaction() else {
         return;

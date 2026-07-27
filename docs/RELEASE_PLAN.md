@@ -2887,10 +2887,12 @@ Deliverables:
 - Explicit `ClassifiedEnvelope -> CanonicallyDecodedTransaction ->
   ForkValidatedTransaction -> ExecutionReadyTransaction` promotion;
 - rejection of unknown or empty typed envelopes at execution admission;
-- composable `StateView`, `StateJournal`, `BlockEnvironment`,
-  `AccessTracker`, `CryptoProvider`, and optional `Inspector` contracts;
-- snapshot-pure reads, distinct original/current storage, transaction-global
-  warmth, iterative call frames, and resettable transaction arenas.
+- request-bound private `StateJournal`, `AccessTracker`, `CryptoProvider`, and
+  `TransactionArena` capabilities plus post-transition `Inspector` events;
+- immutable original storage, journal-authoritative current storage,
+  transaction-global warmth, closure-scoped iterative call frames, and
+  resettable transaction arenas;
+- fail-closed host poisoning after partial lifecycle transitions.
 
 Verification:
 
@@ -2898,15 +2900,19 @@ Verification:
 - fork/type admission matrices and unknown-type negative tests;
 - nested-call rollback tests proving warmth survives child revert while state
   does not;
+- nested LIFO finalization and journal-authoritative post-write storage tests;
 - frame-rejection cleanup tests preserving both the arena rejection and any
   journal rollback failure;
+- partial-finalization poisoning and post-transition inspector dispatch tests;
+- conserved legacy classification and canonical-reparse accounting;
 - deep-call and memory-expansion tests proving EVM exceptions replace host
   recursion or bounds errors.
 
 Exit criteria:
 
-- Only fork-validated typed transactions can enter an execution machine whose
-  state, environment, access, crypto, and observation powers are explicit.
+- Only fork-validated typed transactions can enter a request-bound execution
+  host whose state/environment provenance and private capabilities cannot be
+  independently substituted.
 - `v0.52.7 implementation stop reached. Run pentest for this exact
   commit.`
 

@@ -9,7 +9,7 @@ use eth_valkyoth_protocol::{
     UnvalidatedLegacyTransaction, UnvalidatedSetCodeTransaction,
     decode_access_list_transaction_in_session, decode_blob_transaction_in_session,
     decode_dynamic_fee_transaction_in_session, decode_legacy_transaction_in_session,
-    decode_set_code_transaction_in_session, decode_transaction_envelope,
+    decode_set_code_transaction_in_session, decode_transaction_envelope_in_session,
 };
 
 use crate::ExecutionEnvironment;
@@ -31,8 +31,9 @@ impl<'a> ClassifiedEnvelope<'a> {
         raw: &'a [u8],
         policy: DecodeSessionPolicy,
     ) -> Result<Self, ExecutionAdmissionError> {
-        let session = DecodeSession::new(policy).map_err(ExecutionAdmissionError::DecodePolicy)?;
-        let envelope = decode_transaction_envelope(raw, policy.limits())
+        let mut session =
+            DecodeSession::new(policy).map_err(ExecutionAdmissionError::DecodePolicy)?;
+        let envelope = decode_transaction_envelope_in_session(raw, &mut session)
             .map_err(ExecutionAdmissionError::Envelope)?;
         if let TransactionEnvelope::Typed(typed) = envelope {
             let type_byte = typed.transaction_type.get();
@@ -60,6 +61,12 @@ impl<'a> ClassifiedEnvelope<'a> {
     #[must_use]
     pub const fn envelope(&self) -> TransactionEnvelope<'a> {
         self.envelope
+    }
+
+    /// Conserved work evidence already charged during outer classification.
+    #[must_use]
+    pub const fn decode_session(&self) -> &DecodeSession {
+        &self.session
     }
 
     /// Runs the type-specific canonical decoder under the conserved session.

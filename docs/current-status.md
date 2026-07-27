@@ -108,12 +108,13 @@ Legend:
 `v0.52.7` replaces shell-level execution admission with a non-forgeable
 promotion chain from classified envelope through canonical type-specific
 decode and active-fork/chain checks to an execution-ready transaction.
-`ExecutionRequest` accepts only that final token. Host powers are split into
-snapshot-pure reads, journaled writes, immutable block context,
-transaction-global access tracking, reviewed cryptography, observation-only
-inspection, and resettable bounded memory/frame arenas. This milestone does
-not claim sender recovery, intrinsic-gas, account-state, fee, blob/KZG,
-authorization, or complete consensus validity.
+`ExecutionRequest` accepts only that final token. `ExecutionHost` derives state
+and environment from the request, keeps journal/access/crypto/arena powers
+private, makes its associated journal authoritative for current storage,
+scopes nested children to LIFO closures, poisons itself after partial
+finalization, and returns inspector events only after transitions complete.
+This milestone does not claim sender recovery, intrinsic-gas, account-state,
+fee, blob/KZG, authorization, or complete consensus validity.
 
 `v0.52.6` added bounded hash-addressed node resolution, immutable snapshot
 anchors, multiproof query/output accounting, and optional owned deduplicating

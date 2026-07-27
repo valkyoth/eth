@@ -17,8 +17,9 @@ auditable capabilities.
 - Fail-closed rejection for empty or unsupported typed envelopes.
 - Transaction-type activation and signed-chain checks before execution-ready
   promotion.
-- `StateView`, `StateJournal`, `BlockEnvironment`, `AccessTracker`,
-  `CryptoProvider`, optional `Inspector`, and `TransactionArena`.
+- Request-bound private `StateJournal`, `AccessTracker`, `CryptoProvider`, and
+  `TransactionArena` capabilities with post-transition `InspectorEvent`
+  evidence.
 - Allocation-free `BorrowedTransactionArena` with destructive reset,
   iterative frames, and explicit memory/depth failures.
 - Compile-fail, fork matrix, rollback/warmth, arena-bound, and fuzz coverage.
@@ -33,6 +34,10 @@ auditable capabilities.
   removed.
 - `StateSnapshot` remains compatible through a blanket `StateView`
   implementation.
+- `StateJournal` is associated with its exact immutable view and owns all
+  current-storage reads.
+- Child checkpoint tokens are replaced by closure-scoped `with_child`
+  execution with exact-depth/LIFO checks and fail-closed host poisoning.
 - The live tooling freshness gate now audits Action refs across every workflow
   and verifies every checkout use against the latest tag and exact upstream
   commit; it also checks the active cargo-fuzz CLI release.
@@ -40,18 +45,24 @@ auditable capabilities.
 ## Security Properties
 
 - Outer EIP-2718 classification alone cannot authorize execution.
-- Type-specific canonical decoding conserves one non-copyable decode session.
+- Classification and type-specific canonical decoding conserve one
+  non-copyable decode session, including both legacy parser passes.
 - Unknown typed domains fail closed before execution admission.
 - Fork admission binds the transaction type and explicit signed chain to the
   selected execution environment.
 - Journal rollback cannot cool transaction-global EIP-2929 accesses.
 - Host recursion and unbounded transaction-memory growth are not admitted.
-- Inspectors observe immutable lifecycle events and cannot return consensus
-  decisions.
+- Inspectors receive immutable lifecycle events only after critical
+  transitions complete and cannot return consensus decisions.
 - Inspector depth is documented as a one-based active child-frame count.
 - A frame-capacity failure cannot shadow a simultaneous journal cleanup
   failure; callers receive a distinct fatal consistency error with both
   causes.
+- Host state and environment cannot diverge from `ExecutionRequest` report
+  provenance, and stale compatibility-snapshot storage cannot override a
+  journal write.
+- Partial journal/arena finalization poisons the host and blocks continued
+  execution.
 
 The fork-validation typestate is intentionally limited. Sender recovery,
 intrinsic gas, nonce/account state, balances, fees, blob/KZG rules, EIP-7702
@@ -68,8 +79,9 @@ assigned to `v0.63.0`.
 
 ## Pentest
 
-The initial independent review reported two Low findings: child-frame rejection
-could be shadowed by a rollback failure, and inspector depth documentation
-incorrectly called a one-based count zero-based. Both are remediated. Tagging
-remains blocked until a clean retest and permanent exact-commit report at
+The first independent review reported two Low findings, both remediated. A
+follow-up review reported three High and two Medium findings covering child
+lifecycle atomicity, request provenance, stale current storage, classification
+accounting, and inspector control flow. All five are remediated. Tagging remains
+blocked until a clean retest and permanent exact-commit report at
 `security/pentest/v0.52.7.md`.
