@@ -177,12 +177,13 @@ impl ExecutionGovernor {
 
     /// Destructively starts a fresh transaction budget.
     pub fn reset_transaction(&mut self) -> Result<(), ExecutionGovernorError> {
-        self.used = ExecutionResourceUsage::ZERO;
-        self.work_remaining = self.limits.request.work_units;
-        self.generation = self
+        let next_generation = self
             .generation
             .checked_add(1)
             .ok_or(ExecutionGovernorError::GenerationExhausted)?;
+        self.used = ExecutionResourceUsage::ZERO;
+        self.work_remaining = self.limits.request.work_units;
+        self.generation = next_generation;
         self.transaction_started = true;
         Ok(())
     }
@@ -370,3 +371,45 @@ impl fmt::Display for ExecutionGovernorError {
 
 #[cfg(feature = "std")]
 impl std::error::Error for ExecutionGovernorError {}
+
+#[cfg(test)]
+mod tests {
+    use super::{
+        ExecutionGovernor, ExecutionGovernorError, ExecutionResource, ExecutionResourceLimits,
+        ExecutionResourceRequest,
+    };
+
+    #[test]
+    fn generation_exhaustion_does_not_reset_existing_budget_state() {
+        let request = ExecutionResourceRequest {
+            warm_addresses: 1,
+            warm_storage_slots: 1,
+            journal_entries: 1,
+            journal_checkpoints: 1,
+            frames: 2,
+            memory_bytes: 1,
+            reusable_arena_bytes: 1,
+            cache_entries: 1,
+            work_units: 2,
+        };
+        let Ok(limits) = ExecutionResourceLimits::try_new(request) else {
+            return;
+        };
+        let mut governor = ExecutionGovernor::new(limits);
+        assert_eq!(governor.reset_transaction(), Ok(()));
+        assert_eq!(governor.charge(ExecutionResource::Frame, 1), Ok(()));
+        let Ok(_token) = governor.issue_work(1) else {
+            return;
+        };
+        governor.generation = u64::MAX;
+
+        assert_eq!(
+            governor.reset_transaction(),
+            Err(ExecutionGovernorError::GenerationExhausted)
+        );
+        assert_eq!(governor.used(ExecutionResource::Frame), 1);
+        assert_eq!(governor.work_remaining(), 1);
+        assert!(governor.transaction_started);
+        assert_eq!(governor.generation, u64::MAX);
+    }
+}

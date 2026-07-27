@@ -1,6 +1,7 @@
 use crate::{
-    EVM_MAX_WARM_ADDRESSES, EVM_MAX_WARM_STORAGE_SLOTS, EvmAccessAttempt, EvmAccessProfile,
-    EvmAccessStatus, EvmAccessTracker, EvmAddress, EvmCoreError, EvmEmbeddedAccessTracker, EvmWord,
+    EVM_MAX_GAS_LIMIT, EVM_MAX_WARM_ADDRESSES, EVM_MAX_WARM_STORAGE_SLOTS, EvmAccessAttempt,
+    EvmAccessProfile, EvmAccessStatus, EvmAccessTracker, EvmAddress, EvmCoreError,
+    EvmEmbeddedAccessTracker, EvmWord,
 };
 
 #[test]
@@ -53,6 +54,14 @@ fn gas_derived_hard_ceilings_are_nonzero() {
         assert!(EVM_MAX_WARM_ADDRESSES > 1);
         assert!(EVM_MAX_WARM_STORAGE_SLOTS > EVM_MAX_WARM_ADDRESSES);
     }
+    assert_eq!(
+        usize::try_from(EVM_MAX_GAS_LIMIT / 2_400),
+        Ok(EVM_MAX_WARM_ADDRESSES)
+    );
+    assert_eq!(
+        usize::try_from(EVM_MAX_GAS_LIMIT / 1_900),
+        Ok(EVM_MAX_WARM_STORAGE_SLOTS)
+    );
 }
 
 fn address(value: u8) -> EvmAddress {

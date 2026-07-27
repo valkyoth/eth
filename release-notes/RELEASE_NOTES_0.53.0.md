@@ -44,6 +44,10 @@ transaction execution-resource authority.
   high-water observation rather than cumulative-call accounting.
 - Failed or cancelled work remains charged, and child delegation cannot create
   additional authority.
+- Gas-derived tracker ceilings use exact floor division with compile-time and
+  runtime drift checks.
+- Generation exhaustion is validated before destructive reset mutates any
+  budget state.
 
 The governor is an explicit capability. Integrators must route governed host
 operations through it; the complete node operational binding remains assigned
@@ -58,7 +62,9 @@ to `v0.65.0`.
 
 ## Pentest
 
-Tagging is blocked until the exact implementation commit passes external
-pentesting, remediation, clean retest, release-gate validation, and green
-GitHub CI/CodeQL. The final report will be stored at
+The initial external review reported two Low findings covering off-by-one
+gas-derived tracker ceilings and non-atomic generation-exhaustion reset. Both
+are remediated. Tagging remains blocked until the exact remediation commit
+passes clean retest, release-gate validation, and green GitHub CI/CodeQL. The
+final report will be stored at
 `security/pentest/v0.53.0.md`.

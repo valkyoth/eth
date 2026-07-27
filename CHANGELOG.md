@@ -16,6 +16,9 @@ All notable changes to `eth` are documented here.
 - Refreshed the non-admission review against `revm 42.0.1` and
   `revm-primitives 42.0.0`; the latest line exceeds the Rust `1.90` floor and
   no external execution backend entered the dependency graph.
+- Remediated the initial v0.53.0 pentest by flooring both gas-derived access
+  ceilings with drift assertions and making governor generation exhaustion
+  leave all prior transaction budget state unchanged.
 - Completed the v0.52.7 external pentest and clean retest after remediating
   every reported execution-host lifecycle and GitHub workflow supply-chain
   finding.

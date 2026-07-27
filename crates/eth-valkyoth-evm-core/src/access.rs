@@ -1,16 +1,28 @@
 use crate::{EvmAddress, EvmCoreError, EvmWord};
 
+const EIP2930_ADDRESS_GAS: u64 = 2_400;
+const EIP2930_STORAGE_KEY_GAS: u64 = 1_900;
+const MAX_WARM_ADDRESSES_U64: u64 = crate::EVM_MAX_GAS_LIMIT / EIP2930_ADDRESS_GAS;
+const MAX_WARM_STORAGE_SLOTS_U64: u64 = crate::EVM_MAX_GAS_LIMIT / EIP2930_STORAGE_KEY_GAS;
+
 /// Maximum warmed addresses admitted by the bootstrap execution policy.
 ///
 /// The ceiling covers the maximum number of EIP-2930 address entries that can
 /// fit under [`crate::EVM_MAX_GAS_LIMIT`] at 2,400 intrinsic gas each.
-pub const EVM_MAX_WARM_ADDRESSES: usize = 416_667;
+pub const EVM_MAX_WARM_ADDRESSES: usize = 416_666;
 
 /// Maximum warmed storage slots admitted by the bootstrap execution policy.
 ///
 /// The ceiling covers the maximum number of EIP-2930 storage-key entries that
 /// can fit under [`crate::EVM_MAX_GAS_LIMIT`] at 1,900 intrinsic gas each.
-pub const EVM_MAX_WARM_STORAGE_SLOTS: usize = 526_316;
+pub const EVM_MAX_WARM_STORAGE_SLOTS: usize = 526_315;
+
+const _: () = {
+    assert!(MAX_WARM_ADDRESSES_U64 == 416_666);
+    assert!(MAX_WARM_STORAGE_SLOTS_U64 == 526_315);
+    assert!(MAX_WARM_ADDRESSES_U64 * EIP2930_ADDRESS_GAS <= crate::EVM_MAX_GAS_LIMIT);
+    assert!(MAX_WARM_STORAGE_SLOTS_U64 * EIP2930_STORAGE_KEY_GAS <= crate::EVM_MAX_GAS_LIMIT);
+};
 
 /// Warm/cold access classification for one execution attempt.
 #[derive(Clone, Copy, Debug, Eq, PartialEq)]
