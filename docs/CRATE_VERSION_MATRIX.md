@@ -1,7 +1,7 @@
 # Crate Version Matrix
 
-Status: `v0.52.7` pentest findings remediated; awaiting clean retest of the
-exact remediation commit. Only the EVM support crate and facade change.
+Status: `v0.52.7` release candidate; pentest findings are remediated and the
+clean retest passed. Only the EVM support crate and facade change.
 
 `eth` uses independent crate versions. The facade crate remains the main user
 entry point, but support crates are published only when their own package or

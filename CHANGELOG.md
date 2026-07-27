@@ -4,6 +4,9 @@ All notable changes to `eth` are documented here.
 
 ## Unreleased
 
+- Completed the v0.52.7 external pentest and clean retest after remediating
+  every reported execution-host lifecycle and GitHub workflow supply-chain
+  finding.
 - Closed the v0.52.7 dot-prefixed workflow discovery bypass in both semantic
   Action validation and checkout annotation scanning, with explicit hidden
   `.yml` and `.yaml` regression fixtures.

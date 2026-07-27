@@ -1,7 +1,7 @@
 # Execution Admission And Host Capabilities
 
-Status: `v0.52.7` pentest findings remediated; awaiting clean retest of the
-exact remediation commit.
+Status: `v0.52.7` release candidate; pentest findings are remediated and the
+clean retest passed.
 
 This document defines the transaction and host boundary that every later
 first-party execution machine must consume. It does not claim complete

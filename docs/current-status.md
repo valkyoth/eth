@@ -1,7 +1,7 @@
 # Current Status
 
-Release snapshot: `v0.52.7` pentest findings remediated; awaiting clean retest
-of the exact remediation commit.
+Release snapshot: `v0.52.7` release candidate; pentest findings are remediated
+and the clean retest passed. Tagging awaits green GitHub CI and CodeQL.
 
 This document summarizes what the workspace can do now. The
 [Specification Matrix](SPEC_MATRIX.md) is the source of truth for exact

@@ -2875,8 +2875,8 @@ Exit criteria:
 
 ### v0.52.7 - Execution Admission And Host Capability Split
 
-Status: pentest findings remediated; awaiting clean retest of the exact
-remediation commit.
+Status: implementation complete; pentest findings remediated; clean retest
+passed. Awaiting green GitHub CI and CodeQL before tagging.
 
 Goal: prevent an opaque EIP-2718 classification result from becoming
 executable and separate execution host responsibilities into auditable
@@ -2937,6 +2937,8 @@ Exit criteria:
 - Partial transaction resets and failed or unwound root mutations cannot
   remain execution-usable, and every executable container reference is
   content-addressed.
+- The release pentest is recorded, all 15 findings are remediated, and the
+  clean retest passes before the final report-only commit and tag.
 - `v0.52.7 implementation stop reached. Run pentest for this exact
   commit.`
 

@@ -1,6 +1,6 @@
 # Release Notes - eth v0.52.7
 
-Status: pentest findings remediated; awaiting clean retest.
+Status: release candidate; pentest passed.
 
 ## Summary
 
@@ -102,6 +102,7 @@ remediated. A fourth follow-up reported three Medium findings covering
 transaction/root-mutation unwinding, checkout casing, and mutable container
 references; all three are remediated. A fifth follow-up reported one Medium
 dot-prefixed workflow discovery bypass; both enumerators and their regression
-fixtures now cover hidden workflow filenames. Tagging remains blocked until a
-clean retest and permanent exact-commit report at
-`security/pentest/v0.52.7.md`.
+fixtures now cover hidden workflow filenames. No Critical, High, Medium, or
+Low finding remains after the clean retest. The permanent exact-commit report
+is recorded at `security/pentest/v0.52.7.md`; tagging awaits green GitHub CI
+and CodeQL.
