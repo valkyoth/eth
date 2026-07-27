@@ -2947,7 +2947,8 @@ Exit criteria:
 
 ### v0.53.0 - Bounded Access Tracking And Execution Governor
 
-Status: implementation complete; awaiting pentest.
+Status: implementation complete; all eight pentest findings remediated; clean
+retest passed. Awaiting green GitHub CI and CodeQL before tagging.
 
 Goal: eliminate quadratic warm-access membership from node-scale execution
 while preserving a bounded `no_alloc` implementation for embedded users.
@@ -2985,6 +2986,8 @@ Exit criteria:
 - Reverted child scopes cannot retain discounted access state, accounting mode
   cannot be selected incorrectly, and every configured authority has a
   reviewed hard ceiling.
+- The release pentest is recorded, all eight findings are remediated, and the
+  clean retest passes before the final report-only commit and tag.
 - `v0.53.0 implementation stop reached. Run pentest for this exact
   commit.`
 

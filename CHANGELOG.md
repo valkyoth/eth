@@ -26,6 +26,9 @@ All notable changes to `eth` are documented here.
 - Remediated the third v0.53.0 pentest by replacing full retained-tree rollback
   rebuilds with a bounded append-only radix index and one undo record per
   insertion; rollback now touches only mutations made after its checkpoint.
+- Completed the v0.53.0 external pentest and clean retest after remediating all
+  eight findings across access complexity, rollback semantics, resource
+  authority, initialized warmth, sanitization, and generation safety.
 - Completed the v0.52.7 external pentest and clean retest after remediating
   every reported execution-host lifecycle and GitHub workflow supply-chain
   finding.

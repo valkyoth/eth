@@ -1,6 +1,6 @@
 # Release Notes - eth v0.53.0
 
-Status: implementation complete; awaiting clean retest.
+Status: release candidate; pentest passed.
 
 ## Summary
 
@@ -74,7 +74,7 @@ Three external review rounds reported eight findings: the initial two Low
 findings, then one High, three Medium, and one Low finding, followed by one
 High rollback-complexity finding. They cover child-scope warmth rollback,
 resource accounting, work authority, initialized warmth, retained key erasure,
-and retained-index rebuild amplification. All are remediated. Tagging remains
-blocked until the exact remediation commit passes clean retest, release-gate
-validation, and green GitHub CI/CodeQL. The final report will be stored at
-`security/pentest/v0.53.0.md`.
+and retained-index rebuild amplification. All are remediated, and no Critical,
+High, Medium, or Low finding remains after the clean retest. The permanent
+exact-commit report is recorded at `security/pentest/v0.53.0.md`; tagging
+awaits green GitHub CI and CodeQL.
