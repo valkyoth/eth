@@ -84,20 +84,8 @@ workflow_files() {
     done
 }
 
-action_refs() {
-    while IFS= read -r workflow; do
-        sed -n 's/^[[:space:]]*-\{0,1\}[[:space:]]*uses: [^@][^@]*@\([^[:space:]]*\).*/\1/p' "$workflow"
-    done <<EOF
-$(workflow_files)
-EOF
-}
-
 checkout_uses() {
-    while IFS= read -r workflow; do
-        sed -n '/^[[:space:]]*-\{0,1\}[[:space:]]*uses: actions\/checkout@/p' "$workflow"
-    done <<EOF
-$(workflow_files)
-EOF
+    ruby scripts/check_action_pins.rb "$workflow_dir" --list-checkouts
 }
 
 checkout_pin_lines() {
@@ -124,22 +112,11 @@ check_checkout_pin_format() {
 }
 
 check_all_actions_sha_pinned() {
-    failed=0
-    while IFS= read -r ref; do
-        case "$ref" in
-            "")
-                ;;
-            [0-9a-f][0-9a-f][0-9a-f][0-9a-f][0-9a-f][0-9a-f][0-9a-f][0-9a-f][0-9a-f][0-9a-f][0-9a-f][0-9a-f][0-9a-f][0-9a-f][0-9a-f][0-9a-f][0-9a-f][0-9a-f][0-9a-f][0-9a-f][0-9a-f][0-9a-f][0-9a-f][0-9a-f][0-9a-f][0-9a-f][0-9a-f][0-9a-f][0-9a-f][0-9a-f][0-9a-f][0-9a-f][0-9a-f][0-9a-f][0-9a-f][0-9a-f][0-9a-f][0-9a-f][0-9a-f][0-9a-f])
-                ;;
-            *)
-                echo "GitHub Actions ref is not a full 40-character SHA: ${ref}" >&2
-                failed=1
-                ;;
-        esac
-    done <<EOF
-$(action_refs)
-EOF
-    [ "$failed" -eq 0 ]
+    if ! command -v ruby >/dev/null 2>&1; then
+        echo "ruby with the standard YAML parser is required for Action pin validation" >&2
+        exit 1
+    fi
+    ruby scripts/check_action_pins.rb "$workflow_dir"
 }
 
 latest_checkout_tag() {

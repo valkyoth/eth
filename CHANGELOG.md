@@ -4,6 +4,9 @@ All notable changes to `eth` are documented here.
 
 ## Unreleased
 
+- Remediated two additional v0.52.7 findings by poisoning unfinished child
+  scopes during panic unwinding and replacing line-oriented GitHub Action
+  detection with recursive semantic YAML validation.
 - Remediated five v0.52.7 execution-host findings by request-binding private
   capabilities, making journals authoritative for current storage, replacing
   escapable child tokens with poisoned LIFO closure lifecycles, moving

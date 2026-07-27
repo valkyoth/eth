@@ -9,11 +9,15 @@ class of problem.
 - `cargo audit` for RustSec advisories.
 - `scripts/generate-sbom.sh --check` for exact committed SBOM evidence.
 - `scripts/check_latest_tools.sh` for latest stable Rust, Cargo
-  security/SBOM/fuzz tools, and full-SHA current GitHub Action pins across
-  every workflow.
+  security/SBOM/fuzz tools, and semantic YAML validation of full-SHA current
+  GitHub Action pins across every workflow.
 - `scripts/check_latest_crates.py` for MSRV-aware direct dependency freshness.
 - Dependabot for Cargo and GitHub Actions updates.
 - Manual current-version review before dependency edits.
+
+Action-pin validation uses Ruby's standard-library YAML parser and fails
+closed on malformed documents, non-string `uses` values, mutable or
+expression-based remote references, and unsupported YAML aliases.
 
 ## Dependency Admission
 

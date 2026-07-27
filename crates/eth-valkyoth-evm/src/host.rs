@@ -158,6 +158,40 @@ impl<T> ChildExecution<T> {
     }
 }
 
+trait ChildScopeHost {
+    fn poison_child_scope(&mut self);
+}
+
+struct ChildScope<'scope, H: ChildScopeHost> {
+    host: &'scope mut H,
+    finalized: bool,
+}
+
+impl<'scope, H: ChildScopeHost> ChildScope<'scope, H> {
+    fn new(host: &'scope mut H) -> Self {
+        Self {
+            host,
+            finalized: false,
+        }
+    }
+
+    fn host(&mut self) -> &mut H {
+        self.host
+    }
+
+    fn finish(mut self) {
+        self.finalized = true;
+    }
+}
+
+impl<H: ChildScopeHost> Drop for ChildScope<'_, H> {
+    fn drop(&mut self) {
+        if !self.finalized {
+            self.host.poison_child_scope();
+        }
+    }
+}
+
 /// Request-bound bundle of powers available to an execution machine.
 pub struct ExecutionHost<'host, 'transaction, J, A, C, R>
 where
@@ -294,13 +328,13 @@ where
             }
         };
 
-        let decision = execute(self);
-        if self.poisoned {
+        let mut scope = ChildScope::new(self);
+        let decision = execute(scope.host());
+        if scope.host().poisoned {
             return Err(ChildLifecycleError::HostPoisoned);
         }
-        let found_depth = self.arena.frame_depth();
+        let found_depth = scope.host().arena.frame_depth();
         if found_depth != depth {
-            self.poisoned = true;
             return Err(ChildLifecycleError::FrameDepthMismatch {
                 expected: depth,
                 found: found_depth,
@@ -312,29 +346,27 @@ where
             ChildDecision::Revert(output) => (ChildFinalizeAction::Revert, output),
         };
         let journal_result = match action {
-            ChildFinalizeAction::Commit => self.journal.commit(checkpoint),
-            ChildFinalizeAction::Revert => self.journal.revert(checkpoint),
+            ChildFinalizeAction::Commit => scope.host().journal.commit(checkpoint),
+            ChildFinalizeAction::Revert => scope.host().journal.revert(checkpoint),
         };
         if let Err(error) = journal_result {
-            self.poisoned = true;
             return Err(ChildLifecycleError::JournalConsistencyUnknown { action, error });
         }
 
-        let removed = match self.arena.leave_frame() {
+        let removed = match scope.host().arena.leave_frame() {
             Ok(removed) => removed,
             Err(error) => {
-                self.poisoned = true;
                 return Err(ChildLifecycleError::ArenaConsistencyUnknown { action, error });
             }
         };
         if removed != frame {
-            self.poisoned = true;
             return Err(ChildLifecycleError::FrameMismatch { action });
         }
         let finished = match action {
             ChildFinalizeAction::Commit => InspectorEvent::ChildCommitted { depth },
             ChildFinalizeAction::Revert => InspectorEvent::ChildReverted { depth },
         };
+        scope.finish();
         Ok(ChildExecution {
             output,
             events: [InspectorEvent::ChildStarted { depth }, finished],
@@ -447,5 +479,17 @@ where
     fn poison<T>(&mut self, error: HostCapabilityError) -> Result<T, HostCapabilityError> {
         self.poisoned = true;
         Err(error)
+    }
+}
+
+impl<J, A, C, R> ChildScopeHost for ExecutionHost<'_, '_, J, A, C, R>
+where
+    J: StateJournal,
+    A: AccessTracker,
+    C: CryptoProvider,
+    R: TransactionArena,
+{
+    fn poison_child_scope(&mut self) {
+        self.poisoned = true;
     }
 }

@@ -10,6 +10,7 @@ test -f .github/workflows/release.yml
 test -x scripts/validate-release-readiness.sh
 test -x scripts/test-release-readiness.sh
 test -x scripts/check_latest_tools.sh
+test -x scripts/check_action_pins.rb
 test -x scripts/test-check-latest-tools.sh
 test -x scripts/check_ethereum_upstream.py
 test -x scripts/test-ethereum-upstream.py

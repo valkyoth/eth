@@ -63,7 +63,7 @@ previous_version = "0.10.2"
 version = "0.11.0"
 change = "code"
 publish = true
-reason = "Adds request-bound execution admission and pentest-remediated atomic host capability contracts."
+reason = "Adds request-bound execution admission and pentest-remediated atomic, unwind-safe host capability contracts."
 
 [crates."eth-valkyoth-rpc"]
 previous_version = "0.7.0"

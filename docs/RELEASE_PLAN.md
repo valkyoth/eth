@@ -2892,7 +2892,10 @@ Deliverables:
 - immutable original storage, journal-authoritative current storage,
   transaction-global warmth, closure-scoped iterative call frames, and
   resettable transaction arenas;
-- fail-closed host poisoning after partial lifecycle transitions.
+- fail-closed host poisoning after partial lifecycle transitions or unwinding
+  from an unfinished child;
+- semantic YAML validation of every GitHub Action `uses` key, including flow
+  mappings and reusable workflows.
 
 Verification:
 
@@ -2904,7 +2907,12 @@ Verification:
 - frame-rejection cleanup tests preserving both the arena rejection and any
   journal rollback failure;
 - partial-finalization poisoning and post-transition inspector dispatch tests;
+- panic-unwind tests proving unfinished child scopes poison the host and block
+  every subsequent mutable capability;
 - conserved legacy classification and canonical-reparse accounting;
+- semantic Action-pin fixtures covering block/flow syntax, quoted keys and
+  values, both workflow extensions, reusable workflows, local and Docker
+  actions, expressions, and malformed values;
 - deep-call and memory-expansion tests proving EVM exceptions replace host
   recursion or bounds errors.
 
@@ -2913,6 +2921,8 @@ Exit criteria:
 - Only fork-validated typed transactions can enter a request-bound execution
   host whose state/environment provenance and private capabilities cannot be
   independently substituted.
+- No ordinary return, error, or panic unwind can leave an unfinished child
+  lifecycle reusable, and no YAML spelling can bypass immutable Action pins.
 - `v0.52.7 implementation stop reached. Run pentest for this exact
   commit.`
 

@@ -40,6 +40,7 @@ def main() -> int:
     assert 'release_gate="scripts/release_$(printf' in validator
     assert 'tr . _)_gate.sh"' in validator
     assert 'test -x "$release_gate"' in validator
+    assert "test -x scripts/check_action_pins.rb" in validator
     assert 'grep -q "scripts/validate-release-readiness.sh v${release_version}" "$release_gate"' in validator
     assert "test -f .github/workflows/release.yml" in validator
     assert "workflow_dispatch:" in validator

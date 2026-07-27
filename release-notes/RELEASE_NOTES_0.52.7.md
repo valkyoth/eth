@@ -37,10 +37,12 @@ auditable capabilities.
 - `StateJournal` is associated with its exact immutable view and owns all
   current-storage reads.
 - Child checkpoint tokens are replaced by closure-scoped `with_child`
-  execution with exact-depth/LIFO checks and fail-closed host poisoning.
+  execution with exact-depth/LIFO checks and fail-closed RAII host poisoning,
+  including panic unwinding before finalization.
 - The live tooling freshness gate now audits Action refs across every workflow
-  and verifies every checkout use against the latest tag and exact upstream
-  commit; it also checks the active cargo-fuzz CLI release.
+  through semantic YAML traversal, including flow mappings and reusable
+  workflows, and verifies every checkout use against the latest tag and exact
+  upstream commit; it also checks the active cargo-fuzz CLI release.
 
 ## Security Properties
 
@@ -61,8 +63,8 @@ auditable capabilities.
 - Host state and environment cannot diverge from `ExecutionRequest` report
   provenance, and stale compatibility-snapshot storage cannot override a
   journal write.
-- Partial journal/arena finalization poisons the host and blocks continued
-  execution.
+- Partial journal/arena finalization or panic unwinding poisons the host and
+  blocks continued execution.
 
 The fork-validation typestate is intentionally limited. Sender recovery,
 intrinsic gas, nonce/account state, balances, fees, blob/KZG rules, EIP-7702
@@ -82,6 +84,7 @@ assigned to `v0.63.0`.
 The first independent review reported two Low findings, both remediated. A
 follow-up review reported three High and two Medium findings covering child
 lifecycle atomicity, request provenance, stale current storage, classification
-accounting, and inspector control flow. All five are remediated. Tagging remains
-blocked until a clean retest and permanent exact-commit report at
-`security/pentest/v0.52.7.md`.
+accounting, and inspector control flow. A second follow-up reported two Medium
+findings covering unwind poisoning and flow-style YAML Action-pin bypasses.
+All findings are remediated. Tagging remains blocked until a clean retest and
+permanent exact-commit report at `security/pentest/v0.52.7.md`.

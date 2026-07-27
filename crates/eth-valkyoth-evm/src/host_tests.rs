@@ -429,6 +429,9 @@ fn frame(address: Address) -> IterativeCallFrame {
     }
 }
 
+#[path = "host_unwind_tests.rs"]
+mod unwind_tests;
+
 fn patterned_address() -> Address {
     Address::from_bytes(core::array::from_fn(|index| {
         u8::try_from(index).unwrap_or(u8::MAX)

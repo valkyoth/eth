@@ -78,7 +78,7 @@ counts above policy and estimates above the selected cap.
   environment cannot be supplied independently from its report provenance.
 - Host journal, access, cryptographic, and arena powers are private contracts.
 - Child checkpoints never escape `with_child`, nested finalization is LIFO,
-  and partial finalization poisons the host.
+  and partial finalization or unwinding from child execution poisons the host.
 - Inspector callbacks occur only after immutable transition events are
   returned to the caller.
 - Child frame rejection preserves its arena error, and a simultaneous journal
