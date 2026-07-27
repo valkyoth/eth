@@ -1,7 +1,7 @@
 # Current Status
 
-Release snapshot: `v0.52.6` release candidate; pentest findings are remediated
-and the clean retest passed. Tagging awaits green GitHub CI and CodeQL.
+Release snapshot: `v0.52.7` implementation complete; awaiting pentest of the
+exact implementation-stop commit.
 
 This document summarizes what the workspace can do now. The
 [Specification Matrix](SPEC_MATRIX.md) is the source of truth for exact
@@ -49,6 +49,8 @@ Legend:
 | Capability | Status | Current scope |
 | --- | --- | --- |
 | EVM domains | 🟢 Available | Dependency-free word, stack, memory, gas, fork, opcode, program-counter, access-set, and host-state types |
+| Execution admission | 🟢 Available | Non-forgeable classified, canonical, fork-bound, and execution-ready transaction typestates; unknown and empty typed envelopes fail closed |
+| Host capabilities | 🟢 Available | Separate state-view, journal, block, access, crypto, inspector, and resettable bounded-arena contracts |
 | Native interpreter | 🟡 Partial | Bounded basic stack, arithmetic, control-flow, memory, selected state-read execution, and consensus-correct truncated PUSH zero-padding |
 | Historical fork rules | 🟡 Partial | Explicit fork identifiers and admitted gas/opcode boundaries; full historical execution remains versioned |
 | Call and create | 🟡 Partial | Stack/memory/static/depth planning and journal policy; nested host execution and commits remain fail closed |
@@ -103,7 +105,17 @@ Legend:
 
 ## Current Release
 
-`v0.52.6` adds bounded hash-addressed node resolution, immutable snapshot
+`v0.52.7` replaces shell-level execution admission with a non-forgeable
+promotion chain from classified envelope through canonical type-specific
+decode and active-fork/chain checks to an execution-ready transaction.
+`ExecutionRequest` accepts only that final token. Host powers are split into
+snapshot-pure reads, journaled writes, immutable block context,
+transaction-global access tracking, reviewed cryptography, observation-only
+inspection, and resettable bounded memory/frame arenas. This milestone does
+not claim sender recovery, intrinsic-gas, account-state, fee, blob/KZG,
+authorization, or complete consensus validity.
+
+`v0.52.6` added bounded hash-addressed node resolution, immutable snapshot
 anchors, multiproof query/output accounting, and optional owned deduplicating
 arenas with deterministic cancellable scheduling. Resolver traversal preserves
 canonical short-child and empty-branch semantics from ordered proofs. Arena

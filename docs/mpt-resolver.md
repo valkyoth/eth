@@ -1,7 +1,6 @@
 # MPT Resolver And Multiproof Orchestration
 
-Status: `v0.52.6` release candidate; pentest findings are remediated and the
-clean retest passed.
+Status: shipped in `v0.52.6`.
 
 `MptNodeResolver` replaces positional proof-node lookup with bounded lookup by
 Keccak hash. Resolver entries are strictly hash sorted, duplicate-free, fully

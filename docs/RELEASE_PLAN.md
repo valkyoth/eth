@@ -2836,8 +2836,7 @@ Exit criteria:
 
 ### v0.52.6 - MPT Resolver Multiproof And Snapshot Orchestration
 
-Status: implementation complete; pentest findings remediated; clean retest
-passed. Awaiting green GitHub CI and CodeQL before tagging.
+Status: tagged as `v0.52.6`.
 
 Goal: retain the allocation-free proof kernel while providing a bounded
 orchestration layer suitable for live synchronization.
@@ -2876,7 +2875,8 @@ Exit criteria:
 
 ### v0.52.7 - Execution Admission And Host Capability Split
 
-Status: planned.
+Status: implementation complete; awaiting pentest of the exact implementation
+stop commit.
 
 Goal: prevent an opaque EIP-2718 classification result from becoming
 executable and separate execution host responsibilities into auditable

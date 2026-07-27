@@ -4,12 +4,21 @@
 
 #[cfg(feature = "std")]
 extern crate std;
+#[cfg(all(test, not(feature = "std")))]
+extern crate std;
 
+mod admission;
 mod environment;
 mod gas_estimation;
+mod host;
 mod result;
 mod snapshot;
 
+pub use admission::{
+    CanonicalTransaction, CanonicallyDecodedTransaction, ClassifiedEnvelope,
+    ExecutionAdmissionError, ExecutionAdmissionFailure, ExecutionReadyTransaction,
+    ForkValidatedTransaction,
+};
 pub use environment::{BlockExecutionContext, ExecutionEnvironment, ExecutionEnvironmentError};
 pub use gas_estimation::{
     GasEstimationError, GasEstimationPolicy, GasEstimationReport, GasEstimationRequest,
@@ -17,11 +26,16 @@ pub use gas_estimation::{
     MAX_GAS_ESTIMATION_BACKEND_STEPS, MAX_GAS_ESTIMATION_GAS_CAP,
     MAX_GAS_ESTIMATION_TIMEOUT_MILLIS,
 };
+pub use host::{
+    AccessStatus, AccessTracker, BlockEnvironment, BorrowedTransactionArena, ChildCheckpoint,
+    CryptoProvider, ExecutionHost, HostCapabilityError, Inspector, InspectorEvent,
+    IterativeCallFrame, MAX_ITERATIVE_CALL_FRAMES, MAX_TRANSACTION_MEMORY_BYTES, NoInspector,
+    StateJournal, TransactionArena,
+};
 pub use result::{
     ExecutionError, ExecutionReport, ExecutionRequest, ExecutionResult, ExecutionStatus,
-    ExecutionTransaction,
 };
-pub use snapshot::{SnapshotAccount, SnapshotError, StateSnapshot};
+pub use snapshot::{SnapshotAccount, SnapshotError, StateSnapshot, StateView};
 
 /// Placeholder proving the EVM adapter is explicit and feature-gated.
 #[derive(Clone, Copy, Debug, Eq, PartialEq)]
@@ -73,3 +87,15 @@ pub const fn revm_dependency_review() -> RevmDependencyReview {
 #[cfg(test)]
 #[path = "tests.rs"]
 mod tests;
+
+#[cfg(test)]
+#[path = "admission_tests.rs"]
+mod admission_tests;
+
+#[cfg(test)]
+#[path = "host_tests.rs"]
+mod host_tests;
+
+#[cfg(test)]
+#[path = "test_fixtures.rs"]
+mod test_fixtures;

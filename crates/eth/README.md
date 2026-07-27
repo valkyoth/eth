@@ -33,7 +33,7 @@ receipts, withdrawals, Merkle Patricia Trie proofs, fork-aware validation, and
 bounded first-party EVM components.
 
 The complete stack is built in small independently reviewed milestones rather
-than claimed ahead of its evidence. Version `0.52.6` is still a library, not a
+than claimed ahead of its evidence. Version `0.52.7` is still a library, not a
 production node, wallet, RPC client, or key store.
 Networking, private-key signing, local key storage, and third-party execution
 backends are not enabled by default.
@@ -42,14 +42,14 @@ backends are not enabled by default.
 
 ```toml
 [dependencies]
-eth = "0.52.6"
+eth = "0.52.7"
 ```
 
 For optional sanitization support:
 
 ```toml
 [dependencies]
-eth = { version = "0.52.6", features = ["sanitization"] }
+eth = { version = "0.52.7", features = ["sanitization"] }
 ```
 
 ## Quick Start
@@ -86,6 +86,8 @@ Legend: 🟢 available for the stated scope, 🟡 implemented but incomplete,
 | EIP-712 typed data | 🟢 Available | Bounded typed encoder and hashing path; optional JSON parser |
 | Headers, receipts, and withdrawals | 🟡 Partial | Canonical syntactic decode and selected hashing; full block/state validity is incomplete |
 | MPT proof verification | 🟢 Available | Strict preflight, transaction/receipt inclusion, canonical account decoding, account-bound storage authority, and absence/zero semantics |
+| Execution admission | 🟢 Available | Non-forgeable classified, canonical, fork-bound, and execution-ready transaction typestates |
+| EVM host capabilities | 🟢 Available | Separate state-view, journal, block, access, crypto, inspector, and bounded-arena contracts |
 | Native EVM execution | 🟡 Partial | Bounded basic opcode/state-read interpreter, consensus-correct truncated PUSH handling, and call/create planning; full state transition is incomplete |
 | Native precompiles through BLAKE2F | 🟢 Available | Identity, SHA-256, RIPEMD-160, ModExp, BN254, and BLAKE2F; ECRECOVER uses explicit caller backends |
 | BLS12-381 and KZG | 🟡 Partial | BLS canonical wire/frame parsing and KZG/BLS gas planning; cryptographic execution remains fail closed |
@@ -128,7 +130,7 @@ Optional reviewed software Keccak backend:
 
 ```toml
 [dependencies]
-eth = { version = "0.52.6", features = ["keccak-tiny"] }
+eth = { version = "0.52.7", features = ["keccak-tiny"] }
 ```
 
 ```rust
@@ -142,22 +144,22 @@ Optional reviewed secp256k1 recovery adapter:
 
 ```toml
 [dependencies]
-eth = { version = "0.52.6", features = ["secp256k1-k256"] }
+eth = { version = "0.52.7", features = ["secp256k1-k256"] }
 ```
 
 Optional bounded EVM gas-estimation boundary:
 
 ```toml
 [dependencies]
-eth = { version = "0.52.6", features = ["evm"] }
+eth = { version = "0.52.7", features = ["evm"] }
 ```
 
 ```rust
-use eth::codec::DecodeLimits;
+use eth::codec::{DecodeLimits, DecodeSessionPolicy};
 use eth::evm::{
-    BlockExecutionContext, ExecutionEnvironment, ExecutionRequest, ExecutionTransaction,
-    GasEstimationPolicy, GasEstimationRequest, GasEstimationStatus,
-    GasEstimationTermination, SnapshotAccount, SnapshotError, StateSnapshot,
+    BlockExecutionContext, ClassifiedEnvelope, ExecutionEnvironment, ExecutionRequest,
+    GasEstimationPolicy, GasEstimationRequest, GasEstimationStatus, GasEstimationTermination,
+    SnapshotAccount, SnapshotError, StateSnapshot,
 };
 use eth::primitives::{Address, B256, BlockNumber, ChainId, Gas, Nonce, UnixTimestamp, Wei};
 use eth::protocol::{ForkActivation, ForkSpec, Hardfork, ValidationContext};
@@ -216,12 +218,28 @@ let environment = match ExecutionEnvironment::try_new(context, block) {
     Ok(environment) => environment,
     Err(error) => return Err(error.message()),
 };
-let transaction = match ExecutionTransaction::decode(&[0xc0], limits) {
-    Ok(transaction) => transaction,
+let decode_policy = match DecodeSessionPolicy::compatibility_policy(limits) {
+    Ok(policy) => policy,
     Err(error) => return Err(error.message()),
 };
+let raw_transaction = [
+    0xcb, 0x01, 0x02, 0x82, 0x52, 0x08, 0x80, 0x80, 0x80, 0x25, 0x01, 0x02,
+];
+let classified = match ClassifiedEnvelope::decode(&raw_transaction, decode_policy) {
+    Ok(classified) => classified,
+    Err(error) => return Err(error.message()),
+};
+let canonical = match classified.try_into_canonical() {
+    Ok(canonical) => canonical,
+    Err(failure) => return Err(failure.error().message()),
+};
+let fork_validated = match canonical.try_into_fork_validated(environment) {
+    Ok(validated) => validated,
+    Err(failure) => return Err(failure.error().message()),
+};
+let transaction = fork_validated.into_execution_ready();
 let snapshot = Snapshot;
-let execution = ExecutionRequest::new(environment, transaction, &snapshot);
+let execution = ExecutionRequest::new(transaction, &snapshot);
 let policy = match GasEstimationPolicy::try_new(
     8,
     Gas::new(50_000),
@@ -254,7 +272,7 @@ Optional native EVM core domains:
 
 ```toml
 [dependencies]
-eth = { version = "0.52.6", features = ["evm-core"] }
+eth = { version = "0.52.7", features = ["evm-core"] }
 ```
 
 State access uses explicit host-state traits and caller-provided fixed-capacity
@@ -1206,7 +1224,7 @@ friendly, and independently testable.
 The minimum supported Rust version is Rust `1.90.0`. New deployments should use
 the pinned stable Rust `1.97.1` until the toolchain policy is updated.
 
-Compatibility evidence for `0.52.6`:
+Compatibility evidence for `0.52.7`:
 
 | Rust | Local Evidence |
 | --- | --- |
@@ -1219,7 +1237,7 @@ Compatibility evidence for `0.52.6`:
 scripts/checks.sh
 scripts/check_latest_crates.py
 scripts/check_latest_tools.sh
-scripts/release_0_52_6_gate.sh
+scripts/release_0_52_7_gate.sh
 ```
 
 The two networked freshness checks fail closed when a direct crates.io

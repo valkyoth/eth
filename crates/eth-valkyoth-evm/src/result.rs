@@ -1,102 +1,59 @@
 use core::fmt;
 
-use eth_valkyoth_codec::DecodeLimits;
 use eth_valkyoth_primitives::{B256, Gas, TransactionType};
-use eth_valkyoth_protocol::{
-    TransactionEnvelope, TransactionEnvelopeError, decode_transaction_envelope,
-};
 
-use crate::{ExecutionEnvironment, StateSnapshot};
-
-/// Transaction bytes admitted to the execution boundary.
-#[derive(Clone, Copy, Debug, Eq, PartialEq)]
-pub struct ExecutionTransaction<'a> {
-    raw: &'a [u8],
-    envelope: TransactionEnvelope<'a>,
-}
-
-impl<'a> ExecutionTransaction<'a> {
-    /// Decodes and binds raw transaction bytes to a bounded envelope shell.
-    pub fn decode(raw: &'a [u8], limits: DecodeLimits) -> Result<Self, TransactionEnvelopeError> {
-        let envelope = decode_transaction_envelope(raw, limits)?;
-        Ok(Self { raw, envelope })
-    }
-
-    /// Raw transaction bytes selected for execution.
-    #[must_use]
-    pub const fn raw(self) -> &'a [u8] {
-        self.raw
-    }
-
-    /// Decoded transaction envelope shell selected for execution.
-    #[must_use]
-    pub const fn envelope(self) -> TransactionEnvelope<'a> {
-        self.envelope
-    }
-
-    /// Explicit legacy or typed transaction domain.
-    #[must_use]
-    pub const fn transaction_type(self) -> TransactionType {
-        match self.envelope {
-            TransactionEnvelope::Legacy(_) => TransactionType::LEGACY,
-            TransactionEnvelope::Typed(typed) => typed.transaction_type,
-        }
-    }
-}
+use crate::{ExecutionEnvironment, ExecutionReadyTransaction, StateView};
 
 /// Complete execution request boundary.
 #[derive(Debug)]
-pub struct ExecutionRequest<'a, S: StateSnapshot + ?Sized> {
-    environment: ExecutionEnvironment,
-    transaction: ExecutionTransaction<'a>,
-    snapshot: &'a S,
+pub struct ExecutionRequest<'a, S: StateView + ?Sized> {
+    transaction: ExecutionReadyTransaction<'a>,
+    state: &'a S,
 }
 
-impl<'a, S: StateSnapshot + ?Sized> ExecutionRequest<'a, S> {
-    /// Creates a request from explicit environment, transaction, and state.
+impl<'a, S: StateView + ?Sized> ExecutionRequest<'a, S> {
+    /// Creates a request from an execution-ready transaction and pure state view.
     #[must_use]
-    pub const fn new(
-        environment: ExecutionEnvironment,
-        transaction: ExecutionTransaction<'a>,
-        snapshot: &'a S,
-    ) -> Self {
-        Self {
-            environment,
-            transaction,
-            snapshot,
-        }
+    pub const fn new(transaction: ExecutionReadyTransaction<'a>, state: &'a S) -> Self {
+        Self { transaction, state }
     }
 
-    /// Execution environment for this request.
+    /// Fork and block environment already bound during transaction admission.
     #[must_use]
     pub const fn environment(&self) -> ExecutionEnvironment {
-        self.environment
+        self.transaction.environment()
     }
 
-    /// Transaction selected for execution.
+    /// Execution-ready transaction selected for execution.
     #[must_use]
-    pub const fn transaction(&self) -> ExecutionTransaction<'a> {
-        self.transaction
+    pub const fn transaction(&self) -> &ExecutionReadyTransaction<'a> {
+        &self.transaction
     }
 
-    /// State snapshot selected for execution.
+    /// Snapshot-pure state view selected for execution.
+    #[must_use]
+    pub const fn state(&self) -> &S {
+        self.state
+    }
+
+    /// Compatibility name for the selected state view.
     #[must_use]
     pub const fn snapshot(&self) -> &S {
-        self.snapshot
+        self.state
     }
 
     /// Builds a report with a caller-computed transaction hash.
     ///
     /// This crate does not compute Keccak-256 here because concrete hash
     /// implementations stay outside the EVM boundary. Callers must supply the
-    /// hash of [`ExecutionTransaction::raw`] using their reviewed hash backend.
+    /// hash of [`ExecutionReadyTransaction::raw`] using their reviewed backend.
     #[must_use]
     pub fn report(&self, transaction_hash: B256) -> ExecutionReport {
         ExecutionReport {
-            environment: self.environment,
+            environment: self.environment(),
             transaction_type: self.transaction.transaction_type(),
             transaction_hash,
-            snapshot_id: self.snapshot.snapshot_id(),
+            snapshot_id: self.state.snapshot_id(),
         }
     }
 }

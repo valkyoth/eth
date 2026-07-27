@@ -25,6 +25,43 @@ pub trait StateSnapshot {
     fn storage(&self, address: Address, slot: B256) -> Result<B256, SnapshotError>;
 }
 
+/// Snapshot-pure state reads required by execution.
+///
+/// Every method borrows immutably. Implementations must keep
+/// [`Self::original_storage`] fixed at transaction-start state while
+/// [`Self::current_storage`] reflects the selected journal view.
+pub trait StateView {
+    /// Stable identity for the selected state snapshot.
+    fn snapshot_id(&self) -> B256;
+
+    /// Returns account state for an address if it exists.
+    fn account(&self, address: Address) -> Result<Option<SnapshotAccount>, SnapshotError>;
+
+    /// Storage value at the start of the transaction.
+    fn original_storage(&self, address: Address, slot: B256) -> Result<B256, SnapshotError>;
+
+    /// Storage value in the current journaled view.
+    fn current_storage(&self, address: Address, slot: B256) -> Result<B256, SnapshotError>;
+}
+
+impl<T: StateSnapshot + ?Sized> StateView for T {
+    fn snapshot_id(&self) -> B256 {
+        StateSnapshot::snapshot_id(self)
+    }
+
+    fn account(&self, address: Address) -> Result<Option<SnapshotAccount>, SnapshotError> {
+        StateSnapshot::account(self, address)
+    }
+
+    fn original_storage(&self, address: Address, slot: B256) -> Result<B256, SnapshotError> {
+        StateSnapshot::storage(self, address, slot)
+    }
+
+    fn current_storage(&self, address: Address, slot: B256) -> Result<B256, SnapshotError> {
+        StateSnapshot::storage(self, address, slot)
+    }
+}
+
 /// State snapshot access failure.
 #[non_exhaustive]
 #[derive(Clone, Copy, Debug, Eq, PartialEq)]

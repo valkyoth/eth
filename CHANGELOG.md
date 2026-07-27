@@ -4,6 +4,16 @@ All notable changes to `eth` are documented here.
 
 ## Unreleased
 
+- Added non-forgeable execution admission typestates that promote a classified
+  envelope through complete type-specific canonical decode and active-fork/
+  signed-chain checks before `ExecutionRequest` can be constructed.
+- Split EVM host powers into snapshot-pure state reads, journaled writes,
+  immutable block context, transaction-global access tracking, reviewed
+  cryptography, observation-only inspection, and resettable bounded memory and
+  iterative-frame arenas.
+- Added compile-fail admission coverage, fork/type and unknown-envelope tests,
+  child-revert warmth invariants, explicit frame/memory bound tests, and an
+  execution-admission fuzz target.
 - Added bounded hash-addressed MPT resolution, immutable snapshot anchors,
   multiproof output accounting, optional owned deduplicating arenas, and
   deterministic cancellable host scheduling.

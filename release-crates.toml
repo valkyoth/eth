@@ -1,5 +1,5 @@
 [release]
-version = "0.52.6"
+version = "0.52.7"
 policy = "independent"
 
 [crates."eth-valkyoth-codec"]
@@ -7,95 +7,95 @@ previous_version = "0.21.0"
 version = "0.21.0"
 change = "unchanged"
 publish = false
-reason = "No package changes for v0.52.6."
+reason = "No package changes for v0.52.7."
 
 [crates."eth-valkyoth-primitives"]
 previous_version = "0.11.4"
 version = "0.11.4"
 change = "unchanged"
 publish = false
-reason = "No package changes for v0.52.6."
+reason = "No package changes for v0.52.7."
 
 [crates."eth-valkyoth-hash"]
 previous_version = "0.11.4"
 version = "0.11.4"
 change = "unchanged"
 publish = false
-reason = "No package changes for v0.52.6."
+reason = "No package changes for v0.52.7."
 
 [crates."eth-valkyoth-protocol"]
 previous_version = "0.26.1"
 version = "0.26.1"
 change = "unchanged"
 publish = false
-reason = "No package changes for v0.52.6."
+reason = "No package changes for v0.52.7."
 
 [crates."eth-valkyoth-verify"]
-previous_version = "0.26.0"
+previous_version = "0.27.0"
 version = "0.27.0"
-change = "code"
-publish = true
-reason = "Adds bounded hash-addressed MPT resolution, snapshot-bound multiproof batches, owned deduplicating arenas, and cancellable scheduling."
+change = "unchanged"
+publish = false
+reason = "No package changes for v0.52.7."
 
 [crates."eth-valkyoth-derive"]
 previous_version = "0.18.0"
 version = "0.18.0"
 change = "unchanged"
 publish = false
-reason = "No package changes for v0.52.6."
+reason = "No package changes for v0.52.7."
 
 [crates."eth-valkyoth-sanitization"]
 previous_version = "0.8.0"
 version = "0.8.0"
 change = "unchanged"
 publish = false
-reason = "No package changes for v0.52.6."
+reason = "No package changes for v0.52.7."
 
 [crates."eth-valkyoth-evm-core"]
 previous_version = "0.26.1"
 version = "0.26.1"
 change = "unchanged"
 publish = false
-reason = "No package changes for v0.52.6."
+reason = "No package changes for v0.52.7."
 
 [crates."eth-valkyoth-evm"]
 previous_version = "0.10.2"
-version = "0.10.2"
-change = "unchanged"
-publish = false
-reason = "No package changes for v0.52.6."
+version = "0.11.0"
+change = "code"
+publish = true
+reason = "Adds non-forgeable execution admission typestates and explicit host capability contracts."
 
 [crates."eth-valkyoth-rpc"]
 previous_version = "0.7.0"
 version = "0.7.0"
 change = "unchanged"
 publish = false
-reason = "No package changes for v0.52.6."
+reason = "No package changes for v0.52.7."
 
 [crates."eth-valkyoth-signer"]
 previous_version = "0.7.5"
 version = "0.7.5"
 change = "unchanged"
 publish = false
-reason = "No package changes for v0.52.6."
+reason = "No package changes for v0.52.7."
 
 [crates."eth-valkyoth-reth"]
 previous_version = "0.7.0"
 version = "0.7.0"
 change = "unchanged"
 publish = false
-reason = "No package changes for v0.52.6."
+reason = "No package changes for v0.52.7."
 
 [crates."eth-valkyoth-testkit"]
 previous_version = "0.7.0"
 version = "0.7.0"
 change = "unchanged"
 publish = false
-reason = "No package changes for v0.52.6."
+reason = "No package changes for v0.52.7."
 
 [crates.eth]
-previous_version = "0.52.5"
-version = "0.52.6"
+previous_version = "0.52.6"
+version = "0.52.7"
 change = "code"
 publish = true
-reason = "Exposes bounded snapshot-bound MPT node resolution and multiproof orchestration."
+reason = "Exposes execution admission typestates and explicit host capability contracts."

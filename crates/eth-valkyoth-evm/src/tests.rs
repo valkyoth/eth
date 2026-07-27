@@ -1,18 +1,18 @@
-use eth_valkyoth_codec::DecodeLimits;
+use eth_valkyoth_codec::{DecodeLimits, DecodeSessionPolicy};
 use eth_valkyoth_primitives::{
     Address, B256, BlockNumber, ChainId, Gas, Nonce, UnixTimestamp, Wei,
 };
-use eth_valkyoth_protocol::{
-    ForkActivation, ForkSpec, Hardfork, TransactionEnvelope, ValidationContext,
-};
+use eth_valkyoth_protocol::{ForkActivation, ForkSpec, Hardfork, ValidationContext};
 
 use super::{
-    BlockExecutionContext, EvmAdapterBoundary, ExecutionEnvironment, ExecutionEnvironmentError,
-    ExecutionRequest, ExecutionTransaction, GasEstimationError, GasEstimationPolicy,
-    GasEstimationRequest, GasEstimationStatus, GasEstimationTermination,
-    MAX_GAS_ESTIMATION_ATTEMPTS, SnapshotAccount, SnapshotError, StateSnapshot,
-    revm_dependency_review,
+    BlockExecutionContext, CanonicalTransaction, ClassifiedEnvelope, EvmAdapterBoundary,
+    ExecutionEnvironment, ExecutionEnvironmentError, ExecutionReadyTransaction, ExecutionRequest,
+    GasEstimationError, GasEstimationPolicy, GasEstimationRequest, GasEstimationStatus,
+    GasEstimationTermination, MAX_GAS_ESTIMATION_ATTEMPTS, SnapshotAccount, SnapshotError,
+    StateSnapshot, revm_dependency_review,
 };
+use crate::test_fixtures::legacy_transaction;
+use std::boxed::Box;
 
 const LIMITS: DecodeLimits = DecodeLimits {
     max_input_bytes: 64,
@@ -106,20 +106,26 @@ fn environment_rejects_mismatched_block_context() {
 }
 
 #[test]
-fn transaction_decode_binds_raw_bytes_to_envelope() {
-    let decoded = ExecutionTransaction::decode(&[0x02, 0xc0], LIMITS);
-    assert!(decoded.is_ok(), "{decoded:?}");
-    let transaction = match decoded {
-        Ok(transaction) => transaction,
+fn transaction_admission_binds_raw_bytes_to_canonical_fields() {
+    let environment = match ExecutionEnvironment::try_new(validation_context(), block_context()) {
+        Ok(environment) => environment,
         Err(_) => return,
     };
+    let Some(raw) = legacy_transaction() else {
+        return;
+    };
+    let transaction = execution_ready(&raw, environment);
+    assert!(transaction.is_some(), "{transaction:?}");
+    let Some(transaction) = transaction else {
+        return;
+    };
 
-    assert_eq!(transaction.raw(), &[0x02, 0xc0]);
+    assert_eq!(transaction.raw(), raw);
     assert!(matches!(
-        transaction.envelope(),
-        TransactionEnvelope::Typed(_)
+        transaction.transaction(),
+        CanonicalTransaction::Legacy(_)
     ));
-    assert_eq!(transaction.transaction_type().get(), 2);
+    assert_eq!(transaction.transaction_type().get(), 0);
 }
 
 #[test]
@@ -130,23 +136,24 @@ fn request_report_binds_environment_transaction_and_snapshot() {
         Ok(environment) => environment,
         Err(_) => return,
     };
-    let decoded = ExecutionTransaction::decode(&[0xc0], LIMITS);
-    assert!(decoded.is_ok(), "{decoded:?}");
-    let transaction = match decoded {
-        Ok(transaction) => transaction,
-        Err(_) => return,
+    let Some(raw) = legacy_transaction() else {
+        return;
+    };
+    let transaction = match execution_ready(&raw, environment) {
+        Some(transaction) => transaction,
+        None => return,
     };
     let snapshot = TestSnapshot {
         id: B256::from_bytes([0x22; 32]),
     };
     let transaction_hash = B256::from_bytes([0x99; 32]);
 
-    let request = ExecutionRequest::new(environment, transaction, &snapshot);
+    let request = ExecutionRequest::new(transaction, &snapshot);
     let report = request.report(transaction_hash);
 
     assert_eq!(request.environment(), environment);
-    assert_eq!(request.transaction().raw(), &[0xc0]);
-    assert_eq!(request.snapshot().snapshot_id(), snapshot.id);
+    assert_eq!(request.transaction().raw(), raw);
+    assert_eq!(request.state().snapshot_id(), snapshot.id);
     assert_eq!(report.environment, environment);
     assert_eq!(report.transaction_type.get(), 0);
     assert_eq!(report.transaction_hash, transaction_hash);
@@ -362,7 +369,7 @@ fn gas_estimation_report_binds_policy_execution_and_result() {
     };
 
     assert_eq!(request.policy(), policy);
-    assert_eq!(request.execution().transaction().raw(), &[0xc0]);
+    assert!(!request.execution().transaction().raw().is_empty());
     assert_eq!(report.policy, policy);
     assert_eq!(report.status, GasEstimationStatus::Estimated);
     assert_eq!(report.attempts, 3);
@@ -404,17 +411,24 @@ fn execution_request() -> Option<ExecutionRequest<'static, TestSnapshot>> {
         Ok(environment) => environment,
         Err(_) => return None,
     };
-    let decoded = ExecutionTransaction::decode(&[0xc0], LIMITS);
-    assert!(decoded.is_ok(), "{decoded:?}");
-    let transaction = match decoded {
-        Ok(transaction) => transaction,
-        Err(_) => return None,
-    };
+    let raw = Box::leak(legacy_transaction()?.into_boxed_slice());
+    let transaction = execution_ready(raw, environment)?;
     static SNAPSHOT: TestSnapshot = TestSnapshot {
         id: B256::from_bytes([0x88; 32]),
     };
 
-    Some(ExecutionRequest::new(environment, transaction, &SNAPSHOT))
+    Some(ExecutionRequest::new(transaction, &SNAPSHOT))
+}
+
+fn execution_ready(
+    raw: &[u8],
+    environment: ExecutionEnvironment,
+) -> Option<ExecutionReadyTransaction<'_>> {
+    let policy = DecodeSessionPolicy::compatibility_policy(LIMITS).ok()?;
+    let classified = ClassifiedEnvelope::decode(raw, policy).ok()?;
+    let canonical = classified.try_into_canonical().ok()?;
+    let fork_validated = canonical.try_into_fork_validated(environment).ok()?;
+    Some(fork_validated.into_execution_ready())
 }
 
 fn gas_policy(gas_cap: u64) -> Option<GasEstimationPolicy> {

@@ -13,6 +13,7 @@ cargo-fuzz = true
 [dependencies]
 alloy-rlp = "0.3.16"
 eth-valkyoth-codec = { path = "../crates/eth-valkyoth-codec", version = "0.21.0", features = ["testing"] }
+eth-valkyoth-evm = { path = "../crates/eth-valkyoth-evm", version = "0.11.0" }
 eth-valkyoth-evm-core = { path = "../crates/eth-valkyoth-evm-core", version = "0.26.1", features = ["testing"] }
 eth-valkyoth-hash = { path = "../crates/eth-valkyoth-hash", version = "0.11.4", features = ["tiny-keccak"] }
 eth-valkyoth-primitives = { path = "../crates/eth-valkyoth-primitives", version = "0.11.4" }
@@ -79,6 +80,13 @@ bench = false
 [[bin]]
 name = "transaction_envelope"
 path = "fuzz_targets/transaction_envelope.rs"
+test = false
+doc = false
+bench = false
+
+[[bin]]
+name = "execution_admission"
+path = "fuzz_targets/execution_admission.rs"
 test = false
 doc = false
 bench = false

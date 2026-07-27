@@ -1,0 +1,13 @@
+error[E0308]: mismatched types
+ --> tests/ui/classified_envelope_request.rs:7:35
+  |
+7 |     let _ = ExecutionRequest::new(classified, state);
+  |             --------------------- ^^^^^^^^^^ expected `ExecutionReadyTransaction<'_>`, found `ClassifiedEnvelope<'_>`
+  |             |
+  |             arguments to this function are incorrect
+  |
+note: associated function defined here
+ --> src/result.rs
+  |
+  |     pub const fn new(transaction: ExecutionReadyTransaction<'a>, state: &'a S) -> Self {
+  |                  ^^^

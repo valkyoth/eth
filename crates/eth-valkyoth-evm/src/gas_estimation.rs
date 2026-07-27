@@ -2,7 +2,7 @@ use core::fmt;
 
 use eth_valkyoth_primitives::{B256, Gas};
 
-use crate::{ExecutionReport, ExecutionRequest, StateSnapshot};
+use crate::{ExecutionReport, ExecutionRequest, StateView};
 
 /// Maximum backend attempts admitted for one gas-estimation request.
 pub const MAX_GAS_ESTIMATION_ATTEMPTS: u32 = 32;
@@ -124,12 +124,12 @@ impl GasEstimationPolicy {
 
 /// Complete bounded gas-estimation request.
 #[derive(Debug)]
-pub struct GasEstimationRequest<'a, S: StateSnapshot + ?Sized> {
+pub struct GasEstimationRequest<'a, S: StateView + ?Sized> {
     execution: ExecutionRequest<'a, S>,
     policy: GasEstimationPolicy,
 }
 
-impl<'a, S: StateSnapshot + ?Sized> GasEstimationRequest<'a, S> {
+impl<'a, S: StateView + ?Sized> GasEstimationRequest<'a, S> {
     /// Creates an estimation request after checking the policy against block gas.
     pub fn try_new(
         execution: ExecutionRequest<'a, S>,
