@@ -4,6 +4,10 @@ All notable changes to `eth` are documented here.
 
 ## Unreleased
 
+- Expanded the live tooling freshness gate to inspect every GitHub Actions
+  workflow, require full-SHA checkout pins with version annotations, and reject
+  a stale or mismatched checkout pin in any workflow; cargo-fuzz is now covered
+  by the same current-version gate.
 - Remediated the v0.52.7 pentest by preserving both child-frame rejection and
   journal-cleanup failures in a dedicated `BeginChildError`, and corrected
   inspector depth documentation to describe its one-based active-frame count.

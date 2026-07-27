@@ -1,7 +1,8 @@
 #!/usr/bin/env sh
 set -eu
 
-ci_file=".github/workflows/ci.yml"
+workflow_dir="${GITHUB_WORKFLOW_DIR:-.github/workflows}"
+ci_file="${CI_WORKFLOW_FILE:-${workflow_dir}/ci.yml}"
 rust_toolchain_file="${RUST_TOOLCHAIN_FILE:-rust-toolchain.toml}"
 rust_stable_manifest_url="${RUST_STABLE_MANIFEST_URL:-https://static.rust-lang.org/dist/channel-rust-stable.toml}"
 
@@ -51,6 +52,12 @@ latest_crate_version() {
 check_cargo_tool() {
     tool="$1"
     pinned="$(ci_tool_version "$tool")"
+    check_cargo_tool_version "$tool" "$pinned"
+}
+
+check_cargo_tool_version() {
+    tool="$1"
+    pinned="$2"
     latest="$(latest_crate_version "$tool")"
 
     if [ -z "$pinned" ]; then
@@ -69,8 +76,51 @@ check_cargo_tool() {
     fi
 }
 
-checkout_pin_line() {
-    sed -n 's/.*uses: actions\/checkout@\([0-9a-f]\{40\}\) # \(v[0-9][0-9.]*\).*/\1 \2/p' "$ci_file" | head -n 1
+workflow_files() {
+    for workflow in "$workflow_dir"/*.yml "$workflow_dir"/*.yaml; do
+        if [ -f "$workflow" ]; then
+            printf '%s\n' "$workflow"
+        fi
+    done
+}
+
+action_refs() {
+    while IFS= read -r workflow; do
+        sed -n 's/^[[:space:]]*-\{0,1\}[[:space:]]*uses: [^@][^@]*@\([^[:space:]]*\).*/\1/p' "$workflow"
+    done <<EOF
+$(workflow_files)
+EOF
+}
+
+checkout_uses() {
+    while IFS= read -r workflow; do
+        sed -n '/^[[:space:]]*-\{0,1\}[[:space:]]*uses: actions\/checkout@/p' "$workflow"
+    done <<EOF
+$(workflow_files)
+EOF
+}
+
+checkout_pin_lines() {
+    while IFS= read -r workflow; do
+        sed -n 's/.*uses: actions\/checkout@\([0-9a-f]\{40\}\) # \(v[0-9][0-9.]*\).*/\1 \2/p' "$workflow"
+    done <<EOF
+$(workflow_files)
+EOF
+}
+
+check_checkout_pin_format() {
+    checkout_count="$(checkout_uses | wc -l | tr -d ' ')"
+    parsed_count="$(checkout_pin_lines | wc -l | tr -d ' ')"
+
+    if [ "$checkout_count" -eq 0 ]; then
+        echo "no actions/checkout use found in ${workflow_dir}" >&2
+        exit 1
+    fi
+
+    if [ "$checkout_count" -ne "$parsed_count" ]; then
+        echo "every actions/checkout use must be pinned to a full SHA with a semver tag comment" >&2
+        exit 1
+    fi
 }
 
 check_all_actions_sha_pinned() {
@@ -87,7 +137,7 @@ check_all_actions_sha_pinned() {
                 ;;
         esac
     done <<EOF
-$(sed -n 's/^[[:space:]]*uses: [^@][^@]*@\([^[:space:]]*\).*/\1/p' "$ci_file")
+$(action_refs)
 EOF
     [ "$failed" -eq 0 ]
 }
@@ -107,23 +157,11 @@ checkout_tag_sha() {
 }
 
 check_checkout_action() {
-    pin_line="$(checkout_pin_line)"
-    if [ -z "$pin_line" ]; then
-        echo "actions/checkout must be pinned to a full SHA with a semver tag comment" >&2
-        exit 1
-    fi
-
-    pinned_sha="$(printf '%s\n' "$pin_line" | awk '{ print $1 }')"
-    pinned_tag="$(printf '%s\n' "$pin_line" | awk '{ print $2 }')"
+    check_checkout_pin_format
     latest_tag="$(latest_checkout_tag)"
 
     if [ -z "$latest_tag" ]; then
         echo "could not determine latest actions/checkout tag" >&2
-        exit 1
-    fi
-
-    if [ "$pinned_tag" != "$latest_tag" ]; then
-        echo "actions/checkout is not latest: pinned ${pinned_tag}, latest ${latest_tag}" >&2
         exit 1
     fi
 
@@ -133,10 +171,19 @@ check_checkout_action() {
         exit 1
     fi
 
-    if [ "$pinned_sha" != "$latest_sha" ]; then
-        echo "actions/checkout ${latest_tag} SHA mismatch: pinned ${pinned_sha}, latest ${latest_sha}" >&2
-        exit 1
-    fi
+    while IFS=' ' read -r pinned_sha pinned_tag; do
+        if [ "$pinned_tag" != "$latest_tag" ]; then
+            echo "actions/checkout is not latest: pinned ${pinned_tag}, latest ${latest_tag}" >&2
+            exit 1
+        fi
+
+        if [ "$pinned_sha" != "$latest_sha" ]; then
+            echo "actions/checkout ${latest_tag} SHA mismatch: pinned ${pinned_sha}, latest ${latest_sha}" >&2
+            exit 1
+        fi
+    done <<EOF
+$(checkout_pin_lines)
+EOF
 }
 
 check_latest_rust
@@ -145,8 +192,15 @@ if [ "${CHECK_LATEST_TOOLS_RUST_ONLY:-0}" = "1" ]; then
     exit 0
 fi
 
+if [ "${CHECK_LATEST_TOOLS_ACTION_PINS_ONLY:-0}" = "1" ]; then
+    check_all_actions_sha_pinned
+    check_checkout_pin_format
+    exit 0
+fi
+
 check_cargo_tool cargo-deny
 check_cargo_tool cargo-audit
 check_cargo_tool cargo-sbom
+check_cargo_tool_version cargo-fuzz 0.13.2
 check_all_actions_sha_pinned
 check_checkout_action

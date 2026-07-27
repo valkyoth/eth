@@ -33,6 +33,9 @@ auditable capabilities.
   removed.
 - `StateSnapshot` remains compatible through a blanket `StateView`
   implementation.
+- The live tooling freshness gate now audits Action refs across every workflow
+  and verifies every checkout use against the latest tag and exact upstream
+  commit; it also checks the active cargo-fuzz CLI release.
 
 ## Security Properties
 

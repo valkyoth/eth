@@ -1241,7 +1241,8 @@ scripts/release_0_52_7_gate.sh
 ```
 
 The two networked freshness checks fail closed when a direct crates.io
-dependency, stable Rust release, Cargo tool, or pinned GitHub Action is stale.
+dependency, stable Rust release, Cargo tool, or GitHub Action pin in any
+workflow is stale.
 
 For dependency-policy checks, install `cargo-deny` and `cargo-audit`, then run:
 

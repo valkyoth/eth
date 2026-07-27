@@ -8,6 +8,10 @@ class of problem.
 - `cargo deny check` for license, source, advisory, and duplicate policy.
 - `cargo audit` for RustSec advisories.
 - `scripts/generate-sbom.sh --check` for exact committed SBOM evidence.
+- `scripts/check_latest_tools.sh` for latest stable Rust, Cargo
+  security/SBOM/fuzz tools, and full-SHA current GitHub Action pins across
+  every workflow.
+- `scripts/check_latest_crates.py` for MSRV-aware direct dependency freshness.
 - Dependabot for Cargo and GitHub Actions updates.
 - Manual current-version review before dependency edits.
 

@@ -6,6 +6,8 @@ trap 'rm -rf "$tmp_dir"' EXIT HUP INT TERM
 
 toolchain_file="$tmp_dir/rust-toolchain.toml"
 manifest_file="$tmp_dir/channel-rust-stable.toml"
+workflow_dir="$tmp_dir/workflows"
+mkdir -p "$workflow_dir"
 
 cat >"$toolchain_file" <<'EOF'
 [toolchain]
@@ -50,4 +52,42 @@ if RUST_TOOLCHAIN_FILE="$toolchain_file" \
     exit 1
 fi
 
-echo "latest Rust tool check tests passed"
+cat >"$manifest_file" <<'EOF'
+manifest-version = "2"
+
+[pkg.rust]
+version = "1.97.1 (fixture)"
+EOF
+cat >"$toolchain_file" <<'EOF'
+[toolchain]
+channel = "1.97.1"
+EOF
+
+cat >"$workflow_dir/ci.yml" <<'EOF'
+steps:
+  - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+EOF
+cat >"$workflow_dir/release.yml" <<'EOF'
+steps:
+  - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+EOF
+RUST_TOOLCHAIN_FILE="$toolchain_file" \
+RUST_STABLE_MANIFEST_URL="file://$manifest_file" \
+GITHUB_WORKFLOW_DIR="$workflow_dir" \
+CHECK_LATEST_TOOLS_ACTION_PINS_ONLY=1 \
+    scripts/check_latest_tools.sh
+
+cat >"$workflow_dir/release.yml" <<'EOF'
+steps:
+  - uses: actions/checkout@v7.0.1
+EOF
+if RUST_TOOLCHAIN_FILE="$toolchain_file" \
+    RUST_STABLE_MANIFEST_URL="file://$manifest_file" \
+    GITHUB_WORKFLOW_DIR="$workflow_dir" \
+    CHECK_LATEST_TOOLS_ACTION_PINS_ONLY=1 \
+    scripts/check_latest_tools.sh >/dev/null 2>&1; then
+    echo "unpinned action in secondary workflow was accepted" >&2
+    exit 1
+fi
+
+echo "latest tool check tests passed"
