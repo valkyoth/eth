@@ -1,5 +1,5 @@
 [release]
-version = "0.53.0"
+version = "0.54.0"
 policy = "independent"
 
 [crates."eth-valkyoth-codec"]
@@ -7,95 +7,95 @@ previous_version = "0.21.0"
 version = "0.21.0"
 change = "unchanged"
 publish = false
-reason = "No package changes for v0.53.0."
+reason = "No package changes for v0.54.0."
 
 [crates."eth-valkyoth-primitives"]
 previous_version = "0.11.4"
 version = "0.11.4"
 change = "unchanged"
 publish = false
-reason = "No package changes for v0.53.0."
+reason = "No package changes for v0.54.0."
 
 [crates."eth-valkyoth-hash"]
 previous_version = "0.11.4"
 version = "0.11.4"
 change = "unchanged"
 publish = false
-reason = "No package changes for v0.53.0."
+reason = "No package changes for v0.54.0."
 
 [crates."eth-valkyoth-protocol"]
 previous_version = "0.26.1"
 version = "0.26.1"
 change = "unchanged"
 publish = false
-reason = "No package changes for v0.53.0."
+reason = "No package changes for v0.54.0."
 
 [crates."eth-valkyoth-verify"]
 previous_version = "0.27.0"
 version = "0.27.0"
 change = "unchanged"
 publish = false
-reason = "No package changes for v0.53.0."
+reason = "No package changes for v0.54.0."
 
 [crates."eth-valkyoth-derive"]
 previous_version = "0.18.0"
 version = "0.18.0"
 change = "unchanged"
 publish = false
-reason = "No package changes for v0.53.0."
+reason = "No package changes for v0.54.0."
 
 [crates."eth-valkyoth-sanitization"]
 previous_version = "0.8.0"
 version = "0.8.0"
 change = "unchanged"
 publish = false
-reason = "No package changes for v0.53.0."
+reason = "No package changes for v0.54.0."
 
 [crates."eth-valkyoth-evm-core"]
-previous_version = "0.26.1"
-version = "0.27.0"
+previous_version = "0.27.0"
+version = "0.28.0"
 change = "code"
 publish = true
-reason = "Adds injectable embedded and pre-reserved fixed-width-radix access trackers with atomic capacity and mutation-proportional rollback."
+reason = "Adds exact-input gas quotes, non-forgeable paid precompile capabilities, canonical descriptor validation, and CALL-ready outcomes."
 
 [crates."eth-valkyoth-evm"]
-previous_version = "0.11.0"
-version = "0.12.0"
-change = "code"
+previous_version = "0.12.0"
+version = "0.12.1"
+change = "dependency"
 publish = true
-reason = "Adds core tracker host adapters and a bounded transaction execution governor with hierarchical work tokens."
+reason = "Updates the published EVM-core dependency requirement to 0.28.0."
 
 [crates."eth-valkyoth-rpc"]
 previous_version = "0.7.0"
 version = "0.7.0"
 change = "unchanged"
 publish = false
-reason = "No package changes for v0.53.0."
+reason = "No package changes for v0.54.0."
 
 [crates."eth-valkyoth-signer"]
 previous_version = "0.7.5"
 version = "0.7.5"
 change = "unchanged"
 publish = false
-reason = "No package changes for v0.53.0."
+reason = "No package changes for v0.54.0."
 
 [crates."eth-valkyoth-reth"]
 previous_version = "0.7.0"
 version = "0.7.0"
 change = "unchanged"
 publish = false
-reason = "No package changes for v0.53.0."
+reason = "No package changes for v0.54.0."
 
 [crates."eth-valkyoth-testkit"]
 previous_version = "0.7.0"
 version = "0.7.0"
 change = "unchanged"
 publish = false
-reason = "No package changes for v0.53.0."
+reason = "No package changes for v0.54.0."
 
 [crates.eth]
-previous_version = "0.52.7"
-version = "0.53.0"
+previous_version = "0.53.0"
+version = "0.54.0"
 change = "code"
 publish = true
-reason = "Exposes node access-tracker profiles and bounded execution-governor capabilities."
+reason = "Exposes the metered, exact-input precompile authorization and CALL outcome contract."

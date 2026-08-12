@@ -31,8 +31,9 @@ precompile implementations are assigned to `v0.56.0..=v0.63.0`.
   padding and out-of-range coordinates are rejected before an infinity value
   can be constructed.
 - Fixed frames must have their exact EIP-2537 length. MSM and pairing frames
-  must be non-empty exact multiples of their item length and remain subject to
-  the release-wide precompile input cap.
+  must be non-empty exact multiples of their item length. Paid execution will
+  derive its work bound from the protocol gas quote rather than a global
+  calldata ceiling.
 
 ## Security Boundary
 

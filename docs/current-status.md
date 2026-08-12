@@ -1,8 +1,7 @@
 # Current Status
 
-Release snapshot: `v0.53.0` release candidate; all pentest findings are
-remediated and the clean retest passed. Tagging awaits green GitHub CI and
-CodeQL.
+Release snapshot: `v0.54.0` implementation complete; pentest and clean retest
+are required before release finalization and tagging.
 
 This document summarizes what the workspace can do now. The
 [Specification Matrix](SPEC_MATRIX.md) is the source of truth for exact
@@ -55,8 +54,8 @@ Legend:
 | Native interpreter | 🟡 Partial | Bounded basic stack, arithmetic, control-flow, memory, selected state-read execution, and consensus-correct truncated PUSH zero-padding |
 | Historical fork rules | 🟡 Partial | Explicit fork identifiers and admitted gas/opcode boundaries; full historical execution remains versioned |
 | Call and create | 🟡 Partial | Stack/memory/static/depth planning and journal policy; nested host execution and commits remain fail closed |
-| Identity, SHA-256, RIPEMD-160 | 🟢 Available | First-party dependency-free execution through charged plans |
-| ECRECOVER | 🟢 Boundary | Charged execution through caller-provided secp256k1 and Keccak backends |
+| Identity, SHA-256, RIPEMD-160 | 🟢 Available | First-party dependency-free execution through exact-input quotes and one-shot paid capabilities |
+| ECRECOVER | 🟢 Boundary | Paid execution through caller-provided secp256k1 and Keccak backends |
 | ModExp | 🟢 Available | Bounded first-party EIP-198/EIP-2565 execution |
 | BN254 | 🟢 Available | Add, multiplication, subgroup checks, Miller loop, final exponentiation, and pairing result admission |
 | BLAKE2F | 🟢 Available | Exact EIP-152 frame validation and execution |
@@ -106,7 +105,17 @@ Legend:
 
 ## Current Release
 
-`v0.53.0` replaces the hardwired linear warm-access set with an injectable
+`v0.54.0` removes production execution methods from informational precompile
+plans. Native execution now requires a canonical exact-input gas quote,
+pre-charge output admission, and a non-forgeable one-shot paid capability.
+Immutable borrowing prevents safe-Rust input substitution, altered descriptor
+metadata is rejected, and each execution returns a precise CALL-ready outcome.
+Post-payment failures consume all gas in the dedicated child-call meter and
+explicitly request rollback. Protocol gas replaces the former global calldata
+ceiling; bounded ModExp operand support remains assigned for completion in
+`v0.55.0`. See [Precompile Authorization](precompile-authorization.md).
+
+`v0.53.0` replaced the hardwired linear warm-access set with an injectable
 tracker contract. The default embedded profile remains allocation-free and
 fixed-capacity. The optional node profile pre-reserves bounded compressed-radix
 indexes and undo storage, performs no allocation after construction, and

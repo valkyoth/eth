@@ -2993,7 +2993,7 @@ Exit criteria:
 
 ### v0.54.0 - Metered Precompile Outcome Contract
 
-Status: planned.
+Status: implementation complete; pentest required.
 
 Goal: make precompile charging, validation, execution, failure, and output
 semantics impossible to bypass or confuse at CALL integration.
@@ -3013,7 +3013,7 @@ Verification:
 
 - Forgery/TOCTOU compile-fail and mutation tests;
 - CALL rollback and all-supplied-gas failure matrices;
-- adversarial cycles-per-gas benchmarks for public inputs;
+- adversarial work-per-gas benchmarks for public inputs;
 - output-unchanged tests for failures before execution authorization.
 
 Exit criteria:

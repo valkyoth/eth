@@ -1,8 +1,9 @@
 #![no_main]
 
 use eth_valkyoth_evm_core::{
-    EVM_BN254_PAIRING_OUTPUT_BYTES, EvmFork, EvmGas, EvmGasMeter, EvmPrecompileKind,
-    EvmPrecompilePlan, EvmPrecompileRegistry, parse_bn254_pairing_input,
+    EVM_BN254_PAIRING_OUTPUT_BYTES, EvmBn254Pairing, EvmCoreError, EvmFork, EvmGas,
+    EvmGasMeter, EvmPrecompileKind, EvmPrecompileRegistry, EvmPrecompileStatus,
+    parse_bn254_pairing_input,
     testing_bn254_complete_accumulator_pairs, testing_bn254_miller_pairs,
     testing_bn254_post_loop_point_pairs,
 };
@@ -47,10 +48,17 @@ fuzz_target!(|data: &[u8]| {
 fn execute_bn254_pairing(
     input: &[u8],
     output: &mut [u8],
-) -> Result<usize, eth_valkyoth_evm_core::EvmCoreError> {
+) -> Result<usize, EvmCoreError> {
     let descriptor = EvmPrecompileRegistry::try_new(EvmFork::ISTANBUL)?
         .descriptor(EvmPrecompileKind::Bn254Pairing)?;
-    let plan = EvmPrecompilePlan::try_new(descriptor, input)?;
+    let quote = descriptor.quote::<EvmBn254Pairing>(input)?;
     let mut gas_meter = EvmGasMeter::try_new(EvmGas::new(10_000_000))?;
-    plan.execute_bn254_pairing(&mut gas_meter, input, output)
+    let outcome = quote
+        .authorize(&mut gas_meter, output)?
+        .execute_bn254_pairing();
+    if outcome.status() == EvmPrecompileStatus::Success {
+        Ok(outcome.output_len())
+    } else {
+        Err(outcome.error().unwrap_or(EvmCoreError::PrecompileBackendUnavailable))
+    }
 }

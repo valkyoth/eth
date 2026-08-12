@@ -1,4 +1,4 @@
-use crate::{EVM_PRECOMPILE_INPUT_LIMIT, EvmCoreError, EvmFork, EvmGas};
+use crate::{EvmCoreError, EvmFork, EvmGas};
 
 /// ModExp header byte length: base, exponent, and modulus lengths.
 pub const EVM_MODEXP_HEADER_BYTES: usize = 96;
@@ -50,9 +50,6 @@ impl EvmModExpInput {
 /// length validation only and must not be treated as a constant-time parser for
 /// secret-dependent arithmetic inputs.
 pub fn parse_modexp_input(input: &[u8]) -> Result<EvmModExpInput, EvmCoreError> {
-    if input.len() > EVM_PRECOMPILE_INPUT_LIMIT {
-        return Err(EvmCoreError::PrecompileInputTooLarge);
-    }
     let parsed = EvmModExpInput {
         base_len: checked_len_word(input, LENGTH_BASE_OFFSET)?,
         exponent_len: checked_len_word(input, LENGTH_EXPONENT_OFFSET)?,

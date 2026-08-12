@@ -33,7 +33,7 @@ receipts, withdrawals, Merkle Patricia Trie proofs, fork-aware validation, and
 bounded first-party EVM components.
 
 The complete stack is built in small independently reviewed milestones rather
-than claimed ahead of its evidence. Version `0.53.0` is still a library, not a
+than claimed ahead of its evidence. Version `0.54.0` is still a library, not a
 production node, wallet, RPC client, or key store.
 Networking, private-key signing, local key storage, and third-party execution
 backends are not enabled by default.
@@ -42,14 +42,14 @@ backends are not enabled by default.
 
 ```toml
 [dependencies]
-eth = "0.53.0"
+eth = "0.54.0"
 ```
 
 For optional sanitization support:
 
 ```toml
 [dependencies]
-eth = { version = "0.53.0", features = ["sanitization"] }
+eth = { version = "0.54.0", features = ["sanitization"] }
 ```
 
 ## Quick Start
@@ -113,7 +113,7 @@ for the remaining implementation sequence.
 | `std` | no | Enables `std` support in admitted core crates. |
 | `evm` | no | Explicit no_std EVM execution environment, snapshot, result, and bounded gas-estimation boundary. |
 | `evm-node` | no | Enables the pre-reserved fixed-width-radix node access tracker through the EVM boundary. |
-| `evm-core` | no | Dependency-free native EVM core domains, gas-metered basic opcode execution, explicit bounded state-access traits, and precompile planning. |
+| `evm-core` | no | Dependency-free native EVM core domains, gas-metered basic opcode execution, bounded state access, and exact-input paid precompiles. |
 | `evm-core-node` | no | Enables allocator-backed node access tracking in the native EVM core. |
 | `rpc` | no | Future explicit RPC trust-policy boundary. |
 | `eip712-json` | no | Enables the optional `std` JSON-RPC EIP-712 typed-data parser boundary. |
@@ -132,7 +132,7 @@ Optional reviewed software Keccak backend:
 
 ```toml
 [dependencies]
-eth = { version = "0.53.0", features = ["keccak-tiny"] }
+eth = { version = "0.54.0", features = ["keccak-tiny"] }
 ```
 
 ```rust
@@ -146,14 +146,14 @@ Optional reviewed secp256k1 recovery adapter:
 
 ```toml
 [dependencies]
-eth = { version = "0.53.0", features = ["secp256k1-k256"] }
+eth = { version = "0.54.0", features = ["secp256k1-k256"] }
 ```
 
 Optional bounded EVM gas-estimation boundary:
 
 ```toml
 [dependencies]
-eth = { version = "0.53.0", features = ["evm"] }
+eth = { version = "0.54.0", features = ["evm"] }
 ```
 
 ```rust
@@ -274,7 +274,7 @@ Optional native EVM core domains:
 
 ```toml
 [dependencies]
-eth = { version = "0.53.0", features = ["evm-core"] }
+eth = { version = "0.54.0", features = ["evm-core"] }
 ```
 
 State access uses explicit host-state traits and an injected access tracker.
@@ -341,10 +341,11 @@ canonical EIP-197 zero/one output words for non-empty valid frames. BLAKE2F
 executes the EIP-152 compression function with exact 213-byte input parsing,
 final-flag validation, and round-count gas.
 Dispatcher-facing identity, hash, ECRECOVER, ModExp, BN254 add/mul, BN254
-pairing, and BLAKE2F execution is available only through plans that charge the
-supplied gas meter on every call before output mutation or expensive work.
-Execution recomputes gas from the actual input and rejects any same-length
-input whose content-dependent cost no longer matches the plan.
+pairing, and BLAKE2F execution requires an exact-input gas quote followed by a
+non-forgeable, one-shot paid capability. The immutable quote borrow prevents
+safe-Rust input substitution; canonical registry validation rejects altered
+descriptor metadata; and output capacity plus gas are admitted before
+expensive work. Execution returns one CALL-ready success or failure outcome.
 `EXTCODECOPY` treats empty-copy offsets as irrelevant and zero-fills code
 offsets beyond the bounded EVM code domain without passing them to the host.
 KZG and BLS cryptographic precompiles expose exact fork, frame, output, and gas
@@ -354,17 +355,21 @@ lists and apply the official EIP-2537 gas schedule.
 
 ```rust
 use eth::evm_core::{
-    EvmFork, EvmGas, EvmGasMeter, EvmPrecompileKind, EvmPrecompilePlan,
-    EvmPrecompileRegistry,
+    EvmFork, EvmGas, EvmGasMeter, EvmIdentity, EvmPrecompileKind,
+    EvmPrecompileRegistry, EvmPrecompileStatus,
 };
 
 let registry = EvmPrecompileRegistry::try_new(EvmFork::CANCUN)?;
 let descriptor = registry.descriptor(EvmPrecompileKind::Identity)?;
-let plan = EvmPrecompilePlan::try_new(descriptor, b"eth")?;
+let quote = descriptor.quote::<EvmIdentity>(b"eth")?;
 let mut output = [0_u8; 3];
 let mut gas = EvmGasMeter::try_new(EvmGas::new(18))?;
 
-assert_eq!(plan.execute_identity(&mut gas, b"eth", &mut output)?, 3);
+let outcome = quote
+    .authorize(&mut gas, &mut output)?
+    .execute_identity();
+assert_eq!(outcome.status(), EvmPrecompileStatus::Success);
+assert_eq!(outcome.output_len(), 3);
 assert_eq!(gas.used(), EvmGas::new(18));
 assert_eq!(&output, b"eth");
 # Ok::<(), eth::error::EvmCoreError>(())
@@ -1221,7 +1226,7 @@ friendly, and independently testable.
 | `eth-valkyoth-sanitization` | no | Optional bridge to the `sanitization` crate for secret-bearing Ethereum data. |
 | `eth-valkyoth-derive` | no | Optional sanitization and RLP derive macros. |
 | `eth-valkyoth-evm` | no | Explicit no_std EVM execution boundary; no backend admitted yet. |
-| `eth-valkyoth-evm-core` | no | Dependency-free native EVM core domains plus gas-metered basic bounded opcode execution, explicit host-state reads, fail-closed call/create planning, native precompile execution through BLAKE2F, and canonical EIP-2537 BLS wire/frame parsing while arithmetic remains fail closed. |
+| `eth-valkyoth-evm-core` | no | Dependency-free native EVM core domains plus bounded opcode execution, exact-input paid native precompiles, fail-closed call/create planning, and canonical EIP-2537 BLS wire/frame parsing. |
 | `eth-valkyoth-rpc` | no | Future explicit RPC trust-policy boundary. |
 | `eth-valkyoth-signer` | no | Future signer isolation boundary. |
 | `eth-valkyoth-reth` | no | Future Reth integration boundary. |
@@ -1232,7 +1237,7 @@ friendly, and independently testable.
 The minimum supported Rust version is Rust `1.90.0`. New deployments should use
 the pinned stable Rust `1.97.1` until the toolchain policy is updated.
 
-Compatibility evidence for `0.53.0`:
+Compatibility evidence for `0.54.0`:
 
 | Rust | Local Evidence |
 | --- | --- |

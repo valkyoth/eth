@@ -1,4 +1,4 @@
-use crate::{EVM_PRECOMPILE_INPUT_LIMIT, EvmCoreError, ripemd160, sha256};
+use crate::{EvmCoreError, ripemd160, sha256};
 
 const HASH_OUTPUT_BYTES: usize = 32;
 const RIPEMD160_PADDING_BYTES: usize = 12;
@@ -21,10 +21,7 @@ pub(crate) fn execute_ripemd160(input: &[u8], output: &mut [u8]) -> Result<usize
     Ok(HASH_OUTPUT_BYTES)
 }
 
-fn prepare_hash_output(input: &[u8], output: &[u8]) -> Result<(), EvmCoreError> {
-    if input.len() > EVM_PRECOMPILE_INPUT_LIMIT {
-        return Err(EvmCoreError::PrecompileInputTooLarge);
-    }
+fn prepare_hash_output(_input: &[u8], output: &[u8]) -> Result<(), EvmCoreError> {
     hash_output_read(output)?;
     Ok(())
 }

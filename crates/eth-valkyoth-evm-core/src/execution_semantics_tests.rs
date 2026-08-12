@@ -122,4 +122,8 @@ fn precompile_plan_mismatch_error_has_stable_code() {
         EvmCoreError::PrecompilePlanInputMismatch.code(),
         "precompile_plan_input_mismatch"
     );
+    assert_eq!(
+        EvmCoreError::PrecompileDescriptorMismatch.code(),
+        "precompile_descriptor_mismatch"
+    );
 }

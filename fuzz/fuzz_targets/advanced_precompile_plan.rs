@@ -28,7 +28,7 @@ fuzz_target!(|data: &[u8]| {
         EvmPrecompileInputPolicy::NonEmptyMultipleOf(item) => {
             !input.is_empty() && item != 0 && input.len().is_multiple_of(item)
         }
-        EvmPrecompileInputPolicy::BoundedAny | EvmPrecompileInputPolicy::MultipleOf(_) => false,
+        EvmPrecompileInputPolicy::GasMeteredAny | EvmPrecompileInputPolicy::MultipleOf(_) => false,
     };
     let plan = EvmPrecompilePlan::try_new(descriptor, input);
     assert_eq!(plan.is_ok(), expected_valid);

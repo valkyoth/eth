@@ -2,8 +2,6 @@ use crate::{
     EvmAddress, EvmCoreError, EvmFork, EvmGas, advanced_precompile, hash_precompile, precompile_gas,
 };
 
-/// Maximum precompile calldata bytes admitted by the native planning boundary.
-pub const EVM_PRECOMPILE_INPUT_LIMIT: usize = 1_048_576;
 pub(crate) const WORD_BYTES: usize = 32;
 pub(crate) const PAIRING_ITEM_BYTES: usize = 192;
 const BLAKE2F_INPUT_BYTES: usize = 213;
@@ -127,8 +125,8 @@ pub enum EvmPrecompileImplementation {
 /// Input shape admitted by the precompile planning boundary.
 #[derive(Clone, Copy, Debug, Eq, PartialEq)]
 pub enum EvmPrecompileInputPolicy {
-    /// Any input length up to [`EVM_PRECOMPILE_INPUT_LIMIT`] is accepted.
-    BoundedAny,
+    /// Any host-representable input length is accepted; gas bounds execution.
+    GasMeteredAny,
     /// The input must have exactly this byte length.
     Exact(usize),
     /// The input length must be a multiple of this byte length.
@@ -186,10 +184,10 @@ pub struct EvmPrecompileDescriptor {
     pub output_len: Option<usize>,
 }
 
-/// Validated plan for one precompile call.
+/// Informational plan for one precompile call.
 ///
-/// Execution methods recompute gas from their actual input and reject a
-/// content-dependent cost that differs from this plan.
+/// A plan cannot authorize execution. Native execution requires an exact-input
+/// [`crate::EvmPrecompileGasQuote`] followed by [`crate::PaidPrecompile`].
 #[derive(Clone, Copy, Debug, Eq, PartialEq)]
 pub struct EvmPrecompilePlan {
     descriptor: EvmPrecompileDescriptor,
@@ -203,6 +201,11 @@ impl EvmPrecompilePlan {
         descriptor: EvmPrecompileDescriptor,
         input: &[u8],
     ) -> Result<Self, EvmCoreError> {
+        let canonical =
+            EvmPrecompileRegistry::try_new(descriptor.fork)?.descriptor(descriptor.kind)?;
+        if descriptor != canonical {
+            return Err(EvmCoreError::PrecompileDescriptorMismatch);
+        }
         validate_input_policy(descriptor.input_policy, input.len())?;
         let gas_cost = precompile_gas::gas_cost(descriptor, input)?;
         Ok(Self {
@@ -228,20 +231,6 @@ impl EvmPrecompilePlan {
     #[must_use]
     pub const fn gas_cost(self) -> Option<EvmGas> {
         self.gas_cost
-    }
-
-    /// Revalidates that execution input has the cost recorded by this plan.
-    pub(crate) fn checked_execution_cost(self, input: &[u8]) -> Result<EvmGas, EvmCoreError> {
-        if input.len() != self.input_len {
-            return Err(EvmCoreError::PrecompileInvalidInputLength);
-        }
-        validate_input_policy(self.descriptor.input_policy, input.len())?;
-        let actual = precompile_gas::gas_cost(self.descriptor, input)?
-            .ok_or(EvmCoreError::PrecompileBackendUnavailable)?;
-        if self.gas_cost != Some(actual) {
-            return Err(EvmCoreError::PrecompilePlanInputMismatch);
-        }
-        Ok(actual)
     }
 }
 
@@ -290,9 +279,6 @@ impl EvmPrecompileRegistry {
 }
 
 pub(crate) fn execute_identity(input: &[u8], output: &mut [u8]) -> Result<usize, EvmCoreError> {
-    if input.len() > EVM_PRECOMPILE_INPUT_LIMIT {
-        return Err(EvmCoreError::PrecompileInputTooLarge);
-    }
     let target = output
         .get_mut(..input.len())
         .ok_or(EvmCoreError::PrecompileOutputTooSmall)?;
@@ -384,7 +370,7 @@ const fn input_policy(kind: EvmPrecompileKind) -> EvmPrecompileInputPolicy {
         | EvmPrecompileKind::Bls12PairingCheck
         | EvmPrecompileKind::Bls12MapFpToG1
         | EvmPrecompileKind::Bls12MapFp2ToG2 => advanced_precompile::input_policy(kind),
-        _ => EvmPrecompileInputPolicy::BoundedAny,
+        _ => EvmPrecompileInputPolicy::GasMeteredAny,
     }
 }
 
@@ -449,11 +435,8 @@ pub(crate) fn validate_input_policy(
     policy: EvmPrecompileInputPolicy,
     len: usize,
 ) -> Result<(), EvmCoreError> {
-    if len > EVM_PRECOMPILE_INPUT_LIMIT {
-        return Err(EvmCoreError::PrecompileInputTooLarge);
-    }
     match policy {
-        EvmPrecompileInputPolicy::BoundedAny => Ok(()),
+        EvmPrecompileInputPolicy::GasMeteredAny => Ok(()),
         EvmPrecompileInputPolicy::Exact(expected) if len == expected => Ok(()),
         EvmPrecompileInputPolicy::MultipleOf(chunk) if chunk != 0 && len.is_multiple_of(chunk) => {
             Ok(())

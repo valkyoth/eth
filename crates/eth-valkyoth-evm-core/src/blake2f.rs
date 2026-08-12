@@ -1,4 +1,4 @@
-use crate::{EvmCoreError, EvmGasMeter, EvmPrecompileKind, EvmPrecompilePlan};
+use crate::EvmCoreError;
 
 /// Byte length of the EIP-152 BLAKE2F precompile input.
 pub const EVM_BLAKE2F_INPUT_BYTES: usize = 213;
@@ -35,23 +35,6 @@ const SIGMA: [[usize; 16]; 10] = [
     [6, 15, 14, 9, 11, 3, 0, 8, 12, 2, 13, 7, 1, 4, 10, 5],
     [10, 2, 8, 4, 7, 6, 1, 5, 15, 11, 9, 14, 3, 12, 13, 0],
 ];
-
-impl EvmPrecompilePlan {
-    /// Executes the dependency-free EIP-152 BLAKE2F precompile into `output`.
-    pub fn execute_blake2f(
-        self,
-        gas: &mut EvmGasMeter,
-        input: &[u8],
-        output: &mut [u8],
-    ) -> Result<usize, EvmCoreError> {
-        if self.descriptor().kind != EvmPrecompileKind::Blake2F {
-            return Err(EvmCoreError::PrecompileBackendUnavailable);
-        }
-        let cost = self.checked_execution_cost(input)?;
-        gas.charge(cost)?;
-        execute_blake2f(input, output)
-    }
-}
 
 /// Executes the dependency-free EIP-152 BLAKE2F precompile.
 pub(crate) fn execute_blake2f(input: &[u8], output: &mut [u8]) -> Result<usize, EvmCoreError> {

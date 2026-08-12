@@ -4,7 +4,7 @@
 
 #[cfg(feature = "alloc")]
 extern crate alloc;
-#[cfg(feature = "std")]
+#[cfg(any(feature = "std", test))]
 extern crate std;
 
 mod access;
@@ -36,12 +36,11 @@ mod hash_precompile;
 mod jumpdest;
 mod memory;
 mod modexp;
-mod modexp_execute;
 #[cfg(feature = "testing")]
 mod modexp_testing;
 mod opcode;
 mod precompile;
-mod precompile_execute;
+mod precompile_authorization;
 mod precompile_gas;
 mod program_counter;
 mod ripemd160;
@@ -105,9 +104,13 @@ pub use modexp::{
 pub use modexp_testing::testing_modexp_gas_cost;
 pub use opcode::{EvmOpcode, OpcodeClass, OpcodeInfo};
 pub use precompile::{
-    EVM_PRECOMPILE_INPUT_LIMIT, EvmPrecompileDescriptor, EvmPrecompileGasPolicy,
-    EvmPrecompileImplementation, EvmPrecompileInputPolicy, EvmPrecompileKind, EvmPrecompilePlan,
-    EvmPrecompileRegistry,
+    EvmPrecompileDescriptor, EvmPrecompileGasPolicy, EvmPrecompileImplementation,
+    EvmPrecompileInputPolicy, EvmPrecompileKind, EvmPrecompilePlan, EvmPrecompileRegistry,
+};
+pub use precompile_authorization::{
+    EvmBlake2F, EvmBn254Add, EvmBn254Mul, EvmBn254Pairing, EvmEcRecover, EvmExecutablePrecompile,
+    EvmIdentity, EvmModexp, EvmPrecompileGasQuote, EvmPrecompileOutcome, EvmPrecompileStatus,
+    EvmRipemd160, EvmSha256, PaidPrecompile,
 };
 pub use program_counter::ProgramCounter;
 pub use stack::{EVM_STACK_LIMIT, EvmStack};
@@ -153,6 +156,12 @@ mod call_tests;
 #[cfg(test)]
 #[path = "precompile_tests.rs"]
 mod precompile_tests;
+
+#[cfg(test)]
+mod precompile_test_api;
+
+#[cfg(test)]
+mod precompile_authorization_tests;
 
 #[cfg(test)]
 #[path = "precompile_gas_tests.rs"]

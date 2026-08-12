@@ -124,8 +124,9 @@ The first production value is:
   consensus/proof/admission gaps, `v0.53.0` adds injectable embedded and
   fixed-width compressed-radix node access tracking with mutation-proportional
   nested EIP-2929 rollback, retained-key erasure, and type-safe bounded
-  transaction resource authority, and
-  `v0.54.0..=v0.55.0` close precompile-contract and ModExp gaps, while
+  transaction resource authority, `v0.54.0` adds canonical exact-input gas
+  quotes, non-forgeable paid precompile capabilities, and CALL-ready outcomes,
+  and `v0.55.0` closes the remaining ModExp consensus gap, while
   `v0.56.0..=v0.63.0` build first-party
   BLS12-381 execution, `v0.64.0..=v0.66.0` freeze architecture,
   resource-governor, and cryptographic-provider contracts, and

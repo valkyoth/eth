@@ -1,7 +1,7 @@
 # Crate Version Matrix
 
-Status: `v0.53.0` release candidate; pentest findings are remediated and the
-clean retest passed. The EVM core, EVM boundary, and facade change.
+Status: `v0.54.0` implementation complete; pentest and clean retest required.
+The EVM core, EVM boundary dependency, and facade change.
 
 `eth` uses independent crate versions. The facade crate remains the main user
 entry point, but support crates are published only when their own package or
@@ -28,7 +28,7 @@ API.
 `scripts/release_crates.py --check` validates `release-crates.toml` against the
 workspace manifests and refuses accidental lockstep publication.
 
-## v0.53.0 Tracking Table
+## v0.54.0 Tracking Table
 
 | Crate | Published | Planned | Change | Publish | Reason |
 | --- | --- | --- | --- | --- | --- |
@@ -39,13 +39,13 @@ workspace manifests and refuses accidental lockstep publication.
 | `eth-valkyoth-verify` | `0.27.0` | `0.27.0` | `unchanged` | No | No package changes. |
 | `eth-valkyoth-derive` | `0.18.0` | `0.18.0` | `unchanged` | No | No package changes. |
 | `eth-valkyoth-sanitization` | `0.8.0` | `0.8.0` | `unchanged` | No | No package changes. |
-| `eth-valkyoth-evm-core` | `0.26.1` | `0.27.0` | `code` | Yes | Adds injectable embedded and pre-reserved fixed-width-radix access trackers with atomic capacity and mutation-proportional rollback. |
-| `eth-valkyoth-evm` | `0.11.0` | `0.12.0` | `code` | Yes | Adds core tracker host adapters and a bounded transaction execution governor with hierarchical work tokens. |
+| `eth-valkyoth-evm-core` | `0.27.0` | `0.28.0` | `code` | Yes | Adds exact-input gas quotes, non-forgeable paid precompile capabilities, canonical descriptor validation, and CALL-ready outcomes. |
+| `eth-valkyoth-evm` | `0.12.0` | `0.12.1` | `dependency` | Yes | Updates the published EVM-core dependency requirement to `0.28.0`. |
 | `eth-valkyoth-rpc` | `0.7.0` | `0.7.0` | `unchanged` | No | No package changes. |
 | `eth-valkyoth-signer` | `0.7.5` | `0.7.5` | `unchanged` | No | No package changes. |
 | `eth-valkyoth-reth` | `0.7.0` | `0.7.0` | `unchanged` | No | No package changes. |
 | `eth-valkyoth-testkit` | `0.7.0` | `0.7.0` | `unchanged` | No | No package changes. |
-| `eth` | `0.52.7` | `0.53.0` | `code` | Yes | Exposes node access-tracker profiles and bounded execution-governor capabilities. |
+| `eth` | `0.53.0` | `0.54.0` | `code` | Yes | Exposes the metered exact-input precompile authorization and CALL outcome contract. |
 
 Update this table and `release-crates.toml` in the same commit whenever a crate
 changes release state.

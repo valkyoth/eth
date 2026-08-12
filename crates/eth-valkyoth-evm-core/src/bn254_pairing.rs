@@ -1,5 +1,5 @@
 use crate::{
-    EVM_PRECOMPILE_INPUT_LIMIT, EvmCoreError, EvmGasMeter, EvmPrecompileKind, EvmPrecompilePlan,
+    EvmCoreError,
     bn254::{G1Point, read_g1_point},
     bn254_final::final_exponentiation,
     bn254_g2::{G2Point, read_g2_point},
@@ -21,13 +21,13 @@ pub(crate) struct Bn254PairingTuple {
 ///
 /// This is an unmetered low-level parser for standalone validation and fuzzing.
 /// Interpreter integrations must prefer
-/// [`EvmPrecompilePlan::execute_bn254_pairing`], which charges the supplied gas
-/// meter before tuple validation and subgroup checks are reachable.
+/// a paid [`crate::PaidPrecompile`], which charges the supplied gas meter
+/// before tuple validation and subgroup checks are reachable.
 ///
 /// This parser validates tuple segmentation, G1 points, G2 field elements, G2
 /// curve membership, and G2 subgroup membership. It does not execute the
 /// pairing; callers that need the EIP-197 result must execute a charged
-/// [`EvmPrecompilePlan`].
+/// [`crate::PaidPrecompile`].
 pub fn parse_bn254_pairing_input(input: &[u8]) -> Result<usize, EvmCoreError> {
     let mut pairs = 0usize;
     for_each_valid_pairing_tuple(input, |_| {
@@ -40,9 +40,6 @@ pub(crate) fn for_each_valid_pairing_tuple(
     input: &[u8],
     mut visit: impl FnMut(Bn254PairingTuple),
 ) -> Result<usize, EvmCoreError> {
-    if input.len() > EVM_PRECOMPILE_INPUT_LIMIT {
-        return Err(EvmCoreError::PrecompileInputTooLarge);
-    }
     if !input.len().is_multiple_of(EVM_BN254_PAIRING_ITEM_BYTES) {
         return Err(EvmCoreError::PrecompileInvalidInputLength);
     }
@@ -76,24 +73,4 @@ pub(crate) fn execute_bn254_pairing(
         *last = result;
     }
     Ok(EVM_BN254_PAIRING_OUTPUT_BYTES)
-}
-
-impl EvmPrecompilePlan {
-    /// Executes the EIP-197 BN254 pairing frame into `output`.
-    ///
-    /// This method charges this exact plan's precompile gas before the pairing
-    /// parser and subgroup checks are reachable.
-    pub fn execute_bn254_pairing(
-        self,
-        gas_meter: &mut EvmGasMeter,
-        input: &[u8],
-        output: &mut [u8],
-    ) -> Result<usize, EvmCoreError> {
-        if self.descriptor().kind != EvmPrecompileKind::Bn254Pairing {
-            return Err(EvmCoreError::PrecompileBackendUnavailable);
-        }
-        let gas_cost = self.checked_execution_cost(input)?;
-        gas_meter.charge(gas_cost)?;
-        execute_bn254_pairing(input, output)
-    }
 }

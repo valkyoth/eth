@@ -1,7 +1,6 @@
 # Execution Resource Governor
 
-Status: `v0.53.0` release candidate; pentest findings are remediated and the
-clean retest passed.
+Status: implemented and tagged in `v0.53.0`.
 
 ## Purpose
 

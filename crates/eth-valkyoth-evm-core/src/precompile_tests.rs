@@ -1,6 +1,6 @@
 use crate::{
-    EVM_PRECOMPILE_INPUT_LIMIT, EvmAddress, EvmCoreError, EvmFork, EvmGas, EvmGasMeter,
-    EvmPrecompileImplementation, EvmPrecompileKind, EvmPrecompilePlan, EvmPrecompileRegistry,
+    EvmAddress, EvmCoreError, EvmFork, EvmGas, EvmGasMeter, EvmPrecompileImplementation,
+    EvmPrecompileKind, EvmPrecompilePlan, EvmPrecompileRegistry,
     precompile::{execute_identity, execute_ripemd160, execute_sha256},
 };
 
@@ -136,7 +136,7 @@ fn identity_output_buffer_is_checked_before_copy() -> Result<(), EvmCoreError> {
 }
 
 #[test]
-fn input_policy_rejects_unbounded_or_bad_lengths() -> Result<(), EvmCoreError> {
+fn input_policy_rejects_bad_lengths() -> Result<(), EvmCoreError> {
     let blake = registry(EvmFork::ISTANBUL)?.descriptor(EvmPrecompileKind::Blake2F)?;
     assert_eq!(
         EvmPrecompilePlan::try_new(blake, &[0u8; 212]),
@@ -146,12 +146,6 @@ fn input_policy_rejects_unbounded_or_bad_lengths() -> Result<(), EvmCoreError> {
     assert_eq!(
         EvmPrecompilePlan::try_new(pairing, &[0u8; 191]),
         Err(EvmCoreError::PrecompileInvalidInputLength)
-    );
-    static OVERSIZED: [u8; EVM_PRECOMPILE_INPUT_LIMIT + 1] = [0u8; EVM_PRECOMPILE_INPUT_LIMIT + 1];
-    let identity = registry(EvmFork::FRONTIER)?.descriptor(EvmPrecompileKind::Identity)?;
-    assert_eq!(
-        EvmPrecompilePlan::try_new(identity, &OVERSIZED),
-        Err(EvmCoreError::PrecompileInputTooLarge)
     );
     Ok(())
 }

@@ -1,8 +1,8 @@
 #![no_main]
 
 use eth_valkyoth_evm_core::{
-    EVM_MAX_GAS_LIMIT, EVM_MODEXP_MAX_OPERAND_BYTES, EvmFork, EvmGas, EvmGasMeter,
-    EvmPrecompileKind, EvmPrecompilePlan, EvmPrecompileRegistry, parse_modexp_input,
+    EVM_MAX_GAS_LIMIT, EVM_MODEXP_MAX_OPERAND_BYTES, EvmFork, EvmGas, EvmGasMeter, EvmModexp,
+    EvmPrecompileKind, EvmPrecompileRegistry, EvmPrecompileStatus, parse_modexp_input,
     testing_modexp_gas_cost,
 };
 use libfuzzer_sys::fuzz_target;
@@ -19,11 +19,14 @@ fuzz_target!(|data: &[u8]| {
     let descriptor = EvmPrecompileRegistry::try_new(EvmFork::BERLIN)
         .and_then(|registry| registry.descriptor(EvmPrecompileKind::Modexp))
         .expect("Berlin ModExp descriptor exists");
-    if let Ok(plan) = EvmPrecompilePlan::try_new(descriptor, data) {
+    if let Ok(quote) = descriptor.quote::<EvmModexp>(data) {
         let mut gas = EvmGasMeter::try_new(EvmGas::new(EVM_MAX_GAS_LIMIT))
             .expect("maximum execution gas is valid");
-        if let Ok(len) = plan.execute_modexp(&mut gas, data, &mut output) {
-            assert!(len <= EVM_MODEXP_MAX_OPERAND_BYTES);
+        if let Ok(paid) = quote.authorize(&mut gas, &mut output) {
+            let outcome = paid.execute_modexp();
+            if outcome.status() == EvmPrecompileStatus::Success {
+                assert!(outcome.output_len() <= EVM_MODEXP_MAX_OPERAND_BYTES);
+            }
         }
     }
 

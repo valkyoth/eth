@@ -307,6 +307,10 @@ impl EvmGasMeter {
         Ok(())
     }
 
+    pub(crate) fn consume_remaining(&mut self) {
+        self.used = self.limit;
+    }
+
     /// Charges memory expansion gas for a checked memory range.
     pub fn charge_memory_range(
         &mut self,

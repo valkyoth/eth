@@ -4,6 +4,15 @@ All notable changes to `eth` are documented here.
 
 ## Unreleased
 
+- Started v0.54.0 by removing production execution from informational
+  precompile plans and adding canonical exact-input gas quotes, non-forgeable
+  one-shot paid capabilities, and CALL-ready terminal outcomes.
+- Replaced the global precompile calldata ceiling with protocol-gas admission,
+  moved output checks before charging, made post-payment failures consume all
+  dedicated child-call gas, and migrated native fuzz targets to the paid path.
+- Added descriptor-forgery, TOCTOU compile-fail, authority-duplication,
+  pre-admission atomicity, rollback outcome, redacted-debug, gas-derived bound,
+  and public-input work-per-gas evidence for the 0.54.0 security gate.
 - Started v0.53.0 with an injectable access-tracker contract, an explicit
   allocation-free embedded profile, and a pre-reserved compressed-radix node
   profile with lookup and insertion bounded by fixed Ethereum key width.

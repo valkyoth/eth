@@ -12,7 +12,7 @@ backend drift are consensus and denial-of-service risks.
 ## Decision
 
 The production path will be first-party, dependency-free, `no_std`, and
-allocation-free within explicit input limits. An external implementation may
+allocation-free within gas-derived work and output limits. An external implementation may
 be used as a test oracle or optional accelerator only after separate dependency
 review; it cannot become the sole implementation behind a native support
 claim.
@@ -45,8 +45,8 @@ items before its descriptor changes from a fail-closed state:
   forbidden empty inputs before arithmetic execution.
 - Enforce all required on-curve and subgroup checks, including infinity rules.
 - Charge or reserve gas before expensive validation or arithmetic is reached.
-- Recompute content-dependent gas from the actual execution input and reject
-  plans whose recorded cost no longer matches those bytes.
+- Borrow the exact gas-quoted input through the one-shot paid capability so
+  safe code cannot substitute bytes before execution.
 - Use checked arithmetic for frame counts, gas, offsets, and output lengths.
 - Keep runtime and memory bounded by the public input and release limits.
 - Include official positive and negative vectors plus an independent oracle.

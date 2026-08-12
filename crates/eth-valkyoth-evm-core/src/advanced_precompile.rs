@@ -29,7 +29,7 @@ pub(crate) const fn input_policy(kind: EvmPrecompileKind) -> EvmPrecompileInputP
         EvmPrecompileKind::Bls12MapFp2ToG2 => {
             EvmPrecompileInputPolicy::Exact(EVM_BLS12381_FP2_BYTES)
         }
-        _ => EvmPrecompileInputPolicy::BoundedAny,
+        _ => EvmPrecompileInputPolicy::GasMeteredAny,
     }
 }
 

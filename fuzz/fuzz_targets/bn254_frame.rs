@@ -1,8 +1,8 @@
 #![no_main]
 
 use eth_valkyoth_evm_core::{
-    EVM_BN254_POINT_BYTES, EvmFork, EvmGas, EvmGasMeter, EvmPrecompileKind, EvmPrecompilePlan,
-    EvmPrecompileRegistry,
+    EVM_BN254_POINT_BYTES, EvmBn254Add, EvmBn254Mul, EvmCoreError, EvmFork, EvmGas,
+    EvmGasMeter, EvmPrecompileKind, EvmPrecompileRegistry, EvmPrecompileStatus,
 };
 use libfuzzer_sys::fuzz_target;
 
@@ -43,18 +43,32 @@ fuzz_target!(|data: &[u8]| {
     }
 });
 
-fn execute_bn254_add(input: &[u8], output: &mut [u8]) -> Result<usize, eth_valkyoth_evm_core::EvmCoreError> {
+fn execute_bn254_add(input: &[u8], output: &mut [u8]) -> Result<usize, EvmCoreError> {
     let descriptor = EvmPrecompileRegistry::try_new(EvmFork::ISTANBUL)?
         .descriptor(EvmPrecompileKind::Bn254Add)?;
-    let plan = EvmPrecompilePlan::try_new(descriptor, input)?;
+    let quote = descriptor.quote::<EvmBn254Add>(input)?;
     let mut gas_meter = EvmGasMeter::try_new(EvmGas::new(1_000_000))?;
-    plan.execute_bn254_add(&mut gas_meter, input, output)
+    let outcome = quote
+        .authorize(&mut gas_meter, output)?
+        .execute_bn254_add();
+    outcome_result(outcome)
 }
 
-fn execute_bn254_mul(input: &[u8], output: &mut [u8]) -> Result<usize, eth_valkyoth_evm_core::EvmCoreError> {
+fn execute_bn254_mul(input: &[u8], output: &mut [u8]) -> Result<usize, EvmCoreError> {
     let descriptor = EvmPrecompileRegistry::try_new(EvmFork::ISTANBUL)?
         .descriptor(EvmPrecompileKind::Bn254Mul)?;
-    let plan = EvmPrecompilePlan::try_new(descriptor, input)?;
+    let quote = descriptor.quote::<EvmBn254Mul>(input)?;
     let mut gas_meter = EvmGasMeter::try_new(EvmGas::new(1_000_000))?;
-    plan.execute_bn254_mul(&mut gas_meter, input, output)
+    let outcome = quote
+        .authorize(&mut gas_meter, output)?
+        .execute_bn254_mul();
+    outcome_result(outcome)
+}
+
+fn outcome_result(outcome: eth_valkyoth_evm_core::EvmPrecompileOutcome) -> Result<usize, EvmCoreError> {
+    if outcome.status() == EvmPrecompileStatus::Success {
+        Ok(outcome.output_len())
+    } else {
+        Err(outcome.error().unwrap_or(EvmCoreError::PrecompileBackendUnavailable))
+    }
 }

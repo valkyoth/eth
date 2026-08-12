@@ -1,6 +1,4 @@
-use crate::{
-    EVM_PRECOMPILE_INPUT_LIMIT, EvmCoreError, EvmGasMeter, EvmPrecompileKind, EvmPrecompilePlan,
-};
+use crate::EvmCoreError;
 
 use crate::bn254_field::Fp;
 
@@ -12,9 +10,6 @@ pub const EVM_BN254_ADD_INPUT_BYTES: usize = 128;
 pub const EVM_BN254_MUL_INPUT_BYTES: usize = 96;
 
 pub(crate) fn execute_bn254_add(input: &[u8], output: &mut [u8]) -> Result<usize, EvmCoreError> {
-    if input.len() > EVM_PRECOMPILE_INPUT_LIMIT {
-        return Err(EvmCoreError::PrecompileInputTooLarge);
-    }
     let target = output
         .get_mut(..EVM_BN254_POINT_BYTES)
         .ok_or(EvmCoreError::PrecompileOutputTooSmall)?;
@@ -25,9 +20,6 @@ pub(crate) fn execute_bn254_add(input: &[u8], output: &mut [u8]) -> Result<usize
 }
 
 pub(crate) fn execute_bn254_mul(input: &[u8], output: &mut [u8]) -> Result<usize, EvmCoreError> {
-    if input.len() > EVM_PRECOMPILE_INPUT_LIMIT {
-        return Err(EvmCoreError::PrecompileInputTooLarge);
-    }
     let target = output
         .get_mut(..EVM_BN254_POINT_BYTES)
         .ok_or(EvmCoreError::PrecompileOutputTooSmall)?;
@@ -35,44 +27,6 @@ pub(crate) fn execute_bn254_mul(input: &[u8], output: &mut [u8]) -> Result<usize
     let scalar = read_word(input, EVM_BN254_POINT_BYTES);
     write_point(point.mul_scalar(scalar), target);
     Ok(EVM_BN254_POINT_BYTES)
-}
-
-impl EvmPrecompilePlan {
-    /// Executes the EIP-196 BN254 point-addition precompile into `output`.
-    ///
-    /// This method charges this exact plan's precompile gas before point
-    /// validation or arithmetic is reachable.
-    pub fn execute_bn254_add(
-        self,
-        gas_meter: &mut EvmGasMeter,
-        input: &[u8],
-        output: &mut [u8],
-    ) -> Result<usize, EvmCoreError> {
-        if self.descriptor().kind != EvmPrecompileKind::Bn254Add {
-            return Err(EvmCoreError::PrecompileBackendUnavailable);
-        }
-        let gas_cost = self.checked_execution_cost(input)?;
-        gas_meter.charge(gas_cost)?;
-        execute_bn254_add(input, output)
-    }
-
-    /// Executes the EIP-196 BN254 scalar-multiplication precompile into `output`.
-    ///
-    /// This method charges this exact plan's precompile gas before point
-    /// validation or scalar multiplication is reachable.
-    pub fn execute_bn254_mul(
-        self,
-        gas_meter: &mut EvmGasMeter,
-        input: &[u8],
-        output: &mut [u8],
-    ) -> Result<usize, EvmCoreError> {
-        if self.descriptor().kind != EvmPrecompileKind::Bn254Mul {
-            return Err(EvmCoreError::PrecompileBackendUnavailable);
-        }
-        let gas_cost = self.checked_execution_cost(input)?;
-        gas_meter.charge(gas_cost)?;
-        execute_bn254_mul(input, output)
-    }
 }
 
 #[derive(Clone, Copy, Debug, Eq, PartialEq)]

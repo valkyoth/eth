@@ -1,8 +1,6 @@
 use core::cmp::Ordering;
 
-use crate::{
-    EVM_PRECOMPILE_INPUT_LIMIT, EvmCoreError, EvmGasMeter, EvmPrecompileKind, EvmPrecompilePlan,
-};
+use crate::EvmCoreError;
 
 /// Canonical byte length of the ECRECOVER input frame.
 pub const EVM_ECRECOVER_INPUT_BYTES: usize = 128;
@@ -92,29 +90,6 @@ where
     }
 }
 
-impl EvmPrecompilePlan {
-    /// Executes ECRECOVER with caller-provided secp256k1 and Keccak backends.
-    pub fn execute_ecrecover<B, H>(
-        self,
-        gas_meter: &mut EvmGasMeter,
-        input: &[u8],
-        output: &mut [u8],
-        backend: B,
-        hasher: H,
-    ) -> Result<usize, EvmCoreError>
-    where
-        B: EvmEcRecoverBackend,
-        H: EvmPrecompileKeccak256,
-    {
-        if self.descriptor().kind != EvmPrecompileKind::EcRecover {
-            return Err(EvmCoreError::PrecompileBackendUnavailable);
-        }
-        let gas_cost = self.checked_execution_cost(input)?;
-        gas_meter.charge(gas_cost)?;
-        execute_ecrecover(input, output, backend, hasher)
-    }
-}
-
 /// Executes the ECRECOVER precompile.
 pub(crate) fn execute_ecrecover<B, H>(
     input: &[u8],
@@ -139,10 +114,7 @@ where
     Ok(EVM_ECRECOVER_OUTPUT_BYTES)
 }
 
-fn validate_buffers(input: &[u8], output: &[u8]) -> Result<(), EvmCoreError> {
-    if input.len() > EVM_PRECOMPILE_INPUT_LIMIT {
-        return Err(EvmCoreError::PrecompileInputTooLarge);
-    }
+fn validate_buffers(_input: &[u8], output: &[u8]) -> Result<(), EvmCoreError> {
     output
         .get(..EVM_ECRECOVER_OUTPUT_BYTES)
         .ok_or(EvmCoreError::PrecompileOutputTooSmall)?;

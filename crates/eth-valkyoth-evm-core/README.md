@@ -36,7 +36,7 @@ Most users should depend on `eth` and enable the optional `evm-core` feature:
 
 ```toml
 [dependencies]
-eth = { version = "0.53.0", features = ["evm-core"] }
+eth = { version = "0.54.0", features = ["evm-core"] }
 ```
 
 This crate executes only the audited bootstrap opcode subset. It exposes
@@ -48,10 +48,12 @@ arithmetic, bitwise/comparison, stack manipulation, dynamic jumps,
 return/revert shells, state reads, `EXTCODECOPY`, and a fail-closed `SSTORE`
 shell. It also exposes call/create planning domains for frame depth, static
 write protection, return-data ranges, journal checkpoint policy, and a
-fork-aware precompile registry with bounded input/gas planning. Bytecode input
-is capped at the EIP-170 code-size ceiling, precompile input planning is capped
-at a release hard limit, and valid jump destinations are precomputed once per
-run with a fixed-size no-alloc bitset. Truncated `PUSH1..=PUSH32` immediates
+fork-aware precompile registry with exact-input gas quoting and one-shot paid
+execution capabilities. Bytecode input is capped at the EIP-170 code-size
+ceiling; precompile execution is bounded by protocol gas and output admission
+instead of a consensus-invalid global calldata ceiling. Valid jump destinations
+are precomputed once per run with a fixed-size no-alloc bitset. Truncated
+`PUSH1..=PUSH32` immediates
 follow Ethereum consensus semantics: missing trailing bytes are read as zero,
 the program counter advances by the full declared width, and jump analysis
 uses the same instruction boundary.
@@ -127,9 +129,13 @@ documented in
   until their first-party implementations are admitted. EIP-2537 fixed frames,
   non-empty MSM/pairing lists, output lengths, discount gas, and pairing gas
   are enforced at planning time.
-- Every executable precompile recomputes gas from the actual input immediately
-  before charging. A same-length input with a different content-dependent
-  BLAKE2F or ModExp cost is rejected before arithmetic or output mutation.
+- Every executable precompile requires an immutable exact-input quote and a
+  non-forgeable one-shot `PaidPrecompile` token. Canonical registry validation,
+  output admission, and gas charging happen before expensive work. Safe Rust
+  cannot mutate or substitute the quoted input while the capability is live.
+- `EvmPrecompileOutcome` reports one precise success or call failure, gas
+  consumed, output length, and bounded error. Execution failures consume all
+  gas supplied to the dedicated precompile meter and request CALL rollback.
 - A false `JUMPI` does not convert or validate the unused destination word;
   true branches retain canonical `JUMPDEST` validation.
 - `EXTCODECOPY` ignores both offsets for zero-length copies and zero-fills any
