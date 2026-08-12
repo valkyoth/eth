@@ -22,9 +22,11 @@ fuzz_target!(|data: &[u8]| {
         .and_then(|registry| registry.descriptor(EvmPrecompileKind::Modexp))
         .expect("Berlin ModExp descriptor exists");
     if let Ok(quote) = descriptor.quote::<EvmModexp>(data) {
+        let gas_cost = quote.gas_cost();
         let output_len = quote.output_len();
         let workspace_limbs = quote.modexp_workspace_limbs();
-        if output_len <= FUZZ_OUTPUT_BYTES
+        if gas_cost.get() <= EVM_MAX_GAS_LIMIT
+            && output_len <= FUZZ_OUTPUT_BYTES
             && let Ok(workspace_limbs) = workspace_limbs
             && workspace_limbs <= FUZZ_EXECUTION_LIMBS
         {
@@ -33,14 +35,11 @@ fuzz_target!(|data: &[u8]| {
             let mut workspace = EvmModExpWorkspace::new(&mut storage);
             let mut gas = EvmGasMeter::try_new(EvmGas::new(EVM_MAX_GAS_LIMIT))
                 .expect("maximum execution gas is valid");
-            if let Ok(outcome) = quote.authorize_and_execute_modexp(
-                &mut gas,
-                &mut output,
-                &mut workspace,
-            ) && outcome.status() == EvmPrecompileStatus::Success
-            {
-                assert_eq!(outcome.output_len(), output_len);
-            }
+            let outcome = quote
+                .authorize_and_execute_modexp(&mut gas, &mut output, &mut workspace)
+                .expect("a payable, fully admitted ModExp frame must execute");
+            assert_eq!(outcome.status(), EvmPrecompileStatus::Success);
+            assert_eq!(outcome.output_len(), output_len);
         }
     }
 

@@ -7,11 +7,11 @@ Status: `v0.55.0` implementation report.
 | Area | Reference | Local test | Result |
 | --- | --- | --- | --- |
 | Structural RLP | `alloy-rlp` `0.3.16` | `eth-valkyoth-codec::differential_rlp_reference` | Passing locally |
-| ModExp arithmetic | `num-bigint` `0.5.1` | `eth-valkyoth-evm-core::modexp_differential` | Passing locally through 256-byte operands |
+| ModExp arithmetic | `num-bigint` `0.5.1` | `eth-valkyoth-evm-core::modexp_differential` | Passing locally through 256-byte and adversarial operand shapes |
 
 ## Evidence
 
-The v0.36.0 implementation ran:
+The v0.55.0 implementation and pentest remediation ran:
 
 ```sh
 scripts/run_differential_tests.py

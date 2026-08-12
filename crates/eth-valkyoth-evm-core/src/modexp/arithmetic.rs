@@ -1,8 +1,7 @@
 use core::cmp::Ordering;
 
-use crate::EvmCoreError;
-
 use super::{EvmModExpInput, ModExpLayout};
+use crate::EvmCoreError;
 
 const LIMB_BYTES: usize = core::mem::size_of::<u32>();
 const LIMB_BASE: u64 = 1_u64 << u32::BITS;
@@ -32,11 +31,11 @@ pub(super) fn execute(
     let modulus_len = parsed.modulus_len().try_to_usize()?;
     let base_len = parsed.base_len().try_to_usize()?;
     let exponent_len = parsed.exponent_len().try_to_usize()?;
-    let declared_limbs = required_limbs(modulus_len)?
+    let required = required_limbs(modulus_len)?;
+    let declared_limbs = required
         .checked_sub(1)
         .and_then(|length| length.checked_div(6))
         .ok_or(EvmCoreError::PrecompileInputTooLarge)?;
-    let required = required_limbs(modulus_len)?;
     let limbs = workspace
         .get_mut(..required)
         .ok_or(EvmCoreError::PrecompileWorkspaceTooSmall)?;
@@ -64,19 +63,33 @@ pub(super) fn execute(
         .ok_or(EvmCoreError::PrecompileInputTooLarge)?;
     let dividend = prefix_mut(dividend, dividend_len)?;
 
-    reduce_virtual_segment(input, layout.base_offset, base_len, base, modulus)?;
-    set_one_mod(result, modulus)?;
-    for byte_index in 0..exponent_len {
+    let first_set = (0..exponent_len).find_map(|byte_index| {
         let byte = virtual_byte(input, layout.exponent_offset, byte_index);
-        for bit in 0..8_u8 {
+        (byte != 0).then_some((byte_index, byte, byte.leading_zeros()))
+    });
+    let Some((first_byte_index, first_byte, leading)) = first_set else {
+        set_one_mod(result, modulus)?;
+        return write_result_be(result, output);
+    };
+
+    reduce_virtual_segment(input, layout.base_offset, base_len, base, modulus)?;
+    result.copy_from_slice(base);
+    for bit in leading.saturating_add(1)..8 {
+        square_mod(result, modulus, normalized_modulus, dividend)?;
+        if first_byte & (0x80_u8 >> bit) != 0 {
+            multiply_mod(result, base, modulus, normalized_modulus, dividend)?;
+        }
+    }
+    for byte_index in first_byte_index.saturating_add(1)..exponent_len {
+        let byte = virtual_byte(input, layout.exponent_offset, byte_index);
+        for bit in 0..8 {
             square_mod(result, modulus, normalized_modulus, dividend)?;
             if byte & (0x80_u8 >> bit) != 0 {
                 multiply_mod(result, base, modulus, normalized_modulus, dividend)?;
             }
         }
     }
-    write_result_be(result, output)?;
-    Ok(())
+    write_result_be(result, output)
 }
 
 fn split_mut(values: &mut [u32], at: usize) -> Result<(&mut [u32], &mut [u32]), EvmCoreError> {
@@ -449,7 +462,11 @@ fn write_result_be(result: &[u32], output: &mut [u8]) -> Result<(), EvmCoreError
             .ok_or(EvmCoreError::PrecompileOutputTooSmall)?;
         let limb_index = low_index / LIMB_BYTES;
         let shift = (low_index % LIMB_BYTES).saturating_mul(8);
-        let value = limb(result, limb_index)?.wrapping_shr(u32::try_from(shift).unwrap_or(0));
+        let value = result
+            .get(limb_index)
+            .copied()
+            .unwrap_or(0)
+            .wrapping_shr(u32::try_from(shift).unwrap_or(0));
         *slot = u8::try_from(value & 0xff).unwrap_or(0);
     }
     Ok(())

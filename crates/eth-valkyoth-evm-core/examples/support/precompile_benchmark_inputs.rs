@@ -30,9 +30,29 @@ pub(crate) fn generator_bn254_pairing() -> [u8; 192] {
 }
 
 pub(crate) fn dense_modexp(operand_bytes: usize) -> Vec<u8> {
+    modexp_with_exponent(operand_bytes, &vec![u8::MAX; operand_bytes])
+}
+
+pub(crate) fn sparse_modexp(operand_bytes: usize) -> Vec<u8> {
+    let mut exponent = vec![0_u8; 32];
+    if let Some(last) = exponent.last_mut() {
+        *last = 1;
+    }
+    modexp_with_exponent(operand_bytes, &exponent)
+}
+
+pub(crate) fn zero_exponent_modexp(operand_bytes: usize) -> Vec<u8> {
+    modexp_with_exponent(operand_bytes, &[0_u8; 32])
+}
+
+fn modexp_with_exponent(operand_bytes: usize, exponent: &[u8]) -> Vec<u8> {
     let mut input = Vec::from([0_u8; 96]);
-    for offset in [0_usize, 32, 64] {
-        let bytes = operand_bytes.to_be_bytes();
+    for (offset, length) in [
+        (0_usize, operand_bytes),
+        (32, exponent.len()),
+        (64, operand_bytes),
+    ] {
+        let bytes = length.to_be_bytes();
         let start = offset
             .checked_add(32)
             .and_then(|end| end.checked_sub(bytes.len()));
@@ -45,7 +65,7 @@ pub(crate) fn dense_modexp(operand_bytes: usize) -> Vec<u8> {
         }
     }
     input.extend(std::iter::repeat_n(0xa5_u8, operand_bytes));
-    input.extend(std::iter::repeat_n(u8::MAX, operand_bytes));
+    input.extend_from_slice(exponent);
     input.extend(std::iter::repeat_n(0xf3_u8, operand_bytes));
     input
 }

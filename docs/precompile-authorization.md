@@ -92,7 +92,8 @@ precompile error is a Rust control-plane error or an EVM call failure.
 - complete native precompile unit and conformance suites;
 - fuzz targets migrated to quote, atomic execution, and outcome handling;
 - release-blocking identity, SHA-256, RIPEMD-160, dense BN254 multiplication,
-  non-infinity BN254 pairing, 64-byte and 256-byte ModExp, and high-round BLAKE2F
-  work-per-gas ceilings at `precompile_contract_benchmark`;
+  non-infinity BN254 pairing, Berlin-priced dense 64/256-byte and sparse/zero
+  1,024-byte ModExp, and high-round BLAKE2F work-per-gas ceilings at
+  `precompile_contract_benchmark`;
 - default `no_std`, MSRV, strict clippy, package, SBOM, dependency-policy, and
   release-gate checks.

@@ -1,7 +1,7 @@
 # Crate Version Matrix
 
-Status: `v0.55.0` implementation complete; awaiting exact-commit pentest. The
-EVM core, EVM boundary dependency, and facade change.
+Status: `v0.55.0` pentest findings remediated; awaiting exact-commit retest.
+The EVM core, EVM boundary dependency, and facade change.
 
 `eth` uses independent crate versions. The facade crate remains the main user
 entry point, but support crates are published only when their own package or

@@ -1,6 +1,6 @@
 # Release Notes - eth v0.55.0
 
-Status: implementation complete; awaiting exact-commit pentest and retest.
+Status: pentest findings remediated; awaiting exact-commit retest.
 
 ## Summary
 
@@ -22,7 +22,8 @@ EIP-198/EIP-2565 frame with streamed right-padding and caller-owned workspace.
   256-byte operands.
 - Wide-length, workspace atomicity, zero-output/unrepresentable-exponent,
   80-byte KAT, and deterministic `u128` oracle coverage.
-- 64-byte and 256-byte release-mode ModExp work-per-gas benchmarks.
+- Berlin-priced dense 64/256-byte plus sparse and zero-exponent 1,024-byte
+  release-mode ModExp work-per-gas benchmarks.
 - The [ModExp precompile contract](../docs/modexp-precompile.md).
 
 ## Changed
@@ -40,6 +41,14 @@ EIP-198/EIP-2565 frame with streamed right-padding and caller-owned workspace.
   independent reference paths.
 - The ModExp fuzz target exercises wide declarations and caps only its own
   execution allocations, not parser or gas coverage.
+- Result serialization preserves the full declared modulus width when the
+  significant modulus occupies fewer limbs, including 4/8/12-byte leading
+  zero boundaries.
+- Exponentiation skips leading zero bits, returns directly for exponent zero,
+  and initializes from the reduced base at the highest set bit so work tracks
+  the adjusted exponent length charged by EIP-198/EIP-2565.
+- Payable fuzz frames now require successful execution rather than silently
+  accepting unexpected call failures.
 
 ## Scope
 

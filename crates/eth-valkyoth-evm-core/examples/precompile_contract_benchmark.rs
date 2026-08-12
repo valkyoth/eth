@@ -18,6 +18,7 @@ const BN254_PAIRING_ROUNDS: u32 = 2;
 const MODEXP_ROUNDS: u32 = 2;
 const MODEXP_LEGACY_BYTES: usize = 64;
 const MODEXP_WIDE_BYTES: usize = 256;
+const MODEXP_ADVERSARIAL_BYTES: usize = 1_024;
 const BLAKE2F_ROUNDS: u32 = 100_000;
 const BLAKE2F_SAMPLES: u32 = 4;
 
@@ -28,16 +29,19 @@ const MAX_SHA256_PS_PER_GAS: u128 = 100_000;
 const MAX_RIPEMD160_PS_PER_GAS: u128 = 50_000;
 const MAX_BN254_MUL_PS_PER_GAS: u128 = 500_000;
 const MAX_BN254_PAIRING_PS_PER_GAS: u128 = 1_000_000;
-const MAX_MODEXP_PS_PER_GAS: u128 = 5_000_000;
+const MAX_MODEXP_PS_PER_GAS: u128 = 1_000_000;
 const MAX_BLAKE2F_PS_PER_GAS: u128 = 100_000;
 
 fn main() -> Result<(), Box<dyn std::error::Error>> {
     let registry = EvmPrecompileRegistry::try_new(EvmFork::ISTANBUL)?;
+    let berlin = EvmPrecompileRegistry::try_new(EvmFork::BERLIN)?;
     let linear = vec![0x5a_u8; LINEAR_INPUT_BYTES];
     let bn254_mul_input = inputs::dense_bn254_mul();
     let pairing_input = inputs::generator_bn254_pairing();
     let modexp_legacy_input = inputs::dense_modexp(MODEXP_LEGACY_BYTES);
     let modexp_wide_input = inputs::dense_modexp(MODEXP_WIDE_BYTES);
+    let modexp_sparse_input = inputs::sparse_modexp(MODEXP_ADVERSARIAL_BYTES);
+    let modexp_zero_input = inputs::zero_exponent_modexp(MODEXP_ADVERSARIAL_BYTES);
     let blake2f_input = inputs::high_round_blake2f(BLAKE2F_ROUNDS);
 
     let metrics = [
@@ -75,7 +79,7 @@ fn main() -> Result<(), Box<dyn std::error::Error>> {
         (
             "modexp_legacy",
             benchmark_modexp(
-                registry.descriptor(EvmPrecompileKind::Modexp)?,
+                berlin.descriptor(EvmPrecompileKind::Modexp)?,
                 &modexp_legacy_input,
             )?,
             MAX_MODEXP_PS_PER_GAS,
@@ -83,8 +87,24 @@ fn main() -> Result<(), Box<dyn std::error::Error>> {
         (
             "modexp_wide",
             benchmark_modexp(
-                registry.descriptor(EvmPrecompileKind::Modexp)?,
+                berlin.descriptor(EvmPrecompileKind::Modexp)?,
                 &modexp_wide_input,
+            )?,
+            MAX_MODEXP_PS_PER_GAS,
+        ),
+        (
+            "modexp_sparse",
+            benchmark_modexp(
+                berlin.descriptor(EvmPrecompileKind::Modexp)?,
+                &modexp_sparse_input,
+            )?,
+            MAX_MODEXP_PS_PER_GAS,
+        ),
+        (
+            "modexp_zero_exponent",
+            benchmark_modexp(
+                berlin.descriptor(EvmPrecompileKind::Modexp)?,
+                &modexp_zero_input,
             )?,
             MAX_MODEXP_PS_PER_GAS,
         ),

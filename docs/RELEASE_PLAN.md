@@ -3033,7 +3033,7 @@ Exit criteria:
 
 ### v0.55.0 - Consensus-Complete ModExp
 
-Status: implementation complete; awaiting exact-commit pentest.
+Status: pentest findings remediated; awaiting exact-commit retest.
 
 Goal: replace the 64-byte operand subset with consensus-compatible EIP-198 and
 EIP-2565 execution bounded by protocol gas and available memory.

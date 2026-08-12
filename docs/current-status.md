@@ -1,7 +1,7 @@
 # Current Status
 
-Release snapshot: `v0.55.0` implementation complete; awaiting exact-commit
-pentest and retest before release finalization.
+Release snapshot: `v0.55.0` pentest findings remediated; awaiting exact-commit
+retest before release finalization.
 
 This document summarizes what the workspace can do now. The
 [Specification Matrix](SPEC_MATRIX.md) is the source of truth for exact
@@ -108,8 +108,9 @@ Legend:
 `v0.55.0` removes the private 64-byte ModExp operand ceiling. Length words stay
 256-bit through gas calculation, unpayable declarations fail as out of gas,
 and payable frames execute with streamed right-padding and caller-owned limb
-workspace. Independent BigUint differential tests cover operands through 256
-bytes, and release benchmarks cover both 64-byte and 256-byte frames. See
+workspace. Independent BigUint differential tests cover adversarial operand
+shapes through 256 bytes, and Berlin-priced release benchmarks cover dense,
+sparse, and zero exponents through 1,024-byte frames. See
 [ModExp Precompile](modexp-precompile.md).
 
 `v0.54.0` removes production execution methods from informational precompile

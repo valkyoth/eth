@@ -82,6 +82,9 @@ Release evidence includes:
 - zero, truncation, padding, output, wide-length, and insufficient-workspace
   tests;
 - deterministic `u128` oracle comparisons across limb boundaries;
-- dev-only `num-bigint 0.5.1` differential cases from 1 through 256 bytes;
-- the bounded `modexp_frame` fuzz target;
-- release-mode work-per-gas benchmarks at 64 and 256 bytes.
+- dev-only `num-bigint 0.5.1` differential cases from 1 through 256 bytes plus
+  leading-zero, even, zero, unequal-width, sparse, and truncated operands;
+- the bounded `modexp_frame` fuzz target, which requires every fully admitted
+  payable frame to succeed;
+- Berlin-priced dense 64/256-byte and sparse/zero 1,024-byte work-per-gas
+  benchmarks.

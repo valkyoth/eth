@@ -12,6 +12,9 @@ All notable changes to `eth` are documented here.
   operands, wide-length fuzzing, and 64/256-byte work-per-gas gates.
 - Documented the Prague-era EIP-198/EIP-2565 scope and assigned Osaka
   EIP-7823/EIP-7883 changes explicitly to the current-fork releases.
+- Remediated the v0.55.0 pentest by preserving declared-width zero padding for
+  short significant moduli, skipping non-significant exponent work, expanding
+  BigUint/fuzz oracles, and gating sparse and zero exponents under Berlin gas.
 - Started v0.54.0 by removing production execution from informational
   precompile plans and adding canonical exact-input gas quotes, non-forgeable
   one-shot paid capabilities, and CALL-ready terminal outcomes.
