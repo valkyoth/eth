@@ -220,7 +220,40 @@ def test_publish_plan_skips_unchanged_crates() -> None:
     assert release_crates.publish_plan(plan) == ("eth-valkyoth-codec",)
 
 
-def test_post_tag_preflight_passes_guarded_publish_context() -> None:
+def test_release_tag_requires_valid_signature() -> None:
+    responses = {
+        ("git", "rev-parse", "HEAD"): "candidate",
+        ("git", "rev-list", "-n", "1", "v0.4.0"): "candidate",
+        ("git", "verify-tag", "v0.4.0"): None,
+    }
+    original_try_capture = release_crates.try_capture
+    release_crates.try_capture = lambda command: responses[tuple(command)]
+    try:
+        try:
+            release_crates.check_release_tag("0.4.0", require_tag=True)
+        except SystemExit as error:
+            assert error.code == 1
+        else:
+            raise AssertionError("unsigned release tag was accepted")
+    finally:
+        release_crates.try_capture = original_try_capture
+
+
+def test_release_tag_accepts_valid_signature_at_head() -> None:
+    responses = {
+        ("git", "rev-parse", "HEAD"): "candidate",
+        ("git", "rev-list", "-n", "1", "v0.4.0"): "candidate",
+        ("git", "verify-tag", "v0.4.0"): "",
+    }
+    original_try_capture = release_crates.try_capture
+    release_crates.try_capture = lambda command: responses[tuple(command)]
+    try:
+        assert release_crates.check_release_tag("0.4.0", require_tag=True)
+    finally:
+        release_crates.try_capture = original_try_capture
+
+
+def test_post_tag_preflight_checks_evidence_without_rerunning_gate() -> None:
     calls = []
     original_run = release_crates.run
     release_crates.run = lambda command, **kwargs: calls.append((command, kwargs))
@@ -235,7 +268,7 @@ def test_post_tag_preflight_passes_guarded_publish_context() -> None:
         release_crates.run = original_run
 
     assert calls[0] == (
-        ["scripts/release_0_52_3_gate.sh"],
+        ["scripts/validate-release-readiness.sh", "v0.52.3"],
         {
             "dry_run": False,
             "extra_env": {"ETH_RELEASE_PUBLISH_TAG": "v0.52.3"},
@@ -259,7 +292,10 @@ def test_pre_tag_preflight_does_not_set_publish_context() -> None:
     finally:
         release_crates.run = original_run
 
-    assert calls[0][1] == {"dry_run": False, "extra_env": None}
+    assert calls[0] == (
+        ["scripts/release_0_52_3_gate.sh"],
+        {"dry_run": False},
+    )
 
 
 def run_tests() -> None:
@@ -275,7 +311,9 @@ def run_tests() -> None:
         test_metadata_changes_use_milestone_version,
         test_metadata_changes_must_be_published,
         test_publish_plan_skips_unchanged_crates,
-        test_post_tag_preflight_passes_guarded_publish_context,
+        test_release_tag_requires_valid_signature,
+        test_release_tag_accepts_valid_signature_at_head,
+        test_post_tag_preflight_checks_evidence_without_rerunning_gate,
         test_pre_tag_preflight_does_not_set_publish_context,
     )
     for test in tests:

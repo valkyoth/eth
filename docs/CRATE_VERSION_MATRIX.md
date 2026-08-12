@@ -1,7 +1,8 @@
 # Crate Version Matrix
 
-Status: `v0.55.0` release candidate; pentest and retest passed; awaiting green
-GitHub CI and CodeQL. The EVM core, EVM boundary dependency, and facade change.
+Status: `v0.55.0` tagged and published after its pentest, clean retest, GitHub
+CI, and CodeQL gates passed. The EVM core, EVM boundary dependency, and facade
+changed.
 
 `eth` uses independent crate versions. The facade crate remains the main user
 entry point, but support crates are published only when their own package or

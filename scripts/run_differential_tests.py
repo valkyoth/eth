@@ -5,6 +5,7 @@ from __future__ import annotations
 
 import argparse
 import subprocess
+import sys
 from pathlib import Path
 
 ROOT = Path(__file__).resolve().parents[1]
@@ -61,4 +62,11 @@ def main() -> int:
 
 
 if __name__ == "__main__":
-    raise SystemExit(main())
+    try:
+        raise SystemExit(main())
+    except subprocess.CalledProcessError as error:
+        print(
+            f"error: command failed with status {error.returncode}: {error.cmd[0]}",
+            file=sys.stderr,
+        )
+        raise SystemExit(error.returncode) from None

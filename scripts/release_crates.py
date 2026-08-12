@@ -264,7 +264,14 @@ def check_release_tag(version: str, *, require_tag: bool) -> bool:
         print(f"Warning: {message}.", file=sys.stderr)
         return False
 
-    print(f"Release tag {tag} points at HEAD.")
+    if try_capture(["git", "verify-tag", tag]) is None:
+        print(
+            f"Refusing to publish: release tag {tag} has no valid signature.",
+            file=sys.stderr,
+        )
+        sys.exit(1)
+
+    print(f"Release tag {tag} points at HEAD and has a valid signature.")
     return True
 
 
@@ -290,19 +297,19 @@ def run_preflight(args: argparse.Namespace, *, release_tag_at_head: bool) -> Non
         print("Skipping preflight checks by request.")
         return
 
-    version = parse_version(args.version)
-    gate = ROOT / "scripts" / f"release_{version[0]}_{version[1]}_{version[2]}_gate.sh"
-    gate_env = None
     if release_tag_at_head:
-        gate_env = {"ETH_RELEASE_PUBLISH_TAG": f"v{args.version}"}
-    if gate.exists():
         run(
-            [str(gate.relative_to(ROOT))],
+            ["scripts/validate-release-readiness.sh", f"v{args.version}"],
             dry_run=args.dry_run,
-            extra_env=gate_env,
+            extra_env={"ETH_RELEASE_PUBLISH_TAG": f"v{args.version}"},
         )
     else:
-        run(["scripts/checks.sh"], dry_run=args.dry_run)
+        version = parse_version(args.version)
+        gate = ROOT / "scripts" / f"release_{version[0]}_{version[1]}_{version[2]}_gate.sh"
+        if gate.exists():
+            run([str(gate.relative_to(ROOT))], dry_run=args.dry_run)
+        else:
+            run(["scripts/checks.sh"], dry_run=args.dry_run)
     run(["cargo", "deny", "check"], dry_run=args.dry_run)
     run(["cargo", "audit"], dry_run=args.dry_run)
 
@@ -474,4 +481,11 @@ def main() -> int:
 
 
 if __name__ == "__main__":
-    raise SystemExit(main())
+    try:
+        raise SystemExit(main())
+    except subprocess.CalledProcessError as error:
+        print(
+            f"error: command failed with status {error.returncode}: {error.cmd[0]}",
+            file=sys.stderr,
+        )
+        raise SystemExit(error.returncode) from None

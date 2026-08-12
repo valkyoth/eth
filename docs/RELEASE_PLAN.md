@@ -103,7 +103,8 @@ A version is not tag-ready until:
   pass on implementation and retest commits;
 - `scripts/validate-release-readiness.sh vX.Y.Z` requires the matching
   `security/pentest/vX.Y.Z.md` report to have `Status: PASS` and is run by the
-  local release gate before tagging and again by the publisher after tagging;
+  local release gate before tagging and directly by the publisher after
+  tagging;
 - `sbom/eth.spdx.json` exists, is non-empty, and passes semantic drift
   comparison against a freshly generated document;
 - the tag does not already exist locally;
@@ -113,7 +114,8 @@ A version is not tag-ready until:
   rely on a tag-push workflow for readiness: after a tag is pushed, the
   readiness script still fails closed when invoked directly because the tag
   already exists. `release_crates.py` supplies a guarded post-tag context only
-  after verifying that the expected tag resolves exactly to `HEAD`.
+  after verifying that the expected tag resolves exactly to `HEAD` and has a
+  valid cryptographic signature.
 
 `scripts/check_latest_tools.sh` is a mandatory networked release check. Every
 version-specific release gate must run it before tagging so stale stable Rust,
@@ -164,9 +166,11 @@ Use this loop for every version:
 12. `scripts/validate-release-readiness.sh vX.Y.Z` passes locally through the
     versioned release gate before the tag is created.
 13. Tagging and pushing tags happen only when explicitly requested.
-14. Publishing reruns the versioned gate through `release_crates.py`; its
-    post-tag readiness mode requires the expected release tag to resolve
-    exactly to `HEAD`.
+14. Publishing through `release_crates.py` requires the signed release tag to
+    resolve exactly to `HEAD`, reruns release-readiness/SBOM validation plus
+    `cargo deny` and `cargo audit`, validates the package plan, and retains
+    Cargo's package verification. It does not rerun environment-dependent
+    integration workloads already required by the pre-tag versioned gate.
 
 Root `PENTEST.md` is temporary scratch input. It must not be committed.
 The permanent report is part of the release tag. Because committing the report
@@ -3033,8 +3037,8 @@ Exit criteria:
 
 ### v0.55.0 - Consensus-Complete ModExp
 
-Status: release candidate; pentest and retest passed; awaiting green GitHub CI
-and CodeQL.
+Status: tagged and published after pentest, clean retest, GitHub CI, and CodeQL
+passed.
 
 Goal: replace the 64-byte operand subset with consensus-compatible EIP-198 and
 EIP-2565 execution bounded by protocol gas and available memory.
