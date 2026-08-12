@@ -28,6 +28,7 @@ DIFFERENTIAL_TESTS = [
         "modexp_differential",
     ],
 ]
+CLIENT_DIFFERENTIAL = ["scripts/run_modexp_client_differential.py"]
 
 
 def run(command: list[str]) -> None:
@@ -46,11 +47,16 @@ def main() -> int:
     if args.check:
         for command in DIFFERENTIAL_TESTS:
             run([*command, "--no-run"])
-        print(f"validated {len(DIFFERENTIAL_TESTS)} differential reference paths")
+        run([*CLIENT_DIFFERENTIAL, "--check"])
+        print(
+            f"validated {len(DIFFERENTIAL_TESTS)} in-process paths and "
+            "the external-client differential path"
+        )
         return 0
 
     for command in DIFFERENTIAL_TESTS:
         run(command)
+    run(CLIENT_DIFFERENTIAL)
     return 0
 
 

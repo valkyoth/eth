@@ -84,6 +84,8 @@ Release evidence includes:
 - deterministic `u128` oracle comparisons across limb boundaries;
 - dev-only `num-bigint 0.5.1` differential cases from 1 through 256 bytes plus
   leading-zero, even, zero, unequal-width, sparse, and truncated operands;
+- return-byte differential evidence for 11 matching frames against pinned
+  latest-stable Geth, Besu, and Nethermind containers;
 - the bounded `modexp_frame` fuzz target, which requires every fully admitted
   payable frame to succeed;
 - Berlin-priced dense 64/256-byte and sparse/zero 1,024-byte work-per-gas

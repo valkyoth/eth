@@ -25,6 +25,7 @@ python3 scripts/test-ethereum-upstream.py
 scripts/check_ethereum_upstream.py --local-only
 scripts/run_execution_fixtures.py --check
 scripts/run_differential_tests.py --check
+python3 scripts/test-run-modexp-client-differential.py
 scripts/materialize_fuzz_seeds.py --check
 python3 scripts/test-workspace-dependency-policy.py
 scripts/check_runtime_dependency_policy.py

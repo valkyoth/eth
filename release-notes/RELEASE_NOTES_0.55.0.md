@@ -20,6 +20,9 @@ EIP-198/EIP-2565 frame with streamed right-padding and caller-owned workspace.
   bytes without attacker-sized allocation.
 - An independent `num-bigint 0.5.1` dev-only differential test from 1 through
   256-byte operands.
+- A fail-closed Podman differential gate comparing 11 deterministic ModExp
+  outputs against immutable latest-stable Geth `1.17.5`, Besu `26.7.1`, and
+  Nethermind `1.39.3` images.
 - Wide-length, workspace atomicity, zero-output/unrepresentable-exponent,
   80-byte KAT, and deterministic `u128` oracle coverage.
 - Berlin-priced dense 64/256-byte plus sparse and zero-exponent 1,024-byte
@@ -49,6 +52,9 @@ EIP-198/EIP-2565 frame with streamed right-padding and caller-owned workspace.
   the adjusted exponent length charged by EIP-198/EIP-2565.
 - Payable fuzz frames now require successful execution rather than silently
   accepting unexpected call failures.
+- The external-client gate verifies official latest-release metadata, runtime
+  client identity, loopback-only RPC, and byte-exact output before accepting
+  evidence; containers have no host mounts and no outbound network.
 
 ## Scope
 

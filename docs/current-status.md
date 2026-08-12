@@ -108,9 +108,10 @@ Legend:
 `v0.55.0` removes the private 64-byte ModExp operand ceiling. Length words stay
 256-bit through gas calculation, unpayable declarations fail as out of gas,
 and payable frames execute with streamed right-padding and caller-owned limb
-workspace. Independent BigUint differential tests cover adversarial operand
-shapes through 256 bytes, and Berlin-priced release benchmarks cover dense,
-sparse, and zero exponents through 1,024-byte frames. See
+workspace. Independent BigUint tests plus pinned Geth, Besu, and Nethermind
+client comparisons cover adversarial operand shapes through 256 bytes, and
+Berlin-priced release benchmarks cover dense, sparse, and zero exponents
+through 1,024-byte frames. See
 [ModExp Precompile](modexp-precompile.md).
 
 `v0.54.0` removes production execution methods from informational precompile

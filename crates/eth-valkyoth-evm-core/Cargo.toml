@@ -31,3 +31,7 @@ required-features = ["std"]
 [[example]]
 name = "precompile_contract_benchmark"
 required-features = ["std"]
+
+[[example]]
+name = "modexp_client_vectors"
+required-features = ["std"]

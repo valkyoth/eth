@@ -56,6 +56,17 @@ behavior, execution, consensus, networking, or RPC semantics. Update that
 audit, or the follow-up release that supersedes it, whenever a core-impacting
 dependency changes classification.
 
+## External Differential Clients
+
+The v0.55.0 release gate executes official Geth `1.17.5`, Besu `26.7.1`, and
+Nethermind `1.39.3` images as test-only reference implementations. They are not
+Cargo dependencies, do not enter any crate package or runtime graph, and are
+pinned by immutable multi-platform OCI index digest in
+`scripts/run_modexp_client_differential.py`. The runner checks the official
+latest stable GitHub release before use and rejects a mismatched runtime client
+identity. Containers receive no host mount, publish RPC only to host loopback,
+and run on a disposable internal network without outbound access.
+
 ## Admitted Third-Party Crates
 
 | Crate | Version | License | Default Features | Reason |

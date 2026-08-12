@@ -1,7 +1,7 @@
 # Differential Test Harness
 
 Status: `v0.55.0` covers structural RLP and arbitrary-length ModExp through
-dev-only independent reference paths.
+independent in-process or external-client reference paths.
 
 ## Scope
 
@@ -9,6 +9,7 @@ dev-only independent reference paths.
 | --- | --- | --- | --- |
 | Structural RLP | `eth-valkyoth-codec::differential_rlp_reference` | `alloy-rlp` `0.3.16` | Valid/invalid structural decisions and exact accepted re-encoding match for the curated corpus. |
 | ModExp arithmetic | `eth-valkyoth-evm-core::modexp_differential` | `num-bigint` `0.5.1` | Exact output matches from 1 through 256-byte widths plus leading-zero, even, zero, unequal-width, sparse, truncated, and right-padded operands. |
+| ModExp client behavior | `modexp_client_vectors` through precompile `0x05` | Geth `1.17.5`, Besu `26.7.1`, and Nethermind `1.39.3` | All 11 deterministic frames return byte-identical output from every client. |
 
 Structural RLP comparison cannot distinguish every Ethereum integer-domain
 rule from ordinary byte-string validity. Codec integer tests, primitive bridge
@@ -16,24 +17,38 @@ tests, and fuzz targets cover those semantic domains separately.
 
 ## Commands
 
-Validate that both integration tests compile:
+Validate that the integration tests and first-party client vectors compile and
+that all three client images are immutably pinned:
 
 ```sh
 scripts/run_differential_tests.py --check
 ```
 
-Run both reference paths:
+Run every reference path, including the external clients:
 
 ```sh
 scripts/run_differential_tests.py
 ```
 
-The runner executes:
+The runner executes the in-process paths and then
+`scripts/run_modexp_client_differential.py`:
 
 ```sh
 cargo test -p eth-valkyoth-codec --test differential_rlp_reference --features testing
 cargo test -p eth-valkyoth-evm-core --test modexp_differential
 ```
+
+The external runner requires Podman and network access to the official GitHub
+release APIs and container registry. It fails when a pin is no longer the
+latest stable upstream release, pulls each image by immutable multi-platform
+digest, starts one client at a time, and compares 11 first-party return values
+through `eth_call` to precompile `0x05`.
+
+Each disposable container has no host mount, has `no-new-privileges`, joins a
+temporary internal Podman network without outbound access, and publishes RPC
+only on a random host loopback port. Client logs remain under
+`target/modexp-client-differential/`; a mismatch reports the client, case, and
+log path but does not dump calldata into ordinary release output.
 
 The fuzz workspace also includes `rlp_differential` and `modexp_frame`.
 `modexp_frame` drives 256-bit length parsing, both fork gas formulas, bounded
@@ -44,5 +59,16 @@ wider declarations still reach parsing and gas calculation.
 ## Mismatch Reporting
 
 The RLP test accumulates all mismatches before failing and reports each corpus
-case and mismatch class. ModExp failures report the operand shape whose local
-output differs from the independent BigUint result.
+case and mismatch class. In-process ModExp failures report the operand shape
+whose local output differs from the independent BigUint result. External
+client mismatches report the client and deterministic case name. A missing,
+stale, misidentified, failed, or timed-out client fails closed.
+
+## Comparison Boundary
+
+The external comparison proves ModExp output semantics, not cross-client gas
+accounting. The disposable development chains activate different fork
+schedules, while `v0.55.0` claims EIP-198/EIP-2565 gas through Prague. Fork
+formula tests, official vectors, fuzzing, and work-per-gas benchmarks remain
+the authoritative gas evidence. Osaka EIP-7823/EIP-7883 behavior is not
+claimed by this release.

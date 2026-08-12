@@ -15,6 +15,9 @@ All notable changes to `eth` are documented here.
 - Remediated the v0.55.0 pentest by preserving declared-width zero padding for
   short significant moduli, skipping non-significant exponent work, expanding
   BigUint/fuzz oracles, and gating sparse and zero exponents under Berlin gas.
+- Closed the v0.55.0 differential-evidence gap with a fail-closed 11-vector
+  ModExp comparison against immutable latest-stable Geth, Besu, and Nethermind
+  containers, including upstream freshness and runtime-identity checks.
 - Started v0.54.0 by removing production execution from informational
   precompile plans and adding canonical exact-input gas quotes, non-forgeable
   one-shot paid capabilities, and CALL-ready terminal outcomes.
