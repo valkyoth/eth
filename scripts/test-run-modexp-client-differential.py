@@ -19,6 +19,10 @@ sys.modules[SPEC.name] = MODULE
 SPEC.loader.exec_module(MODULE)
 
 
+def object_id() -> str:
+    return MODULE.secrets.token_hex(32)
+
+
 class FakeResponse:
     def __init__(self, tag: str) -> None:
         self.payload = json.dumps({"tag_name": tag}).encode("ascii")
@@ -116,10 +120,32 @@ class DifferentialRunnerTests(unittest.TestCase):
             with self.assertRaisesRegex(RuntimeError, "must delegate"):
                 MODULE.require_resource_controllers()
 
+    def test_isolation_preflight_requires_exact_rootless_metadata(self) -> None:
+        rootless = MODULE.subprocess.CompletedProcess(
+            args=["podman"], returncode=0, stdout="true\n", stderr=""
+        )
+        controllers = MODULE.subprocess.CompletedProcess(
+            args=["podman"],
+            returncode=0,
+            stdout='["cpu", "memory", "pids"]\n',
+            stderr="",
+        )
+        with mock.patch.object(MODULE, "run", side_effect=[rootless, controllers]):
+            MODULE.require_isolated_podman()
+
+        for output in ("false\n", "not-json\n"):
+            result = MODULE.subprocess.CompletedProcess(
+                args=["podman"], returncode=0, stdout=output, stderr=""
+            )
+            with mock.patch.object(MODULE, "run", return_value=result):
+                with self.assertRaises(RuntimeError):
+                    MODULE.require_isolated_podman()
+
     def test_container_boundary_is_loopback_only_and_has_no_mounts(self) -> None:
         command = MODULE.container_command(
             MODULE.CLIENTS[0], "test-client", "test-internal"
         )
+        self.assertEqual(command[:2], ["podman", "create"])
         self.assertIn("127.0.0.1::8545", command)
         self.assertIn("test-internal", command)
         self.assertIn("--security-opt=no-new-privileges", command)
@@ -141,6 +167,52 @@ class DifferentialRunnerTests(unittest.TestCase):
         )
         self.assertIn("--user", besu)
         self.assertIn("1000:1000", besu)
+
+    def test_object_existence_is_strict_and_bounded(self) -> None:
+        for status, expected in ((0, True), (1, False)):
+            completed = MODULE.subprocess.CompletedProcess(
+                args=["podman"], returncode=status, stdout="", stderr=""
+            )
+            with mock.patch.object(MODULE.subprocess, "run", return_value=completed):
+                self.assertEqual(
+                    MODULE.podman_object_exists("container", object_id()), expected
+                )
+
+        invalid = MODULE.subprocess.CompletedProcess(
+            args=["podman"], returncode=125, stdout="", stderr=""
+        )
+        with mock.patch.object(MODULE.subprocess, "run", return_value=invalid):
+            with self.assertRaisesRegex(RuntimeError, "existence check failed"):
+                MODULE.podman_object_exists("network", object_id())
+
+    def test_container_cleanup_fails_if_owned_id_remains(self) -> None:
+        with mock.patch.object(MODULE, "run", side_effect=RuntimeError("remove")):
+            with mock.patch.object(MODULE, "podman_object_exists", return_value=True):
+                with self.assertRaisesRegex(RuntimeError, "container cleanup failed"):
+                    MODULE.cleanup_container(object_id())
+
+        with mock.patch.object(MODULE, "run"):
+            with mock.patch.object(MODULE, "podman_object_exists", return_value=False):
+                MODULE.cleanup_container(object_id())
+
+    def test_creation_failure_never_cleans_a_colliding_name(self) -> None:
+        with mock.patch.object(MODULE, "run", side_effect=RuntimeError("collision")):
+            with mock.patch.object(MODULE, "cleanup_container") as cleanup:
+                with self.assertRaisesRegex(RuntimeError, "container creation failed"):
+                    MODULE.compare_client(
+                        MODULE.CLIENTS[0], [], object_id(), MODULE.secrets.token_hex(16)
+                    )
+                cleanup.assert_not_called()
+
+    def test_network_cleanup_failure_is_not_suppressed(self) -> None:
+        with mock.patch.object(MODULE, "run", side_effect=RuntimeError("remove")):
+            with mock.patch.object(MODULE, "podman_object_exists", return_value=True):
+                with self.assertRaisesRegex(RuntimeError, "network cleanup failed"):
+                    MODULE.cleanup_network(object_id())
+
+        with mock.patch.object(MODULE, "run"):
+            with mock.patch.object(MODULE, "podman_object_exists", return_value=False):
+                MODULE.cleanup_network(object_id())
 
 
 if __name__ == "__main__":

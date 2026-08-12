@@ -38,14 +38,18 @@ operand cases. The runner validated each runtime identity against its expected
 stable release and each pin against the official latest-release API before
 accepting the comparison.
 
-The pentest remediation adds mandatory CPU, memory, PID, filesystem, log,
-subprocess-time, port-binding, proxy, and response-size isolation to the same
-comparison. A host without delegated `cpu`, `memory`, and `pids` cgroup v2
+The pentest remediation adds mandatory rootless execution plus CPU, memory,
+PID, filesystem, log, subprocess-time, port-binding, proxy, response-size,
+object-ownership, and verified-cleanup isolation to the same comparison. A
+rootful host or a host without delegated `cpu`, `memory`, and `pids` cgroup v2
 controllers is rejected before client execution; there is no weaker release
-mode. The remediation host exposed only `pids`, so the fail-closed preflight was
-verified there and all remaining hardened controls independently completed all
-33 comparisons. The exact-commit retest and release gate must run the complete
-command on a host with all three controllers delegated.
+mode. Containers are created before they are started so cleanup operates on a
+confirmed immutable ID, network creation is tracked independently, and the
+gate fails when any owned object remains. The remediation host exposed only
+`pids`, so the fail-closed preflight was verified there and all remaining
+hardened controls independently completed all 33 comparisons. The exact-commit
+retest and release gate must run the complete command on a rootless host with
+all three controllers delegated.
 
 ## Deliberate Limits
 

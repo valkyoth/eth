@@ -5,8 +5,8 @@ from __future__ import annotations
 
 import argparse
 import json
-import os
 import re
+import secrets
 import subprocess
 import sys
 import time
@@ -30,6 +30,7 @@ IMAGE_PATTERN = re.compile(r"^[a-z0-9./-]+@sha256:[0-9a-f]{64}$")
 HEX_PATTERN = re.compile(r"^0x(?:[0-9a-f]{2})*$")
 CASE_PATTERN = re.compile(r"^[a-z0-9-]+$")
 PORT_PATTERN = re.compile(r"^127\.0\.0\.1:([0-9]{1,5})$")
+OBJECT_ID_PATTERN = re.compile(r"^[0-9a-f]{64}$")
 RPC_OPENER = urllib.request.build_opener(urllib.request.ProxyHandler({}))
 
 
@@ -186,6 +187,20 @@ def require_resource_controllers() -> None:
         )
 
 
+def require_isolated_podman() -> None:
+    result = run(
+        ["podman", "info", "--format", "{{json .Host.Security.Rootless}}"],
+        capture=True,
+    )
+    try:
+        rootless = json.loads(result.stdout)
+    except json.JSONDecodeError as error:
+        raise RuntimeError("Podman returned malformed rootless metadata") from error
+    if rootless is not True:
+        raise RuntimeError("external clients require rootless Podman")
+    require_resource_controllers()
+
+
 def parse_vectors(output: str) -> list[tuple[str, str, str]]:
     vectors: list[tuple[str, str, str]] = []
     names: set[str] = set()
@@ -272,8 +287,7 @@ def wait_for_rpc(container_id: str, port: int) -> str:
 def container_command(client: Client, name: str, network: str) -> list[str]:
     command = [
         "podman",
-        "run",
-        "--detach",
+        "create",
         "--rm",
         "--pull=never",
         "--name",
@@ -313,9 +327,11 @@ def published_port(container_id: str) -> int:
     return port
 
 
-def write_bounded_logs(name: str, client_name: str) -> Path | None:
+def write_bounded_logs(container_id: str, client_name: str) -> Path | None:
     try:
-        result = run(["podman", "logs", "--tail", "200", name], capture=True)
+        result = run(
+            ["podman", "logs", "--tail", "200", container_id], capture=True
+        )
         LOG_DIR.mkdir(parents=True, exist_ok=True)
         relative = Path("target") / "modexp-client-differential" / f"{client_name}.log"
         contents = f"{result.stdout}\n{result.stderr}"[-MAX_SAVED_LOG_CHARS:]
@@ -325,31 +341,78 @@ def write_bounded_logs(name: str, client_name: str) -> Path | None:
         return None
 
 
-def cleanup_container(name: str) -> None:
-    for command in (
-        ["podman", "stop", "--time", "10", name],
-        ["podman", "rm", "--force", name],
-    ):
-        try:
-            run(command, capture=True, timeout=20)
-        except RuntimeError:
-            pass
+def podman_object_exists(kind: str, identifier: str) -> bool:
+    if kind not in {"container", "network"}:
+        raise ValueError("unsupported Podman object kind")
+    try:
+        result = subprocess.run(
+            ["podman", kind, "exists", identifier],
+            cwd=ROOT,
+            check=False,
+            text=True,
+            capture_output=True,
+            timeout=COMMAND_TIMEOUT_SECONDS,
+        )
+    except subprocess.TimeoutExpired as error:
+        raise RuntimeError(f"Podman {kind} existence check timed out") from error
+    except OSError as error:
+        raise RuntimeError(f"Podman {kind} existence check failed") from error
+    if result.returncode == 0:
+        return True
+    if result.returncode == 1:
+        return False
+    raise RuntimeError(f"Podman {kind} existence check failed")
+
+
+def cleanup_container(container_id: str) -> None:
+    try:
+        run(
+            ["podman", "rm", "--force", container_id],
+            capture=True,
+            timeout=20,
+        )
+    except RuntimeError as error:
+        if podman_object_exists("container", container_id):
+            raise RuntimeError("client container cleanup failed") from error
+    if podman_object_exists("container", container_id):
+        raise RuntimeError("client container cleanup failed")
+
+
+def cleanup_network(network: str) -> None:
+    try:
+        run(["podman", "network", "rm", network], capture=True, timeout=20)
+    except RuntimeError as error:
+        if podman_object_exists("network", network):
+            raise RuntimeError("client network cleanup failed") from error
+    if podman_object_exists("network", network):
+        raise RuntimeError("client network cleanup failed")
 
 
 def compare_client(
-    client: Client, vectors: list[tuple[str, str, str]], network: str
+    client: Client,
+    vectors: list[tuple[str, str, str]],
+    network: str,
+    run_id: str,
 ) -> str:
-    name = f"eth-modexp-{client.name}-{os_process_id()}"
+    name = f"eth-modexp-{client.name}-{run_id}"
     container_id: str | None = None
+    owned_reference: str | None = None
     try:
         try:
-            container_id = run(
+            candidate_id = run(
                 container_command(client, name, network), capture=True
             ).stdout.strip()
+            owned_reference = name
         except RuntimeError as error:
-            raise RuntimeError(f"{client.name} container launch failed") from error
-        if not container_id:
+            raise RuntimeError(f"{client.name} container creation failed") from error
+        if not OBJECT_ID_PATTERN.fullmatch(candidate_id):
             raise RuntimeError(f"{client.name} did not return a container identity")
+        container_id = candidate_id
+        owned_reference = container_id
+        try:
+            run(["podman", "start", container_id], capture=True)
+        except RuntimeError as error:
+            raise RuntimeError(f"{client.name} container start failed") from error
         port = published_port(container_id)
         version = wait_for_rpc(container_id, port)
         if client.version_marker not in version:
@@ -367,16 +430,15 @@ def compare_client(
         return version
     except Exception as error:
         log_path = (
-            write_bounded_logs(name, client.name) if container_id is not None else None
+            write_bounded_logs(container_id, client.name)
+            if container_id is not None
+            else None
         )
         diagnostic = f"; bounded log: {log_path}" if log_path is not None else ""
         raise RuntimeError(f"{error}{diagnostic}") from error
     finally:
-        cleanup_container(name)
-
-
-def os_process_id() -> int:
-    return os.getpid()
+        if owned_reference is not None:
+            cleanup_container(owned_reference)
 
 
 def main() -> int:
@@ -394,7 +456,7 @@ def main() -> int:
         return 0
 
     run(["podman", "--version"], capture=True)
-    require_resource_controllers()
+    require_isolated_podman()
     check_latest_releases()
     for client in CLIENTS:
         run(
@@ -402,17 +464,28 @@ def main() -> int:
             capture=True,
             timeout=IMAGE_PULL_TIMEOUT_SECONDS,
         )
-    network = f"eth-modexp-differential-{os_process_id()}"
+    run_id = secrets.token_hex(16)
+    network_name = f"eth-modexp-differential-{run_id}"
+    network_id: str | None = None
+    network_created = False
     try:
-        run(["podman", "network", "create", "--internal", network], capture=True)
+        run(
+            ["podman", "network", "create", "--internal", network_name],
+            capture=True,
+        )
+        network_created = True
+        network_id = run(
+            ["podman", "network", "inspect", "--format", "{{.ID}}", network_name],
+            capture=True,
+        ).stdout.strip()
+        if not OBJECT_ID_PATTERN.fullmatch(network_id):
+            raise RuntimeError("Podman did not return a network identity")
         for client in CLIENTS:
-            version = compare_client(client, vectors, network)
+            version = compare_client(client, vectors, network_id, run_id)
             print(f"{client.name}\t{version}\t{len(vectors)} vectors passed")
     finally:
-        try:
-            run(["podman", "network", "rm", network], capture=True, timeout=20)
-        except RuntimeError:
-            pass
+        if network_created:
+            cleanup_network(network_id or network_name)
     return 0
 
 

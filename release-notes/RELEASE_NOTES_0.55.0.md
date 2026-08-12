@@ -59,6 +59,10 @@ EIP-198/EIP-2565 frame with streamed right-padding and caller-owned workspace.
   log ceilings; bounded subprocess/cleanup waits and HTTP reads; atomic
   Podman-assigned ports; proxy-free loopback RPC; and sanitized infrastructure
   failures without tracebacks or command arguments.
+- Follow-up remediation verifies rootless Podman explicitly, replaces
+  process-derived names with 128-bit random ownership identifiers, captures
+  immutable container and network IDs before client execution, and fails the
+  gate unless every owned object is confirmed removed.
 
 ## Scope
 

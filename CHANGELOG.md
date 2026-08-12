@@ -21,6 +21,9 @@ All notable changes to `eth` are documented here.
 - Remediated the external-client harness pentest with mandatory cgroup resource
   ceilings, read-only capability-free containers, bounded logs/tmpfs/HTTP and
   subprocess waits, atomic loopback ports, and sanitized infrastructure errors.
+- Closed the follow-up container-isolation findings by requiring verified
+  rootless Podman, assigning high-entropy object names, starting only confirmed
+  container IDs, and making residual container/network cleanup gate-fatal.
 - Started v0.54.0 by removing production execution from informational
   precompile plans and adding canonical exact-input gas quotes, non-forgeable
   one-shot paid capabilities, and CALL-ready terminal outcomes.
