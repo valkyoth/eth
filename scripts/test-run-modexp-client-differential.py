@@ -265,6 +265,46 @@ class DifferentialRunnerTests(unittest.TestCase):
                 with self.assertRaisesRegex(RuntimeError, "inspection failed"):
                     MODULE.recover_owned_object("network", "random-network", run_id)
 
+    def test_malformed_container_id_rejects_wrong_label_replacement(self) -> None:
+        run_id = MODULE.secrets.token_hex(16)
+        created = MODULE.subprocess.CompletedProcess(
+            args=["podman"], returncode=0, stdout="malformed\n", stderr=""
+        )
+        replacement = MODULE.subprocess.CompletedProcess(
+            args=["podman"],
+            returncode=0,
+            stdout=f"{MODULE.secrets.token_hex(16)}\t{object_id()}\n",
+            stderr="",
+        )
+        with mock.patch.object(MODULE, "run", side_effect=[created, replacement]):
+            with mock.patch.object(MODULE, "cleanup_container") as cleanup:
+                with self.assertRaisesRegex(RuntimeError, "unexpected object"):
+                    MODULE.create_container(
+                        MODULE.CLIENTS[0], "random-name", object_id(), run_id
+                    )
+                cleanup.assert_not_called()
+
+    def test_network_inspection_error_rejects_wrong_label_replacement(self) -> None:
+        run_id = MODULE.secrets.token_hex(16)
+        created = MODULE.subprocess.CompletedProcess(
+            args=["podman"], returncode=0, stdout="random-network\n", stderr=""
+        )
+        replacement = MODULE.subprocess.CompletedProcess(
+            args=["podman"],
+            returncode=0,
+            stdout=f"{MODULE.secrets.token_hex(16)}\t{object_id()}\n",
+            stderr="",
+        )
+        with mock.patch.object(
+            MODULE,
+            "run",
+            side_effect=[created, RuntimeError("inspect"), replacement],
+        ):
+            with mock.patch.object(MODULE, "cleanup_network") as cleanup:
+                with self.assertRaisesRegex(RuntimeError, "unexpected object"):
+                    MODULE.create_network("random-network", run_id)
+                cleanup.assert_not_called()
+
     def test_network_cleanup_failure_is_not_suppressed(self) -> None:
         with mock.patch.object(MODULE, "run", side_effect=RuntimeError("remove")):
             with mock.patch.object(MODULE, "podman_object_exists", return_value=True):

@@ -48,11 +48,13 @@ confirmed immutable ID, network creation is tracked independently, and the
 gate fails when any owned object remains. Follow-up remediation labels every
 object with the 128-bit run token and recovers matching objects after a
 creation timeout or error, closing the partial-success leak without permitting
-same-name third-party deletion. The remediation host exposed only `pids`, so
-the fail-closed preflight was verified there and all remaining hardened
-controls independently completed all 33 comparisons. The exact-commit retest
-and release gate must run the complete command on a rootless host with all
-three controllers delegated.
+same-name third-party deletion. The same ownership verifier gates cleanup after
+malformed successful-create output and failed post-create network inspection,
+so object replacement cannot turn either path into destructive name-based
+cleanup. The remediation host exposed only `pids`, so the fail-closed preflight
+was verified there and all remaining hardened controls independently completed
+all 33 comparisons. The exact-commit retest and release gate must run the
+complete command on a rootless host with all three controllers delegated.
 
 ## Deliberate Limits
 

@@ -67,6 +67,9 @@ EIP-198/EIP-2565 frame with streamed right-padding and caller-owned workspace.
   label. A timed-out or failed create triggers label-checked recovery, while an
   absent object, an inspection failure, malformed metadata, or a wrong owner
   remains a distinct fail-closed outcome.
+- Post-create malformed container identities and failed network-ID inspection
+  now use the same label-checked recovery, preventing a same-name replacement
+  from being removed through either error path.
 
 ## Scope
 

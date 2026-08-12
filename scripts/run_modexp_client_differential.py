@@ -324,6 +324,8 @@ def cleanup_network(network: str) -> None:
 
 
 def recover_owned_object(kind: str, name: str, run_id: str) -> None:
+    if kind not in {"container", "network"}:
+        raise ValueError("unsupported Podman object kind")
     label_source = ".Config.Labels" if kind == "container" else ".Labels"
     template = f'{{{{index {label_source} "{OWNERSHIP_LABEL}"}}}}\t{{{{.ID}}}}'
     try:
@@ -355,7 +357,7 @@ def create_container(client: Client, name: str, network: str, run_id: str) -> st
         recover_owned_object("container", name, run_id)
         raise RuntimeError(f"{client.name} container creation failed") from error
     if not OBJECT_ID_PATTERN.fullmatch(container_id):
-        cleanup_container(name)
+        recover_owned_object("container", name, run_id)
         raise RuntimeError(f"{client.name} did not return a container identity")
     return container_id
 
@@ -382,11 +384,11 @@ def create_network(name: str, run_id: str) -> str:
             ["podman", "network", "inspect", "--format", "{{.ID}}", name],
             capture=True,
         ).stdout.strip()
-    except RuntimeError:
-        cleanup_network(name)
-        raise
+    except RuntimeError as error:
+        recover_owned_object("network", name, run_id)
+        raise RuntimeError("client network inspection failed") from error
     if not OBJECT_ID_PATTERN.fullmatch(network_id):
-        cleanup_network(name)
+        recover_owned_object("network", name, run_id)
         raise RuntimeError("Podman did not return a network identity")
     return network_id
 

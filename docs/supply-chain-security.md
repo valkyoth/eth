@@ -72,7 +72,8 @@ read-only root, dropped capabilities, size-limited tmpfs storage, and a 10 MiB
 log ceiling. Runs use high-entropy names and matching ownership labels, start
 containers only after capturing their immutable IDs, recover matching objects
 after uncertain create results, and verify removal of every owned container
-and network. A same-name object with the wrong label is never removed.
+and network. Every name-based recovery path verifies the label immediately
+before removal; a same-name object with the wrong label is never removed.
 Subprocess, cleanup, HTTP response, proxy, and Podman-assigned loopback-port
 boundaries are also fail-closed.
 

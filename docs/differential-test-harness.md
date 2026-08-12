@@ -71,8 +71,11 @@ any client starts. If creation times out or otherwise reports an uncertain
 result, recovery inspects the random name and removes it only when its label
 matches the current run. Absence, an ownership mismatch, malformed metadata,
 and an inspection failure are distinct outcomes; uncertain ownership never
-authorizes deletion. Cleanup verifies that each owned container and network no
-longer exists and fails the gate if residue remains.
+authorizes deletion. This label verification also applies after successful
+creation when returned container identity metadata is malformed or subsequent
+network-ID inspection fails, closing replacement races on every name-based
+path. Cleanup verifies that each owned container and network no longer exists
+and fails the gate if residue remains.
 Podman assigns the host port atomically, the mapping must resolve to
 `127.0.0.1`, loopback RPC bypasses environment proxy configuration, and
 RPC/release-metadata responses have fixed byte ceilings.

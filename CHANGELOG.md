@@ -27,6 +27,8 @@ All notable changes to `eth` are documented here.
 - Hardened uncertain Podman creation outcomes with per-run ownership labels and
   label-checked container/network recovery, without deleting colliding objects
   that do not carry the current run token.
+- Removed the remaining name-cleanup race by routing malformed container-ID and
+  failed network-inspection paths through the ownership-label verifier.
 - Started v0.54.0 by removing production execution from informational
   precompile plans and adding canonical exact-input gas quotes, non-forgeable
   one-shot paid capabilities, and CALL-ready terminal outcomes.
