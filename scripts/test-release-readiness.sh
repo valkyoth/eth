@@ -20,6 +20,7 @@ export PATH
 source_script="$(pwd)/scripts/validate-release-readiness.sh"
 generate_sbom_script="$(pwd)/scripts/generate-sbom.sh"
 compare_sbom_script="$(pwd)/scripts/compare_sbom.py"
+release_train_script="$(pwd)/scripts/release_train.py"
 
 make_fixture() {
     name="$1"
@@ -29,6 +30,7 @@ make_fixture() {
     cp "$source_script" "$repo/scripts/validate-release-readiness.sh"
     cp "$generate_sbom_script" "$repo/scripts/generate-sbom.sh"
     cp "$compare_sbom_script" "$repo/scripts/compare_sbom.py"
+    cp "$release_train_script" "$repo/scripts/release_train.py"
 
     (
         cd "$repo"
@@ -222,4 +224,66 @@ repo="$(make_fixture stale-publish-tag)"
     assert_fails_with "publish tag v0.2.0 does not point at HEAD" \
         env ETH_RELEASE_PUBLISH_TAG="v0.2.0" \
         scripts/validate-release-readiness.sh "v0.2.0"
+)
+
+repo="$(make_fixture internal-train)"
+(
+    cd "$repo"
+    git tag "v0.55.0"
+    reviewed_commit="$(git rev-parse HEAD)"
+    write_release_notes "0.56.0"
+    printf 'Publication: DEFERRED TO v0.60.0\n' >>release-notes/RELEASE_NOTES_0.56.0.md
+    write_sbom
+    write_pentest "v0.56.0" "$reviewed_commit"
+    cat >>security/pentest/v0.56.0.md <<'EOF'
+Assessment: INCREMENTAL
+Baseline: v0.55.0
+Range-End: v0.56.0
+EOF
+    cat >release-crates.toml <<'EOF'
+[release]
+version = "0.56.0"
+milestone = "0.56.0"
+baseline = "0.55.0"
+review_baseline = "0.55.0"
+cumulative_milestones = ["0.56.0"]
+stage = "internal"
+EOF
+    git add security/pentest/v0.56.0.md
+    git commit -q -m "internal report"
+
+    scripts/validate-release-readiness.sh "v0.56.0"
+)
+
+repo="$(make_fixture public-train)"
+(
+    cd "$repo"
+    git tag "v0.55.0"
+    printf 'internal report\n' >security/pentest/v0.56.0.md
+    git add security/pentest/v0.56.0.md
+    git commit -q -m "internal milestone"
+    git tag "v0.56.0"
+    reviewed_commit="$(git rev-parse HEAD)"
+    write_release_notes "0.60.0"
+    printf 'Publication: PENDING\n' >>release-notes/RELEASE_NOTES_0.60.0.md
+    write_sbom
+    write_pentest "v0.60.0" "$reviewed_commit"
+    cat >>security/pentest/v0.60.0.md <<'EOF'
+Assessment: CUMULATIVE
+Baseline: v0.55.0
+Range-End: v0.60.0
+EOF
+    cat >release-crates.toml <<'EOF'
+[release]
+version = "0.60.0"
+milestone = "0.60.0"
+baseline = "0.55.0"
+review_baseline = "0.56.0"
+cumulative_milestones = ["0.56.0", "0.60.0"]
+stage = "public"
+EOF
+    git add security/pentest/v0.60.0.md
+    git commit -q -m "public report"
+
+    scripts/validate-release-readiness.sh "v0.60.0"
 )

@@ -220,6 +220,48 @@ def test_publish_plan_skips_unchanged_crates() -> None:
     assert release_crates.publish_plan(plan) == ("eth-valkyoth-codec",)
 
 
+def test_internal_stage_retains_support_versions_without_publication() -> None:
+    entry = {
+        "previous_version": "0.29.0",
+        "version": "0.29.0",
+        "change": "code",
+        "publish": False,
+        "reason": "accumulate for v0.60.0",
+    }
+    release_crates.validate_plan_entry(
+        "eth-valkyoth-evm-core", entry, "0.56.0", "internal"
+    )
+
+
+def test_internal_facade_follows_tag_without_publication() -> None:
+    entry = {
+        "previous_version": "0.55.0",
+        "version": "0.56.0",
+        "change": "code",
+        "publish": False,
+        "reason": "tagged internal milestone",
+    }
+    release_crates.validate_plan_entry("eth", entry, "0.56.0", "internal")
+
+
+def test_internal_stage_rejects_selected_publication() -> None:
+    entry = {
+        "previous_version": "0.29.0",
+        "version": "0.29.0",
+        "change": "code",
+        "publish": True,
+        "reason": "invalid internal publication",
+    }
+    assert_fails(
+        "cannot publish at internal stage",
+        release_crates.validate_plan_entry,
+        "eth-valkyoth-evm-core",
+        entry,
+        "0.56.0",
+        "internal",
+    )
+
+
 def test_release_tag_requires_valid_signature() -> None:
     responses = {
         ("git", "rev-parse", "HEAD"): "candidate",
@@ -311,6 +353,9 @@ def run_tests() -> None:
         test_metadata_changes_use_milestone_version,
         test_metadata_changes_must_be_published,
         test_publish_plan_skips_unchanged_crates,
+        test_internal_stage_retains_support_versions_without_publication,
+        test_internal_facade_follows_tag_without_publication,
+        test_internal_stage_rejects_selected_publication,
         test_release_tag_requires_valid_signature,
         test_release_tag_accepts_valid_signature_at_head,
         test_post_tag_preflight_checks_evidence_without_rerunning_gate,

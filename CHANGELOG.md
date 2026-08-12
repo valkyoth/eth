@@ -35,6 +35,9 @@ All notable changes to `eth` are documented here.
   publisher verifies the signed exact tag, permanent evidence, SBOM, dependency
   policy, audit status, package plan, and Cargo archives without rerunning
   environment-dependent Podman workloads; subprocess failures are now concise.
+- Adopted pentested signed tags for every roadmap milestone while batching
+  crates.io publication at five-minor checkpoints, with cumulative tag-chain,
+  package-delta, dependency-closure, and internal-publication enforcement.
 - Started v0.54.0 by removing production execution from informational
   precompile plans and adding canonical exact-input gas quotes, non-forgeable
   one-shot paid capabilities, and CALL-ready terminal outcomes.

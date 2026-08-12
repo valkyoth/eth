@@ -8,15 +8,25 @@ changed.
 entry point, but support crates are published only when their own package or
 published dependency requirements change.
 
+Beginning after the public `v0.55.0` anchor, intermediate tags select no
+crates. The `eth` source version follows each tag, support crates retain their
+published versions, and all cumulative changes are classified for the next
+minor divisible by five.
+
 ## Version Rules
 
-| Change kind | Version rule | Publish? |
+| Change kind | Public-checkpoint version rule | Publish? |
 | --- | --- | --- |
 | `code` | `eth` uses the milestone version; support crates use their next independent minor. | Yes |
 | `bugfix` | API-compatible support-crate fixes increment the current patch exactly once. | Yes |
 | `dependency` | Patch-bump the existing line. | Yes |
 | `metadata` | Use the milestone version when republishing corrected package metadata. | Yes |
 | `unchanged` | Keep the previous published version. | No |
+
+At `stage = "internal"`, `eth` follows the tag version without publication;
+support crates keep their preceding published versions regardless of their
+cumulative change classification. At `stage = "public"`, the table above is
+applied once to the complete delta from the preceding public checkpoint.
 
 `dependency` means the crate did not receive meaningful implementation or API
 changes, but its manifest must change because a related workspace crate moved
@@ -27,7 +37,8 @@ public API and support-crate type identity. It must not add or remove public
 API.
 
 `scripts/release_crates.py --check` validates `release-crates.toml` against the
-workspace manifests and refuses accidental lockstep publication.
+workspace manifests, verifies the complete tag train, and refuses accidental
+lockstep or internal-milestone publication.
 
 ## v0.55.0 Tracking Table
 

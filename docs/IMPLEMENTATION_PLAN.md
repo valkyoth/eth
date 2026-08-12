@@ -70,6 +70,9 @@ The first production value is:
 - Normal `.rs` files must stay below 500 lines.
 - Security documentation, release notes, and test evidence are release
   requirements, not cleanup work.
+- Every roadmap version receives a pentest and signed GitHub tag; crates.io
+  publication is cumulative at each pre-1.0 minor divisible by five, beginning
+  with the train after published `v0.55.0`.
 
 ## Workspace Shape
 

@@ -38,6 +38,8 @@ def main() -> int:
     assert 'test -f "$current_pentest_report"' not in validator
     assert "grep -q '^Status: PASS$' \"$current_pentest_report\"" not in validator
     assert 'release_gate="scripts/release_$(printf' in validator
+    assert 'release_stage=' in validator
+    assert 'test "$release_stage" = internal || test "$release_stage" = public' in validator
     assert 'tr . _)_gate.sh"' in validator
     assert 'test -x "$release_gate"' in validator
     assert "test -x scripts/check_action_pins.rb" in validator
@@ -59,6 +61,10 @@ def main() -> int:
         ROOT / f"scripts/release_{release_version.replace('.', '_')}_gate.sh"
     ).read_text(encoding="utf-8")
     assert "scripts/check_latest_crates.py" in release_gate
+    assert (ROOT / "scripts" / "release_train.py").is_file()
+    assert (ROOT / "scripts" / "test-release-train.py").is_file()
+    assert (ROOT / "docs" / "VERSIONING_POLICY.md").is_file()
+    assert (ROOT / "docs" / "RELEASE_RUNBOOK.md").is_file()
 
     release_workflow = RELEASE_WORKFLOW.read_text(encoding="utf-8")
     assert "workflow_dispatch:" in release_workflow

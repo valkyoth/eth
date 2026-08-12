@@ -1,6 +1,11 @@
 [release]
 version = "0.55.0"
+milestone = "0.55.0"
+baseline = "0.55.0"
+review_baseline = "0.55.0"
+cumulative_milestones = []
 policy = "independent"
+stage = "public"
 
 [crates."eth-valkyoth-codec"]
 previous_version = "0.21.0"

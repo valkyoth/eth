@@ -15,6 +15,9 @@ test -x scripts/test-check-latest-tools.sh
 test -x scripts/check_ethereum_upstream.py
 test -x scripts/test-ethereum-upstream.py
 test -x scripts/release_crates.py
+test -f scripts/release_publish.py
+test -f scripts/release_train.py
+test -f scripts/test-release-train.py
 test -x scripts/sync_spec_sources.py
 test -x scripts/test-sync-spec-sources.py
 test -x scripts/run_execution_fixtures.py
@@ -30,6 +33,8 @@ test -x scripts/test-release-metadata.py
 test -f scripts/check_spec_provenance.py
 test -f release-crates.toml
 test -f docs/CRATE_VERSION_MATRIX.md
+test -f docs/VERSIONING_POLICY.md
+test -f docs/RELEASE_RUNBOOK.md
 test -f conformance/execution-fixtures.toml
 test -f release-notes/RELEASE_NOTES_0.1.0.md
 test -f release-notes/RELEASE_NOTES_0.2.0.md
@@ -118,8 +123,10 @@ test -f security/pentest/v0.40.0.md
 test -f security/pentest/v0.41.0.md
 release_version="$(python3 -c 'import tomllib; print(tomllib.load(open("release-crates.toml", "rb"))["release"]["version"])')"
 eth_manifest_version="$(python3 -c 'import tomllib; print(tomllib.load(open("crates/eth/Cargo.toml", "rb"))["package"]["version"])')"
+release_stage="$(python3 -c 'import tomllib; print(tomllib.load(open("release-crates.toml", "rb"))["release"]["stage"])')"
 release_gate="scripts/release_$(printf '%s' "$release_version" | tr . _)_gate.sh"
 test "$release_version" = "$eth_manifest_version"
+test "$release_stage" = internal || test "$release_stage" = public
 test -x "$release_gate"
 grep -q "scripts/validate-release-readiness.sh v${release_version}" "$release_gate"
 grep -q 'scripts/check_latest_tools.sh' "$release_gate"

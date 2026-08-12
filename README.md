@@ -38,6 +38,12 @@ production node, wallet, RPC client, or key store.
 Networking, private-key signing, local key storage, and third-party execution
 backends are not enabled by default.
 
+`v0.55.0` is the publication-cadence anchor. Every roadmap version continues
+to receive its own pentest, release evidence, and signed GitHub tag, while
+crates.io packages are published cumulatively at `v0.60.0`, `v0.65.0`, and
+each later pre-1.0 minor divisible by five. Intermediate tags remain source
+milestones and never publish crates.
+
 ## Install
 
 ```toml

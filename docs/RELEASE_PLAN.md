@@ -4,7 +4,8 @@ Status: planning document
 
 This plan is intentionally granular. `eth` is security-sensitive Ethereum
 protocol software, so each milestone must be small enough to review, test,
-pentest, and stop cleanly before tagging.
+pentest, and stop cleanly before tagging. Every milestone keeps a signed GitHub
+tag; crates.io publication is batched at five-minor checkpoints.
 
 The list below is not a maximum. Add patch releases or split a milestone before
 implementation if the work no longer fits in one safe review pass.
@@ -12,11 +13,32 @@ implementation if the work no longer fits in one safe review pass.
 Tags use:
 
 ```text
-v0.N.0      milestone release
-v0.N.P      patch/fix release for milestone N
+v0.N.0      tagged milestone; public when N is divisible by five
+v0.N.P      tagged patch/fix milestone; never advances publication cadence
 v1.0.0-rc.N exact 1.0-versioned production candidate
 v1.0.0      first serious production-ready Ethereum crate
 ```
+
+## Tagged Release Trains
+
+`v0.55.0` is the publication-cadence anchor. Beginning with `v0.56.0`, every
+minor and patch version completes the existing pentest, report, GitHub, CodeQL,
+and signed-tag workflow, but only `v0.60.0`, `v0.65.0`, and later pre-1.0
+minors divisible by five publish crates.io packages. See the
+[versioning policy](VERSIONING_POLICY.md) and
+[release runbook](RELEASE_RUNBOOK.md).
+
+Internal tags receive an incremental pentest against the immediately preceding
+tag. Public checkpoints receive a cumulative integration pentest over every
+change after the preceding published checkpoint and verify the complete
+intervening tag/report chain. Patch tags remain in the same train and do not
+move the next checkpoint.
+
+The `eth` source version follows every tag. Supporting crates retain their
+latest published versions at internal milestones and receive at most one
+cumulative bump per change class at a public checkpoint. No internal milestone
+may select a crate for publication, and `scripts/release_crates.py` enforces
+that rule.
 
 ## Release Principles
 
@@ -166,7 +188,10 @@ Use this loop for every version:
 12. `scripts/validate-release-readiness.sh vX.Y.Z` passes locally through the
     versioned release gate before the tag is created.
 13. Tagging and pushing tags happen only when explicitly requested.
-14. Publishing through `release_crates.py` requires the signed release tag to
+14. Internal milestones stop after their signed tag is pushed. Scheduled
+    public checkpoints continue to publication only after a cumulative
+    integration pentest covering the complete train.
+15. Publishing through `release_crates.py` requires the signed release tag to
     resolve exactly to `HEAD`, reruns release-readiness/SBOM validation plus
     `cargo deny` and `cargo audit`, validates the package plan, and retains
     Cargo's package verification. It does not rerun environment-dependent
@@ -3076,7 +3101,8 @@ Exit criteria:
 
 ### v0.56.0 - BLS12-381 G1 Arithmetic And Addition
 
-Status: planned.
+Status: planned internal tagged milestone; crates.io publication is deferred
+to `v0.60.0`.
 
 Goal: implement dependency-free G1 field arithmetic and the `0x0b` addition
 precompile with official positive, infinity, invalid-field, and invalid-curve
@@ -3114,7 +3140,8 @@ Exit criteria:
 
 ### v0.57.0 - BLS12-381 Fp2, G2, And Addition
 
-Status: planned.
+Status: planned internal tagged milestone; crates.io publication is deferred
+to `v0.60.0`.
 
 Goal: implement dependency-free Fp2/G2 arithmetic and the `0x0d` addition
 precompile, then establish the extension-tower foundation required by pairing.
@@ -3149,7 +3176,8 @@ Exit criteria:
 
 ### v0.58.0 - BLS12-381 Subgroup Validation
 
-Status: planned.
+Status: planned internal tagged milestone; crates.io publication is deferred
+to `v0.60.0`.
 
 Goal: admit bounded first-party G1/G2 subgroup checks for MSM and pairing
 inputs without incorrectly adding subgroup rejection to the addition APIs.
@@ -3186,7 +3214,8 @@ Exit criteria:
 
 ### v0.59.0 - BLS12-381 Multiscalar Multiplication
 
-Status: planned.
+Status: planned internal tagged milestone; crates.io publication is deferred
+to `v0.60.0`.
 
 Goal: implement `0x0c` and `0x0e` with bounded Pippenger-style execution,
 official discount gas, item limits, vectors, differential tests, and CPU/gas
@@ -3225,7 +3254,7 @@ Exit criteria:
 
 ### v0.60.0 - BLS12-381 Map-To-Curve
 
-Status: planned.
+Status: planned cumulative public crates.io checkpoint after `v0.55.0`.
 
 Goal: implement the EIP-2537 Fp-to-G1 and Fp2-to-G2 mappings at `0x10` and
 `0x11` from the pinned mapping specification and official vectors.

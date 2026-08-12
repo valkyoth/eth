@@ -3,6 +3,10 @@
 Release snapshot: `v0.55.0` tagged and published after its pentest, clean
 retest, GitHub CI, and CodeQL gates passed.
 
+Every following roadmap version remains a pentested signed GitHub tag. The next
+cumulative crates.io publication is `v0.60.0`; intermediate minor and patch
+tags publish no crates.
+
 This document summarizes what the workspace can do now. The
 [Specification Matrix](SPEC_MATRIX.md) is the source of truth for exact
 protocol claims, and the [Release Plan](RELEASE_PLAN.md) assigns every

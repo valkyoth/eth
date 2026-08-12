@@ -8,8 +8,17 @@ import json
 import os
 import subprocess
 import sys
-import time
 from pathlib import Path
+
+from release_publish import confirm_no_verify, selected_steps, wait_for_index
+from release_train import (
+    parse_version,
+    publication_allowed,
+    validate_cumulative_package_changes,
+    validate_facade_previous_version,
+    validate_release_context,
+    validate_repository_train,
+)
 
 try:
     import tomllib
@@ -79,17 +88,6 @@ def load_toml(path: Path) -> dict:
         return tomllib.load(handle)
 
 
-def parse_version(version: str) -> tuple[int, int, int]:
-    parts = version.split(".")
-    if len(parts) != 3:
-        raise RuntimeError(f"version must be MAJOR.MINOR.PATCH: {version}")
-    try:
-        major, minor, patch = (int(part) for part in parts)
-    except ValueError as exc:
-        raise RuntimeError(f"version must be numeric: {version}") from exc
-    return (major, minor, patch)
-
-
 def release_version(plan_path: Path = DEFAULT_PLAN) -> str:
     plan = load_toml(plan_path)
     return plan["release"]["version"]
@@ -113,9 +111,8 @@ def release_plan(plan_path: Path) -> dict:
     plan = load_toml(plan_path)
     release = plan.get("release", {})
     crates = plan.get("crates", {})
-    version = release.get("version")
-    if not isinstance(version, str):
-        raise RuntimeError("release-crates.toml is missing [release].version")
+    context = validate_release_context(release)
+    version = context["version"]
     if set(crates) != set(PUBLISH_ORDER):
         raise RuntimeError(
             "release-crates.toml crates are not in sync with PUBLISH_ORDER: "
@@ -123,11 +120,14 @@ def release_plan(plan_path: Path) -> dict:
         )
     parse_version(version)
     for package_name, entry in crates.items():
-        validate_plan_entry(package_name, entry, version)
-    return {"version": version, "crates": crates}
+        validate_plan_entry(package_name, entry, version, context["stage"])
+    context["crates"] = crates
+    return context
 
 
-def validate_plan_entry(package_name: str, entry: dict, release: str) -> None:
+def validate_plan_entry(
+    package_name: str, entry: dict, release: str, stage: str = "public"
+) -> None:
     previous = entry.get("previous_version")
     version = entry.get("version")
     change = entry.get("change")
@@ -143,6 +143,20 @@ def validate_plan_entry(package_name: str, entry: dict, release: str) -> None:
     previous_version = parse_version(previous)
     planned_version = parse_version(version)
     release_parts = parse_version(release)
+
+    if stage == "internal":
+        if publish:
+            raise RuntimeError(f"{package_name} cannot publish at internal stage")
+        if package_name == "eth":
+            if planned_version != release_parts:
+                raise RuntimeError(f"eth must match internal milestone {release}")
+            if change == "unchanged":
+                raise RuntimeError("eth cannot be unchanged at an internal milestone")
+        elif planned_version != previous_version:
+            raise RuntimeError(
+                f"{package_name} must retain its published version internally"
+            )
+        return
 
     if change == "code":
         if package_name == "eth":
@@ -275,23 +289,6 @@ def check_release_tag(version: str, *, require_tag: bool) -> bool:
     return True
 
 
-def confirm_no_verify(args: argparse.Namespace) -> int:
-    if not args.no_verify or args.dry_run:
-        return 0
-
-    print(
-        "\nWARNING: --no-verify bypasses cargo package verification.\n"
-        "Use it only with a documented release incident or crates.io issue.\n"
-        "Type 'no-verify confirmed' to continue:",
-        file=sys.stderr,
-    )
-    response = input().strip()
-    if response != "no-verify confirmed":
-        print("Aborted.", file=sys.stderr)
-        return 1
-    return 0
-
-
 def run_preflight(args: argparse.Namespace, *, release_tag_at_head: bool) -> None:
     if args.skip_checks:
         print("Skipping preflight checks by request.")
@@ -320,28 +317,6 @@ def publish_plan(plan: dict) -> tuple[str, ...]:
         for package in PUBLISH_ORDER
         if plan["crates"][package]["publish"]
     )
-
-
-def selected_steps(start_at: str, steps: tuple[str, ...]) -> tuple[str, ...]:
-    if not steps:
-        return ()
-    try:
-        index = steps.index(start_at)
-    except ValueError as exc:
-        raise RuntimeError(f"unknown package for --start-at: {start_at}") from exc
-    return steps[index:]
-
-
-def wait_for_index(package: str, version: str, *, dry_run: bool) -> None:
-    print()
-    print(f"Published {package} {version}.")
-    print(f"Wait until crates.io shows: https://crates.io/crates/{package}/{version}")
-    print("Then press Enter to continue with dependent crates.")
-    if dry_run:
-        print("[dry-run] skipping wait")
-        return
-    input()
-    time.sleep(5)
 
 
 def publish(package: str, args: argparse.Namespace) -> None:
@@ -416,6 +391,9 @@ def main() -> int:
         else (ROOT / raw_plan_path).resolve()
     )
     plan = release_plan(plan_path)
+    if plan_path == DEFAULT_PLAN.resolve():
+        validate_repository_train(plan)
+        validate_facade_previous_version(plan)
     if args.version is None:
         args.version = plan["version"]
     elif args.version != plan["version"]:
@@ -429,11 +407,22 @@ def main() -> int:
     metadata = cargo_metadata()
     packages = workspace_packages(metadata)
     verify_publish_order(packages, plan)
+    validate_cumulative_package_changes(packages, plan)
 
     if args.check:
         print("release_crates.py publish order is up to date.")
-        print(f"release_crates.py release plan is {args.version}.")
+        print(
+            f"release_crates.py release plan is {args.version} "
+            f"with stage={plan['stage']}."
+        )
         return 0
+
+    if not publication_allowed(plan):
+        print(
+            "Refusing crates.io publication for an internal tagged milestone.",
+            file=sys.stderr,
+        )
+        return 1
 
     require_clean_tree(allow_dirty=args.allow_dirty or args.dry_run)
     release_tag_at_head = check_release_tag(
