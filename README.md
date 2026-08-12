@@ -345,9 +345,9 @@ pairing, and BLAKE2F execution requires an exact-input gas quote followed by a
 non-forgeable, one-shot paid capability. The immutable quote borrow prevents
 safe-Rust input substitution; canonical registry validation rejects altered
 descriptor metadata; and output capacity plus gas are admitted before
-expensive work. Abandonment or unwind consumes the complete child meter, and
-the preferred atomic APIs return one must-use CALL-ready success or failure
-outcome without exposing an armed capability.
+expensive work. The armed capability is crate-private, so external safe Rust
+cannot abandon or forget it; atomic APIs return one must-use CALL-ready success
+or failure outcome. Internal drop or unwind consumes the complete child meter.
 `EXTCODECOPY` treats empty-copy offsets as irrelevant and zero-fills code
 offsets beyond the bounded EVM code domain without passing them to the host.
 KZG and BLS cryptographic precompiles expose exact fork, frame, output, and gas

@@ -46,7 +46,7 @@ fn output_and_gas_admission_fail_before_mutation() -> Result<(), EvmCoreError> {
     assert_eq!(
         descriptor
             .quote::<EvmIdentity>(&input)?
-            .authorize(&mut exact_meter, &mut short_output)
+            .authorize_internal(&mut exact_meter, &mut short_output)
             .err(),
         Some(EvmCoreError::PrecompileOutputTooSmall)
     );
@@ -57,7 +57,7 @@ fn output_and_gas_admission_fail_before_mutation() -> Result<(), EvmCoreError> {
     assert_eq!(
         descriptor
             .quote::<EvmIdentity>(&input)?
-            .authorize(&mut short_meter, &mut output)
+            .authorize_internal(&mut short_meter, &mut output)
             .err(),
         Some(EvmCoreError::OutOfGas)
     );
@@ -76,7 +76,9 @@ fn execution_failure_consumes_supplied_gas_and_requests_rollback() -> Result<(),
     let mut meter = EvmGasMeter::try_new(EvmGas::new(77))?;
     let mut output = [11_u8; 64];
 
-    let outcome = quote.authorize(&mut meter, &mut output)?.execute_blake2f();
+    let outcome = quote
+        .authorize_internal(&mut meter, &mut output)?
+        .execute_blake2f();
 
     assert_eq!(outcome.status(), EvmPrecompileStatus::CallFailure);
     assert_eq!(outcome.gas_consumed(), EvmGas::new(77));
@@ -100,7 +102,7 @@ fn dropping_paid_authority_consumes_the_complete_child_meter() -> Result<(), Evm
     meter.charge(EvmGas::new(7))?;
     let mut output = [0_u8; 3];
 
-    let paid = quote.authorize(&mut meter, &mut output)?;
+    let paid = quote.authorize_internal(&mut meter, &mut output)?;
     drop(paid);
 
     assert_eq!(meter.used(), meter.limit());
@@ -206,7 +208,7 @@ fn gas_replaces_the_old_global_input_ceiling() -> Result<(), EvmCoreError> {
     let mut meter = EvmGasMeter::try_new(EvmGas::new(98_000))?;
     let mut output = std::vec![0_u8; INPUT.len()];
     assert_eq!(
-        quote.authorize(&mut meter, &mut output).err(),
+        quote.authorize_internal(&mut meter, &mut output).err(),
         Some(EvmCoreError::OutOfGas)
     );
     assert_eq!(meter.used(), EvmGas::new(0));
@@ -228,7 +230,7 @@ fn expensive_curve_validation_is_reached_only_after_payment() -> Result<(), EvmC
     let mut output = [seed; 64];
 
     let outcome = quote
-        .authorize(&mut meter, &mut output)?
+        .authorize_internal(&mut meter, &mut output)?
         .execute_bn254_add();
     assert_eq!(outcome.status(), EvmPrecompileStatus::CallFailure);
     assert_eq!(meter.used(), meter.limit());

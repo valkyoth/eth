@@ -21,13 +21,13 @@ pub(crate) struct Bn254PairingTuple {
 ///
 /// This is an unmetered low-level parser for standalone validation and fuzzing.
 /// Interpreter integrations must prefer
-/// a paid [`crate::PaidPrecompile`], which charges the supplied gas meter
+/// crate-private paid authority, which charges the supplied gas meter
 /// before tuple validation and subgroup checks are reachable.
 ///
 /// This parser validates tuple segmentation, G1 points, G2 field elements, G2
 /// curve membership, and G2 subgroup membership. It does not execute the
 /// pairing; callers that need the EIP-197 result must execute a charged
-/// [`crate::PaidPrecompile`].
+/// atomic typed execution.
 pub fn parse_bn254_pairing_input(input: &[u8]) -> Result<usize, EvmCoreError> {
     let mut pairs = 0usize;
     for_each_valid_pairing_tuple(input, |_| {

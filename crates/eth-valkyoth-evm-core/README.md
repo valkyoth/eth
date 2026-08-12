@@ -129,13 +129,13 @@ documented in
   until their first-party implementations are admitted. EIP-2537 fixed frames,
   non-empty MSM/pairing lists, output lengths, discount gas, and pairing gas
   are enforced at planning time.
-- Every executable precompile requires an immutable exact-input quote and a
-  non-forgeable one-shot `PaidPrecompile` token. Canonical registry validation,
-  output admission, and gas charging happen before expensive work. Safe Rust
-  cannot mutate or substitute the quoted input while the capability is live.
-- Paid capabilities and outcomes are must-use. Dropping an armed capability or
-  unwinding through execution consumes the complete dedicated child meter;
-  atomic authorize-and-execute methods avoid exposing that intermediate state.
+- Every executable precompile requires an immutable exact-input quote and
+  atomic typed execution. Canonical registry validation, output admission, and
+  gas charging happen before expensive work. Safe Rust cannot mutate or
+  substitute the quoted input while the quote is live.
+- Armed paid authority is crate-private and cannot be named, dropped, or
+  forgotten by external safe Rust. Its internal drop guard consumes the
+  complete dedicated child meter on unwind; public outcomes are must-use.
 - `EvmPrecompileOutcome` reports one precise success or call failure, gas
   consumed, output length, and bounded error. Execution failures consume all
   gas supplied to the dedicated precompile meter and request CALL rollback.

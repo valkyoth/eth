@@ -54,8 +54,7 @@ fn execute_bn254_pairing(
     let quote = descriptor.quote::<EvmBn254Pairing>(input)?;
     let mut gas_meter = EvmGasMeter::try_new(EvmGas::new(10_000_000))?;
     let outcome = quote
-        .authorize(&mut gas_meter, output)?
-        .execute_bn254_pairing();
+        .authorize_and_execute_bn254_pairing(&mut gas_meter, output)?;
     if outcome.status() == EvmPrecompileStatus::Success {
         Ok(outcome.output_len())
     } else {

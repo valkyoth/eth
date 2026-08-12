@@ -3000,8 +3000,8 @@ semantics impossible to bypass or confuse at CALL integration.
 
 Deliverables:
 
-- Non-forgeable `PaidPrecompile<K>` authorization produced only after a valid
-  gas quote and work/output admission;
+- Crate-private non-forgeable `PaidPrecompile<K>` authorization produced only
+  after a valid gas quote and work/output admission;
 - `GasQuote` semantics bound to exact input or its digest to prevent
   time-of-check/time-of-use substitution;
 - `PrecompileOutcome` covering success, call failure, gas consumed, and output;
@@ -3014,6 +3014,8 @@ Deliverables:
 Verification:
 
 - Forgery/TOCTOU compile-fail and mutation tests;
+- external raw-authorization, armed-type naming, and `mem::forget` bypass
+  compile-fail tests;
 - CALL rollback and all-supplied-gas failure matrices;
 - release-blocking adversarial work-per-gas ceilings for every variable-work
   native precompile;

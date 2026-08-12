@@ -110,7 +110,7 @@ pub use precompile::{
 pub use precompile_authorization::{
     EvmBlake2F, EvmBn254Add, EvmBn254Mul, EvmBn254Pairing, EvmEcRecover, EvmExecutablePrecompile,
     EvmIdentity, EvmModexp, EvmPrecompileGasQuote, EvmPrecompileOutcome, EvmPrecompileStatus,
-    EvmRipemd160, EvmSha256, PaidPrecompile,
+    EvmRipemd160, EvmSha256,
 };
 pub use program_counter::ProgramCounter;
 pub use stack::{EVM_STACK_LIMIT, EvmStack};

@@ -187,7 +187,7 @@ pub struct EvmPrecompileDescriptor {
 /// Informational plan for one precompile call.
 ///
 /// A plan cannot authorize execution. Native execution requires an exact-input
-/// [`crate::EvmPrecompileGasQuote`] followed by [`crate::PaidPrecompile`].
+/// [`crate::EvmPrecompileGasQuote`] followed by atomic typed execution.
 #[derive(Clone, Copy, Debug, Eq, PartialEq)]
 pub struct EvmPrecompilePlan {
     descriptor: EvmPrecompileDescriptor,

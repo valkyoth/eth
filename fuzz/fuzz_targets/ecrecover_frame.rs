@@ -16,10 +16,14 @@ fuzz_target!(|data: &[u8]| {
     };
     let mut output = [0_u8; 32];
     let mut gas = EvmGasMeter::try_new(EvmGas::new(3_000)).expect("ECRECOVER gas is valid");
-    let Ok(paid) = quote.authorize(&mut gas, &mut output) else {
+    let Ok(outcome) = quote.authorize_and_execute_ecrecover(
+        &mut gas,
+        &mut output,
+        FuzzBackend,
+        FuzzKeccak,
+    ) else {
         return;
     };
-    let outcome = paid.execute_ecrecover(FuzzBackend, FuzzKeccak);
     if outcome.status() == EvmPrecompileStatus::Success {
         assert!(outcome.output_len() == 0 || outcome.output_len() == output.len());
     }

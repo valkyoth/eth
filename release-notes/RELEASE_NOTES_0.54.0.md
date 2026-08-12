@@ -12,13 +12,14 @@ one-shot paid capabilities, and precise CALL-ready outcomes.
 
 - Sealed marker types for every native precompile admitted in this release.
 - `EvmPrecompileGasQuote<'input, K>` with an immutable exact-input borrow.
-- `PaidPrecompile<'input, 'meter, 'output, K>` as the only production
+- Crate-private `PaidPrecompile<'input, 'meter, 'output, K>` as the only
   native-execution authority, borrowing the exact admitted output buffer.
 - Fail-closed paid-authority drop handling plus typed atomic
   `authorize_and_execute_*` entry points.
 - `EvmPrecompileOutcome` and `EvmPrecompileStatus` for success, call failure,
   gas consumed, output length, bounded error, and rollback decisions.
-- Compile-fail tests for quoted-input mutation and paid-authority duplication.
+- Compile-fail tests for quoted-input mutation, raw-authorization privacy,
+  armed-type privacy, and must-use outcomes.
 - Forged-descriptor, marker mismatch, output preflight, atomic out-of-gas,
   post-payment failure, redacted-debug, and gas-derived input-bound tests.
 - Release-blocking adversarial work-per-gas ceilings for identity, SHA-256,
@@ -40,7 +41,7 @@ one-shot paid capabilities, and precise CALL-ready outcomes.
 - Protocol gas replaces the former release-wide precompile calldata ceiling.
   Exact frame and tuple rules remain enforced, and bounded ModExp retains its
   separate operand cap until `v0.55.0`.
-- Native precompile fuzz targets use the quote/authorize/outcome path.
+- Native precompile fuzz targets use the quote/atomic-execution/outcome path.
 - Paid capabilities and outcomes are must-use. Explicit drop, early return, or
   panic unwind while authority is armed consumes the complete dedicated child
   meter.
@@ -50,18 +51,17 @@ one-shot paid capabilities, and precise CALL-ready outcomes.
 
 ## Integration Requirement
 
-The meter passed to `authorize` must be scoped to gas supplied to that
-precompile CALL. A transaction-global unrestricted meter would be consumed in
-full on a post-payment execution failure and is therefore not a valid input to
-this API.
+The meter passed to an atomic execution method must be scoped to gas supplied
+to that precompile CALL. A transaction-global unrestricted meter would be
+consumed in full on a post-payment execution failure and is therefore not a
+valid input to this API.
 
 ## Breaking Changes
 
 Direct `EvmPrecompilePlan::execute_*` methods are removed. Integrators must
-request the matching typed quote from a canonical descriptor, authorize it
-against a dedicated gas meter and output capacity, then consume the returned
-paid capability exactly once. The atomic typed methods are the preferred
-integration path.
+request the matching typed quote from a canonical descriptor and invoke its
+atomic typed method with a dedicated gas meter and output buffer. Raw paid
+authority is intentionally unavailable to external code.
 
 ## Versioning
 

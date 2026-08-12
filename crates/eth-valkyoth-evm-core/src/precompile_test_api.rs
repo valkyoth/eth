@@ -1,3 +1,4 @@
+use crate::precompile_authorization::PaidPrecompile;
 use crate::{
     EvmBlake2F, EvmBn254Add, EvmBn254Mul, EvmBn254Pairing, EvmCoreError, EvmEcRecover,
     EvmEcRecoverBackend, EvmExecutablePrecompile, EvmGasMeter, EvmIdentity, EvmModexp,
@@ -11,7 +12,7 @@ impl EvmPrecompilePlan {
         gas: &'meter mut EvmGasMeter,
         input: &'input [u8],
         output: &'output mut [u8],
-    ) -> Result<crate::PaidPrecompile<'input, 'meter, 'output, K>, EvmCoreError> {
+    ) -> Result<PaidPrecompile<'input, 'meter, 'output, K>, EvmCoreError> {
         if self.descriptor().kind != K::KIND {
             return Err(EvmCoreError::PrecompileBackendUnavailable);
         }
@@ -22,7 +23,7 @@ impl EvmPrecompilePlan {
         if self.gas_cost() != Some(quote.gas_cost()) {
             return Err(EvmCoreError::PrecompilePlanInputMismatch);
         }
-        quote.authorize(gas, output)
+        quote.authorize_internal(gas, output)
     }
 
     pub(crate) fn execute_identity(

@@ -22,6 +22,23 @@ pub enum EvmPrecompileStatus {
 }
 
 /// One terminal, CALL-ready precompile result.
+///
+/// ```compile_fail
+/// #![deny(unused_must_use)]
+/// use eth_valkyoth_evm_core::{
+///     EvmFork, EvmGas, EvmGasMeter, EvmIdentity, EvmPrecompileKind,
+///     EvmPrecompileRegistry,
+/// };
+///
+/// let descriptor = EvmPrecompileRegistry::try_new(EvmFork::FRONTIER)?
+///     .descriptor(EvmPrecompileKind::Identity)?;
+/// let input = [1_u8, 2, 3];
+/// let quote = descriptor.quote::<EvmIdentity>(&input)?;
+/// let mut gas = EvmGasMeter::try_new(EvmGas::new(18))?;
+/// let mut output = [0_u8; 3];
+/// quote.authorize_and_execute_identity(&mut gas, &mut output)?;
+/// # Ok::<(), eth_valkyoth_evm_core::EvmCoreError>(())
+/// ```
 #[must_use = "CALL status, gas, output length, and rollback must be handled"]
 #[derive(Clone, Copy, Debug, Eq, PartialEq)]
 pub struct EvmPrecompileOutcome {
@@ -149,6 +166,29 @@ impl EvmExecutablePrecompile for EvmModexp {
 /// let _ = quote;
 /// # Ok::<(), eth_valkyoth_evm_core::EvmCoreError>(())
 /// ```
+///
+/// Raw paid authority cannot be created or named by external safe Rust:
+///
+/// ```compile_fail
+/// use eth_valkyoth_evm_core::{
+///     EvmFork, EvmGas, EvmGasMeter, EvmIdentity, EvmPrecompileKind,
+///     EvmPrecompileRegistry,
+/// };
+///
+/// let descriptor = EvmPrecompileRegistry::try_new(EvmFork::FRONTIER)?
+///     .descriptor(EvmPrecompileKind::Identity)?;
+/// let input = [1_u8, 2, 3];
+/// let quote = descriptor.quote::<EvmIdentity>(&input)?;
+/// let mut gas = EvmGasMeter::try_new(EvmGas::new(18))?;
+/// let mut output = [0_u8; 3];
+/// let _paid = quote.authorize_internal(&mut gas, &mut output)?;
+/// # Ok::<(), eth_valkyoth_evm_core::EvmCoreError>(())
+/// ```
+///
+/// ```compile_fail
+/// use eth_valkyoth_evm_core::PaidPrecompile;
+/// # fn main() {}
+/// ```
 pub struct EvmPrecompileGasQuote<'input, K> {
     descriptor: EvmPrecompileDescriptor,
     input: &'input [u8],
@@ -209,8 +249,8 @@ impl<'input, K> EvmPrecompileGasQuote<'input, K> {
         self.output_len
     }
 
-    /// Charges the quote after output admission and creates a one-shot token.
-    pub fn authorize<'meter, 'output>(
+    /// Charges the quote and creates crate-private one-shot authority.
+    pub(crate) fn authorize_internal<'meter, 'output>(
         self,
         gas_meter: &'meter mut EvmGasMeter,
         output: &'output mut [u8],
@@ -230,64 +270,12 @@ impl<'input, K> EvmPrecompileGasQuote<'input, K> {
     }
 }
 
-/// One-shot proof that exact precompile work was admitted and charged.
+/// Crate-private proof that exact precompile work was admitted and charged.
 ///
 /// This capability is intentionally neither constructible, cloneable, nor
 /// copyable outside its authorization path.
-///
-/// ```compile_fail
-/// use eth_valkyoth_evm_core::{
-///     EvmFork, EvmGas, EvmGasMeter, EvmIdentity, EvmPrecompileKind,
-///     EvmPrecompileRegistry,
-/// };
-///
-/// let descriptor = EvmPrecompileRegistry::try_new(EvmFork::FRONTIER)?
-///     .descriptor(EvmPrecompileKind::Identity)?;
-/// let input = [1_u8, 2, 3];
-/// let quote = descriptor.quote::<EvmIdentity>(&input)?;
-/// let mut gas = EvmGasMeter::try_new(EvmGas::new(18))?;
-/// let mut output = [0_u8; 3];
-/// let paid = quote.authorize(&mut gas, &mut output)?;
-/// let _forged_duplicate = paid.clone(); // rejected: paid work is one-shot
-/// # Ok::<(), eth_valkyoth_evm_core::EvmCoreError>(())
-/// ```
-///
-/// ```compile_fail
-/// use eth_valkyoth_evm_core::{
-///     EvmFork, EvmGas, EvmGasMeter, EvmIdentity, EvmPrecompileKind,
-///     EvmPrecompileRegistry,
-/// };
-///
-/// let descriptor = EvmPrecompileRegistry::try_new(EvmFork::FRONTIER)?
-///     .descriptor(EvmPrecompileKind::Identity)?;
-/// let input = [1_u8, 2, 3];
-/// let quote = descriptor.quote::<EvmIdentity>(&input)?;
-/// let mut gas = EvmGasMeter::try_new(EvmGas::new(18))?;
-/// let mut output = [0_u8; 3];
-/// let paid = quote.authorize(&mut gas, &mut output)?;
-/// output[0] = 9; // rejected: the exact output remains mutably borrowed
-/// let _ = paid.execute_identity();
-/// # Ok::<(), eth_valkyoth_evm_core::EvmCoreError>(())
-/// ```
-///
-/// ```compile_fail
-/// #![deny(unused_must_use)]
-/// use eth_valkyoth_evm_core::{
-///     EvmFork, EvmGas, EvmGasMeter, EvmIdentity, EvmPrecompileKind,
-///     EvmPrecompileRegistry,
-/// };
-///
-/// let descriptor = EvmPrecompileRegistry::try_new(EvmFork::FRONTIER)?
-///     .descriptor(EvmPrecompileKind::Identity)?;
-/// let input = [1_u8, 2, 3];
-/// let quote = descriptor.quote::<EvmIdentity>(&input)?;
-/// let mut gas = EvmGasMeter::try_new(EvmGas::new(18))?;
-/// let mut output = [0_u8; 3];
-/// quote.authorize(&mut gas, &mut output)?.execute_identity();
-/// # Ok::<(), eth_valkyoth_evm_core::EvmCoreError>(())
-/// ```
 #[must_use = "paid precompile authority must be executed to a terminal outcome"]
-pub struct PaidPrecompile<'input, 'meter, 'output, K> {
+pub(crate) struct PaidPrecompile<'input, 'meter, 'output, K> {
     quote: EvmPrecompileGasQuote<'input, K>,
     gas_meter: &'meter mut EvmGasMeter,
     output: &'output mut [u8],
@@ -331,7 +319,7 @@ macro_rules! native_execution {
     ($marker:ty, $method:ident, $execute:path) => {
         impl PaidPrecompile<'_, '_, '_, $marker> {
             #[doc = concat!("Executes the paid `", stringify!($method), "` precompile.")]
-            pub fn $method(self) -> EvmPrecompileOutcome {
+            pub(crate) fn $method(self) -> EvmPrecompileOutcome {
                 let result = $execute(self.quote.input, self.output);
                 self.finish(result)
             }
@@ -348,7 +336,7 @@ macro_rules! atomic_native_execution {
                 gas_meter: &mut EvmGasMeter,
                 output: &mut [u8],
             ) -> Result<EvmPrecompileOutcome, EvmCoreError> {
-                Ok(self.authorize(gas_meter, output)?.$execute())
+                Ok(self.authorize_internal(gas_meter, output)?.$execute())
             }
         }
     };
@@ -398,7 +386,7 @@ atomic_native_execution!(EvmBlake2F, authorize_and_execute_blake2f, execute_blak
 
 impl PaidPrecompile<'_, '_, '_, EvmEcRecover> {
     /// Executes paid ECRECOVER with caller-provided cryptographic backends.
-    pub fn execute_ecrecover<B, H>(self, backend: B, hasher: H) -> EvmPrecompileOutcome
+    pub(crate) fn execute_ecrecover<B, H>(self, backend: B, hasher: H) -> EvmPrecompileOutcome
     where
         B: EvmEcRecoverBackend,
         H: EvmPrecompileKeccak256,
@@ -422,7 +410,7 @@ impl EvmPrecompileGasQuote<'_, EvmEcRecover> {
         H: EvmPrecompileKeccak256,
     {
         Ok(self
-            .authorize(gas_meter, output)?
+            .authorize_internal(gas_meter, output)?
             .execute_ecrecover(backend, hasher))
     }
 }

@@ -19,6 +19,8 @@ All notable changes to `eth` are documented here.
 - Remediated the first v0.54.0 pentest by making paid authority fail closed on
   drop and unwind, requiring terminal outcomes to be used, adding atomic
   execution entry points, and enforcing adversarial work-per-gas ceilings.
+- Closed the v0.54.0 retest `mem::forget` bypass by making raw authorization
+  and armed paid authority crate-private; external execution is atomic-only.
 - Started v0.53.0 with an injectable access-tracker contract, an explicit
   allocation-free embedded profile, and a pre-reserved compressed-radix node
   profile with lookup and insertion bounded by fixed Ethereum key width.

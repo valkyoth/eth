@@ -22,11 +22,10 @@ fuzz_target!(|data: &[u8]| {
     if let Ok(quote) = descriptor.quote::<EvmModexp>(data) {
         let mut gas = EvmGasMeter::try_new(EvmGas::new(EVM_MAX_GAS_LIMIT))
             .expect("maximum execution gas is valid");
-        if let Ok(paid) = quote.authorize(&mut gas, &mut output) {
-            let outcome = paid.execute_modexp();
-            if outcome.status() == EvmPrecompileStatus::Success {
-                assert!(outcome.output_len() <= EVM_MODEXP_MAX_OPERAND_BYTES);
-            }
+        if let Ok(outcome) = quote.authorize_and_execute_modexp(&mut gas, &mut output)
+            && outcome.status() == EvmPrecompileStatus::Success
+        {
+            assert!(outcome.output_len() <= EVM_MODEXP_MAX_OPERAND_BYTES);
         }
     }
 

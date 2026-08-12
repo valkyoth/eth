@@ -49,8 +49,7 @@ fn execute_bn254_add(input: &[u8], output: &mut [u8]) -> Result<usize, EvmCoreEr
     let quote = descriptor.quote::<EvmBn254Add>(input)?;
     let mut gas_meter = EvmGasMeter::try_new(EvmGas::new(1_000_000))?;
     let outcome = quote
-        .authorize(&mut gas_meter, output)?
-        .execute_bn254_add();
+        .authorize_and_execute_bn254_add(&mut gas_meter, output)?;
     outcome_result(outcome)
 }
 
@@ -60,8 +59,7 @@ fn execute_bn254_mul(input: &[u8], output: &mut [u8]) -> Result<usize, EvmCoreEr
     let quote = descriptor.quote::<EvmBn254Mul>(input)?;
     let mut gas_meter = EvmGasMeter::try_new(EvmGas::new(1_000_000))?;
     let outcome = quote
-        .authorize(&mut gas_meter, output)?
-        .execute_bn254_mul();
+        .authorize_and_execute_bn254_mul(&mut gas_meter, output)?;
     outcome_result(outcome)
 }
 

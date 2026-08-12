@@ -27,9 +27,8 @@ fuzz_target!(|data: &[u8]| {
     let mut gas = EvmGasMeter::try_new(EvmGas::new(u64::from(rounds).saturating_add(1)))
         .expect("positive fuzz gas limit");
     let outcome = quote
-        .authorize(&mut gas, &mut output)
-        .expect("quoted frame fits output and gas")
-        .execute_blake2f();
+        .authorize_and_execute_blake2f(&mut gas, &mut output)
+        .expect("quoted frame fits output and gas");
     if matches!(data[EVM_BLAKE2F_INPUT_BYTES - 1], 0 | 1) {
         assert_eq!(outcome.status(), EvmPrecompileStatus::Success);
         assert_eq!(outcome.output_len(), EVM_BLAKE2F_OUTPUT_BYTES);
