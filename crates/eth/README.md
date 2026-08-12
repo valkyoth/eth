@@ -1278,7 +1278,7 @@ Compatibility evidence for `0.55.0`:
 scripts/checks.sh
 scripts/check_latest_crates.py
 scripts/check_latest_tools.sh
-scripts/release_0_53_0_gate.sh
+scripts/release_0_55_0_gate.sh
 ```
 
 The two networked freshness checks fail closed when a direct crates.io

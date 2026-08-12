@@ -1,6 +1,7 @@
 # Release Notes - eth v0.55.0
 
-Status: pentest findings remediated; awaiting exact-commit retest.
+Status: release candidate; pentest and retest passed; awaiting green GitHub CI
+and CodeQL.
 
 ## Summary
 
@@ -108,6 +109,7 @@ These pre-1.0 changes are required to remove the private consensus boundary.
 
 ## Pentest
 
-Tagging is blocked until the exact implementation commit is externally
-pentested, every finding is remediated, a clean retest is recorded at
-`security/pentest/v0.55.0.md`, and GitHub CI plus CodeQL are green.
+The external pentest and all follow-up retests passed after the ModExp and
+external-client runner findings were remediated. The permanent report is
+recorded at `security/pentest/v0.55.0.md`. Tagging remains blocked until GitHub
+CI and CodeQL are green for the report-only release-candidate commit.

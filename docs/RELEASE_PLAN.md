@@ -3033,7 +3033,8 @@ Exit criteria:
 
 ### v0.55.0 - Consensus-Complete ModExp
 
-Status: pentest findings remediated; awaiting exact-commit retest.
+Status: release candidate; pentest and retest passed; awaiting green GitHub CI
+and CodeQL.
 
 Goal: replace the 64-byte operand subset with consensus-compatible EIP-198 and
 EIP-2565 execution bounded by protocol gas and available memory.

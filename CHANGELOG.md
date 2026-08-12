@@ -29,6 +29,8 @@ All notable changes to `eth` are documented here.
   that do not carry the current run token.
 - Removed the remaining name-cleanup race by routing malformed container-ID and
   failed network-inspection paths through the ownership-label verifier.
+- Completed the v0.55.0 external pentest and clean retest sequence; the release
+  candidate now waits only for green GitHub CI and CodeQL.
 - Started v0.54.0 by removing production execution from informational
   precompile plans and adding canonical exact-input gas quotes, non-forgeable
   one-shot paid capabilities, and CALL-ready terminal outcomes.
