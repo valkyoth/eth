@@ -1,6 +1,7 @@
 # Release Notes - eth v0.54.0
 
-Status: implementation complete; pentest and clean retest required.
+Status: release candidate; pentest findings remediated and clean retest passed;
+awaiting green GitHub CI and CodeQL before tagging.
 
 ## Summary
 
@@ -74,6 +75,22 @@ authority is intentionally unavailable to external code.
 
 ## Pentest
 
-The implementation stop must be pentested at its exact commit. Every finding
-must be remediated and independently retested before the permanent report-only
-commit and release tag.
+The initial external review found three issues in paid-authority lifecycle and
+release evidence: abandoning or unwinding through an armed capability did not
+fail closed, callers could discard terminal outcomes, and benchmark evidence
+did not cover every variable-work native precompile with enforced ceilings.
+The first remediation added fail-closed drop handling, must-use outcomes,
+atomic execution entry points, lifecycle tests, and adversarial ceilings for
+all variable-work native precompiles.
+
+The follow-up found one residual Medium issue: external safe Rust could call
+raw authorization and use `core::mem::forget` on the returned paid capability,
+leaving only quoted gas charged while retaining the meter and output buffer.
+Raw authorization and `PaidPrecompile` are now crate-private, and the public API
+exposes only atomic typed execution. Compile-fail tests prove external code
+cannot invoke raw authorization or name the armed type.
+
+The final retest found no remaining Critical, High, Medium, or Low security
+issue. The permanent exact-commit report is recorded at
+`security/pentest/v0.54.0.md`; tagging awaits green GitHub CI and CodeQL on the
+report-only release commit.

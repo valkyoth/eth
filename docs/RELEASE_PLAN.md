@@ -2993,7 +2993,8 @@ Exit criteria:
 
 ### v0.54.0 - Metered Precompile Outcome Contract
 
-Status: implementation complete; pentest required.
+Status: implementation complete; pentest findings remediated; clean retest
+passed; awaiting green GitHub CI and CodeQL before tagging.
 
 Goal: make precompile charging, validation, execution, failure, and output
 semantics impossible to bypass or confuse at CALL integration.

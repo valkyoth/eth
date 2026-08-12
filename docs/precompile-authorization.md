@@ -1,7 +1,7 @@
 # Precompile Authorization Contract
 
-Status: implemented for native precompiles in `v0.54.0`; release pentest is
-required before tagging.
+Status: implemented for native precompiles in `v0.54.0`; pentest findings are
+remediated and the clean retest passed. Tagging awaits green GitHub checks.
 
 ## Purpose
 

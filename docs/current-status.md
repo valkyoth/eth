@@ -1,7 +1,7 @@
 # Current Status
 
-Release snapshot: `v0.54.0` implementation complete; pentest and clean retest
-are required before release finalization and tagging.
+Release snapshot: `v0.54.0` release candidate; pentest findings are remediated
+and the final retest passed. Tagging awaits green GitHub CI and CodeQL.
 
 This document summarizes what the workspace can do now. The
 [Specification Matrix](SPEC_MATRIX.md) is the source of truth for exact
