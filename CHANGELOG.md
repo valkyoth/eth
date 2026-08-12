@@ -24,6 +24,9 @@ All notable changes to `eth` are documented here.
 - Completed the v0.54.0 external pentest and clean retest after remediating
   paid-authority abandonment, unchecked terminal outcomes, incomplete
   work-per-gas evidence, and the residual public capability-forgetting path.
+- Fixed a pre-publication v0.54.0 release-gate race by isolating the radix wipe
+  counter from a concurrently running structural test; 100 parallel stress
+  runs preserve the exact rollback, clear, and drop wipe-count assertions.
 - Started v0.53.0 with an injectable access-tracker contract, an explicit
   allocation-free embedded profile, and a pre-reserved compressed-radix node
   profile with lookup and insertion bounded by fixed Ethereum key width.

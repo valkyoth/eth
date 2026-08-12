@@ -94,3 +94,12 @@ The final retest found no remaining Critical, High, Medium, or Low security
 issue. The permanent exact-commit report is recorded at
 `security/pentest/v0.54.0.md`; tagging awaits green GitHub CI and CodeQL on the
 report-only release commit.
+
+After the first tag was created but before any crate was published, the
+publish preflight exposed a nondeterministic test-isolation failure. The radix
+wipe lifecycle test and an unrelated structural rollback test shared one
+process-global wipe counter, so parallel execution could inflate the expected
+exact count. The structural test now uses a separate non-counting probe while
+the lifecycle test retains exact rollback, clear, and drop assertions. One
+hundred consecutive parallel stress runs pass. The unpublished tag was removed
+and must be recreated only after the repaired report-only candidate is green.
