@@ -38,6 +38,9 @@ one-shot paid capabilities, and precise CALL-ready outcomes.
   Exact frame and tuple rules remain enforced, and bounded ModExp retains its
   separate operand cap until `v0.55.0`.
 - Native precompile fuzz targets use the quote/authorize/outcome path.
+- The compile-fail test harness uses `trybuild 1.0.120`; compatible transitive
+  lockfile patches and the generated SBOM are current at the implementation
+  stop.
 
 ## Integration Requirement
 
