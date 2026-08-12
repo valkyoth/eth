@@ -1,6 +1,7 @@
 use crate::{
-    EvmBlake2F, EvmBn254Add, EvmCoreError, EvmFork, EvmGas, EvmGasMeter, EvmIdentity,
-    EvmPrecompileGasPolicy, EvmPrecompileKind, EvmPrecompileRegistry, EvmPrecompileStatus,
+    EvmBlake2F, EvmBn254Add, EvmCoreError, EvmEcRecover, EvmEcRecoverBackend,
+    EvmEcRecoverSignature, EvmFork, EvmGas, EvmGasMeter, EvmIdentity, EvmPrecompileGasPolicy,
+    EvmPrecompileKeccak256, EvmPrecompileKind, EvmPrecompileRegistry, EvmPrecompileStatus,
     EvmSha256,
 };
 use std::format;
@@ -22,7 +23,7 @@ fn exact_input_quote_authorizes_one_success_outcome() -> Result<(), EvmCoreError
 
     let mut meter = EvmGasMeter::try_new(EvmGas::new(18))?;
     let mut output = [0_u8; 3];
-    let outcome = quote.authorize(&mut meter, &mut output)?.execute_identity();
+    let outcome = quote.authorize_and_execute_identity(&mut meter, &mut output)?;
 
     assert_eq!(outcome.status(), EvmPrecompileStatus::Success);
     assert_eq!(outcome.gas_consumed(), EvmGas::new(18));
@@ -88,6 +89,89 @@ fn execution_failure_consumes_supplied_gas_and_requests_rollback() -> Result<(),
     assert_eq!(meter.used(), EvmGas::new(77));
     assert_eq!(output, [11_u8; 64]);
     Ok(())
+}
+
+#[test]
+fn dropping_paid_authority_consumes_the_complete_child_meter() -> Result<(), EvmCoreError> {
+    let input = b"eth";
+    let quote =
+        descriptor(EvmFork::FRONTIER, EvmPrecompileKind::Identity)?.quote::<EvmIdentity>(input)?;
+    let mut meter = EvmGasMeter::try_new(EvmGas::new(100))?;
+    meter.charge(EvmGas::new(7))?;
+    let mut output = [0_u8; 3];
+
+    let paid = quote.authorize(&mut meter, &mut output)?;
+    drop(paid);
+
+    assert_eq!(meter.used(), meter.limit());
+    assert_eq!(output, [0_u8; 3]);
+    Ok(())
+}
+
+#[test]
+fn successful_paid_execution_leaves_unused_child_gas() -> Result<(), EvmCoreError> {
+    let input = b"eth";
+    let quote =
+        descriptor(EvmFork::FRONTIER, EvmPrecompileKind::Identity)?.quote::<EvmIdentity>(input)?;
+    let mut meter = EvmGasMeter::try_new(EvmGas::new(100))?;
+    let mut output = [0_u8; 3];
+
+    let outcome = quote.authorize_and_execute_identity(&mut meter, &mut output)?;
+
+    assert_eq!(outcome.status(), EvmPrecompileStatus::Success);
+    assert_eq!(meter.used(), EvmGas::new(18));
+    assert_eq!(&output, input);
+    Ok(())
+}
+
+#[test]
+fn panicking_ecrecover_backend_consumes_the_complete_child_meter() -> Result<(), EvmCoreError> {
+    let seed = runtime_test_byte();
+    let mut input = [seed ^ seed; 128];
+    input[63] = 27;
+    input[95] = seed;
+    input[127] = seed;
+    let quote = descriptor(EvmFork::FRONTIER, EvmPrecompileKind::EcRecover)?
+        .quote::<EvmEcRecover>(&input)?;
+    let mut meter = EvmGasMeter::try_new(EvmGas::new(4_000))?;
+    let mut output = [seed; 32];
+
+    let unwind = std::panic::catch_unwind(std::panic::AssertUnwindSafe(|| {
+        let result = quote.authorize_and_execute_ecrecover(
+            &mut meter,
+            &mut output,
+            PanickingBackend,
+            UnreachableHasher,
+        );
+        assert!(result.is_ok());
+    }));
+
+    assert!(unwind.is_err());
+    assert_eq!(meter.used(), meter.limit());
+    assert!(output.iter().all(|byte| *byte == seed));
+    Ok(())
+}
+
+struct PanickingBackend;
+
+impl EvmEcRecoverBackend for PanickingBackend {
+    fn recover_uncompressed_public_key(
+        &mut self,
+        _digest: [u8; 32],
+        _signature: EvmEcRecoverSignature,
+    ) -> Option<[u8; 64]> {
+        assert!(std::thread::panicking(), "intentional test backend panic");
+        None
+    }
+}
+
+struct UnreachableHasher;
+
+impl EvmPrecompileKeccak256 for UnreachableHasher {
+    fn keccak256(&mut self, _input: &[u8]) -> [u8; 32] {
+        assert!(std::thread::panicking(), "hasher must not be reached");
+        [0_u8; 32]
+    }
 }
 
 #[test]

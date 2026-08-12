@@ -133,6 +133,9 @@ documented in
   non-forgeable one-shot `PaidPrecompile` token. Canonical registry validation,
   output admission, and gas charging happen before expensive work. Safe Rust
   cannot mutate or substitute the quoted input while the capability is live.
+- Paid capabilities and outcomes are must-use. Dropping an armed capability or
+  unwinding through execution consumes the complete dedicated child meter;
+  atomic authorize-and-execute methods avoid exposing that intermediate state.
 - `EvmPrecompileOutcome` reports one precise success or call failure, gas
   consumed, output length, and bounded error. Execution failures consume all
   gas supplied to the dedicated precompile meter and request CALL rollback.

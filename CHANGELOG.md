@@ -16,6 +16,9 @@ All notable changes to `eth` are documented here.
 - Refreshed `trybuild` to `1.0.120` and updated all Rust-1.90-compatible
   transitive lockfile patches; the latest crate and GitHub tooling audits are
   clean.
+- Remediated the first v0.54.0 pentest by making paid authority fail closed on
+  drop and unwind, requiring terminal outcomes to be used, adding atomic
+  execution entry points, and enforcing adversarial work-per-gas ceilings.
 - Started v0.53.0 with an injectable access-tracker contract, an explicit
   allocation-free embedded profile, and a pre-reserved compressed-radix node
   profile with lookup and insertion bounded by fixed Ethereum key width.

@@ -3005,6 +3005,8 @@ Deliverables:
 - `GasQuote` semantics bound to exact input or its digest to prevent
   time-of-check/time-of-use substitution;
 - `PrecompileOutcome` covering success, call failure, gas consumed, and output;
+- fail-closed paid-capability abandonment and atomic authorize-and-execute
+  entry points;
 - cheap framing separated from metered BN254/BLS curve and subgroup work;
 - backend contracts for maximum work and output, with gas-derived input bounds
   instead of a consensus-invalid global byte ceiling.
@@ -3013,13 +3015,16 @@ Verification:
 
 - Forgery/TOCTOU compile-fail and mutation tests;
 - CALL rollback and all-supplied-gas failure matrices;
-- adversarial work-per-gas benchmarks for public inputs;
+- release-blocking adversarial work-per-gas ceilings for every variable-work
+  native precompile;
 - output-unchanged tests for failures before execution authorization.
 
 Exit criteria:
 
 - No expensive precompile work runs without charged authorization, and CALL
-  semantics receive one precise outcome without repeating work.
+  semantics receive one precise must-use outcome without repeating work;
+- dropping or unwinding through paid authority consumes the complete dedicated
+  child meter, and benchmark regressions fail the gate.
 - `v0.54.0 implementation stop reached. Run pentest for this exact
   commit.`
 

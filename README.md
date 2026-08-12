@@ -345,7 +345,9 @@ pairing, and BLAKE2F execution requires an exact-input gas quote followed by a
 non-forgeable, one-shot paid capability. The immutable quote borrow prevents
 safe-Rust input substitution; canonical registry validation rejects altered
 descriptor metadata; and output capacity plus gas are admitted before
-expensive work. Execution returns one CALL-ready success or failure outcome.
+expensive work. Abandonment or unwind consumes the complete child meter, and
+the preferred atomic APIs return one must-use CALL-ready success or failure
+outcome without exposing an armed capability.
 `EXTCODECOPY` treats empty-copy offsets as irrelevant and zero-fills code
 offsets beyond the bounded EVM code domain without passing them to the host.
 KZG and BLS cryptographic precompiles expose exact fork, frame, output, and gas
@@ -365,9 +367,7 @@ let quote = descriptor.quote::<EvmIdentity>(b"eth")?;
 let mut output = [0_u8; 3];
 let mut gas = EvmGasMeter::try_new(EvmGas::new(18))?;
 
-let outcome = quote
-    .authorize(&mut gas, &mut output)?
-    .execute_identity();
+let outcome = quote.authorize_and_execute_identity(&mut gas, &mut output)?;
 assert_eq!(outcome.status(), EvmPrecompileStatus::Success);
 assert_eq!(outcome.output_len(), 3);
 assert_eq!(gas.used(), EvmGas::new(18));

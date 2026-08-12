@@ -14,13 +14,16 @@ one-shot paid capabilities, and precise CALL-ready outcomes.
 - `EvmPrecompileGasQuote<'input, K>` with an immutable exact-input borrow.
 - `PaidPrecompile<'input, 'meter, 'output, K>` as the only production
   native-execution authority, borrowing the exact admitted output buffer.
+- Fail-closed paid-authority drop handling plus typed atomic
+  `authorize_and_execute_*` entry points.
 - `EvmPrecompileOutcome` and `EvmPrecompileStatus` for success, call failure,
   gas consumed, output length, bounded error, and rollback decisions.
 - Compile-fail tests for quoted-input mutation and paid-authority duplication.
 - Forged-descriptor, marker mismatch, output preflight, atomic out-of-gas,
   post-payment failure, redacted-debug, and gas-derived input-bound tests.
-- Public-input identity, SHA-256, and BN254 multiplication work-per-gas
-  benchmark evidence.
+- Release-blocking adversarial work-per-gas ceilings for identity, SHA-256,
+  RIPEMD-160, dense BN254 multiplication, non-infinity BN254 pairing, maximal
+  bounded ModExp, and high-round BLAKE2F.
 - A dedicated [precompile authorization contract](../docs/precompile-authorization.md).
 
 ## Changed
@@ -38,6 +41,9 @@ one-shot paid capabilities, and precise CALL-ready outcomes.
   Exact frame and tuple rules remain enforced, and bounded ModExp retains its
   separate operand cap until `v0.55.0`.
 - Native precompile fuzz targets use the quote/authorize/outcome path.
+- Paid capabilities and outcomes are must-use. Explicit drop, early return, or
+  panic unwind while authority is armed consumes the complete dedicated child
+  meter.
 - The compile-fail test harness uses `trybuild 1.0.120`; compatible transitive
   lockfile patches and the generated SBOM are current at the implementation
   stop.
@@ -54,7 +60,8 @@ this API.
 Direct `EvmPrecompilePlan::execute_*` methods are removed. Integrators must
 request the matching typed quote from a canonical descriptor, authorize it
 against a dedicated gas meter and output capacity, then consume the returned
-paid capability exactly once.
+paid capability exactly once. The atomic typed methods are the preferred
+integration path.
 
 ## Versioning
 

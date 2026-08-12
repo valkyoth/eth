@@ -22,6 +22,7 @@ pub enum EvmPrecompileStatus {
 }
 
 /// One terminal, CALL-ready precompile result.
+#[must_use = "CALL status, gas, output length, and rollback must be handled"]
 #[derive(Clone, Copy, Debug, Eq, PartialEq)]
 pub struct EvmPrecompileOutcome {
     status: EvmPrecompileStatus,
@@ -224,6 +225,7 @@ impl<'input, K> EvmPrecompileGasQuote<'input, K> {
             gas_meter,
             output,
             supplied_gas,
+            armed: true,
         })
     }
 }
@@ -267,16 +269,35 @@ impl<'input, K> EvmPrecompileGasQuote<'input, K> {
 /// let _ = paid.execute_identity();
 /// # Ok::<(), eth_valkyoth_evm_core::EvmCoreError>(())
 /// ```
+///
+/// ```compile_fail
+/// #![deny(unused_must_use)]
+/// use eth_valkyoth_evm_core::{
+///     EvmFork, EvmGas, EvmGasMeter, EvmIdentity, EvmPrecompileKind,
+///     EvmPrecompileRegistry,
+/// };
+///
+/// let descriptor = EvmPrecompileRegistry::try_new(EvmFork::FRONTIER)?
+///     .descriptor(EvmPrecompileKind::Identity)?;
+/// let input = [1_u8, 2, 3];
+/// let quote = descriptor.quote::<EvmIdentity>(&input)?;
+/// let mut gas = EvmGasMeter::try_new(EvmGas::new(18))?;
+/// let mut output = [0_u8; 3];
+/// quote.authorize(&mut gas, &mut output)?.execute_identity();
+/// # Ok::<(), eth_valkyoth_evm_core::EvmCoreError>(())
+/// ```
+#[must_use = "paid precompile authority must be executed to a terminal outcome"]
 pub struct PaidPrecompile<'input, 'meter, 'output, K> {
     quote: EvmPrecompileGasQuote<'input, K>,
     gas_meter: &'meter mut EvmGasMeter,
     output: &'output mut [u8],
     supplied_gas: EvmGas,
+    armed: bool,
 }
 
 impl<K> PaidPrecompile<'_, '_, '_, K> {
-    fn finish(self, result: Result<usize, EvmCoreError>) -> EvmPrecompileOutcome {
-        match result {
+    fn finish(mut self, result: Result<usize, EvmCoreError>) -> EvmPrecompileOutcome {
+        let outcome = match result {
             Ok(output_len) => EvmPrecompileOutcome {
                 status: EvmPrecompileStatus::Success,
                 gas_consumed: self.quote.gas_cost,
@@ -292,6 +313,16 @@ impl<K> PaidPrecompile<'_, '_, '_, K> {
                     error: Some(error),
                 }
             }
+        };
+        self.armed = false;
+        outcome
+    }
+}
+
+impl<K> Drop for PaidPrecompile<'_, '_, '_, K> {
+    fn drop(&mut self) {
+        if self.armed {
+            self.gas_meter.consume_remaining();
         }
     }
 }
@@ -303,6 +334,21 @@ macro_rules! native_execution {
             pub fn $method(self) -> EvmPrecompileOutcome {
                 let result = $execute(self.quote.input, self.output);
                 self.finish(result)
+            }
+        }
+    };
+}
+
+macro_rules! atomic_native_execution {
+    ($marker:ty, $method:ident, $execute:ident) => {
+        impl EvmPrecompileGasQuote<'_, $marker> {
+            /// Authorizes and executes without exposing the armed capability.
+            pub fn $method(
+                self,
+                gas_meter: &mut EvmGasMeter,
+                output: &mut [u8],
+            ) -> Result<EvmPrecompileOutcome, EvmCoreError> {
+                Ok(self.authorize(gas_meter, output)?.$execute())
             }
         }
     };
@@ -321,6 +367,35 @@ native_execution!(
 );
 native_execution!(EvmBlake2F, execute_blake2f, execute_blake2f);
 
+atomic_native_execution!(
+    EvmIdentity,
+    authorize_and_execute_identity,
+    execute_identity
+);
+atomic_native_execution!(EvmSha256, authorize_and_execute_sha256, execute_sha256);
+atomic_native_execution!(
+    EvmRipemd160,
+    authorize_and_execute_ripemd160,
+    execute_ripemd160
+);
+atomic_native_execution!(EvmModexp, authorize_and_execute_modexp, execute_modexp);
+atomic_native_execution!(
+    EvmBn254Add,
+    authorize_and_execute_bn254_add,
+    execute_bn254_add
+);
+atomic_native_execution!(
+    EvmBn254Mul,
+    authorize_and_execute_bn254_mul,
+    execute_bn254_mul
+);
+atomic_native_execution!(
+    EvmBn254Pairing,
+    authorize_and_execute_bn254_pairing,
+    execute_bn254_pairing
+);
+atomic_native_execution!(EvmBlake2F, authorize_and_execute_blake2f, execute_blake2f);
+
 impl PaidPrecompile<'_, '_, '_, EvmEcRecover> {
     /// Executes paid ECRECOVER with caller-provided cryptographic backends.
     pub fn execute_ecrecover<B, H>(self, backend: B, hasher: H) -> EvmPrecompileOutcome
@@ -330,5 +405,24 @@ impl PaidPrecompile<'_, '_, '_, EvmEcRecover> {
     {
         let result = execute_ecrecover(self.quote.input, self.output, backend, hasher);
         self.finish(result)
+    }
+}
+
+impl EvmPrecompileGasQuote<'_, EvmEcRecover> {
+    /// Authorizes and executes ECRECOVER without exposing an armed capability.
+    pub fn authorize_and_execute_ecrecover<B, H>(
+        self,
+        gas_meter: &mut EvmGasMeter,
+        output: &mut [u8],
+        backend: B,
+        hasher: H,
+    ) -> Result<EvmPrecompileOutcome, EvmCoreError>
+    where
+        B: EvmEcRecoverBackend,
+        H: EvmPrecompileKeccak256,
+    {
+        Ok(self
+            .authorize(gas_meter, output)?
+            .execute_ecrecover(backend, hasher))
     }
 }
