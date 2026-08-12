@@ -55,6 +55,10 @@ EIP-198/EIP-2565 frame with streamed right-padding and caller-owned workspace.
 - The external-client gate verifies official latest-release metadata, runtime
   client identity, loopback-only RPC, and byte-exact output before accepting
   evidence; containers have no host mounts and no outbound network.
+- Pentest remediation adds mandatory CPU, memory, PID, filesystem, tmpfs, and
+  log ceilings; bounded subprocess/cleanup waits and HTTP reads; atomic
+  Podman-assigned ports; proxy-free loopback RPC; and sanitized infrastructure
+  failures without tracebacks or command arguments.
 
 ## Scope
 

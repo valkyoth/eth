@@ -65,7 +65,12 @@ pinned by immutable multi-platform OCI index digest in
 `scripts/run_modexp_client_differential.py`. The runner checks the official
 latest stable GitHub release before use and rejects a mismatched runtime client
 identity. Containers receive no host mount, publish RPC only to host loopback,
-and run on a disposable internal network without outbound access.
+and run on a disposable internal network without outbound access. The runner
+requires delegated CPU, memory, and PID cgroup controllers and applies a 2 GiB
+memory/swap ceiling, two-CPU quota, 512-PID ceiling, read-only root, dropped
+capabilities, size-limited tmpfs storage, and a 10 MiB log ceiling. Subprocess,
+cleanup, HTTP response, proxy, and Podman-assigned loopback-port boundaries are
+also fail-closed.
 
 ## Admitted Third-Party Crates
 

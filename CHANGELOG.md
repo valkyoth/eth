@@ -18,6 +18,9 @@ All notable changes to `eth` are documented here.
 - Closed the v0.55.0 differential-evidence gap with a fail-closed 11-vector
   ModExp comparison against immutable latest-stable Geth, Besu, and Nethermind
   containers, including upstream freshness and runtime-identity checks.
+- Remediated the external-client harness pentest with mandatory cgroup resource
+  ceilings, read-only capability-free containers, bounded logs/tmpfs/HTTP and
+  subprocess waits, atomic loopback ports, and sanitized infrastructure errors.
 - Started v0.54.0 by removing production execution from informational
   precompile plans and adding canonical exact-input gas quotes, non-forgeable
   one-shot paid capabilities, and CALL-ready terminal outcomes.

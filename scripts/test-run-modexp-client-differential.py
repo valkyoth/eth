@@ -29,8 +29,8 @@ class FakeResponse:
     def __exit__(self, *_args: object) -> None:
         return None
 
-    def read(self) -> bytes:
-        return self.payload
+    def read(self, amount: int = -1) -> bytes:
+        return self.payload if amount < 0 else self.payload[:amount]
 
 
 class DifferentialRunnerTests(unittest.TestCase):
@@ -69,15 +69,78 @@ class DifferentialRunnerTests(unittest.TestCase):
             with self.assertRaises(RuntimeError):
                 MODULE.check_latest_releases()
 
+    def test_bounded_reader_rejects_oversized_payload(self) -> None:
+        response = FakeResponse("payload-that-is-too-long")
+        with self.assertRaises(RuntimeError):
+            MODULE.read_bounded(response, 4, "fixture")
+
+    def test_run_wraps_timeout_and_failure_without_command_arguments(self) -> None:
+        with mock.patch.object(
+            MODULE.subprocess, "run", side_effect=MODULE.subprocess.TimeoutExpired("tool", 1)
+        ):
+            with self.assertRaisesRegex(RuntimeError, "command timed out: podman"):
+                MODULE.run(["podman", "secret-value"])
+        with mock.patch.object(
+            MODULE.subprocess,
+            "run",
+            side_effect=MODULE.subprocess.CalledProcessError(9, ["podman", "secret-value"]),
+        ):
+            with self.assertRaisesRegex(RuntimeError, "status 9: podman"):
+                MODULE.run(["podman", "secret-value"])
+
+    def test_published_port_accepts_only_podman_loopback_mapping(self) -> None:
+        completed = MODULE.subprocess.CompletedProcess(
+            args=["podman"], returncode=0, stdout="127.0.0.1:18545\n", stderr=""
+        )
+        with mock.patch.object(MODULE, "run", return_value=completed):
+            self.assertEqual(MODULE.published_port("container"), 18545)
+        completed.stdout = "0.0.0.0:18545\n"
+        with mock.patch.object(MODULE, "run", return_value=completed):
+            with self.assertRaises(RuntimeError):
+                MODULE.published_port("container")
+
+    def test_resource_controller_preflight_fails_closed(self) -> None:
+        complete = MODULE.subprocess.CompletedProcess(
+            args=["podman"],
+            returncode=0,
+            stdout='["cpu", "memory", "pids"]\n',
+            stderr="",
+        )
+        with mock.patch.object(MODULE, "run", return_value=complete):
+            MODULE.require_resource_controllers()
+
+        incomplete = MODULE.subprocess.CompletedProcess(
+            args=["podman"], returncode=0, stdout='["pids"]\n', stderr=""
+        )
+        with mock.patch.object(MODULE, "run", return_value=incomplete):
+            with self.assertRaisesRegex(RuntimeError, "must delegate"):
+                MODULE.require_resource_controllers()
+
     def test_container_boundary_is_loopback_only_and_has_no_mounts(self) -> None:
         command = MODULE.container_command(
-            MODULE.CLIENTS[0], "test-client", "test-internal", 18545
+            MODULE.CLIENTS[0], "test-client", "test-internal"
         )
-        self.assertIn("127.0.0.1:18545:8545", command)
+        self.assertIn("127.0.0.1::8545", command)
         self.assertIn("test-internal", command)
         self.assertIn("--security-opt=no-new-privileges", command)
+        self.assertIn("--cap-drop=all", command)
+        self.assertIn("--memory=2g", command)
+        self.assertIn("--memory-swap=2g", command)
+        self.assertIn("--cpus=2", command)
+        self.assertIn("--pids-limit=512", command)
+        self.assertIn("--read-only", command)
+        self.assertIn(
+            "--tmpfs=/data:rw,nosuid,nodev,size=4g,mode=1777",
+            command,
+        )
+        self.assertIn("--log-opt=max-size=10mb", command)
         self.assertNotIn("--volume", command)
         self.assertNotIn("-v", command)
+        besu = MODULE.container_command(
+            MODULE.CLIENTS[1], "test-besu", "test-internal"
+        )
+        self.assertIn("--user", besu)
+        self.assertIn("1000:1000", besu)
 
 
 if __name__ == "__main__":

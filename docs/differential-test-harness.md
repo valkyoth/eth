@@ -50,6 +50,20 @@ only on a random host loopback port. Client logs remain under
 `target/modexp-client-differential/`; a mismatch reports the client, case, and
 log path but does not dump calldata into ordinary release output.
 
+The release host must delegate the cgroup v2 `cpu`, `memory`, and `pids`
+controllers to rootless Podman. The runner checks this before pulling or
+starting clients and fails closed when a controller is unavailable. Each
+client receives a 2 GiB memory/swap ceiling, two-CPU quota, 512-PID ceiling,
+read-only root filesystem, capability-free process, bounded tmpfs data and
+temporary directories, and a 10 MiB container-log ceiling. Besu starts
+directly as its image-defined unprivileged `1000:1000` account rather than
+retaining capabilities for its root user-switch wrapper.
+
+Podman operations and cleanup have explicit timeouts. Podman assigns the host
+port atomically, the mapping must resolve to `127.0.0.1`, loopback RPC bypasses
+environment proxy configuration, and RPC/release-metadata responses have fixed
+byte ceilings.
+
 The fuzz workspace also includes `rlp_differential` and `modexp_frame`.
 `modexp_frame` drives 256-bit length parsing, both fork gas formulas, bounded
 workspace admission, and atomic execution. Every payable frame within harness

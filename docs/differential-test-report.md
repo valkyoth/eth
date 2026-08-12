@@ -38,6 +38,15 @@ operand cases. The runner validated each runtime identity against its expected
 stable release and each pin against the official latest-release API before
 accepting the comparison.
 
+The pentest remediation adds mandatory CPU, memory, PID, filesystem, log,
+subprocess-time, port-binding, proxy, and response-size isolation to the same
+comparison. A host without delegated `cpu`, `memory`, and `pids` cgroup v2
+controllers is rejected before client execution; there is no weaker release
+mode. The remediation host exposed only `pids`, so the fail-closed preflight was
+verified there and all remaining hardened controls independently completed all
+33 comparisons. The exact-commit retest and release gate must run the complete
+command on a host with all three controllers delegated.
+
 ## Deliberate Limits
 
 These differential paths remain intentionally narrow. External-client results
