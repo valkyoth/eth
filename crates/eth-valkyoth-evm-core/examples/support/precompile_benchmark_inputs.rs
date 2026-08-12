@@ -29,20 +29,24 @@ pub(crate) fn generator_bn254_pairing() -> [u8; 192] {
     input
 }
 
-pub(crate) fn dense_modexp() -> Vec<u8> {
-    const OPERAND_BYTES: usize = 64;
+pub(crate) fn dense_modexp(operand_bytes: usize) -> Vec<u8> {
     let mut input = Vec::from([0_u8; 96]);
     for offset in [0_usize, 32, 64] {
-        if let Some(slot) = offset
-            .checked_add(31)
-            .and_then(|index| input.get_mut(index))
-        {
-            *slot = u8::try_from(OPERAND_BYTES).unwrap_or(u8::MAX);
+        let bytes = operand_bytes.to_be_bytes();
+        let start = offset
+            .checked_add(32)
+            .and_then(|end| end.checked_sub(bytes.len()));
+        if let Some(target) = start.and_then(|start| {
+            start
+                .checked_add(bytes.len())
+                .and_then(|end| input.get_mut(start..end))
+        }) {
+            target.copy_from_slice(&bytes);
         }
     }
-    input.extend_from_slice(&[0xa5_u8; OPERAND_BYTES]);
-    input.extend_from_slice(&[u8::MAX; OPERAND_BYTES]);
-    input.extend_from_slice(&[0xf3_u8; OPERAND_BYTES]);
+    input.extend(std::iter::repeat_n(0xa5_u8, operand_bytes));
+    input.extend(std::iter::repeat_n(u8::MAX, operand_bytes));
+    input.extend(std::iter::repeat_n(0xf3_u8, operand_bytes));
     input
 }
 

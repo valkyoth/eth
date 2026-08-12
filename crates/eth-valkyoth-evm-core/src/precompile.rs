@@ -108,7 +108,7 @@ pub enum EvmPrecompileImplementation {
     NativeSha256,
     /// The release can execute RIPEMD-160 dependency-free.
     NativeRipemd160,
-    /// The release can execute bounded dependency-free ModExp.
+    /// The release can execute gas-bounded dependency-free ModExp.
     NativeModexp,
     /// The release can execute dependency-free BN254 point addition.
     NativeBn254Add,

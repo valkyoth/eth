@@ -106,12 +106,12 @@ remain separately versioned.
 Source trail:
 
 - `spec-lock.toml` pins `ethereum/execution-specs` at
-  `4f5c7d19adc916a268b7eadc196756068a325515`.
+  `2867859a3c19b925f7dc47dae648cca9758f4f80`.
 - The pinned `src/ethereum/merkle_patricia_trie.py` source describes
   `LeafNode`, `ExtensionNode`, `BranchNode`, hex-prefix compact paths, and the
   hash-or-inline child-reference boundary.
 - `spec-lock.toml` pins `ethereum/execution-apis` at
-  `f74de4b86e3b011384808c294c3d71f2854729a2`.
+  `742d45db810b31265c8d3c075af324953330d1ed`.
 - The vendored CC0 Hive fixture
   `crates/eth-valkyoth-verify/tests/fixtures/execution_apis_get_account_proof_with_storage.io`
   supplies a real account-plus-storage proof generated for execution-client

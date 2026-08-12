@@ -1,13 +1,13 @@
 use core::{fmt, marker::PhantomData};
 
 use crate::{
-    EvmCoreError, EvmGas, EvmGasMeter, EvmPrecompileDescriptor, EvmPrecompileImplementation,
-    EvmPrecompileKind, EvmPrecompileRegistry,
+    EVM_MAX_GAS_LIMIT, EvmCoreError, EvmGas, EvmGasMeter, EvmModExpWorkspace,
+    EvmPrecompileDescriptor, EvmPrecompileImplementation, EvmPrecompileKind, EvmPrecompileRegistry,
     blake2f::execute_blake2f,
     bn254::{execute_bn254_add, execute_bn254_mul},
     bn254_pairing::execute_bn254_pairing,
     ecrecover::{EvmEcRecoverBackend, EvmPrecompileKeccak256, execute_ecrecover},
-    modexp::{execute_modexp, parse_modexp_input},
+    modexp::{execute_modexp, modexp_workspace_limbs, parse_modexp_input},
     precompile::{execute_identity, execute_ripemd160, execute_sha256, validate_input_policy},
     precompile_gas,
 };
@@ -92,7 +92,7 @@ pub trait EvmExecutablePrecompile: sealed::Sealed {
     const IMPLEMENTATION: EvmPrecompileImplementation;
 
     #[doc(hidden)]
-    fn output_len(input: &[u8]) -> Result<usize, EvmCoreError>;
+    fn output_len(input: &[u8], gas_cost: EvmGas) -> Result<usize, EvmCoreError>;
 }
 
 macro_rules! fixed_precompile {
@@ -107,7 +107,7 @@ macro_rules! fixed_precompile {
             const IMPLEMENTATION: EvmPrecompileImplementation =
                 EvmPrecompileImplementation::$implementation;
 
-            fn output_len(_input: &[u8]) -> Result<usize, EvmCoreError> {
+            fn output_len(_input: &[u8], _gas_cost: EvmGas) -> Result<usize, EvmCoreError> {
                 Ok($output)
             }
         }
@@ -131,12 +131,12 @@ impl EvmExecutablePrecompile for EvmIdentity {
     const KIND: EvmPrecompileKind = EvmPrecompileKind::Identity;
     const IMPLEMENTATION: EvmPrecompileImplementation = EvmPrecompileImplementation::NativeIdentity;
 
-    fn output_len(input: &[u8]) -> Result<usize, EvmCoreError> {
+    fn output_len(input: &[u8], _gas_cost: EvmGas) -> Result<usize, EvmCoreError> {
         Ok(input.len())
     }
 }
 
-/// Type identity for the bounded ModExp precompile.
+/// Type identity for the gas-bounded ModExp precompile.
 pub enum EvmModexp {}
 
 impl sealed::Sealed for EvmModexp {}
@@ -145,8 +145,11 @@ impl EvmExecutablePrecompile for EvmModexp {
     const KIND: EvmPrecompileKind = EvmPrecompileKind::Modexp;
     const IMPLEMENTATION: EvmPrecompileImplementation = EvmPrecompileImplementation::NativeModexp;
 
-    fn output_len(input: &[u8]) -> Result<usize, EvmCoreError> {
-        Ok(parse_modexp_input(input)?.modulus_len())
+    fn output_len(input: &[u8], gas_cost: EvmGas) -> Result<usize, EvmCoreError> {
+        if gas_cost.get() > EVM_MAX_GAS_LIMIT {
+            return Ok(0);
+        }
+        parse_modexp_input(input)?.modulus_len().try_to_usize()
     }
 }
 
@@ -225,7 +228,7 @@ impl EvmPrecompileDescriptor {
         validate_input_policy(self.input_policy, input.len())?;
         let gas_cost = precompile_gas::gas_cost(self, input)?
             .ok_or(EvmCoreError::PrecompileBackendUnavailable)?;
-        let output_len = K::output_len(input)?;
+        let output_len = K::output_len(input, gas_cost)?;
         Ok(EvmPrecompileGasQuote {
             descriptor: self,
             input,
@@ -345,7 +348,6 @@ macro_rules! atomic_native_execution {
 native_execution!(EvmIdentity, execute_identity, execute_identity);
 native_execution!(EvmSha256, execute_sha256, execute_sha256);
 native_execution!(EvmRipemd160, execute_ripemd160, execute_ripemd160);
-native_execution!(EvmModexp, execute_modexp, execute_modexp);
 native_execution!(EvmBn254Add, execute_bn254_add, execute_bn254_add);
 native_execution!(EvmBn254Mul, execute_bn254_mul, execute_bn254_mul);
 native_execution!(
@@ -366,7 +368,6 @@ atomic_native_execution!(
     authorize_and_execute_ripemd160,
     execute_ripemd160
 );
-atomic_native_execution!(EvmModexp, authorize_and_execute_modexp, execute_modexp);
 atomic_native_execution!(
     EvmBn254Add,
     authorize_and_execute_bn254_add,
@@ -383,6 +384,42 @@ atomic_native_execution!(
     execute_bn254_pairing
 );
 atomic_native_execution!(EvmBlake2F, authorize_and_execute_blake2f, execute_blake2f);
+
+impl PaidPrecompile<'_, '_, '_, EvmModexp> {
+    pub(crate) fn execute_modexp(
+        self,
+        workspace: &mut EvmModExpWorkspace<'_>,
+    ) -> EvmPrecompileOutcome {
+        let result = execute_modexp(self.quote.input, self.output, workspace);
+        self.finish(result)
+    }
+}
+
+impl EvmPrecompileGasQuote<'_, EvmModexp> {
+    /// Returns caller-owned limbs required to execute this quoted frame.
+    pub fn modexp_workspace_limbs(&self) -> Result<usize, EvmCoreError> {
+        if self.gas_cost.get() > EVM_MAX_GAS_LIMIT {
+            return Ok(0);
+        }
+        modexp_workspace_limbs(self.input)
+    }
+
+    /// Authorizes and executes ModExp with explicit caller-owned workspace.
+    pub fn authorize_and_execute_modexp(
+        self,
+        gas_meter: &mut EvmGasMeter,
+        output: &mut [u8],
+        workspace: &mut EvmModExpWorkspace<'_>,
+    ) -> Result<EvmPrecompileOutcome, EvmCoreError> {
+        let required = self.modexp_workspace_limbs()?;
+        if workspace.capacity() < required {
+            return Err(EvmCoreError::PrecompileWorkspaceTooSmall);
+        }
+        Ok(self
+            .authorize_internal(gas_meter, output)?
+            .execute_modexp(workspace))
+    }
+}
 
 impl PaidPrecompile<'_, '_, '_, EvmEcRecover> {
     /// Executes paid ECRECOVER with caller-provided cryptographic backends.

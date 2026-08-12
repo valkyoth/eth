@@ -32,7 +32,7 @@ Most users should depend on the facade crate:
 
 ```toml
 [dependencies]
-eth = { version = "0.54.0", features = ["evm"] }
+eth = { version = "0.55.0", features = ["evm"] }
 ```
 
 Crates.io: <https://crates.io/crates/eth>
@@ -41,8 +41,9 @@ This package is published separately so the `eth` workspace can keep small,
 auditable crate boundaries. Treat it as a lower-level building block unless the
 `eth` documentation explicitly says otherwise.
 
-The `0.12.1` support-crate release, shipped with `eth` `0.54.0`, updates its
-published EVM-core dependency requirement to the metered precompile contract.
+The `0.12.2` support-crate release, shipped with `eth` `0.55.0`, updates its
+published EVM-core requirement for wide-length, caller-workspace ModExp
+execution without a private operand ceiling.
 
 The `0.12.0` implementation added:
 

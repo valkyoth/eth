@@ -33,6 +33,7 @@ state and are ignored by git.
 | `eip712_typed` | EIP-712 typed-data `encodeType` and hashStruct paths over bounded generated type graphs, reserved-name collisions, primitive values, and one-level arrays. |
 | `eip712_json` | Optional EIP-712 JSON-RPC typed-data parser over arbitrary UTF-8, bounded parser limits, and deterministic stub hashing. |
 | `decode_limits` | Stateless and accumulator decode-budget APIs. |
+| `modexp_frame` | Wide EIP-198 length words, Byzantium/Berlin gas, harness-bounded caller workspace, atomic execution, and output-length invariants without a parser operand cap. |
 
 Every new parser that accepts untrusted bytes must either extend one of these
 targets or add a new target in the same release.

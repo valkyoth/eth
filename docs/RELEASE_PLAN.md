@@ -3033,7 +3033,7 @@ Exit criteria:
 
 ### v0.55.0 - Consensus-Complete ModExp
 
-Status: planned.
+Status: implementation complete; awaiting exact-commit pentest.
 
 Goal: replace the 64-byte operand subset with consensus-compatible EIP-198 and
 EIP-2565 execution bounded by protocol gas and available memory.
@@ -5546,7 +5546,9 @@ Goal: deliver the Current Fork Execution Changes release with this required outc
 
 Deliverables:
 
-- Implement all opcodes, precompiles, system contracts, gas changes, request types, and state-transition changes in the admitted current manifest.
+- Implement all opcodes, precompiles, system contracts, gas changes, request
+  types, and state-transition changes in the admitted current manifest,
+  including Osaka EIP-7823 ModExp input limits and EIP-7883 ModExp repricing.
 
 Verification:
 

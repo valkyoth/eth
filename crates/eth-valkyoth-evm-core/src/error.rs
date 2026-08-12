@@ -96,6 +96,8 @@ pub enum EvmCoreError {
     PrecompileGasOverflow,
     /// The provided precompile output buffer is too small.
     PrecompileOutputTooSmall,
+    /// Caller-owned ModExp arithmetic workspace is too small.
+    PrecompileWorkspaceTooSmall,
     /// A precompile field element is outside its canonical field range.
     PrecompileFieldElementOutOfRange,
     /// A precompile elliptic-curve point is not on the admitted curve.
@@ -170,6 +172,7 @@ impl EvmCoreError {
             Self::PrecompileDescriptorMismatch => "precompile_descriptor_mismatch",
             Self::PrecompileGasOverflow => "precompile_gas_overflow",
             Self::PrecompileOutputTooSmall => "precompile_output_too_small",
+            Self::PrecompileWorkspaceTooSmall => "precompile_workspace_too_small",
             Self::PrecompileFieldElementOutOfRange => "precompile_field_element_out_of_range",
             Self::PrecompilePointNotOnCurve => "precompile_point_not_on_curve",
             Self::PrecompilePointNotInSubgroup => "precompile_point_not_in_subgroup",

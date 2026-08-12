@@ -47,8 +47,8 @@ gas-metering for basic stack/control-flow bytecode, without admitting a
 concrete production execution backend.
 
 Official source and fixture revisions are governed by
-[Spec Source Policy](spec-source-policy.md). `v0.34.0` checked upstream `HEAD`
-on 2026-07-04 and pinned execution-specs, execution tests, EIPs,
+[Spec Source Policy](spec-source-policy.md). `v0.55.0` refreshed upstream
+revisions on 2026-08-12 and pinned execution-specs, execution tests, EIPs,
 execution-apis, and consensus-specs in `spec-lock.toml`. The external
 reference-store path and license notes are documented in
 [Ethereum Reference Store](reference-store.md). Consensus-sensitive behavior

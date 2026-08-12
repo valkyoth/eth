@@ -36,7 +36,7 @@ Most users should depend on `eth` and enable the optional `evm-core` feature:
 
 ```toml
 [dependencies]
-eth = { version = "0.54.0", features = ["evm-core"] }
+eth = { version = "0.55.0", features = ["evm-core"] }
 ```
 
 This crate executes only the audited bootstrap opcode subset. It exposes
@@ -57,7 +57,7 @@ are precomputed once per run with a fixed-size no-alloc bitset. Truncated
 follow Ethereum consensus semantics: missing trailing bytes are read as zero,
 the program counter advances by the full declared width, and jump analysis
 uses the same instruction boundary.
-The Frontier identity, SHA-256, RIPEMD-160, bounded Byzantium ModExp,
+The Frontier identity, SHA-256, RIPEMD-160, gas-bounded Byzantium ModExp,
 BN254 add/mul, BN254 pairing frames, and Istanbul BLAKE2F execute through
 first-party dependency-free implementations. ECRECOVER executes through
 explicit caller-provided secp256k1 and Keccak backend traits. KZG and BLS
@@ -116,7 +116,7 @@ documented in
   state commits occur. Zero-length ranges canonicalize their irrelevant offset
   to zero without host-width conversion or memory expansion.
 - Precompile descriptors are fork-aware. Identity, SHA-256, RIPEMD-160,
-  bounded ModExp, BN254 add/mul, BN254 pairing frames, BLAKE2F, and
+  gas-bounded ModExp, BN254 add/mul, BN254 pairing frames, BLAKE2F, and
   ECRECOVER can execute without default crypto dependencies; ECRECOVER requires
   caller-provided secp256k1 and Keccak backend traits. BN254 pairing validates
   bounded frames, G2 subgroup membership, tuple streaming,
@@ -133,6 +133,10 @@ documented in
   atomic typed execution. Canonical registry validation, output admission, and
   gas charging happen before expensive work. Safe Rust cannot mutate or
   substitute the quoted input while the quote is live.
+- ModExp keeps declared lengths as 256-bit values through gas admission and
+  executes every payable Prague-era EIP-198/EIP-2565 frame with caller-owned
+  workspace and no private operand ceiling. See the
+  [ModExp contract](https://github.com/valkyoth/eth/blob/main/docs/modexp-precompile.md).
 - Armed paid authority is crate-private and cannot be named, dropped, or
   forgotten by external safe Rust. Its internal drop guard consumes the
   complete dedicated child meter on unwind; public outcomes are must-use.

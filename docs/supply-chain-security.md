@@ -64,6 +64,7 @@ dependency changes classification.
 | `crunchy` | `0.2.4` | `MIT` | enabled | Tiny macro helper pulled by `tiny-keccak`; no direct public API dependency. |
 | `libfuzzer-sys` | `0.4.13` | `(MIT OR Apache-2.0) AND NCSA` | fuzz-only | LLVM libFuzzer runtime for `fuzz/` targets. |
 | `k256` | `0.14.0` | `MIT OR Apache-2.0` | disabled, `ecdsa` enabled | Optional `secp256k1-k256` backend for digest-level sender recovery. |
+| `num-bigint` | `0.5.1` | `MIT OR Apache-2.0` | disabled, `std` enabled | Dev-only independent ModExp arithmetic differential oracle; absent from runtime graphs. |
 | `proc-macro2` | `1.0.107` | `MIT OR Apache-2.0` | enabled | Token handling for optional derive macros. |
 | `quote` | `1.0.47` | `MIT OR Apache-2.0` | enabled | Code generation for optional derive macros. |
 | `sanitization` | `2.0.3` | `MIT OR Apache-2.0` | enabled | Optional canonical wiping, protected-container, and runtime protection-report bridge. |
@@ -72,7 +73,7 @@ dependency changes classification.
 | `subtle` | `2.6.1` | `BSD-3-Clause` | disabled, `core_hint_black_box` enabled | Constant-time equality for security-boundary byte comparisons. |
 | `syn` | `3.0.3` | `MIT OR Apache-2.0` | enabled, `full` enabled | Syntax parsing for optional derive macros. |
 | `tiny-keccak` | `2.0.2` | `CC0-1.0` | disabled, `keccak` enabled | Optional non-default software Keccak-256 backend admitted in v0.27.0. |
-| `trybuild` | `1.0.118` | `MIT OR Apache-2.0` | enabled | Dev-only compile-fail diagnostics for public derive macros. |
+| `trybuild` | `1.0.120` | `MIT OR Apache-2.0` | enabled | Dev-only compile-fail diagnostics for public derive macros. |
 
 `CC0-1.0` is not a globally allowed license in `deny.toml`. The release policy
 uses a scoped cargo-deny license exception for `tiny-keccak 2.0.2` only, so any

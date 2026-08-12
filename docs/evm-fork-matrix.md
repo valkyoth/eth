@@ -112,7 +112,8 @@ claims call/create execution compatibility.
 `v0.46.0` adds dependency-free SHA-256 and RIPEMD-160 execution. `v0.47.0`
 adds ECRECOVER execution through caller-provided secp256k1 and Keccak backend
 traits. `v0.48.0` adds bounded first-party ModExp parsing, EIP-198/EIP-2565
-gas, execution, and fuzzing with an explicit operand cap. `v0.49.0` adds
+gas, execution, and fuzzing; `v0.55.0` removes its private operand cap through
+wide gas admission and caller-owned workspace. `v0.49.0` adds
 first-party BN254 add/mul execution with canonical field and point validation.
 `v0.50.0` adds the BN254 pairing frame boundary with empty-input execution and
 G2 curve validation. `v0.50.1` adds G2 subgroup validation, `v0.50.2` adds the
@@ -135,20 +136,20 @@ Cancun KZG point evaluation, and Prague BLS12-381 precompiles.
 | Precompile domain | Address range | First admitted native fork | Execution status |
 | --- | ---: | --- | --- |
 | `ecrecover`, SHA-256, RIPEMD-160, identity | `0x01..=0x04` | Frontier | Identity, SHA-256, and RIPEMD-160 execute dependency-free. ECRECOVER executes only with caller-provided secp256k1 and Keccak backends. |
-| Modular exponentiation | `0x05` | Byzantium | Executes through bounded first-party no-alloc bigint code with EIP-198 and EIP-2565 gas formulas and an explicit release operand cap. |
+| Modular exponentiation | `0x05` | Byzantium | Executes payable first-party EIP-198/EIP-2565 frames through Prague with 256-bit declared lengths, virtual right-padding, and caller-owned no-alloc workspace. Osaka EIP-7823/EIP-7883 changes are assigned to `v0.116.0`. |
 | BN254 add/mul/pairing | `0x06..=0x08` | Byzantium | Add and scalar multiplication execute dependency-free with canonical field and point validation. Pairing validates bounded frames, G2 curve membership, G2 subgroup membership, tuple streaming, line-function arithmetic, sparse Miller-loop accumulation, optimized bounded final exponentiation, Frobenius Q1/-Q2 point mapping, and the projective post-loop line carrier, then writes canonical EIP-197 zero/one result words documented in `docs/bn254-pairing-economics.md`. |
 | BLAKE2F | `0x09` | Istanbul | Executes EIP-152 exact 213-byte frames with final-flag validation, round-count gas, and 64-byte output. |
 | KZG point evaluation | `0x0a` | Cancun | Exact 192-byte input, 64-byte output, and fixed 50,000-gas planning; first-party verification and blob integration are assigned to `v0.107.0..=v0.111.0`. |
 | BLS12-381 precompiles | `0x0b..=0x11` | Prague | Exact/non-empty frame policies, fixed output lengths, and official EIP-2537 gas planning; first-party execution is assigned through `v0.56.0..=v0.63.0`. |
 
 The registry is still intentionally narrower than a full precompile executor.
-Plans enforce the release input ceiling before gas calculation, expose fixed
+Plans expose fixed
 output sizes where known, and return `PrecompileBackendUnavailable` for
 remaining cryptographic execution until reviewed backend crates or first-party
 implementations are admitted. ECRECOVER intentionally accepts high-s
 signatures because EIP-2 changed transaction validity but left the recover
-precompile unchanged. ModExp intentionally rejects operands above the release
-cap until larger first-party bigint execution is separately reviewed.
+precompile unchanged. ModExp has no private operand ceiling; gas-unpayable
+256-bit declarations fail before host-size conversion or arithmetic.
 
 Future interpreter dispatch must preserve the fail-closed boundary: a
 `PrecompileBackendUnavailable` result from a planned precompile is a reverting

@@ -98,7 +98,8 @@ pub use fork::{EvmFork, OpcodeTable};
 pub use gas::{EVM_DEFAULT_GAS_LIMIT, EVM_MAX_GAS_LIMIT, EvmGas, EvmGasMeter, EvmGasSchedule};
 pub use memory::{EVM_MEMORY_LIMIT_BYTES, EvmMemory};
 pub use modexp::{
-    EVM_MODEXP_HEADER_BYTES, EVM_MODEXP_MAX_OPERAND_BYTES, EvmModExpInput, parse_modexp_input,
+    EVM_MODEXP_HEADER_BYTES, EvmModExpInput, EvmModExpLength, EvmModExpWorkspace,
+    modexp_workspace_limbs, parse_modexp_input,
 };
 #[cfg(feature = "testing")]
 pub use modexp_testing::testing_modexp_gas_cost;

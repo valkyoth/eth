@@ -1,7 +1,7 @@
 # Crate Version Matrix
 
-Status: `v0.54.0` release candidate; pentest findings are remediated and the
-final retest passed. The EVM core, EVM boundary dependency, and facade change.
+Status: `v0.55.0` implementation complete; awaiting exact-commit pentest. The
+EVM core, EVM boundary dependency, and facade change.
 
 `eth` uses independent crate versions. The facade crate remains the main user
 entry point, but support crates are published only when their own package or
@@ -28,7 +28,7 @@ API.
 `scripts/release_crates.py --check` validates `release-crates.toml` against the
 workspace manifests and refuses accidental lockstep publication.
 
-## v0.54.0 Tracking Table
+## v0.55.0 Tracking Table
 
 | Crate | Published | Planned | Change | Publish | Reason |
 | --- | --- | --- | --- | --- | --- |
@@ -39,13 +39,13 @@ workspace manifests and refuses accidental lockstep publication.
 | `eth-valkyoth-verify` | `0.27.0` | `0.27.0` | `unchanged` | No | No package changes. |
 | `eth-valkyoth-derive` | `0.18.0` | `0.18.0` | `unchanged` | No | No package changes. |
 | `eth-valkyoth-sanitization` | `0.8.0` | `0.8.0` | `unchanged` | No | No package changes. |
-| `eth-valkyoth-evm-core` | `0.27.0` | `0.28.0` | `code` | Yes | Adds exact-input gas quotes, non-forgeable paid precompile capabilities, canonical descriptor validation, and CALL-ready outcomes. |
-| `eth-valkyoth-evm` | `0.12.0` | `0.12.1` | `dependency` | Yes | Updates the published EVM-core dependency requirement to `0.28.0`. |
+| `eth-valkyoth-evm-core` | `0.28.0` | `0.29.0` | `code` | Yes | Replaces the private 64-byte ModExp ceiling with wide-length gas admission and caller-owned arbitrary-length arithmetic workspace. |
+| `eth-valkyoth-evm` | `0.12.1` | `0.12.2` | `dependency` | Yes | Updates the published EVM-core dependency requirement to `0.29.0`. |
 | `eth-valkyoth-rpc` | `0.7.0` | `0.7.0` | `unchanged` | No | No package changes. |
 | `eth-valkyoth-signer` | `0.7.5` | `0.7.5` | `unchanged` | No | No package changes. |
 | `eth-valkyoth-reth` | `0.7.0` | `0.7.0` | `unchanged` | No | No package changes. |
 | `eth-valkyoth-testkit` | `0.7.0` | `0.7.0` | `unchanged` | No | No package changes. |
-| `eth` | `0.53.0` | `0.54.0` | `code` | Yes | Exposes the metered exact-input precompile authorization and CALL outcome contract. |
+| `eth` | `0.54.0` | `0.55.0` | `code` | Yes | Exposes consensus-complete Prague-era EIP-198/EIP-2565 ModExp execution and workspace APIs. |
 
 Update this table and `release-crates.toml` in the same commit whenever a crate
 changes release state.

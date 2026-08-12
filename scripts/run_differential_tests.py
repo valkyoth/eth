@@ -8,15 +8,25 @@ import subprocess
 from pathlib import Path
 
 ROOT = Path(__file__).resolve().parents[1]
-DIFFERENTIAL_TEST = [
-    "cargo",
-    "test",
-    "-p",
-    "eth-valkyoth-codec",
-    "--test",
-    "differential_rlp_reference",
-    "--features",
-    "testing",
+DIFFERENTIAL_TESTS = [
+    [
+        "cargo",
+        "test",
+        "-p",
+        "eth-valkyoth-codec",
+        "--test",
+        "differential_rlp_reference",
+        "--features",
+        "testing",
+    ],
+    [
+        "cargo",
+        "test",
+        "-p",
+        "eth-valkyoth-evm-core",
+        "--test",
+        "modexp_differential",
+    ],
 ]
 
 
@@ -34,11 +44,13 @@ def main() -> int:
     args = parser.parse_args()
 
     if args.check:
-        run([*DIFFERENTIAL_TEST, "--no-run"])
-        print("validated 1 differential reference path")
+        for command in DIFFERENTIAL_TESTS:
+            run([*command, "--no-run"])
+        print(f"validated {len(DIFFERENTIAL_TESTS)} differential reference paths")
         return 0
 
-    run(DIFFERENTIAL_TEST)
+    for command in DIFFERENTIAL_TESTS:
+        run(command)
     return 0
 
 

@@ -175,7 +175,7 @@ checksum = "877a4ace8713b0bcf2a4e7eec82529c029f1d0619886d18145fea96c3ffe5c0f"
 
 [[package]]
 name = "eth"
-version = "0.54.0"
+version = "0.55.0"
 dependencies = [
  "eth-valkyoth-codec",
  "eth-valkyoth-evm",
@@ -213,7 +213,7 @@ dependencies = [
 
 [[package]]
 name = "eth-valkyoth-evm"
-version = "0.12.1"
+version = "0.12.2"
 dependencies = [
  "eth-valkyoth-codec",
  "eth-valkyoth-evm-core",
@@ -224,9 +224,10 @@ dependencies = [
 
 [[package]]
 name = "eth-valkyoth-evm-core"
-version = "0.28.0"
+version = "0.29.0"
 dependencies = [
  "eth-valkyoth-sanitization",
+ "num-bigint",
 ]
 
 [[package]]
@@ -388,6 +389,25 @@ name = "memchr"
 version = "2.8.3"
 source = "registry+https://github.com/rust-lang/crates.io-index"
 checksum = "cf8baf1c55e62ffcace7a9f06f4bd9cd3f0c4beb022d3b367256b91b87513d98"
+
+[[package]]
+name = "num-bigint"
+version = "0.5.1"
+source = "registry+https://github.com/rust-lang/crates.io-index"
+checksum = "93e7820bc0a80a0238e650327316f929ba18d5be054b647490a3a6a339f3e7c0"
+dependencies = [
+ "num-integer",
+ "num-traits",
+]
+
+[[package]]
+name = "num-integer"
+version = "0.1.47"
+source = "registry+https://github.com/rust-lang/crates.io-index"
+checksum = "7ce2d95d4b3734dc35aa2f45e1aa22cd416814592a4f9d9205e11affd5b8e10b"
+dependencies = [
+ "num-traits",
+]
 
 [[package]]
 name = "num-traits"

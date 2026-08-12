@@ -1,7 +1,7 @@
 # Current Status
 
-Release snapshot: `v0.54.0` release candidate; pentest findings are remediated
-and the final retest passed. Tagging awaits green GitHub CI and CodeQL.
+Release snapshot: `v0.55.0` implementation complete; awaiting exact-commit
+pentest and retest before release finalization.
 
 This document summarizes what the workspace can do now. The
 [Specification Matrix](SPEC_MATRIX.md) is the source of truth for exact
@@ -56,7 +56,7 @@ Legend:
 | Call and create | 🟡 Partial | Stack/memory/static/depth planning and journal policy; nested host execution and commits remain fail closed |
 | Identity, SHA-256, RIPEMD-160 | 🟢 Available | First-party dependency-free execution through exact-input quotes and one-shot paid capabilities |
 | ECRECOVER | 🟢 Boundary | Paid execution through caller-provided secp256k1 and Keccak backends |
-| ModExp | 🟢 Available | Bounded first-party EIP-198/EIP-2565 execution |
+| ModExp | 🟢 Available | First-party EIP-198/EIP-2565 execution through Prague with 256-bit length admission, virtual padding, and caller-owned gas-bounded workspace; Osaka changes are assigned to `v0.116.0` |
 | BN254 | 🟢 Available | Add, multiplication, subgroup checks, Miller loop, final exponentiation, and pairing result admission |
 | BLAKE2F | 🟢 Available | Exact EIP-152 frame validation and execution |
 | BLS12-381 | 🟡 Partial | Exact gas/frame planning and canonical Fp, Fr, Fp2, scalar, G1/G2 wire parsing; curve arithmetic and precompile execution remain fail closed |
@@ -105,6 +105,13 @@ Legend:
 
 ## Current Release
 
+`v0.55.0` removes the private 64-byte ModExp operand ceiling. Length words stay
+256-bit through gas calculation, unpayable declarations fail as out of gas,
+and payable frames execute with streamed right-padding and caller-owned limb
+workspace. Independent BigUint differential tests cover operands through 256
+bytes, and release benchmarks cover both 64-byte and 256-byte frames. See
+[ModExp Precompile](modexp-precompile.md).
+
 `v0.54.0` removes production execution methods from informational precompile
 plans. Native execution now requires a canonical exact-input gas quote,
 pre-charge output admission, and a non-forgeable one-shot paid capability.
@@ -112,8 +119,7 @@ Immutable borrowing prevents safe-Rust input substitution, altered descriptor
 metadata is rejected, and each execution returns a precise CALL-ready outcome.
 Post-payment failures consume all gas in the dedicated child-call meter and
 explicitly request rollback. Protocol gas replaces the former global calldata
-ceiling; bounded ModExp operand support remains assigned for completion in
-`v0.55.0`. See [Precompile Authorization](precompile-authorization.md).
+ceiling. See [Precompile Authorization](precompile-authorization.md).
 
 `v0.53.0` replaced the hardwired linear warm-access set with an injectable
 tracker contract. The default embedded profile remains allocation-free and

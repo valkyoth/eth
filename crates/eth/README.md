@@ -33,7 +33,7 @@ receipts, withdrawals, Merkle Patricia Trie proofs, fork-aware validation, and
 bounded first-party EVM components.
 
 The complete stack is built in small independently reviewed milestones rather
-than claimed ahead of its evidence. Version `0.54.0` is still a library, not a
+than claimed ahead of its evidence. Version `0.55.0` is still a library, not a
 production node, wallet, RPC client, or key store.
 Networking, private-key signing, local key storage, and third-party execution
 backends are not enabled by default.
@@ -42,14 +42,14 @@ backends are not enabled by default.
 
 ```toml
 [dependencies]
-eth = "0.54.0"
+eth = "0.55.0"
 ```
 
 For optional sanitization support:
 
 ```toml
 [dependencies]
-eth = { version = "0.54.0", features = ["sanitization"] }
+eth = { version = "0.55.0", features = ["sanitization"] }
 ```
 
 ## Quick Start
@@ -89,7 +89,7 @@ Legend: 🟢 available for the stated scope, 🟡 implemented but incomplete,
 | Execution admission | 🟢 Available | Non-forgeable classified, canonical, fork-bound, and execution-ready transaction typestates |
 | EVM host capabilities | 🟢 Available | Separate state-view, journal, block, crypto, inspector, and bounded-arena contracts plus embedded-linear/fixed-width-radix node access profiles and transaction resource governors |
 | Native EVM execution | 🟡 Partial | Bounded basic opcode/state-read interpreter, consensus-correct truncated PUSH handling, and call/create planning; full state transition is incomplete |
-| Native precompiles through BLAKE2F | 🟢 Available | Identity, SHA-256, RIPEMD-160, ModExp, BN254, and BLAKE2F; ECRECOVER uses explicit caller backends |
+| Native precompiles through BLAKE2F | 🟢 Available | Identity, SHA-256, RIPEMD-160, Prague-era EIP-198/EIP-2565 ModExp without a private operand cap, BN254, and BLAKE2F; ECRECOVER uses explicit caller backends |
 | BLS12-381 and KZG | 🟡 Partial | BLS canonical wire/frame parsing and KZG/BLS gas planning; cryptographic execution remains fail closed |
 | Owned SDK, providers, wallets, and contract tooling | 🔴 Planned | Assigned to `v0.83.0..=v0.98.0` and `v0.122.0..=v0.159.0` |
 | Complete execution, storage, and execution-client product | 🔴 Planned | Assigned to `v0.99.0..=v0.121.0`, `v0.160.0..=v0.170.0`, and `v0.312.0..=v0.327.0` |
@@ -132,7 +132,7 @@ Optional reviewed software Keccak backend:
 
 ```toml
 [dependencies]
-eth = { version = "0.54.0", features = ["keccak-tiny"] }
+eth = { version = "0.55.0", features = ["keccak-tiny"] }
 ```
 
 ```rust
@@ -146,14 +146,14 @@ Optional reviewed secp256k1 recovery adapter:
 
 ```toml
 [dependencies]
-eth = { version = "0.54.0", features = ["secp256k1-k256"] }
+eth = { version = "0.55.0", features = ["secp256k1-k256"] }
 ```
 
 Optional bounded EVM gas-estimation boundary:
 
 ```toml
 [dependencies]
-eth = { version = "0.54.0", features = ["evm"] }
+eth = { version = "0.55.0", features = ["evm"] }
 ```
 
 ```rust
@@ -274,7 +274,7 @@ Optional native EVM core domains:
 
 ```toml
 [dependencies]
-eth = { version = "0.54.0", features = ["evm-core"] }
+eth = { version = "0.55.0", features = ["evm-core"] }
 ```
 
 State access uses explicit host-state traits and an injected access tracker.
@@ -330,10 +330,11 @@ assert_eq!(report.gas_used.get(), 9);
 ```
 
 Precompiles are explicit and fork-aware. Identity, SHA-256, RIPEMD-160,
-bounded ModExp, BN254 add/mul, BN254 pairing frames, BLAKE2F, and ECRECOVER
+gas-bounded ModExp, BN254 add/mul, BN254 pairing frames, BLAKE2F, and ECRECOVER
 can execute now; ECRECOVER requires caller-provided secp256k1 and Keccak
-backends. ModExp uses a first-party no-alloc engine with an explicit release
-operand cap. BN254 add/mul uses first-party fixed-size field arithmetic with
+backends. ModExp keeps 256-bit declared lengths through gas admission and uses
+caller-owned workspace without a private operand ceiling. BN254 add/mul uses
+first-party fixed-size field arithmetic with
 canonical field and point validation. BN254 pairing validates bounded frames,
 G2 curve membership, and G2 subgroup membership, streams validated tuples into
 the internal Miller-loop accumulator, executes empty input as one, and returns
@@ -372,6 +373,33 @@ assert_eq!(outcome.status(), EvmPrecompileStatus::Success);
 assert_eq!(outcome.output_len(), 3);
 assert_eq!(gas.used(), EvmGas::new(18));
 assert_eq!(&output, b"eth");
+# Ok::<(), eth::error::EvmCoreError>(())
+```
+
+ModExp uses quote-sized caller workspace instead of an allocator or private
+operand ceiling:
+
+```rust
+use eth::evm_core::{
+    EvmFork, EvmGasMeter, EvmModExpWorkspace, EvmModexp, EvmPrecompileKind,
+    EvmPrecompileRegistry,
+};
+
+let mut input = [0_u8; 100];
+input[31] = 1;
+input[63] = 1;
+input[95] = 1;
+input[96..].copy_from_slice(&[5, 3, 7, 0]);
+let descriptor = EvmPrecompileRegistry::try_new(EvmFork::BERLIN)?
+    .descriptor(EvmPrecompileKind::Modexp)?;
+let quote = descriptor.quote::<EvmModexp>(&input)?;
+let mut storage = [0_u32; 7];
+let mut workspace = EvmModExpWorkspace::new(&mut storage);
+let mut output = [0_u8; 1];
+let mut gas = EvmGasMeter::try_new(quote.gas_cost())?;
+let outcome = quote.authorize_and_execute_modexp(&mut gas, &mut output, &mut workspace)?;
+assert_eq!(outcome.output_len(), 1);
+assert_eq!(output, [6]);
 # Ok::<(), eth::error::EvmCoreError>(())
 ```
 
@@ -1237,7 +1265,7 @@ friendly, and independently testable.
 The minimum supported Rust version is Rust `1.90.0`. New deployments should use
 the pinned stable Rust `1.97.1` until the toolchain policy is updated.
 
-Compatibility evidence for `0.54.0`:
+Compatibility evidence for `0.55.0`:
 
 | Rust | Local Evidence |
 | --- | --- |

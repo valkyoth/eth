@@ -4,6 +4,14 @@ All notable changes to `eth` are documented here.
 
 ## Unreleased
 
+- Started v0.55.0 by replacing the private 64-byte ModExp operand ceiling with
+  256-bit declared lengths, gas-derived host conversion, streamed right
+  padding, and caller-owned arbitrary-length limb workspace.
+- Added dependency-free multiplication/long-division modular arithmetic,
+  independent `num-bigint 0.5.1` differential coverage through 256-byte
+  operands, wide-length fuzzing, and 64/256-byte work-per-gas gates.
+- Documented the Prague-era EIP-198/EIP-2565 scope and assigned Osaka
+  EIP-7823/EIP-7883 changes explicitly to the current-fork releases.
 - Started v0.54.0 by removing production execution from informational
   precompile plans and adding canonical exact-input gas quotes, non-forgeable
   one-shot paid capabilities, and CALL-ready terminal outcomes.

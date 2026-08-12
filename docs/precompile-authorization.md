@@ -44,15 +44,16 @@ Authorization performs these operations in order:
 1. compare the entire descriptor with the canonical descriptor for its fork;
 2. require the sealed marker type to match the descriptor and backend;
 3. validate cheap input framing and calculate consensus gas;
-4. calculate the backend's required output capacity;
-5. reject insufficient output without charging or mutation;
+4. calculate the backend's required output and caller-workspace capacity;
+5. reject insufficient host capacity without charging or mutation;
 6. charge the exact gas quote atomically;
 7. expose expensive parsing, curve, subgroup, hashing, or arithmetic work.
 
 There is no release-wide precompile calldata ceiling. Exact and tuple-framed
 precompiles retain their consensus shape rules. Variable work is admitted by
-its protocol gas formula and the caller's gas meter. The bounded ModExp engine
-retains its separately documented operand limit until `v0.55.0`.
+its protocol gas formula and the caller's gas meter. `v0.55.0` ModExp retains
+256-bit declared lengths through gas admission and executes every payable
+Prague-era frame with caller-owned workspace rather than a private cap.
 
 ## CALL Gas Scope
 
@@ -63,7 +64,7 @@ unrestricted meter.
 
 | Stage | Result | Gas | Output |
 | --- | --- | --- | --- |
-| Quote or output admission fails | Rust `Err` | unchanged | unchanged |
+| Quote, output, or workspace admission fails | Rust `Err` | unchanged | unchanged |
 | Gas charge fails | `OutOfGas` | unchanged | unchanged |
 | Paid execution succeeds | `Success` | exact quoted gas | valid prefix reported |
 | Paid execution fails | `CallFailure` | all child-supplied gas | zero valid bytes; child rollback required |
@@ -91,7 +92,7 @@ precompile error is a Rust control-plane error or an EVM call failure.
 - complete native precompile unit and conformance suites;
 - fuzz targets migrated to quote, atomic execution, and outcome handling;
 - release-blocking identity, SHA-256, RIPEMD-160, dense BN254 multiplication,
-  non-infinity BN254 pairing, maximal bounded ModExp, and high-round BLAKE2F
+  non-infinity BN254 pairing, 64-byte and 256-byte ModExp, and high-round BLAKE2F
   work-per-gas ceilings at `precompile_contract_benchmark`;
 - default `no_std`, MSRV, strict clippy, package, SBOM, dependency-policy, and
   release-gate checks.

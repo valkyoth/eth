@@ -1,9 +1,9 @@
 use crate::precompile_authorization::PaidPrecompile;
 use crate::{
     EvmBlake2F, EvmBn254Add, EvmBn254Mul, EvmBn254Pairing, EvmCoreError, EvmEcRecover,
-    EvmEcRecoverBackend, EvmExecutablePrecompile, EvmGasMeter, EvmIdentity, EvmModexp,
-    EvmPrecompileKeccak256, EvmPrecompileOutcome, EvmPrecompilePlan, EvmPrecompileStatus,
-    EvmRipemd160, EvmSha256,
+    EvmEcRecoverBackend, EvmExecutablePrecompile, EvmGasMeter, EvmIdentity, EvmModExpWorkspace,
+    EvmModexp, EvmPrecompileKeccak256, EvmPrecompileOutcome, EvmPrecompilePlan,
+    EvmPrecompileStatus, EvmRipemd160, EvmSha256,
 };
 
 impl EvmPrecompilePlan {
@@ -68,9 +68,12 @@ impl EvmPrecompilePlan {
         input: &[u8],
         output: &mut [u8],
     ) -> Result<usize, EvmCoreError> {
+        let required = crate::modexp_workspace_limbs(input)?;
+        let mut storage = std::vec![0_u32; required];
+        let mut workspace = EvmModExpWorkspace::new(&mut storage);
         outcome(
             self.test_authorize::<EvmModexp>(gas, input, output)?
-                .execute_modexp(),
+                .execute_modexp(&mut workspace),
         )
     }
 

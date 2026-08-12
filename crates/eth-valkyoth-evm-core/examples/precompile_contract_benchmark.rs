@@ -16,6 +16,8 @@ const HASH_ROUNDS: u32 = 4;
 const BN254_MUL_ROUNDS: u32 = 16;
 const BN254_PAIRING_ROUNDS: u32 = 2;
 const MODEXP_ROUNDS: u32 = 2;
+const MODEXP_LEGACY_BYTES: usize = 64;
+const MODEXP_WIDE_BYTES: usize = 256;
 const BLAKE2F_ROUNDS: u32 = 100_000;
 const BLAKE2F_SAMPLES: u32 = 4;
 
@@ -34,7 +36,8 @@ fn main() -> Result<(), Box<dyn std::error::Error>> {
     let linear = vec![0x5a_u8; LINEAR_INPUT_BYTES];
     let bn254_mul_input = inputs::dense_bn254_mul();
     let pairing_input = inputs::generator_bn254_pairing();
-    let modexp_input = inputs::dense_modexp();
+    let modexp_legacy_input = inputs::dense_modexp(MODEXP_LEGACY_BYTES);
+    let modexp_wide_input = inputs::dense_modexp(MODEXP_WIDE_BYTES);
     let blake2f_input = inputs::high_round_blake2f(BLAKE2F_ROUNDS);
 
     let metrics = [
@@ -70,10 +73,18 @@ fn main() -> Result<(), Box<dyn std::error::Error>> {
             MAX_BN254_PAIRING_PS_PER_GAS,
         ),
         (
-            "modexp",
+            "modexp_legacy",
             benchmark_modexp(
                 registry.descriptor(EvmPrecompileKind::Modexp)?,
-                &modexp_input,
+                &modexp_legacy_input,
+            )?,
+            MAX_MODEXP_PS_PER_GAS,
+        ),
+        (
+            "modexp_wide",
+            benchmark_modexp(
+                registry.descriptor(EvmPrecompileKind::Modexp)?,
+                &modexp_wide_input,
             )?,
             MAX_MODEXP_PS_PER_GAS,
         ),
@@ -184,12 +195,16 @@ fn benchmark_modexp(
     input: &[u8],
 ) -> Result<u128, Box<dyn std::error::Error>> {
     let gas = descriptor.quote::<EvmModexp>(input)?.gas_cost();
-    let mut output = [0_u8; 64];
+    let workspace_limbs = eth_valkyoth_evm_core::modexp_workspace_limbs(input)?;
+    let mut workspace_storage = vec![0_u32; workspace_limbs];
+    let output_len = descriptor.quote::<EvmModexp>(input)?.output_len();
+    let mut output = vec![0_u8; output_len];
     measure(gas, MODEXP_ROUNDS, || {
         let mut meter = EvmGasMeter::try_new(gas)?;
+        let mut workspace = eth_valkyoth_evm_core::EvmModExpWorkspace::new(&mut workspace_storage);
         let outcome = descriptor
             .quote::<EvmModexp>(input)?
-            .authorize_and_execute_modexp(&mut meter, &mut output)?;
+            .authorize_and_execute_modexp(&mut meter, &mut output, &mut workspace)?;
         require_success(outcome.status())?;
         black_box(&output);
         Ok(())

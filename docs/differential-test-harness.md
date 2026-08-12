@@ -1,38 +1,28 @@
 # Differential Test Harness
 
-Status: v0.36.0 starts differential testing with a dev-only `alloy-rlp`
-reference path.
-
-The first differential target is structural RLP handling in
-`eth-valkyoth-codec`. The harness compares this crate's canonical scalar/list
-acceptance and exact re-encoding against `alloy-rlp` header decoding for a
-curated corpus of valid and invalid RLP items.
+Status: `v0.55.0` covers structural RLP and arbitrary-length ModExp through
+dev-only independent reference paths.
 
 ## Scope
 
-v0.36.0 claims one independent reference path:
-
 | Area | Local path | Independent reference | Claim |
 | --- | --- | --- | --- |
-| Structural RLP | `eth-valkyoth-codec::differential_rlp_reference` | `alloy-rlp` `0.3.16` | Valid/invalid structural RLP decisions match for the curated corpus, and accepted local cases re-encode to identical bytes. |
+| Structural RLP | `eth-valkyoth-codec::differential_rlp_reference` | `alloy-rlp` `0.3.16` | Valid/invalid structural decisions and exact accepted re-encoding match for the curated corpus. |
+| ModExp arithmetic | `eth-valkyoth-evm-core::modexp_differential` | `num-bigint` `0.5.1` | Exact output matches from 1 through 256-byte base/modulus widths, including both sides of the former 64-byte ceiling. |
 
-This is structural RLP coverage. Integer-domain canonicality remains covered by
-the codec integer tests, primitive bridge tests, and fuzz targets because a
-generic RLP reference cannot distinguish every Ethereum integer-domain rule
-from ordinary byte-string validity.
+Structural RLP comparison cannot distinguish every Ethereum integer-domain
+rule from ordinary byte-string validity. Codec integer tests, primitive bridge
+tests, and fuzz targets cover those semantic domains separately.
 
 ## Commands
 
-Validate the harness configuration:
+Validate that both integration tests compile:
 
 ```sh
 scripts/run_differential_tests.py --check
 ```
 
-The check mode compiles the actual differential integration test with
-`--no-run`; it does not rely on a constant success message.
-
-Run the differential harness:
+Run both reference paths:
 
 ```sh
 scripts/run_differential_tests.py
@@ -42,18 +32,16 @@ The runner executes:
 
 ```sh
 cargo test -p eth-valkyoth-codec --test differential_rlp_reference --features testing
+cargo test -p eth-valkyoth-evm-core --test modexp_differential
 ```
 
-The fuzz workspace also includes `rlp_differential`, which feeds arbitrary
-bytes to both `eth-valkyoth-codec` and `alloy-rlp`. The target asserts
-structural accept/reject agreement and exact byte-for-byte re-encoding for
-accepted values. Explicit `DecodeLimits` resource rejections are treated as
-local policy differences, not reference mismatches.
+The fuzz workspace also includes `rlp_differential` and `modexp_frame`.
+`modexp_frame` drives 256-bit length parsing, both fork gas formulas, bounded
+workspace admission, and atomic execution. Its execution allocation is
+harness-capped; wider declarations still reach parsing and gas calculation.
 
 ## Mismatch Reporting
 
-The Rust test accumulates all mismatches before failing. Reports include the
-case name and whether the mismatch came from the reference rejecting a
-claimed-valid case, this crate rejecting a reference-accepted case, this crate
-accepting a reference-rejected case, or canonical re-encoding producing
-different bytes.
+The RLP test accumulates all mismatches before failing and reports each corpus
+case and mismatch class. ModExp failures report the exact operand width whose
+local output differs from the independent BigUint result.
