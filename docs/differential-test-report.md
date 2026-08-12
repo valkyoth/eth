@@ -45,11 +45,14 @@ rootful host or a host without delegated `cpu`, `memory`, and `pids` cgroup v2
 controllers is rejected before client execution; there is no weaker release
 mode. Containers are created before they are started so cleanup operates on a
 confirmed immutable ID, network creation is tracked independently, and the
-gate fails when any owned object remains. The remediation host exposed only
-`pids`, so the fail-closed preflight was verified there and all remaining
-hardened controls independently completed all 33 comparisons. The exact-commit
-retest and release gate must run the complete command on a rootless host with
-all three controllers delegated.
+gate fails when any owned object remains. Follow-up remediation labels every
+object with the 128-bit run token and recovers matching objects after a
+creation timeout or error, closing the partial-success leak without permitting
+same-name third-party deletion. The remediation host exposed only `pids`, so
+the fail-closed preflight was verified there and all remaining hardened
+controls independently completed all 33 comparisons. The exact-commit retest
+and release gate must run the complete command on a rootless host with all
+three controllers delegated.
 
 ## Deliberate Limits
 

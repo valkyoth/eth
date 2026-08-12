@@ -63,6 +63,10 @@ EIP-198/EIP-2565 frame with streamed right-padding and caller-owned workspace.
   process-derived names with 128-bit random ownership identifiers, captures
   immutable container and network IDs before client execution, and fails the
   gate unless every owned object is confirmed removed.
+- Every external-client object now carries the random run token as an ownership
+  label. A timed-out or failed create triggers label-checked recovery, while an
+  absent object, an inspection failure, malformed metadata, or a wrong owner
+  remains a distinct fail-closed outcome.
 
 ## Scope
 

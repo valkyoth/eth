@@ -24,6 +24,9 @@ All notable changes to `eth` are documented here.
 - Closed the follow-up container-isolation findings by requiring verified
   rootless Podman, assigning high-entropy object names, starting only confirmed
   container IDs, and making residual container/network cleanup gate-fatal.
+- Hardened uncertain Podman creation outcomes with per-run ownership labels and
+  label-checked container/network recovery, without deleting colliding objects
+  that do not carry the current run token.
 - Started v0.54.0 by removing production execution from informational
   precompile plans and adding canonical exact-input gas quotes, non-forgeable
   one-shot paid capabilities, and CALL-ready terminal outcomes.

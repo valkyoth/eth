@@ -142,10 +142,12 @@ class DifferentialRunnerTests(unittest.TestCase):
                     MODULE.require_isolated_podman()
 
     def test_container_boundary_is_loopback_only_and_has_no_mounts(self) -> None:
+        run_id = MODULE.secrets.token_hex(16)
         command = MODULE.container_command(
-            MODULE.CLIENTS[0], "test-client", "test-internal"
+            MODULE.CLIENTS[0], "test-client", "test-internal", run_id
         )
         self.assertEqual(command[:2], ["podman", "create"])
+        self.assertIn(f"{MODULE.OWNERSHIP_LABEL}={run_id}", command)
         self.assertIn("127.0.0.1::8545", command)
         self.assertIn("test-internal", command)
         self.assertIn("--security-opt=no-new-privileges", command)
@@ -163,7 +165,7 @@ class DifferentialRunnerTests(unittest.TestCase):
         self.assertNotIn("--volume", command)
         self.assertNotIn("-v", command)
         besu = MODULE.container_command(
-            MODULE.CLIENTS[1], "test-besu", "test-internal"
+            MODULE.CLIENTS[1], "test-besu", "test-internal", run_id
         )
         self.assertIn("--user", besu)
         self.assertIn("1000:1000", besu)
@@ -195,14 +197,73 @@ class DifferentialRunnerTests(unittest.TestCase):
             with mock.patch.object(MODULE, "podman_object_exists", return_value=False):
                 MODULE.cleanup_container(object_id())
 
-    def test_creation_failure_never_cleans_a_colliding_name(self) -> None:
-        with mock.patch.object(MODULE, "run", side_effect=RuntimeError("collision")):
+    def test_creation_error_without_object_does_not_cleanup_name(self) -> None:
+        failures = [RuntimeError("create"), RuntimeError("inspect")]
+        with mock.patch.object(MODULE, "run", side_effect=failures):
+            with mock.patch.object(MODULE, "podman_object_exists", return_value=False):
+                with mock.patch.object(MODULE, "cleanup_container") as cleanup:
+                    with self.assertRaisesRegex(RuntimeError, "container creation failed"):
+                        MODULE.create_container(
+                            MODULE.CLIENTS[0],
+                            "random-name",
+                            object_id(),
+                            MODULE.secrets.token_hex(16),
+                        )
+                    cleanup.assert_not_called()
+
+    def test_uncertain_container_creation_recovers_matching_object(self) -> None:
+        run_id = MODULE.secrets.token_hex(16)
+        identifier = object_id()
+        inspected = MODULE.subprocess.CompletedProcess(
+            args=["podman"],
+            returncode=0,
+            stdout=f"{run_id}\t{identifier}\n",
+            stderr="",
+        )
+        with mock.patch.object(
+            MODULE, "run", side_effect=[RuntimeError("timeout"), inspected]
+        ):
             with mock.patch.object(MODULE, "cleanup_container") as cleanup:
                 with self.assertRaisesRegex(RuntimeError, "container creation failed"):
-                    MODULE.compare_client(
-                        MODULE.CLIENTS[0], [], object_id(), MODULE.secrets.token_hex(16)
+                    MODULE.create_container(
+                        MODULE.CLIENTS[0], "random-name", object_id(), run_id
                     )
-                cleanup.assert_not_called()
+                cleanup.assert_called_once_with(identifier)
+
+    def test_uncertain_network_creation_recovers_matching_object(self) -> None:
+        run_id = MODULE.secrets.token_hex(16)
+        identifier = object_id()
+        inspected = MODULE.subprocess.CompletedProcess(
+            args=["podman"],
+            returncode=0,
+            stdout=f"{run_id}\t{identifier}\n",
+            stderr="",
+        )
+        with mock.patch.object(
+            MODULE, "run", side_effect=[RuntimeError("timeout"), inspected]
+        ):
+            with mock.patch.object(MODULE, "cleanup_network") as cleanup:
+                with self.assertRaisesRegex(RuntimeError, "network creation failed"):
+                    MODULE.create_network("random-network", run_id)
+                cleanup.assert_called_once_with(identifier)
+
+    def test_recovery_rejects_wrong_owner_and_inspection_failure(self) -> None:
+        run_id = MODULE.secrets.token_hex(16)
+        wrong_owner = MODULE.secrets.token_hex(16)
+        inspected = MODULE.subprocess.CompletedProcess(
+            args=["podman"],
+            returncode=0,
+            stdout=f"{wrong_owner}\t{object_id()}\n",
+            stderr="",
+        )
+        with mock.patch.object(MODULE, "run", return_value=inspected):
+            with self.assertRaisesRegex(RuntimeError, "unexpected object"):
+                MODULE.recover_owned_object("container", "random-name", run_id)
+
+        with mock.patch.object(MODULE, "run", side_effect=RuntimeError("inspect")):
+            with mock.patch.object(MODULE, "podman_object_exists", return_value=True):
+                with self.assertRaisesRegex(RuntimeError, "inspection failed"):
+                    MODULE.recover_owned_object("network", "random-network", run_id)
 
     def test_network_cleanup_failure_is_not_suppressed(self) -> None:
         with mock.patch.object(MODULE, "run", side_effect=RuntimeError("remove")):

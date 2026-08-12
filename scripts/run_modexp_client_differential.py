@@ -12,8 +12,9 @@ import sys
 import time
 import urllib.error
 import urllib.request
-from dataclasses import dataclass
 from pathlib import Path
+
+from modexp_client_config import CLIENTS, Client
 
 ROOT = Path(__file__).resolve().parents[1]
 LOG_DIR = ROOT / "target" / "modexp-client-differential"
@@ -31,78 +32,8 @@ HEX_PATTERN = re.compile(r"^0x(?:[0-9a-f]{2})*$")
 CASE_PATTERN = re.compile(r"^[a-z0-9-]+$")
 PORT_PATTERN = re.compile(r"^127\.0\.0\.1:([0-9]{1,5})$")
 OBJECT_ID_PATTERN = re.compile(r"^[0-9a-f]{64}$")
+OWNERSHIP_LABEL = "io.valkyoth.modexp-run"
 RPC_OPENER = urllib.request.build_opener(urllib.request.ProxyHandler({}))
-
-
-@dataclass(frozen=True)
-class Client:
-    name: str
-    image: str
-    release_api: str
-    release_tag: str
-    version_marker: str
-    user: str | None
-    arguments: tuple[str, ...]
-
-
-CLIENTS = (
-    Client(
-        "geth",
-        "docker.io/ethereum/client-go@sha256:523d3ba26623a619e912019068dc2784f02934070ac46bdae4d5b9df0d917814",
-        "https://api.github.com/repos/ethereum/go-ethereum/releases/latest",
-        "v1.17.5",
-        "Geth/v1.17.5-",
-        None,
-        (
-            "--dev",
-            "--http",
-            "--http.addr=0.0.0.0",
-            "--http.port=8545",
-            "--http.api=eth,web3",
-            "--http.vhosts=*",
-            "--nodiscover",
-            "--datadir=/data/geth",
-        ),
-    ),
-    Client(
-        "besu",
-        "docker.io/hyperledger/besu@sha256:5c319f8f5f3449438c03ea7fa2c9bf24b866dc55ac98d802bb41ad793e740587",
-        "https://api.github.com/repos/besu-eth/besu/releases/latest",
-        "26.7.1",
-        "besu/v26.7.1/",
-        "1000:1000",
-        (
-            "--network=dev",
-            "--rpc-http-enabled=true",
-            "--rpc-http-host=0.0.0.0",
-            "--rpc-http-port=8545",
-            "--rpc-http-api=ETH,WEB3",
-            "--host-allowlist=*",
-            "--p2p-enabled=false",
-            "--data-path=/data/besu",
-        ),
-    ),
-    Client(
-        "nethermind",
-        "docker.io/nethermind/nethermind@sha256:1b6b01419de4ff75ed3d61995904bccc2fdcc2865fee6dae07d88c14a0758e40",
-        "https://api.github.com/repos/NethermindEth/nethermind/releases/latest",
-        "1.39.3",
-        "Nethermind/v1.39.3+",
-        None,
-        (
-            "--config=spaceneth",
-            "--JsonRpc.Host=0.0.0.0",
-            "--JsonRpc.Port=8545",
-            "--JsonRpc.EnabledModules=Eth,Web3",
-            "--Init.WebSocketsEnabled=false",
-            "--Network.ExternalIp=127.0.0.1",
-            "--Network.LocalIp=127.0.0.1",
-            "--Init.BaseDbPath=/data/nethermind",
-            "--Init.LogDirectory=/data/nethermind-logs",
-            "--KeyStore.KeyStoreDirectory=/data/nethermind-keystore",
-        ),
-    ),
-)
 
 
 def run(
@@ -284,7 +215,9 @@ def wait_for_rpc(container_id: str, port: int) -> str:
     raise TimeoutError(f"client RPC startup timed out: {last_error}")
 
 
-def container_command(client: Client, name: str, network: str) -> list[str]:
+def container_command(
+    client: Client, name: str, network: str, run_id: str
+) -> list[str]:
     command = [
         "podman",
         "create",
@@ -292,6 +225,8 @@ def container_command(client: Client, name: str, network: str) -> list[str]:
         "--pull=never",
         "--name",
         name,
+        "--label",
+        f"{OWNERSHIP_LABEL}={run_id}",
         "--network",
         network,
         "--publish",
@@ -388,6 +323,74 @@ def cleanup_network(network: str) -> None:
         raise RuntimeError("client network cleanup failed")
 
 
+def recover_owned_object(kind: str, name: str, run_id: str) -> None:
+    label_source = ".Config.Labels" if kind == "container" else ".Labels"
+    template = f'{{{{index {label_source} "{OWNERSHIP_LABEL}"}}}}\t{{{{.ID}}}}'
+    try:
+        result = run(
+            ["podman", kind, "inspect", "--format", template, name],
+            capture=True,
+        )
+    except RuntimeError as error:
+        if not podman_object_exists(kind, name):
+            return
+        raise RuntimeError(f"{kind} recovery inspection failed") from error
+    fields = result.stdout.strip().split("\t")
+    if len(fields) != 2 or not OBJECT_ID_PATTERN.fullmatch(fields[1]):
+        raise RuntimeError(f"Podman returned malformed {kind} ownership metadata")
+    if fields[0] != run_id:
+        raise RuntimeError(f"unexpected object occupies the {kind} ownership name")
+    if kind == "container":
+        cleanup_container(fields[1])
+    else:
+        cleanup_network(fields[1])
+
+
+def create_container(client: Client, name: str, network: str, run_id: str) -> str:
+    try:
+        container_id = run(
+            container_command(client, name, network, run_id), capture=True
+        ).stdout.strip()
+    except RuntimeError as error:
+        recover_owned_object("container", name, run_id)
+        raise RuntimeError(f"{client.name} container creation failed") from error
+    if not OBJECT_ID_PATTERN.fullmatch(container_id):
+        cleanup_container(name)
+        raise RuntimeError(f"{client.name} did not return a container identity")
+    return container_id
+
+
+def create_network(name: str, run_id: str) -> str:
+    try:
+        run(
+            [
+                "podman",
+                "network",
+                "create",
+                "--internal",
+                "--label",
+                f"{OWNERSHIP_LABEL}={run_id}",
+                name,
+            ],
+            capture=True,
+        )
+    except RuntimeError as error:
+        recover_owned_object("network", name, run_id)
+        raise RuntimeError("client network creation failed") from error
+    try:
+        network_id = run(
+            ["podman", "network", "inspect", "--format", "{{.ID}}", name],
+            capture=True,
+        ).stdout.strip()
+    except RuntimeError:
+        cleanup_network(name)
+        raise
+    if not OBJECT_ID_PATTERN.fullmatch(network_id):
+        cleanup_network(name)
+        raise RuntimeError("Podman did not return a network identity")
+    return network_id
+
+
 def compare_client(
     client: Client,
     vectors: list[tuple[str, str, str]],
@@ -396,19 +399,8 @@ def compare_client(
 ) -> str:
     name = f"eth-modexp-{client.name}-{run_id}"
     container_id: str | None = None
-    owned_reference: str | None = None
     try:
-        try:
-            candidate_id = run(
-                container_command(client, name, network), capture=True
-            ).stdout.strip()
-            owned_reference = name
-        except RuntimeError as error:
-            raise RuntimeError(f"{client.name} container creation failed") from error
-        if not OBJECT_ID_PATTERN.fullmatch(candidate_id):
-            raise RuntimeError(f"{client.name} did not return a container identity")
-        container_id = candidate_id
-        owned_reference = container_id
+        container_id = create_container(client, name, network, run_id)
         try:
             run(["podman", "start", container_id], capture=True)
         except RuntimeError as error:
@@ -437,8 +429,8 @@ def compare_client(
         diagnostic = f"; bounded log: {log_path}" if log_path is not None else ""
         raise RuntimeError(f"{error}{diagnostic}") from error
     finally:
-        if owned_reference is not None:
-            cleanup_container(owned_reference)
+        if container_id is not None:
+            cleanup_container(container_id)
 
 
 def main() -> int:
@@ -467,25 +459,14 @@ def main() -> int:
     run_id = secrets.token_hex(16)
     network_name = f"eth-modexp-differential-{run_id}"
     network_id: str | None = None
-    network_created = False
     try:
-        run(
-            ["podman", "network", "create", "--internal", network_name],
-            capture=True,
-        )
-        network_created = True
-        network_id = run(
-            ["podman", "network", "inspect", "--format", "{{.ID}}", network_name],
-            capture=True,
-        ).stdout.strip()
-        if not OBJECT_ID_PATTERN.fullmatch(network_id):
-            raise RuntimeError("Podman did not return a network identity")
+        network_id = create_network(network_name, run_id)
         for client in CLIENTS:
             version = compare_client(client, vectors, network_id, run_id)
             print(f"{client.name}\t{version}\t{len(vectors)} vectors passed")
     finally:
-        if network_created:
-            cleanup_network(network_id or network_name)
+        if network_id is not None:
+            cleanup_network(network_id)
     return 0
 
 

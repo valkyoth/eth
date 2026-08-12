@@ -20,6 +20,7 @@ test -x scripts/test-sync-spec-sources.py
 test -x scripts/run_execution_fixtures.py
 test -x scripts/run_differential_tests.py
 test -x scripts/run_modexp_client_differential.py
+test -f scripts/modexp_client_config.py
 test -x scripts/test-run-modexp-client-differential.py
 test -x scripts/check_runtime_dependency_policy.py
 test -x scripts/test-runtime-dependency-policy.py
@@ -221,9 +222,9 @@ test -f docs/unsupported-execution-fixtures.md
 test -f docs/differential-test-harness.md
 test -f docs/differential-test-report.md
 grep -q 'run_modexp_client_differential.py' scripts/run_differential_tests.py
-grep -q 'ethereum/client-go@sha256:' scripts/run_modexp_client_differential.py
-grep -q 'hyperledger/besu@sha256:' scripts/run_modexp_client_differential.py
-grep -q 'nethermind/nethermind@sha256:' scripts/run_modexp_client_differential.py
+grep -q 'ethereum/client-go@sha256:' scripts/modexp_client_config.py
+grep -q 'hyperledger/besu@sha256:' scripts/modexp_client_config.py
+grep -q 'nethermind/nethermind@sha256:' scripts/modexp_client_config.py
 test -f docs/revm-dependency-review.md
 test -f docs/ethereum-upstream-check.md
 test -f docs/core-independence-audit.md

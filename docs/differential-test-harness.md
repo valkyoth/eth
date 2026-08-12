@@ -42,7 +42,9 @@ The external runner requires Podman and network access to the official GitHub
 release APIs and container registry. It fails when a pin is no longer the
 latest stable upstream release, pulls each image by immutable multi-platform
 digest, starts one client at a time, and compares 11 first-party return values
-through `eth_call` to precompile `0x05`.
+through `eth_call` to precompile `0x05`. Client release identities, image
+digests, and arguments live in `scripts/modexp_client_config.py`; runner logic
+and security policy remain in `scripts/run_modexp_client_differential.py`.
 
 Each disposable container has no host mount, has `no-new-privileges`, joins a
 temporary internal Podman network without outbound access, and publishes RPC
@@ -61,11 +63,16 @@ unprivileged `1000:1000` account rather than retaining capabilities for its
 root user-switch wrapper.
 
 Podman operations and cleanup have explicit timeouts. Every run uses a
-128-bit random ownership suffix. The runner creates each container without
-starting it, captures its immutable ID, and uses only that ID for startup,
-inspection, logging, and removal. Network creation is tracked separately and
-its ID is captured before any client starts. Cleanup verifies that each owned
-container and network no longer exists and fails the gate if residue remains.
+128-bit random ownership suffix and applies that token as an ownership label to
+every object. The runner creates each container without starting it, captures
+its immutable ID, and uses only that ID for startup, inspection, logging, and
+removal. Network creation is tracked separately and its ID is captured before
+any client starts. If creation times out or otherwise reports an uncertain
+result, recovery inspects the random name and removes it only when its label
+matches the current run. Absence, an ownership mismatch, malformed metadata,
+and an inspection failure are distinct outcomes; uncertain ownership never
+authorizes deletion. Cleanup verifies that each owned container and network no
+longer exists and fails the gate if residue remains.
 Podman assigns the host port atomically, the mapping must resolve to
 `127.0.0.1`, loopback RPC bypasses environment proxy configuration, and
 RPC/release-metadata responses have fixed byte ceilings.
