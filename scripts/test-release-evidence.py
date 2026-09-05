@@ -8,6 +8,7 @@ from unittest.mock import patch
 
 import release_train
 import release_crates
+import release_evidence
 from release_evidence import authenticated_tag, validate_report, validate_train_reports
 from release_test_support import Repository
 
@@ -53,6 +54,26 @@ class EvidenceTests(unittest.TestCase):
             self.repo.sign("0.56.0", other.key)
             with self.assertRaises(SystemExit):
                 release_crates.check_release_tag("0.56.0", require_tag=True)
+
+    def test_signed_object_cannot_be_relabelled_as_another_version(self):
+        tag = self.repo.git("rev-parse", "refs/tags/v0.55.0")
+        self.repo.git("update-ref", "refs/tags/v0.56.0", tag)
+        with self.assertRaisesRegex(RuntimeError, "signed tag name"):
+            authenticated_tag(self.repo.root, "0.56.0")
+
+    def test_authentication_uses_immutable_tag_object(self):
+        commit = self.repo.report("0.56.0")
+        old_tag = self.repo.git("rev-parse", "refs/tags/v0.55.0")
+        original = release_evidence.git
+
+        def move_ref(root, *args):
+            result = original(root, *args)
+            if "verify-tag" in args:
+                self.repo.git("update-ref", "refs/tags/v0.56.0", old_tag)
+            return result
+
+        with patch.object(release_evidence, "git", side_effect=move_ref):
+            self.assertEqual(authenticated_tag(self.repo.root, "0.56.0"), commit)
 
     def test_shortened_baseline_rejected_by_actual_readiness(self):
         self.train()

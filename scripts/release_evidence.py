@@ -23,19 +23,26 @@ def authenticated_tag(root: Path, version: str, candidate: str = "HEAD") -> str:
     if not re.fullmatch(r"(?:0|[1-9][0-9]*)\.(?:0|[1-9][0-9]*)\.(?:0|[1-9][0-9]*)", version):
         raise RuntimeError("noncanonical release version")
     ref = f"refs/tags/v{version}"
-    if git(root, "cat-file", "-t", ref) != "tag":
+    oid = git(root, "rev-parse", "--verify", ref)
+    candidate_commit = git(root, "rev-parse", f"{candidate}^{{commit}}")
+    if git(root, "cat-file", "-t", oid) != "tag":
         raise RuntimeError(f"{ref}: release tag must be signed and annotated")
-    policy_body = git(root, "show", "HEAD:security/release-allowed-signers")
-    if "-----BEGIN SSH SIGNATURE-----" not in git(root, "cat-file", "tag", ref):
+    policy_body = git(root, "show", f"{candidate_commit}:security/release-allowed-signers")
+    tag_body = git(root, "cat-file", "tag", oid)
+    header = tag_body.split("\n\n", 1)[0]
+    if (re.findall(r"^tag (.+)$", header, re.MULTILINE) != [f"v{version}"]
+            or re.findall(r"^type (.+)$", header, re.MULTILINE) != ["commit"]):
+        raise RuntimeError(f"{ref}: signed tag name or target type differs")
+    if "-----BEGIN SSH SIGNATURE-----" not in tag_body:
         raise RuntimeError(f"{ref}: release tag needs an authorized SSH signature")
     # Use committed trust policy, never a dirty file or the user's wider keyring.
     with tempfile.TemporaryDirectory(prefix="eth-release-signers-") as directory:
         policy = Path(directory) / "allowed-signers"
         policy.write_text(policy_body + "\n", encoding="utf-8")
         git(root, "-c", "gpg.format=ssh", "-c", "gpg.ssh.program=ssh-keygen",
-            "-c", f"gpg.ssh.allowedSignersFile={policy}", "verify-tag", ref)
-    commit = git(root, "rev-parse", f"{ref}^{{commit}}")
-    git(root, "merge-base", "--is-ancestor", commit, candidate)
+            "-c", f"gpg.ssh.allowedSignersFile={policy}", "verify-tag", oid)
+    commit = git(root, "rev-parse", f"{oid}^{{commit}}")
+    git(root, "merge-base", "--is-ancestor", commit, candidate_commit)
     return commit
 
 

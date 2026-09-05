@@ -35,6 +35,9 @@ published v0.55.0 tag. This file contains a public key only. Key rotation is a
 reviewed policy change before the report-only commit; retain historical keys
 needed to authenticate the release train. Invalid or untrusted signatures,
 lightweight tags, merge report commits and unrelated ancestry are rejected.
+The signed object's embedded version name must also match the requested tag.
+Verification and ancestry use a captured immutable object ID, not repeated
+reads of a mutable tag reference.
 
 ## F3: Inherited Dependency Contracts
 
