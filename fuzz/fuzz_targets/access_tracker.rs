@@ -20,7 +20,7 @@ fuzz_target!(|data: &[u8]| {
         return;
     }
 
-    for operation in data.chunks_exact(OPERATION_BYTES) {
+    for operation in data.as_chunks::<OPERATION_BYTES>().0 {
         let Some((&selector, fields)) = operation.split_first() else {
             continue;
         };

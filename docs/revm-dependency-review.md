@@ -7,7 +7,9 @@ non-admitted.
 
 REVM is not part of the `eth` dependency graph in v0.41.0.
 
-The review was refreshed on 2026-07-27. It must be refreshed before
+Registry versions were refreshed on 2026-09-05. The dependency-policy rejection
+of the compatible line below is retained from 2026-07-27, not claimed as a new
+transitive-graph admission. The full review must be refreshed before
 2026-10-27, or before any REVM/external execution backend is admitted,
 whichever is sooner. First-party boundary-only work in `eth-valkyoth-evm` does
 not admit REVM. The review checked the latest registry line and the newest line
@@ -15,8 +17,8 @@ compatible with the workspace's Rust `1.90.0` floor:
 
 | Candidate | Version | Rust requirement | Result |
 | --- | --- | --- | --- |
-| `revm` latest | `42.0.1` | `1.91.0` | rejected for current MSRV range |
-| `revm-primitives` latest | `42.0.0` | `1.91.0` | rejected for current MSRV range |
+| `revm` latest | `43.0.0` | `1.91.0` | rejected for current MSRV range |
+| `revm-primitives` latest | `43.0.0` | `1.91.0` | rejected for current MSRV range |
 | `revm` newest MSRV-compatible line | `36.0.0` | `1.88.0` | rejected by dependency policy |
 | `revm-primitives` matching `revm 36.0.0` | `22.1.0` | `1.88.0` | rejected by dependency policy |
 
@@ -46,7 +48,7 @@ bounded native basic opcode execution pass. No REVM feature or dependency is
 exposed until a future review can pass:
 
 - `cargo deny check`;
-- Rust `1.90.0` through `1.97.1` compatibility;
+- Rust `1.90.0` through `1.98.1` compatibility;
 - no default feature expansion into the core facade graph;
 - the normal pentest-before-tag flow.
 

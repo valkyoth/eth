@@ -3,6 +3,11 @@
 Status: `v0.55.0` refreshes official Ethereum source and fixture revisions
 through 2026-08-12 and retains the reproducible local sync path.
 
+The [2026-09-05 maintenance review](maintenance-review-2026-09-05.md) records
+newer upstream observations separately from those implementation evidence pins.
+It also adds the newly separate official SSZ repository to synchronization and
+drift monitoring; this is not a claim of SSZ implementation or conformance.
+
 `eth` keeps large upstream Ethereum repositories outside this crate. The
 default reference store path is recorded in `spec-lock.toml` as
 `../../test/eth`, which resolves from this checkout to:
@@ -50,6 +55,7 @@ scripts/sync_spec_sources.py --lock-only
 | EIPs | `https://github.com/ethereum/EIPs` | `582684e2d7d372c09f45777be8ea603e485e9e9d` |
 | Execution APIs | `https://github.com/ethereum/execution-apis` | `742d45db810b31265c8d3c075af324953330d1ed` |
 | Consensus specs | `https://github.com/ethereum/consensus-specs` | `6d0e95d972a90bbf79a356ded6a704d769bb67c0` |
+| SSZ specs (source admission only) | `https://github.com/ethereum/ssz-specs` | `9ff5170ab7701540b008e12ff3d42fe0c6d35cf9` |
 
 ## License Notes
 

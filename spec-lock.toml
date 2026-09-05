@@ -17,5 +17,10 @@ execution_apis_repo = "https://github.com/ethereum/execution-apis"
 execution_apis_rev = "742d45db810b31265c8d3c075af324953330d1ed"
 consensus_specs_repo = "https://github.com/ethereum/consensus-specs"
 consensus_specs_rev = "6d0e95d972a90bbf79a356ded6a704d769bb67c0"
+# SSZ moved out of consensus-specs; monitoring/source admission only, not
+# conformance evidence. Existing implementation pins above remain unchanged.
+ssz_specs_repo = "https://github.com/ethereum/ssz-specs"
+ssz_specs_rev = "9ff5170ab7701540b008e12ff3d42fe0c6d35cf9"
+ssz_specs_checked_at = "2026-09-05"
 local_reference_store_env = "ETH_REFERENCE_STORE"
 local_reference_store_default = "../../test/eth"

@@ -22,6 +22,7 @@ REPO_KEYS = (
     "eips",
     "execution_apis",
     "consensus_specs",
+    "ssz_specs",
 )
 
 

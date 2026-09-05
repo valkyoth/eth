@@ -42,6 +42,44 @@ that rule.
 
 ## Release Principles
 
+### September 2026 Upstream Admission Requirements
+
+The [2026-09-05 source review](maintenance-review-2026-09-05.md) adds the
+following mandatory deliverables and verification to the named planned
+releases. These are not implemented-feature claims. Each owner must implement
+its part, not only a descriptor, and its exit requires the listed evidence plus
+its existing exact-commit pentest, remediation and stop below.
+
+`v0.115.0` must recheck scheduled versus proposed status and activation against
+pinned official sources. Networking upgrades have separate negotiation; testnet
+activation is not mainnet admission. Reconcile this table at `v0.204.0` and the
+final `v0.336.0` acceptance matrix. Split an oversized owner into new minor
+milestones before implementation; do not hide feature work under patch tags.
+
+| Version owner | Required implementation deliverables | Verification and exit evidence |
+| --- | --- | --- |
+| `v0.115.0` | Classify EIP-7773 Glamsterdam and EIP-8081 Hegota manifests, execution/consensus names, activations and experimental branches. Track EIP-7610's removal from Glamsterdam. | Pinned scheduled/proposed/removed matrix; no testnet-only rule enabled on mainnet by default. |
+| `v0.116.0` | EIP-2780 intrinsic/runtime gas, EIP-7778 pre-refund block accounting, EIP-7976 calldata floor, EIP-7981 access lists, EIP-8037 state-gas reservoirs/rollback/child merges and EIP-8038 state access, alongside assigned Osaka rules. | Fork-edge fixtures and independent clients for halts, reverts, delegation spills, refund placement and funded accounts; no conflation of execution and state gas. |
+| `v0.116.0` | EIP-7843 SLOTNUM, EIP-7954 contract/initcode limits, EIP-7997 factory predeploy, EIP-8024 stack opcodes and EIP-8246 SELFDESTRUCT balance behavior. | Opcode/deployment vectors, funded-remnant CREATE2 and historical regressions; only admitted forks change behavior. |
+| `v0.87.0`, `v0.105.0`, `v0.116.0` | EIP-7708 transfer-log models, execution emission and receipt/bloom integration, including system calls. | Revert, zero-value, system-address and receipt-gas fixtures; no omitted or duplicated logs. |
+| `v0.88.0`, `v0.104.0`, `v0.116.0` | EIP-7928 canonical block access lists, ordering/indexes, reverted reads, recreated accounts, roots and state integration. | Malformed/non-minimal encodings, max nonce and missing/extra account/slot differentials; no promotion based on syntax alone. |
+| `v0.99.0`, `v0.117.0` | New execution-specs fixtures for pre-Berlin pricing, EIP-7702 delegation clearing/precompile dispatch, ECRECOVER inverse points, CREATE collisions and receipt accounting. | Every applicable case has a runnable first-party test and independent oracle; out-of-scope cases retain named future owners. |
+| `v0.86.0`, `v0.116.0`, `v0.131.0` | EIP-8141 Frame Transaction models, signing/authorization and builders, then execution, approval scopes, rollback, precompile dispatch, floors and state-gas limits. | Official frame-family vectors, negative signature/scope and frame gas tests; decoding alone is not Hegota support. |
+| `v0.122.0`, `v0.173.0`, `v0.315.0`, `v0.316.0` | Current execution-apis schemas: BAL getters, hash-based raw receipts, net methods, simulation and admitted REST-SSZ Engine transport. Isolate testing_commitBlockV1. | Wire/error and cross-client server fixtures; production RPC defaults expose no test mutation endpoint. |
+| `v0.173.0`, `v0.256.0` | Amsterdam BAL validity, custody columns, SSZ payloads and Bogota inclusion-list sequencing/non-zero response constraints. | Undecodable BAL gets INVALID only from authoritative evidence; timeout/missing-data remain distinct; coordinator sequencing/size tests pass. |
+| `v0.171.0`, `v0.221.0` | Standalone ethereum/ssz-specs source/vectors; EIP-7688 progressive structures, roots/proofs and mutable caches required by admitted forks. | Standalone SSZ/consensus differentials, progressive soft-limit/encoding and cache rollback tests; no dependency on deleted generic vector paths. |
+| `v0.186.0`, `v0.187.0`, `v0.190.0`, `v0.255.0` | Separately negotiate eth/70 partial receipts (7975), eth/71 BAL (8159), eth/72 sparse blobpool (8070), snap/2 BAL healing (8189), and cell-level column deltas (8136). | Mixed-version peers, custodyColumns null/empty-list cases, malformed deltas and bounded reconstruction; negotiation is not consensus activation. |
+| `v0.224.0`, `v0.227.0`, `v0.233.0` | EIP-8045 slashed-proposer exclusion, EIP-8061 churn, Gloas upgrades and EIP-8261 gas-limit schedule configuration. | Official proposer/churn/upgrade and empty-parent gas-limit vectors; historical state unchanged. |
+| `v0.231.0`, `v0.237.0`, `v0.263.0`, `v0.280.0` | Full EIP-7732 ePBS and EIP-8282 builder requests: bids, registry/payments, payload timeliness committee, withholding/fallback and fork choice, not just a relay adapter. | Same-key slot reuse, exited builders, parent/hash equality, equivocation, unavailable parents and fork-transition differentials; signing/payment safety survives failure. |
+| `v0.230.0`, `v0.237.0`, `v0.247.0`, `v0.248.0`, `v0.263.0` | EIP-7805 FOCIL list formation, gossip/timeliness, dependent-root storage, validation, block-production and fork-choice enforcement. | Reorg, wrong dependent root, withheld/conflicting lists and max-size tests; builders cannot bypass inclusion constraints. |
+| `v0.262.0`, `v0.264.0`, `v0.275.0`, `v0.279.0` | Current Beacon/Keymanager/Builder APIs: produceBlockV4, builder preferences/forwarding headers, progressive payload-attestation responses, execution_requests_root, per-key builder configuration, BuilderRequestAuth and bid-payment valuation. | Pinned OpenAPI 3.1 and builder fixtures, gas-limit/payment validation, forwarding authentication, key-isolation and mixed-version tests; no unchecked builder route or payment field. |
+| `v0.185.0`, `v0.186.0`, `v0.246.0` | Updated discv5 admission controls and WHOAREYOU challenge retransmission; post-Merge NewBlockHashes/NewBlock deprecation. | Handshake replay/amplification and duplicate-challenge tests, pre/post-Merge message profiles; no legacy announcement treated as PoS fork-choice authority. |
+| `v0.204.0`, `v0.220.0`, `v0.233.0` | Reassess experimental EIP-8148 sweep thresholds, EIP-8205 credentials, EIP-8321 RANDAO, proof-engine changes and proposed Hegota additions. | Admitted/rejected/proposed inventory with implementation owners before enabling selected proposals; experimental branches do not imply scheduled inclusion. |
+
+Every owner retains its Goal, Deliverables, Verification, Exit criteria and
+pentest below. Final acceptance reconciles this inventory with implementation
+and integration reports; source drift never silently enables new rules.
+
 Every release must have:
 
 - a clear definition of done;
@@ -366,8 +404,8 @@ Goal: initialize the serious Rust workspace and policy baseline.
 
 Deliverables:
 
-- Rust stable `1.97.1` pinned.
-- Rust `1.90.0` through `1.97.1` compatibility policy.
+- Rust stable `1.98.1` pinned.
+- Rust `1.90.0` through `1.98.1` compatibility policy.
 - Focused no_std workspace crates.
 - CI, dependency policy, security policy, release notes.
 - Implementation, release, scope, threat-model, modularity, toolchain,
@@ -5561,6 +5599,8 @@ Goal: deliver the Current Fork Manifest Admission release with this required out
 Deliverables:
 
 - Generate a reviewed rule manifest from pinned execution/consensus specs for Prague/Pectra, Osaka/Fusaka/Fulu, and then-active Glamsterdam, Hegotá, Gloas, or successor work as applicable.
+- Reconcile the September 2026 admission requirements above, withdrawn
+  proposals and separately negotiated networking versions.
 
 Verification:
 
@@ -5583,6 +5623,9 @@ Deliverables:
 - Implement all opcodes, precompiles, system contracts, gas changes, request
   types, and state-transition changes in the admitted current manifest,
   including Osaka EIP-7823 ModExp input limits and EIP-7883 ModExp repricing.
+- Implement the gas, opcode, BAL, transfer-log and frame-execution obligations
+  above after revision/fork admission; split into new minor versions before
+  coding if this cannot fit one pentest pass.
 
 Verification:
 
@@ -7035,7 +7078,7 @@ Deliverables:
 
 Verification:
 
-- Official consensus-spec vectors;
+- Official standalone SSZ-specs vectors plus fork-specific consensus vectors;
 - malformed-offset fuzzing;
 - list/bitlist/offset/Merkleization complexity oracles and nested-ledger
   conservation tests;

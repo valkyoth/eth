@@ -30,6 +30,7 @@ REPO_KEYS = (
     "eips",
     "execution_apis",
     "consensus_specs",
+    "ssz_specs",
 )
 
 
@@ -49,8 +50,8 @@ class SourcePin:
 
 
 CRATE_REVIEWS = (
-    CrateReview("revm", "42.0.1", "1.91.0", "36.0.0"),
-    CrateReview("revm-primitives", "42.0.0", "1.91.0", "22.1.0"),
+    CrateReview("revm", "43.0.0", "1.91.0", "36.0.0"),
+    CrateReview("revm-primitives", "43.0.0", "1.91.0", "22.1.0"),
 )
 
 

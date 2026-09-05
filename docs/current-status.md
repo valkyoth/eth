@@ -46,7 +46,7 @@ Legend:
 | Transaction signing | 🟢 Available | Signing preimages and hashes for legacy, EIP-2930, EIP-1559, EIP-4844, and EIP-7702 |
 | MPT node decoding | 🟢 Available | Strict locally canonical branch, extension, leaf, compact-path, inline-reference, and proof-list parsing with shared-session accounting |
 | MPT inclusion proofs | 🟢 Available | Full-proof preflight, hash-addressed snapshot-bound multiproofs, transaction/receipt inclusion, canonical account decoding, account-bound storage verification, and canonical absence/zero semantics |
-| Secret sanitization | 🟢 Optional | Explicit opt-in bridge to `sanitization 2.0.3`, canonical wiping, drop-safety contracts, and runtime protection reports |
+| Secret sanitization | 🟢 Optional | Explicit opt-in bridge to `sanitization 2.0.4`, canonical wiping, drop-safety contracts, and runtime protection reports |
 
 ## EVM Support
 
@@ -99,7 +99,7 @@ Legend:
 | --- | --- |
 | License | `MIT OR Apache-2.0` |
 | MSRV | Rust `1.90.0` |
-| Pinned stable | Rust `1.97.1` |
+| Pinned stable | Rust `1.98.1` |
 | Default target | `no_std` |
 | Unsafe code | Forbidden in first-party crates |
 | Default networking/signing | None |
@@ -174,6 +174,6 @@ pinned Execution APIs Hive fixture verifies a real account-plus-storage
 response end to end. The earlier byte-exact independently rooted APIs remain
 available only as lower-level compatibility boundaries.
 
-The current workspace uses Rust `1.97.1` for the full gate and checks every
-supported Rust toolchain from `1.90.0` through `1.97.0` with
+The current workspace uses Rust `1.98.1` for the full gate and checks every
+supported Rust toolchain from `1.90.0` through `1.98.0` with
 `cargo check --workspace --all-features`.

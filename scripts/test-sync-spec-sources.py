@@ -47,6 +47,8 @@ execution_apis_repo = "https://github.com/ethereum/execution-apis"
 execution_apis_rev = "3123456789abcdef0123456789abcdef01234567"
 consensus_specs_repo = "https://github.com/ethereum/consensus-specs"
 consensus_specs_rev = "4123456789abcdef0123456789abcdef01234567"
+ssz_specs_repo = "https://github.com/ethereum/ssz-specs"
+ssz_specs_rev = "5123456789abcdef0123456789abcdef01234567"
 """.strip(),
         encoding="utf-8",
     )
@@ -74,7 +76,7 @@ def test_default_store_fallback_and_repo_validation(tmp: Path) -> None:
     write_spec_lock(spec_lock, "https://github.com/ethereum/execution-specs")
     store, sources = sync_spec_sources.parse_spec_lock()
     assert store == (repo_root / "../reference-store").resolve()
-    assert len(sources) == 5
+    assert len(sources) == 6
 
     os.environ["ETH_REFERENCE_STORE"] = str(tmp / "override")
     store, _ = sync_spec_sources.parse_spec_lock()

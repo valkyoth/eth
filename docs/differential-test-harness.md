@@ -9,7 +9,7 @@ independent in-process or external-client reference paths.
 | --- | --- | --- | --- |
 | Structural RLP | `eth-valkyoth-codec::differential_rlp_reference` | `alloy-rlp` `0.3.16` | Valid/invalid structural decisions and exact accepted re-encoding match for the curated corpus. |
 | ModExp arithmetic | `eth-valkyoth-evm-core::modexp_differential` | `num-bigint` `0.5.1` | Exact output matches from 1 through 256-byte widths plus leading-zero, even, zero, unequal-width, sparse, truncated, and right-padded operands. |
-| ModExp client behavior | `modexp_client_vectors` through precompile `0x05` | Geth `1.17.5`, Besu `26.7.1`, and Nethermind `1.39.3` | All 11 deterministic frames return byte-identical output from every client. |
+| ModExp client behavior | `modexp_client_vectors` through precompile `0x05` | Geth `1.17.5`, Besu `26.8.1`, and Nethermind `1.39.3` | All 11 deterministic frames return byte-identical output from every client. |
 
 Structural RLP comparison cannot distinguish every Ethereum integer-domain
 rule from ordinary byte-string validity. Codec integer tests, primitive bridge

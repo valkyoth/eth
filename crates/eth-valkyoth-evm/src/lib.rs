@@ -86,12 +86,13 @@ pub struct RevmDependencyReview {
 /// narrower `revm-primitives` crate were both checked and rejected because
 /// their current transitive graph fails the repository dependency policy.
 ///
-/// Reviewed 2026-07-27. Re-review is required before 2026-10-27 or before any
+/// Registry refreshed 2026-09-05; the prior dependency-policy rejection remains.
+/// Re-review is required before 2026-10-27 or before any
 /// external execution backend is admitted, whichever is sooner.
 pub const REVM_DEPENDENCY_REVIEW: RevmDependencyReview = RevmDependencyReview {
-    reviewed_on: "2026-07-27",
+    reviewed_on: "2026-09-05",
     re_review_before: "2026-10-27",
-    latest_revm_version: "42.0.1",
+    latest_revm_version: "43.0.0",
     latest_revm_rust_version: "1.91.0",
     newest_msrv_compatible_revm_version: "36.0.0",
     admitted: false,

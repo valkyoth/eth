@@ -1269,14 +1269,17 @@ friendly, and independently testable.
 ## Rust Version Support
 
 The minimum supported Rust version is Rust `1.90.0`. New deployments should use
-the pinned stable Rust `1.97.1` until the toolchain policy is updated.
+the pinned stable Rust `1.98.1` until the toolchain policy is updated.
 
-Compatibility evidence for `0.55.0`:
+Toolchain policy for the next release (historical tag evidence is unchanged):
 
 | Rust | Local Evidence |
 | --- | --- |
-| `1.90.0`-`1.97.0` | `cargo check --workspace --all-features` on every supported toolchain |
-| `1.97.1` | Full release gate |
+| `1.90.0`-`1.98.0` | `cargo check --workspace --all-features` on every supported toolchain |
+| `1.98.1` | Full release gate required before tagging |
+
+See the [maintenance review](https://github.com/valkyoth/eth/blob/main/docs/maintenance-review-2026-09-05.md) for checks
+completed on the updated dependencies and any environment limitations.
 
 ## Checks
 

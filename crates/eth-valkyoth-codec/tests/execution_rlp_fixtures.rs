@@ -155,12 +155,12 @@ fn decode_hex(input: &str) -> Result<Vec<u8>, Box<dyn Error>> {
         Some(stripped) => stripped,
         None => input,
     };
-    let mut chunks = hex.as_bytes().chunks_exact(2);
-    if !chunks.remainder().is_empty() {
+    let (chunks, remainder) = hex.as_bytes().as_chunks::<2>();
+    if !remainder.is_empty() {
         return Err(format!("hex string has odd length: {input}").into());
     }
     let mut output = Vec::new();
-    for chunk in &mut chunks {
+    for chunk in chunks {
         let pair = str::from_utf8(chunk)?;
         output.push(u8::from_str_radix(pair, 16)?);
     }

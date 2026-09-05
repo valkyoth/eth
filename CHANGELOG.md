@@ -4,6 +4,15 @@ All notable changes to `eth` are documented here.
 
 ## Unreleased
 
+- Refreshed maintenance tooling to Rust 1.98.1 while retaining Rust 1.90.0,
+  updated sanitization/syn and both lockfiles, and refreshed the SBOM.
+- Updated the immutable Besu reference image to 26.8.1; retained historical
+  26.7.1 differential evidence without claiming a new container run.
+- Reviewed official Ethereum source drift, added standalone SSZ monitoring,
+  and assigned current fork/API/network changes to explicit roadmap work.
+- Fetch full history in CI for publication-train tag validation, retaining
+  the current SHA-pinned checkout action and CodeQL Default configuration.
+
 - Started v0.55.0 by replacing the private 64-byte ModExp operand ceiling with
   256-bit declared lengths, gas-derived host conversion, streamed right
   padding, and caller-owned arbitrary-length limb workspace.

@@ -53,7 +53,7 @@ For derive macros:
 eth-valkyoth-sanitization = { version = "0.8", features = ["derive"] }
 ```
 
-The `0.8` bridge uses `sanitization 2.0.3`. The canonical `wipe` module replaces
+The `0.8` bridge uses `sanitization 2.0.4`. The canonical `wipe` module replaces
 the removed best-effort wipe surface. The sanitization derive macros generate
 calls to `eth_valkyoth_sanitization::SecureSanitize`, implement
 `DropSafeSanitize` for their field-wise sanitizers, and require

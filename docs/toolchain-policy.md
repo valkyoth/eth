@@ -1,7 +1,7 @@
 # eth Toolchain Policy
 
-`eth` pins stable Rust `1.97.1` in `rust-toolchain.toml` and supports Rust
-`1.90.0` through `1.97.1`.
+`eth` pins stable Rust `1.98.1` in `rust-toolchain.toml` and supports Rust
+`1.90.0` through `1.98.1`.
 
 Rules:
 
@@ -19,9 +19,9 @@ Rules:
 Compatibility command:
 
 ```bash
-for toolchain in 1.90.0 1.91.0 1.92.0 1.93.0 1.94.0 1.95.0 1.96.0 1.96.1 1.97.0; do
+for toolchain in 1.90.0 1.91.0 1.91.1 1.92.0 1.93.0 1.93.1 1.94.0 1.94.1 1.95.0 1.96.0 1.96.1 1.97.0 1.97.1 1.98.0; do
     cargo "+$toolchain" check --workspace --all-features
 done
 ```
 
-The full release gate runs under the pinned Rust `1.97.1` toolchain.
+The full release gate runs under the pinned Rust `1.98.1` toolchain.

@@ -27,6 +27,11 @@ The REVM section reports:
 The Ethereum source section reports each pinned source in `spec-lock.toml`
 against its current remote `HEAD`.
 
+This includes the standalone `ethereum/ssz-specs` repository after its
+relocation from consensus-specs. The
+[2026-09-05 review](maintenance-review-2026-09-05.md) records observed hashes
+and named roadmap owners separately from retained implementation fixture pins.
+
 Remote movement is not an immediate failure. It is maintenance input. A moved
 source means the next implementation or maintenance release must decide whether
 the new upstream revision changes fork rules, opcode/gas schedules,

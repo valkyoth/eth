@@ -37,10 +37,10 @@ CLIENTS = (
     ),
     Client(
         "besu",
-        "docker.io/hyperledger/besu@sha256:5c319f8f5f3449438c03ea7fa2c9bf24b866dc55ac98d802bb41ad793e740587",
+        "docker.io/hyperledger/besu@sha256:6f3f21ce533383fcc8db3bce02252b59d5a9e776b72b5a1c8ecd2db011600042",
         "https://api.github.com/repos/besu-eth/besu/releases/latest",
-        "26.7.1",
-        "besu/v26.7.1/",
+        "26.8.1",
+        "besu/v26.8.1/",
         "1000:1000",
         (
             "--network=dev",

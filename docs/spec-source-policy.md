@@ -14,6 +14,7 @@ Use these as primary sources:
 - EIPs: `https://github.com/ethereum/EIPs`
 - Execution APIs: `https://github.com/ethereum/execution-apis`
 - Consensus specs: `https://github.com/ethereum/consensus-specs`
+- SSZ specs and generic vectors: `https://github.com/ethereum/ssz-specs`
 - Beacon APIs: `https://github.com/ethereum/beacon-APIs`
 - Keymanager APIs: `https://github.com/ethereum/keymanager-APIs`
 - Builder specs: `https://github.com/ethereum/builder-specs`
@@ -44,6 +45,12 @@ Before implementing or changing consensus-sensitive behavior:
 Do not add future sources to the active `spec-lock.toml` merely because they
 appear in the roadmap. Add and pin each source at the first release that
 implements or tests behavior governed by it.
+
+Exception: when an already monitored upstream repository relocates a
+specification, track the destination as an explicitly labeled source-only pin
+so drift monitoring does not lose coverage. Such a pin does not establish
+implementation or conformance evidence. The September 2026 SSZ relocation is
+recorded in the [maintenance review](maintenance-review-2026-09-05.md).
 
 If the official sources disagree, are ambiguous, or have no fixture for the
 behavior, stop and document the ambiguity before implementing. Do not silently

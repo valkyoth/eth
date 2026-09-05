@@ -8,6 +8,8 @@ import sys
 from pathlib import Path
 from types import SimpleNamespace
 
+import sync_spec_sources
+
 
 ROOT = Path(__file__).resolve().parents[1]
 SCRIPT = ROOT / "scripts" / "check_ethereum_upstream.py"
@@ -52,7 +54,16 @@ def test_remote_head_rejects_empty_ls_remote_output() -> None:
         checker.subprocess.run = original_run
 
 
+def test_relocated_ssz_source_is_monitored_and_synchronized() -> None:
+    ssz = next(pin for pin in checker.load_source_pins() if pin.name == "ssz_specs")
+    assert ssz.repo == "https://github.com/ethereum/ssz-specs"
+    assert checker.REPO_KEYS == sync_spec_sources.REPO_KEYS
+    _, sources = sync_spec_sources.parse_spec_lock()
+    assert next(source.rev for source in sources if source.name == "ssz_specs") == ssz.rev
+
+
 def run_tests() -> None:
+    test_relocated_ssz_source_is_monitored_and_synchronized()
     test_unknown_rust_version_is_not_msrv_evidence()
     test_invalid_rust_version_is_not_msrv_evidence()
     test_remote_head_rejects_empty_ls_remote_output()

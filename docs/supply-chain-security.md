@@ -58,7 +58,7 @@ dependency changes classification.
 
 ## External Differential Clients
 
-The v0.55.0 release gate executes official Geth `1.17.5`, Besu `26.7.1`, and
+The active release gate uses official Geth `1.17.5`, Besu `26.8.1`, and
 Nethermind `1.39.3` images as test-only reference implementations. They are not
 Cargo dependencies, do not enter any crate package or runtime graph, and are
 pinned by immutable multi-platform OCI index digest in
@@ -77,6 +77,10 @@ before removal; a same-name object with the wrong label is never removed.
 Subprocess, cleanup, HTTP response, proxy, and Podman-assigned loopback-port
 boundaries are also fail-closed.
 
+The v0.55.0 report retains its actual Besu `26.7.1` results. See the
+[maintenance review](maintenance-review-2026-09-05.md) for the updated image
+and the host delegation prerequisite for collecting fresh evidence.
+
 ## Admitted Third-Party Crates
 
 | Crate | Version | License | Default Features | Reason |
@@ -88,11 +92,11 @@ boundaries are also fail-closed.
 | `num-bigint` | `0.5.1` | `MIT OR Apache-2.0` | disabled, `std` enabled | Dev-only independent ModExp arithmetic differential oracle; absent from runtime graphs. |
 | `proc-macro2` | `1.0.107` | `MIT OR Apache-2.0` | enabled | Token handling for optional derive macros. |
 | `quote` | `1.0.47` | `MIT OR Apache-2.0` | enabled | Code generation for optional derive macros. |
-| `sanitization` | `2.0.3` | `MIT OR Apache-2.0` | enabled | Optional canonical wiping, protected-container, and runtime protection-report bridge. |
+| `sanitization` | `2.0.4` | `MIT OR Apache-2.0` | enabled | Optional canonical wiping, protected-container, and runtime protection-report bridge. |
 | `serde` | `1.0.229` | `MIT OR Apache-2.0` | enabled | Optional EIP-712 JSON parser data model. |
 | `serde_json` | `1.0.151` | `MIT OR Apache-2.0` | enabled | Optional EIP-712 JSON parser; excluded from default and core decode paths. |
 | `subtle` | `2.6.1` | `BSD-3-Clause` | disabled, `core_hint_black_box` enabled | Constant-time equality for security-boundary byte comparisons. |
-| `syn` | `3.0.3` | `MIT OR Apache-2.0` | enabled, `full` enabled | Syntax parsing for optional derive macros. |
+| `syn` | `3.0.5` | `MIT OR Apache-2.0` | enabled, `full` enabled | Syntax parsing for optional derive macros. |
 | `tiny-keccak` | `2.0.2` | `CC0-1.0` | disabled, `keccak` enabled | Optional non-default software Keccak-256 backend admitted in v0.27.0. |
 | `trybuild` | `1.0.120` | `MIT OR Apache-2.0` | enabled | Dev-only compile-fail diagnostics for public derive macros. |
 
