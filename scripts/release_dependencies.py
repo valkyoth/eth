@@ -5,12 +5,11 @@ from __future__ import annotations
 
 import io
 import json
+import re
 import subprocess
 import tarfile
 import tempfile
 from pathlib import Path
-
-from release_evidence import authenticated_tag
 
 
 def dependency_contract(package: dict, root: Path) -> str:
@@ -33,8 +32,10 @@ def dependency_contract(package: dict, root: Path) -> str:
     }}, sort_keys=True)
 
 
-def baseline_contracts(root: Path, baseline: str) -> dict[str, str]:
-    commit = authenticated_tag(root, baseline)
+def baseline_contracts(root: Path, commit: str) -> dict[str, str]:
+    """Inspect the immutable commit already authenticated by the caller."""
+    if not re.fullmatch(r"[0-9a-f]{40}", commit):
+        raise RuntimeError("baseline contracts require an authenticated commit ID")
     archive = subprocess.check_output(["git", "archive", "--format=tar", commit], cwd=root)
     with tempfile.TemporaryDirectory(prefix="eth-release-contracts-") as directory:
         snapshot = Path(directory)
@@ -62,7 +63,7 @@ def baseline_contracts(root: Path, baseline: str) -> dict[str, str]:
                 for package in metadata["packages"] if package["id"] in members}
 
 
-def changed_contracts(root: Path, packages: dict[str, dict], baseline: str) -> set[str]:
-    old = baseline_contracts(root, baseline)
+def changed_contracts(root: Path, packages: dict[str, dict], commit: str) -> set[str]:
+    old = baseline_contracts(root, commit)
     return {name for name, package in packages.items()
             if old.get(name) != dependency_contract(package, root)}

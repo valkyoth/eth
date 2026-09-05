@@ -10,7 +10,8 @@ from pathlib import Path
 from unittest.mock import patch
 
 import release_train
-from release_dependencies import dependency_contract
+import release_dependencies
+from release_dependencies import baseline_contracts, dependency_contract
 from release_test_support import Repository
 
 ROOT_MANIFEST = '''[workspace]
@@ -111,6 +112,43 @@ class DependencyTests(unittest.TestCase):
         self.repo.git("tag", "v0.55.0")
         with patch.object(release_train, "ROOT", self.repo.root), self.assertRaises(RuntimeError):
             release_train.changed_packages(self.packages(), "0.55.0")
+
+    def test_shadow_baseline_cannot_hide_source_or_allow_unchanged_classification(self):
+        self.repo.write("crate/src/lib.rs", "pub fn changed() {}\n")
+        candidate = self.repo.commit()
+        self.repo.git("update-ref", "refs/v0.55.0", candidate)
+        with patch.object(release_train, "ROOT", self.repo.root):
+            packages = self.packages()
+            self.assertEqual(release_train.changed_packages(packages, "0.55.0"), {"fixture"})
+            plan = dict(stage="public", anchor=False, baseline="0.55.0", crates={
+                name: dict(change="unchanged", previous_version="0.1.0", version="0.1.0")
+                for name in packages})
+            with self.assertRaisesRegex(RuntimeError, "changed after"):
+                release_train.validate_cumulative_package_changes(packages, plan)
+
+    def test_baseline_movement_cannot_change_source_or_contract_snapshot(self):
+        baseline = self.repo.git("rev-parse", "refs/tags/v0.55.0^{commit}")
+        self.repo.write("local/src/lib.rs", "pub fn changed() {}\n")
+        self.repo.write("Cargo.toml", ROOT_MANIFEST.replace('version = "3.0.3"', 'version = "3.0.5"', 1))
+        candidate = self.repo.commit()
+        authenticate = release_train.authenticated_tag
+
+        def move_baseline(root, version):
+            commit = authenticate(root, version)
+            self.repo.git("update-ref", "refs/tags/v0.55.0", candidate)
+            return commit
+
+        with (patch.object(release_train, "ROOT", self.repo.root),
+              patch.object(release_train, "authenticated_tag", side_effect=move_baseline) as auth,
+              patch.object(release_dependencies, "baseline_contracts", wraps=baseline_contracts) as snapshot):
+            self.assertEqual(release_train.changed_packages(self.packages(), "0.55.0"), {"fixture", "local"})
+            auth.assert_called_once_with(self.repo.root, "0.55.0")
+            snapshot.assert_called_once_with(self.repo.root, baseline)
+
+    def test_snapshot_rejects_mutable_reference_names(self):
+        for ref in ("HEAD", "v0.55.0", "refs/tags/v0.55.0"):
+            with self.subTest(ref=ref), self.assertRaisesRegex(RuntimeError, "commit ID"):
+                baseline_contracts(self.repo.root, ref)
 
 
 if __name__ == "__main__":

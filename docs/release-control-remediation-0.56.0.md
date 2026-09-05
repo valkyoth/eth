@@ -55,6 +55,28 @@ building the baseline. Source-path changes and internal version dependency
 closure remain enforced as before. Library dependency contracts and lockfile
 resolution are distinct: SBOM and transitive lockfile review remain required.
 
+## R1: Caller Identity Binding On Retest
+
+The retest of `c7373628f3f1ce6d32f5778767ce230c457d7bce` confirmed the
+original F1-F3 cases fixed, but found a Medium release-authentication
+regression: callers compared a short Git version reference while discarding
+the different commit returned by the signature verifier. A competing
+`refs/vVERSION` could authorize an unsigned descendant or hide source changes.
+Git's [reference resolution rules](https://git-scm.com/docs/gitrevisions#_specifying_revisions)
+explain why a short version name is not an authoritative tag identity.
+
+The publisher and post-tag evidence validator now share
+`authenticated_candidate`: capture HEAD once, authenticate the fully qualified
+tag against that candidate, and require the returned commit to equal it.
+Candidate movement during authentication or evidence validation fails closed.
+Pre-tag checks still permit a missing candidate tag when explicitly allowed.
+Current report validation reads the captured commit, not a new HEAD lookup.
+
+Cumulative source and Cargo-contract comparisons now use the same baseline
+commit returned by one authentication call. The archive helper accepts only a
+full commit ID and never re-resolves a version. These are point-in-time checks;
+the release checkout must remain exclusively controlled throughout publication.
+
 ## Regression Evidence
 
 The tests use disposable repositories and temporary SSH keys, never real tag
@@ -70,6 +92,11 @@ commits, wrong assessment/range/predecessor, unrelated history, merge parents
 and mixed code/report commits. Cargo fixtures test root-only inherited version,
 feature, default-feature and target-specific alias changes, correct dependency
 release classification, and equivalent contracts across temporary paths.
+R1 regressions additionally exercise signed current-tag success, unsigned
+descendants with and without shadow refs, actual post-tag readiness and its
+Python evidence entry point, source-only changes hidden behind a competing
+baseline ref, candidate movement in both directions, baseline movement before
+source/contract comparison, and rejection of mutable archive references.
 
 ```sh
 python3 scripts/test-release-train.py
@@ -79,6 +106,12 @@ python3 scripts/test-release-crates.py
 scripts/test-release-readiness.sh
 scripts/checks.sh
 ```
+
+R1 local verification on 2026-09-05 passed: 16 signed-evidence tests, 8
+dependency tests, 8 train tests, publisher/readiness regressions, and the full
+`scripts/checks.sh` suite (731 Rust tests passed, 0 failed, 4 ignored).
+Separate fuzz-workspace Clippy with `--all-targets -- -D warnings` also passed.
+These are remediation checks, not an independent clean pentest attestation.
 
 Full release admission still requires external retest, the permanent report,
 green CI/CodeQL and the previously documented capable Podman host. The ignored

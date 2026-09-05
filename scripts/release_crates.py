@@ -11,7 +11,7 @@ import sys
 from pathlib import Path
 
 from release_publish import confirm_no_verify, selected_steps, wait_for_index
-from release_evidence import authenticated_tag
+from release_evidence import authenticated_candidate
 from release_train import (
     parse_version,
     publication_allowed,
@@ -261,8 +261,19 @@ def verify_publish_order(packages: dict[str, dict], plan: dict) -> None:
 
 def check_release_tag(version: str, *, require_tag: bool) -> bool:
     tag = f"v{version}"
+    if parse_version(version) >= (0, 55, 0):
+        if not require_tag and try_capture(["git", "rev-parse", "--verify", f"refs/tags/{tag}"]) is None:
+            print(f"Warning: release tag {tag!r} was not found.", file=sys.stderr)
+            return False
+        try:
+            commit = authenticated_candidate(ROOT, version)
+        except RuntimeError as error:
+            print(f"Refusing to publish: {error}", file=sys.stderr)
+            sys.exit(1)
+        print(f"Release tag {tag} authenticates candidate HEAD {commit}.")
+        return True
     head = try_capture(["git", "rev-parse", "HEAD"])
-    tagged_commit = try_capture(["git", "rev-list", "-n", "1", tag])
+    tagged_commit = try_capture(["git", "rev-list", "-n", "1", f"refs/tags/{tag}"])
     if head is None or tagged_commit is None:
         message = f"release tag {tag!r} was not found"
         if require_tag:
@@ -279,14 +290,7 @@ def check_release_tag(version: str, *, require_tag: bool) -> bool:
         print(f"Warning: {message}.", file=sys.stderr)
         return False
 
-    if parse_version(version) >= (0, 55, 0):
-        try:
-            authenticated_tag(ROOT, version)
-            valid_signature = True
-        except RuntimeError:
-            valid_signature = False
-    else:
-        valid_signature = try_capture(["git", "verify-tag", tag]) is not None
+    valid_signature = try_capture(["git", "verify-tag", f"refs/tags/{tag}"]) is not None
     if not valid_signature:
         print(
             f"Refusing to publish: release tag {tag} has no valid signature.",

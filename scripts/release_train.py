@@ -182,20 +182,12 @@ def validate_facade_previous_version(plan: dict) -> None:
 
 
 def changed_packages(packages: dict[str, dict], baseline: str) -> set[str]:
-    tag = f"v{baseline}"
-    if subprocess.run(
-        ["git", "rev-parse", "-q", "--verify", f"refs/tags/{tag}"],
-        cwd=ROOT,
-        check=False,
-        stdout=subprocess.DEVNULL,
-        stderr=subprocess.DEVNULL,
-    ).returncode != 0:
-        raise RuntimeError(f"release baseline tag is missing: {tag}")
+    commit = authenticated_tag(ROOT, baseline)
     changed: set[str] = set()
     for name, package in packages.items():
         relative = Path(package["manifest_path"]).resolve().parent.relative_to(ROOT)
         tracked = subprocess.check_output(
-            ["git", "diff", "--name-only", tag, "--", str(relative)],
+            ["git", "diff", "--name-only", commit, "--", str(relative)],
             cwd=ROOT,
             text=True,
         ).strip()
@@ -206,7 +198,7 @@ def changed_packages(packages: dict[str, dict], baseline: str) -> set[str]:
         ).strip()
         if tracked or untracked:
             changed.add(name)
-    return changed | changed_contracts(ROOT, packages, baseline)
+    return changed | changed_contracts(ROOT, packages, commit)
 
 
 def validate_dependency_closure(packages: dict[str, dict], plan: dict) -> None:

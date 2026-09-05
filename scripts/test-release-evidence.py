@@ -1,6 +1,8 @@
 #!/usr/bin/env python3
 """Signed-history regressions for F1/F2, including the actual readiness script."""
 
+import os
+import subprocess
 import tempfile
 import unittest
 from pathlib import Path
@@ -9,7 +11,7 @@ from unittest.mock import patch
 import release_train
 import release_crates
 import release_evidence
-from release_evidence import authenticated_tag, validate_report, validate_train_reports
+from release_evidence import authenticated_candidate, authenticated_tag, validate_report, validate_train_reports
 from release_test_support import Repository
 
 
@@ -60,6 +62,58 @@ class EvidenceTests(unittest.TestCase):
         self.repo.git("update-ref", "refs/tags/v0.56.0", tag)
         with self.assertRaisesRegex(RuntimeError, "signed tag name"):
             authenticated_tag(self.repo.root, "0.56.0")
+
+    def test_publisher_rejects_ancestor_even_with_competing_short_ref(self):
+        self.repo.report("0.60.0")
+        with patch.object(release_crates, "ROOT", self.repo.root):
+            self.assertTrue(release_crates.check_release_tag("0.60.0", require_tag=True))
+            descendant = self.repo.commit("unsigned candidate")
+            for shadow in (False, True):
+                if shadow:
+                    self.repo.git("update-ref", "refs/v0.60.0", descendant)
+                with self.subTest(shadow=shadow), self.assertRaises(SystemExit):
+                    release_crates.check_release_tag("0.60.0", require_tag=True)
+
+    def test_pretag_missing_candidate_is_allowed_only_when_not_required(self):
+        with patch.object(release_crates, "ROOT", self.repo.root):
+            self.assertFalse(release_crates.check_release_tag("0.60.0", require_tag=False))
+            with self.assertRaises(SystemExit):
+                release_crates.check_release_tag("0.60.0", require_tag=True)
+
+    def test_actual_posttag_readiness_and_evidence_reject_shadowed_ancestor(self):
+        self.train()
+        result = self.repo.readiness()
+        self.assertEqual(result.returncode, 0, result.stderr)
+        self.repo.sign("0.60.0")
+        env = dict(os.environ, ETH_RELEASE_PUBLISH_TAG="v0.60.0")
+        commands = (["sh", "scripts/validate-release-readiness.sh", "v0.60.0"],
+                    ["python3", "scripts/validate_train_evidence.py", "0.60.0"])
+        for command in commands:
+            result = subprocess.run(command, cwd=self.repo.root, env=env, text=True, capture_output=True)
+            self.assertEqual(result.returncode, 0, result.stderr)
+        descendant = self.repo.report("0.60.0", signed=False)
+        self.repo.git("update-ref", "refs/v0.60.0", descendant)
+        for command in commands:
+            result = subprocess.run(command, cwd=self.repo.root, env=env, text=True, capture_output=True)
+            self.assertNotEqual(result.returncode, 0)
+            self.assertIn("does not point at", result.stderr)
+
+    def test_candidate_cannot_change_during_authentication(self):
+        signed = self.repo.report("0.60.0")
+        descendant = self.repo.commit("unsigned descendant")
+        original = release_evidence.git
+        for initial, moved in ((signed, descendant), (descendant, signed)):
+            self.repo.git("update-ref", "HEAD", initial)
+
+            def move_head(root, *args):
+                result = original(root, *args)
+                if args == ("rev-parse", "--verify", "refs/tags/v0.60.0"):
+                    self.repo.git("update-ref", "HEAD", moved)
+                return result
+
+            with self.subTest(initial=initial), patch.object(release_evidence, "git", side_effect=move_head):
+                with self.assertRaisesRegex(RuntimeError, "HEAD"):
+                    authenticated_candidate(self.repo.root, "0.60.0")
 
     def test_authentication_uses_immutable_tag_object(self):
         commit = self.repo.report("0.56.0")

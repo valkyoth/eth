@@ -19,7 +19,10 @@ return `None`; square roots choose the smaller canonical root.
 The initial pentest identified three release-control findings, now addressed
 with signed-history and effective-Cargo-contract regression tests. See the
 [remediation record](../docs/release-control-remediation-0.56.0.md). Field
-arithmetic was unchanged; external retest and final admission remain pending.
+arithmetic was unchanged. A follow-up caller-identity finding now binds current
+tag admission and baseline comparisons to captured authenticated commits,
+with conflicting/moving-reference regressions. External retest and final
+admission remain pending.
 
 - Public inputs only; no constant-time or secret-key safety claim.
 - No G1/G2 operations, subgroup checks, map-to-curve, pairing or signature

@@ -265,8 +265,8 @@ def test_internal_stage_rejects_selected_publication() -> None:
 def test_release_tag_requires_valid_signature() -> None:
     responses = {
         ("git", "rev-parse", "HEAD"): "candidate",
-        ("git", "rev-list", "-n", "1", "v0.4.0"): "candidate",
-        ("git", "verify-tag", "v0.4.0"): None,
+        ("git", "rev-list", "-n", "1", "refs/tags/v0.4.0"): "candidate",
+        ("git", "verify-tag", "refs/tags/v0.4.0"): None,
     }
     original_try_capture = release_crates.try_capture
     release_crates.try_capture = lambda command: responses[tuple(command)]
@@ -284,8 +284,8 @@ def test_release_tag_requires_valid_signature() -> None:
 def test_release_tag_accepts_valid_signature_at_head() -> None:
     responses = {
         ("git", "rev-parse", "HEAD"): "candidate",
-        ("git", "rev-list", "-n", "1", "v0.4.0"): "candidate",
-        ("git", "verify-tag", "v0.4.0"): "",
+        ("git", "rev-list", "-n", "1", "refs/tags/v0.4.0"): "candidate",
+        ("git", "verify-tag", "refs/tags/v0.4.0"): "",
     }
     original_try_capture = release_crates.try_capture
     release_crates.try_capture = lambda command: responses[tuple(command)]

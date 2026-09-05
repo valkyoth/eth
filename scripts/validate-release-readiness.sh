@@ -35,7 +35,7 @@ if git rev-parse -q --verify "refs/tags/${tag}" >/dev/null; then
         exit 1
     fi
 
-    tag_commit="$(git rev-list -n 1 "$tag")"
+    tag_commit="$(git rev-parse --verify "refs/tags/${tag}^{commit}")"
     head_commit="$(git rev-parse HEAD)"
     if [ "$tag_commit" != "$head_commit" ]; then
         echo "publish tag ${tag} does not point at HEAD" >&2

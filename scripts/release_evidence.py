@@ -46,6 +46,17 @@ def authenticated_tag(root: Path, version: str, candidate: str = "HEAD") -> str:
     return commit
 
 
+def authenticated_candidate(root: Path, version: str) -> str:
+    """Bind the authorized tag to one captured candidate, not a short ref."""
+    head = git(root, "rev-parse", "--verify", "HEAD^{commit}")
+    commit = authenticated_tag(root, version, candidate=head)
+    if commit != head:
+        raise RuntimeError(f"release tag v{version} does not point at candidate HEAD")
+    if git(root, "rev-parse", "--verify", "HEAD^{commit}") != head:
+        raise RuntimeError("candidate HEAD moved during authentication")
+    return commit
+
+
 def field(body: str, name: str) -> str:
     values = re.findall(rf"^{re.escape(name)}:[ \t]*(.*)$", body, re.MULTILINE)
     if len(values) != 1 or not values[0].strip():

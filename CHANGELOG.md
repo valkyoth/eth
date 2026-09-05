@@ -9,6 +9,8 @@ All notable changes to `eth` are documented here.
 - Remediated pentest release-control findings: cadence-derived public baselines,
   authenticated prior PASS reports with exact lineage, committed signer policy,
   and effective workspace-inherited dependency comparisons with regression tests.
+- Bound publisher/readiness admission and cumulative source/dependency snapshots
+  to exact authenticated commits; added conflicting/moving-reference regressions.
 
 - Added first-party public-input BLS12-381 base-field arithmetic, fixed-width
   reduction, inversion and deterministic square root without runtime dependencies.
