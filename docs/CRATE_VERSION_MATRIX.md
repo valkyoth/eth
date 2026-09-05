@@ -1,8 +1,7 @@
 # Crate Version Matrix
 
-Status: `v0.55.0` tagged and published after its pentest, clean retest, GitHub
-CI, and CodeQL gates passed. The EVM core, EVM boundary dependency, and facade
-changed.
+Status: `v0.56.0` internal implementation candidate, awaiting pentest.
+No crates are selected for publication before the `v0.60.0` checkpoint.
 
 `eth` uses independent crate versions. The facade crate remains the main user
 entry point, but support crates are published only when their own package or
@@ -40,24 +39,24 @@ API.
 workspace manifests, verifies the complete tag train, and refuses accidental
 lockstep or internal-milestone publication.
 
-## v0.55.0 Tracking Table
+## v0.56.0 Tracking Table
 
-| Crate | Published | Planned | Change | Publish | Reason |
+| Crate | Published | Source | Change | Publish | Reason |
 | --- | --- | --- | --- | --- | --- |
-| `eth-valkyoth-codec` | `0.21.0` | `0.21.0` | `unchanged` | No | No package changes. |
-| `eth-valkyoth-primitives` | `0.11.4` | `0.11.4` | `unchanged` | No | No package changes. |
-| `eth-valkyoth-hash` | `0.11.4` | `0.11.4` | `unchanged` | No | No package changes. |
-| `eth-valkyoth-protocol` | `0.26.1` | `0.26.1` | `unchanged` | No | No package changes. |
-| `eth-valkyoth-verify` | `0.27.0` | `0.27.0` | `unchanged` | No | No package changes. |
-| `eth-valkyoth-derive` | `0.18.0` | `0.18.0` | `unchanged` | No | No package changes. |
-| `eth-valkyoth-sanitization` | `0.8.0` | `0.8.0` | `unchanged` | No | No package changes. |
-| `eth-valkyoth-evm-core` | `0.28.0` | `0.29.0` | `code` | Yes | Replaces the private 64-byte ModExp ceiling with wide-length gas admission and caller-owned arbitrary-length arithmetic workspace. |
-| `eth-valkyoth-evm` | `0.12.1` | `0.12.2` | `dependency` | Yes | Updates the published EVM-core dependency requirement to `0.29.0`. |
-| `eth-valkyoth-rpc` | `0.7.0` | `0.7.0` | `unchanged` | No | No package changes. |
-| `eth-valkyoth-signer` | `0.7.5` | `0.7.5` | `unchanged` | No | No package changes. |
-| `eth-valkyoth-reth` | `0.7.0` | `0.7.0` | `unchanged` | No | No package changes. |
-| `eth-valkyoth-testkit` | `0.7.0` | `0.7.0` | `unchanged` | No | No package changes. |
-| `eth` | `0.54.0` | `0.55.0` | `code` | Yes | Exposes consensus-complete Prague-era EIP-198/EIP-2565 ModExp execution and workspace APIs. |
+| `eth-valkyoth-codec` | `0.21.0` | `0.21.0` | `unchanged` | No | Retains published version during the internal release train. |
+| `eth-valkyoth-primitives` | `0.11.4` | `0.11.4` | `unchanged` | No | Retains published version during the internal release train. |
+| `eth-valkyoth-hash` | `0.11.4` | `0.11.4` | `unchanged` | No | Retains published version during the internal release train. |
+| `eth-valkyoth-protocol` | `0.26.1` | `0.26.1` | `unchanged` | No | Retains published version during the internal release train. |
+| `eth-valkyoth-verify` | `0.27.0` | `0.27.0` | `unchanged` | No | Retains published version during the internal release train. |
+| `eth-valkyoth-derive` | `0.18.0` | `0.18.0` | `dependency` | No | Workspace dependency maintenance is accumulated for v0.60.0. |
+| `eth-valkyoth-sanitization` | `0.8.0` | `0.8.0` | `dependency` | No | Workspace dependency maintenance is accumulated for v0.60.0. |
+| `eth-valkyoth-evm-core` | `0.29.0` | `0.29.0` | `code` | No | Adds fixed-width public-input BLS12-381 base-field arithmetic; cumulative bump at v0.60.0. |
+| `eth-valkyoth-evm` | `0.12.2` | `0.12.2` | `unchanged` | No | Retains published version during the internal release train. |
+| `eth-valkyoth-rpc` | `0.7.0` | `0.7.0` | `unchanged` | No | Retains published version during the internal release train. |
+| `eth-valkyoth-signer` | `0.7.5` | `0.7.5` | `unchanged` | No | Retains published version during the internal release train. |
+| `eth-valkyoth-reth` | `0.7.0` | `0.7.0` | `unchanged` | No | Retains published version during the internal release train. |
+| `eth-valkyoth-testkit` | `0.7.0` | `0.7.0` | `unchanged` | No | Retains published version during the internal release train. |
+| `eth` | `0.55.0` | `0.56.0` | `code` | No | Internal facade milestone for public-input BLS12-381 Fp arithmetic; no publication before v0.60.0. |
 
 Update this table and `release-crates.toml` in the same commit whenever a crate
 changes release state.

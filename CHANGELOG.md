@@ -4,6 +4,15 @@ All notable changes to `eth` are documented here.
 
 ## Unreleased
 
+### v0.56.0 Internal Candidate
+
+- Added first-party public-input BLS12-381 base-field arithmetic, fixed-width
+  reduction, inversion and deterministic square root without runtime dependencies.
+- Added independent BigUint differential coverage, fuzz invariants, benchmarks
+  and a scope/resource contract. Curve/precompile execution remains fail closed.
+- Advanced only the facade source version; publication is deferred to v0.60.0
+  and pentest remains pending.
+
 - Resliced the unpublished roadmap into 98 additional implementation passes,
   promoted 11 planned patch milestones to minors, preserved all 296 future
   contracts and added an old-to-new map through v0.449.0.

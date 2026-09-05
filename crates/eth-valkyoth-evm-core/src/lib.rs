@@ -14,6 +14,8 @@ mod access_node;
 mod access_radix;
 mod advanced_precompile;
 mod blake2f;
+mod bls12_field;
+mod bls12_field_api;
 mod bls12_frame;
 mod bls12_gas;
 mod bls12_wire;

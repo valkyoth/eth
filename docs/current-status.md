@@ -3,6 +3,11 @@
 Release snapshot: `v0.55.0` tagged and published after its pentest, clean
 retest, GitHub CI, and CodeQL gates passed.
 
+Source candidate: `v0.56.0`, pending pentest, adds public-input BLS12-381
+Fp arithmetic only. The tables below retain the published snapshot; no curve,
+subgroup, signature or BLS precompile execution is implied by field operations.
+See the [base-field scope and verification](bls12-381-base-field.md).
+
 Every following roadmap version remains a pentested signed GitHub tag. The next
 cumulative crates.io publication is `v0.60.0`; intermediate minor and patch
 tags publish no crates.

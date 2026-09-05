@@ -3202,11 +3202,12 @@ Exit criteria:
 
 ### v0.56.0 - BLS12-381 Base Field
 
-Status: planned; internal signed tag, publication at v0.60.0.
+Status: implementation candidate; pentest pending; internal tag, publication at v0.60.0.
 
 Goal: establish canonical first-party Fp arithmetic independently of curve execution.
 
-Scope: implementation pass. Depends on v0.55.0. The retained
+Scope: implementation pass. Depends on v0.55.0. The exact APIs, resource bounds
+and commands are in [BLS12-381 base field](bls12-381-base-field.md). The retained
 workstream contract at v0.58.0 applies from this first implementation;
 its integration gate is not a prerequisite implementation. No later
 feature is implicitly enabled by this pass.

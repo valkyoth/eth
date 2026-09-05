@@ -20,6 +20,14 @@ eth-valkyoth-primitives = { path = "../crates/eth-valkyoth-primitives", version 
 eth-valkyoth-protocol = { path = "../crates/eth-valkyoth-protocol", version = "0.26.1" }
 eth-valkyoth-verify = { path = "../crates/eth-valkyoth-verify", version = "0.27.0", features = ["json", "secp256k1-k256"] }
 libfuzzer-sys = "0.4.13"
+num-bigint = { version = "0.5.1", default-features = false, features = ["std"] }
+
+[[bin]]
+name = "bls12381_field"
+path = "fuzz_targets/bls12381_field.rs"
+test = false
+doc = false
+bench = false
 
 [[bin]]
 name = "rlp"

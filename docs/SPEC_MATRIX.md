@@ -1,5 +1,11 @@
 # eth Specification Matrix
 
+The internal `v0.56.0` candidate adds public-input BLS12-381 Fp conversion,
+reduction and arithmetic using EIP-2537's field modulus. Its
+[scope and source evidence](bls12-381-base-field.md) are separate from curve
+and precompile admission. Pentest is pending; this is not yet a published
+capability. The wire decoder still rejects noncanonical encodings.
+
 Status: source revisions pinned for `v0.37.4`; scalar, list, and canonical
 integer RLP decoding, canonical RLP encoding helpers, primitive RLP bridging,
 Keccak-256 trait boundary, RLP fuzz harness baseline, external execution

@@ -16,7 +16,7 @@ pub const EVM_BLS12381_G2_POINT_BYTES: usize = 256;
 const FP_VALUE_BYTES: usize = 48;
 const FP_PADDING_BYTES: usize = EVM_BLS12381_FP_BYTES - FP_VALUE_BYTES;
 
-const FP_MODULUS: [u8; FP_VALUE_BYTES] = [
+pub(crate) const FP_MODULUS: [u8; FP_VALUE_BYTES] = [
     0x1a, 0x01, 0x11, 0xea, 0x39, 0x7f, 0xe6, 0x9a, 0x4b, 0x1b, 0xa7, 0xb6, 0x43, 0x4b, 0xac, 0xd7,
     0x64, 0x77, 0x4b, 0x84, 0xf3, 0x85, 0x12, 0xbf, 0x67, 0x30, 0xd2, 0xa0, 0xf6, 0xb0, 0xf6, 0x24,
     0x1e, 0xab, 0xff, 0xfe, 0xb1, 0x53, 0xff, 0xff, 0xb9, 0xfe, 0xff, 0xff, 0xff, 0xff, 0xaa, 0xab,
@@ -28,10 +28,17 @@ const FR_MODULUS: [u8; EVM_BLS12381_FR_BYTES] = [
 ];
 
 /// Canonical BLS12-381 base-field value decoded from EIP-2537 wire bytes.
+///
+/// Arithmetic is for public inputs only: comparisons and reductions may branch
+/// on values. This type is not a constant-time secret-key arithmetic backend.
 #[derive(Clone, Copy, Debug, Eq, PartialEq)]
 pub struct EvmBls12381Fp([u8; FP_VALUE_BYTES]);
 
 impl EvmBls12381Fp {
+    pub(crate) fn from_field(value: crate::bls12_field::Fp) -> Self {
+        Self(value.to_canonical())
+    }
+
     /// Decodes one canonical 64-byte EIP-2537 base-field element.
     pub fn try_from_be_bytes(input: &[u8]) -> Result<Self, EvmCoreError> {
         let encoded: &[u8; EVM_BLS12381_FP_BYTES] = input

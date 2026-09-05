@@ -44,6 +44,11 @@ crates.io packages are published cumulatively at `v0.60.0`, `v0.65.0`, and
 each later pre-1.0 minor divisible by five. Intermediate tags remain source
 milestones and never publish crates.
 
+The source checkout is preparing internal milestone `0.56.0`: public-input
+BLS12-381 base-field arithmetic, pending pentest. This is not yet available
+on crates.io; dependency examples below deliberately use published `0.55.0`.
+G1/G2 and BLS precompile execution remain unavailable.
+
 ## Install
 
 ```toml

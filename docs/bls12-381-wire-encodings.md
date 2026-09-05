@@ -12,7 +12,10 @@ this release.
 
 It does not prove that a non-infinity point lies on the BLS12-381 curve, belongs
 to the required subgroup, or is valid for arithmetic. Those checks and the
-precompile implementations are assigned to `v0.56.0..=v0.70.0`.
+precompile implementations are assigned to `v0.57.0..=v0.70.0`.
+The `v0.56.0` source candidate supplies public-input Fp arithmetic only;
+see the [base-field contract](bls12-381-base-field.md). Arithmetic reduction
+does not relax the canonical wire decoder described here.
 
 ## Canonical Rules
 
