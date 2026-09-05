@@ -45,7 +45,8 @@ each later pre-1.0 minor divisible by five. Intermediate tags remain source
 milestones and never publish crates.
 
 The source checkout is preparing internal milestone `0.56.0`: public-input
-BLS12-381 base-field arithmetic, pending pentest. This is not yet available
+BLS12-381 base-field arithmetic, with a clean pentest retest. Tag admission
+still requires the full release gate and green GitHub checks. This is not available
 on crates.io; dependency examples below deliberately use published `0.55.0`.
 G1/G2 and BLS precompile execution remain unavailable.
 
@@ -1292,7 +1293,7 @@ completed on the updated dependencies and any environment limitations.
 scripts/checks.sh
 scripts/check_latest_crates.py
 scripts/check_latest_tools.sh
-scripts/release_0_55_0_gate.sh
+scripts/release_0_56_0_gate.sh
 ```
 
 The two networked freshness checks fail closed when a direct crates.io

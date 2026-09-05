@@ -72,7 +72,8 @@ The internal `v0.56.0` source candidate adds `EvmBls12381Fp` modular
 arithmetic, inversion and square root without enabling curve execution.
 These operations are public-input only, not constant-time secret arithmetic.
 See the [base-field contract](https://github.com/valkyoth/eth/blob/main/docs/bls12-381-base-field.md).
-This addition is pending pentest and is not in the published `eth 0.55.0`
+The pentest retest is clean; tag admission still requires the full release gate
+and green GitHub checks. This addition is not in the published `eth 0.55.0`
 package used by the dependency examples above.
 
 ```rust

@@ -15,7 +15,8 @@ previously planned workstream contracts, extracts 98 implementation passes and
 promotes 11 planned patch milestones to minors. Unpublished work now extends
 through `v0.449.0`; published history through `v0.55.0` is unchanged. The
 [version map](roadmap-version-map.json) records every previous assignment.
-The next implementation is `v0.56.0`, BLS12-381 base-field arithmetic only.
+The current candidate is `v0.56.0`, BLS12-381 base-field arithmetic only;
+pentest retest is clean, with release admission and GitHub checks pending.
 
 Tags use:
 
@@ -3202,7 +3203,10 @@ Exit criteria:
 
 ### v0.56.0 - BLS12-381 Base Field
 
-Status: implementation candidate; pentest pending; internal tag, publication at v0.60.0.
+Status: implementation and pentest remediation complete; clean retest confirmed.
+Release admission remains blocked by the required external-client run on a
+host with CPU/memory delegation, and awaits green GitHub CI/CodeQL. Internal
+tag only; publication at v0.60.0.
 
 Goal: establish canonical first-party Fp arithmetic independently of curve execution.
 

@@ -1,6 +1,7 @@
 # v0.56.0 Release-Control Remediation
 
-Status: fixes implemented; external retest pending. Not a PASS attestation.
+Status: fixes implemented; clean external retest confirmed by the maintainer
+on 2026-09-05. This remediation history is not the permanent PASS attestation.
 
 The incremental review of `v0.55.0` through
 `4bb67147e72f6ac3168403c44e781a2246d61cb9` reported two Medium release-integrity
@@ -113,10 +114,11 @@ dependency tests, 8 train tests, publisher/readiness regressions, and the full
 Separate fuzz-workspace Clippy with `--all-targets -- -D warnings` also passed.
 These are remediation checks, not an independent clean pentest attestation.
 
-Full release admission still requires external retest, the permanent report,
-green CI/CodeQL and the previously documented capable Podman host. The ignored
+Full release admission still requires the permanent report, green CI/CodeQL
+and the previously documented capable Podman host. The ignored
 root PENTEST.md is consumed and removed; this document preserves the actionable
-findings without claiming an independent retest has occurred.
+findings; the maintainer subsequently confirmed the R1 retest clean for
+`e638f37`. No Rust implementation changed during release-document finalization.
 
 Reference contracts: [Git SSH signature trust](https://git-scm.com/docs/git-config#Documentation/git-config.txt-gpgsshallowedSignersFile),
 [Cargo configuration discovery](https://doc.rust-lang.org/cargo/reference/config.html),

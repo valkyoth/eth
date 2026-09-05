@@ -1,7 +1,8 @@
 # BLS12-381 Base Field
 
 Milestone: `v0.56.0`, internal source release; crates.io publication at
-`v0.60.0`. Pentest is pending. This is not G1, G2 or signature execution.
+`v0.60.0`. Pentest retest is clean; full release admission and GitHub checks
+remain pending. This is not G1, G2 or signature execution.
 
 ## Scope Manifest
 
@@ -132,5 +133,6 @@ Local review on 2026-09-05, Rust 1.98.1, x86_64 Linux:
   The gate is retained unchanged and must run on a capable host before tag
   admission. No client-run success or full release-gate success is claimed.
 
-Pentest, remediation/retest where needed, the permanent security report,
-GitHub CI and CodeQL remain required before tag authorization.
+The maintainer confirmed a clean external retest on 2026-09-05 after the
+release-control remediation. The permanent security report, capable-host
+external regression, GitHub CI and CodeQL remain required before tag authorization.

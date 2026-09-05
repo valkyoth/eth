@@ -17,7 +17,8 @@ The [release plan](RELEASE_PLAN.md) assigns this work to bounded, individually
 pentested milestones. The [September scope review](ROADMAP_REVIEW_2026_09_05.md)
 records the latest splits and full-client/library acceptance requirements;
 the [version map](roadmap-version-map.json) preserves previous assignments.
-The next slice is `v0.56.0`, BLS12-381 base-field arithmetic. Unpublished
+The current candidate is `v0.56.0`, BLS12-381 base-field arithmetic; its pentest
+retest is clean, with full release admission and GitHub checks pending. Unpublished
 implementation and assurance passes continue through `v0.449.0` before RC/1.0;
 that endpoint is a scope inventory, not a deadline or automatic readiness claim.
 

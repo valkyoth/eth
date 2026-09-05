@@ -1,6 +1,6 @@
 # eth v0.56.0
 
-Status: release-control findings remediated; awaiting external retest.
+Status: pentest retest clean; full release admission and GitHub checks pending.
 Publication: DEFERRED TO v0.60.0
 
 ## Scope
@@ -21,8 +21,8 @@ with signed-history and effective-Cargo-contract regression tests. See the
 [remediation record](../docs/release-control-remediation-0.56.0.md). Field
 arithmetic was unchanged. A follow-up caller-identity finding now binds current
 tag admission and baseline comparisons to captured authenticated commits,
-with conflicting/moving-reference regressions. External retest and final
-admission remain pending.
+with conflicting/moving-reference regressions. The maintainer confirmed the
+external retest clean on 2026-09-05. Final admission remains pending.
 
 - Public inputs only; no constant-time or secret-key safety claim.
 - No G1/G2 operations, subgroup checks, map-to-curve, pairing or signature
@@ -31,7 +31,7 @@ admission remain pending.
   authorization and hosts remain responsible for aggregate workload admission.
 - Independent BigUint differential tests, boundary/carry tests, algebraic
   fuzzing and fixed-work benchmarks cover the new field layer.
-- Pentest and final release admission are pending, not implied by local tests.
+- Clean pentest does not waive the full release gate or hosted CI/CodeQL.
 - The existing external-client ModExp regression is still host-blocked by
   missing Podman CPU/memory delegation. It remains a mandatory pre-tag check.
 
