@@ -16,7 +16,7 @@ Run these regularly and before releases:
 ```bash
 scripts/checks.sh
 scripts/check_latest_tools.sh
-scripts/release_0_1_gate.sh
+scripts/release_0_56_0_gate.sh --implementation
 cargo deny check
 cargo audit
 scripts/generate-sbom.sh --check
@@ -30,6 +30,12 @@ The verification steps are documented in
 
 ## Release Gate
 
+The maintainer workflow is implementation/testing, pentest and remediation,
+permanent report, commit, GitHub checks, then explicit permission to tag/push.
+GitHub failures return to fixes/tests/report updates and a new commit.
+Consume and delete root `PENTEST.md` after preserving findings and resolutions;
+a clean pentest is documented directly. See the [runbook](docs/RELEASE_RUNBOOK.md).
+
 Every release tag must point at a final pentest-report commit. The matching
 `security/pentest/vX.Y.Z.md` report must have `Status: PASS`, and
 `scripts/validate-release-readiness.sh vX.Y.Z` must pass before the tag is
@@ -41,6 +47,13 @@ already exists.
 The pentest-report commit must be the direct, linear child of the reviewed
 commit. Do not squash-merge or rewrite the release branch between the reviewed
 implementation commit and the final report commit.
+
+The active gate's `--implementation` mode runs portable tests, freshness,
+audits, fuzzing and compiler compatibility before review. Default/`--tag` mode
+checks final metadata and report readiness only; it does not start clients.
+External-client runs remain explicit, fully isolated tests. An unavailable
+host is recorded as missing evidence with its scope, not a hidden success or
+an automatic additional tag-stage prerequisite for v0.56.0.
 
 ## Dependency Policy
 

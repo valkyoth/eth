@@ -114,8 +114,10 @@ dependency tests, 8 train tests, publisher/readiness regressions, and the full
 Separate fuzz-workspace Clippy with `--all-targets -- -D warnings` also passed.
 These are remediation checks, not an independent clean pentest attestation.
 
-Full release admission still requires the permanent report, green CI/CodeQL
-and the previously documented capable Podman host. The ignored
+Final release admission requires the permanent report, green CI/CodeQL and
+explicit maintainer approval. The updated [runbook](RELEASE_RUNBOOK.md)
+separates host-dependent integration evidence from tag-stage admission;
+the Podman limitation is retained in the report, not hidden or marked passed. The ignored
 root PENTEST.md is consumed and removed; this document preserves the actionable
 findings; the maintainer subsequently confirmed the R1 retest clean for
 `e638f37`. No Rust implementation changed during release-document finalization.

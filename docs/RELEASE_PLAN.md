@@ -16,7 +16,8 @@ promotes 11 planned patch milestones to minors. Unpublished work now extends
 through `v0.449.0`; published history through `v0.55.0` is unchanged. The
 [version map](roadmap-version-map.json) records every previous assignment.
 The current candidate is `v0.56.0`, BLS12-381 base-field arithmetic only;
-pentest retest is clean, with release admission and GitHub checks pending.
+pentest retest is clean. The simplified release workflow update awaits fresh
+GitHub checks and explicit tag authorization.
 
 Tags use:
 
@@ -208,6 +209,15 @@ verification pass, or exit criterion is too broad for one reviewable release.
 Every version must pass a security review and pentest before it is tagged. This
 applies to `v0.N.P` patch tags as well as milestone tags.
 
+From v0.56.0 onward, implementation checks run before the pentest handoff;
+final tag admission only validates metadata/report readiness after green
+GitHub checks and explicit maintainer authorization. The active versioned
+gate uses `--implementation` for the first phase and defaults to `--tag` for
+the second. External-client/Podman tests remain separate evidence-producing
+commands, never silently weakened or reported passed when unavailable. The
+[runbook](RELEASE_RUNBOOK.md#integration-evidence) defines scope and limitation
+recording. No new feature may claim conformance without its required evidence.
+
 A version is not tag-ready until:
 
 - `scripts/checks.sh` passes;
@@ -274,7 +284,8 @@ No tag is created at that point.
 Use this loop for every version:
 
 1. Implementation reaches the version stop point.
-2. Local gates pass: `scripts/checks.sh`, `cargo deny check`, and `cargo audit`.
+2. Portable implementation checks pass, including the versioned gate's
+   `--implementation` phase, `scripts/checks.sh`, Deny and Audit.
 3. The maintainer runs pentest and writes temporary findings to root
    `PENTEST.md`.
 4. Findings are reviewed and fixed.
@@ -283,12 +294,17 @@ Use this loop for every version:
    commit is finalized.
 7. Local gates are run again.
 8. GitHub CI and CodeQL default setup are checked after the fix commit.
-9. A permanent report is written at `security/pentest/vX.Y.Z.md` only when the
-   exact implementation commit has passed with `Status: PASS`.
+9. Keep the permanent `security/pentest/vX.Y.Z.md` report/history current during
+   fixes; mark it PASS only when review is clean. If the maintainer reports a
+   clean pentest directly, document that result without requiring scratch findings.
 10. Commit only the permanent report as the release report commit.
 11. GitHub CI and CodeQL default setup are checked on the release report commit.
-12. `scripts/validate-release-readiness.sh vX.Y.Z` passes locally through the
-    versioned release gate before the tag is created.
+    Reported GitHub failures return to fixes, regression tests, report updates
+    and new commits, followed by another GitHub wait.
+12. After the maintainer confirms GitHub green and explicitly authorizes the
+    tag, `scripts/validate-release-readiness.sh vX.Y.Z` passes through the
+    versioned gate's default/`--tag` phase. Do not rerun implementation or
+    environment-dependent client workloads at this point.
 13. Tagging and pushing tags happen only when explicitly requested.
 14. Internal milestones stop after their signed tag is pushed. Scheduled
     public checkpoints continue to publication only after a cumulative
@@ -3204,9 +3220,11 @@ Exit criteria:
 ### v0.56.0 - BLS12-381 Base Field
 
 Status: implementation and pentest remediation complete; clean retest confirmed.
-Release admission remains blocked by the required external-client run on a
-host with CPU/memory delegation, and awaits green GitHub CI/CodeQL. Internal
-tag only; publication at v0.60.0.
+The maintainer-approved workflow separates portable implementation checks from
+final report/tag admission. The host-unavailable external-client run remains
+documented missing evidence, not an additional tag blocker for this field-only
+milestone. Await fresh GitHub CI/CodeQL after the workflow update and explicit
+tag authorization. Internal tag only; publication at v0.60.0.
 
 Goal: establish canonical first-party Fp arithmetic independently of curve execution.
 

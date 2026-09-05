@@ -38,10 +38,16 @@ def run(command: list[str]) -> None:
 
 def main() -> int:
     parser = argparse.ArgumentParser()
-    parser.add_argument(
+    mode = parser.add_mutually_exclusive_group()
+    mode.add_argument(
         "--check",
         action="store_true",
         help="validate that the differential harness is configured",
+    )
+    mode.add_argument(
+        "--in-process",
+        action="store_true",
+        help="run only independent in-process oracles; no external-client evidence",
     )
     args = parser.parse_args()
 
@@ -57,7 +63,8 @@ def main() -> int:
 
     for command in DIFFERENTIAL_TESTS:
         run(command)
-    run(CLIENT_DIFFERENTIAL)
+    if not args.in_process:
+        run(CLIENT_DIFFERENTIAL)
     return 0
 
 

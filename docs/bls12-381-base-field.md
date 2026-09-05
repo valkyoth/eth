@@ -1,8 +1,8 @@
 # BLS12-381 Base Field
 
 Milestone: `v0.56.0`, internal source release; crates.io publication at
-`v0.60.0`. Pentest retest is clean; full release admission and GitHub checks
-remain pending. This is not G1, G2 or signature execution.
+`v0.60.0`. Pentest retest is clean; the workflow update awaits fresh GitHub
+checks and tag approval. This is not G1, G2 or signature execution.
 
 ## Scope Manifest
 
@@ -97,7 +97,7 @@ cargo +1.90.0 check --workspace --all-features
 scripts/materialize_fuzz_seeds.py
 cargo +nightly fuzz run bls12381_field -- -max_total_time=30 -max_len=96
 scripts/checks.sh
-scripts/release_0_56_0_gate.sh
+scripts/release_0_56_0_gate.sh --implementation
 ```
 
 `num-bigint` is a test/fuzz-only independent arithmetic oracle. Fuzzing checks
@@ -106,8 +106,9 @@ algebraic invariants. It never enters the runtime dependency graph.
 The benchmark uses fixed iteration counts and black-box barriers; it measures
 public API cost including conversions, not constant-time behavior. Actual
 reports go in `target/` and must accompany the implementation review.
-The final release gate deliberately requires a completed exact-commit pentest
-report; ordinary checks can pass before that report exists.
+The gate's default/`--tag` phase requires a completed exact-commit pentest
+report; `--implementation` runs portable checks before that report exists.
+Client infrastructure tests run separately and are recorded with their scope.
 
 ## Implementation Evidence
 
@@ -130,9 +131,12 @@ Local review on 2026-09-05, Rust 1.98.1, x86_64 Linux:
 - Existing in-process RLP and ModExp differential regressions passed.
 - The inherited Geth/Besu/Nethermind regression is blocked by the host's
   missing CPU/memory cgroup delegation, both inside and outside the sandbox.
-  The gate is retained unchanged and must run on a capable host before tag
-  admission. No client-run success or full release-gate success is claimed.
+  Under the original combined gate this blocked release admission. The
+  maintainer subsequently separated implementation and tag phases; client
+  execution remains unavailable evidence, not a tag-stage prerequisite for
+  this field-only release. No client-run success is claimed.
 
 The maintainer confirmed a clean external retest on 2026-09-05 after the
-release-control remediation. The permanent security report, capable-host
-external regression, GitHub CI and CodeQL remain required before tag authorization.
+release-control remediation. The permanent security report, current-candidate
+GitHub CI and CodeQL remain required before tag authorization under the
+[maintainer workflow](RELEASE_RUNBOOK.md).

@@ -46,7 +46,7 @@ milestones and never publish crates.
 
 The source checkout is preparing internal milestone `0.56.0`: public-input
 BLS12-381 base-field arithmetic, with a clean pentest retest. Tag admission
-still requires the full release gate and green GitHub checks. This is not available
+still requires report readiness, green GitHub checks and maintainer approval. This is not available
 on crates.io; dependency examples below deliberately use published `0.55.0`.
 G1/G2 and BLS precompile execution remain unavailable.
 
@@ -1282,7 +1282,7 @@ Toolchain policy for the next release (historical tag evidence is unchanged):
 | Rust | Local Evidence |
 | --- | --- |
 | `1.90.0`-`1.98.0` | `cargo check --workspace --all-features` on every supported toolchain |
-| `1.98.1` | Full release gate required before tagging |
+| `1.98.1` | Full portable implementation checks before pentest; report readiness before tagging |
 
 See the [maintenance review](https://github.com/valkyoth/eth/blob/main/docs/maintenance-review-2026-09-05.md) for checks
 completed on the updated dependencies and any environment limitations.
@@ -1293,8 +1293,13 @@ completed on the updated dependencies and any environment limitations.
 scripts/checks.sh
 scripts/check_latest_crates.py
 scripts/check_latest_tools.sh
-scripts/release_0_56_0_gate.sh
+scripts/release_0_56_0_gate.sh --implementation
 ```
+
+After clean pentest and green GitHub checks, the same gate without arguments
+validates metadata/report readiness for maintainer-authorized tagging.
+External-client testing is separate; unavailable runs are recorded explicitly
+in the pentest report. See the [release workflow](https://github.com/valkyoth/eth/blob/main/docs/RELEASE_RUNBOOK.md).
 
 The two networked freshness checks fail closed when a direct crates.io
 dependency, stable Rust release, Cargo tool, or GitHub Action pin in any

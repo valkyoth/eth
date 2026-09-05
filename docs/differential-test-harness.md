@@ -24,6 +24,16 @@ that all three client images are immutably pinned:
 scripts/run_differential_tests.py --check
 ```
 
+Run portable independent oracles before pentest without claiming client evidence:
+
+```sh
+scripts/run_differential_tests.py --in-process
+```
+
+From v0.56.0, final tag admission does not rerun client infrastructure. Record
+unavailable client runs and their scope in the permanent report, following
+the [release workflow](RELEASE_RUNBOOK.md#integration-evidence).
+
 Run every reference path, including the external clients:
 
 ```sh

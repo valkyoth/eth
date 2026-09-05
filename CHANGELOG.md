@@ -6,6 +6,10 @@ All notable changes to `eth` are documented here.
 
 ### v0.56.0 Internal Candidate
 
+- Simplified the maintainer release loop: portable checks before pentest,
+  fixes/tests/report updates, commit and GitHub wait, then metadata/report
+  admission and explicit tag approval. Client infrastructure is a separate
+  evidence run; unavailable tests remain disclosed without weakening isolation.
 - Remediated pentest release-control findings: cadence-derived public baselines,
   authenticated prior PASS reports with exact lineage, committed signer policy,
   and effective workspace-inherited dependency comparisons with regression tests.
@@ -18,7 +22,8 @@ All notable changes to `eth` are documented here.
   and a scope/resource contract. Curve/precompile execution remains fail closed.
 - Advanced only the facade source version; publication is deferred to v0.60.0
   and the pentest retest is clean. Full release admission and GitHub checks
-  remain pending, including the capable-host external-client regression.
+  remain pending for the workflow update. The host-unavailable external-client
+  regression is documented separately from tag admission.
 
 - Resliced the unpublished roadmap into 98 additional implementation passes,
   promoted 11 planned patch milestones to minors, preserved all 296 future

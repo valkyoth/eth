@@ -7,8 +7,10 @@ Source candidate: `v0.56.0`, with a clean pentest retest, adds public-input BLS1
 Fp arithmetic only. The tables below retain the published snapshot; no curve,
 subgroup, signature or BLS precompile execution is implied by field operations.
 See the [base-field scope and verification](bls12-381-base-field.md).
-Tag admission still requires the full gate, including the host-blocked external
-client differential run, and green GitHub CI/CodeQL.
+The workflow update awaits fresh GitHub CI/CodeQL and maintainer tag approval.
+Portable checks run before review; tag admission validates report readiness.
+The host-unavailable client differential run is recorded as missing evidence,
+not a passed test or an additional tag blocker for this field-only milestone.
 
 Every following roadmap version remains a pentested signed GitHub tag. The next
 cumulative crates.io publication is `v0.60.0`; intermediate minor and patch
