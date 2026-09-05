@@ -6,6 +6,8 @@ scripts/check_shell_syntax.sh
 scripts/check_doc_links.sh
 scripts/check_release_plan.sh
 scripts/test-release-plan.sh
+python3 scripts/check_roadmap_map.py
+python3 scripts/test-roadmap-map.py
 scripts/test-check-latest-tools.sh
 scripts/test-check-latest-crates.py
 if ! cmp -s README.md crates/eth/README.md; then

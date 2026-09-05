@@ -1,0 +1,2178 @@
+{
+  "source_commit": "958f47dd1b2f0264ef4dc217421b92dbc9bd6428",
+  "published_through": "v0.55.0",
+  "added_passes": 98,
+  "retained_contracts": 296,
+  "mapping": [
+    {
+      "previous": "v0.56.0",
+      "title": "BLS12-381 G1 Arithmetic And Addition",
+      "passes": [
+        "v0.56.0",
+        "v0.57.0",
+        "v0.58.0"
+      ]
+    },
+    {
+      "previous": "v0.57.0",
+      "title": "BLS12-381 Fp2, G2, And Addition",
+      "passes": [
+        "v0.59.0",
+        "v0.60.0",
+        "v0.61.0"
+      ]
+    },
+    {
+      "previous": "v0.58.0",
+      "title": "BLS12-381 Subgroup Validation",
+      "passes": [
+        "v0.62.0"
+      ]
+    },
+    {
+      "previous": "v0.59.0",
+      "title": "BLS12-381 Multiscalar Multiplication",
+      "passes": [
+        "v0.63.0"
+      ]
+    },
+    {
+      "previous": "v0.60.0",
+      "title": "BLS12-381 Map-To-Curve",
+      "passes": [
+        "v0.64.0"
+      ]
+    },
+    {
+      "previous": "v0.61.0",
+      "title": "BLS12-381 Pairing Foundation",
+      "passes": [
+        "v0.65.0",
+        "v0.66.0",
+        "v0.67.0",
+        "v0.68.0"
+      ]
+    },
+    {
+      "previous": "v0.62.0",
+      "title": "BLS12-381 Pairing Execution",
+      "passes": [
+        "v0.69.0"
+      ]
+    },
+    {
+      "previous": "v0.63.0",
+      "title": "Prague Advanced-Precompile Admission",
+      "passes": [
+        "v0.70.0"
+      ]
+    },
+    {
+      "previous": "v0.64.0",
+      "title": "Architecture Invariant Gate",
+      "passes": [
+        "v0.71.0"
+      ]
+    },
+    {
+      "previous": "v0.65.0",
+      "title": "Hierarchical Resource Governor Contract",
+      "passes": [
+        "v0.72.0"
+      ]
+    },
+    {
+      "previous": "v0.66.0",
+      "title": "Cryptographic Substrate Contract Freeze",
+      "passes": [
+        "v0.73.0"
+      ]
+    },
+    {
+      "previous": "v0.67.0",
+      "title": "First-Party Keccak-256 Core",
+      "passes": [
+        "v0.74.0"
+      ]
+    },
+    {
+      "previous": "v0.68.0",
+      "title": "First-Party secp256k1 Arithmetic",
+      "passes": [
+        "v0.75.0",
+        "v0.76.0",
+        "v0.77.0"
+      ]
+    },
+    {
+      "previous": "v0.69.0",
+      "title": "First-Party HMAC ECDSA Recovery And ECDH",
+      "passes": [
+        "v0.78.0",
+        "v0.79.0",
+        "v0.80.0",
+        "v0.81.0"
+      ]
+    },
+    {
+      "previous": "v0.70.0",
+      "title": "Symmetric Transport And Keystore Cryptography",
+      "passes": [
+        "v0.82.0",
+        "v0.83.0",
+        "v0.84.0",
+        "v0.85.0",
+        "v0.86.0"
+      ]
+    },
+    {
+      "previous": "v0.71.0",
+      "title": "Early Core Cryptography Integration And Audit",
+      "passes": [
+        "v0.87.0"
+      ]
+    },
+    {
+      "previous": "v0.72.0",
+      "title": "Cross-Format Decode Work Accounting",
+      "passes": [
+        "v0.88.0"
+      ]
+    },
+    {
+      "previous": "v0.73.0",
+      "title": "Shared Clock And Time-Evidence Contract",
+      "passes": [
+        "v0.89.0"
+      ]
+    },
+    {
+      "previous": "v0.74.0",
+      "title": "Validation Outcomes, Object Invalidity And Peer Evidence",
+      "passes": [
+        "v0.90.0",
+        "v0.91.0",
+        "v0.92.0",
+        "v0.93.0"
+      ]
+    },
+    {
+      "previous": "v0.75.0",
+      "title": "Early secp256k1 Arithmetic Proof Gate",
+      "passes": [
+        "v0.94.0"
+      ]
+    },
+    {
+      "previous": "v0.76.0",
+      "title": "Signing And Transport Capability Separation",
+      "passes": [
+        "v0.95.0"
+      ]
+    },
+    {
+      "previous": "v0.77.0",
+      "title": "Contextual Protocol, Wire And Operational Limit Domains",
+      "passes": [
+        "v0.96.0",
+        "v0.97.0",
+        "v0.98.0"
+      ]
+    },
+    {
+      "previous": "v0.78.0",
+      "title": "Hierarchical Evidence Capability Composition",
+      "passes": [
+        "v0.99.0",
+        "v0.100.0"
+      ]
+    },
+    {
+      "previous": "v0.79.0",
+      "title": "Evidence Collection Modes And Immutable Sink Access",
+      "passes": [
+        "v0.101.0",
+        "v0.102.0"
+      ]
+    },
+    {
+      "previous": "v0.80.0",
+      "title": "Evidence Hot-Path And API Containment Gate",
+      "passes": [
+        "v0.103.0",
+        "v0.104.0"
+      ]
+    },
+    {
+      "previous": "v0.81.0",
+      "title": "Evidence Arena Capacity And Benchmark Integrity",
+      "passes": [
+        "v0.105.0",
+        "v0.106.0"
+      ]
+    },
+    {
+      "previous": "v0.82.0",
+      "title": "Evidence Benchmark Measurement And Dispatch Closure",
+      "passes": [
+        "v0.107.0",
+        "v0.108.0",
+        "v0.109.0"
+      ]
+    },
+    {
+      "previous": "v0.83.0",
+      "title": "General Integer Primitives",
+      "passes": [
+        "v0.110.0"
+      ]
+    },
+    {
+      "previous": "v0.84.0",
+      "title": "Bytes And Hash Domains",
+      "passes": [
+        "v0.111.0"
+      ]
+    },
+    {
+      "previous": "v0.84.4",
+      "title": "Session-Bound Traversal API Hardening",
+      "passes": [
+        "v0.112.0"
+      ]
+    },
+    {
+      "previous": "v0.85.0",
+      "title": "Ethereum Text And Serde Interoperability",
+      "passes": [
+        "v0.113.0",
+        "v0.114.0"
+      ]
+    },
+    {
+      "previous": "v0.86.0",
+      "title": "Owned Transaction Models",
+      "passes": [
+        "v0.115.0"
+      ]
+    },
+    {
+      "previous": "v0.87.0",
+      "title": "Owned Block And Receipt Models",
+      "passes": [
+        "v0.116.0"
+      ]
+    },
+    {
+      "previous": "v0.88.0",
+      "title": "Owned State And Execution Models",
+      "passes": [
+        "v0.117.0"
+      ]
+    },
+    {
+      "previous": "v0.89.0",
+      "title": "Lossless Model Conversion Matrix",
+      "passes": [
+        "v0.118.0"
+      ]
+    },
+    {
+      "previous": "v0.90.0",
+      "title": "Bounded Allocation Convenience",
+      "passes": [
+        "v0.119.0"
+      ]
+    },
+    {
+      "previous": "v0.91.0",
+      "title": "Decode Policies And Error Context",
+      "passes": [
+        "v0.120.0"
+      ]
+    },
+    {
+      "previous": "v0.92.0",
+      "title": "Payload-Bound Typestates",
+      "passes": [
+        "v0.121.0"
+      ]
+    },
+    {
+      "previous": "v0.93.0",
+      "title": "Chain Specification And Fork Rules 2.0",
+      "passes": [
+        "v0.122.0"
+      ]
+    },
+    {
+      "previous": "v0.94.0",
+      "title": "Shared Protocol And Execution Domains",
+      "passes": [
+        "v0.123.0"
+      ]
+    },
+    {
+      "previous": "v0.95.0",
+      "title": "Native EVM Core Integration",
+      "passes": [
+        "v0.124.0"
+      ]
+    },
+    {
+      "previous": "v0.96.0",
+      "title": "Facade Prelude And Feature Truth",
+      "passes": [
+        "v0.125.0",
+        "v0.126.0"
+      ]
+    },
+    {
+      "previous": "v0.97.0",
+      "title": "Ecosystem Conversion Adapters",
+      "passes": [
+        "v0.127.0"
+      ]
+    },
+    {
+      "previous": "v0.98.0",
+      "title": "Owned SDK Hardening",
+      "passes": [
+        "v0.128.0"
+      ]
+    },
+    {
+      "previous": "v0.99.0",
+      "title": "Official State-Test Admission",
+      "passes": [
+        "v0.129.0"
+      ]
+    },
+    {
+      "previous": "v0.100.0",
+      "title": "Native EVM Audit Hardening",
+      "passes": [
+        "v0.130.0"
+      ]
+    },
+    {
+      "previous": "v0.101.0",
+      "title": "Genesis And Chain Configuration",
+      "passes": [
+        "v0.131.0"
+      ]
+    },
+    {
+      "previous": "v0.102.0",
+      "title": "Semantic Transaction Validity",
+      "passes": [
+        "v0.132.0",
+        "v0.133.0"
+      ]
+    },
+    {
+      "previous": "v0.103.0",
+      "title": "Header And Block Validity",
+      "passes": [
+        "v0.134.0"
+      ]
+    },
+    {
+      "previous": "v0.104.0",
+      "title": "State Transition And Journaling",
+      "passes": [
+        "v0.135.0",
+        "v0.136.0",
+        "v0.137.0"
+      ]
+    },
+    {
+      "previous": "v0.104.1",
+      "title": "System Operations And Execution Requests",
+      "passes": [
+        "v0.138.0",
+        "v0.139.0"
+      ]
+    },
+    {
+      "previous": "v0.105.0",
+      "title": "Receipts Logs Bloom And Withdrawals",
+      "passes": [
+        "v0.140.0"
+      ]
+    },
+    {
+      "previous": "v0.106.0",
+      "title": "Trie Construction And Root Computation",
+      "passes": [
+        "v0.141.0",
+        "v0.142.0"
+      ]
+    },
+    {
+      "previous": "v0.107.0",
+      "title": "KZG Trusted Setup Boundary",
+      "passes": [
+        "v0.143.0"
+      ]
+    },
+    {
+      "previous": "v0.108.0",
+      "title": "KZG Field And Polynomial Core",
+      "passes": [
+        "v0.144.0",
+        "v0.145.0"
+      ]
+    },
+    {
+      "previous": "v0.109.0",
+      "title": "KZG Commitments And Proofs",
+      "passes": [
+        "v0.146.0",
+        "v0.147.0",
+        "v0.148.0"
+      ]
+    },
+    {
+      "previous": "v0.110.0",
+      "title": "Point-Evaluation Precompile Execution",
+      "passes": [
+        "v0.149.0"
+      ]
+    },
+    {
+      "previous": "v0.111.0",
+      "title": "Blob Transaction And Block Integration",
+      "passes": [
+        "v0.150.0"
+      ]
+    },
+    {
+      "previous": "v0.112.0",
+      "title": "EOF Format And Static Validation",
+      "passes": [
+        "v0.151.0"
+      ]
+    },
+    {
+      "previous": "v0.113.0",
+      "title": "EOF Control Flow And Execution",
+      "passes": [
+        "v0.152.0"
+      ]
+    },
+    {
+      "previous": "v0.114.0",
+      "title": "EOF Creation And State Transition",
+      "passes": [
+        "v0.153.0"
+      ]
+    },
+    {
+      "previous": "v0.115.0",
+      "title": "Current Fork Manifest Admission",
+      "passes": [
+        "v0.154.0"
+      ]
+    },
+    {
+      "previous": "v0.116.0",
+      "title": "Current Fork Execution Changes",
+      "passes": [
+        "v0.155.0",
+        "v0.156.0",
+        "v0.157.0",
+        "v0.158.0",
+        "v0.159.0",
+        "v0.160.0",
+        "v0.161.0",
+        "v0.162.0",
+        "v0.163.0",
+        "v0.164.0",
+        "v0.165.0"
+      ]
+    },
+    {
+      "previous": "v0.117.0",
+      "title": "Complete Execution Fixture Gate",
+      "passes": [
+        "v0.166.0"
+      ]
+    },
+    {
+      "previous": "v0.118.0",
+      "title": "Execution Differential And Performance Gate",
+      "passes": [
+        "v0.167.0"
+      ]
+    },
+    {
+      "previous": "v0.118.1",
+      "title": "Snapshot-Bound Execution Caches And Prefetch",
+      "passes": [
+        "v0.168.0"
+      ]
+    },
+    {
+      "previous": "v0.118.2",
+      "title": "Deterministic Speculative Parallel Execution",
+      "passes": [
+        "v0.169.0",
+        "v0.170.0"
+      ]
+    },
+    {
+      "previous": "v0.119.0",
+      "title": "Inspector And Hook Framework",
+      "passes": [
+        "v0.171.0"
+      ]
+    },
+    {
+      "previous": "v0.120.0",
+      "title": "Trace And State-Diff Models",
+      "passes": [
+        "v0.172.0"
+      ]
+    },
+    {
+      "previous": "v0.121.0",
+      "title": "Deterministic Simulation And Overrides",
+      "passes": [
+        "v0.173.0"
+      ]
+    },
+    {
+      "previous": "v0.122.0",
+      "title": "Typed RPC Method Surface",
+      "passes": [
+        "v0.174.0",
+        "v0.175.0",
+        "v0.176.0"
+      ]
+    },
+    {
+      "previous": "v0.123.0",
+      "title": "Runtime-Neutral Transport Traits",
+      "passes": [
+        "v0.177.0"
+      ]
+    },
+    {
+      "previous": "v0.124.0",
+      "title": "HTTP Provider",
+      "passes": [
+        "v0.178.0"
+      ]
+    },
+    {
+      "previous": "v0.125.0",
+      "title": "WebSocket Provider",
+      "passes": [
+        "v0.179.0"
+      ]
+    },
+    {
+      "previous": "v0.126.0",
+      "title": "IPC Custom And EIP-1193 Transports",
+      "passes": [
+        "v0.180.0",
+        "v0.181.0"
+      ]
+    },
+    {
+      "previous": "v0.127.0",
+      "title": "RPC IDs Batching And Cancellation",
+      "passes": [
+        "v0.182.0"
+      ]
+    },
+    {
+      "previous": "v0.128.0",
+      "title": "Method Validation And Block Consistency",
+      "passes": [
+        "v0.183.0"
+      ]
+    },
+    {
+      "previous": "v0.129.0",
+      "title": "Provider Middleware",
+      "passes": [
+        "v0.184.0"
+      ]
+    },
+    {
+      "previous": "v0.130.0",
+      "title": "Quorum Verified And Traced Providers",
+      "passes": [
+        "v0.185.0"
+      ]
+    },
+    {
+      "previous": "v0.131.0",
+      "title": "Transaction Request Builders",
+      "passes": [
+        "v0.186.0"
+      ]
+    },
+    {
+      "previous": "v0.132.0",
+      "title": "Transaction Fillers",
+      "passes": [
+        "v0.187.0"
+      ]
+    },
+    {
+      "previous": "v0.133.0",
+      "title": "Blob Sidecars And Fee Markets",
+      "passes": [
+        "v0.188.0"
+      ]
+    },
+    {
+      "previous": "v0.134.0",
+      "title": "Build Simulate Sign Broadcast Workflow",
+      "passes": [
+        "v0.189.0"
+      ]
+    },
+    {
+      "previous": "v0.135.0",
+      "title": "Pending Transaction Watcher",
+      "passes": [
+        "v0.190.0"
+      ]
+    },
+    {
+      "previous": "v0.136.0",
+      "title": "Replacement Cancellation And Drop Recovery",
+      "passes": [
+        "v0.191.0"
+      ]
+    },
+    {
+      "previous": "v0.137.0",
+      "title": "Offline Signing Packages",
+      "passes": [
+        "v0.192.0"
+      ]
+    },
+    {
+      "previous": "v0.138.0",
+      "title": "Live Node Integration Matrix",
+      "passes": [
+        "v0.193.0"
+      ]
+    },
+    {
+      "previous": "v0.139.0",
+      "title": "Signer Interface 2.0",
+      "passes": [
+        "v0.194.0"
+      ]
+    },
+    {
+      "previous": "v0.140.0",
+      "title": "Local Secret Signer",
+      "passes": [
+        "v0.195.0"
+      ]
+    },
+    {
+      "previous": "v0.141.0",
+      "title": "Encrypted Keystore",
+      "passes": [
+        "v0.196.0"
+      ]
+    },
+    {
+      "previous": "v0.142.0",
+      "title": "BIP-39 Mnemonics",
+      "passes": [
+        "v0.197.0"
+      ]
+    },
+    {
+      "previous": "v0.143.0",
+      "title": "BIP-32 And BIP-44 Derivation",
+      "passes": [
+        "v0.198.0"
+      ]
+    },
+    {
+      "previous": "v0.144.0",
+      "title": "Remote Hardware HSM And KMS Signers",
+      "passes": [
+        "v0.199.0",
+        "v0.200.0"
+      ]
+    },
+    {
+      "previous": "v0.145.0",
+      "title": "Signing Policy ERC-1271 And Multisig",
+      "passes": [
+        "v0.201.0"
+      ]
+    },
+    {
+      "previous": "v0.146.0",
+      "title": "Safe Workflows",
+      "passes": [
+        "v0.202.0"
+      ]
+    },
+    {
+      "previous": "v0.147.0",
+      "title": "ERC-4337 Core",
+      "passes": [
+        "v0.203.0"
+      ]
+    },
+    {
+      "previous": "v0.148.0",
+      "title": "Bundler EntryPoint And Paymasters",
+      "passes": [
+        "v0.204.0",
+        "v0.205.0"
+      ]
+    },
+    {
+      "previous": "v0.149.0",
+      "title": "Session Keys And Delegated Accounts",
+      "passes": [
+        "v0.206.0"
+      ]
+    },
+    {
+      "previous": "v0.150.0",
+      "title": "ABI Type System",
+      "passes": [
+        "v0.207.0"
+      ]
+    },
+    {
+      "previous": "v0.151.0",
+      "title": "ABI Encode Decode",
+      "passes": [
+        "v0.208.0"
+      ]
+    },
+    {
+      "previous": "v0.152.0",
+      "title": "Artifact And Metadata Ingestion",
+      "passes": [
+        "v0.209.0"
+      ]
+    },
+    {
+      "previous": "v0.153.0",
+      "title": "Contract Macros And Code Generation",
+      "passes": [
+        "v0.210.0"
+      ]
+    },
+    {
+      "previous": "v0.154.0",
+      "title": "Deployment And Linking",
+      "passes": [
+        "v0.211.0"
+      ]
+    },
+    {
+      "previous": "v0.155.0",
+      "title": "Events Filters And Reorg Streams",
+      "passes": [
+        "v0.212.0"
+      ]
+    },
+    {
+      "previous": "v0.156.0",
+      "title": "Errors Multicall And Overrides",
+      "passes": [
+        "v0.213.0"
+      ]
+    },
+    {
+      "previous": "v0.157.0",
+      "title": "Token And NFT Standards",
+      "passes": [
+        "v0.214.0"
+      ]
+    },
+    {
+      "previous": "v0.158.0",
+      "title": "ENS Permit And Signature Standards",
+      "passes": [
+        "v0.215.0",
+        "v0.216.0",
+        "v0.217.0"
+      ]
+    },
+    {
+      "previous": "v0.159.0",
+      "title": "Contract Tooling Hardening",
+      "passes": [
+        "v0.218.0"
+      ]
+    },
+    {
+      "previous": "v0.160.0",
+      "title": "Database Traits And Schema",
+      "passes": [
+        "v0.219.0"
+      ]
+    },
+    {
+      "previous": "v0.160.1",
+      "title": "Production Storage Pilot",
+      "passes": [
+        "v0.220.0"
+      ]
+    },
+    {
+      "previous": "v0.161.0",
+      "title": "Chain Content Stores",
+      "passes": [
+        "v0.221.0"
+      ]
+    },
+    {
+      "previous": "v0.162.0",
+      "title": "State Trie Flat State And Indexes",
+      "passes": [
+        "v0.222.0"
+      ]
+    },
+    {
+      "previous": "v0.163.0",
+      "title": "Atomic Batches And Crash Consistency",
+      "passes": [
+        "v0.223.0"
+      ]
+    },
+    {
+      "previous": "v0.164.0",
+      "title": "Migrations Snapshots And Cache Policy",
+      "passes": [
+        "v0.224.0",
+        "v0.225.0"
+      ]
+    },
+    {
+      "previous": "v0.164.1",
+      "title": "Persistent Fault And Recovery Gate",
+      "passes": [
+        "v0.226.0"
+      ]
+    },
+    {
+      "previous": "v0.165.0",
+      "title": "Pruning Archive And History Expiry",
+      "passes": [
+        "v0.227.0"
+      ]
+    },
+    {
+      "previous": "v0.166.0",
+      "title": "Canonical Import And Reorg",
+      "passes": [
+        "v0.228.0"
+      ]
+    },
+    {
+      "previous": "v0.167.0",
+      "title": "Heads Fork Choice And Orphans",
+      "passes": [
+        "v0.229.0"
+      ]
+    },
+    {
+      "previous": "v0.168.0",
+      "title": "Payload Orchestration And Invalidation",
+      "passes": [
+        "v0.230.0"
+      ]
+    },
+    {
+      "previous": "v0.169.0",
+      "title": "Operational Client Runtime",
+      "passes": [
+        "v0.231.0"
+      ]
+    },
+    {
+      "previous": "v0.170.0",
+      "title": "Storage And Client Performance Gate",
+      "passes": [
+        "v0.232.0"
+      ]
+    },
+    {
+      "previous": "v0.171.0",
+      "title": "SSZ Foundational Codec And Merkleization",
+      "passes": [
+        "v0.233.0",
+        "v0.234.0",
+        "v0.235.0"
+      ]
+    },
+    {
+      "previous": "v0.172.0",
+      "title": "Beacon Types And Fork Domains",
+      "passes": [
+        "v0.236.0"
+      ]
+    },
+    {
+      "previous": "v0.173.0",
+      "title": "Engine API Types And Validation",
+      "passes": [
+        "v0.237.0",
+        "v0.238.0"
+      ]
+    },
+    {
+      "previous": "v0.174.0",
+      "title": "Engine Transport And Protocol Boundary",
+      "passes": [
+        "v0.239.0"
+      ]
+    },
+    {
+      "previous": "v0.174.1",
+      "title": "Early Engine Vertical Devnet",
+      "passes": [
+        "v0.240.0"
+      ]
+    },
+    {
+      "previous": "v0.175.0",
+      "title": "Beacon API Provider Client",
+      "passes": [
+        "v0.241.0"
+      ]
+    },
+    {
+      "previous": "v0.176.0",
+      "title": "Light Client Bootstrap And Weak Subjectivity",
+      "passes": [
+        "v0.242.0"
+      ]
+    },
+    {
+      "previous": "v0.177.0",
+      "title": "BLS Sync Committee Verification",
+      "passes": [
+        "v0.243.0",
+        "v0.244.0",
+        "v0.245.0"
+      ]
+    },
+    {
+      "previous": "v0.178.0",
+      "title": "Committee Rotation And Persistence",
+      "passes": [
+        "v0.246.0"
+      ]
+    },
+    {
+      "previous": "v0.179.0",
+      "title": "Finality Optimistic Scoring And Misbehavior",
+      "passes": [
+        "v0.247.0"
+      ]
+    },
+    {
+      "previous": "v0.180.0",
+      "title": "Execution Proof Binding",
+      "passes": [
+        "v0.248.0"
+      ]
+    },
+    {
+      "previous": "v0.181.0",
+      "title": "Checkpoint Recovery And Multi-Source Acquisition",
+      "passes": [
+        "v0.249.0"
+      ]
+    },
+    {
+      "previous": "v0.182.0",
+      "title": "Complete Light-Client Conformance",
+      "passes": [
+        "v0.250.0"
+      ]
+    },
+    {
+      "previous": "v0.183.0",
+      "title": "PeerDAS Threat Model And Admission Plan",
+      "passes": [
+        "v0.251.0"
+      ]
+    },
+    {
+      "previous": "v0.184.0",
+      "title": "Networking Threat And Dependency Gate",
+      "passes": [
+        "v0.252.0"
+      ]
+    },
+    {
+      "previous": "v0.185.0",
+      "title": "Discovery And RLPx",
+      "passes": [
+        "v0.253.0",
+        "v0.254.0",
+        "v0.255.0",
+        "v0.256.0",
+        "v0.257.0"
+      ]
+    },
+    {
+      "previous": "v0.186.0",
+      "title": "Eth Protocol Messages",
+      "passes": [
+        "v0.258.0",
+        "v0.259.0",
+        "v0.260.0"
+      ]
+    },
+    {
+      "previous": "v0.187.0",
+      "title": "Snap Protocol",
+      "passes": [
+        "v0.261.0",
+        "v0.262.0",
+        "v0.263.0"
+      ]
+    },
+    {
+      "previous": "v0.188.0",
+      "title": "Peer Service",
+      "passes": [
+        "v0.264.0"
+      ]
+    },
+    {
+      "previous": "v0.189.0",
+      "title": "Request Scheduler And Backpressure",
+      "passes": [
+        "v0.265.0"
+      ]
+    },
+    {
+      "previous": "v0.190.0",
+      "title": "Transaction Pool",
+      "passes": [
+        "v0.266.0",
+        "v0.267.0",
+        "v0.268.0"
+      ]
+    },
+    {
+      "previous": "v0.191.0",
+      "title": "Sync Orchestration",
+      "passes": [
+        "v0.269.0"
+      ]
+    },
+    {
+      "previous": "v0.192.0",
+      "title": "Multi-Peer Full And Snap Sync",
+      "passes": [
+        "v0.270.0"
+      ]
+    },
+    {
+      "previous": "v0.193.0",
+      "title": "Portal And Historical Data Acquisition",
+      "passes": [
+        "v0.271.0"
+      ]
+    },
+    {
+      "previous": "v0.194.0",
+      "title": "Builder Validator And Network Hardening",
+      "passes": [
+        "v0.272.0"
+      ]
+    },
+    {
+      "previous": "v0.195.0",
+      "title": "Proof Format Abstraction",
+      "passes": [
+        "v0.273.0"
+      ]
+    },
+    {
+      "previous": "v0.196.0",
+      "title": "Execution Witness Model",
+      "passes": [
+        "v0.274.0"
+      ]
+    },
+    {
+      "previous": "v0.197.0",
+      "title": "MPT Witness Construction And Verification",
+      "passes": [
+        "v0.275.0"
+      ]
+    },
+    {
+      "previous": "v0.198.0",
+      "title": "Stateless Execution",
+      "passes": [
+        "v0.276.0"
+      ]
+    },
+    {
+      "previous": "v0.199.0",
+      "title": "Verkle Or Successor Commitment Boundary",
+      "passes": [
+        "v0.277.0"
+      ]
+    },
+    {
+      "previous": "v0.200.0",
+      "title": "Successor Commitment Backend",
+      "passes": [
+        "v0.278.0",
+        "v0.279.0",
+        "v0.280.0",
+        "v0.281.0"
+      ]
+    },
+    {
+      "previous": "v0.201.0",
+      "title": "Successor Witness And State Integration",
+      "passes": [
+        "v0.282.0"
+      ]
+    },
+    {
+      "previous": "v0.202.0",
+      "title": "State Expiry And Address Evolution",
+      "passes": [
+        "v0.283.0"
+      ]
+    },
+    {
+      "previous": "v0.203.0",
+      "title": "ZK Execution Proof Boundary",
+      "passes": [
+        "v0.284.0"
+      ]
+    },
+    {
+      "previous": "v0.204.0",
+      "title": "Future Fork Automation",
+      "passes": [
+        "v0.285.0"
+      ]
+    },
+    {
+      "previous": "v0.205.0",
+      "title": "Platform And Target Matrix",
+      "passes": [
+        "v0.286.0"
+      ]
+    },
+    {
+      "previous": "v0.206.0",
+      "title": "Whole-System Performance Program",
+      "passes": [
+        "v0.287.0"
+      ]
+    },
+    {
+      "previous": "v0.206.1",
+      "title": "Structure-Aware Fuzz And Complexity Oracles",
+      "passes": [
+        "v0.288.0"
+      ]
+    },
+    {
+      "previous": "v0.207.0",
+      "title": "Kani Codec Primitive And Typestate Proofs",
+      "passes": [
+        "v0.289.0"
+      ]
+    },
+    {
+      "previous": "v0.208.0",
+      "title": "Kani EVM Trie And State Proofs",
+      "passes": [
+        "v0.290.0"
+      ]
+    },
+    {
+      "previous": "v0.208.1",
+      "title": "Kani Cryptographic Arithmetic Proofs",
+      "passes": [
+        "v0.291.0"
+      ]
+    },
+    {
+      "previous": "v0.209.0",
+      "title": "Miri Sanitizers And Undefined-Behavior Gate",
+      "passes": [
+        "v0.292.0"
+      ]
+    },
+    {
+      "previous": "v0.209.1",
+      "title": "Protocol And Concurrency Model Checking",
+      "passes": [
+        "v0.293.0"
+      ]
+    },
+    {
+      "previous": "v0.209.2",
+      "title": "Side-Channel And Gas-To-Cycles Assurance",
+      "passes": [
+        "v0.294.0"
+      ]
+    },
+    {
+      "previous": "v0.210.0",
+      "title": "Compatibility And Semver Gate",
+      "passes": [
+        "v0.295.0"
+      ]
+    },
+    {
+      "previous": "v0.211.0",
+      "title": "Task-Oriented Documentation",
+      "passes": [
+        "v0.296.0"
+      ]
+    },
+    {
+      "previous": "v0.212.0",
+      "title": "Core SDK API Stability Baseline",
+      "passes": [
+        "v0.297.0"
+      ]
+    },
+    {
+      "previous": "v0.213.0",
+      "title": "Core Cryptography And Codec Audit",
+      "passes": [
+        "v0.298.0"
+      ]
+    },
+    {
+      "previous": "v0.214.0",
+      "title": "Execution Storage And Light-Client Audit",
+      "passes": [
+        "v0.299.0"
+      ]
+    },
+    {
+      "previous": "v0.215.0",
+      "title": "Provider Wallet And Contract Audit",
+      "passes": [
+        "v0.300.0"
+      ]
+    },
+    {
+      "previous": "v0.216.0",
+      "title": "Execution Networking Sync And Runtime Audit",
+      "passes": [
+        "v0.301.0"
+      ]
+    },
+    {
+      "previous": "v0.217.0",
+      "title": "Foundation Remediation Release",
+      "passes": [
+        "v0.302.0"
+      ]
+    },
+    {
+      "previous": "v0.218.0",
+      "title": "Full-Stack Foundation Integration Baseline",
+      "passes": [
+        "v0.303.0"
+      ]
+    },
+    {
+      "previous": "v0.219.0",
+      "title": "Consensus Client Architecture And Threat Model",
+      "passes": [
+        "v0.304.0"
+      ]
+    },
+    {
+      "previous": "v0.220.0",
+      "title": "Consensus Configuration And Fork Registry",
+      "passes": [
+        "v0.305.0"
+      ]
+    },
+    {
+      "previous": "v0.221.0",
+      "title": "Complete SSZ Client Surface",
+      "passes": [
+        "v0.306.0",
+        "v0.307.0",
+        "v0.308.0"
+      ]
+    },
+    {
+      "previous": "v0.222.0",
+      "title": "BLS Signing Aggregation And Batch Verification",
+      "passes": [
+        "v0.309.0",
+        "v0.310.0",
+        "v0.311.0"
+      ]
+    },
+    {
+      "previous": "v0.223.0",
+      "title": "PeerDAS Cell And Reconstruction Core",
+      "passes": [
+        "v0.312.0",
+        "v0.313.0",
+        "v0.314.0",
+        "v0.315.0"
+      ]
+    },
+    {
+      "previous": "v0.224.0",
+      "title": "Committees Shuffling Domains And Signing Roots",
+      "passes": [
+        "v0.316.0"
+      ]
+    },
+    {
+      "previous": "v0.225.0",
+      "title": "Beacon Transition Shell And Per-Slot Processing",
+      "passes": [
+        "v0.317.0"
+      ]
+    },
+    {
+      "previous": "v0.226.0",
+      "title": "Epoch Registry And Balance Processing",
+      "passes": [
+        "v0.318.0"
+      ]
+    },
+    {
+      "previous": "v0.227.0",
+      "title": "Activation Exit Churn Withdrawal And Consolidation",
+      "passes": [
+        "v0.319.0"
+      ]
+    },
+    {
+      "previous": "v0.228.0",
+      "title": "Rewards Penalties Participation And Inactivity",
+      "passes": [
+        "v0.320.0"
+      ]
+    },
+    {
+      "previous": "v0.229.0",
+      "title": "Deposits Slashings And Credential Operations",
+      "passes": [
+        "v0.321.0"
+      ]
+    },
+    {
+      "previous": "v0.230.0",
+      "title": "Attestations Sync Committees And Block Operations",
+      "passes": [
+        "v0.322.0"
+      ]
+    },
+    {
+      "previous": "v0.231.0",
+      "title": "Execution Payload And Request Processing",
+      "passes": [
+        "v0.323.0",
+        "v0.324.0",
+        "v0.325.0"
+      ]
+    },
+    {
+      "previous": "v0.232.0",
+      "title": "Data Availability State Transition",
+      "passes": [
+        "v0.326.0"
+      ]
+    },
+    {
+      "previous": "v0.233.0",
+      "title": "Explicit Consensus Fork Upgrades",
+      "passes": [
+        "v0.327.0"
+      ]
+    },
+    {
+      "previous": "v0.234.0",
+      "title": "Complete State-Transition Vector Gate",
+      "passes": [
+        "v0.328.0"
+      ]
+    },
+    {
+      "previous": "v0.235.0",
+      "title": "Transactional Fork-Choice Store",
+      "passes": [
+        "v0.329.0"
+      ]
+    },
+    {
+      "previous": "v0.236.0",
+      "title": "LMD-GHOST And Latest Messages",
+      "passes": [
+        "v0.330.0"
+      ]
+    },
+    {
+      "previous": "v0.237.0",
+      "title": "Casper FFG Proposer Boost And Reorg Policy",
+      "passes": [
+        "v0.331.0",
+        "v0.332.0",
+        "v0.333.0",
+        "v0.334.0"
+      ]
+    },
+    {
+      "previous": "v0.238.0",
+      "title": "Optimistic Execution And Invalidation",
+      "passes": [
+        "v0.335.0"
+      ]
+    },
+    {
+      "previous": "v0.239.0",
+      "title": "Fork-Choice Persistence And Recovery",
+      "passes": [
+        "v0.336.0"
+      ]
+    },
+    {
+      "previous": "v0.240.0",
+      "title": "Beacon Operation Pools",
+      "passes": [
+        "v0.337.0"
+      ]
+    },
+    {
+      "previous": "v0.241.0",
+      "title": "Hot And Finalized Beacon Storage",
+      "passes": [
+        "v0.338.0"
+      ]
+    },
+    {
+      "previous": "v0.242.0",
+      "title": "State Snapshots And Reconstruction",
+      "passes": [
+        "v0.339.0"
+      ]
+    },
+    {
+      "previous": "v0.243.0",
+      "title": "Sidecar Custody Pruning And Retention",
+      "passes": [
+        "v0.340.0"
+      ]
+    },
+    {
+      "previous": "v0.244.0",
+      "title": "Beacon Database Migration And Repair",
+      "passes": [
+        "v0.341.0"
+      ]
+    },
+    {
+      "previous": "v0.245.0",
+      "title": "Consensus Networking Threat And Dependency Gate",
+      "passes": [
+        "v0.342.0"
+      ]
+    },
+    {
+      "previous": "v0.246.0",
+      "title": "Discv5 ENR And Secure Transport",
+      "passes": [
+        "v0.343.0"
+      ]
+    },
+    {
+      "previous": "v0.247.0",
+      "title": "GossipSub Topics And Subnet Management",
+      "passes": [
+        "v0.344.0",
+        "v0.345.0"
+      ]
+    },
+    {
+      "previous": "v0.248.0",
+      "title": "Staged Gossip Validation And Seen Caches",
+      "passes": [
+        "v0.346.0"
+      ]
+    },
+    {
+      "previous": "v0.249.0",
+      "title": "Consensus Req Resp Protocols",
+      "passes": [
+        "v0.347.0"
+      ]
+    },
+    {
+      "previous": "v0.250.0",
+      "title": "Consensus Peer Scoring And Backpressure",
+      "passes": [
+        "v0.348.0"
+      ]
+    },
+    {
+      "previous": "v0.251.0",
+      "title": "Checkpoint And Weak-Subjectivity Sync",
+      "passes": [
+        "v0.349.0"
+      ]
+    },
+    {
+      "previous": "v0.252.0",
+      "title": "Head And Range Sync",
+      "passes": [
+        "v0.350.0"
+      ]
+    },
+    {
+      "previous": "v0.253.0",
+      "title": "Finalized Backfill And State Reconstruction",
+      "passes": [
+        "v0.351.0"
+      ]
+    },
+    {
+      "previous": "v0.254.0",
+      "title": "Optimistic Sync And Execution Recovery",
+      "passes": [
+        "v0.352.0"
+      ]
+    },
+    {
+      "previous": "v0.255.0",
+      "title": "PeerDAS Sync Custody And Backfill",
+      "passes": [
+        "v0.353.0",
+        "v0.354.0"
+      ]
+    },
+    {
+      "previous": "v0.256.0",
+      "title": "Beacon Engine Coordinator",
+      "passes": [
+        "v0.355.0"
+      ]
+    },
+    {
+      "previous": "v0.257.0",
+      "title": "Multi-Execution-Client Failover",
+      "passes": [
+        "v0.356.0"
+      ]
+    },
+    {
+      "previous": "v0.258.0",
+      "title": "Deposit Contract Tracking And Deposit Tree",
+      "passes": [
+        "v0.357.0"
+      ]
+    },
+    {
+      "previous": "v0.259.0",
+      "title": "Genesis Construction Eth1 Voting And Genesis Sync",
+      "passes": [
+        "v0.358.0"
+      ]
+    },
+    {
+      "previous": "v0.260.0",
+      "title": "Availability Tracking And Block Admission",
+      "passes": [
+        "v0.359.0"
+      ]
+    },
+    {
+      "previous": "v0.261.0",
+      "title": "Beacon Node Orchestration",
+      "passes": [
+        "v0.360.0"
+      ]
+    },
+    {
+      "previous": "v0.262.0",
+      "title": "Beacon Node REST And Event APIs",
+      "passes": [
+        "v0.361.0",
+        "v0.362.0"
+      ]
+    },
+    {
+      "previous": "v0.263.0",
+      "title": "Beacon Block Production Service",
+      "passes": [
+        "v0.363.0"
+      ]
+    },
+    {
+      "previous": "v0.264.0",
+      "title": "Validator API And Production Boundary",
+      "passes": [
+        "v0.364.0"
+      ]
+    },
+    {
+      "previous": "v0.265.0",
+      "title": "Slashing Protection Model And Invariants",
+      "passes": [
+        "v0.365.0"
+      ]
+    },
+    {
+      "previous": "v0.266.0",
+      "title": "Transactional Slashing Database",
+      "passes": [
+        "v0.366.0"
+      ]
+    },
+    {
+      "previous": "v0.267.0",
+      "title": "EIP-3076 Interchange And Safety Recovery",
+      "passes": [
+        "v0.367.0"
+      ]
+    },
+    {
+      "previous": "v0.268.0",
+      "title": "Validator Key Foundation And Deposit Data",
+      "passes": [
+        "v0.368.0"
+      ]
+    },
+    {
+      "previous": "v0.269.0",
+      "title": "Validator Signer And Local Keystores",
+      "passes": [
+        "v0.369.0"
+      ]
+    },
+    {
+      "previous": "v0.270.0",
+      "title": "Validator Duty Scheduler And Safety State",
+      "passes": [
+        "v0.370.0"
+      ]
+    },
+    {
+      "previous": "v0.271.0",
+      "title": "Proposer Duties Signing And Publication",
+      "passes": [
+        "v0.371.0"
+      ]
+    },
+    {
+      "previous": "v0.272.0",
+      "title": "Attester And Aggregator Duties",
+      "passes": [
+        "v0.372.0"
+      ]
+    },
+    {
+      "previous": "v0.273.0",
+      "title": "Sync Committee Duties",
+      "passes": [
+        "v0.373.0"
+      ]
+    },
+    {
+      "previous": "v0.274.0",
+      "title": "Validator Lifecycle Requests And Operations",
+      "passes": [
+        "v0.374.0"
+      ]
+    },
+    {
+      "previous": "v0.275.0",
+      "title": "Keymanager Operator API",
+      "passes": [
+        "v0.375.0",
+        "v0.376.0"
+      ]
+    },
+    {
+      "previous": "v0.276.0",
+      "title": "Remote Signer Protocol And Slashing Authority",
+      "passes": [
+        "v0.377.0"
+      ]
+    },
+    {
+      "previous": "v0.277.0",
+      "title": "HSM KMS And Hardware Custody Adapters",
+      "passes": [
+        "v0.378.0"
+      ]
+    },
+    {
+      "previous": "v0.278.0",
+      "title": "Threshold DVT And Distributed Slashing Coordination",
+      "passes": [
+        "v0.379.0",
+        "v0.380.0"
+      ]
+    },
+    {
+      "previous": "v0.279.0",
+      "title": "Builder API And Blinded Proposals",
+      "passes": [
+        "v0.381.0"
+      ]
+    },
+    {
+      "previous": "v0.280.0",
+      "title": "Relay Multiplexing Local Fallback And PBS Evolution",
+      "passes": [
+        "v0.382.0"
+      ]
+    },
+    {
+      "previous": "v0.281.0",
+      "title": "Optional Slasher Service",
+      "passes": [
+        "v0.383.0"
+      ]
+    },
+    {
+      "previous": "v0.282.0",
+      "title": "Consensus Connectivity And NAT Diagnostics",
+      "passes": [
+        "v0.384.0"
+      ]
+    },
+    {
+      "previous": "v0.283.0",
+      "title": "Consensus Operations Monitoring And Analytics",
+      "passes": [
+        "v0.385.0"
+      ]
+    },
+    {
+      "previous": "v0.284.0",
+      "title": "Beacon Node Executable And Packaging",
+      "passes": [
+        "v0.386.0"
+      ]
+    },
+    {
+      "previous": "v0.285.0",
+      "title": "Validator Client Executable And Packaging",
+      "passes": [
+        "v0.387.0"
+      ]
+    },
+    {
+      "previous": "v0.286.0",
+      "title": "Database Inspection Migration And Recovery Tools",
+      "passes": [
+        "v0.388.0"
+      ]
+    },
+    {
+      "previous": "v0.287.0",
+      "title": "Deterministic Consensus Simulator",
+      "passes": [
+        "v0.389.0"
+      ]
+    },
+    {
+      "previous": "v0.288.0",
+      "title": "Production Acceptance Matrix And Quantitative Budgets",
+      "passes": [
+        "v0.390.0"
+      ]
+    },
+    {
+      "previous": "v0.289.0",
+      "title": "Hive And Multi-Consensus-Client Interoperability",
+      "passes": [
+        "v0.391.0"
+      ]
+    },
+    {
+      "previous": "v0.290.0",
+      "title": "Multi-Execution-Client Interoperability",
+      "passes": [
+        "v0.392.0"
+      ]
+    },
+    {
+      "previous": "v0.291.0",
+      "title": "Long-Running Validator Testnet",
+      "passes": [
+        "v0.393.0"
+      ]
+    },
+    {
+      "previous": "v0.292.0",
+      "title": "Consensus Client Performance Gate",
+      "passes": [
+        "v0.394.0"
+      ]
+    },
+    {
+      "previous": "v0.293.0",
+      "title": "Kani State Transition And Fork-Choice Proofs",
+      "passes": [
+        "v0.395.0"
+      ]
+    },
+    {
+      "previous": "v0.294.0",
+      "title": "Kani Slashing And Duty-Safety Proofs",
+      "passes": [
+        "v0.396.0"
+      ]
+    },
+    {
+      "previous": "v0.295.0",
+      "title": "SSZ BLS PeerDAS And Acceleration Audit",
+      "passes": [
+        "v0.397.0"
+      ]
+    },
+    {
+      "previous": "v0.296.0",
+      "title": "State Transition And Fork-Choice Audit",
+      "passes": [
+        "v0.398.0"
+      ]
+    },
+    {
+      "previous": "v0.297.0",
+      "title": "Consensus Network Sync And DA Audit",
+      "passes": [
+        "v0.399.0"
+      ]
+    },
+    {
+      "previous": "v0.298.0",
+      "title": "Validator Slashing Keymanager And Builder Audit",
+      "passes": [
+        "v0.400.0"
+      ]
+    },
+    {
+      "previous": "v0.299.0",
+      "title": "Beacon Storage API And Operations Audit",
+      "passes": [
+        "v0.401.0"
+      ]
+    },
+    {
+      "previous": "v0.300.0",
+      "title": "Complete Consensus Remediation",
+      "passes": [
+        "v0.402.0"
+      ]
+    },
+    {
+      "previous": "v0.301.0",
+      "title": "Foundation And Consensus API Stability Baseline",
+      "passes": [
+        "v0.403.0"
+      ]
+    },
+    {
+      "previous": "v0.302.0",
+      "title": "RC-Aware Release Tooling Foundation",
+      "passes": [
+        "v0.404.0"
+      ]
+    },
+    {
+      "previous": "v0.303.0",
+      "title": "Exact Archive Publication Prototype",
+      "passes": [
+        "v0.405.0"
+      ]
+    },
+    {
+      "previous": "v0.304.0",
+      "title": "Consensus Product Baseline Gate",
+      "passes": [
+        "v0.406.0"
+      ]
+    },
+    {
+      "previous": "v0.305.0",
+      "title": "Core Cryptography Consumer Inventory",
+      "passes": [
+        "v0.407.0"
+      ]
+    },
+    {
+      "previous": "v0.306.0",
+      "title": "Core Crypto Side-Channel And Acceleration Revalidation",
+      "passes": [
+        "v0.408.0"
+      ]
+    },
+    {
+      "previous": "v0.307.0",
+      "title": "Cryptographic Cache Transcript And Batch Audit",
+      "passes": [
+        "v0.409.0"
+      ]
+    },
+    {
+      "previous": "v0.308.0",
+      "title": "Core Cryptography Production Readmission",
+      "passes": [
+        "v0.410.0"
+      ]
+    },
+    {
+      "previous": "v0.309.0",
+      "title": "Ethash Hashimoto Cache And Dataset",
+      "passes": [
+        "v0.411.0"
+      ]
+    },
+    {
+      "previous": "v0.310.0",
+      "title": "Historical PoW Difficulty Ommers And Rewards",
+      "passes": [
+        "v0.412.0"
+      ]
+    },
+    {
+      "previous": "v0.311.0",
+      "title": "Genesis-To-Merge Historical Execution Gate",
+      "passes": [
+        "v0.413.0"
+      ]
+    },
+    {
+      "previous": "v0.312.0",
+      "title": "Production Database Backend Admission",
+      "passes": [
+        "v0.414.0"
+      ]
+    },
+    {
+      "previous": "v0.313.0",
+      "title": "Execution Stage Pipeline Unwind And State Healing",
+      "passes": [
+        "v0.415.0"
+      ]
+    },
+    {
+      "previous": "v0.314.0",
+      "title": "Local Execution Payload Builder",
+      "passes": [
+        "v0.416.0"
+      ]
+    },
+    {
+      "previous": "v0.315.0",
+      "title": "Authenticated Engine API Server",
+      "passes": [
+        "v0.417.0"
+      ]
+    },
+    {
+      "previous": "v0.316.0",
+      "title": "Public Execution JSON-RPC Server",
+      "passes": [
+        "v0.418.0",
+        "v0.419.0",
+        "v0.420.0"
+      ]
+    },
+    {
+      "previous": "v0.317.0",
+      "title": "Filters Subscriptions GraphQL And Client APIs",
+      "passes": [
+        "v0.421.0",
+        "v0.422.0",
+        "v0.423.0"
+      ]
+    },
+    {
+      "previous": "v0.318.0",
+      "title": "Execution Discovery DNS And Peer Operations",
+      "passes": [
+        "v0.424.0"
+      ]
+    },
+    {
+      "previous": "v0.319.0",
+      "title": "Execution Node Executable And Packaging",
+      "passes": [
+        "v0.425.0"
+      ]
+    },
+    {
+      "previous": "v0.320.0",
+      "title": "Execution Database Chain And Snapshot Tools",
+      "passes": [
+        "v0.426.0"
+      ]
+    },
+    {
+      "previous": "v0.321.0",
+      "title": "Execution Operations Security And Resource Controls",
+      "passes": [
+        "v0.427.0"
+      ]
+    },
+    {
+      "previous": "v0.322.0",
+      "title": "Execution Hive And RPC Compatibility",
+      "passes": [
+        "v0.428.0"
+      ]
+    },
+    {
+      "previous": "v0.323.0",
+      "title": "Execution Engine Multi-Consensus-Client Interoperability",
+      "passes": [
+        "v0.429.0"
+      ]
+    },
+    {
+      "previous": "v0.324.0",
+      "title": "Mainnet And Testnet Sync Follow Gate",
+      "passes": [
+        "v0.430.0"
+      ]
+    },
+    {
+      "previous": "v0.325.0",
+      "title": "Execution Client Performance Gate",
+      "passes": [
+        "v0.431.0"
+      ]
+    },
+    {
+      "previous": "v0.326.0",
+      "title": "Complete Execution Client Audit",
+      "passes": [
+        "v0.432.0"
+      ]
+    },
+    {
+      "previous": "v0.327.0",
+      "title": "Complete Execution Client Remediation",
+      "passes": [
+        "v0.433.0"
+      ]
+    },
+    {
+      "previous": "v0.328.0",
+      "title": "First-Party Integrated Node Orchestration",
+      "passes": [
+        "v0.434.0"
+      ]
+    },
+    {
+      "previous": "v0.329.0",
+      "title": "Private Devnet And Custom Network Tooling",
+      "passes": [
+        "v0.435.0"
+      ]
+    },
+    {
+      "previous": "v0.330.0",
+      "title": "Mixed First-Party And Independent Client Matrix",
+      "passes": [
+        "v0.436.0"
+      ]
+    },
+    {
+      "previous": "v0.331.0",
+      "title": "Long-Running Integrated Ethereum Testnet",
+      "passes": [
+        "v0.437.0"
+      ]
+    },
+    {
+      "previous": "v0.332.0",
+      "title": "Integrated Node Performance And Failure Recovery",
+      "passes": [
+        "v0.438.0"
+      ]
+    },
+    {
+      "previous": "v0.333.0",
+      "title": "Operator Installation Upgrade And Incident Guides",
+      "passes": [
+        "v0.439.0"
+      ]
+    },
+    {
+      "previous": "v0.334.0",
+      "title": "Complete Full-Stack Security Audit",
+      "passes": [
+        "v0.440.0"
+      ]
+    },
+    {
+      "previous": "v0.335.0",
+      "title": "Complete Full-Stack Remediation",
+      "passes": [
+        "v0.441.0"
+      ]
+    },
+    {
+      "previous": "v0.336.0",
+      "title": "Final Production Acceptance Matrix",
+      "passes": [
+        "v0.442.0",
+        "v0.443.0",
+        "v0.444.0",
+        "v0.445.0"
+      ]
+    },
+    {
+      "previous": "v0.337.0",
+      "title": "Complete Public API And Crate Stability Freeze",
+      "passes": [
+        "v0.446.0"
+      ]
+    },
+    {
+      "previous": "v0.338.0",
+      "title": "Final Release Evidence Dry Run",
+      "passes": [
+        "v0.447.0"
+      ]
+    },
+    {
+      "previous": "v0.339.0",
+      "title": "Version-Only 1.0 Promotion Rehearsal",
+      "passes": [
+        "v0.448.0"
+      ]
+    },
+    {
+      "previous": "v0.340.0",
+      "title": "Production Candidate Admission Gate",
+      "passes": [
+        "v0.449.0"
+      ]
+    }
+  ]
+}

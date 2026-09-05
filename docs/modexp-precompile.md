@@ -22,7 +22,7 @@ gas exceeds this crate's reviewed `EVM_MAX_GAS_LIMIT`, the quote records
 
 Osaka-era EIP-7823 input limits and EIP-7883 gas changes are not claimed by the
 currently supported Prague fork table. They are explicit work under
-`v0.115.0` fork-manifest admission and `v0.116.0` current-fork execution, not
+`v0.154.0` fork-manifest admission and `v0.155.0` Osaka ModExp execution, not
 an implicit extension of the Prague rules implemented here.
 
 ## Workspace Contract

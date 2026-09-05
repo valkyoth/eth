@@ -24,14 +24,14 @@ and pentest.
 
 | Domain | Current planning contract | First-party execution releases |
 | --- | --- | --- |
-| EIP-4844 KZG point evaluation | Exact 192-byte input, 64-byte output, fixed 50,000 gas | `v0.107.0..=v0.111.0` |
-| EIP-2537 G1 add | Exact 256-byte input, 128-byte output, fixed 375 gas | `v0.52.1` and `v0.56.0` |
-| EIP-2537 G1 MSM | Non-empty `160 * k` input, 128-byte output, official discount gas | `v0.52.1`, `v0.58.0`, and `v0.59.0` |
-| EIP-2537 G2 add | Exact 512-byte input, 256-byte output, fixed 600 gas | `v0.52.1` and `v0.57.0` |
-| EIP-2537 G2 MSM | Non-empty `288 * k` input, 256-byte output, official discount gas | `v0.52.1`, `v0.58.0`, and `v0.59.0` |
-| EIP-2537 pairing | Non-empty `384 * k` input, 32-byte output, `37,700 + 32,600 * k` gas | `v0.57.0`, `v0.58.0`, `v0.61.0`, and `v0.62.0` |
-| EIP-2537 map Fp to G1 | Exact 64-byte input, 128-byte output, fixed 5,500 gas | `v0.60.0` |
-| EIP-2537 map Fp2 to G2 | Exact 128-byte input, 256-byte output, fixed 23,800 gas | `v0.60.0` |
+| EIP-4844 KZG point evaluation | Exact 192-byte input, 64-byte output, fixed 50,000 gas | `v0.143.0..=v0.150.0` |
+| EIP-2537 G1 add | Exact 256-byte input, 128-byte output, fixed 375 gas | `v0.52.1` and `v0.58.0` |
+| EIP-2537 G1 MSM | Non-empty `160 * k` input, 128-byte output, official discount gas | `v0.52.1`, `v0.62.0`, and `v0.63.0` |
+| EIP-2537 G2 add | Exact 512-byte input, 256-byte output, fixed 600 gas | `v0.52.1` and `v0.61.0` |
+| EIP-2537 G2 MSM | Non-empty `288 * k` input, 256-byte output, official discount gas | `v0.52.1`, `v0.62.0`, and `v0.63.0` |
+| EIP-2537 pairing | Non-empty `384 * k` input, 32-byte output, `37,700 + 32,600 * k` gas | `v0.61.0`, `v0.62.0`, `v0.68.0`, and `v0.69.0` |
+| EIP-2537 map Fp to G1 | Exact 64-byte input, 128-byte output, fixed 5,500 gas | `v0.64.0` |
+| EIP-2537 map Fp2 to G2 | Exact 128-byte input, 256-byte output, fixed 23,800 gas | `v0.64.0` |
 
 ## Shared Admission Checklist
 

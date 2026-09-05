@@ -13,6 +13,14 @@ validator client, execution and consensus networking/sync, transactional
 slashing protection, builder integration, stateless execution, and explicit
 optional ecosystem adapters.
 
+The [release plan](RELEASE_PLAN.md) assigns this work to bounded, individually
+pentested milestones. The [September scope review](ROADMAP_REVIEW_2026_09_05.md)
+records the latest splits and full-client/library acceptance requirements;
+the [version map](roadmap-version-map.json) preserves previous assignments.
+The next slice is `v0.56.0`, BLS12-381 base-field arithmetic. Unpublished
+implementation and assurance passes continue through `v0.449.0` before RC/1.0;
+that endpoint is a scope inventory, not a deadline or automatic readiness claim.
+
 ## Core Position
 
 `eth` is not a generic re-export of upstream Ethereum crates and must not hide
@@ -132,10 +140,10 @@ The first production value is:
   and `v0.55.0` closes the Prague-era ModExp consensus gap with wide declared
   lengths, virtual padding, gas-derived host conversion, caller-owned
   arbitrary-length workspace, and independent arithmetic differentials, while
-  `v0.56.0..=v0.63.0` build first-party
-  BLS12-381 execution, `v0.64.0..=v0.66.0` freeze architecture,
+  `v0.56.0..=v0.70.0` build first-party
+  BLS12-381 execution, `v0.71.0..=v0.73.0` freeze architecture,
   resource-governor, and cryptographic-provider contracts, and
-  `v0.67.0..=v0.82.0` implement/audit first-party core crypto plus shared
+  `v0.74.0..=v0.109.0` implement/audit first-party core crypto plus shared
   cross-format accounting, session-safe clocks, atomically reserved bounded
   object/peer evidence, early secp proof, signing/transport separation,
   non-forgeable constant-size validation contexts, authority-tagged
@@ -147,7 +155,7 @@ The first production value is:
   boundaries through async/resource lifecycle completion, exact runtime-mode
   dispatch with physical-capacity-class resource charging, and fail-closed
   generation retirement; and
-  `v0.107.0` through `v0.111.0` build first-party KZG/blob verification before
+  `v0.143.0` through `v0.150.0` build first-party KZG/blob verification before
   later releases claim complete affected-fork execution.
 - `eth-valkyoth-sdk`: optional owned models, prelude, builders, and high-level
   workflows over the focused core crates.

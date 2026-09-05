@@ -1,6 +1,11 @@
 # Maintenance Review: 2026-09-05
 
 Scope: maintenance after published `v0.55.0`, before starting `v0.56.0`.
+
+Version assignments below are the source-review snapshot before the subsequent
+[scope review](ROADMAP_REVIEW_2026_09_05.md). Consult its
+[version map](roadmap-version-map.json) for current planned numbers; source
+hashes and completed test evidence in this dated review remain unchanged.
 No tag is replaced and no crates are published by this update. The five-minor
 publication cadence, exact-commit pentests and signed milestone tags remain.
 

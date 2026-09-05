@@ -4,6 +4,13 @@ All notable changes to `eth` are documented here.
 
 ## Unreleased
 
+- Resliced the unpublished roadmap into 98 additional implementation passes,
+  promoted 11 planned patch milestones to minors, preserved all 296 future
+  contracts and added an old-to-new map through v0.449.0.
+- Added explicit scope/predecessor checks, downstream packaged-client
+  acceptance gates, and separate current-fork, cryptography, P2P, evidence,
+  SSZ/BLS/PeerDAS and API implementation stops without changing published tags.
+
 - Refreshed maintenance tooling to Rust 1.98.1 while retaining Rust 1.90.0,
   updated sanitization/syn and both lockfiles, and refreshed the SBOM.
 - Updated the immutable Besu reference image to 26.8.1; retained historical

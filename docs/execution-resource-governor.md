@@ -68,7 +68,7 @@ so nesting cannot create authority. Tokens carry the issuing transaction
 generation for later node-governor integration.
 
 The governor is a capability API, not an implicit scheduler. Hosts must route
-every governed operation through it. `v0.65.0` assigns the complete node
+every governed operation through it. `v0.72.0` assigns the complete node
 resource-governor binding and operational policy freeze.
 
 ## Verification

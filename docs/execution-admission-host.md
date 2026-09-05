@@ -48,7 +48,7 @@ candidate token and a stable error.
 The current shared `Hardfork` domain does not model Berlin separately.
 EIP-2930 admission therefore fails closed before London rather than claiming
 historical Berlin support. The complete fork-domain redesign remains assigned
-to `v0.63.0`.
+to `v0.70.0`.
 
 This name is deliberately narrower than complete transaction validity. The
 stage does not prove sender recovery, intrinsic gas, nonce/account state,

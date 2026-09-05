@@ -136,11 +136,11 @@ Cancun KZG point evaluation, and Prague BLS12-381 precompiles.
 | Precompile domain | Address range | First admitted native fork | Execution status |
 | --- | ---: | --- | --- |
 | `ecrecover`, SHA-256, RIPEMD-160, identity | `0x01..=0x04` | Frontier | Identity, SHA-256, and RIPEMD-160 execute dependency-free. ECRECOVER executes only with caller-provided secp256k1 and Keccak backends. |
-| Modular exponentiation | `0x05` | Byzantium | Executes payable first-party EIP-198/EIP-2565 frames through Prague with 256-bit declared lengths, virtual right-padding, and caller-owned no-alloc workspace. Osaka EIP-7823/EIP-7883 changes are assigned to `v0.116.0`. |
+| Modular exponentiation | `0x05` | Byzantium | Executes payable first-party EIP-198/EIP-2565 frames through Prague with 256-bit declared lengths, virtual right-padding, and caller-owned no-alloc workspace. Osaka EIP-7823/EIP-7883 changes are assigned to `v0.155.0`. |
 | BN254 add/mul/pairing | `0x06..=0x08` | Byzantium | Add and scalar multiplication execute dependency-free with canonical field and point validation. Pairing validates bounded frames, G2 curve membership, G2 subgroup membership, tuple streaming, line-function arithmetic, sparse Miller-loop accumulation, optimized bounded final exponentiation, Frobenius Q1/-Q2 point mapping, and the projective post-loop line carrier, then writes canonical EIP-197 zero/one result words documented in `docs/bn254-pairing-economics.md`. |
 | BLAKE2F | `0x09` | Istanbul | Executes EIP-152 exact 213-byte frames with final-flag validation, round-count gas, and 64-byte output. |
-| KZG point evaluation | `0x0a` | Cancun | Exact 192-byte input, 64-byte output, and fixed 50,000-gas planning; first-party verification and blob integration are assigned to `v0.107.0..=v0.111.0`. |
-| BLS12-381 precompiles | `0x0b..=0x11` | Prague | Exact/non-empty frame policies, fixed output lengths, and official EIP-2537 gas planning; first-party execution is assigned through `v0.56.0..=v0.63.0`. |
+| KZG point evaluation | `0x0a` | Cancun | Exact 192-byte input, 64-byte output, and fixed 50,000-gas planning; first-party verification and blob integration are assigned to `v0.143.0..=v0.150.0`. |
+| BLS12-381 precompiles | `0x0b..=0x11` | Prague | Exact/non-empty frame policies, fixed output lengths, and official EIP-2537 gas planning; first-party execution is assigned through `v0.56.0..=v0.70.0`. |
 
 The registry is still intentionally narrower than a full precompile executor.
 Plans expose fixed

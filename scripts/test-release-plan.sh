@@ -80,4 +80,14 @@ cp "$valid" "$nonmonotonic"
 sed 's/v0\.1\.0/v0.0.9/g' "$valid" >>"$nonmonotonic"
 expect_failure "$nonmonotonic"
 
+future="$tmp_dir/future.md"
+sed -e 's/v0\.1\.0/v0.56.0/g' -e '/^Deliverables:/i\
+Scope: one implementation boundary.\
+' "$valid" >"$future"
+scripts/check_release_plan.sh "$future" >/dev/null
+sed '/^Scope:/d' "$future" >"$tmp_dir/missing-scope.md"
+expect_failure "$tmp_dir/missing-scope.md"
+sed 's/^Scope:.*/Scope:/' "$future" >"$tmp_dir/empty-scope.md"
+expect_failure "$tmp_dir/empty-scope.md"
+
 echo "release plan checker tests passed"

@@ -30,6 +30,11 @@ function finish_release( normalized, required) {
     } else if (!goal_content) {
         problem("Goal section must not be empty")
     }
+    if (status_is_planned && version_major == 0 && version_minor >= 56) {
+        if (scope_count != 1 || !scope_content) {
+            problem("planned milestones must contain one nonempty Scope section")
+        }
+    }
     if (deliverables_count != 1) {
         problem("must contain exactly one Deliverables section")
     } else if (!deliverables_content) {
@@ -68,6 +73,7 @@ function finish_release( normalized, required) {
 function reset_release() {
     section = ""
     status_count = goal_count = deliverables_count = verification_count = exit_count = 0
+    scope_count = scope_content = 0
     status_content = 0
     goal_content = deliverables_content = verification_content = exit_content = 0
     patch_rationale_count = patch_rationale_content = status_is_planned = 0
@@ -175,6 +181,15 @@ version != "" && /^Deliverables:/ {
     if (section_line != "") deliverables_content = 1
     next
 }
+version != "" && /^Scope:/ {
+    if (section_order != 1) problem("Scope must follow Goal and precede Deliverables")
+    scope_count++
+    section_line = $0
+    sub(/^Scope:[[:space:]]*/, "", section_line)
+    if (section_line != "") scope_content = 1
+    section = "scope"
+    next
+}
 version != "" && /^Verification:/ {
     if (section_order != 2) problem("Verification must follow Deliverables")
     section_order = 3
@@ -202,6 +217,7 @@ version != "" && /^Exit criteria:/ {
 version != "" && $0 !~ /^[[:space:]]*$/ {
     if (section == "patch_rationale") patch_rationale_content = 1
     if (section == "goal") goal_content = 1
+    if (section == "scope") scope_content = 1
     if (section == "deliverables") deliverables_content = 1
     if (section == "verification") verification_content = 1
     if (section == "exit") exit_content = 1
