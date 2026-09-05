@@ -6,6 +6,10 @@ All notable changes to `eth` are documented here.
 
 ### v0.56.0 Internal Candidate
 
+- Remediated pentest release-control findings: cadence-derived public baselines,
+  authenticated prior PASS reports with exact lineage, committed signer policy,
+  and effective workspace-inherited dependency comparisons with regression tests.
+
 - Added first-party public-input BLS12-381 base-field arithmetic, fixed-width
   reduction, inversion and deterministic square root without runtime dependencies.
 - Added independent BigUint differential coverage, fuzz invariants, benchmarks

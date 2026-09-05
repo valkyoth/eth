@@ -11,6 +11,7 @@ import sys
 from pathlib import Path
 
 from release_publish import confirm_no_verify, selected_steps, wait_for_index
+from release_evidence import authenticated_tag
 from release_train import (
     parse_version,
     publication_allowed,
@@ -278,7 +279,15 @@ def check_release_tag(version: str, *, require_tag: bool) -> bool:
         print(f"Warning: {message}.", file=sys.stderr)
         return False
 
-    if try_capture(["git", "verify-tag", tag]) is None:
+    if parse_version(version) >= (0, 55, 0):
+        try:
+            authenticated_tag(ROOT, version)
+            valid_signature = True
+        except RuntimeError:
+            valid_signature = False
+    else:
+        valid_signature = try_capture(["git", "verify-tag", tag]) is not None
+    if not valid_signature:
         print(
             f"Refusing to publish: release tag {tag} has no valid signature.",
             file=sys.stderr,

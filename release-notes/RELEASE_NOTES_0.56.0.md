@@ -1,6 +1,6 @@
 # eth v0.56.0
 
-Status: implementation candidate; awaiting pentest.
+Status: release-control findings remediated; awaiting external retest.
 Publication: DEFERRED TO v0.60.0
 
 ## Scope
@@ -15,6 +15,11 @@ does not reduce malformed field encodings. Nonsquares and zero inversion
 return `None`; square roots choose the smaller canonical root.
 
 ## Security And Limits
+
+The initial pentest identified three release-control findings, now addressed
+with signed-history and effective-Cargo-contract regression tests. See the
+[remediation record](../docs/release-control-remediation-0.56.0.md). Field
+arithmetic was unchanged; external retest and final admission remain pending.
 
 - Public inputs only; no constant-time or secret-key safety claim.
 - No G1/G2 operations, subgroup checks, map-to-curve, pairing or signature

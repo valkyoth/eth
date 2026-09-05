@@ -106,15 +106,6 @@ if [ -n "$release_stage" ] && [ "$version" != "0.55.0" ]; then
             echo "public checkpoint release notes must record Publication: PENDING" >&2
             exit 1
         fi
-        milestones="$(python3 -c 'import tomllib; print(" ".join(tomllib.load(open("release-crates.toml", "rb"))["release"]["cumulative_milestones"]))')"
-        for milestone in $milestones; do
-            [ "$milestone" = "$version" ] && continue
-            report="security/pentest/v${milestone}.md"
-            if ! git cat-file -e "v${milestone}:${report}" 2>/dev/null; then
-                echo "public checkpoint lacks tagged pentest report for v${milestone}" >&2
-                exit 1
-            fi
-        done
     else
         echo "unknown release stage: ${release_stage}" >&2
         exit 1
@@ -138,4 +129,8 @@ if [ "$changed_paths" != "$pentest_report" ]; then
     echo "release report commit may only change ${pentest_report}" >&2
     echo "$changed_paths" >&2
     exit 1
+fi
+
+if [ -n "$release_stage" ]; then
+    python3 scripts/validate_train_evidence.py "$version"
 fi

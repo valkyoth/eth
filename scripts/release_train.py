@@ -4,7 +4,11 @@
 from __future__ import annotations
 
 import subprocess
+import re
 from pathlib import Path
+
+from release_evidence import authenticated_tag, git
+from release_dependencies import changed_contracts
 
 
 ROOT = Path(__file__).resolve().parents[1]
@@ -13,6 +17,8 @@ CADENCE_BASELINE = (0, 55, 0)
 
 
 def parse_version(version: str) -> tuple[int, int, int]:
+    if not re.fullmatch(r"(?:0|[1-9][0-9]*)\.(?:0|[1-9][0-9]*)\.(?:0|[1-9][0-9]*)", version):
+        raise RuntimeError(f"version must be canonical MAJOR.MINOR.PATCH: {version}")
     parts = version.split(".")
     if len(parts) != 3:
         raise RuntimeError(f"version must be MAJOR.MINOR.PATCH: {version}")
@@ -122,8 +128,22 @@ def semantic_tags_before(version: str) -> tuple[str, ...]:
 def validate_repository_train(plan: dict) -> None:
     if plan["anchor"]:
         return
-    baseline = parse_version(plan["baseline"])
+    major, minor, patch = parse_version(plan["version"])
+    if major != 0:
+        raise RuntimeError("1.0 requires its separately admitted candidate policy")
+    baseline_minor = ((minor - (patch == 0)) // 5) * 5
+    expected_baseline = f"0.{baseline_minor}.0"
+    if plan["baseline"] != expected_baseline:
+        raise RuntimeError(f"baseline must be preceding public checkpoint {expected_baseline}")
+    baseline = parse_version(expected_baseline)
     preceding = semantic_tags_before(plan["version"])
+    if expected_baseline not in preceding:
+        raise RuntimeError(f"scheduled public checkpoint tag is missing: v{expected_baseline}")
+    required_minors = {f"0.{n}.0" for n in range(baseline_minor + 1, minor)}
+    if patch:
+        required_minors.add(f"0.{minor}.0")
+    if not required_minors.issubset(preceding):
+        raise RuntimeError("scheduled intermediate minor tag is missing")
     expected = tuple(
         version for version in preceding if parse_version(version) > baseline
     ) + (plan["version"],)
@@ -138,6 +158,11 @@ def validate_repository_train(plan: dict) -> None:
             "review_baseline must be the immediately preceding release tag: "
             f"expected {expected_review}, actual {plan['review_baseline']}"
         )
+    previous_commit = authenticated_tag(ROOT, expected_baseline)
+    for version in expected[:-1]:
+        commit = authenticated_tag(ROOT, version)
+        git(ROOT, "merge-base", "--is-ancestor", previous_commit, commit)
+        previous_commit = commit
 
 
 def validate_facade_previous_version(plan: dict) -> None:
@@ -181,7 +206,7 @@ def changed_packages(packages: dict[str, dict], baseline: str) -> set[str]:
         ).strip()
         if tracked or untracked:
             changed.add(name)
-    return changed
+    return changed | changed_contracts(ROOT, packages, baseline)
 
 
 def validate_dependency_closure(packages: dict[str, dict], plan: dict) -> None:

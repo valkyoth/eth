@@ -39,7 +39,9 @@ At `v0.60.0`, `v0.65.0`, and each later scheduled checkpoint:
    update all dependent requirements.
 3. Run a cumulative integration pentest over the complete range after the
    preceding published checkpoint through the candidate.
-4. Verify permanent pentest evidence exists in every intervening signed tag.
+4. Authenticate every prior tag with the committed release-signer policy and
+   validate its PASS report, reviewed-commit parent, report-only diff and
+   assessment chain. Missing scheduled checkpoints/minors block release.
 5. Complete the normal report-only commit, hosted checks, signed tag, and
    explicit tag-push authorization.
 6. Run `scripts/release_crates.py --require-tag`; dependencies publish first

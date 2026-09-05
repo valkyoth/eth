@@ -1,5 +1,10 @@
 # Security Policy
 
+Release-train tags are authenticated against the public keys in the candidate's
+committed `security/release-allowed-signers`, not arbitrary operator keyrings.
+Trust-policy edits require review before the report-only release commit.
+See [release-control evidence](docs/release-control-remediation-0.56.0.md).
+
 `eth` is security-sensitive protocol software. Treat parsing, fork validation,
 proof verification, RPC, signing, EVM execution, Reth integration, P2P, release
 scripts, CI, and dependency updates as high-risk until reviewed and tested.

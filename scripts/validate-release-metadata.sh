@@ -17,6 +17,10 @@ test -x scripts/test-ethereum-upstream.py
 test -x scripts/release_crates.py
 test -f scripts/release_publish.py
 test -f scripts/release_train.py
+test -f scripts/release_evidence.py
+test -f scripts/release_dependencies.py
+test -f scripts/validate_train_evidence.py
+test -s security/release-allowed-signers
 test -f scripts/test-release-train.py
 test -x scripts/sync_spec_sources.py
 test -x scripts/test-sync-spec-sources.py

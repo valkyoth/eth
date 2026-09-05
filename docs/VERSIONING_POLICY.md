@@ -32,6 +32,13 @@ exact candidate. The checkpoint gate also verifies that every intervening
 minor and patch tag is represented in `cumulative_milestones`; no internal
 slice may disappear from the publication range.
 
+The required preceding public baseline is calculated from the cadence, then
+resolved from authenticated ancestor tags; metadata cannot select a newer or
+older comparison point. Missing scheduled checkpoints/minors fail closed.
+Prior reports are validated for PASS, unique fields, exact linear report-only
+commit binding, assessment/predecessor/range and authorized signatures, not
+merely file existence. See the [release-control remediation](release-control-remediation-0.56.0.md).
+
 Incremental reports reduce review size but do not replace the cumulative
 checkpoint assessment. Findings are remediated and retested under the normal
 project workflow before either kind of tag is created.
@@ -51,6 +58,11 @@ when their source changes. At a public checkpoint:
 This prevents unpublished support-crate versions from entering dependency
 requirements while preserving independent crate versioning. Package changes
 are compared cumulatively against the preceding public checkpoint.
+
+This includes effective external dependency requirements/features inherited
+from the root workspace manifest. Cargo metadata from an isolated authenticated
+baseline snapshot is compared with the candidate. Checkout path relocation
+alone is ignored; dependency source, target, rename and feature changes are not.
 
 ## Enforced Metadata
 

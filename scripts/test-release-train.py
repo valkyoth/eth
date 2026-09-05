@@ -93,7 +93,7 @@ def test_repository_train_rejects_omitted_patch_tag() -> None:
             "0.60.0",
             stage="public",
             review_baseline="0.59.0",
-            milestones=("0.56.0", "0.57.0", "0.59.0", "0.60.0"),
+            milestones=("0.56.0", "0.57.0", "0.58.0", "0.59.0", "0.60.0"),
         )
     )
     original = release_train.semantic_tags_before
@@ -102,6 +102,7 @@ def test_repository_train_rejects_omitted_patch_tag() -> None:
         "0.56.0",
         "0.57.0",
         "0.57.1",
+        "0.58.0",
         "0.59.0",
     )
     try:
