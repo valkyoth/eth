@@ -17,6 +17,7 @@ mod blake2f;
 mod bls12_field;
 mod bls12_field_api;
 mod bls12_frame;
+mod bls12_g1;
 mod bls12_gas;
 mod bls12_wire;
 mod bn254;
@@ -68,6 +69,7 @@ pub use bls12_frame::{
     parse_bls12381_g2_msm, parse_bls12381_map_fp_to_g1, parse_bls12381_map_fp2_to_g2,
     parse_bls12381_pairing,
 };
+pub use bls12_g1::{EvmBls12381G1Affine, EvmBls12381G1Projective};
 pub use bls12_wire::{
     EVM_BLS12381_FP_BYTES, EVM_BLS12381_FP2_BYTES, EVM_BLS12381_FR_BYTES,
     EVM_BLS12381_G1_POINT_BYTES, EVM_BLS12381_G2_POINT_BYTES, EVM_BLS12381_SCALAR_BYTES,

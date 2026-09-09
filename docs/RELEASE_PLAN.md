@@ -15,9 +15,9 @@ previously planned workstream contracts, extracts 98 implementation passes and
 promotes 11 planned patch milestones to minors. Unpublished work now extends
 through `v0.449.0`; published history through `v0.55.0` is unchanged. The
 [version map](roadmap-version-map.json) records every previous assignment.
-The current candidate is `v0.56.0`, BLS12-381 base-field arithmetic only;
-pentest retest is clean. The simplified release workflow update awaits fresh
-GitHub checks and explicit tag authorization.
+The current candidate is `v0.57.0`, BLS12-381 G1 group operations on the
+tagged `v0.56.0` base field. Exact-commit pentest is pending; this slice does
+not enable subgroup validation or charged precompile dispatch.
 
 Tags use:
 
@@ -3219,12 +3219,11 @@ Exit criteria:
 
 ### v0.56.0 - BLS12-381 Base Field
 
-Status: implementation and pentest remediation complete; clean retest confirmed.
+Status: tagged as v0.56.0 after clean retest and GitHub approval.
 The maintainer-approved workflow separates portable implementation checks from
 final report/tag admission. The host-unavailable external-client run remains
 documented missing evidence, not an additional tag blocker for this field-only
-milestone. Await fresh GitHub CI/CodeQL after the workflow update and explicit
-tag authorization. Internal tag only; publication at v0.60.0.
+milestone. Internal tag only; publication at v0.60.0.
 
 Goal: establish canonical first-party Fp arithmetic independently of curve execution.
 
@@ -3256,11 +3255,13 @@ Exit criteria:
 
 ### v0.57.0 - BLS12-381 G1 Group Operations
 
-Status: planned; internal signed tag, publication at v0.60.0.
+Status: implementation candidate; exact-commit pentest pending. Internal
+signed tag only after report/GitHub approval; publication at v0.60.0.
 
 Goal: build complete G1 arithmetic on the admitted field.
 
-Scope: implementation pass. Depends on v0.56.0. The retained
+Scope: implementation pass. Depends on v0.56.0. Exact APIs, resources,
+fixture provenance and commands are in [G1 arithmetic](bls12-g1-arithmetic.md). The retained
 workstream contract at v0.58.0 applies from this first implementation;
 its integration gate is not a prerequisite implementation. No later
 feature is implicitly enabled by this pass.

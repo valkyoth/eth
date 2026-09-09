@@ -3,14 +3,14 @@
 Release snapshot: `v0.55.0` tagged and published after its pentest, clean
 retest, GitHub CI, and CodeQL gates passed.
 
-Source candidate: `v0.56.0`, with a clean pentest retest, adds public-input BLS12-381
-Fp arithmetic only. The tables below retain the published snapshot; no curve,
-subgroup, signature or BLS precompile execution is implied by field operations.
-See the [base-field scope and verification](bls12-381-base-field.md).
-The workflow update awaits fresh GitHub CI/CodeQL and maintainer tag approval.
+Source candidate: `v0.57.0` adds public-input BLS12-381 G1 affine/projective
+arithmetic and on-curve parsing on the tagged v0.56.0 base field. Its pentest
+is pending. The tables below retain the published snapshot; subgroup,
+signature and charged BLS precompile execution remain unavailable.
+See the [G1 scope and verification](bls12-g1-arithmetic.md).
 Portable checks run before review; tag admission validates report readiness.
 The host-unavailable client differential run is recorded as missing evidence,
-not a passed test or an additional tag blocker for this field-only milestone.
+not a passed test or an additional tag blocker for this arithmetic-only milestone.
 
 Every following roadmap version remains a pentested signed GitHub tag. The next
 cumulative crates.io publication is `v0.60.0`; intermediate minor and patch

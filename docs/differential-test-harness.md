@@ -1,7 +1,8 @@
 # Differential Test Harness
 
 Status: `v0.55.0` covers structural RLP and arbitrary-length ModExp through
-independent in-process or external-client reference paths.
+independent in-process or external-client reference paths. The internal
+v0.57.0 candidate also registers v0.56.0 Fp and new G1 independent oracles.
 
 ## Scope
 
@@ -9,6 +10,8 @@ independent in-process or external-client reference paths.
 | --- | --- | --- | --- |
 | Structural RLP | `eth-valkyoth-codec::differential_rlp_reference` | `alloy-rlp` `0.3.16` | Valid/invalid structural decisions and exact accepted re-encoding match for the curated corpus. |
 | ModExp arithmetic | `eth-valkyoth-evm-core::modexp_differential` | `num-bigint` `0.5.1` | Exact output matches from 1 through 256-byte widths plus leading-zero, even, zero, unequal-width, sparse, truncated, and right-padded operands. |
+| BLS12-381 base field | `eth-valkyoth-evm-core::bls12_field_differential` | `num-bigint` `0.5.1` | Independent modular arithmetic, inverses and square-root postconditions. |
+| BLS12-381 G1 | `eth-valkyoth-evm-core::bls12_g1_differential` | `num-bigint` `0.5.1` affine oracle | Independent full-curve point generation, addition, doubling and parsing; no subgroup or charged execution claim. |
 | ModExp client behavior | `modexp_client_vectors` through precompile `0x05` | Geth `1.17.5`, Besu `26.8.1`, and Nethermind `1.39.3` | All 11 deterministic frames return byte-identical output from every client. |
 
 Structural RLP comparison cannot distinguish every Ethereum integer-domain
@@ -46,7 +49,13 @@ The runner executes the in-process paths and then
 ```sh
 cargo test -p eth-valkyoth-codec --test differential_rlp_reference --features testing
 cargo test -p eth-valkyoth-evm-core --test modexp_differential
+cargo test -p eth-valkyoth-evm-core --test bls12_field_differential
+cargo test -p eth-valkyoth-evm-core --test bls12_g1_differential
 ```
+
+G1 also has all nine pinned EIP-2537 positive addition vectors in the normal
+workspace tests; see [G1 fixture provenance](bls12-g1-arithmetic.md). These
+are offline upstream results, not a new Geth/Besu/Nethermind execution run.
 
 The external runner requires Podman and network access to the official GitHub
 release APIs and container registry. It fails when a pin is no longer the

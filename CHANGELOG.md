@@ -4,7 +4,20 @@ All notable changes to `eth` are documented here.
 
 ## Unreleased
 
-### v0.56.0 Internal Candidate
+### v0.57.0 Internal Candidate
+
+- Added first-party BLS12-381 G1 on-curve affine/projective types, complete
+  addition/doubling, infinity, negation, conversions and geometric equality.
+- Added all nine pinned official addition vectors, independent affine BigUint
+  differential tests, malformed/exceptional/scaled-coordinate coverage,
+  differential fuzzing and fixed-work benchmarks. No runtime dependency added.
+- Kept existing wire-only parsing compatible; subgroup admission and charged
+  dispatch stay assigned to v0.62.0 and v0.58.0 respectively.
+- Updated optional sanitization to 2.1.0 and dev-only trybuild to 1.0.121.
+- Exact-commit pentest pending. This is an internal milestone; the next
+  cumulative crates.io publication remains v0.60.0.
+
+### v0.56.0 Internal Tag
 
 - Simplified the maintainer release loop: portable checks before pentest,
   fixes/tests/report updates, commit and GitHub wait, then metadata/report
@@ -21,8 +34,8 @@ All notable changes to `eth` are documented here.
 - Added independent BigUint differential coverage, fuzz invariants, benchmarks
   and a scope/resource contract. Curve/precompile execution remains fail closed.
 - Advanced only the facade source version; publication is deferred to v0.60.0
-  and the pentest retest is clean. Full release admission and GitHub checks
-  remain pending for the workflow update. The host-unavailable external-client
+  and the pentest retest and GitHub checks passed before tagging.
+  The host-unavailable external-client
   regression is documented separately from tag admission.
 
 - Resliced the unpublished roadmap into 98 additional implementation passes,

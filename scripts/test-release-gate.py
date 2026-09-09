@@ -14,6 +14,9 @@ SCRIPTS = Path(__file__).resolve().parent
 
 
 class GateTests(unittest.TestCase):
+    version = "0.56.0"
+    fuzz_target = "bls12381_field"
+
     def setUp(self):
         self.temp = tempfile.TemporaryDirectory()
         self.addCleanup(self.temp.cleanup)
@@ -22,7 +25,7 @@ class GateTests(unittest.TestCase):
         (self.root / "bin").mkdir()
         self.log = self.root / "calls"
         self.gate = self.root / "gate.sh"
-        self.gate.write_text((SCRIPTS / "release_0_56_0_gate.sh").read_text())
+        self.gate.write_text((SCRIPTS / f"release_{self.version.replace('.', '_')}_gate.sh").read_text())
         names = ("validate-release-metadata.sh", "validate-release-readiness.sh",
                  "checks.sh", "check_latest_tools.sh", "check_latest_crates.py",
                  "check_ethereum_upstream.py", "materialize_fuzz_seeds.py",
@@ -56,7 +59,7 @@ class GateTests(unittest.TestCase):
                 result, calls = self.invoke(*args)
                 self.assertEqual(result.returncode, 0, result.stderr)
                 self.assertEqual(calls, ["validate-release-metadata.sh ",
-                                         "validate-release-readiness.sh v0.56.0"])
+                                         f"validate-release-readiness.sh v{self.version}"])
 
     def test_tag_errors_are_not_ignored(self):
         for fail in ("validate-release-metadata.sh", "validate-release-readiness.sh"):
@@ -74,7 +77,7 @@ class GateTests(unittest.TestCase):
                          "cargo +1.90.0 check --workspace --all-features",
                          "cargo +1.98.0 check --workspace --all-features"):
             self.assertIn(expected, calls)
-        self.assertTrue(any("fuzz run bls12381_field" in call for call in calls))
+        self.assertTrue(any(f"fuzz run {self.fuzz_target}" in call for call in calls))
         self.assertFalse(any("readiness" in call or "metadata.sh" in call for call in calls))
         self.assertNotIn("run_differential_tests.py ", calls)
 
@@ -89,6 +92,11 @@ class GateTests(unittest.TestCase):
                 result, calls = self.invoke(*args)
                 self.assertEqual(result.returncode, 2)
                 self.assertEqual(calls, [])
+
+
+class G1GateTests(GateTests):
+    version = "0.57.0"
+    fuzz_target = "bls12381_g1"
 
 
 class DifferentialSelectionTests(unittest.TestCase):

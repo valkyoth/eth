@@ -28,6 +28,8 @@ DIFFERENTIAL_TESTS = [
         "--test",
         "modexp_differential",
     ],
+    ["cargo", "test", "-p", "eth-valkyoth-evm-core", "--test", "bls12_field_differential"],
+    ["cargo", "test", "-p", "eth-valkyoth-evm-core", "--test", "bls12_g1_differential"],
 ]
 CLIENT_DIFFERENTIAL = ["scripts/run_modexp_client_differential.py"]
 

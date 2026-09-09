@@ -1,10 +1,11 @@
 # eth Specification Matrix
 
-The internal `v0.56.0` candidate adds public-input BLS12-381 Fp conversion,
-reduction and arithmetic using EIP-2537's field modulus. Its
-[scope and source evidence](bls12-381-base-field.md) are separate from curve
-and precompile admission. Pentest is pending; this is not yet a published
-capability. The wire decoder still rejects noncanonical encodings.
+The internal `v0.57.0` candidate adds public-input BLS12-381 G1 affine/projective
+arithmetic and on-curve parsing on v0.56.0's Fp. Its
+[scope and source evidence](bls12-g1-arithmetic.md) are separate from subgroup
+and charged precompile admission. Pentest is pending; this is not a published
+capability. Existing wire-only point domains remain unchanged; new G1 types
+enforce curve membership. Both parsers reject noncanonical encodings.
 
 Status: source revisions pinned for `v0.37.4`; scalar, list, and canonical
 integer RLP decoding, canonical RLP encoding helpers, primitive RLP bridging,
