@@ -1,6 +1,6 @@
 # eth v0.57.0
 
-Status: implementation checks passed; exact-commit pentest pending.
+Status: implementation checks and pentest passed; GitHub/tag approval pending.
 Publication: DEFERRED TO v0.60.0
 
 ## Scope
@@ -27,7 +27,9 @@ Existing `EvmBls12381G1Point` parsing remains wire-only and API-compatible.
 See the [scope, resources and provenance](../docs/bls12-g1-arithmetic.md).
 The Rust 1.98.1 implementation gate, 1.90.0-through-1.98.0 compatibility
 checks and nine additional no-default-feature cross-compilation targets passed.
-The final differential fuzz smoke completed 15,212 inputs without failure.
-The next step is exact-commit pentest. GitHub approval and explicit maintainer
-authorization still precede a signed internal tag. Crates.io examples stay on
+The pre-pentest differential fuzz smoke completed 15,212 inputs without failure.
+The maintainer reported a clean external pentest of implementation commit
+`9dc582e45d78f50af4dd90d11813873fcdded55a`, with no remediation required.
+GitHub approval and explicit maintainer authorization still precede a signed
+internal tag. Crates.io examples stay on
 published `eth 0.55.0`; cumulative publication remains v0.60.0.

@@ -1,6 +1,7 @@
 # BLS12-381 G1 Arithmetic
 
-Milestone: v0.57.0, internal source candidate, pentest pending. Publication is
+Milestone: v0.57.0, internal source candidate, pentest clean; GitHub/tag approval
+pending. Publication is
 at v0.60.0. Owner: `eth-valkyoth-evm-core`, exposed by `eth::evm_core` under
 the optional `evm-core` feature. No new runtime dependency or default feature.
 
@@ -102,6 +103,15 @@ scripts/release_0_57_0_gate.sh --implementation
 
 The implementation stop requires these tests and pentest of the exact commit.
 No permanent PASS report or tag is generated before the maintainer's review.
+
+The maintainer subsequently reported a clean external pentest of
+`9dc582e45d78f50af4dd90d11813873fcdded55a` against v0.56.0. No remediation was
+required. The review confirmed canonical curve validation, exceptional-case
+arithmetic, fixed-size memory-safe operations and unchanged execution
+authorization. Its independent Python oracle and additional fuzz evidence are
+attributed to the supplied review, not represented as locally reproduced
+artifacts. Subgroup validation, private-input timing, cross-client execution,
+exhaustive fuzzing and formal verification are not claims of this milestone.
 
 ### Local Implementation Evidence, 2026-09-09
 

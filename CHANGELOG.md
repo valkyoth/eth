@@ -14,8 +14,9 @@ All notable changes to `eth` are documented here.
 - Kept existing wire-only parsing compatible; subgroup admission and charged
   dispatch stay assigned to v0.62.0 and v0.58.0 respectively.
 - Updated optional sanitization to 2.1.0 and dev-only trybuild to 1.0.121.
-- Exact-commit pentest pending. This is an internal milestone; the next
-  cumulative crates.io publication remains v0.60.0.
+- External pentest of `9dc582e` is clean, with no remediation required;
+  GitHub checks and explicit tag approval remain pending. This is an internal
+  milestone; the next cumulative crates.io publication remains v0.60.0.
 
 ### v0.56.0 Internal Tag
 

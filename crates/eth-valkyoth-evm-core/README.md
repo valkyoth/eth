@@ -72,7 +72,7 @@ The internal `v0.57.0` source candidate adds `EvmBls12381G1Affine` and
 `EvmBls12381G1Projective` for on-curve parsing, conversions, infinity,
 addition/doubling and negation on the tagged v0.56.0 field arithmetic.
 Public data only, not constant-time or subgroup-validated. BLS precompile
-dispatch remains unavailable; pentest is pending. See the
+dispatch remains unavailable; pentest is clean, with GitHub/tag approval pending. See the
 [G1 contract](https://github.com/valkyoth/eth/blob/main/docs/bls12-g1-arithmetic.md).
 These additions are not in the published `eth 0.55.0` dependency examples above.
 

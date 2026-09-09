@@ -3,7 +3,7 @@
 The internal `v0.57.0` candidate adds public-input BLS12-381 G1 affine/projective
 arithmetic and on-curve parsing on v0.56.0's Fp. Its
 [scope and source evidence](bls12-g1-arithmetic.md) are separate from subgroup
-and charged precompile admission. Pentest is pending; this is not a published
+and charged precompile admission. Pentest is clean; this is not a published
 capability. Existing wire-only point domains remain unchanged; new G1 types
 enforce curve membership. Both parsers reject noncanonical encodings.
 

@@ -16,8 +16,8 @@ promotes 11 planned patch milestones to minors. Unpublished work now extends
 through `v0.449.0`; published history through `v0.55.0` is unchanged. The
 [version map](roadmap-version-map.json) records every previous assignment.
 The current candidate is `v0.57.0`, BLS12-381 G1 group operations on the
-tagged `v0.56.0` base field. Exact-commit pentest is pending; this slice does
-not enable subgroup validation or charged precompile dispatch.
+tagged `v0.56.0` base field. Pentest is clean; GitHub/tag approval is pending.
+This slice does not enable subgroup validation or charged precompile dispatch.
 
 Tags use:
 
@@ -3255,8 +3255,8 @@ Exit criteria:
 
 ### v0.57.0 - BLS12-381 G1 Group Operations
 
-Status: implementation candidate; exact-commit pentest pending. Internal
-signed tag only after report/GitHub approval; publication at v0.60.0.
+Status: implementation candidate; pentest clean, GitHub/tag approval pending.
+Internal signed tag only after report/GitHub approval; publication at v0.60.0.
 
 Goal: build complete G1 arithmetic on the admitted field.
 

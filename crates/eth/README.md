@@ -45,7 +45,8 @@ each later pre-1.0 minor divisible by five. Intermediate tags remain source
 milestones and never publish crates.
 
 The source checkout is preparing internal milestone `0.57.0`: on-curve G1
-arithmetic on the tagged v0.56.0 BLS12-381 base field, pending pentest.
+arithmetic on the tagged v0.56.0 BLS12-381 base field. Pentest is clean;
+GitHub checks and explicit tag approval remain pending.
 This is not on crates.io; dependency examples deliberately use published
 `0.55.0`. Subgroup checks, G2 arithmetic and BLS precompile execution remain
 unavailable. See the [G1 scope](https://github.com/valkyoth/eth/blob/main/docs/bls12-g1-arithmetic.md).
