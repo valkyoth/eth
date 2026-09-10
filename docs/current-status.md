@@ -4,7 +4,8 @@ Release snapshot: `v0.55.0` tagged and published after its pentest, clean
 retest, GitHub CI, and CodeQL gates passed.
 
 Source candidate: `v0.59.0` adds BLS12-381 Fp2 arithmetic, conjugation,
-inversion and checked roots; pentest pending. Paid G1ADD is tagged as v0.58.0.
+inversion and checked roots; pentest clean, GitHub/tag approval pending.
+Paid G1ADD is tagged as v0.58.0.
 The tables retain the
 published snapshot, not source-only capabilities. Other BLS precompiles,
 subgroup and signature verification remain unavailable.

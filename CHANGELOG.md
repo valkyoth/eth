@@ -11,7 +11,9 @@ All notable changes to `eth` are documented here.
 - Added independent polynomial differential checks, boundary/malformed-input
   tests, structured fuzzing, CPU smoke and explicit arithmetic contracts.
 - Linked every partial README capability to its completion/verification
-  releases. Pentest pending; no crates.io publication before v0.60.0.
+  releases. External SAST of `3922897` found no Critical, High or Medium
+  issues; no remediation or retest required. GitHub/tag approval pending;
+  no crates.io publication before v0.60.0.
 
 ### v0.58.0 Internal Tag
 

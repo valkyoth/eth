@@ -17,7 +17,8 @@ through `v0.449.0`; published history through `v0.55.0` is unchanged. The
 [version map](roadmap-version-map.json) records every previous assignment.
 The current candidate is `v0.59.0`, BLS12-381 quadratic-extension arithmetic
 on the tagged field foundation. v0.58.0 charged G1 addition is tagged.
-Pentest is pending for this new slice; it enables no G2 or other precompile.
+Pentest is clean for this new slice; GitHub/tag approval remains pending.
+It enables no G2 or other precompile.
 The [partial-capability completion map](partial-capability-completion.md)
 traces all five yellow README rows to implementation and acceptance releases.
 
@@ -3339,8 +3340,8 @@ Exit criteria:
 
 ### v0.59.0 - BLS12-381 Quadratic Extension Field
 
-Status: implementation candidate; pentest pending. Internal signed tag after
-review and approval; publication at v0.60.0.
+Status: implementation candidate; pentest clean, GitHub/tag approval pending.
+Internal signed tag after approval; publication at v0.60.0.
 
 Goal: freeze Fp2 coefficient and non-residue conventions before G2 formulas.
 
@@ -3428,11 +3429,17 @@ Deliverables:
 - G2 curve-membership validation that remains separate from subgroup checks;
 - charged `0x0d` execution over exactly two G2 points with canonical 256-byte
   output and no subgroup rejection;
+- non-forgeable gas/work authorization before remotely reachable Fp2/G2
+  arithmetic, including inversion or square-root work, preserving the v0.59.0
+  public-input-only contract;
 - explicit extension-tower conventions reused by later pairing releases.
 
 Verification:
 
 - official EIP-2537 G2 addition vectors and generator constants;
+- cross-client G2 vectors against pinned Geth, Besu and Nethermind versions;
+  instrumented regressions proving failed admission performs no inversion or
+  square-root work and paid failures preserve the output/gas contract;
 - Fp2 field identities plus G2 identity, inverse, doubling, commutativity, and
   associativity properties;
 - independent differential vectors for field and point arithmetic;

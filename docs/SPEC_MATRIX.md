@@ -3,7 +3,7 @@
 The internal `v0.59.0` candidate adds public-input Fp2 arithmetic with
 `v^2=-1`, canonical coefficient order, conjugation, inversion and checked roots.
 Its [scope and verification](bls12-fp2-arithmetic.md) exclude G2 execution.
-Pentest is pending; this is not a published capability. Paid G1ADD is tagged
+Pentest is clean; this is not a published capability. Paid G1ADD is tagged
 as v0.58.0; other BLS execution and subgroup verification remain unavailable.
 The inventory below retains
 the published baseline, while this paragraph records source-only additions.

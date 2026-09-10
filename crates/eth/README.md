@@ -46,7 +46,8 @@ milestones and never publish crates.
 
 The source checkout is preparing internal milestone `0.59.0`: public-input
 BLS12-381 Fp2 arithmetic, conjugation, inversion and checked square roots,
-building on tagged Fp/G1 arithmetic and charged G1 addition. Pentest is pending.
+building on tagged Fp/G1 arithmetic and charged G1 addition. Pentest is clean;
+GitHub checks and explicit tag approval remain pending.
 This is not on crates.io; dependency examples deliberately use published
 `0.55.0`. Subgroup checks, G2 arithmetic and other BLS precompiles remain
 unavailable. See the [Fp2 scope](https://github.com/valkyoth/eth/blob/main/docs/bls12-fp2-arithmetic.md).

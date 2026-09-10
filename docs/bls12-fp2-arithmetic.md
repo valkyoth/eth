@@ -1,6 +1,7 @@
 # BLS12-381 Quadratic Extension Field
 
-Source milestone: v0.59.0, internal-only; pentest pending. The next public
+Source milestone: v0.59.0, internal-only; pentest clean, GitHub/tag approval
+pending. The next public
 checkpoint is v0.60.0. This document does not claim G2 or pairing execution.
 
 ## Contract
@@ -113,6 +114,20 @@ entry changes here; existing paid G1ADD regression tests remain mandatory.
 - Core normal dependency tree remains empty. The packaged facade README is
   identical to the GitHub README and contains no bundled bitmap.
 
-Independent pentest, cross-client G2 execution, exhaustive fuzzing and formal
-proof are not claimed. The implementation stop is ready for exact-commit
-pentest; findings must be fixed and retested before tag approval.
+## External Review And Integration Obligations
+
+The maintainer supplied clean incremental SAST for v0.58.0 through
+`39228979b26a060b85a480d7124ad1de3a2f8445`: no Critical, High or Medium
+findings and no remediation or retest required. The review reports workspace,
+package, doctest, Clippy, debug/release differential and SBOM checks passing,
+plus 2,659 additional Fp2 fuzz executions. The reviewer disabled LeakSanitizer
+leak detection because ptrace was unavailable; this is not leak-check evidence.
+Fresh local finalization results are recorded separately in the permanent
+`security/pentest/v0.59.0.md` report.
+
+Before remotely reachable G2/precompile integration, v0.61.0 must enforce
+non-forgeable gas/work authorization before any inversion or square-root
+work and collect cross-client G2 vectors. v0.60.0 remains standalone public
+point arithmetic, not remote execution admission. Cross-client G2 execution,
+exhaustive fuzzing and formal proof are not claimed for this field-only slice.
+GitHub checks and explicit maintainer tag approval remain pending.

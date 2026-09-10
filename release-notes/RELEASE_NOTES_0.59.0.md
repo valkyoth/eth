@@ -1,6 +1,6 @@
 # eth v0.59.0
 
-Status: implementation checks passed; pentest pending.
+Status: implementation checks and pentest passed; GitHub/tag approval pending.
 Publication: DEFERRED TO v0.60.0
 
 ## Scope
@@ -31,5 +31,13 @@ checks, Cargo Deny and both advisory scans. All 14 older-Rust checks from
 1.90.0 through 1.98.0 and nine no-default cross-target checks passed. Fp2 and
 charged-G1 fuzz smokes completed 5,128 and 33,566 executions respectively.
 Detailed commands, measurements and limitations are retained in the Fp2 scope
-document. Next step: exact-commit pentest. No PASS report or tag is authorized
-by this implementation candidate.
+document. These counts are implementation-phase evidence; the permanent
+pentest report records fresh release-finalization results separately.
+
+The maintainer supplied clean SAST of `39228979b26a060b85a480d7124ad1de3a2f8445`
+against v0.58.0: no Critical, High or Medium findings, with no remediation or
+retest required. External fuzzing added 2,659 executions with leak detection
+disabled for a ptrace restriction. The public-input restriction remains
+mandatory; gas/work-before-arithmetic and cross-client G2 evidence are explicit
+v0.61.0 obligations. Next step: GitHub CI/CodeQL wait, then explicit maintainer
+tag authorization. This internal milestone does not publish to crates.io.

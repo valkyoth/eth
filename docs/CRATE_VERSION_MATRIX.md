@@ -1,6 +1,6 @@
 # Crate Version Matrix
 
-Status: `v0.59.0` internal candidate; pentest pending.
+Status: `v0.59.0` internal candidate; pentest clean, GitHub/tag approval pending.
 No crates are selected for publication before the `v0.60.0` checkpoint.
 
 `eth` uses independent crate versions. The facade crate remains the main user
