@@ -125,6 +125,9 @@ impl EvmBls12381Scalar {
 }
 
 /// Canonical EIP-2537 Fp2 value in `c0 || c1` coefficient order.
+///
+/// Represents `c0 + c1*v` with `v^2 = -1`. Arithmetic is variable-time,
+/// for public inputs only, and does not validate G2 points or subgroups.
 #[derive(Clone, Copy, Debug, Eq, PartialEq)]
 pub struct EvmBls12381Fp2 {
     c0: EvmBls12381Fp,
@@ -132,6 +135,12 @@ pub struct EvmBls12381Fp2 {
 }
 
 impl EvmBls12381Fp2 {
+    /// Constructs a value from two already-canonical base-field coefficients.
+    #[must_use]
+    pub const fn from_coefficients(c0: EvmBls12381Fp, c1: EvmBls12381Fp) -> Self {
+        Self { c0, c1 }
+    }
+
     /// Decodes one exact EIP-2537 `c0 || c1` field encoding.
     pub fn try_from_be_bytes(input: &[u8]) -> Result<Self, EvmCoreError> {
         require_len(input, EVM_BLS12381_FP2_BYTES)?;

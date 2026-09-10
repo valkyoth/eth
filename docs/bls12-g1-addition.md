@@ -1,7 +1,6 @@
 # Charged BLS12-381 G1 Addition
 
-Milestone: v0.58.0, internal source candidate; pentest clean, GitHub/tag approval
-pending. Crates.io
+Milestone: v0.58.0, signed internal tag after clean pentest and GitHub checks. Crates.io
 publication remains v0.60.0. Owner: `eth-valkyoth-evm-core`, optional
 `eth::evm_core`. No new runtime dependency, allocation or unsafe code.
 

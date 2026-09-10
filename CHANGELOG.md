@@ -4,14 +4,23 @@ All notable changes to `eth` are documented here.
 
 ## Unreleased
 
-### v0.58.0 Internal Candidate
+### v0.59.0 Internal Candidate
+
+- Added fixed-width public-input Fp2 arithmetic, conjugation, inversion and
+  deterministic checked roots; canonical coefficient order stays unchanged.
+- Added independent polynomial differential checks, boundary/malformed-input
+  tests, structured fuzzing, CPU smoke and explicit arithmetic contracts.
+- Linked every partial README capability to its completion/verification
+  releases. Pentest pending; no crates.io publication before v0.60.0.
+
+### v0.58.0 Internal Tag
 
 - Added paid Prague G1 addition at `0x0b`, exact 375-gas charging and atomic
   canonical output, reusing first-party Fp/G1 arithmetic without new dependencies.
 - Added official positive/negative execution vectors, admission-work counters,
   paid-path differential fuzzing, fixed-gas CPU smoke and integration docs.
 - External pentest/SAST of `e5b4afa` is clean, with no Critical, High or Medium
-  findings and no remediation required. GitHub/tag approval remains pending;
+  findings and no remediation required. GitHub checks passed and v0.58.0 was tagged;
   no crates.io publication before v0.60.0.
 
 ### v0.57.0 Internal Tag

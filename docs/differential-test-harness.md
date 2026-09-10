@@ -2,8 +2,8 @@
 
 Status: `v0.55.0` covers structural RLP and arbitrary-length ModExp through
 independent in-process or external-client reference paths. The internal
-v0.58.0 candidate retains the tagged Fp/G1 independent oracles and adds
-charged G1 execution fuzzing plus official positive/negative frame evidence.
+v0.59.0 candidate retains the tagged Fp/G1 and charged G1 evidence and adds
+an independent Fp2 polynomial oracle, root-existence checks and fuzzing.
 
 ## Scope
 
@@ -12,6 +12,7 @@ charged G1 execution fuzzing plus official positive/negative frame evidence.
 | Structural RLP | `eth-valkyoth-codec::differential_rlp_reference` | `alloy-rlp` `0.3.16` | Valid/invalid structural decisions and exact accepted re-encoding match for the curated corpus. |
 | ModExp arithmetic | `eth-valkyoth-evm-core::modexp_differential` | `num-bigint` `0.5.1` | Exact output matches from 1 through 256-byte widths plus leading-zero, even, zero, unequal-width, sparse, truncated, and right-padded operands. |
 | BLS12-381 base field | `eth-valkyoth-evm-core::bls12_field_differential` | `num-bigint` `0.5.1` | Independent modular arithmetic, inverses and square-root postconditions. |
+| BLS12-381 Fp2 | `eth-valkyoth-evm-core::bls12_fp2_differential` | `num-bigint` `0.5.1` polynomial oracle | Exact coefficient arithmetic, inverse exponentiation, Frobenius, Euler root existence and independently squared roots; no G2 execution claim. |
 | BLS12-381 G1 | `eth-valkyoth-evm-core::bls12_g1_differential` | `num-bigint` `0.5.1` affine oracle | Independent full-curve point generation, addition, doubling and parsing; no subgroup or charged execution claim. |
 | ModExp client behavior | `modexp_client_vectors` through precompile `0x05` | Geth `1.17.5`, Besu `26.8.1`, and Nethermind `1.39.3` | All 11 deterministic frames return byte-identical output from every client. |
 
@@ -52,6 +53,7 @@ cargo test -p eth-valkyoth-codec --test differential_rlp_reference --features te
 cargo test -p eth-valkyoth-evm-core --test modexp_differential
 cargo test -p eth-valkyoth-evm-core --test bls12_field_differential
 cargo test -p eth-valkyoth-evm-core --test bls12_g1_differential
+cargo test -p eth-valkyoth-evm-core --test bls12_fp2_differential
 ```
 
 G1 also has all nine pinned EIP-2537 positive addition vectors in the normal

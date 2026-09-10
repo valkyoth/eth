@@ -15,10 +15,11 @@ previously planned workstream contracts, extracts 98 implementation passes and
 promotes 11 planned patch milestones to minors. Unpublished work now extends
 through `v0.449.0`; published history through `v0.55.0` is unchanged. The
 [version map](roadmap-version-map.json) records every previous assignment.
-The current candidate is `v0.58.0`, charged BLS12-381 G1 addition on the
-tagged `v0.56.0` field and `v0.57.0` group arithmetic. Pentest is clean;
-GitHub/tag approval remains pending.
-This slice does not enable subgroup validation or other BLS precompiles.
+The current candidate is `v0.59.0`, BLS12-381 quadratic-extension arithmetic
+on the tagged field foundation. v0.58.0 charged G1 addition is tagged.
+Pentest is pending for this new slice; it enables no G2 or other precompile.
+The [partial-capability completion map](partial-capability-completion.md)
+traces all five yellow README rows to implementation and acceptance releases.
 
 Tags use:
 
@@ -3289,8 +3290,8 @@ Exit criteria:
 
 ### v0.58.0 - BLS12-381 G1 Arithmetic And Addition Completion
 
-Status: implementation candidate; pentest clean, GitHub/tag approval pending.
-Internal signed tag only after approval; publication at v0.60.0.
+Status: tagged as v0.58.0 after clean pentest and GitHub checks.
+Internal signed tag; publication at v0.60.0.
 
 Goal: implement dependency-free G1 field arithmetic and the `0x0b` addition
 precompile with official positive, infinity, invalid-field, and invalid-curve
@@ -3338,7 +3339,8 @@ Exit criteria:
 
 ### v0.59.0 - BLS12-381 Quadratic Extension Field
 
-Status: planned; internal signed tag, publication at v0.60.0.
+Status: implementation candidate; pentest pending. Internal signed tag after
+review and approval; publication at v0.60.0.
 
 Goal: freeze Fp2 coefficient and non-residue conventions before G2 formulas.
 
@@ -3350,12 +3352,18 @@ feature is implicitly enabled by this pass.
 Deliverables:
 
 - Implement Fp2 arithmetic, conjugation, inversion and square root without enabling G2 execution.
+- Freeze `v^2=-1`, canonical `c0 || c1` encoding, smaller-wire-root selection,
+  zero/nonsquare behavior and public-input-only resource bounds in the
+  [Fp2 contract](bls12-fp2-arithmetic.md).
 - Document public/private ownership, supported inputs/forks, failure
   behavior, feature/resource bounds and runnable examples for this slice.
 
 Verification:
 
 - Independent extension-field vectors and zero/nonresidue/inversion properties.
+- `cargo test -p eth-valkyoth-evm-core --test bls12_fp2_differential`,
+  `cargo +nightly fuzz run bls12381_fp2 -- -max_total_time=30 -max_len=193`,
+  fixed-work `bls12_fp2_benchmark` and `scripts/release_0_59_0_gate.sh --implementation`.
 - Record executable commands and immutable fixtures/results; run the
   full local gate and exact-commit pentest, fix findings and retest.
 

@@ -3,11 +3,13 @@
 Release snapshot: `v0.55.0` tagged and published after its pentest, clean
 retest, GitHub CI, and CodeQL gates passed.
 
-Source candidate: `v0.58.0` integrates paid BLS12-381 G1 addition using the
-tagged Fp/G1 arithmetic; pentest is clean, GitHub/tag approval pending. The tables retain the
+Source candidate: `v0.59.0` adds BLS12-381 Fp2 arithmetic, conjugation,
+inversion and checked roots; pentest pending. Paid G1ADD is tagged as v0.58.0.
+The tables retain the
 published snapshot, not source-only capabilities. Other BLS precompiles,
 subgroup and signature verification remain unavailable.
-See the [charged G1 scope](bls12-g1-addition.md).
+See the [Fp2 scope](bls12-fp2-arithmetic.md) and
+[completion map for every partial README row](partial-capability-completion.md).
 Portable checks run before review; tag admission validates report readiness.
 The host-unavailable client differential run is recorded as missing evidence,
 not a passed test or an additional tag blocker for this arithmetic-only milestone.

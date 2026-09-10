@@ -23,6 +23,13 @@ libfuzzer-sys = "0.4.13"
 num-bigint = { version = "0.5.1", default-features = false, features = ["std"] }
 
 [[bin]]
+name = "bls12381_fp2"
+path = "fuzz_targets/bls12381_fp2.rs"
+test = false
+doc = false
+bench = false
+
+[[bin]]
 name = "bls12381_g1"
 path = "fuzz_targets/bls12381_g1.rs"
 test = false

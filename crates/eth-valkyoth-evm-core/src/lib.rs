@@ -16,6 +16,8 @@ mod advanced_precompile;
 mod blake2f;
 mod bls12_field;
 mod bls12_field_api;
+mod bls12_fp2;
+mod bls12_fp2_api;
 mod bls12_frame;
 mod bls12_g1;
 mod bls12_gas;

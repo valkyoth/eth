@@ -1,10 +1,11 @@
 # eth Specification Matrix
 
-The internal `v0.58.0` candidate adds paid Prague G1 addition using tagged
-Fp/G1 arithmetic. Its [scope and source evidence](bls12-g1-addition.md) cover
-exact input/output, 375 gas, atomic failure and no subgroup rejection.
-Pentest is clean; this is not a published capability. Other BLS execution
-and subgroup verification remain unavailable. The inventory below retains
+The internal `v0.59.0` candidate adds public-input Fp2 arithmetic with
+`v^2=-1`, canonical coefficient order, conjugation, inversion and checked roots.
+Its [scope and verification](bls12-fp2-arithmetic.md) exclude G2 execution.
+Pentest is pending; this is not a published capability. Paid G1ADD is tagged
+as v0.58.0; other BLS execution and subgroup verification remain unavailable.
+The inventory below retains
 the published baseline, while this paragraph records source-only additions.
 
 Status: source revisions pinned for `v0.37.4`; scalar, list, and canonical

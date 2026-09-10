@@ -1,9 +1,9 @@
 [release]
-version = "0.58.0"
-milestone = "0.58.0"
+version = "0.59.0"
+milestone = "0.59.0"
 baseline = "0.55.0"
-review_baseline = "0.57.0"
-cumulative_milestones = ["0.56.0", "0.57.0", "0.58.0"]
+review_baseline = "0.58.0"
+cumulative_milestones = ["0.56.0", "0.57.0", "0.58.0", "0.59.0"]
 policy = "independent"
 stage = "internal"
 
@@ -61,7 +61,7 @@ previous_version = "0.29.0"
 version = "0.29.0"
 change = "code"
 publish = false
-reason = "Adds public-input BLS12-381 Fp/G1 arithmetic and charged G1 addition; cumulative bump at v0.60.0."
+reason = "Adds public-input BLS12-381 Fp/Fp2/G1 arithmetic and charged G1 addition; cumulative bump at v0.60.0."
 
 [crates."eth-valkyoth-evm"]
 previous_version = "0.12.2"
@@ -99,8 +99,8 @@ publish = false
 reason = "Retains published version during the internal release train."
 
 [crates."eth"]
-previous_version = "0.57.0"
-version = "0.58.0"
+previous_version = "0.58.0"
+version = "0.59.0"
 change = "code"
 publish = false
-reason = "Internal facade milestone for charged BLS12-381 G1 addition; no publication before v0.60.0."
+reason = "Internal facade milestone for BLS12-381 Fp2 arithmetic; no publication before v0.60.0."

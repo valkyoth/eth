@@ -67,12 +67,18 @@ Fr, Fp2, unrestricted MSM scalar, G1/G2 coordinate, infinity, and complete
 precompile-frame parsing is available without allocation. Parsed point values
 are wire-valid only; standalone validated G1 domains are separate types.
 
-The internal `v0.58.0` candidate adds sealed `EvmBls12G1Add` execution at
+The tagged `v0.58.0` source adds sealed `EvmBls12G1Add` execution at
 Prague address `0x0b`, using the tagged Fp/G1 arithmetic. Exactly 256 input
 bytes, 375 gas and canonical atomic 128-byte output are required. Public
 data only, no subgroup rejection or constant-time claim. Other BLS/KZG
 execution remains unavailable; pentest is clean, with GitHub/tag approval pending. See the
 [charged G1 contract](https://github.com/valkyoth/eth/blob/main/docs/bls12-g1-addition.md).
+
+The internal `v0.59.0` candidate adds `EvmBls12381Fp2` arithmetic over
+`v^2=-1`, conjugation, inversion and checked square roots, preserving canonical
+`c0 || c1` wire order. These fixed-size, variable-time APIs are public-input
+only. No G2/subgroup/MSM/map/pairing capability is enabled; pentest is pending.
+See the [Fp2 contract](https://github.com/valkyoth/eth/blob/main/docs/bls12-fp2-arithmetic.md).
 These additions are not in the published `eth 0.55.0` dependency examples above.
 
 ```rust
