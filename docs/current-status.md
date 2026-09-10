@@ -4,7 +4,7 @@ Release snapshot: `v0.55.0` tagged and published after its pentest, clean
 retest, GitHub CI, and CodeQL gates passed.
 
 Source candidate: `v0.58.0` integrates paid BLS12-381 G1 addition using the
-tagged Fp/G1 arithmetic; pentest is pending. The tables below retain the
+tagged Fp/G1 arithmetic; pentest is clean, GitHub/tag approval pending. The tables retain the
 published snapshot, not source-only capabilities. Other BLS precompiles,
 subgroup and signature verification remain unavailable.
 See the [charged G1 scope](bls12-g1-addition.md).

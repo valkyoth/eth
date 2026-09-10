@@ -10,7 +10,9 @@ All notable changes to `eth` are documented here.
   canonical output, reusing first-party Fp/G1 arithmetic without new dependencies.
 - Added official positive/negative execution vectors, admission-work counters,
   paid-path differential fuzzing, fixed-gas CPU smoke and integration docs.
-- Pentest pending; no crates.io publication before v0.60.0.
+- External pentest/SAST of `e5b4afa` is clean, with no Critical, High or Medium
+  findings and no remediation required. GitHub/tag approval remains pending;
+  no crates.io publication before v0.60.0.
 
 ### v0.57.0 Internal Tag
 

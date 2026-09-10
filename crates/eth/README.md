@@ -46,7 +46,7 @@ milestones and never publish crates.
 
 The source checkout is preparing internal milestone `0.58.0`: charged
 BLS12-381 G1 addition at Prague address `0x0b`, using the tagged Fp/G1
-arithmetic. Pentest is pending.
+arithmetic. Pentest is clean; GitHub checks and explicit tag approval remain pending.
 This is not on crates.io; dependency examples deliberately use published
 `0.55.0`. Subgroup checks, G2 arithmetic and other BLS precompiles remain
 unavailable. See the [charged G1 scope](https://github.com/valkyoth/eth/blob/main/docs/bls12-g1-addition.md).

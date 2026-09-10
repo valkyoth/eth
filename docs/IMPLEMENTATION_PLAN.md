@@ -18,9 +18,9 @@ pentested milestones. The [September scope review](ROADMAP_REVIEW_2026_09_05.md)
 records the latest splits and full-client/library acceptance requirements;
 the [version map](roadmap-version-map.json) preserves previous assignments.
 The current candidate is `v0.58.0`, charged BLS12-381 G1 addition on the
-tagged v0.56.0 field and v0.57.0 group arithmetic; pentest is pending.
-Unpublished
-implementation and assurance passes continue through `v0.449.0` before RC/1.0;
+tagged v0.56.0 field and v0.57.0 group arithmetic; pentest is clean, with
+GitHub/tag approval pending. Unpublished implementation and assurance passes
+continue through `v0.449.0` before RC/1.0;
 that endpoint is a scope inventory, not a deadline or automatic readiness claim.
 
 ## Core Position

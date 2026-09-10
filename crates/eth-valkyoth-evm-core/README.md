@@ -71,7 +71,7 @@ The internal `v0.58.0` candidate adds sealed `EvmBls12G1Add` execution at
 Prague address `0x0b`, using the tagged Fp/G1 arithmetic. Exactly 256 input
 bytes, 375 gas and canonical atomic 128-byte output are required. Public
 data only, no subgroup rejection or constant-time claim. Other BLS/KZG
-execution remains unavailable; pentest is pending. See the
+execution remains unavailable; pentest is clean, with GitHub/tag approval pending. See the
 [charged G1 contract](https://github.com/valkyoth/eth/blob/main/docs/bls12-g1-addition.md).
 These additions are not in the published `eth 0.55.0` dependency examples above.
 

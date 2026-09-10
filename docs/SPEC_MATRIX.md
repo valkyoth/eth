@@ -3,7 +3,7 @@
 The internal `v0.58.0` candidate adds paid Prague G1 addition using tagged
 Fp/G1 arithmetic. Its [scope and source evidence](bls12-g1-addition.md) cover
 exact input/output, 375 gas, atomic failure and no subgroup rejection.
-Pentest is pending; this is not a published capability. Other BLS execution
+Pentest is clean; this is not a published capability. Other BLS execution
 and subgroup verification remain unavailable. The inventory below retains
 the published baseline, while this paragraph records source-only additions.
 

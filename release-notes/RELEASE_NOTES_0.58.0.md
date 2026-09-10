@@ -1,6 +1,6 @@
 # eth v0.58.0
 
-Status: implementation checks passed; exact-commit pentest pending.
+Status: implementation checks and pentest passed; GitHub/tag approval pending.
 Publication: DEFERRED TO v0.60.0
 
 ## Scope
@@ -29,9 +29,12 @@ full CALL interpreter or external-client conformance is implied.
 
 This source milestone selects no crates for publication. The main crate
 version is 0.58.0; support crate bumps accumulate for v0.60.0. README dependency
-examples retain published `eth 0.55.0`. Next step: exact-commit pentest.
+examples retain published `eth 0.55.0`. The external pentest/SAST of
+`e5b4afaeabbcb17f4a61ac63c148edaa66beda48` is clean, with no Critical, High or
+Medium findings and no remediation required. Next step: GitHub CI/CodeQL wait,
+then explicit maintainer tag authorization.
 
 The Rust 1.98.1 implementation gate, 14 older-Rust compatibility checks and
-nine no-default-feature cross-target builds passed. Charged/standalone G1 fuzz
+nine no-default-feature cross-target builds passed. Pre-pentest charged/standalone G1 fuzz
 smokes completed 31,791/15,358 inputs without a finding. See the integration
 document for commands, scope limitations and fixed-work CPU measurements.

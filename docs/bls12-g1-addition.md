@@ -1,6 +1,7 @@
 # Charged BLS12-381 G1 Addition
 
-Milestone: v0.58.0, internal source candidate; pentest pending. Crates.io
+Milestone: v0.58.0, internal source candidate; pentest clean, GitHub/tag approval
+pending. Crates.io
 publication remains v0.60.0. Owner: `eth-valkyoth-evm-core`, optional
 `eth::evm_core`. No new runtime dependency, allocation or unsafe code.
 
@@ -116,6 +117,13 @@ and subsequent MSM/pairing/map milestones through v0.70.0.
 
 Implementation stop: run pentest for the exact implementation commit. A clean
 report, GitHub CI/CodeQL approval and explicit tag authorization remain required.
+
+The maintainer subsequently confirmed a clean pentest and supplied incremental
+SAST evidence for v0.57.0 through `e5b4afaeabbcb17f4a61ac63c148edaa66beda48`.
+No Critical, High or Medium security finding or remediation was reported, and
+no retest was requested. The review confirmed the charged G1ADD contract and
+public-input restrictions. Fresh local release verification is recorded
+separately from the external review's test, benchmark and fuzz results.
 
 ## Local Verification, 2026-09-10
 

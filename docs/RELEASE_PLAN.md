@@ -16,7 +16,8 @@ promotes 11 planned patch milestones to minors. Unpublished work now extends
 through `v0.449.0`; published history through `v0.55.0` is unchanged. The
 [version map](roadmap-version-map.json) records every previous assignment.
 The current candidate is `v0.58.0`, charged BLS12-381 G1 addition on the
-tagged `v0.56.0` field and `v0.57.0` group arithmetic. Pentest is pending.
+tagged `v0.56.0` field and `v0.57.0` group arithmetic. Pentest is clean;
+GitHub/tag approval remains pending.
 This slice does not enable subgroup validation or other BLS precompiles.
 
 Tags use:
@@ -3288,8 +3289,8 @@ Exit criteria:
 
 ### v0.58.0 - BLS12-381 G1 Arithmetic And Addition Completion
 
-Status: implementation candidate; exact-commit pentest pending. Internal
-signed tag only after approval; publication at v0.60.0.
+Status: implementation candidate; pentest clean, GitHub/tag approval pending.
+Internal signed tag only after approval; publication at v0.60.0.
 
 Goal: implement dependency-free G1 field arithmetic and the `0x0b` addition
 precompile with official positive, infinity, invalid-field, and invalid-curve
