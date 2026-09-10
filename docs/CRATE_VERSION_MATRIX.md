@@ -1,6 +1,6 @@
 # Crate Version Matrix
 
-Status: `v0.57.0` internal candidate; pentest clean, GitHub/tag approval pending.
+Status: `v0.58.0` internal candidate; exact-commit pentest pending.
 No crates are selected for publication before the `v0.60.0` checkpoint.
 
 `eth` uses independent crate versions. The facade crate remains the main user
@@ -39,7 +39,7 @@ API.
 workspace manifests, verifies the complete tag train, and refuses accidental
 lockstep or internal-milestone publication.
 
-## v0.57.0 Tracking Table
+## v0.58.0 Tracking Table
 
 | Crate | Published | Source | Change | Publish | Reason |
 | --- | --- | --- | --- | --- | --- |
@@ -50,13 +50,13 @@ lockstep or internal-milestone publication.
 | `eth-valkyoth-verify` | `0.27.0` | `0.27.0` | `unchanged` | No | Retains published version during the internal release train. |
 | `eth-valkyoth-derive` | `0.18.0` | `0.18.0` | `dependency` | No | Workspace dependency maintenance is accumulated for v0.60.0. |
 | `eth-valkyoth-sanitization` | `0.8.0` | `0.8.0` | `dependency` | No | Workspace dependency maintenance is accumulated for v0.60.0. |
-| `eth-valkyoth-evm-core` | `0.29.0` | `0.29.0` | `code` | No | Adds fixed-width public-input BLS12-381 Fp and G1 arithmetic; cumulative bump at v0.60.0. |
+| `eth-valkyoth-evm-core` | `0.29.0` | `0.29.0` | `code` | No | Adds public-input BLS12-381 Fp/G1 arithmetic and charged G1 addition; cumulative bump at v0.60.0. |
 | `eth-valkyoth-evm` | `0.12.2` | `0.12.2` | `unchanged` | No | Retains published version during the internal release train. |
 | `eth-valkyoth-rpc` | `0.7.0` | `0.7.0` | `unchanged` | No | Retains published version during the internal release train. |
 | `eth-valkyoth-signer` | `0.7.5` | `0.7.5` | `unchanged` | No | Retains published version during the internal release train. |
 | `eth-valkyoth-reth` | `0.7.0` | `0.7.0` | `unchanged` | No | Retains published version during the internal release train. |
 | `eth-valkyoth-testkit` | `0.7.0` | `0.7.0` | `unchanged` | No | Retains published version during the internal release train. |
-| `eth` | `0.55.0` | `0.57.0` | `code` | No | Internal facade milestone for public-input BLS12-381 G1 arithmetic; no publication before v0.60.0. |
+| `eth` | `0.55.0` | `0.58.0` | `code` | No | Internal facade milestone for charged BLS12-381 G1 addition; no publication before v0.60.0. |
 
 Update this table and `release-crates.toml` in the same commit whenever a crate
 changes release state.

@@ -30,6 +30,13 @@ doc = false
 bench = false
 
 [[bin]]
+name = "bls12381_g1_add"
+path = "fuzz_targets/bls12381_g1_add.rs"
+test = false
+doc = false
+bench = false
+
+[[bin]]
 name = "bls12381_field"
 path = "fuzz_targets/bls12381_field.rs"
 test = false

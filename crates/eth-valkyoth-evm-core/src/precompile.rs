@@ -112,6 +112,8 @@ pub enum EvmPrecompileImplementation {
     NativeModexp,
     /// The release can execute dependency-free BN254 point addition.
     NativeBn254Add,
+    /// The release can execute dependency-free EIP-2537 G1 addition.
+    NativeBls12G1Add,
     /// The release can execute dependency-free BN254 scalar multiplication.
     NativeBn254Mul,
     /// The release can execute dependency-free BN254 pairing frames.
@@ -344,6 +346,7 @@ const fn descriptor_for_kind(kind: EvmPrecompileKind, fork: EvmFork) -> EvmPreco
         EvmPrecompileKind::Bn254Mul => EvmPrecompileImplementation::NativeBn254Mul,
         EvmPrecompileKind::Bn254Pairing => EvmPrecompileImplementation::NativeBn254PairingFrame,
         EvmPrecompileKind::Blake2F => EvmPrecompileImplementation::NativeBlake2F,
+        EvmPrecompileKind::Bls12G1Add => EvmPrecompileImplementation::NativeBls12G1Add,
         _ => EvmPrecompileImplementation::RequiresCryptoBackend,
     };
     EvmPrecompileDescriptor {

@@ -1,7 +1,8 @@
 # BLS12-381 G1 Arithmetic
 
-Milestone: v0.57.0, internal source candidate, pentest clean; GitHub/tag approval
-pending. Publication is
+Milestone: v0.57.0, tagged after clean pentest and GitHub approval. This document
+retains that standalone arithmetic scope; [v0.58.0](bls12-g1-addition.md) adds
+charged addition. Publication is
 at v0.60.0. Owner: `eth-valkyoth-evm-core`, exposed by `eth::evm_core` under
 the optional `evm-core` feature. No new runtime dependency or default feature.
 

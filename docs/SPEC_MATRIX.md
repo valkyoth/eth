@@ -1,11 +1,11 @@
 # eth Specification Matrix
 
-The internal `v0.57.0` candidate adds public-input BLS12-381 G1 affine/projective
-arithmetic and on-curve parsing on v0.56.0's Fp. Its
-[scope and source evidence](bls12-g1-arithmetic.md) are separate from subgroup
-and charged precompile admission. Pentest is clean; this is not a published
-capability. Existing wire-only point domains remain unchanged; new G1 types
-enforce curve membership. Both parsers reject noncanonical encodings.
+The internal `v0.58.0` candidate adds paid Prague G1 addition using tagged
+Fp/G1 arithmetic. Its [scope and source evidence](bls12-g1-addition.md) cover
+exact input/output, 375 gas, atomic failure and no subgroup rejection.
+Pentest is pending; this is not a published capability. Other BLS execution
+and subgroup verification remain unavailable. The inventory below retains
+the published baseline, while this paragraph records source-only additions.
 
 Status: source revisions pinned for `v0.37.4`; scalar, list, and canonical
 integer RLP decoding, canonical RLP encoding helpers, primitive RLP bridging,

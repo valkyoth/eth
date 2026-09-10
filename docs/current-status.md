@@ -3,11 +3,11 @@
 Release snapshot: `v0.55.0` tagged and published after its pentest, clean
 retest, GitHub CI, and CodeQL gates passed.
 
-Source candidate: `v0.57.0` adds public-input BLS12-381 G1 affine/projective
-arithmetic and on-curve parsing on the tagged v0.56.0 base field. Its pentest
-is clean; GitHub/tag approval is pending. The tables below retain the published
-snapshot; subgroup, signature and charged BLS precompile execution remain unavailable.
-See the [G1 scope and verification](bls12-g1-arithmetic.md).
+Source candidate: `v0.58.0` integrates paid BLS12-381 G1 addition using the
+tagged Fp/G1 arithmetic; pentest is pending. The tables below retain the
+published snapshot, not source-only capabilities. Other BLS precompiles,
+subgroup and signature verification remain unavailable.
+See the [charged G1 scope](bls12-g1-addition.md).
 Portable checks run before review; tag admission validates report readiness.
 The host-unavailable client differential run is recorded as missing evidence,
 not a passed test or an additional tag blocker for this arithmetic-only milestone.

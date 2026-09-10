@@ -15,9 +15,9 @@ previously planned workstream contracts, extracts 98 implementation passes and
 promotes 11 planned patch milestones to minors. Unpublished work now extends
 through `v0.449.0`; published history through `v0.55.0` is unchanged. The
 [version map](roadmap-version-map.json) records every previous assignment.
-The current candidate is `v0.57.0`, BLS12-381 G1 group operations on the
-tagged `v0.56.0` base field. Pentest is clean; GitHub/tag approval is pending.
-This slice does not enable subgroup validation or charged precompile dispatch.
+The current candidate is `v0.58.0`, charged BLS12-381 G1 addition on the
+tagged `v0.56.0` field and `v0.57.0` group arithmetic. Pentest is pending.
+This slice does not enable subgroup validation or other BLS precompiles.
 
 Tags use:
 
@@ -3255,8 +3255,8 @@ Exit criteria:
 
 ### v0.57.0 - BLS12-381 G1 Group Operations
 
-Status: implementation candidate; pentest clean, GitHub/tag approval pending.
-Internal signed tag only after report/GitHub approval; publication at v0.60.0.
+Status: tagged as v0.57.0 after clean pentest and GitHub approval.
+Internal signed tag; publication at v0.60.0.
 
 Goal: build complete G1 arithmetic on the admitted field.
 
@@ -3288,7 +3288,8 @@ Exit criteria:
 
 ### v0.58.0 - BLS12-381 G1 Arithmetic And Addition Completion
 
-Status: planned; internal signed tag, publication at v0.60.0.
+Status: implementation candidate; exact-commit pentest pending. Internal
+signed tag only after approval; publication at v0.60.0.
 
 Goal: implement dependency-free G1 field arithmetic and the `0x0b` addition
 precompile with official positive, infinity, invalid-field, and invalid-curve
@@ -3300,6 +3301,8 @@ the extracted implementations. The retained bullets below remain the
 complete workstream acceptance contract, not permission to reimplement
 those pieces. Remaining implementation in this pass is limited to:
 charged G1 addition dispatch, exact gas and atomic canonical output.
+See [the integration contract](bls12-g1-addition.md) for exact admission versus
+terminal CALL failure behavior, evidence commands and public-input bounds.
 
 Deliverables:
 
@@ -3310,8 +3313,9 @@ Deliverables:
 - curve-membership validation separated from subgroup validation;
 - charged `0x0b` execution over exactly two G1 points with canonical 128-byte
   output and no subgroup rejection, as required by EIP-2537;
-- output-unchanged and no-arithmetic evidence for wrong-kind, wrong-length,
-  malformed-point, and out-of-gas failures.
+- output-unchanged and no curve-work evidence for wrong-kind, wrong-length
+  and out-of-gas failures; malformed points perform only bounded validation
+  after payment, never group addition or normalization.
 
 Verification:
 
@@ -6531,6 +6535,10 @@ feature is implicitly enabled by this pass.
 Deliverables:
 
 - Implement ordered block transaction execution, journal leases and commit/revert, consuming existing execution/evidence capabilities.
+- Integrate nested precompile admission and terminal outcomes, including
+  v0.58.0 G1ADD: protocol input/out-of-gas errors fail CALL with the correct
+  child gas and rollback; host capacity/configuration errors remain distinct
+  from consensus invalidity. Test exact gas and return-data propagation.
 - Document public/private ownership, supported inputs/forks, failure
   behavior, feature/resource bounds and runnable examples for this slice.
 

@@ -44,12 +44,12 @@ crates.io packages are published cumulatively at `v0.60.0`, `v0.65.0`, and
 each later pre-1.0 minor divisible by five. Intermediate tags remain source
 milestones and never publish crates.
 
-The source checkout is preparing internal milestone `0.57.0`: on-curve G1
-arithmetic on the tagged v0.56.0 BLS12-381 base field. Pentest is clean;
-GitHub checks and explicit tag approval remain pending.
+The source checkout is preparing internal milestone `0.58.0`: charged
+BLS12-381 G1 addition at Prague address `0x0b`, using the tagged Fp/G1
+arithmetic. Pentest is pending.
 This is not on crates.io; dependency examples deliberately use published
-`0.55.0`. Subgroup checks, G2 arithmetic and BLS precompile execution remain
-unavailable. See the [G1 scope](https://github.com/valkyoth/eth/blob/main/docs/bls12-g1-arithmetic.md).
+`0.55.0`. Subgroup checks, G2 arithmetic and other BLS precompiles remain
+unavailable. See the [charged G1 scope](https://github.com/valkyoth/eth/blob/main/docs/bls12-g1-addition.md).
 
 ## Install
 
@@ -1294,7 +1294,7 @@ completed on the updated dependencies and any environment limitations.
 scripts/checks.sh
 scripts/check_latest_crates.py
 scripts/check_latest_tools.sh
-scripts/release_0_57_0_gate.sh --implementation
+scripts/release_0_58_0_gate.sh --implementation
 ```
 
 After clean pentest and green GitHub checks, the same gate without arguments

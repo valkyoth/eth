@@ -2,7 +2,8 @@
 
 Status: `v0.55.0` covers structural RLP and arbitrary-length ModExp through
 independent in-process or external-client reference paths. The internal
-v0.57.0 candidate also registers v0.56.0 Fp and new G1 independent oracles.
+v0.58.0 candidate retains the tagged Fp/G1 independent oracles and adds
+charged G1 execution fuzzing plus official positive/negative frame evidence.
 
 ## Scope
 

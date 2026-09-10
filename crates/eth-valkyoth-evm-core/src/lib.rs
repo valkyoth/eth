@@ -19,6 +19,7 @@ mod bls12_field_api;
 mod bls12_frame;
 mod bls12_g1;
 mod bls12_gas;
+mod bls12_precompile;
 mod bls12_wire;
 mod bn254;
 mod bn254_field;
@@ -112,6 +113,7 @@ pub use precompile::{
     EvmPrecompileDescriptor, EvmPrecompileGasPolicy, EvmPrecompileImplementation,
     EvmPrecompileInputPolicy, EvmPrecompileKind, EvmPrecompilePlan, EvmPrecompileRegistry,
 };
+pub use precompile_authorization::EvmBls12G1Add;
 pub use precompile_authorization::{
     EvmBlake2F, EvmBn254Add, EvmBn254Mul, EvmBn254Pairing, EvmEcRecover, EvmExecutablePrecompile,
     EvmIdentity, EvmModexp, EvmPrecompileGasQuote, EvmPrecompileOutcome, EvmPrecompileStatus,

@@ -60,20 +60,19 @@ uses the same instruction boundary.
 The Frontier identity, SHA-256, RIPEMD-160, gas-bounded Byzantium ModExp,
 BN254 add/mul, BN254 pairing frames, and Istanbul BLAKE2F execute through
 first-party dependency-free implementations. ECRECOVER executes through
-explicit caller-provided secp256k1 and Keccak backend traits. KZG and BLS
-cryptographic execution remains fail closed, while their descriptors now carry
+explicit caller-provided secp256k1 and Keccak backend traits. Published KZG/BLS
+cryptographic execution remains fail closed, while their descriptors carry
 exact EIP-4844/EIP-2537 input, output, and gas plans. Canonical EIP-2537 Fp,
 Fr, Fp2, unrestricted MSM scalar, G1/G2 coordinate, infinity, and complete
 precompile-frame parsing is available without allocation. Parsed point values
-are wire-valid only; curve and subgroup validation remains fail closed until
-the assigned arithmetic releases.
+are wire-valid only; standalone validated G1 domains are separate types.
 
-The internal `v0.57.0` source candidate adds `EvmBls12381G1Affine` and
-`EvmBls12381G1Projective` for on-curve parsing, conversions, infinity,
-addition/doubling and negation on the tagged v0.56.0 field arithmetic.
-Public data only, not constant-time or subgroup-validated. BLS precompile
-dispatch remains unavailable; pentest is clean, with GitHub/tag approval pending. See the
-[G1 contract](https://github.com/valkyoth/eth/blob/main/docs/bls12-g1-arithmetic.md).
+The internal `v0.58.0` candidate adds sealed `EvmBls12G1Add` execution at
+Prague address `0x0b`, using the tagged Fp/G1 arithmetic. Exactly 256 input
+bytes, 375 gas and canonical atomic 128-byte output are required. Public
+data only, no subgroup rejection or constant-time claim. Other BLS/KZG
+execution remains unavailable; pentest is pending. See the
+[charged G1 contract](https://github.com/valkyoth/eth/blob/main/docs/bls12-g1-addition.md).
 These additions are not in the published `eth 0.55.0` dependency examples above.
 
 ```rust
@@ -133,8 +132,8 @@ documented in
   point mapping, and the projective post-loop line carrier, then writes
   canonical EIP-197 zero/one output words. BLAKE2F executes EIP-152 exact-length frames with
   final-flag validation and round-count gas.
-  KZG and BLS cryptographic precompiles are bounded plans only and fail closed
-  until their first-party implementations are admitted. EIP-2537 fixed frames,
+  Source v0.58.0 also admits charged G1 addition. Other KZG/BLS precompiles
+  remain bounded plans and fail closed. EIP-2537 fixed frames,
   non-empty MSM/pairing lists, output lengths, discount gas, and pairing gas
   are enforced at planning time.
 - Every executable precompile requires an immutable exact-input quote and

@@ -421,7 +421,11 @@ fn advanced_precompile_shapes_match_eip_frames() -> Result<(), EvmCoreError> {
         assert_eq!(plan.gas_cost(), Some(EvmGas::new(gas)));
         assert_eq!(
             descriptor.implementation,
-            EvmPrecompileImplementation::RequiresCryptoBackend
+            if kind == EvmPrecompileKind::Bls12G1Add {
+                EvmPrecompileImplementation::NativeBls12G1Add
+            } else {
+                EvmPrecompileImplementation::RequiresCryptoBackend
+            }
         );
     }
     Ok(())

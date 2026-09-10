@@ -4,7 +4,15 @@ All notable changes to `eth` are documented here.
 
 ## Unreleased
 
-### v0.57.0 Internal Candidate
+### v0.58.0 Internal Candidate
+
+- Added paid Prague G1 addition at `0x0b`, exact 375-gas charging and atomic
+  canonical output, reusing first-party Fp/G1 arithmetic without new dependencies.
+- Added official positive/negative execution vectors, admission-work counters,
+  paid-path differential fuzzing, fixed-gas CPU smoke and integration docs.
+- Pentest pending; no crates.io publication before v0.60.0.
+
+### v0.57.0 Internal Tag
 
 - Added first-party BLS12-381 G1 on-curve affine/projective types, complete
   addition/doubling, infinity, negation, conversions and geometric equality.
@@ -15,7 +23,7 @@ All notable changes to `eth` are documented here.
   dispatch stay assigned to v0.62.0 and v0.58.0 respectively.
 - Updated optional sanitization to 2.1.0 and dev-only trybuild to 1.0.121.
 - External pentest of `9dc582e` is clean, with no remediation required;
-  GitHub checks and explicit tag approval remain pending. This is an internal
+  GitHub checks passed and the signed tag was pushed. This is an internal
   milestone; the next cumulative crates.io publication remains v0.60.0.
 
 ### v0.56.0 Internal Tag

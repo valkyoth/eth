@@ -4,6 +4,7 @@ use crate::{
     EVM_MAX_GAS_LIMIT, EvmCoreError, EvmGas, EvmGasMeter, EvmModExpWorkspace,
     EvmPrecompileDescriptor, EvmPrecompileImplementation, EvmPrecompileKind, EvmPrecompileRegistry,
     blake2f::execute_blake2f,
+    bls12_precompile::execute_g1_add,
     bn254::{execute_bn254_add, execute_bn254_mul},
     bn254_pairing::execute_bn254_pairing,
     ecrecover::{EvmEcRecoverBackend, EvmPrecompileKeccak256, execute_ecrecover},
@@ -121,6 +122,7 @@ fixed_precompile!(EvmBn254Add, Bn254Add, NativeBn254Add, 64);
 fixed_precompile!(EvmBn254Mul, Bn254Mul, NativeBn254Mul, 64);
 fixed_precompile!(EvmBn254Pairing, Bn254Pairing, NativeBn254PairingFrame, 32);
 fixed_precompile!(EvmBlake2F, Blake2F, NativeBlake2F, 64);
+fixed_precompile!(EvmBls12G1Add, Bls12G1Add, NativeBls12G1Add, 128);
 
 /// Type identity for the identity precompile.
 pub enum EvmIdentity {}
@@ -356,6 +358,7 @@ native_execution!(
     execute_bn254_pairing
 );
 native_execution!(EvmBlake2F, execute_blake2f, execute_blake2f);
+native_execution!(EvmBls12G1Add, execute_bls12_g1_add, execute_g1_add);
 
 atomic_native_execution!(
     EvmIdentity,
@@ -384,6 +387,11 @@ atomic_native_execution!(
     execute_bn254_pairing
 );
 atomic_native_execution!(EvmBlake2F, authorize_and_execute_blake2f, execute_blake2f);
+atomic_native_execution!(
+    EvmBls12G1Add,
+    authorize_and_execute_bls12_g1_add,
+    execute_bls12_g1_add
+);
 
 impl PaidPrecompile<'_, '_, '_, EvmModexp> {
     pub(crate) fn execute_modexp(

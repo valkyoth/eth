@@ -1,6 +1,9 @@
-//! All nine official addition vectors, tested as standalone arithmetic, not dispatch.
+//! All nine official addition vectors through standalone and charged arithmetic.
 
-use eth_valkyoth_evm_core::{EvmBls12381G1Affine as Affine, EvmCoreError};
+use eth_valkyoth_evm_core::{
+    EvmBls12G1Add, EvmBls12381G1Affine as Affine, EvmCoreError, EvmFork, EvmGas, EvmGasMeter,
+    EvmPrecompileKind, EvmPrecompileRegistry, EvmPrecompileStatus,
+};
 
 fn decode<const N: usize>(hex: &str) -> Result<[u8; N], EvmCoreError> {
     if hex.len() != N.saturating_mul(2) {
@@ -41,6 +44,20 @@ fn all_official_g1_addition_vectors_match() -> Result<(), EvmCoreError> {
         let (left, right) = input.split_at(128);
         let a = Affine::try_from_be_bytes(left)?;
         let b = Affine::try_from_be_bytes(right)?;
+        for gas in [375, 1000] {
+            let quote = EvmPrecompileRegistry::try_new(EvmFork::PRAGUE)?
+                .descriptor(EvmPrecompileKind::Bls12G1Add)?
+                .quote::<EvmBls12G1Add>(&input)?;
+            let mut meter = EvmGasMeter::try_new(EvmGas::new(gas))?;
+            let mut output = [0xa5; 129];
+            let outcome = quote.authorize_and_execute_bls12_g1_add(&mut meter, &mut output)?;
+            assert_eq!(outcome.status(), EvmPrecompileStatus::Success, "{name}");
+            assert_eq!(&output[..128], &expected, "{name}");
+            assert_eq!(output[128], 0xa5);
+            assert_eq!(outcome.gas_consumed(), EvmGas::new(375));
+            assert_eq!(outcome.output_len(), 128);
+            assert_eq!(meter.used(), EvmGas::new(375));
+        }
         assert_eq!(a.add_point(b).to_be_bytes(), expected, "{name}");
         assert_eq!(
             a.to_projective()
