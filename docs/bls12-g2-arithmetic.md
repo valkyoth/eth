@@ -1,7 +1,7 @@
 # BLS12-381 G2 Group Operations
 
-Source milestone: v0.60.0 public-checkpoint candidate. Per-tag pentest report
-finalization is pending. This slice implements standalone public-point
+Source milestone: v0.60.0 public-checkpoint candidate. Pentest is complete;
+GitHub and release approval are pending. This slice implements standalone public-point
 arithmetic; it does not authorize G2 precompile execution.
 
 ## Contract
@@ -131,8 +131,11 @@ not claimed as a fresh v0.60.0 run. This infrastructure limitation is recorded
 under the [integration-evidence workflow](RELEASE_RUNBOOK.md#integration-evidence);
 G2 cross-client execution is still a mandatory v0.61.0 deliverable.
 
-Implementation stop reached. The maintainer supplied a clean incremental
+The maintainer supplied a clean incremental
 assessment of v0.59.0 through 4ea7c26, with no Critical, High or Medium findings.
-It covers that committed G2 slice, not subsequent gate-policy changes. Final
-local verification and the permanent report must record this scope accurately.
+The additional v0.55.0-to-implementation review confirms no Critical finding
+or serious Rust implementation defect; its reported diff counts match 4ea7c26.
+Neither assessment is represented as external review of the later 8442290
+gate-policy change. Local review and signed-history regressions cover that
+change separately; the permanent report retains the exact review boundaries.
 The ordinary per-tag pentest applies; publication adds no cumulative assessment.

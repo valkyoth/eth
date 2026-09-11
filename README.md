@@ -45,8 +45,8 @@ each later pre-1.0 minor divisible by five. Intermediate tags remain source
 milestones and never publish crates.
 
 The `v0.60.0` publication candidate combines public-input BLS12-381 Fp/Fp2
-and G1/G2 arithmetic with gas-authorized G1 addition. Per-tag pentest finalization and
-release approval are pending; the latest published checkpoint remains
+and G1/G2 arithmetic with gas-authorized G1 addition. Pentest is complete;
+GitHub checks and release approval are pending. The latest published checkpoint remains
 `v0.55.0` until publication. G2ADD, subgroup checks, MSM, mapping, pairing and
 KZG execution still have explicit later releases.
 See the [current scope](https://github.com/valkyoth/eth/blob/main/docs/current-status.md).

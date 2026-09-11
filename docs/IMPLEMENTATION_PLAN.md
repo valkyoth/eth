@@ -18,7 +18,7 @@ pentested milestones. The [September scope review](ROADMAP_REVIEW_2026_09_05.md)
 records the latest splits and full-client/library acceptance requirements;
 the [version map](roadmap-version-map.json) preserves previous assignments.
 The current candidate is `v0.60.0`, public-input BLS12-381 G2 operations;
-per-tag pentest report finalization is pending. Fp2 is tagged as v0.59.0.
+pentest is complete; GitHub and release approval are pending. Fp2 is tagged as v0.59.0.
 The public checkpoint includes all five implementation slices, independent
 package bumps and verified crate README examples. G2ADD remains v0.61.0.
 Unpublished implementation and assurance passes

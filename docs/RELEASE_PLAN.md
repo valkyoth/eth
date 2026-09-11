@@ -17,7 +17,7 @@ through `v0.449.0`; published history through `v0.55.0` is unchanged. The
 [version map](roadmap-version-map.json) records every previous assignment.
 The current candidate is `v0.60.0`, BLS12-381 G2 group operations on the
 tagged Fp2 foundation. v0.59.0 is tagged. This public checkpoint also bundles
-all changes since v0.55.0; per-tag pentest report finalization is pending.
+all changes since v0.55.0; pentest is complete, GitHub and release approval are pending.
 Standalone G2 arithmetic does not enable the G2 precompile.
 The [partial-capability completion map](partial-capability-completion.md)
 traces all five yellow README rows to implementation and acceptance releases.
@@ -3378,7 +3378,7 @@ Exit criteria:
 
 ### v0.60.0 - BLS12-381 G2 Group Operations
 
-Status: implementation checks passed; public checkpoint, per-tag pentest report finalization pending.
+Status: implementation checks and pentest complete; public checkpoint, GitHub and release approval pending.
 
 Goal: complete G2 point formulas before charged addition.
 

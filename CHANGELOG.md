@@ -10,7 +10,8 @@ All notable changes to `eth` are documented here.
   exceptional-case handling and canonical encoding, without subgroup or G2ADD
   admission. Added official vectors, an independent oracle, fuzzing and CPU smoke.
 - Prepared cumulative v0.56.0 through v0.60.0 publication with independent
-  versions for all changed packages. Per-tag pentest report finalization is pending.
+  versions for all changed packages. Pentest is complete; GitHub and release
+  approval are pending.
 - Unified pentest scope across internal tags and public checkpoints: each tag
   reviews the preceding-tag delta, without an extra cumulative publication
   pentest. Retained signed report checks and cumulative package classification;
@@ -20,6 +21,10 @@ All notable changes to `eth` are documented here.
   and replaced stale version snippets with valid `cargo add` commands.
 - Verified package archives using the complete local unpublished dependency
   closure, with README identity and no-bundled-logo checks.
+- Recorded clean incremental G2 review and the additional v0.55.0-to-implementation
+  security assessment. No runtime remediation was requested. The subsequent
+  gate-policy changes have separate local review and signed-history regression
+  evidence; the broader assessment is not claimed to cover that later commit.
 
 ### v0.59.0 Internal Tag
 

@@ -1,6 +1,6 @@
 # Crate Version Matrix
 
-Status: `v0.60.0` public-checkpoint candidate; per-tag pentest report finalization pending.
+Status: `v0.60.0` public-checkpoint candidate; pentest complete, GitHub and release approval pending.
 All 14 packages have changes since the published `v0.55.0` baseline.
 
 `eth` uses independent crate versions. The facade crate remains the main user

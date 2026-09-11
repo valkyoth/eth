@@ -1,6 +1,6 @@
 # eth v0.60.0
 
-Status: implementation checks passed; per-tag pentest report finalization pending.
+Status: implementation checks and pentest complete; GitHub and release approval pending.
 Publication: PENDING
 
 ## Public Checkpoint
@@ -63,8 +63,14 @@ start because the host lacks required Podman controller delegation; no client
 pass or weakened-isolation fallback is claimed. Full measurements and scope
 limitations are retained in the G2 document.
 
-Finish local implementation checks, use the regular pentest of the exact
-candidate against v0.59.0, remediate and retest findings, then record the real
-permanent report. Commit final evidence and wait for GitHub/CodeQL green and
-explicit maintainer approval before creating the signed tag. Publish in the
-validated dependency order only after that approval. No publication yet.
+The maintainer supplied a clean v0.59.0-to-4ea7c26 incremental assessment and
+an additional v0.55.0-to-implementation review. The latter's 22-commit,
+179-file, 17,937-insertion counts match 4ea7c26; neither external assessment
+is claimed to cover the later 8442290 gate-policy change. That change received
+local review, 20 signed-history regressions and full repository verification.
+No runtime remediation or retest was requested. The permanent report records
+external and local evidence separately.
+
+Commit final evidence and wait for GitHub/CodeQL green and explicit maintainer
+approval before creating the signed tag. Publish in the validated dependency
+order only after that approval. No publication yet.
