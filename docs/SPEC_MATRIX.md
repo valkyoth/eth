@@ -2,7 +2,7 @@
 
 The public `v0.60.0` candidate bundles v0.56.0 through v0.60.0:
 public-input BLS12-381 Fp/Fp2 and validated G1/G2 group arithmetic, plus charged
-Prague G1ADD. Cumulative pentest and publication are pending. See the
+Prague G1ADD. Per-tag pentest finalization and publication are pending. See the
 [G2 contract and verification](bls12-g2-arithmetic.md). Curve validation is
 not subgroup validation or execution authority; G2ADD remains v0.61.0.
 

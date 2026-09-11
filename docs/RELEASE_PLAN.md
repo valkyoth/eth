@@ -17,7 +17,7 @@ through `v0.449.0`; published history through `v0.55.0` is unchanged. The
 [version map](roadmap-version-map.json) records every previous assignment.
 The current candidate is `v0.60.0`, BLS12-381 G2 group operations on the
 tagged Fp2 foundation. v0.59.0 is tagged. This public checkpoint also bundles
-all changes since v0.55.0; cumulative pentest is pending.
+all changes since v0.55.0; per-tag pentest report finalization is pending.
 Standalone G2 arithmetic does not enable the G2 precompile.
 The [partial-capability completion map](partial-capability-completion.md)
 traces all five yellow README rows to implementation and acceptance releases.
@@ -40,11 +40,11 @@ minors divisible by five publish crates.io packages. See the
 [versioning policy](VERSIONING_POLICY.md) and
 [release runbook](RELEASE_RUNBOOK.md).
 
-Internal tags receive an incremental pentest against the immediately preceding
-tag. Public checkpoints receive a cumulative integration pentest over every
-change after the preceding published checkpoint and verify the complete
-intervening tag/report chain. Patch tags remain in the same train and do not
-move the next checkpoint.
+Every tag, including public checkpoints, receives an incremental pentest against
+the immediately preceding tag. Publishing adds no second or cumulative pentest.
+The gate verifies the complete intervening tag/report chain; cumulative package
+classification still uses the preceding published checkpoint. Patch tags remain
+in the same train and do not move the next checkpoint.
 
 The `eth` source version follows every tag. Supporting crates retain their
 latest published versions at internal milestones and receive at most one
@@ -3378,7 +3378,7 @@ Exit criteria:
 
 ### v0.60.0 - BLS12-381 G2 Group Operations
 
-Status: implementation checks passed; public checkpoint, cumulative pentest pending.
+Status: implementation checks passed; public checkpoint, per-tag pentest report finalization pending.
 
 Goal: complete G2 point formulas before charged addition.
 
@@ -3414,9 +3414,9 @@ Verification:
 Exit criteria:
 
 - G2 arithmetic is vector-backed before the precompile dispatcher consumes it.
-- The cumulative v0.55.0-to-candidate pentest covers the complete five-minor
-  integration, documentation and publication tooling; earlier incremental
-  reports do not substitute for this review.
+- The regular v0.59.0-to-candidate pentest covers this slice, documentation and
+  publication tooling. Every earlier tag retains its own authenticated PASS
+  report; crates.io publication does not require another cumulative pentest.
 - Evidence covers each listed behavior; no placeholder counts as
   implementation and unresolved failures block the tag.
 - `v0.60.0 implementation stop reached. Run pentest for this exact
@@ -3596,7 +3596,7 @@ Exit criteria:
 
 ### v0.65.0 - BLS12-381 Pairing Extension Tower
 
-Status: planned; public crates.io checkpoint after cumulative review.
+Status: planned; public crates.io checkpoint after the regular per-tag pentest.
 
 Goal: establish Fp6/Fp12 arithmetic independently of Miller iteration.
 
@@ -3773,7 +3773,7 @@ Exit criteria:
 
 ### v0.70.0 - Prague Advanced-Precompile Admission
 
-Status: planned; public crates.io checkpoint after cumulative review.
+Status: planned; public crates.io checkpoint after the regular per-tag pentest.
 
 Goal: run the complete official EIP-2537 fixture set, fuzz and pentest every
 advanced precompile path, and admit only the Prague claims backed by evidence.
@@ -3996,7 +3996,7 @@ Exit criteria:
 
 ### v0.75.0 - secp256k1 Field And Scalar Arithmetic
 
-Status: planned; public crates.io checkpoint after cumulative review.
+Status: planned; public crates.io checkpoint after the regular per-tag pentest.
 
 Goal: separate secret-capable field/scalar arithmetic from point formulas.
 
@@ -4155,7 +4155,7 @@ Exit criteria:
 
 ### v0.80.0 - secp256k1 Recovery And ECDH
 
-Status: planned; public crates.io checkpoint after cumulative review.
+Status: planned; public crates.io checkpoint after the regular per-tag pentest.
 
 Goal: separate public-key recovery and transport agreement from signing authority.
 
@@ -4327,7 +4327,7 @@ Exit criteria:
 
 ### v0.85.0 - RLPx ECIES Transcript Cryptography
 
-Status: planned; public crates.io checkpoint after cumulative review.
+Status: planned; public crates.io checkpoint after the regular per-tag pentest.
 
 Goal: bind admitted symmetric and ECDH primitives to the RLPx transcript.
 
@@ -4514,7 +4514,7 @@ Exit criteria:
 
 ### v0.90.0 - Validation Outcome And Minimal Evidence Kernel
 
-Status: planned; public crates.io checkpoint after cumulative review.
+Status: planned; public crates.io checkpoint after the regular per-tag pentest.
 
 Goal: make authoritative invalidity distinct from local inability to validate.
 
@@ -4787,7 +4787,7 @@ Exit criteria:
 
 ### v0.95.0 - Signing And Transport Capability Separation
 
-Status: planned; public crates.io checkpoint after cumulative review.
+Status: planned; public crates.io checkpoint after the regular per-tag pentest.
 
 Goal: prevent secp256k1 execution signers, BLS12-381 consensus signers, and
 secp256k1 transport key-agreement identities from being interchanged.
@@ -5056,7 +5056,7 @@ Exit criteria:
 
 ### v0.100.0 - Hierarchical Evidence Capability Composition Completion
 
-Status: planned; public crates.io checkpoint after cumulative review.
+Status: planned; public crates.io checkpoint after the regular per-tag pentest.
 
 Goal: make evidence capacity a conserved linear capability across standalone,
 nested, concurrent, batch, and persistent validation workflows.
@@ -5441,7 +5441,7 @@ Exit criteria:
 
 ### v0.105.0 - Evidence Arena Ownership And Generations
 
-Status: planned; public crates.io checkpoint after cumulative review.
+Status: planned; public crates.io checkpoint after the regular per-tag pentest.
 
 Goal: make arena reuse safe under cancellation and worker transfer.
 
@@ -5797,7 +5797,7 @@ come from pinned official sources, not memory:
 
 ### v0.110.0 - General Integer Primitives
 
-Status: planned; public crates.io checkpoint after cumulative review.
+Status: planned; public crates.io checkpoint after the regular per-tag pentest.
 
 Goal: Ethereum-sized integer work no longer depends on transaction-specific `Wei` helpers or external core types.
 
@@ -5967,7 +5967,7 @@ Exit criteria:
 
 ### v0.115.0 - Owned Transaction Models
 
-Status: planned; public crates.io checkpoint after cumulative review.
+Status: planned; public crates.io checkpoint after the regular per-tag pentest.
 
 Goal: Applications can retain and mutate complete transactions without keeping input buffers alive.
 
@@ -6087,7 +6087,7 @@ Exit criteria:
 
 ### v0.120.0 - Decode Policies And Error Context
 
-Status: planned; public crates.io checkpoint after cumulative review.
+Status: planned; public crates.io checkpoint after the regular per-tag pentest.
 
 Goal: Integrators can select reviewed policies and diagnose failures without parsing strings.
 
@@ -6234,7 +6234,7 @@ Exit criteria:
 
 ### v0.125.0 - External no_std And SDK Consumer Pilot
 
-Status: planned; public crates.io checkpoint after cumulative review.
+Status: planned; public crates.io checkpoint after the regular per-tag pentest.
 
 Goal: prove the facade is usable outside this workspace.
 
@@ -6366,7 +6366,7 @@ Exit criteria:
 
 ### v0.130.0 - Native EVM Audit Hardening
 
-Status: planned; public crates.io checkpoint after cumulative review.
+Status: planned; public crates.io checkpoint after the regular per-tag pentest.
 
 Goal: Deeper state transition work rests on an independently reviewed engine.
 
@@ -6554,7 +6554,7 @@ Exit criteria:
 
 ### v0.135.0 - Ordered Transaction State Journal
 
-Status: planned; public crates.io checkpoint after cumulative review.
+Status: planned; public crates.io checkpoint after the regular per-tag pentest.
 
 Goal: compute transaction state changes with correct nested rollback.
 
@@ -6767,7 +6767,7 @@ Exit criteria:
 
 ### v0.140.0 - Receipts Logs Bloom And Withdrawals
 
-Status: planned; public crates.io checkpoint after cumulative review.
+Status: planned; public crates.io checkpoint after the regular per-tag pentest.
 
 Goal: Post-execution outputs match consensus serialization and accounting rules.
 
@@ -6904,7 +6904,7 @@ Exit criteria:
 
 ### v0.145.0 - KZG Field And Polynomial Core Completion
 
-Status: planned; public crates.io checkpoint after cumulative review.
+Status: planned; public crates.io checkpoint after the regular per-tag pentest.
 
 Goal: KZG arithmetic foundations are first party and independently verified.
 
@@ -7068,7 +7068,7 @@ Exit criteria:
 
 ### v0.150.0 - Blob Transaction And Block Integration
 
-Status: planned; public crates.io checkpoint after cumulative review.
+Status: planned; public crates.io checkpoint after the regular per-tag pentest.
 
 Goal: EIP-4844 validity is complete from transaction through block transition.
 
@@ -7190,7 +7190,7 @@ Exit criteria:
 
 ### v0.155.0 - Osaka ModExp Fork Rules
 
-Status: planned; public crates.io checkpoint after cumulative review.
+Status: planned; public crates.io checkpoint after the regular per-tag pentest.
 
 Goal: complete the explicitly assigned Osaka ModExp changes.
 
@@ -7345,7 +7345,7 @@ Exit criteria:
 
 ### v0.160.0 - Transfer Logs And SELFDESTRUCT Integration
 
-Status: planned; public crates.io checkpoint after cumulative review.
+Status: planned; public crates.io checkpoint after the regular per-tag pentest.
 
 Goal: implement transfer observability and changed balance lifecycle.
 
@@ -7500,7 +7500,7 @@ Exit criteria:
 
 ### v0.165.0 - Current Fork Execution Changes Completion
 
-Status: planned; public crates.io checkpoint after cumulative review.
+Status: planned; public crates.io checkpoint after the regular per-tag pentest.
 
 Goal: No current execution-fork rule remains a descriptor or silent unsupported path.
 
@@ -7667,7 +7667,7 @@ Exit criteria:
 
 ### v0.170.0 - Deterministic Speculative Parallel Execution Completion
 
-Status: planned; public crates.io checkpoint after cumulative review.
+Status: planned; public crates.io checkpoint after the regular per-tag pentest.
 
 
 
@@ -7828,7 +7828,7 @@ Exit criteria:
 
 ### v0.175.0 - Typed Diagnostic RPC Namespaces
 
-Status: planned; public crates.io checkpoint after cumulative review.
+Status: planned; public crates.io checkpoint after the regular per-tag pentest.
 
 Goal: separate debug trace and txpool schemas from ordinary reads.
 
@@ -7995,7 +7995,7 @@ Exit criteria:
 
 ### v0.180.0 - Native IPC Transport Adapters
 
-Status: planned; public crates.io checkpoint after cumulative review.
+Status: planned; public crates.io checkpoint after the regular per-tag pentest.
 
 Goal: admit native socket and pipe trust checks independently of browsers.
 
@@ -8135,7 +8135,7 @@ Exit criteria:
 
 ### v0.185.0 - Quorum Verified And Traced Providers
 
-Status: planned; public crates.io checkpoint after cumulative review.
+Status: planned; public crates.io checkpoint after the regular per-tag pentest.
 
 Goal: Trust policy changes the return type and evidence, not only a boolean setting.
 
@@ -8269,7 +8269,7 @@ Exit criteria:
 
 ### v0.190.0 - Pending Transaction Watcher
 
-Status: planned; public crates.io checkpoint after cumulative review.
+Status: planned; public crates.io checkpoint after the regular per-tag pentest.
 
 Goal: A broadcast transaction reaches a final, replaced, dropped, or timed-out terminal state explicitly.
 
@@ -8400,7 +8400,7 @@ Exit criteria:
 
 ### v0.195.0 - Local Secret Signer
 
-Status: planned; public crates.io checkpoint after cumulative review.
+Status: planned; public crates.io checkpoint after the regular per-tag pentest.
 
 Goal: Local signing is usable but remains opt-in and security-reviewed.
 
@@ -8536,7 +8536,7 @@ Exit criteria:
 
 ### v0.200.0 - Remote Hardware HSM And KMS Signers Completion
 
-Status: planned; public crates.io checkpoint after cumulative review.
+Status: planned; public crates.io checkpoint after the regular per-tag pentest.
 
 Goal: External key custody integrates through one auditable signer boundary.
 
@@ -8666,7 +8666,7 @@ Exit criteria:
 
 ### v0.205.0 - Bundler EntryPoint And Paymasters Completion
 
-Status: planned; public crates.io checkpoint after cumulative review.
+Status: planned; public crates.io checkpoint after the regular per-tag pentest.
 
 Goal: ERC-4337 works end to end with explicit third-party trust boundaries.
 
@@ -8797,7 +8797,7 @@ Exit criteria:
 
 ### v0.210.0 - Contract Macros And Code Generation
 
-Status: planned; public crates.io checkpoint after cumulative review.
+Status: planned; public crates.io checkpoint after the regular per-tag pentest.
 
 Goal: Users can obtain typed bindings without hand-written field glue.
 
@@ -8917,7 +8917,7 @@ Exit criteria:
 
 ### v0.215.0 - ENS Resolution And Normalization
 
-Status: planned; public crates.io checkpoint after cumulative review.
+Status: planned; public crates.io checkpoint after the regular per-tag pentest.
 
 Goal: implement name resolution without conflating names and addresses.
 
@@ -9056,7 +9056,7 @@ Exit criteria:
 
 ### v0.220.0 - Production Storage Pilot
 
-Status: planned; public crates.io checkpoint after cumulative review.
+Status: planned; public crates.io checkpoint after the regular per-tag pentest.
 
 
 
@@ -9195,7 +9195,7 @@ Exit criteria:
 
 ### v0.225.0 - Migrations Snapshots And Cache Policy Completion
 
-Status: planned; public crates.io checkpoint after cumulative review.
+Status: planned; public crates.io checkpoint after the regular per-tag pentest.
 
 Goal: Storage upgrades and restores are reproducible and fail closed.
 
@@ -9379,7 +9379,7 @@ Exit criteria:
 
 ### v0.230.0 - Payload Orchestration And Invalidation
 
-Status: planned; public crates.io checkpoint after cumulative review.
+Status: planned; public crates.io checkpoint after the regular per-tag pentest.
 
 Goal: Payload work terminates consistently under reorgs and invalid blocks.
 
@@ -9537,7 +9537,7 @@ Exit criteria:
 
 ### v0.235.0 - SSZ Foundational Codec And Merkleization Completion
 
-Status: planned; public crates.io checkpoint after cumulative review.
+Status: planned; public crates.io checkpoint after the regular per-tag pentest.
 
 Goal: establish the immutable SSZ wire and Merkle foundation required by
 light-client and protocol-type work without claiming the later mutable,
@@ -9724,7 +9724,7 @@ Exit criteria:
 
 ### v0.240.0 - Early Engine Vertical Devnet
 
-Status: planned; public crates.io checkpoint after cumulative review.
+Status: planned; public crates.io checkpoint after the regular per-tag pentest.
 
 
 
@@ -9889,7 +9889,7 @@ Exit criteria:
 
 ### v0.245.0 - BLS Sync Committee Verification Completion
 
-Status: planned; public crates.io checkpoint after cumulative review.
+Status: planned; public crates.io checkpoint after the regular per-tag pentest.
 
 Goal: Sync committee attestations are cryptographically verified first party or through an audited explicit backend.
 
@@ -10012,7 +10012,7 @@ Exit criteria:
 
 ### v0.250.0 - Complete Light-Client Conformance
 
-Status: planned; public crates.io checkpoint after cumulative review.
+Status: planned; public crates.io checkpoint after the regular per-tag pentest.
 
 Goal: Complete light-client claims are fixture-backed and operationally documented.
 
@@ -10178,7 +10178,7 @@ Exit criteria:
 
 ### v0.255.0 - DNS Discovery Trees
 
-Status: planned; public crates.io checkpoint after cumulative review.
+Status: planned; public crates.io checkpoint after the regular per-tag pentest.
 
 Goal: verify signed DNS node trees before dialing.
 
@@ -10339,7 +10339,7 @@ Exit criteria:
 
 ### v0.260.0 - Eth Protocol Messages Completion
 
-Status: planned; public crates.io checkpoint after cumulative review.
+Status: planned; public crates.io checkpoint after the regular per-tag pentest.
 
 Goal: Execution chain data can be exchanged through typed wire messages.
 
@@ -10512,7 +10512,7 @@ Exit criteria:
 
 ### v0.265.0 - Request Scheduler And Backpressure
 
-Status: planned; public crates.io checkpoint after cumulative review.
+Status: planned; public crates.io checkpoint after the regular per-tag pentest.
 
 Goal: Network work cannot create unbounded queues or retry amplification.
 
@@ -10681,7 +10681,7 @@ Exit criteria:
 
 ### v0.270.0 - Multi-Peer Full And Snap Sync
 
-Status: planned; public crates.io checkpoint after cumulative review.
+Status: planned; public crates.io checkpoint after the regular per-tag pentest.
 
 Goal: A node can reach verified canonical state without trusting one peer.
 
@@ -10817,7 +10817,7 @@ Exit criteria:
 
 ### v0.275.0 - MPT Witness Construction And Verification
 
-Status: planned; public crates.io checkpoint after cumulative review.
+Status: planned; public crates.io checkpoint after the regular per-tag pentest.
 
 Goal: MPT-backed execution inputs can be proven complete.
 
@@ -10951,7 +10951,7 @@ Exit criteria:
 
 ### v0.280.0 - Successor Commitment Proof Construction
 
-Status: planned; public crates.io checkpoint after cumulative review.
+Status: planned; public crates.io checkpoint after the regular per-tag pentest.
 
 Goal: make successor commitments and proofs executable before state migration.
 
@@ -11081,7 +11081,7 @@ Exit criteria:
 
 ### v0.285.0 - Future Fork Automation
 
-Status: planned; public crates.io checkpoint after cumulative review.
+Status: planned; public crates.io checkpoint after the regular per-tag pentest.
 
 Goal: New hard forks cannot silently outrun the support matrix.
 
@@ -11273,7 +11273,7 @@ Exit criteria:
 
 ### v0.290.0 - Kani EVM Trie And State Proofs
 
-Status: planned; public crates.io checkpoint after cumulative review.
+Status: planned; public crates.io checkpoint after the regular per-tag pentest.
 
 Goal: Selected consensus-critical execution invariants have machine-checked evidence.
 
@@ -11450,7 +11450,7 @@ Exit criteria:
 
 ### v0.295.0 - Compatibility And Semver Gate
 
-Status: planned; public crates.io checkpoint after cumulative review.
+Status: planned; public crates.io checkpoint after the regular per-tag pentest.
 
 Goal: Accidental breaking or stale publication metadata blocks release.
 
@@ -11587,7 +11587,7 @@ Exit criteria:
 
 ### v0.300.0 - Provider Wallet And Contract Audit
 
-Status: planned; public crates.io checkpoint after cumulative review.
+Status: planned; public crates.io checkpoint after the regular per-tag pentest.
 
 Goal: No unresolved critical/high SDK or key-management finding remains.
 
@@ -11726,7 +11726,7 @@ Exit criteria:
 
 ### v0.305.0 - Consensus Configuration And Fork Registry
 
-Status: planned; public crates.io checkpoint after cumulative review.
+Status: planned; public crates.io checkpoint after the regular per-tag pentest.
 
 Goal: Consensus behavior is source-generated and fork-modular rather than spread through optional-field conditionals.
 
@@ -11889,7 +11889,7 @@ Exit criteria:
 
 ### v0.310.0 - BLS Batch Verification And Isolation
 
-Status: planned; public crates.io checkpoint after cumulative review.
+Status: planned; public crates.io checkpoint after the regular per-tag pentest.
 
 Goal: batch consensus verification without unsound attribution.
 
@@ -12068,7 +12068,7 @@ Exit criteria:
 
 ### v0.315.0 - PeerDAS Cell And Reconstruction Core Completion
 
-Status: planned; public crates.io checkpoint after cumulative review.
+Status: planned; public crates.io checkpoint after the regular per-tag pentest.
 
 Goal: implement the first-party cryptographic and erasure-coding core before
 any state-transition, storage, networking, synchronization, or validator path
@@ -12224,7 +12224,7 @@ Exit criteria:
 
 ### v0.320.0 - Rewards Penalties Participation And Inactivity
 
-Status: planned; public crates.io checkpoint after cumulative review.
+Status: planned; public crates.io checkpoint after the regular per-tag pentest.
 
 Goal: Balance outcomes match official vectors across normal and non-finalizing periods.
 
@@ -12358,7 +12358,7 @@ Exit criteria:
 
 ### v0.325.0 - Execution Payload And Request Processing Completion
 
-Status: planned; public crates.io checkpoint after cumulative review.
+Status: planned; public crates.io checkpoint after the regular per-tag pentest.
 
 Goal: Consensus transition is correctly bound to execution validity and current request types.
 
@@ -12483,7 +12483,7 @@ Exit criteria:
 
 ### v0.330.0 - LMD-GHOST And Latest Messages
 
-Status: planned; public crates.io checkpoint after cumulative review.
+Status: planned; public crates.io checkpoint after the regular per-tag pentest.
 
 Goal: Head computation matches LMD-GHOST under competing branches and votes.
 
@@ -12627,7 +12627,7 @@ Exit criteria:
 
 ### v0.335.0 - Optimistic Execution And Invalidation
 
-Status: planned; public crates.io checkpoint after cumulative review.
+Status: planned; public crates.io checkpoint after the regular per-tag pentest.
 
 Goal: Execution-invalid ancestry cannot remain canonical or authorize validator duties.
 
@@ -12747,7 +12747,7 @@ Exit criteria:
 
 ### v0.340.0 - Sidecar Custody Pruning And Retention
 
-Status: planned; public crates.io checkpoint after cumulative review.
+Status: planned; public crates.io checkpoint after the regular per-tag pentest.
 
 Goal: Data availability obligations persist correctly across restarts and pruning.
 
@@ -12891,7 +12891,7 @@ Exit criteria:
 
 ### v0.345.0 - GossipSub Topics And Subnet Management Completion
 
-Status: planned; public crates.io checkpoint after cumulative review.
+Status: planned; public crates.io checkpoint after the regular per-tag pentest.
 
 Goal: The node joins and leaves every required gossip domain at the correct time.
 
@@ -13085,7 +13085,7 @@ Exit criteria:
 
 ### v0.350.0 - Head And Range Sync
 
-Status: planned; public crates.io checkpoint after cumulative review.
+Status: planned; public crates.io checkpoint after the regular per-tag pentest.
 
 Goal: A node reaches current head under bounded resources and adversarial peers.
 
@@ -13217,7 +13217,7 @@ Exit criteria:
 
 ### v0.355.0 - Beacon Engine Coordinator
 
-Status: planned; public crates.io checkpoint after cumulative review.
+Status: planned; public crates.io checkpoint after the regular per-tag pentest.
 
 Goal: build on the `v0.239.0` authenticated protocol/transport boundary and
 own beacon-node fork-choice, payload-building, and execution-status
@@ -13379,7 +13379,7 @@ Exit criteria:
 
 ### v0.360.0 - Beacon Node Orchestration
 
-Status: planned; public crates.io checkpoint after cumulative review.
+Status: planned; public crates.io checkpoint after the regular per-tag pentest.
 
 Goal: The focused crates operate as one coherent beacon node with explicit terminal states.
 
@@ -13550,7 +13550,7 @@ Exit criteria:
 
 ### v0.365.0 - Slashing Protection Model And Invariants
 
-Status: planned; public crates.io checkpoint after cumulative review.
+Status: planned; public crates.io checkpoint after the regular per-tag pentest.
 
 Goal: Slashability decisions are a small first-party security kernel with explicit invariants.
 
@@ -13705,7 +13705,7 @@ Exit criteria:
 
 ### v0.370.0 - Validator Duty Scheduler And Safety State
 
-Status: planned; public crates.io checkpoint after cumulative review.
+Status: planned; public crates.io checkpoint after the regular per-tag pentest.
 
 Goal: No duty reaches signing unless timing, chain, quorum, and safety preconditions hold.
 
@@ -13856,7 +13856,7 @@ Exit criteria:
 
 ### v0.375.0 - Transactional Keymanager Methods
 
-Status: planned; public crates.io checkpoint after cumulative review.
+Status: planned; public crates.io checkpoint after the regular per-tag pentest.
 
 Goal: make key import/delete operations safe before convenience administration.
 
@@ -14026,7 +14026,7 @@ Exit criteria:
 
 ### v0.380.0 - Threshold DVT And Distributed Slashing Coordination Completion
 
-Status: planned; public crates.io checkpoint after cumulative review.
+Status: planned; public crates.io checkpoint after the regular per-tag pentest.
 
 Goal: support threshold and distributed validator signing without weakening
 single-signature slashing invariants.
@@ -14218,7 +14218,7 @@ Exit criteria:
 
 ### v0.385.0 - Consensus Operations Monitoring And Analytics
 
-Status: planned; public crates.io checkpoint after cumulative review.
+Status: planned; public crates.io checkpoint after the regular per-tag pentest.
 
 Goal: operate and monitor beacon and validator services with stable schemas,
 including validator performance and safety analytics.
@@ -14388,7 +14388,7 @@ Exit criteria:
 
 ### v0.390.0 - Production Acceptance Matrix And Quantitative Budgets
 
-Status: planned; public crates.io checkpoint after cumulative review.
+Status: planned; public crates.io checkpoint after the regular per-tag pentest.
 
 Goal: replace subjective production gates with a versioned, numeric acceptance
 contract before interoperability, longevity, and performance claims run.
@@ -14598,7 +14598,7 @@ Exit criteria:
 
 ### v0.395.0 - Kani State Transition And Fork-Choice Proofs
 
-Status: planned; public crates.io checkpoint after cumulative review.
+Status: planned; public crates.io checkpoint after the regular per-tag pentest.
 
 Goal: Selected consensus-state and fork-choice safety invariants have machine-checked evidence.
 
@@ -14739,7 +14739,7 @@ Exit criteria:
 
 ### v0.400.0 - Validator Slashing Keymanager And Builder Audit
 
-Status: planned; public crates.io checkpoint after cumulative review.
+Status: planned; public crates.io checkpoint after the regular per-tag pentest.
 
 Goal: No unresolved critical/high signing, slashing, key-custody, or builder finding remains.
 
@@ -14884,7 +14884,7 @@ Exit criteria:
 
 ### v0.405.0 - Exact Archive Publication Prototype
 
-Status: planned; public crates.io checkpoint after cumulative review.
+Status: planned; public crates.io checkpoint after the regular per-tag pentest.
 
 Goal: prove that approved crate archives can be preserved and published
 without repackaging.
@@ -15055,7 +15055,7 @@ Exit criteria:
 
 ### v0.410.0 - Core Cryptography Production Readmission
 
-Status: planned; public crates.io checkpoint after cumulative review.
+Status: planned; public crates.io checkpoint after the regular per-tag pentest.
 
 Goal: close all full-stack cryptographic findings and readmit the exact final
 production paths before historical and executable product completion.
@@ -15218,7 +15218,7 @@ Exit criteria:
 
 ### v0.415.0 - Execution Stage Pipeline Unwind And State Healing
 
-Status: planned; public crates.io checkpoint after cumulative review.
+Status: planned; public crates.io checkpoint after the regular per-tag pentest.
 
 Goal: turn sync and storage components into a restartable production import
 pipeline.
@@ -15383,7 +15383,7 @@ Exit criteria:
 
 ### v0.420.0 - Public Execution JSON-RPC Server Completion
 
-Status: planned; public crates.io checkpoint after cumulative review.
+Status: planned; public crates.io checkpoint after the regular per-tag pentest.
 
 Goal: serve the complete pinned standard execution API with production
 security controls.
@@ -15553,7 +15553,7 @@ Exit criteria:
 
 ### v0.425.0 - Execution Node Executable And Packaging
 
-Status: planned; public crates.io checkpoint after cumulative review.
+Status: planned; public crates.io checkpoint after the regular per-tag pentest.
 
 Goal: ship a standalone production execution-node binary and reusable node
 builder.
@@ -15714,7 +15714,7 @@ Exit criteria:
 
 ### v0.430.0 - Mainnet And Testnet Sync Follow Gate
 
-Status: planned; public crates.io checkpoint after cumulative review.
+Status: planned; public crates.io checkpoint after the regular per-tag pentest.
 
 Goal: demonstrate reliable public-network synchronization and continuous
 canonical following.
@@ -15871,7 +15871,7 @@ Exit criteria:
 
 ### v0.435.0 - Private Devnet And Custom Network Tooling
 
-Status: planned; public crates.io checkpoint after cumulative review.
+Status: planned; public crates.io checkpoint after the regular per-tag pentest.
 
 Goal: create reproducible execution/consensus networks for testing and
 downstream client development.
@@ -16032,7 +16032,7 @@ Exit criteria:
 
 ### v0.440.0 - Complete Full-Stack Security Audit
 
-Status: planned; public crates.io checkpoint after cumulative review.
+Status: planned; public crates.io checkpoint after the regular per-tag pentest.
 
 Goal: independently review the integrated Ethereum stack and every cross-layer
 trust transition.
@@ -16188,7 +16188,7 @@ Exit criteria:
 
 ### v0.445.0 - Final Production Acceptance Matrix Completion
 
-Status: planned; public crates.io checkpoint after cumulative review.
+Status: planned; public crates.io checkpoint after the regular per-tag pentest.
 
 Goal: apply one quantitative acceptance contract to every production product
 and embedding mode.

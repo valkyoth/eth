@@ -25,10 +25,10 @@ to review independently.
 
 ## Pentest Scope
 
-An internal milestone receives an incremental pentest against the immediately
-preceding tag. A public checkpoint receives a cumulative integration pentest
-covering every change after the preceding published checkpoint through the
-exact candidate. The checkpoint gate also verifies that every intervening
+Every milestone, including a public crates.io checkpoint, receives an incremental
+pentest against the immediately preceding tag through the exact candidate.
+Publishing does not require a second or cumulative pentest. Each tagged slice
+retains its own permanent report. The gate verifies that every intervening
 minor and patch tag is represented in `cumulative_milestones`; no internal
 slice may disappear from the publication range.
 
@@ -39,9 +39,11 @@ Prior reports are validated for PASS, unique fields, exact linear report-only
 commit binding, assessment/predecessor/range and authorized signatures, not
 merely file existence. See the [release-control remediation](release-control-remediation-0.56.0.md).
 
-Incremental reports reduce review size but do not replace the cumulative
-checkpoint assessment. Findings are remediated and retested under the normal
-project workflow before either kind of tag is created.
+Findings are remediated and retested under the same workflow before every tag.
+The publication baseline remains the basis for cumulative package classification,
+not the current pentest scope. This policy supersedes the cumulative-checkpoint
+assessment requirement described in historical release-control reports; those
+reports remain unchanged historical evidence.
 
 ## Crate Versions
 
@@ -88,4 +90,4 @@ alone is ignored; dependency source, target, rename and feature changes are not.
 `stage = "internal"` and verifies cumulative package and dependency changes at
 public checkpoints. Release readiness also requires internal release notes to
 record `Publication: DEFERRED TO v0.N.0`, public checkpoint notes to record
-`Publication: PENDING`, and matching incremental or cumulative report fields.
+`Publication: PENDING`, and matching incremental report fields for every tag.

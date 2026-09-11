@@ -42,7 +42,7 @@ class Repository:
 
     def report(self, version: str, baseline="0.55.0", transform=None, signed=True):
         reviewed = self.commit()
-        assessment = "CUMULATIVE" if int(version.split(".")[1]) % 5 == 0 and version.endswith(".0") else "INCREMENTAL"
+        assessment = "INCREMENTAL"
         body = (f"Status: PASS\nReviewed-Commit: {reviewed}\nTester: Release fixture\n"
                 f"Scope: Local test\nDate: 2026-09-05\nAssessment: {assessment}\n"
                 f"Baseline: v{baseline}\nRange-End: v{version}\n")
@@ -64,14 +64,15 @@ class Repository:
             self.write(f"scripts/{name}", (SCRIPTS / name).read_text())
         self.write("scripts/generate-sbom.sh", "#!/bin/sh\nexit 0\n")
         (self.root / "scripts/generate-sbom.sh").chmod(0o755)
-        stage = "public" if version == "0.60.0" else "internal"
+        stage = "public" if int(version.split(".")[1]) % 5 == 0 and version.endswith(".0") else "internal"
         self.write("release-crates.toml", "[release]\n" + "\n".join(
             f"{key} = {json.dumps(value)}" for key, value in dict(
                 version=version, milestone=version, stage=stage, baseline=baseline,
                 review_baseline=review, cumulative_milestones=milestones).items()))
         self.write("sbom/eth.spdx.json", "{}")
-        publication = "PENDING" if stage == "public" else "DEFERRED TO v0.60.0"
+        from release_train import next_public_checkpoint
+        publication = "PENDING" if stage == "public" else f"DEFERRED TO v{next_public_checkpoint(version)}"
         self.write(f"release-notes/RELEASE_NOTES_{version}.md", f"Publication: {publication}\n")
-        self.report(version, baseline if stage == "public" else review, signed=False)
+        self.report(version, review, signed=False)
         return subprocess.run(["sh", "scripts/validate-release-readiness.sh", f"v{version}"],
                               cwd=self.root, capture_output=True, text=True)

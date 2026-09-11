@@ -15,13 +15,11 @@ release_notes="release-notes/RELEASE_NOTES_${version}.md"
 pentest_report="security/pentest/${tag}.md"
 publish_tag="${ETH_RELEASE_PUBLISH_TAG:-}"
 release_stage=""
-public_baseline=""
 review_baseline=""
 
 if [ -f release-crates.toml ]; then
     metadata_version="$(python3 -c 'import tomllib; print(tomllib.load(open("release-crates.toml", "rb"))["release"]["version"])')"
     release_stage="$(python3 -c 'import tomllib; print(tomllib.load(open("release-crates.toml", "rb"))["release"]["stage"])')"
-    public_baseline="$(python3 -c 'import tomllib; print(tomllib.load(open("release-crates.toml", "rb"))["release"]["baseline"])')"
     review_baseline="$(python3 -c 'import tomllib; print(tomllib.load(open("release-crates.toml", "rb"))["release"]["review_baseline"])')"
     if [ "$metadata_version" != "$version" ]; then
         echo "release metadata version ${metadata_version} does not match ${version}" >&2
@@ -87,21 +85,17 @@ if [ -n "$release_stage" ] && [ "$version" != "0.55.0" ]; then
         echo "pentest Range-End must be ${tag}" >&2
         exit 1
     fi
+    if [ "$assessment" != "INCREMENTAL" ] || [ "$report_baseline" != "v${review_baseline}" ]; then
+        echo "pentest must be INCREMENTAL from v${review_baseline}" >&2
+        exit 1
+    fi
     if [ "$release_stage" = "internal" ]; then
         checkpoint="$(python3 -c 'import sys; sys.path.insert(0, "scripts"); import release_train; print("v" + release_train.next_public_checkpoint(sys.argv[1]))' "$version")"
-        if [ "$assessment" != "INCREMENTAL" ] || [ "$report_baseline" != "v${review_baseline}" ]; then
-            echo "internal pentest must be INCREMENTAL from v${review_baseline}" >&2
-            exit 1
-        fi
         if [ "$publication" != "DEFERRED TO ${checkpoint}" ]; then
             echo "internal release notes must defer publication to ${checkpoint}" >&2
             exit 1
         fi
     elif [ "$release_stage" = "public" ]; then
-        if [ "$assessment" != "CUMULATIVE" ] || [ "$report_baseline" != "v${public_baseline}" ]; then
-            echo "public checkpoint pentest must be CUMULATIVE from v${public_baseline}" >&2
-            exit 1
-        fi
         if [ "$publication" != "PENDING" ]; then
             echo "public checkpoint release notes must record Publication: PENDING" >&2
             exit 1

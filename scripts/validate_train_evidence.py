@@ -26,9 +26,8 @@ def main() -> int:
         validate_repository_train(plan)
         if not plan["anchor"]:
             validate_train_reports(ROOT, plan)
-            assessment = "CUMULATIVE" if plan["stage"] == "public" else "INCREMENTAL"
-            baseline = plan["baseline"] if plan["stage"] == "public" else plan["review_baseline"]
-            validate_report(ROOT, candidate, plan["version"], assessment, baseline)
+            validate_report(ROOT, candidate, plan["version"],
+                            "INCREMENTAL", plan["review_baseline"])
         else:
             validate_report(ROOT, candidate, plan["version"])
         if git(ROOT, "rev-parse", "--verify", "HEAD^{commit}") != candidate:

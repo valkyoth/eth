@@ -1,8 +1,8 @@
 # Current Status
 
 Latest published checkpoint: `v0.55.0`. Source candidate: `v0.60.0`,
-the next cumulative public release; implementation checks passed and cumulative
-pentest is pending. The tables describe this candidate, not a
+the next cumulative public release; implementation checks passed and per-tag
+pentest report finalization is pending. The tables describe this candidate, not a
 production-ready node or a promise that the package is already on crates.io.
 
 The candidate combines Fp/Fp2 and G1/G2 public-input arithmetic with charged

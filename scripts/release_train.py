@@ -7,7 +7,7 @@ import subprocess
 import re
 from pathlib import Path
 
-from release_evidence import authenticated_tag, git
+from release_evidence import authenticated_tag, git, semantic_tags_before as evidence_tags_before
 from release_dependencies import changed_contracts
 
 
@@ -110,19 +110,7 @@ def validate_release_context(release: dict) -> dict:
 
 
 def semantic_tags_before(version: str) -> tuple[str, ...]:
-    candidate = parse_version(version)
-    raw = subprocess.check_output(
-        ["git", "tag", "--list", "v*.*.*"], cwd=ROOT, text=True
-    )
-    parsed: list[tuple[int, int, int]] = []
-    for tag in raw.splitlines():
-        try:
-            tagged = parse_version(tag.removeprefix("v"))
-        except RuntimeError:
-            continue
-        if tagged < candidate:
-            parsed.append(tagged)
-    return tuple(".".join(str(part) for part in item) for item in sorted(parsed))
+    return evidence_tags_before(ROOT, version)
 
 
 def validate_repository_train(plan: dict) -> None:

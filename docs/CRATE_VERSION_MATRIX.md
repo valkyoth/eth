@@ -1,6 +1,6 @@
 # Crate Version Matrix
 
-Status: `v0.60.0` public-checkpoint candidate; cumulative pentest pending.
+Status: `v0.60.0` public-checkpoint candidate; per-tag pentest report finalization pending.
 All 14 packages have changes since the published `v0.55.0` baseline.
 
 `eth` uses independent crate versions. The facade crate remains the main user
@@ -60,5 +60,5 @@ lockstep or internal-milestone publication.
 | `eth` | `0.55.0` | `0.60.0` | `code` | Yes | Publishes the complete v0.56.0 through v0.60.0 train and refreshed documentation. |
 
 Update this table and `release-crates.toml` together. Publication follows the
-listed dependency order after cumulative pentest, local verification, GitHub
+listed dependency order after per-tag pentest, local verification, GitHub
 green, and explicit signed-tag approval. No crates have been published yet.

@@ -23,10 +23,10 @@ defined by the [versioning policy](VERSIONING_POLICY.md).
    review until clean. If the maintainer reports a clean pentest, document that
    result without inventing findings or an additional audit.
 7. Commit the permanent `security/pentest/vX.Y.Z.md` report for the exact
-   reviewed implementation commit. Internal reports record
+   reviewed implementation commit. All reports record
    `Assessment: INCREMENTAL`, the preceding tag as `Baseline`, and the current
-   tag as `Range-End`. Public reports use `Assessment: CUMULATIVE` and the
-   preceding published checkpoint as `Baseline`.
+   tag as `Range-End`, including public crates.io checkpoints. Publishing does
+   not require an additional or cumulative pentest.
 8. Wait for GitHub CI and CodeQL. If the maintainer reports failures, fix and
    test them, update the report, commit again, and wait for the new candidate.
 9. When the maintainer confirms GitHub is green and explicitly asks to tag and
@@ -51,8 +51,8 @@ At `v0.60.0`, `v0.65.0`, and each later scheduled checkpoint:
    implementation slice.
 2. Bump each changed support crate once from its latest published version and
    update all dependent requirements.
-3. Run a cumulative integration pentest over the complete range after the
-   preceding published checkpoint through the candidate.
+3. Complete the ordinary per-tag pentest against `review_baseline` as described
+   above. The public package baseline does not change the pentest scope.
 4. Authenticate every prior tag with the committed release-signer policy and
    validate its PASS report, reviewed-commit parent, report-only diff and
    assessment chain. Missing scheduled checkpoints/minors block release.

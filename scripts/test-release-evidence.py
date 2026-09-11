@@ -47,6 +47,68 @@ class EvidenceTests(unittest.TestCase):
         result = self.repo.readiness("0.56.0", review="0.55.0", milestones=["0.56.0"])
         self.assertEqual(result.returncode, 0, result.stderr)
 
+    def test_public_checkpoint_requires_normal_incremental_report(self):
+        self.train()
+        result = self.repo.readiness()
+        self.assertEqual(result.returncode, 0, result.stderr)
+        commands = (["sh", "scripts/validate-release-readiness.sh", "v0.60.0"],
+                    ["python3", "scripts/validate_train_evidence.py", "0.60.0"])
+        transformations = (
+            lambda b: b.replace("INCREMENTAL", "CUMULATIVE"),
+            lambda b: b.replace("Baseline: v0.59.0", "Baseline: v0.55.0"),
+            lambda b: b.replace("Status: PASS", "Status: FAIL"),
+            lambda b: "",
+        )
+        for index, transform in enumerate(transformations):
+            self.repo.report("0.60.0", "0.59.0", transform=transform, signed=False)
+            for command in commands:
+                with self.subTest(index=index, command=command):
+                    result = subprocess.run(command, cwd=self.repo.root, text=True, capture_output=True)
+                    self.assertNotEqual(result.returncode, 0)
+        self.repo.git("rm", "security/pentest/v0.60.0.md")
+        self.repo.commit("missing report")
+        for command in commands:
+            result = subprocess.run(command, cwd=self.repo.root, text=True, capture_output=True)
+            self.assertNotEqual(result.returncode, 0)
+
+    def test_next_train_accepts_incremental_public_baseline_after_patch(self):
+        self.train()
+        self.repo.report("0.59.1", "0.59.0")
+        self.repo.report("0.60.0", "0.59.1")
+        result = self.repo.readiness("0.61.0", baseline="0.60.0", review="0.60.0",
+                                     milestones=["0.61.0"])
+        self.assertEqual(result.returncode, 0, result.stderr)
+        self.repo.sign("0.61.0")
+        for minor in range(62, 65):
+            self.repo.report(f"0.{minor}.0", f"0.{minor - 1}.0")
+        result = self.repo.readiness("0.65.0", baseline="0.60.0", review="0.64.0",
+                                     milestones=[f"0.{minor}.0" for minor in range(61, 66)])
+        self.assertEqual(result.returncode, 0, result.stderr)
+
+    def test_next_train_rejects_bad_public_baseline_report(self):
+        self.train()
+        self.repo.report("0.59.1", "0.59.0")
+        cases = (
+            ("0.59.0", None),
+            ("0.59.1", lambda b: b.replace("INCREMENTAL", "CUMULATIVE")),
+            ("0.59.1", lambda b: b.replace("Status: PASS", "Status: FAIL")),
+        )
+        for baseline, transform in cases:
+            with self.subTest(baseline=baseline, transform=transform):
+                self.repo.report("0.60.0", baseline, transform=transform)
+                result = self.repo.readiness("0.61.0", baseline="0.60.0", review="0.60.0",
+                                             milestones=["0.61.0"])
+                self.assertNotEqual(result.returncode, 0)
+                self.repo.git("tag", "-d", "v0.60.0")
+
+    def test_semantic_predecessors_ignore_noncanonical_and_future_tags(self):
+        for version in ("0.59.2", "0.59.10", "0.059.0", "0.60.0-rc.1", "0.60.0", "0.65.0"):
+            self.repo.git("tag", f"v{version}")
+        self.assertEqual(release_evidence.semantic_tags_before(self.repo.root, "0.60.0"),
+                         ("0.55.0", "0.59.2", "0.59.10"))
+        with self.assertRaisesRegex(RuntimeError, "noncanonical"):
+            release_evidence.semantic_tags_before(self.repo.root, "0.060.0")
+
     def test_publisher_uses_same_authorized_signer_policy(self):
         self.repo.report("0.56.0")
         with patch.object(release_crates, "ROOT", self.repo.root):

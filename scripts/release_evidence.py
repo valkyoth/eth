@@ -64,6 +64,22 @@ def field(body: str, name: str) -> str:
     return values[0].strip()
 
 
+def semantic_tags_before(root: Path, version: str) -> tuple[str, ...]:
+    """Return canonical numeric release tags preceding a milestone, including patches."""
+    pattern = r"(?:0|[1-9][0-9]*)\.(?:0|[1-9][0-9]*)\.(?:0|[1-9][0-9]*)"
+    if not re.fullmatch(pattern, version):
+        raise RuntimeError("noncanonical release version")
+    candidate = tuple(int(part) for part in version.split("."))
+    versions = []
+    for tag in git(root, "tag", "--list", "v*.*.*").splitlines():
+        value = tag.removeprefix("v")
+        if re.fullmatch(pattern, value):
+            parsed = tuple(int(part) for part in value.split("."))
+            if parsed < candidate:
+                versions.append(parsed)
+    return tuple(".".join(str(part) for part in value) for value in sorted(versions))
+
+
 def validate_report(root: Path, commit: str, version: str,
                     assessment: str | None = None, baseline: str | None = None) -> None:
     path = f"security/pentest/v{version}.md"
@@ -102,8 +118,12 @@ def validate_train_reports(root: Path, plan: dict) -> None:
     if baseline == "0.55.0":
         validate_report(root, baseline_commit, baseline)
     else:
-        minor = int(baseline.split(".")[1])
-        validate_report(root, baseline_commit, baseline, "CUMULATIVE", f"0.{minor - 5}.0")
+        preceding = semantic_tags_before(root, baseline)
+        if not preceding:
+            raise RuntimeError(f"v{baseline}: preceding pentested tag is missing")
+        previous = preceding[-1]
+        authenticated_tag(root, previous, candidate=baseline_commit)
+        validate_report(root, baseline_commit, baseline, "INCREMENTAL", previous)
     previous = baseline
     previous_commit = baseline_commit
     for version in plan["cumulative_milestones"]:
