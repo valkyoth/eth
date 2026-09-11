@@ -25,21 +25,40 @@
 
 # eth-valkyoth-primitives
 
-Support crate for `eth`: core `no_std` Ethereum protocol primitives.
+Explicit `no_std` Ethereum value domains for
+[`eth`](https://crates.io/crates/eth): addresses, hashes, chain IDs, currency,
+gas, nonces, indexes and transaction types. The types share canonical integer
+validation with the codec instead of maintaining a second parser.
 
-Most users should depend on the facade crate instead:
+Most applications should use the facade:
 
-```toml
-[dependencies]
-eth = "0.52.4"
+```sh
+cargo add eth
 ```
 
-Crates.io: <https://crates.io/crates/eth>
+## Example
 
-This package is published separately so the `eth` workspace can keep small,
-auditable crate boundaries. Treat it as a lower-level building block unless the
-`eth` documentation explicitly says otherwise.
+```rust
+use eth::primitives::{Address, ChainId, Gas, Nonce, Wei};
 
-The `0.11.0` release implements the public codec `RlpEncode` and `RlpDecode`
-traits for primitive domain types so reviewed structs can derive RLP without
-duplicating primitive canonicality logic.
+let chain = ChainId::new(1);
+let recipient = Address::from_bytes([0_u8; 20]);
+let value = Wei::from_u128(1_000_000_000);
+let gas = Gas::new(21_000);
+let nonce = Nonce::new(0);
+assert_eq!(chain, ChainId::new(1));
+assert_eq!(value, Wei::from_u128(1_000_000_000));
+assert_eq!((recipient, gas, nonce), (Address::from_bytes([0_u8; 20]), Gas::new(21_000), Nonce::new(0)));
+```
+
+A well-formed domain value is not proof of transaction validity, ownership,
+chain membership or sufficient balance. Address and hash bytes are public
+identifiers, not secret containers. Primitive RLP helpers enforce canonical
+encoding; untrusted compound operations also need the codec's shared session.
+
+See the [facade examples](https://docs.rs/eth) and
+[specification matrix](https://github.com/valkyoth/eth/blob/main/docs/SPEC_MATRIX.md).
+
+## License
+
+MIT OR Apache-2.0, at your option.

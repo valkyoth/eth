@@ -25,30 +25,33 @@
 
 # eth-valkyoth-hash
 
-Support crate for `eth`: `no_std` Keccak-256 hashing boundary traits.
+The `no_std` Keccak-256 backend boundary for
+[`eth`](https://crates.io/crates/eth). Default builds expose traits, digest
+domains and conformance helpers without selecting a hash implementation.
 
-Most users should depend on the facade crate instead:
+Opt into the reviewed software backend through the facade:
 
-```toml
-[dependencies]
-eth = "0.52.4"
+```sh
+cargo add eth --features keccak-tiny
 ```
 
-Crates.io: <https://crates.io/crates/eth>
+## Example
 
-This package is published separately so the `eth` workspace can keep small,
-auditable crate boundaries. The `0.11.0` release adds the optional
-`tiny-keccak` feature and `TinyKeccak256` backend for applications that want a
-reviewed software Keccak-256 implementation without changing the default
-dependency graph. The backend is covered by empty-input, `abc`, and chunking
-known-answer tests.
+```rust
+use eth::hash::{KECCAK256_ABC, TinyKeccak256, hash_one};
 
-```toml
-[dependencies]
-eth = { version = "0.27", features = ["keccak-tiny"] }
+let digest = hash_one(TinyKeccak256::default(), b"abc");
+assert_eq!(<[u8; 32]>::from(digest), KECCAK256_ABC);
 ```
 
-The default build still defines only the trait boundary and conformance
-helpers. `tiny-keccak` does not expose a documented sponge-state zeroization
-contract, so deployments that require state clearing should provide a custom
-hasher with an explicit sanitization contract.
+Ethereum uses Keccak-256, not SHA3-256. Backend admission requires known-answer,
+chunking and differential tests. The optional `tiny-keccak` backend is not
+enabled by default and does not promise sponge-state zeroization. Secret
+hashing paths that need state clearing must supply a backend with an explicit
+sanitization contract.
+
+See the [hash boundary](https://github.com/valkyoth/eth/blob/main/docs/keccak-boundary.md).
+
+## License
+
+MIT OR Apache-2.0, at your option.

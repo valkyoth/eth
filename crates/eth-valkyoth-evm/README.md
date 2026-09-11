@@ -25,27 +25,35 @@
 
 # eth-valkyoth-evm
 
-Support crate for `eth`: non-forgeable execution admission, explicit EVM host
-capabilities, and bounded gas-estimation contracts.
+Non-forgeable execution admission, explicit host capabilities and bounded
+gas-estimation contracts for [`eth`](https://crates.io/crates/eth).
+This `no_std` boundary does not bundle a complete execution engine.
 
-Most users should depend on the facade crate:
-
-```toml
-[dependencies]
-eth = { version = "0.55.0", features = ["evm"] }
+```sh
+cargo add eth --features evm
 ```
 
-Crates.io: <https://crates.io/crates/eth>
+## Example
 
-This package is published separately so the `eth` workspace can keep small,
-auditable crate boundaries. Treat it as a lower-level building block unless the
-`eth` documentation explicitly says otherwise.
+Build a bounded gas-estimation policy without starting any backend:
 
-The `0.12.2` support-crate release, shipped with `eth` `0.55.0`, updates its
-published EVM-core requirement for wide-length, caller-workspace ModExp
-execution without a private operand ceiling.
+```rust
+use eth::evm::{GasEstimationPolicy, GasEstimationTermination};
+use eth::primitives::Gas;
 
-The `0.12.0` implementation added:
+let policy = GasEstimationPolicy::try_new(
+    8,
+    Gas::new(50_000),
+    GasEstimationTermination::BackendStepLimit { max_backend_steps: 1_000 },
+)?;
+assert_eq!(policy.gas_cap(), Gas::new(50_000));
+# Ok::<(), eth::evm::GasEstimationError>(())
+```
+
+A policy is not an estimate. A request additionally needs an execution-ready
+transaction, an immutable state snapshot and an admitted backend.
+
+## Current Scope
 
 - direct host adapters for the allocation-free embedded and optional
   pre-reserved fixed-width-radix node access trackers;
@@ -57,7 +65,7 @@ The `0.12.0` implementation added:
   and nested EIP-2929 access rollback aligned with journal checkpoints;
 - deterministic capacity, cancellation, delegation, and reset tests.
 
-It retains the `0.11.0` execution-admission and host-capability foundation:
+Execution admission and host-capability contracts include:
 
 - `ClassifiedEnvelope -> CanonicallyDecodedTransaction ->
   ForkValidatedTransaction -> ExecutionReadyTransaction` promotion;
@@ -86,3 +94,13 @@ later gates.
 The compatibility `StateSnapshot` trait remains available and implements the
 immutable `StateView` automatically. Current storage must be supplied by its
 associated journal. No complete execution backend is admitted yet.
+
+REVM remains unadmitted. The public dependency-review record is a dated
+assessment, not permission to add an unchecked backend.
+
+See [execution admission](https://github.com/valkyoth/eth/blob/main/docs/execution-admission-host.md)
+and the [resource governor](https://github.com/valkyoth/eth/blob/main/docs/execution-resource-governor.md).
+
+## License
+
+MIT OR Apache-2.0, at your option.

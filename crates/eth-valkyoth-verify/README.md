@@ -25,130 +25,53 @@
 
 # eth-valkyoth-verify
 
-Support crate for `eth`: `no_std` Ethereum verification boundaries.
+Bounded Ethereum signature, typed-data and Merkle Patricia Trie verification
+for [`eth`](https://crates.io/crates/eth). The default crate is `no_std`;
+JSON parsing and concrete recovery backends are opt-in.
 
-Most users should depend on the facade crate instead:
-
-```toml
-[dependencies]
-eth = "0.52.6"
+```sh
+cargo add eth
 ```
 
-Crates.io: <https://crates.io/crates/eth>
+## Example
 
-This package is published separately so the `eth` workspace can keep small,
-auditable crate boundaries. Treat it as a lower-level building block unless the
-`eth` documentation explicitly says otherwise.
+Require the expected replay-protection domain before signature recovery:
 
-The `0.27.0` release adds a bounded hash-addressed MPT node resolver,
-snapshot-bound multiproof batches, cumulative output accounting, and optional
-owned deduplicating arenas with deterministic cancellable scheduling.
+```rust
+use eth::primitives::{Address, ChainId};
+use eth::verify::{Eip712Domain, require_eip712_domain};
 
-The previous `0.26.0` release adds canonical Ethereum account decoding and composed
-EIP-1186 proof verification. `verify_account_proof` returns a non-forgeable
-`VerifiedAccount` capability for authenticated inclusion or absence;
-`verify_account_storage` derives its only accepted storage root from that
-capability. Storage absence maps to canonical zero, while an explicitly stored
-zero is rejected. The release includes the pinned Execution APIs Hive
-account-plus-storage fixture and preserves operation-wide decode sessions.
-The `AccountTrieRoot` must come from an independent trust path, normally a
-separately verified block header. Deriving it from the supplied proof nodes, or
-accepting both root and proof from the same untrusted RPC response, does not
-authenticate state.
+let chain = ChainId::new(1);
+let contract = Address::from_bytes([0_u8; 20]);
+let domain = Eip712Domain::complete(chain, contract);
+require_eip712_domain(chain, contract, domain)?;
+# Ok::<(), eth::error::VerifyError>(())
+```
 
-The previous `0.25.0` release preflights every supplied MPT proof node before hashing,
-charges every actual hash through one shared session, and adds public
-session-aware transaction, receipt, account, and storage inclusion APIs. It
-rejects locally noncanonical empty extensions, empty leaves, degenerate
-branches, redundant extension children, and invalid inline/hash thresholds.
+This checks domain fields only, not a signature or the correctness of a supplied
+domain separator. Use the typed encoder to construct the separator and message
+hash before recovery.
 
-The previous `0.24.0` release added shared-session MPT node and proof-node syntax
-entry points. They charge structural and borrowed semantic passes to one
-ledger.
+## Current Scope
 
-The `0.23.0` support-crate release, shipped with `eth` `0.52.1`, rejects
-malformed EIP-712 struct and field identifiers, duplicate borrowed type,
-field, and value names, and clears partial encode-data output on failure.
-It also validates fully unwrapped array member types before hashing and adds
-default plus caller-configurable cumulative dynamic-byte work limits across
-domain and message hashing. These are signing-boundary security contract
-changes; use `0.23` rather than a `0.22` compatibility requirement.
+- Canonical transaction signatures and explicit secp256k1/Keccak backends.
+- Bounded borrowed EIP-712 encoding/hashing; optional JSON typed-data parsing.
+- MPT syntax, authenticated inclusion/absence, transaction/receipt membership,
+  canonical account decoding, and account-bound storage proofs.
+- Hash-addressed node resolution, snapshot-bound multiproof batches, cumulative
+  output budgets and optional owned deduplicating arenas.
 
-The previous `0.22.0` support-crate release, shipped with `eth` `0.52.0`, applies a
-64-type ceiling to both EIP-712 schema paths, traverses shared dependency DAGs
-once, redacts signing-value formatting, and removes `Copy` and `Clone` from
-borrowed signing values. These are intentional public compatibility changes;
-use `0.22` rather than a `0.21` compatibility requirement.
+A trie root must come from an independent trust path, normally a separately
+verified block header. Accepting root and proof from one untrusted RPC response
+does not authenticate state. `VerifiedAccount` binds storage authority to the
+authenticated account; absence maps to zero and explicitly stored zero is
+rejected. Raw storage inclusion alone does not bind the root to an account.
 
-The `0.20.0` support-crate release, shipped with `eth` `0.33.0`, adds account
-and storage MPT inclusion proof verification. The new
-`verify_account_inclusion` and `verify_storage_inclusion` APIs verify exact
-encoded account or storage value bytes at `keccak256(address)` or
-`keccak256(slot_key)` under distinct `AccountTrieRoot` and `StorageTrieRoot`
-domains. They prove byte-exact trie membership only; they do not decode account
-fields, prove that a storage root belongs to a specific account, or interpret
-the included storage scalar.
+Every untrusted traversal and actual hash must debit the same operation-wide
+`DecodeSession`. Legacy iterators require trusted or independently bounded
+inputs. Preflight rejects noncanonical nodes before invoking hash backends.
 
-The previous `0.19.0` support-crate release, shipped with `eth` `0.32.0`, adds
-transaction and receipt MPT inclusion proof verification. The new
-`verify_transaction_inclusion` and `verify_receipt_inclusion` APIs verify exact
-encoded transaction or receipt bytes at `rlp(transaction_index)` under distinct
-`TransactionTrieRoot` and `ReceiptTrieRoot` domains. They use the
-`eth-valkyoth-hash::Keccak256` trait boundary and distinguish malformed,
-absent, and wrong-root/value-mismatch proofs.
-
-The previous `0.18.0` support-crate release, shipped with `eth` `0.31.0`, adds bounded
-syntactic Merkle Patricia Trie node decoding. It exposes borrowed branch,
-extension, leaf, compact-path, child-reference, and proof-node-list types, and
-enforces cumulative proof-node and encoded-byte budgets. This is not trie-root
-or key-membership verification.
-
-The previous `0.17.3` support-crate release, shipped with `eth` `0.30.0`, updates the
-published dependency range for `eth-valkyoth-protocol 0.25.0`. No verification
-API changes are introduced by this patch release.
-
-The previous `0.17.2` support-crate release, shipped with `eth` `0.29.0`, updates the
-published dependency range for `eth-valkyoth-protocol 0.24.0`. No verification
-API changes are introduced by this patch release.
-
-The previous `0.17.1` support-crate release, shipped with `eth` `0.28.0`, updates the
-published dependency range for `eth-valkyoth-protocol 0.23.0`. No verification
-API changes are introduced by this patch release.
-
-The previous `0.17.0` support-crate release, shipped with `eth` `0.27.0`, adds EIP-712
-JSON parser fuzz coverage and a raw JSON structural-depth regression test. The
-`json` feature continues to rely on `serde_json`'s default recursion guard and
-must not be built with `serde_json/unbounded_depth`.
-
-The previous `0.16.0` support-crate release, shipped with `eth` `0.26.1`, adds an
-optional `json` feature for bounded EIP-712 JSON-RPC typed-data parsing. The
-feature depends on current `serde`/`serde_json`, requires `std`, rejects
-duplicate JSON object keys, enforces explicit parser limits, and remains
-disabled by default.
-
-The previous `0.15.0` support-crate release, shipped with `eth` `0.26.0`, adds a
-no-allocation EIP-712 typed-data encoder over caller-provided borrowed
-descriptors. It supports canonical `encodeType`, bounded `encodeData`,
-`hashStruct`, domain separator construction, and final `0x1901` signing digest
-construction without adding a concrete Keccak backend or JSON parser.
-
-The previous `0.14.2` support-crate release aligned the published codec,
-primitive, hash, and protocol dependency ranges for the public RLP derive
-surface.
-
-The previous `0.14.1` support-crate release aligned the protocol dependency
-with the EIP-7702 set-code transaction validity gate.
-
-The previous `0.14.0` release added EIP-7702 set-code transaction signing
-hashes, decoded set-code transaction signature validation, and authorization
-tuple signing-hash plus signer recovery helpers. The transaction signature
-domain and authorization signature domain use distinct APIs and hash newtypes.
-
-The crate also provides decoded transaction signature validation helpers for
-legacy EIP-155, EIP-2930, EIP-1559, EIP-4844, and EIP-7702 transaction
-domains. Use raw digest recovery only after constructing the correct Ethereum
-signing digest and checking the transaction, authorization, or structured-data
-domain.
+## Security Contract
 
 Decoded transaction signature validation is still not full execution
 validation. It does not itself prove fork validity, enforce fee rules, validate
@@ -178,3 +101,14 @@ discovery visits reachable types once before canonical ordering, and recursive
 hashing reuses a fixed 64-entry type-hash cache.
 Borrowed signing values are neither `Copy` nor `Clone`, and their manual
 `Debug` implementations redact all payload contents.
+
+
+The optional JSON path requires `std`, rejects duplicate keys and enforces
+parser limits. Do not enable `serde_json/unbounded_depth`.
+
+See [EIP-712](https://github.com/valkyoth/eth/blob/main/docs/eip712-domain-safety.md)
+and the [specification matrix](https://github.com/valkyoth/eth/blob/main/docs/SPEC_MATRIX.md).
+
+## License
+
+MIT OR Apache-2.0, at your option.

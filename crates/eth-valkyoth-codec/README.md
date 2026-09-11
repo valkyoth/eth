@@ -25,38 +25,46 @@
 
 # eth-valkyoth-codec
 
-Support crate for `eth`: bounded `no_std` Ethereum wire codec policy.
+Canonical Ethereum RLP and cumulative decode budgets for
+[`eth`](https://crates.io/crates/eth). This lower-level `no_std` crate
+parses borrowed scalars, lists and integers, and encodes into caller-owned
+buffers. Most applications should use the facade:
 
-Most users should depend on the facade crate instead:
-
-```toml
-[dependencies]
-eth = "0.52.4"
+```sh
+cargo add eth
 ```
 
-Crates.io: <https://crates.io/crates/eth>
+## Example
 
-This package is published separately so the `eth` workspace can keep small,
-auditable crate boundaries. Treat it as a lower-level building block unless the
-`eth` documentation explicitly says otherwise.
+```rust
+use eth::codec::{DecodeLimits, decode_rlp_u64, encode_rlp_integer};
 
-The `0.21.0` release extends `DecodeSessionPolicy` with explicit compact-path
-nibble and trie-value byte ceilings plus noncommitting complete hash-capacity
-preflight. These limits let proof consumers reject work before invoking a
-cryptographic backend while still charging each actual hash atomically.
+let limits = DecodeLimits::reviewed_policy(32, 4, 4, 32, 4, 4);
+let mut output = [0_u8; 3];
+let written = encode_rlp_integer(&[4, 0], &mut output)?;
+assert_eq!(decode_rlp_u64(&output[..written], limits)?, 1024);
+# Ok::<(), eth::error::DecodeError>(())
+```
 
-The previous `0.20.0` release added the non-copyable `DecodeSession` and reviewed
-`DecodeSessionPolicy`. Session-aware RLP APIs conserve one cumulative ledger
-across structural parsing, nested iteration, semantic reparses, proof nodes,
-hash work, and future pre-allocation capacity charges.
+## Security Contract
 
-The RLP parser surface is covered by the workspace fuzz harness. See the
-project fuzzing guide for target names, committed seed corpus handling, and
-crash reproduction:
+For nested untrusted input, retain one non-copyable `DecodeSession` and use
+the `*_in_session` APIs for structural parsing and every subsequent traversal.
+Legacy iterators are only suitable for trusted or independently bounded data.
+Review every policy field against concurrency, memory and protocol needs;
+changing one template value does not establish a safe deployment policy.
 
-<https://github.com/valkyoth/eth/blob/main/docs/fuzzing.md>
+Budgets cover item visits, nesting, proof nodes, compact-path nibbles, trie
+values and actual hash work. Hash-capacity preflight does not debit the ledger;
+each actual hash must still be charged. Payload-only integer helpers validate
+canonicality, not wire framing or an operation-wide budget.
 
-The `0.17.0` release adds public `RlpEncode` and `RlpDecode` traits plus
-`RlpDeriveError` for derive-generated struct encoders and decoders. Decoders
-require explicit `DecodeLimits`; callers must discard encode output buffers
-after any returned error.
+`RlpEncode` and `RlpDecode` support optional derives. Discard the output buffer
+on any encoding error: aggregate encoders can have written an earlier prefix.
+
+See [decode sessions](https://github.com/valkyoth/eth/blob/main/docs/decode-session.md)
+and [fuzzing](https://github.com/valkyoth/eth/blob/main/docs/fuzzing.md).
+
+## License
+
+MIT OR Apache-2.0, at your option.

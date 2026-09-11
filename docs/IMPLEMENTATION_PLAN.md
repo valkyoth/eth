@@ -17,8 +17,10 @@ The [release plan](RELEASE_PLAN.md) assigns this work to bounded, individually
 pentested milestones. The [September scope review](ROADMAP_REVIEW_2026_09_05.md)
 records the latest splits and full-client/library acceptance requirements;
 the [version map](roadmap-version-map.json) preserves previous assignments.
-The current candidate is `v0.59.0`, public-input BLS12-381 Fp2 arithmetic;
-pentest is clean, with GitHub/tag approval pending. Charged G1 addition is tagged as v0.58.0.
+The current candidate is `v0.60.0`, public-input BLS12-381 G2 operations;
+cumulative pentest from v0.55.0 is pending. Fp2 is tagged as v0.59.0.
+The public checkpoint includes all five implementation slices, independent
+package bumps and verified crate README examples. G2ADD remains v0.61.0.
 Unpublished implementation and assurance passes
 continue through `v0.449.0` before RC/1.0;
 that endpoint is a scope inventory, not a deadline or automatic readiness claim.

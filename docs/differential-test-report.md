@@ -1,6 +1,8 @@
 # Differential Test Report
 
-Status: `v0.55.0` implementation report.
+Status: historical `v0.55.0` client implementation evidence. This is not a
+fresh v0.60.0 client run. Current G2 oracle/vector evidence is recorded in
+[the G2 scope](bls12-g2-arithmetic.md).
 
 ## Claimed Reference Paths
 
@@ -20,8 +22,9 @@ The v0.55.0 implementation and pentest remediation ran:
 scripts/run_differential_tests.py
 ```
 
-The release gate also runs the same command so the differential claim is not
-only a documentation statement.
+The v0.55.0 implementation gate ran this command. Current implementation
+gates select portable oracles explicitly; unavailable fresh client runs must
+be documented rather than inferred from this historical report.
 
 The external-client comparison was executed on 2026-08-12 with these immutable
 multi-platform image identities and runtime-reported versions:

@@ -15,10 +15,10 @@ previously planned workstream contracts, extracts 98 implementation passes and
 promotes 11 planned patch milestones to minors. Unpublished work now extends
 through `v0.449.0`; published history through `v0.55.0` is unchanged. The
 [version map](roadmap-version-map.json) records every previous assignment.
-The current candidate is `v0.59.0`, BLS12-381 quadratic-extension arithmetic
-on the tagged field foundation. v0.58.0 charged G1 addition is tagged.
-Pentest is clean for this new slice; GitHub/tag approval remains pending.
-It enables no G2 or other precompile.
+The current candidate is `v0.60.0`, BLS12-381 G2 group operations on the
+tagged Fp2 foundation. v0.59.0 is tagged. This public checkpoint also bundles
+all changes since v0.55.0; cumulative pentest is pending.
+Standalone G2 arithmetic does not enable the G2 precompile.
 The [partial-capability completion map](partial-capability-completion.md)
 traces all five yellow README rows to implementation and acceptance releases.
 
@@ -3340,8 +3340,8 @@ Exit criteria:
 
 ### v0.59.0 - BLS12-381 Quadratic Extension Field
 
-Status: implementation candidate; pentest clean, GitHub/tag approval pending.
-Internal signed tag after approval; publication at v0.60.0.
+Status: tagged as v0.59.0 after clean pentest and GitHub checks.
+Internal signed tag; publication at v0.60.0.
 
 Goal: freeze Fp2 coefficient and non-residue conventions before G2 formulas.
 
@@ -3378,7 +3378,7 @@ Exit criteria:
 
 ### v0.60.0 - BLS12-381 G2 Group Operations
 
-Status: planned; public crates.io checkpoint after cumulative review.
+Status: implementation checks passed; public checkpoint, cumulative pentest pending.
 
 Goal: complete G2 point formulas before charged addition.
 
@@ -3390,18 +3390,33 @@ feature is implicitly enabled by this pass.
 Deliverables:
 
 - Implement G2 affine/projective conversions, complete addition/doubling and curve validation without subgroup-only rejection.
+- Keep public-input-only and curve-versus-subgroup contracts explicit in the
+  [G2 implementation scope](bls12-g2-arithmetic.md); paid G2ADD remains v0.61.0.
+- Classify every package change since v0.55.0, assign independent versions and
+  verify the complete unpublished dependency closure before publication.
+- Refresh every package README with the remote WebP logo, current scope,
+  version-free `cargo add` instructions and compiled examples; keep the
+  GitHub/facade READMEs identical and logo bytes out of package archives.
 - Document public/private ownership, supported inputs/forks, failure
   behavior, feature/resource bounds and runnable examples for this slice.
 
 Verification:
 
 - Independent G2 vectors, infinity/equal/inverse cases and malformed coefficient ordering.
+- Reproduce all 9 positive and 7 rejection EIP-2537 vectors; run the independent
+  BigUint affine oracle, non-real projective rescalings, differential fuzzing,
+  fixed-work benchmark and `scripts/release_0_60_0_gate.sh --implementation`.
+- Run `python3 scripts/check_readmes.py --test` with the documented feature
+  combinations, archive-content checks and release-script regressions.
 - Record executable commands and immutable fixtures/results; run the
   full local gate and exact-commit pentest, fix findings and retest.
 
 Exit criteria:
 
 - G2 arithmetic is vector-backed before the precompile dispatcher consumes it.
+- The cumulative v0.55.0-to-candidate pentest covers the complete five-minor
+  integration, documentation and publication tooling; earlier incremental
+  reports do not substitute for this review.
 - Evidence covers each listed behavior; no placeholder counts as
   implementation and unresolved failures block the tag.
 - `v0.60.0 implementation stop reached. Run pentest for this exact

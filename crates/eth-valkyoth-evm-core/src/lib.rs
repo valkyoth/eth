@@ -20,6 +20,7 @@ mod bls12_fp2;
 mod bls12_fp2_api;
 mod bls12_frame;
 mod bls12_g1;
+mod bls12_g2;
 mod bls12_gas;
 mod bls12_precompile;
 mod bls12_wire;
@@ -73,6 +74,7 @@ pub use bls12_frame::{
     parse_bls12381_pairing,
 };
 pub use bls12_g1::{EvmBls12381G1Affine, EvmBls12381G1Projective};
+pub use bls12_g2::{EvmBls12381G2Affine, EvmBls12381G2Projective};
 pub use bls12_wire::{
     EVM_BLS12381_FP_BYTES, EVM_BLS12381_FP2_BYTES, EVM_BLS12381_FR_BYTES,
     EVM_BLS12381_G1_POINT_BYTES, EVM_BLS12381_G2_POINT_BYTES, EVM_BLS12381_SCALAR_BYTES,

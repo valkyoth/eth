@@ -4,7 +4,20 @@ All notable changes to `eth` are documented here.
 
 ## Unreleased
 
-### v0.59.0 Internal Candidate
+### v0.60.0 Public Candidate
+
+- Added validated public-input G2 affine/projective operations, complete
+  exceptional-case handling and canonical encoding, without subgroup or G2ADD
+  admission. Added official vectors, an independent oracle, fuzzing and CPU smoke.
+- Prepared cumulative v0.56.0 through v0.60.0 publication with independent
+  versions for all changed packages. Cumulative pentest is pending.
+- Refreshed all crate READMEs with remote logos, current scopes and runnable
+  examples. Added documented-feature doctests, corrected hidden std assumptions
+  and replaced stale version snippets with valid `cargo add` commands.
+- Verified package archives using the complete local unpublished dependency
+  closure, with README identity and no-bundled-logo checks.
+
+### v0.59.0 Internal Tag
 
 - Added fixed-width public-input Fp2 arithmetic, conjugation, inversion and
   deterministic checked roots; canonical coefficient order stays unchanged.
@@ -12,7 +25,7 @@ All notable changes to `eth` are documented here.
   tests, structured fuzzing, CPU smoke and explicit arithmetic contracts.
 - Linked every partial README capability to its completion/verification
   releases. External SAST of `3922897` found no Critical, High or Medium
-  issues; no remediation or retest required. GitHub/tag approval pending;
+  issues; no remediation or retest required. GitHub passed and v0.59.0 was tagged;
   no crates.io publication before v0.60.0.
 
 ### v0.58.0 Internal Tag

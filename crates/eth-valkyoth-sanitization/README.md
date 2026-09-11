@@ -25,93 +25,71 @@
 
 # eth-valkyoth-sanitization
 
-Optional sanitization bridge for `eth`.
+Opt-in optimizer-resistant clearing for secret-bearing Ethereum data. This
+bridge depends on [`sanitization`](https://crates.io/crates/sanitization)
+and is absent from the default [`eth`](https://crates.io/crates/eth) graph.
 
-Most users should depend on the facade crate instead:
+Use the facade for basic wiping:
 
-```toml
-[dependencies]
-eth = "0.52.5"
+```sh
+cargo add eth --features sanitization
 ```
 
-Crates.io: <https://crates.io/crates/eth>
+## Example
 
-This package exists for users who explicitly want optimizer-resistant memory
-clearing for secret-bearing Ethereum data. It depends on
-[`sanitization`](https://crates.io/crates/sanitization), so it is not part of
-the default `eth` dependency graph.
+The bytes below are demonstration data, not a private key:
 
-```toml
-[dependencies]
-eth-valkyoth-sanitization = "0.8"
+```rust
+use eth::sanitization::wipe;
+
+let mut bytes = *b"public demonstration bytes";
+wipe::array(&mut bytes);
+assert!(bytes.iter().all(|byte| *byte == 0));
 ```
 
-For derive macros:
+For optional struct derives, depend directly on the bridge:
 
-```toml
-[dependencies]
-eth-valkyoth-sanitization = { version = "0.8", features = ["derive"] }
+```sh
+cargo add eth-valkyoth-sanitization --features derive
 ```
 
-The `0.8` bridge uses `sanitization 2.0.4`. The canonical `wipe` module replaces
-the removed best-effort wipe surface. The sanitization derive macros generate
-calls to `eth_valkyoth_sanitization::SecureSanitize`, implement
-`DropSafeSanitize` for their field-wise sanitizers, and require
-`DropSafeSanitize + Unpin` for generated drop code.
-
-They do not replace review of secret ownership, copies, logging, paging, swap,
-crash dumps, or compiler/runtime behavior.
-
-Enum derives are rejected because Rust does not guarantee inactive variant
-backing bytes are cleared when the active variant changes. Use a struct wrapper
-for secret material until a verified full-width clear primitive exists.
-
-For private-key or seed deployments, enable and verify the hardening features
-that match the target:
-
-```toml
-[dependencies]
-eth-valkyoth-sanitization = {
-    version = "0.8",
-    features = [
-        "hardened-only",
-        "memory-lock",
-        "multi-pass-clear",
-        "cache-flush",
-        "register-scrub",
-    ]
+```rust
+#[derive(eth_valkyoth_sanitization::SecureSanitize, eth_valkyoth_sanitization::SecureSanitizeOnDrop)]
+struct OwnedBytes {
+    bytes: [u8; 8],
 }
+use eth_valkyoth_sanitization::SecureSanitize;
+let mut value = OwnedBytes { bytes: *b"example!" };
+value.secure_sanitize();
+assert!(value.bytes.iter().all(|byte| *byte == 0));
 ```
 
-The `hardened-only` feature fails compilation unless the legacy hardening
-feature set is present. `HARDENING_FEATURES_ENABLED` reports only compile-time
-selection; it does not prove that an OS control succeeded.
+The bridge uses the `sanitization 2.1` API. `wipe` is the canonical clearing
+boundary. Field-wise derives implement `DropSafeSanitize`; generated drop
+requires `DropSafeSanitize + Unpin`. Enums are rejected because inactive
+variant backing storage may retain previous secrets.
 
-Applications that handle private keys or seeds must inspect the
+## Hardening
+
+For a target that supports these controls:
+
+```sh
+cargo add eth-valkyoth-sanitization --features hardened-only,memory-lock,multi-pass-clear,cache-flush,register-scrub
+```
+
+`hardened-only` rejects a build without the required hardening feature set.
+`HARDENING_FEATURES_ENABLED` reports compile-time selection, **not successful
+OS protection**. Applications handling keys or seeds must inspect the
 `ProtectionReport` returned by protected containers and fail according to
-their deployment policy. A compile-time assertion can still prevent an
-accidental weak feature build:
+their deployment policy. Review target support before selecting additional
+guard-page, canary, fork-exclusion or interoperability features.
 
-```rust
-const _: () = assert!(
-    eth_valkyoth_sanitization::HARDENING_FEATURES_ENABLED,
-    "enable memory-lock, multi-pass-clear, cache-flush, and register-scrub"
-);
-```
+Clearing does not replace review of ownership, copies, logs, paging, swap,
+crash dumps or compiler/runtime behavior. Legacy `sanitize_bytes`,
+`best_effort::sanitize_bytes_best_effort` and `HARDENED_MODE` names remain
+compatibility aliases; new code should use `wipe` and the explicit runtime
+protection report.
 
-Ordinary owned buffers use the canonical wipe boundary:
+## License
 
-```rust
-use eth_valkyoth_sanitization::wipe;
-
-let mut key = [0x42_u8; 32];
-wipe::array(&mut key);
-assert_eq!(key, [0_u8; 32]);
-```
-
-The legacy `sanitize_bytes`,
-`best_effort::sanitize_bytes_best_effort`, and `HARDENED_MODE` names remain
-available so the `eth 0.52.5` patch release preserves the public facade exposed
-by `eth 0.52.4`. New code should use `wipe` and
-`HARDENING_FEATURES_ENABLED`; protected containers must still inspect their
-runtime `ProtectionReport`.
+MIT OR Apache-2.0, at your option.

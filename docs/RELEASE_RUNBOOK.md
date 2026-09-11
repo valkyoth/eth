@@ -16,8 +16,8 @@ defined by the [versioning policy](VERSIONING_POLICY.md).
 4. For an internal stage, retain support crates at their published versions,
    move `eth` to the tag version, and select no crate for publication.
 5. Run repository and version-specific implementation checks, then explicitly
-   stop and ask the maintainer to pentest. For v0.59.0, use
-   `scripts/release_0_59_0_gate.sh --implementation`; no final report is needed.
+   stop and ask the maintainer to pentest. For v0.60.0, use
+   `scripts/release_0_60_0_gate.sh --implementation`; no final report is needed.
 6. If findings arrive in root `PENTEST.md`, fix them, add regression tests,
    update the permanent report/history, and delete the scratch file. Repeat
    review until clean. If the maintainer reports a clean pentest, document that
@@ -31,7 +31,7 @@ defined by the [versioning policy](VERSIONING_POLICY.md).
    test them, update the report, commit again, and wait for the new candidate.
 9. When the maintainer confirms GitHub is green and explicitly asks to tag and
    push, run only final metadata/report readiness and create/push the signed
-   annotated tag. For v0.59.0, `scripts/release_0_59_0_gate.sh` (or `--tag`)
+   annotated tag. For v0.60.0, `scripts/release_0_60_0_gate.sh` (or `--tag`)
    performs that admission check, without rerunning implementation workloads.
 
 The report-only commit is bookkeeping handled within this loop, not a new

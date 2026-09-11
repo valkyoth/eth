@@ -109,6 +109,11 @@ class Fp2GateTests(GateTests):
     fuzz_target = "bls12381_fp2"
 
 
+class G2GateTests(GateTests):
+    version = "0.60.0"
+    fuzz_target = "bls12381_g2"
+
+
 class DifferentialSelectionTests(unittest.TestCase):
     def test_in_process_is_explicit_and_default_still_runs_clients(self):
         for args, expected in (([], [*differential.DIFFERENTIAL_TESTS, differential.CLIENT_DIFFERENTIAL]),

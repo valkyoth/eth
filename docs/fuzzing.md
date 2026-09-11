@@ -74,7 +74,8 @@ cargo fuzz run rlp_differential
 cargo fuzz run rlp_integer
 ```
 
-The release gate only requires that the fuzz workspace builds:
+Normal CI checks that the fuzz workspace builds; each release implementation
+gate additionally runs the targeted fuzz smokes named by its scope:
 
 ```bash
 cargo check --manifest-path fuzz/Cargo.toml
@@ -82,6 +83,15 @@ cargo check --manifest-path fuzz/Cargo.toml
 
 Long-running fuzz campaigns are expected before parser-heavy releases, but they
 are not run inside normal CI.
+
+The v0.60.0 `bls12381_g2` target tests malformed/canonical point decoding and
+group operations against an independent BigUint affine oracle. It does not
+only compare production formulas with themselves. Canonical generator and
+infinity seeds exercise the exact 256-byte parser from the first run:
+
+```sh
+cargo +nightly fuzz run bls12381_g2 -- -max_total_time=30 -max_len=257
+```
 
 ## Crash Reproduction
 

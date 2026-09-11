@@ -31,6 +31,7 @@ DIFFERENTIAL_TESTS = [
     ["cargo", "test", "-p", "eth-valkyoth-evm-core", "--test", "bls12_field_differential"],
     ["cargo", "test", "-p", "eth-valkyoth-evm-core", "--test", "bls12_g1_differential"],
     ["cargo", "test", "-p", "eth-valkyoth-evm-core", "--test", "bls12_fp2_differential"],
+    ["cargo", "test", "-p", "eth-valkyoth-evm-core", "--test", "bls12_g2_differential"],
 ]
 CLIENT_DIFFERENTIAL = ["scripts/run_modexp_client_differential.py"]
 

@@ -1,9 +1,9 @@
 # Differential Test Harness
 
 Status: `v0.55.0` covers structural RLP and arbitrary-length ModExp through
-independent in-process or external-client reference paths. The internal
-v0.59.0 candidate retains the tagged Fp/G1 and charged G1 evidence and adds
-an independent Fp2 polynomial oracle, root-existence checks and fuzzing.
+independent in-process or external-client reference paths. The public
+v0.60.0 candidate retains Fp/Fp2/G1 and charged G1 evidence and adds an
+independent G2 affine oracle, malformed coefficient-order checks and fuzzing.
 
 ## Scope
 
@@ -14,6 +14,7 @@ an independent Fp2 polynomial oracle, root-existence checks and fuzzing.
 | BLS12-381 base field | `eth-valkyoth-evm-core::bls12_field_differential` | `num-bigint` `0.5.1` | Independent modular arithmetic, inverses and square-root postconditions. |
 | BLS12-381 Fp2 | `eth-valkyoth-evm-core::bls12_fp2_differential` | `num-bigint` `0.5.1` polynomial oracle | Exact coefficient arithmetic, inverse exponentiation, Frobenius, Euler root existence and independently squared roots; no G2 execution claim. |
 | BLS12-381 G1 | `eth-valkyoth-evm-core::bls12_g1_differential` | `num-bigint` `0.5.1` affine oracle | Independent full-curve point generation, addition, doubling and parsing; no subgroup or charged execution claim. |
+| BLS12-381 G2 | `eth-valkyoth-evm-core::bls12_g2_differential` | `num-bigint` `0.5.1` affine oracle | Independent point generation, polynomial coefficients and affine slopes; exceptional/projective cases and exact parsing, no subgroup or charged execution claim. |
 | ModExp client behavior | `modexp_client_vectors` through precompile `0x05` | Geth `1.17.5`, Besu `26.8.1`, and Nethermind `1.39.3` | All 11 deterministic frames return byte-identical output from every client. |
 
 Structural RLP comparison cannot distinguish every Ethereum integer-domain
@@ -54,7 +55,12 @@ cargo test -p eth-valkyoth-evm-core --test modexp_differential
 cargo test -p eth-valkyoth-evm-core --test bls12_field_differential
 cargo test -p eth-valkyoth-evm-core --test bls12_g1_differential
 cargo test -p eth-valkyoth-evm-core --test bls12_fp2_differential
+cargo test -p eth-valkyoth-evm-core --test bls12_g2_differential
 ```
+
+G2 includes all nine positive and seven rejection official addition vectors;
+see [G2 fixture provenance](bls12-g2-arithmetic.md). Fresh cross-client G2
+execution remains an explicit v0.61.0 obligation.
 
 G1 also has all nine pinned EIP-2537 positive addition vectors in the normal
 workspace tests; see [G1 fixture provenance](bls12-g1-arithmetic.md). These

@@ -1,7 +1,7 @@
 # Partial Capability Completion Map
 
-Reviewed for the v0.59.0 implementation against the current release plan.
-The five yellow README rows describe the **published v0.55.0** scope, not
+Reviewed for the v0.60.0 candidate against the current release plan.
+The five yellow README rows describe the **candidate v0.60.0** scope, not
 the latest internal tag. Each has concrete implementation and acceptance
 milestones below; none is an indefinite deferral.
 

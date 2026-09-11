@@ -50,7 +50,8 @@ crates retain their latest published versions during internal milestones even
 when their source changes. At a public checkpoint:
 
 - cumulative code changes receive one appropriate independent minor bump;
-- API-compatible bug fixes receive one patch bump;
+- API-compatible bug fixes, test corrections and README/example corrections
+  receive one patch bump;
 - dependency-only changes receive one patch bump;
 - unchanged crates keep their published version and are not uploaded;
 - changed dependencies publish before dependants and `eth` publishes last.
@@ -58,6 +59,14 @@ when their source changes. At a public checkpoint:
 This prevents unpublished support-crate versions from entering dependency
 requirements while preserving independent crate versioning. Package changes
 are compared cumulatively against the preceding public checkpoint.
+
+README installation commands use `cargo add` instead of repeating versions.
+Cargo still writes a versioned dependency; omitting a version from a normal
+registry dependency or recommending `"*"` is not the policy. Ordinary
+documentation corrections do not invoke exceptional metadata lockstep.
+`python3 scripts/check_readmes.py --test` checks remote logos, matching facade
+READMEs, installation features and runnable examples. Package verification
+also checks the README and excludes logo bytes in every archive.
 
 This includes effective external dependency requirements/features inherited
 from the root workspace manifest. Cargo metadata from an isolated authenticated

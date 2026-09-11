@@ -25,17 +25,28 @@
 
 # eth-valkyoth-reth
 
-Support crate for `eth`: future Reth integration boundary.
+An opt-in integration marker for
+[`eth`](https://crates.io/crates/eth). This package keeps the future Reth
+adapter separate from the default `no_std` protocol graph.
 
-Most users should depend on the facade crate instead:
-
-```toml
-[dependencies]
-eth = "0.37"
+```sh
+cargo add eth --features reth
 ```
 
-Crates.io: <https://crates.io/crates/eth>
+## Example
 
-This package is published separately so the `eth` workspace can keep small,
-auditable crate boundaries. Treat it as a lower-level building block unless the
-`eth` documentation explicitly says otherwise.
+The currently available surface is only a marker:
+
+```rust
+let boundary = eth::reth::RethAdapterBoundary;
+assert_eq!(boundary, eth::reth::RethAdapterBoundary);
+```
+
+No Reth dependency, RPC connection, execution engine, database adapter or node
+is provided. Enabling this feature does not install or run Reth. Actual
+integration requires future implementation and dependency admission under the
+[release plan](https://github.com/valkyoth/eth/blob/main/docs/RELEASE_PLAN.md).
+
+## License
+
+MIT OR Apache-2.0, at your option.

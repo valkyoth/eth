@@ -9,6 +9,17 @@ pub(crate) struct Fp2 {
 }
 
 impl Fp2 {
+    pub(crate) fn from_u64(value: u64) -> Self {
+        Self::from_coefficients(value, 0)
+    }
+
+    pub(crate) fn from_coefficients(c0: u64, c1: u64) -> Self {
+        Self {
+            c0: Fp::from_u64(c0),
+            c1: Fp::from_u64(c1),
+        }
+    }
+
     pub(crate) fn from_wire(value: EvmBls12381Fp2) -> Self {
         Self {
             c0: Fp::from_wire(value.c0()),

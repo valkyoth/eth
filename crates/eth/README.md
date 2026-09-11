@@ -33,7 +33,7 @@ receipts, withdrawals, Merkle Patricia Trie proofs, fork-aware validation, and
 bounded first-party EVM components.
 
 The complete stack is built in small independently reviewed milestones rather
-than claimed ahead of its evidence. Version `0.55.0` is still a library, not a
+than claimed ahead of its evidence. Version `0.60.0` is still a library, not a
 production node, wallet, RPC client, or key store.
 Networking, private-key signing, local key storage, and third-party execution
 backends are not enabled by default.
@@ -44,26 +44,28 @@ crates.io packages are published cumulatively at `v0.60.0`, `v0.65.0`, and
 each later pre-1.0 minor divisible by five. Intermediate tags remain source
 milestones and never publish crates.
 
-The source checkout is preparing internal milestone `0.59.0`: public-input
-BLS12-381 Fp2 arithmetic, conjugation, inversion and checked square roots,
-building on tagged Fp/G1 arithmetic and charged G1 addition. Pentest is clean;
-GitHub checks and explicit tag approval remain pending.
-This is not on crates.io; dependency examples deliberately use published
-`0.55.0`. Subgroup checks, G2 arithmetic and other BLS precompiles remain
-unavailable. See the [Fp2 scope](https://github.com/valkyoth/eth/blob/main/docs/bls12-fp2-arithmetic.md).
+The `v0.60.0` publication candidate combines public-input BLS12-381 Fp/Fp2
+and G1/G2 arithmetic with gas-authorized G1 addition. Cumulative pentest and
+release approval are pending; the latest published checkpoint remains
+`v0.55.0` until publication. G2ADD, subgroup checks, MSM, mapping, pairing and
+KZG execution still have explicit later releases.
+See the [current scope](https://github.com/valkyoth/eth/blob/main/docs/current-status.md).
 
 ## Install
 
-```toml
-[dependencies]
-eth = "0.55.0"
+```sh
+cargo add eth
 ```
+
+`cargo add` selects the latest compatible published version and writes a
+versioned dependency to your `Cargo.toml`; no wildcard requirement is needed.
+These examples are tested against the candidate workspace. New v0.60.0 APIs
+become installable from crates.io only after the checkpoint is published.
 
 For optional sanitization support:
 
-```toml
-[dependencies]
-eth = { version = "0.55.0", features = ["sanitization"] }
+```sh
+cargo add eth --features sanitization
 ```
 
 ## Quick Start
@@ -90,9 +92,10 @@ if let TransactionEnvelope::Typed(typed) = envelope {
 Legend: 🟢 available for the stated scope, 🟡 implemented but incomplete,
 🔴 not implemented.
 
-This table describes published `v0.55.0`. Every yellow row has explicit
+This table describes the `v0.60.0` candidate's implemented scope. Every yellow row has explicit
 [completion releases and verification gates](https://github.com/valkyoth/eth/blob/main/docs/partial-capability-completion.md);
-green requires verified, published support, not merely a planned milestone.
+green indicates implemented support for that row's exact scope, not production
+readiness or completion of the broader Ethereum stack.
 
 | Capability | Status | Current scope |
 | --- | --- | --- |
@@ -108,7 +111,7 @@ green requires verified, published support, not merely a planned milestone.
 | EVM host capabilities | 🟢 Available | Separate state-view, journal, block, crypto, inspector, and bounded-arena contracts plus embedded-linear/fixed-width-radix node access profiles and transaction resource governors |
 | Native EVM execution | 🟡 Partial | Bounded basic opcode/state-read interpreter, consensus-correct truncated PUSH handling, and call/create planning; full state transition is incomplete |
 | Native precompiles through BLAKE2F | 🟢 Available | Identity, SHA-256, RIPEMD-160, Prague-era EIP-198/EIP-2565 ModExp without a private operand cap, BN254, and BLAKE2F; ECRECOVER uses explicit caller backends |
-| BLS12-381 and KZG | 🟡 Partial | BLS canonical wire/frame parsing and KZG/BLS gas planning; cryptographic execution remains fail closed |
+| BLS12-381 and KZG | 🟡 Partial | Canonical wire parsing, public-input Fp/Fp2/G1/G2 arithmetic and paid G1ADD; remaining BLS/KZG execution is unavailable |
 | Owned SDK, providers, wallets, and contract tooling | 🔴 Planned | Assigned to `v0.110.0..=v0.128.0` and `v0.174.0..=v0.218.0` |
 | Complete execution, storage, and execution-client product | 🔴 Planned | Assigned to `v0.129.0..=v0.173.0`, `v0.219.0..=v0.232.0`, and `v0.414.0..=v0.433.0` |
 | Consensus, beacon node, and validator client | 🔴 Planned | Foundations start at `v0.233.0`; complete implementation and assurance continue through `v0.406.0` |
@@ -140,7 +143,7 @@ for the remaining implementation sequence.
 | `sanitization` | no | Re-exports optional secret sanitization bridge APIs. |
 | `signer` | no | Future signer isolation boundary. |
 | `reth` | no | Future Reth integration boundary. |
-| `testkit` | no | Test fixtures, conformance helpers, and adversarial inputs. |
+| `testkit` | no | Corpus-revision metadata; repository test runners are separate development tools. |
 
 Default builds do not enable networking, signing, local key storage, Reth, P2P,
 REVM, or concrete production EVM execution. The optional `evm` and `evm-core`
@@ -148,9 +151,8 @@ features provide boundary and native core execution primitives only.
 
 Optional reviewed software Keccak backend:
 
-```toml
-[dependencies]
-eth = { version = "0.55.0", features = ["keccak-tiny"] }
+```sh
+cargo add eth --features keccak-tiny
 ```
 
 ```rust
@@ -162,16 +164,14 @@ assert_eq!(<[u8; 32]>::from(digest), KECCAK256_ABC);
 
 Optional reviewed secp256k1 recovery adapter:
 
-```toml
-[dependencies]
-eth = { version = "0.55.0", features = ["secp256k1-k256"] }
+```sh
+cargo add eth --features secp256k1-k256
 ```
 
 Optional bounded EVM gas-estimation boundary:
 
-```toml
-[dependencies]
-eth = { version = "0.55.0", features = ["evm"] }
+```sh
+cargo add eth --features evm
 ```
 
 ```rust
@@ -290,9 +290,8 @@ assert_eq!(report.policy.gas_cap(), Gas::new(50_000));
 
 Optional native EVM core domains:
 
-```toml
-[dependencies]
-eth = { version = "0.55.0", features = ["evm-core"] }
+```sh
+cargo add eth --features evm-core
 ```
 
 State access uses explicit host-state traits and an injected access tracker.
@@ -369,9 +368,12 @@ cannot abandon or forget it; atomic APIs return one must-use CALL-ready success
 or failure outcome. Internal drop or unwind consumes the complete child meter.
 `EXTCODECOPY` treats empty-copy offsets as irrelevant and zero-fills code
 offsets beyond the bounded EVM code domain without passing them to the host.
-KZG and BLS cryptographic precompiles expose exact fork, frame, output, and gas
-plans and return a backend-unavailable error until their first-party arithmetic
-releases are admitted. BLS MSM and pairing plans reject empty and partial item
+Charged EIP-2537 G1ADD is available at Prague address `0x0b`, with exact
+256-byte input, 375 gas and canonical atomic 128-byte output. Standalone G1/G2
+curve operations and Fp/Fp2 arithmetic are also available for public inputs only;
+curve validity is not subgroup validity and these APIs are variable-time.
+Other KZG/BLS precompiles expose exact fork, frame, output and gas plans but
+return a backend-unavailable error until their scheduled admission releases. BLS MSM and pairing plans reject empty and partial item
 lists and apply the official EIP-2537 gas schedule.
 
 ```rust
@@ -511,7 +513,7 @@ let limits = DecodeLimits {
     max_proof_nodes: 4,
     max_total_items: 32,
 };
-let tx = decode_dynamic_fee_transaction(&dynamic_fee_tx, limits)?;
+let tx = decode_dynamic_fee_transaction(&dynamic_fee_tx, limits).map_err(|error| error.message())?;
 
 assert_eq!(tx.chain_id.get(), 1);
 assert_eq!(tx.nonce, Nonce::new(2));
@@ -525,9 +527,9 @@ assert_eq!(tx.access_list.storage_key_count(), 0);
 assert_eq!(tx.y_parity, SignatureYParity::Odd);
 
 let mut encoded = [0_u8; 32];
-let written = encode_dynamic_fee_transaction(&tx, &mut encoded)?;
+let written = encode_dynamic_fee_transaction(&tx, &mut encoded).map_err(|error| error.message())?;
 assert_eq!(encoded.get(..written), Some(dynamic_fee_tx.as_slice()));
-# Ok::<(), Box<dyn std::error::Error>>(())
+# Ok::<(), &'static str>(())
 ```
 
 ## Replay Domain Checks
@@ -554,14 +556,14 @@ let limits = DecodeLimits {
     max_proof_nodes: 4,
     max_total_items: 32,
 };
-let tx = decode_dynamic_fee_transaction(&dynamic_fee_tx, limits)?;
+let tx = decode_dynamic_fee_transaction(&dynamic_fee_tx, limits).map_err(|error| error.message())?;
 
-require_dynamic_fee_replay_domain(ChainId::new(1), &tx)?;
+require_dynamic_fee_replay_domain(ChainId::new(1), &tx).map_err(|error| error.message())?;
 assert_eq!(
     require_dynamic_fee_replay_domain(ChainId::new(5), &tx),
     Err(VerifyError::WrongChain)
 );
-# Ok::<(), Box<dyn std::error::Error>>(())
+# Ok::<(), &'static str>(())
 ```
 
 ## Transaction Signing Hashes
@@ -602,7 +604,7 @@ let limits = DecodeLimits {
     max_proof_nodes: 4,
     max_total_items: 32,
 };
-let tx = decode_dynamic_fee_transaction(&dynamic_fee_tx, limits)?;
+let tx = decode_dynamic_fee_transaction(&dynamic_fee_tx, limits).map_err(|error| error.message())?;
 let mut scratch = [0_u8; 64];
 let signing_hash = dynamic_fee_transaction_signing_hash(
     &tx,
@@ -610,10 +612,10 @@ let signing_hash = dynamic_fee_transaction_signing_hash(
     PlatformKeccak {
         output: B256::from([0x44_u8; 32]),
     },
-)?;
+).map_err(|error| error.message())?;
 
 assert_eq!(signing_hash.to_b256(), B256::from([0x44_u8; 32]));
-# Ok::<(), Box<dyn std::error::Error>>(())
+# Ok::<(), &'static str>(())
 ```
 
 The example hasher is illustrative only. Production hashers must compute
@@ -665,10 +667,10 @@ let authorization_hash = set_code_authorization_signing_hash(
     PlatformKeccak {
         output: B256::from([0x55_u8; 32]),
     },
-)?;
+).map_err(|error| error.message())?;
 
 assert_eq!(authorization_hash.to_b256(), B256::from([0x55_u8; 32]));
-# Ok::<(), Box<dyn std::error::Error>>(())
+# Ok::<(), &'static str>(())
 ```
 
 ## EIP-712 Typed Data
@@ -743,7 +745,7 @@ let _digest = eip712_typed_data_signing_digest::<ExampleKeccak>(
 #     fn update(&mut self, input: &[u8]) { let _ = input; }
 #     fn finalize(self) -> B256 { B256::from([0x33_u8; 32]) }
 # }
-# Ok::<(), Box<dyn std::error::Error>>(())
+# Ok::<(), eth::verify::Eip712EncodeError>(())
 ```
 
 JSON-RPC typed-data parsing is available only through the opt-in
@@ -751,7 +753,12 @@ JSON-RPC typed-data parsing is available only through the opt-in
 object keys, shares the validated schema and type-hash cache with the borrowed
 encoder, and still relies on a caller-provided Keccak backend.
 
-```rust,ignore
+```sh
+cargo add eth --features eip712-json,keccak-tiny
+```
+
+```rust
+use eth::hash::TinyKeccak256;
 use eth::verify::{Eip712JsonLimits, eip712_json_typed_data_signing_digest};
 
 let json = r#"{
@@ -761,12 +768,12 @@ let json = r#"{
   "message": {"owner": "0x1111111111111111111111111111111111111111"}
 }"#;
 let mut scratch = [0_u8; 512];
-let _digest = eip712_json_typed_data_signing_digest::<ExampleKeccak>(
+let _digest = eip712_json_typed_data_signing_digest::<TinyKeccak256>(
     json,
     Eip712JsonLimits::DEFAULT,
     &mut scratch,
 )?;
-# Ok::<(), Box<dyn std::error::Error>>(())
+# Ok::<(), eth::verify::Eip712JsonError>(())
 ```
 
 ## Sender Recovery
@@ -1033,16 +1040,16 @@ let raw = [
     0x43, 0x03,
 ];
 
-let withdrawals = decode_withdrawals(&raw, limits)?;
+let withdrawals = decode_withdrawals(&raw, limits).map_err(|error| error.message())?;
 let mut entries = withdrawals.entries();
-let first = entries.next().transpose()?.ok_or("missing withdrawal")?;
+let first = entries.next().transpose().map_err(|error| error.message())?.ok_or("missing withdrawal")?;
 
 assert_eq!(withdrawals.len(), 1);
 assert_eq!(first.index.get(), 1);
 assert_eq!(first.validator_index.get(), 2);
 assert_eq!(first.amount.get(), 3);
 assert!(entries.next().is_none());
-# Ok::<(), Box<dyn std::error::Error>>(())
+# Ok::<(), &'static str>(())
 ```
 
 ## MPT Nodes
@@ -1066,11 +1073,11 @@ let limits = DecodeLimits {
 };
 let raw_leaf = [0xc5, 0x20, 0x83, b'd', b'o', b'g'];
 
-let node = decode_mpt_node(&raw_leaf, limits)?;
+let node = decode_mpt_node(&raw_leaf, limits).map_err(|error| error.message())?;
 
 if let MptNode::Leaf(leaf) = node {
     assert!(leaf.path.is_leaf());
-    assert_eq!(leaf.path.nibble_count()?, 0);
+    assert_eq!(leaf.path.nibble_count().map_err(|error| error.message())?, 0);
     assert_eq!(leaf.value, b"dog");
 } else {
     assert!(false);
@@ -1082,7 +1089,7 @@ assert_eq!(
     decode_mpt_node(&branch, limits),
     Err(MptNodeDecodeError::DegenerateBranch { occupied: 0 }),
 );
-# Ok::<(), Box<dyn std::error::Error>>(())
+# Ok::<(), &'static str>(())
 ```
 
 Transaction and receipt inclusion proofs can be checked against trusted trie
@@ -1223,7 +1230,7 @@ word; reserved `ChainId(0)` maps to `None`.
 The main facade stays small by default. Applications that handle local secret
 material can opt into the sanitization bridge:
 
-```rust,ignore
+```rust
 use eth::sanitization::{SecretBytes32, SecureSanitize};
 
 let mut key = SecretBytes32::from_array([0x42_u8; 32]);
@@ -1233,22 +1240,19 @@ assert!(key.constant_time_eq(&[0_u8; 32]));
 
 For derive macros, depend on the support crate directly:
 
-```toml
-[dependencies]
-eth-valkyoth-sanitization = { version = "0.8", features = ["derive"] }
+```sh
+cargo add eth-valkyoth-sanitization --features derive
 ```
 
-The `0.8` bridge uses `sanitization 2.0`: ordinary buffers are cleared through
+The bridge uses the `sanitization 2.1` API: ordinary buffers are cleared through
 the canonical `wipe` module, generated drop paths require
 `DropSafeSanitize + Unpin`, and native hardening must be confirmed from each
 protected container's runtime `ProtectionReport`.
 
 Public RLP encode/decode derives live in `eth-valkyoth-derive`:
 
-```toml
-[dependencies]
-eth-valkyoth-derive = "0.18"
-eth-valkyoth-codec = "0.21"
+```sh
+cargo add eth-valkyoth-derive eth-valkyoth-codec
 ```
 
 The derive surface is intentionally conservative. It supports reviewed structs
@@ -1272,7 +1276,7 @@ friendly, and independently testable.
 | `eth-valkyoth-sanitization` | no | Optional bridge to the `sanitization` crate for secret-bearing Ethereum data. |
 | `eth-valkyoth-derive` | no | Optional sanitization and RLP derive macros. |
 | `eth-valkyoth-evm` | no | Explicit no_std EVM execution boundary; no backend admitted yet. |
-| `eth-valkyoth-evm-core` | no | Dependency-free native EVM core domains plus bounded opcode execution, exact-input paid native precompiles, fail-closed call/create planning, and canonical EIP-2537 BLS wire/frame parsing. |
+| `eth-valkyoth-evm-core` | no | Dependency-free native EVM core domains plus bounded opcode execution, exact-input paid native precompiles, fail-closed call/create planning, canonical EIP-2537 wire parsing, public-input BLS field/group arithmetic and paid G1ADD. |
 | `eth-valkyoth-rpc` | no | Future explicit RPC trust-policy boundary. |
 | `eth-valkyoth-signer` | no | Future signer isolation boundary. |
 | `eth-valkyoth-reth` | no | Future Reth integration boundary. |
@@ -1299,7 +1303,7 @@ completed on the updated dependencies and any environment limitations.
 scripts/checks.sh
 scripts/check_latest_crates.py
 scripts/check_latest_tools.sh
-scripts/release_0_59_0_gate.sh --implementation
+scripts/release_0_60_0_gate.sh --implementation
 ```
 
 After clean pentest and green GitHub checks, the same gate without arguments

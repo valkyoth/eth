@@ -1,19 +1,16 @@
 # Current Status
 
-Release snapshot: `v0.55.0` tagged and published after its pentest, clean
-retest, GitHub CI, and CodeQL gates passed.
+Latest published checkpoint: `v0.55.0`. Source candidate: `v0.60.0`,
+the next cumulative public release; implementation checks passed and cumulative
+pentest is pending. The tables describe this candidate, not a
+production-ready node or a promise that the package is already on crates.io.
 
-Source candidate: `v0.59.0` adds BLS12-381 Fp2 arithmetic, conjugation,
-inversion and checked roots; pentest clean, GitHub/tag approval pending.
-Paid G1ADD is tagged as v0.58.0.
-The tables retain the
-published snapshot, not source-only capabilities. Other BLS precompiles,
-subgroup and signature verification remain unavailable.
-See the [Fp2 scope](bls12-fp2-arithmetic.md) and
+The candidate combines Fp/Fp2 and G1/G2 public-input arithmetic with charged
+G1ADD. Other BLS precompiles, subgroup checks and signature verification remain
+unavailable. See [G2 scope](bls12-g2-arithmetic.md) and the
 [completion map for every partial README row](partial-capability-completion.md).
-Portable checks run before review; tag admission validates report readiness.
-The host-unavailable client differential run is recorded as missing evidence,
-not a passed test or an additional tag blocker for this arithmetic-only milestone.
+Normal implementation checks do not require a fabricated final pentest report;
+tag admission validates the real report after maintainer review.
 
 Every following roadmap version remains a pentested signed GitHub tag. The next
 cumulative crates.io publication is `v0.60.0`; intermediate minor and patch
@@ -75,7 +72,7 @@ Legend:
 | ModExp | 🟢 Available | First-party EIP-198/EIP-2565 execution through Prague with 256-bit length admission, virtual padding, and caller-owned gas-bounded workspace; Osaka changes are assigned to `v0.155.0` |
 | BN254 | 🟢 Available | Add, multiplication, subgroup checks, Miller loop, final exponentiation, and pairing result admission |
 | BLAKE2F | 🟢 Available | Exact EIP-152 frame validation and execution |
-| BLS12-381 | 🟡 Partial | Exact gas/frame planning and canonical Fp, Fr, Fp2, scalar, G1/G2 wire parsing; curve arithmetic and precompile execution remain fail closed |
+| BLS12-381 | 🟡 Partial | Canonical wire parsing, Fp/Fp2 and G1/G2 public-input arithmetic, and charged G1ADD; other BLS execution remains unavailable |
 | KZG point evaluation | 🟡 Partial | Exact frame, output, and gas planning; trusted setup and cryptographic verification remain fail closed |
 | Full state transition | 🔴 Planned | Transaction execution, state commits, logs, refunds, roots, and complete fork conformance remain assigned later releases |
 

@@ -1,7 +1,6 @@
 # BLS12-381 Quadratic Extension Field
 
-Source milestone: v0.59.0, internal-only; pentest clean, GitHub/tag approval
-pending. The next public
+Source milestone: v0.59.0, signed internal tag after clean pentest and GitHub. The next public
 checkpoint is v0.60.0. This document does not claim G2 or pairing execution.
 
 ## Contract
@@ -83,7 +82,7 @@ bytes and reduced full-width coefficients with the same independent oracle.
 The fixed-work host smoke measures 1,000 inverse/root pairs, not portable gas
 calibration, constant-time evidence, or an external client run.
 
-G2 point formulas are v0.60.0, paid G2ADD is v0.61.0, subgroup validation is
+G2 point formulas are implemented in the [v0.60.0 candidate](bls12-g2-arithmetic.md), paid G2ADD is v0.61.0, subgroup validation is
 v0.62.0, and later MSM/map/pairing admission runs through v0.70.0. No registry
 entry changes here; existing paid G1ADD regression tests remain mandatory.
 
@@ -130,4 +129,4 @@ non-forgeable gas/work authorization before any inversion or square-root
 work and collect cross-client G2 vectors. v0.60.0 remains standalone public
 point arithmetic, not remote execution admission. Cross-client G2 execution,
 exhaustive fuzzing and formal proof are not claimed for this field-only slice.
-GitHub checks and explicit maintainer tag approval remain pending.
+GitHub passed and the maintainer authorized the signed v0.59.0 tag.

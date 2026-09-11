@@ -25,18 +25,31 @@
 
 # eth-valkyoth-testkit
 
-Support crate for `eth`: testing helpers and future Ethereum conformance
-fixtures.
+Corpus-revision metadata for
+[`eth`](https://crates.io/crates/eth), available through an optional feature.
 
-Most users should depend on the facade crate instead:
-
-```toml
-[dependencies]
-eth = "0.37"
+```sh
+cargo add eth --features testkit
 ```
 
-Crates.io: <https://crates.io/crates/eth>
+## Example
 
-This package is published separately so the `eth` workspace can keep small,
-auditable crate boundaries. Treat it as a lower-level building block unless the
-`eth` documentation explicitly says otherwise.
+```rust
+use eth::testkit::CorpusRevision;
+
+let corpus = CorpusRevision::new("application-fixtures", "reviewed-revision");
+assert_eq!(corpus.name, "application-fixtures");
+assert_eq!(corpus.revision, "reviewed-revision");
+```
+
+This package records names and revisions; it does not download, authenticate
+or execute a corpus. The repository's fixture importers, independent oracles,
+fuzz targets and client differential harnesses are development tools, not
+features of this marker API.
+
+See [fixture testing](https://github.com/valkyoth/eth/blob/main/docs/execution-fixture-harness.md)
+and [differential testing](https://github.com/valkyoth/eth/blob/main/docs/differential-test-harness.md).
+
+## License
+
+MIT OR Apache-2.0, at your option.

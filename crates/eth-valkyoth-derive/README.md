@@ -25,58 +25,57 @@
 
 # eth-valkyoth-derive
 
-Optional derive macros for `eth` support crates.
+Opt-in RLP and sanitization derives for the
+[`eth`](https://crates.io/crates/eth) workspace. Procedural macros run on the
+build host; generated runtime code can remain `no_std`. They are not default
+facade dependencies.
 
-Most users should depend on the facade crate instead:
+## RLP Example
 
-```toml
-[dependencies]
-eth = "0.52.5"
+The generated default path names the codec crate directly:
+
+```sh
+cargo add eth-valkyoth-derive eth-valkyoth-codec
 ```
-
-Crates.io: <https://crates.io/crates/eth>
-
-This package is only for users who explicitly opt into derive ergonomics. It
-provides sanitization derives and reviewed public RLP derives.
-
-```toml
-[dependencies]
-eth-valkyoth-sanitization = { version = "0.8", features = ["derive"] }
-```
-
-The `0.18` series aligns sanitization derives with `sanitization 2.0`.
-`SecureSanitize` also implements the field-wise `DropSafeSanitize` contract,
-and `SecureSanitizeOnDrop` requires `DropSafeSanitize + Unpin`.
-
-The crate also exports `RlpEncode` and `RlpDecode` derives for reviewed
-simple structs. Generated decoders require `DecodeLimits`, encode structs as
-RLP lists in Rust declaration order, reject generics/enums/unions, and require
-skipped fields to use `#[eth_rlp(skip, default, reason = "...")]`.
-
-Supported field attribute:
 
 ```rust
-#[eth_sanitization(skip, reason = "non-secret label")]
+use eth_valkyoth_codec::{DecodeLimits, RlpDecode, RlpEncode};
+
+#[derive(Debug, PartialEq, eth_valkyoth_derive::RlpEncode, eth_valkyoth_derive::RlpDecode)]
+struct Counter {
+    nonce: u64,
+}
+
+let value = Counter { nonce: 1 };
+let mut output = [0_u8; 8];
+let written = value.encode_rlp(&mut output)?;
+let limits = DecodeLimits::reviewed_policy(32, 4, 4, 32, 4, 4);
+assert_eq!(Counter::decode_rlp(&output[..written], limits)?, value);
+# Ok::<(), eth_valkyoth_codec::RlpDeriveError>(())
 ```
 
-RLP skipped-field attribute:
+RLP derives encode simple structs as lists in declaration order and reject
+generics, enums and unions. Skipped fields require
+`#[eth_rlp(skip, default, reason = "derived cache")]`. A custom codec path uses
+`#[eth_rlp(crate = "::my_codec_path")]`. Discard output on any error, including
+failures after earlier fields were written.
 
-```rust
-#[eth_rlp(skip, default, reason = "derived cache")]
+## Sanitization
+
+```sh
+cargo add eth-valkyoth-sanitization --features derive
 ```
 
-Supported container attribute:
+`SecureSanitize` implements the field-wise `DropSafeSanitize` contract;
+`SecureSanitizeOnDrop` requires `DropSafeSanitize + Unpin`. Enum derives are
+rejected because inactive variant storage may retain secrets. Structs still
+require ownership/copy/logging review.
 
-```rust
-#[eth_sanitization(crate = "::my_sanitization_path")]
-```
+A skipped nonsecret field needs
+`#[eth_sanitization(skip, reason = "non-secret label")]`; a custom bridge path
+uses `#[eth_sanitization(crate = "::my_sanitization_path")]`.
+See the [sanitization bridge](https://docs.rs/eth-valkyoth-sanitization).
 
-RLP container attribute:
+## License
 
-```rust
-#[eth_rlp(crate = "::my_codec_path")]
-```
-
-Enum derives are rejected because inactive variant backing bytes may retain
-secret material after variant changes. Use a struct wrapper for secret-bearing
-state.
+MIT OR Apache-2.0, at your option.

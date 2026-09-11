@@ -25,20 +25,33 @@
 
 # eth-valkyoth-rpc
 
-Support crate for `eth`: future RPC trust-policy boundary.
+Explicit RPC trust-policy names for
+[`eth`](https://crates.io/crates/eth), isolated behind an optional feature.
 
-Most users should depend on the facade crate instead:
-
-```toml
-[dependencies]
-eth = "0.37"
+```sh
+cargo add eth --features rpc
 ```
 
-Crates.io: <https://crates.io/crates/eth>
+## Example
 
-This package is published separately so the `eth` workspace can keep small,
-auditable crate boundaries. Treat it as a lower-level building block unless the
-`eth` documentation explicitly says otherwise.
+```rust
+use eth::rpc::RpcTrustModel;
 
-The trusted RPC model requires an explicit acknowledgment string at
-construction time so single-provider trust decisions are visible in review.
+let policy = RpcTrustModel::trusted_with_explicit_acknowledgment(
+    "This application explicitly trusts its configured endpoint",
+);
+assert!(matches!(policy, RpcTrustModel::Trusted { .. }));
+```
+
+This package currently contains policy types only. Selecting `Verified` does
+not fetch or verify proofs, and selecting `Quorum` does not query independent
+providers. There is no HTTP/WebSocket client, endpoint validation, retry engine
+or network activity. Applications must implement and enforce their chosen
+policy; a value alone is not evidence.
+
+Full provider and RPC behavior has explicit versions in the
+[release plan](https://github.com/valkyoth/eth/blob/main/docs/RELEASE_PLAN.md).
+
+## License
+
+MIT OR Apache-2.0, at your option.

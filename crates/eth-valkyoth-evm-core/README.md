@@ -25,77 +25,68 @@
 
 # eth-valkyoth-evm-core
 
-`eth-valkyoth-evm-core` is an internal support crate for
-[`eth`](https://crates.io/crates/eth). Its default profile provides
-dependency-free, `no_std` EVM core domains while the first-party audited EVM
-engine is built in small release passes. The optional allocator-backed node
-tracker uses the project's audited sanitization bridge to erase retained
-access metadata.
+First-party `no_std` EVM domains and bounded execution components for
+[`eth`](https://crates.io/crates/eth). The default profile has no runtime
+dependencies or allocator requirement. Optional node tracking uses the
+sanitization bridge to erase retained access metadata.
 
-Most users should depend on `eth` and enable the optional `evm-core` feature:
-
-```toml
-[dependencies]
-eth = { version = "0.55.0", features = ["evm-core"] }
+```sh
+cargo add eth --features evm-core
 ```
 
-This crate executes only the audited bootstrap opcode subset. It exposes
-bounded types for EVM words, stacks, memory, program counters, opcode
-classification, fork identifiers, deterministic core errors, explicit
-host-state traits, injectable warm/cold access tracking, historical fork
-identifiers, opcode-introduction metadata, and a no-alloc interpreter for stack
-arithmetic, bitwise/comparison, stack manipulation, dynamic jumps,
-return/revert shells, state reads, `EXTCODECOPY`, and a fail-closed `SSTORE`
-shell. It also exposes call/create planning domains for frame depth, static
-write protection, return-data ranges, journal checkpoint policy, and a
-fork-aware precompile registry with exact-input gas quoting and one-shot paid
-execution capabilities. Bytecode input is capped at the EIP-170 code-size
-ceiling; precompile execution is bounded by protocol gas and output admission
-instead of a consensus-invalid global calldata ceiling. Valid jump destinations
-are precomputed once per run with a fixed-size no-alloc bitset. Truncated
-`PUSH1..=PUSH32` immediates
-follow Ethereum consensus semantics: missing trailing bytes are read as zero,
-the program counter advances by the full declared width, and jump analysis
-uses the same instruction boundary.
-The Frontier identity, SHA-256, RIPEMD-160, gas-bounded Byzantium ModExp,
-BN254 add/mul, BN254 pairing frames, and Istanbul BLAKE2F execute through
-first-party dependency-free implementations. ECRECOVER executes through
-explicit caller-provided secp256k1 and Keccak backend traits. Published KZG/BLS
-cryptographic execution remains fail closed, while their descriptors carry
-exact EIP-4844/EIP-2537 input, output, and gas plans. Canonical EIP-2537 Fp,
-Fr, Fp2, unrestricted MSM scalar, G1/G2 coordinate, infinity, and complete
-precompile-frame parsing is available without allocation. Parsed point values
-are wire-valid only; standalone validated G1 domains are separate types.
+## Example
 
-The tagged `v0.58.0` source adds sealed `EvmBls12G1Add` execution at
-Prague address `0x0b`, using the tagged Fp/G1 arithmetic. Exactly 256 input
-bytes, 375 gas and canonical atomic 128-byte output are required. Public
-data only, no subgroup rejection or constant-time claim. Other BLS/KZG
-execution remains unavailable. See the
-[charged G1 contract](https://github.com/valkyoth/eth/blob/main/docs/bls12-g1-addition.md).
-
-The internal `v0.59.0` candidate adds `EvmBls12381Fp2` arithmetic over
-`v^2=-1`, conjugation, inversion and checked square roots, preserving canonical
-`c0 || c1` wire order. These fixed-size, variable-time APIs are public-input
-only. No G2/subgroup/MSM/map/pairing capability is enabled; pentest is clean,
-with GitHub/tag approval pending.
-See the [Fp2 contract](https://github.com/valkyoth/eth/blob/main/docs/bls12-fp2-arithmetic.md).
-These additions are not in the published `eth 0.55.0` dependency examples above.
+Execute an exact-input, gas-authorized identity precompile:
 
 ```rust
-use eth::evm_core::{EVM_BLS12381_G1_POINT_BYTES, EvmBls12381G1Point};
+use eth::evm_core::{
+    EvmFork, EvmGas, EvmGasMeter, EvmIdentity, EvmPrecompileKind,
+    EvmPrecompileRegistry, EvmPrecompileStatus,
+};
 
-let encoded = [0_u8; EVM_BLS12381_G1_POINT_BYTES];
-let point = EvmBls12381G1Point::try_from_be_bytes(&encoded)?;
-assert!(point.is_infinity());
+let descriptor = EvmPrecompileRegistry::try_new(EvmFork::CANCUN)?
+    .descriptor(EvmPrecompileKind::Identity)?;
+let quote = descriptor.quote::<EvmIdentity>(b"eth")?;
+let mut output = [0_u8; 3];
+let mut gas = EvmGasMeter::try_new(EvmGas::new(18))?;
+let outcome = quote.authorize_and_execute_identity(&mut gas, &mut output)?;
+assert_eq!(outcome.status(), EvmPrecompileStatus::Success);
+assert_eq!(&output, b"eth");
 # Ok::<(), eth::error::EvmCoreError>(())
 ```
 
-The complete wire contract is documented in
-[`docs/bls12-381-wire-encodings.md`](https://github.com/valkyoth/eth/blob/main/docs/bls12-381-wire-encodings.md).
-The PUSH-at-EOF consensus rule and its independent conformance sources are
-documented in
-[`docs/truncated-push-semantics.md`](https://github.com/valkyoth/eth/blob/main/docs/truncated-push-semantics.md).
+## BLS12-381 Arithmetic
+
+Fp/Fp2 field arithmetic and validated G1/G2 affine/projective point operations
+are available. Wire-only `G1Point`/`G2Point` types enforce canonical encoding;
+the separate `G1Affine`/`G2Affine` types also enforce curve membership.
+None establishes prime-subgroup membership.
+
+```rust
+use eth::evm_core::{EvmBls12381Fp as Fp, EvmBls12381Fp2 as Fp2, EvmBls12381G2Affine as G2};
+
+let x = Fp2::from_u64(2);
+let y = x.square().mul_mod(x)
+    .add_mod(Fp2::from_coefficients(Fp::from_u64(4), Fp::from_u64(4)))
+    .sqrt().ok_or(eth::error::EvmCoreError::PrecompilePointNotOnCurve)?;
+let point = G2::try_from_coordinates(x, y)?;
+assert_eq!(point.add_point(point), point.double());
+assert!(point.add_point(point.negate()).is_infinity());
+# Ok::<(), eth::error::EvmCoreError>(())
+```
+
+These fixed-size APIs are variable-time and **public-input only**. They must
+not process signing secrets. Standalone arithmetic is not paid execution
+authority. Charged G1ADD is available at Prague address `0x0b` with exact
+256-byte input, 375 gas and atomic 128-byte output. G2ADD admission is assigned
+to v0.61.0; subgroup, MSM, mapping and pairing follow in v0.62.0 through v0.70.0.
+KZG execution remains unavailable.
+
+See [G2 arithmetic](https://github.com/valkyoth/eth/blob/main/docs/bls12-g2-arithmetic.md),
+[charged G1](https://github.com/valkyoth/eth/blob/main/docs/bls12-g1-addition.md)
+and the [fork/opcode matrix](https://github.com/valkyoth/eth/blob/main/docs/evm-fork-matrix.md).
+The interpreter is still a bounded subset, not a complete state-transition
+engine: call/create planning and recognized unsupported operations fail closed.
 
 ## Security posture
 
@@ -139,7 +130,7 @@ documented in
   point mapping, and the projective post-loop line carrier, then writes
   canonical EIP-197 zero/one output words. BLAKE2F executes EIP-152 exact-length frames with
   final-flag validation and round-count gas.
-  Source v0.58.0 also admits charged G1 addition. Other KZG/BLS precompiles
+  Charged EIP-2537 G1 addition is admitted. Other KZG/BLS precompiles
   remain bounded plans and fail closed. EIP-2537 fixed frames,
   non-empty MSM/pairing lists, output lengths, discount gas, and pairing gas
   are enforced at planning time.
@@ -164,3 +155,7 @@ documented in
 - Unsupported opcodes and unsupported forks are rejected with named errors.
 - No nested call/create execution, log, remaining cryptographic precompile,
   refund, or committed storage-write semantics are claimed yet.
+
+## License
+
+MIT OR Apache-2.0, at your option.

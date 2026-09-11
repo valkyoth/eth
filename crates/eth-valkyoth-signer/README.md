@@ -25,18 +25,35 @@
 
 # eth-valkyoth-signer
 
-Support crate for `eth`: future signer isolation boundary.
+Optional signer-identity boundary for
+[`eth`](https://crates.io/crates/eth). Default facade builds do not include it.
 
-Most users should depend on the facade crate instead:
-
-```toml
-[dependencies]
-eth = "0.52.4"
+```sh
+cargo add eth --features signer
 ```
 
-Crates.io: <https://crates.io/crates/eth>
+## Example
 
-This package is published separately so the `eth` workspace can keep small,
-auditable crate boundaries. The `0.7.1` release aligns the primitive dependency
-range for `eth` `0.26.0`. Treat it as a lower-level building block unless the
-`eth` documentation explicitly says otherwise.
+Expose a public address without adding private-key storage:
+
+```rust
+use eth::primitives::Address;
+use eth::signer::SignerIdentity;
+
+struct PublicIdentity(Address);
+impl SignerIdentity for PublicIdentity {
+    fn address(&self) -> Address { self.0 }
+}
+let identity = PublicIdentity(Address::from_bytes([0_u8; 20]));
+assert_eq!(identity.address(), Address::from_bytes([0_u8; 20]));
+```
+
+`SignerIdentity` reports an address; it does not prove control of it. This
+package does not yet sign transactions, store keys, operate a wallet, contact a
+hardware signer, or sanitize secrets automatically. Signature validation and
+recovery are separate verification APIs. Private-key ownership and signing are
+assigned to later [releases](https://github.com/valkyoth/eth/blob/main/docs/RELEASE_PLAN.md).
+
+## License
+
+MIT OR Apache-2.0, at your option.

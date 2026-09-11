@@ -25,86 +25,59 @@
 
 # eth-valkyoth-protocol
 
-Support crate for `eth`: fork-aware `no_std` Ethereum protocol validation
-state and transaction envelope shell classification.
+Borrowed Ethereum transaction, header, receipt and withdrawal models, canonical
+encoding, signing preimages and explicit fork contexts for
+[`eth`](https://crates.io/crates/eth). This is a `no_std` protocol library,
+not a node or a complete state-transition validator.
 
-Most users should depend on the facade crate instead:
-
-```toml
-[dependencies]
-eth = "0.52.4"
+```sh
+cargo add eth
 ```
 
-Crates.io: <https://crates.io/crates/eth>
+## Example
 
-This package is published separately so the `eth` workspace can keep small,
-auditable crate boundaries. Treat it as a lower-level building block unless the
-`eth` documentation explicitly says otherwise.
+Classify a typed envelope under a reviewed byte and item policy:
 
-The `0.26.0` release adds shared-session decoding for envelopes and legacy,
-EIP-2930, EIP-1559, EIP-4844, and EIP-7702 transactions. Nested access lists,
-storage keys, blob hashes, and authorization tuples debit the same non-resetting
-work ledger.
+```rust
+use eth::codec::DecodeLimits;
+use eth::protocol::{TransactionEnvelope, decode_transaction_envelope};
 
-The `0.25.0` support-crate release, shipped with `eth` `0.30.0`, adds
-syntactic EIP-4895 withdrawal-list decoding. It returns
-`UnvalidatedWithdrawals`, models global withdrawal indexes, validator indexes,
-recipient addresses, and nonzero Gwei amounts explicitly, and keeps entries
-borrowed without claiming consensus-layer dequeue correctness, header
-`withdrawals_root` matching, or state-balance application.
+let limits = DecodeLimits::reviewed_policy(32, 4, 4, 32, 4, 4);
+let envelope = decode_transaction_envelope(&[0x02, 0xc0], limits)?;
+assert!(matches!(envelope, TransactionEnvelope::Typed(_)));
+# Ok::<(), eth::error::TransactionEnvelopeError>(())
+```
 
-The previous `0.24.0` support-crate release, shipped with `eth` `0.29.0`, adds
-syntactic legacy and EIP-2718 typed receipt decoding. It returns
-`UnvalidatedReceipt`, models status-or-state-root explicitly, validates the
-256-byte logs bloom and log/topic shape, and keeps logs borrowed without
-claiming receipt-trie or block-root validity.
+Classification of this empty type-2 payload does not make it a valid EIP-1559
+transaction. Use the specific decoder and the relevant validity checks next.
 
-The previous `0.23.0` support-crate release, shipped with `eth` `0.28.0`, adds
-syntactic execution block header decoding for legacy, London, Shanghai,
-Cancun, and Prague field sets. It returns `UnvalidatedBlockHeader`, hashes the
-exact canonical header RLP through the caller-provided Keccak boundary, and
-returns a distinct `BlockHash` domain newtype instead of raw `B256`.
+## Current Scope
 
-The previous `0.22.1` support-crate release, shipped with `eth` `0.26.0`,
-aligns the published codec and primitive dependency ranges for the public RLP
-derive surface.
+- Legacy, EIP-2930, EIP-1559, EIP-4844 and EIP-7702 decode/encode and signing preimages.
+- Shared-session envelope and transaction decoding, including nested access lists,
+  storage keys, blob hashes and authorization tuples.
+- Syntactic legacy through Prague headers, receipts and EIP-4895 withdrawals.
+- Caller-reviewed chain/fork tables and explicit validation-state transitions.
+- EIP-7702 context checks, including nonempty authorizations, fee order and
+  caller-supplied gas/account policy; invalid individual authorizations are skipped.
 
-The previous `0.22.0` support-crate release added the
-EIP-7702 set-code transaction validity gate. It checks Prague/Pectra fork
-context, non-empty authorization lists, fee order, caller-computed gas policy,
-and caller-provided authority account state without bundling a node or RPC
-dependency. Per-authorization failures are counted as skipped tuples instead of
-rejecting the whole transaction.
+## Security Contract
 
-The previous `0.21.0` release added no-allocation EIP-7702 set-code
-transaction and authorization signing-preimage helpers. The transaction
-preimage uses type byte `0x04`; authorization tuple preimages use the EIP-7702
-authorization magic byte `0x05` over `rlp([chain_id, address, nonce])`.
+Untrusted traversal must use `*_in_session` APIs with the same cumulative
+ledger. An `Unvalidated*` result proves syntax, not signatures, sender identity,
+state validity, fee/blob-gas policy or KZG correctness. Blob transactions still
+need fork-aware nonempty/hash-version checks. Header hashes do not authenticate
+the header, receipt syntax does not prove a receipt root, and withdrawal syntax
+does not prove consensus dequeue correctness or apply balances.
 
-The previous `0.20.0` release added unvalidated EIP-7702 set-code transaction
-decoding and encoding for type byte `0x04`. It decodes the required
-destination address plus authorization tuples shaped as
-`[chain_id, address, nonce, y_parity, r, s]`, then re-encodes the borrowed
-model without allocation.
+Use `ChainSpec::try_new` for dynamic or generated fork tables;
+`ChainSpec::new` is only for hand-audited static tables. Caller context must
+come from an independently trusted chain view. Recovery and proof checking live
+in the verification layer; transaction execution lives in the EVM layers.
 
-Earlier releases added proof-gated transaction typestate transitions for
-decoded, canonical, fork-validated, and sender-recovered state tokens. The
-proof token fields remain private, so external callers cannot fabricate
-validation state before the real validators land. Successful promotion consumes
-the previous state token; failed promotion returns the original token with the
-validation error.
+See the [specification matrix](https://github.com/valkyoth/eth/blob/main/docs/SPEC_MATRIX.md)
+for exact implemented boundaries and versioned completion work.
 
-The crate also provides caller-reviewed `ChainSpec`, `ForkSpec`, `Hardfork`,
-and `ValidationContext` types for explicit fork activation context. Use
-`ChainSpec::new` only for hand-audited static tables; use `ChainSpec::try_new`
-for dynamic, generated, or merged fork entries. Selection APIs reject
-wrong-chain entries, duplicate hardforks, and non-monotonic hardfork or
-activation ordering before returning a fork context.
+## License
 
-This crate retains the earlier EIP-2718 typed envelope classification and
-unvalidated transaction models for legacy, EIP-2930 access-list, EIP-1559
-dynamic-fee, EIP-4844 blob, and EIP-7702 set-code transactions. It does not
-validate signatures, recover senders, enforce transaction chain binding,
-account for gas or blob gas, verify KZG commitments/proofs, validate set-code
-authorization signatures itself, apply duplicate access-list policy, or execute
-transactions.
+MIT OR Apache-2.0, at your option.
