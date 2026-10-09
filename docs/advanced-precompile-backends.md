@@ -2,7 +2,7 @@
 
 Status: `v0.52.0` fixes the EIP-4844 KZG and EIP-2537 BLS12-381 planning
 contracts and assigns every remaining execution path to a concrete first-party
-release.
+release. v0.58.0 supplies paid G1ADD; the v0.61.0 candidate adds paid G2ADD.
 
 This document is the release-blocking admission policy for cryptographic
 precompiles at addresses `0x0a..=0x11`. These precompiles process public EVM
@@ -18,9 +18,10 @@ review; it cannot become the sole implementation behind a native support
 claim.
 
 `v0.52.0` implements frame and gas planning, not curve or proof execution.
-Every descriptor continues to report `RequiresCryptoBackend` and execution
-must fail closed until its assigned release passes vectors, fuzzing, review,
-and pentest.
+Only the admitted G1ADD and candidate G2ADD descriptors select first-party
+execution. The remaining advanced descriptors report `RequiresCryptoBackend`
+and must fail closed until their assigned release passes vectors, fuzzing,
+review and pentest. See [G2 execution](bls12-g2-addition.md) for candidate scope.
 
 | Domain | Current planning contract | First-party execution releases |
 | --- | --- | --- |

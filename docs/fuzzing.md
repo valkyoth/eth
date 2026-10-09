@@ -1,5 +1,10 @@
 # Fuzzing
 
+The v0.61.0 `bls12381_g2_add` target compares paid G2ADD with an independent
+BigUint affine oracle, including generated finite points, invalid frames,
+gas/output limits, atomic failures and suffix preservation. Run
+`cargo +nightly fuzz run bls12381_g2_add -- -max_total_time=30 -max_len=513`.
+
 Status: `v0.37.4` RLP, transaction envelope, legacy transaction decode,
 EIP-2930 access-list transaction decode, EIP-1559 dynamic-fee transaction
 decode, EIP-4844 blob transaction decode, EIP-7702 set-code transaction decode,

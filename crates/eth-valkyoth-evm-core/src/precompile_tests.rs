@@ -423,6 +423,8 @@ fn advanced_precompile_shapes_match_eip_frames() -> Result<(), EvmCoreError> {
             descriptor.implementation,
             if kind == EvmPrecompileKind::Bls12G1Add {
                 EvmPrecompileImplementation::NativeBls12G1Add
+            } else if kind == EvmPrecompileKind::Bls12G2Add {
+                EvmPrecompileImplementation::NativeBls12G2Add
             } else {
                 EvmPrecompileImplementation::RequiresCryptoBackend
             }

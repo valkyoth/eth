@@ -221,7 +221,6 @@ def container_command(
     command = [
         "podman",
         "create",
-        "--rm",
         "--pull=never",
         "--name",
         name,

@@ -1,8 +1,8 @@
 # Differential Test Report
 
 Status: historical `v0.55.0` client implementation evidence. This is not a
-fresh v0.60.0 client run. Current G2 oracle/vector evidence is recorded in
-[the G2 scope](bls12-g2-arithmetic.md).
+fresh v0.60.0 client run. Fresh v0.61.0 G2 client evidence is recorded in
+[G2 execution](bls12-g2-addition.md); the older results below remain historical.
 
 ## Claimed Reference Paths
 

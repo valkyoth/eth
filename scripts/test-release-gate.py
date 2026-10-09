@@ -16,6 +16,7 @@ SCRIPTS = Path(__file__).resolve().parent
 class GateTests(unittest.TestCase):
     version = "0.56.0"
     fuzz_target = "bls12381_field"
+    rust_version = "1.98.1"
 
     def setUp(self):
         self.temp = tempfile.TemporaryDirectory()
@@ -33,7 +34,7 @@ class GateTests(unittest.TestCase):
         for name in names:
             self.stub("scripts/" + name)
         self.stub("bin/cargo")
-        self.stub("bin/rustc", 'printf "rustc 1.98.1 (fixture)\\n"\n')
+        self.stub("bin/rustc", f'printf "rustc {self.rust_version} (fixture)\\n"\n')
 
     def stub(self, name, tail=""):
         path = self.root / name
@@ -112,6 +113,12 @@ class Fp2GateTests(GateTests):
 class G2GateTests(GateTests):
     version = "0.60.0"
     fuzz_target = "bls12381_g2"
+
+
+class G2AdditionGateTests(GateTests):
+    version = "0.61.0"
+    fuzz_target = "bls12381_g2_add"
+    rust_version = "1.99.0"
 
 
 class DifferentialSelectionTests(unittest.TestCase):

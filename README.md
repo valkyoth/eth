@@ -33,7 +33,7 @@ receipts, withdrawals, Merkle Patricia Trie proofs, fork-aware validation, and
 bounded first-party EVM components.
 
 The complete stack is built in small independently reviewed milestones rather
-than claimed ahead of its evidence. Version `0.60.0` is still a library, not a
+than claimed ahead of its evidence. Version `0.61.0` is still a library, not a
 production node, wallet, RPC client, or key store.
 Networking, private-key signing, local key storage, and third-party execution
 backends are not enabled by default.
@@ -44,11 +44,11 @@ crates.io packages are published cumulatively at `v0.60.0`, `v0.65.0`, and
 each later pre-1.0 minor divisible by five. Intermediate tags remain source
 milestones and never publish crates.
 
-The `v0.60.0` publication candidate combines public-input BLS12-381 Fp/Fp2
-and G1/G2 arithmetic with gas-authorized G1 addition. Pentest is complete;
-GitHub checks and release approval are pending. The latest published checkpoint remains
-`v0.55.0` until publication. G2ADD, subgroup checks, MSM, mapping, pairing and
-KZG execution still have explicit later releases.
+The `v0.61.0` source candidate adds gas-authorized G2 addition to the existing
+public-input BLS12-381 Fp/Fp2 and G1/G2 arithmetic. Pentest is pending.
+The latest published checkpoint is `v0.60.0`; new source APIs become available
+on crates.io at `v0.65.0`. Subgroup checks, MSM, mapping, pairing and KZG
+execution still have explicit later releases.
 See the [current scope](https://github.com/valkyoth/eth/blob/main/docs/current-status.md).
 
 ## Install
@@ -59,8 +59,8 @@ cargo add eth
 
 `cargo add` selects the latest compatible published version and writes a
 versioned dependency to your `Cargo.toml`; no wildcard requirement is needed.
-These examples are tested against the candidate workspace. New v0.60.0 APIs
-become installable from crates.io only after the checkpoint is published.
+These examples are tested against the candidate workspace. New v0.61.0 APIs
+require this source milestone until the v0.65.0 checkpoint is published.
 
 For optional sanitization support:
 
@@ -92,7 +92,7 @@ if let TransactionEnvelope::Typed(typed) = envelope {
 Legend: 🟢 available for the stated scope, 🟡 implemented but incomplete,
 🔴 not implemented.
 
-This table describes the `v0.60.0` candidate's implemented scope. Every yellow row has explicit
+This table describes the `v0.61.0` candidate's implemented scope. Every yellow row has explicit
 [completion releases and verification gates](https://github.com/valkyoth/eth/blob/main/docs/partial-capability-completion.md);
 green indicates implemented support for that row's exact scope, not production
 readiness or completion of the broader Ethereum stack.
@@ -111,7 +111,7 @@ readiness or completion of the broader Ethereum stack.
 | EVM host capabilities | 🟢 Available | Separate state-view, journal, block, crypto, inspector, and bounded-arena contracts plus embedded-linear/fixed-width-radix node access profiles and transaction resource governors |
 | Native EVM execution | 🟡 Partial | Bounded basic opcode/state-read interpreter, consensus-correct truncated PUSH handling, and call/create planning; full state transition is incomplete |
 | Native precompiles through BLAKE2F | 🟢 Available | Identity, SHA-256, RIPEMD-160, Prague-era EIP-198/EIP-2565 ModExp without a private operand cap, BN254, and BLAKE2F; ECRECOVER uses explicit caller backends |
-| BLS12-381 and KZG | 🟡 Partial | Canonical wire parsing, public-input Fp/Fp2/G1/G2 arithmetic and paid G1ADD; remaining BLS/KZG execution is unavailable |
+| BLS12-381 and KZG | 🟡 Partial | Canonical wire parsing, public-input Fp/Fp2/G1/G2 arithmetic and paid G1ADD/G2ADD; remaining BLS/KZG execution is unavailable |
 | Owned SDK, providers, wallets, and contract tooling | 🔴 Planned | Assigned to `v0.110.0..=v0.128.0` and `v0.174.0..=v0.218.0` |
 | Complete execution, storage, and execution-client product | 🔴 Planned | Assigned to `v0.129.0..=v0.173.0`, `v0.219.0..=v0.232.0`, and `v0.414.0..=v0.433.0` |
 | Consensus, beacon node, and validator client | 🔴 Planned | Foundations start at `v0.233.0`; complete implementation and assurance continue through `v0.406.0` |
@@ -369,7 +369,9 @@ or failure outcome. Internal drop or unwind consumes the complete child meter.
 `EXTCODECOPY` treats empty-copy offsets as irrelevant and zero-fills code
 offsets beyond the bounded EVM code domain without passing them to the host.
 Charged EIP-2537 G1ADD is available at Prague address `0x0b`, with exact
-256-byte input, 375 gas and canonical atomic 128-byte output. Standalone G1/G2
+256-byte input, 375 gas and canonical atomic 128-byte output. G2ADD is available
+at `0x0d`, with exact 512-byte input, 600 gas and atomic 256-byte output.
+Neither addition precompile rejects on-curve non-subgroup points. Standalone G1/G2
 curve operations and Fp/Fp2 arithmetic are also available for public inputs only;
 curve validity is not subgroup validity and these APIs are variable-time.
 Other KZG/BLS precompiles expose exact fork, frame, output and gas plans but
@@ -1276,7 +1278,7 @@ friendly, and independently testable.
 | `eth-valkyoth-sanitization` | no | Optional bridge to the `sanitization` crate for secret-bearing Ethereum data. |
 | `eth-valkyoth-derive` | no | Optional sanitization and RLP derive macros. |
 | `eth-valkyoth-evm` | no | Explicit no_std EVM execution boundary; no backend admitted yet. |
-| `eth-valkyoth-evm-core` | no | Dependency-free native EVM core domains plus bounded opcode execution, exact-input paid native precompiles, fail-closed call/create planning, canonical EIP-2537 wire parsing, public-input BLS field/group arithmetic and paid G1ADD. |
+| `eth-valkyoth-evm-core` | no | Dependency-free native EVM core domains plus bounded opcode execution, exact-input paid native precompiles, fail-closed call/create planning, canonical EIP-2537 wire parsing, public-input BLS field/group arithmetic and paid G1ADD/G2ADD. |
 | `eth-valkyoth-rpc` | no | Future explicit RPC trust-policy boundary. |
 | `eth-valkyoth-signer` | no | Future signer isolation boundary. |
 | `eth-valkyoth-reth` | no | Future Reth integration boundary. |
@@ -1285,16 +1287,16 @@ friendly, and independently testable.
 ## Rust Version Support
 
 The minimum supported Rust version is Rust `1.90.0`. New deployments should use
-the pinned stable Rust `1.98.1` until the toolchain policy is updated.
+the pinned stable Rust `1.99.0` until the toolchain policy is updated.
 
 Toolchain policy for the next release (historical tag evidence is unchanged):
 
 | Rust | Local Evidence |
 | --- | --- |
-| `1.90.0`-`1.98.0` | `cargo check --workspace --all-features` on every supported toolchain |
-| `1.98.1` | Full portable implementation checks before pentest; report readiness before tagging |
+| `1.90.0`-`1.98.1` | `cargo check --workspace --all-features` on every supported toolchain |
+| `1.99.0` | Full portable implementation checks before pentest; report readiness before tagging |
 
-See the [maintenance review](https://github.com/valkyoth/eth/blob/main/docs/maintenance-review-2026-09-05.md) for checks
+See the [maintenance review](https://github.com/valkyoth/eth/blob/main/docs/maintenance-review-2026-10-09.md) for checks
 completed on the updated dependencies and any environment limitations.
 
 ## Checks
@@ -1303,7 +1305,7 @@ completed on the updated dependencies and any environment limitations.
 scripts/checks.sh
 scripts/check_latest_crates.py
 scripts/check_latest_tools.sh
-scripts/release_0_60_0_gate.sh --implementation
+scripts/release_0_61_0_gate.sh --implementation
 ```
 
 After clean pentest and green GitHub checks, the same gate without arguments

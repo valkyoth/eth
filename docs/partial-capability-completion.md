@@ -1,8 +1,8 @@
 # Partial Capability Completion Map
 
-Reviewed for the v0.60.0 candidate against the current release plan.
-The five yellow README rows describe the **candidate v0.60.0** scope, not
-the latest internal tag. Each has concrete implementation and acceptance
+Reviewed for the v0.61.0 candidate against the current release plan.
+The five yellow README rows describe the **candidate v0.61.0** scope, not
+the published v0.60.0 checkpoint. Each has concrete implementation and acceptance
 milestones below; none is an indefinite deferral.
 
 | README capability | Implementation owners | Completion and verification gates |
@@ -24,7 +24,7 @@ At a public checkpoint, review each affected row against retained tests,
 remediated pentest findings, CI and the specification matrix. Promote only the
 verified scope present in the published archives. Split rows when one bounded
 sub-capability is complete but another is not; do not mark all BLS/KZG green
-because G1ADD alone works. New fork rules require their own admission evidence.
+because G1ADD/G2ADD work. New fork rules require their own admission evidence.
 Full production claims still require the final v0.442.0..=v0.449.0 gates.
 
 Recheck these links whenever the roadmap is renumbered or a README scope changes.

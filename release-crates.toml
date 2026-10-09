@@ -1,106 +1,106 @@
 [release]
-version = "0.60.0"
-milestone = "0.60.0"
-baseline = "0.55.0"
-review_baseline = "0.59.0"
-cumulative_milestones = ["0.56.0", "0.57.0", "0.58.0", "0.59.0", "0.60.0"]
+version = "0.61.0"
+milestone = "0.61.0"
+baseline = "0.60.0"
+review_baseline = "0.60.0"
+cumulative_milestones = ["0.61.0"]
 policy = "independent"
-stage = "public"
+stage = "internal"
 
 [crates."eth-valkyoth-codec"]
-previous_version = "0.21.0"
+previous_version = "0.21.1"
 version = "0.21.1"
-change = "bugfix"
-publish = true
-reason = "Corrects README examples and test maintenance without API changes."
+change = "unchanged"
+publish = false
+reason = "Retains published version during the internal release train."
 
 [crates."eth-valkyoth-primitives"]
-previous_version = "0.11.4"
+previous_version = "0.11.5"
 version = "0.11.5"
-change = "dependency"
-publish = true
-reason = "Updates codec requirement and current domain examples."
+change = "unchanged"
+publish = false
+reason = "Retains published version during the internal release train."
 
 [crates."eth-valkyoth-hash"]
-previous_version = "0.11.4"
+previous_version = "0.11.5"
 version = "0.11.5"
-change = "dependency"
-publish = true
-reason = "Updates primitives requirement and backend examples."
+change = "unchanged"
+publish = false
+reason = "Retains published version during the internal release train."
 
 [crates."eth-valkyoth-protocol"]
-previous_version = "0.26.1"
+previous_version = "0.26.2"
 version = "0.26.2"
-change = "dependency"
-publish = true
-reason = "Updates internal requirements and current bounded transaction examples."
+change = "unchanged"
+publish = false
+reason = "Retains published version during the internal release train."
 
 [crates."eth-valkyoth-verify"]
-previous_version = "0.27.0"
+previous_version = "0.27.1"
 version = "0.27.1"
-change = "dependency"
-publish = true
-reason = "Updates internal requirements and verification guidance."
+change = "unchanged"
+publish = false
+reason = "Retains published version during the internal release train."
 
 [crates."eth-valkyoth-derive"]
-previous_version = "0.18.0"
+previous_version = "0.18.1"
 version = "0.18.1"
 change = "dependency"
-publish = true
-reason = "Updates macro dependencies and executable derive examples."
+publish = false
+reason = "Updates syn and trybuild; cumulative bump at v0.65.0."
 
 [crates."eth-valkyoth-sanitization"]
-previous_version = "0.8.0"
+previous_version = "0.8.1"
 version = "0.8.1"
-change = "dependency"
-publish = true
-reason = "Updates sanitization dependency and current wipe guidance."
+change = "unchanged"
+publish = false
+reason = "Retains published version during the internal release train."
 
 [crates."eth-valkyoth-evm-core"]
-previous_version = "0.29.0"
+previous_version = "0.30.0"
 version = "0.30.0"
 change = "code"
-publish = true
-reason = "Adds cumulative public-input BLS12-381 Fp/Fp2/G1/G2 arithmetic and charged G1 addition."
+publish = false
+reason = "Adds paid G2ADD with canonical output and cross-client verification; cumulative bump at v0.65.0."
 
 [crates."eth-valkyoth-evm"]
-previous_version = "0.12.2"
+previous_version = "0.13.0"
 version = "0.13.0"
-change = "code"
-publish = true
-reason = "Updates public backend review metadata and native core dependency."
+change = "unchanged"
+publish = false
+reason = "Retains published version during the internal release train."
 
 [crates."eth-valkyoth-rpc"]
-previous_version = "0.7.0"
+previous_version = "0.7.1"
 version = "0.7.1"
-change = "bugfix"
-publish = true
-reason = "Clarifies trust-policy-only scope and adds a tested example."
+change = "unchanged"
+publish = false
+reason = "Retains published version during the internal release train."
 
 [crates."eth-valkyoth-signer"]
-previous_version = "0.7.5"
+previous_version = "0.7.6"
 version = "0.7.6"
-change = "dependency"
-publish = true
-reason = "Updates primitives requirement and identity-only documentation."
+change = "unchanged"
+publish = false
+reason = "Retains published version during the internal release train."
 
 [crates."eth-valkyoth-reth"]
-previous_version = "0.7.0"
+previous_version = "0.7.1"
 version = "0.7.1"
-change = "bugfix"
-publish = true
-reason = "Clarifies placeholder scope and adds a tested boundary example."
+change = "unchanged"
+publish = false
+reason = "Retains published version during the internal release train."
 
 [crates."eth-valkyoth-testkit"]
-previous_version = "0.7.0"
+previous_version = "0.7.1"
 version = "0.7.1"
-change = "bugfix"
-publish = true
-reason = "Clarifies corpus metadata scope and adds a tested example."
+change = "unchanged"
+publish = false
+reason = "Retains published version during the internal release train."
 
 [crates."eth"]
-previous_version = "0.55.0"
-version = "0.60.0"
+previous_version = "0.60.0"
+version = "0.61.0"
 change = "code"
-publish = true
-reason = "Publishes the complete v0.56.0 through v0.60.0 train and refreshed documentation."
+publish = false
+reason = "Internal milestone for charged BLS12-381 G2 addition; publication at v0.65.0."

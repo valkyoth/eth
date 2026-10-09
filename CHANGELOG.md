@@ -4,6 +4,18 @@ All notable changes to `eth` are documented here.
 
 ## Unreleased
 
+### v0.61.0 Internal Candidate
+
+- Added dependency-free, gas-authorized Prague G2ADD at `0x0d`: exact 512-byte
+  input, 600 gas, canonical atomic 256-byte output, and no subgroup rejection.
+- Added work-instrumented admission regressions, official paid-path fixtures,
+  independent differential fuzzing, a charged benchmark and three-client checks.
+- Updated stable Rust to 1.99.0, syn/trybuild and both dependency lockfiles;
+  retained Rust 1.90.0 as the MSRV. Refreshed digest-pinned execution clients.
+- This milestone is source-only. Support crate versions remain at v0.60.0's
+  published values; cumulative package publication resumes at v0.65.0.
+- Implementation checks passed; ready for the incremental pentest.
+
 ### v0.60.0 Public Candidate
 
 - Added validated public-input G2 affine/projective operations, complete

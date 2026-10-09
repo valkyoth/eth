@@ -19,10 +19,10 @@ class Client:
 CLIENTS = (
     Client(
         "geth",
-        "docker.io/ethereum/client-go@sha256:523d3ba26623a619e912019068dc2784f02934070ac46bdae4d5b9df0d917814",
+        "docker.io/ethereum/client-go@sha256:abf3605177f8bdcfce436985a8054cca4ae59256323a4ffb72c56c04f3d1fadd",
         "https://api.github.com/repos/ethereum/go-ethereum/releases/latest",
-        "v1.17.5",
-        "Geth/v1.17.5-",
+        "v1.17.8",
+        "Geth/v1.17.8-",
         None,
         (
             "--dev",
@@ -37,13 +37,14 @@ CLIENTS = (
     ),
     Client(
         "besu",
-        "docker.io/hyperledger/besu@sha256:6f3f21ce533383fcc8db3bce02252b59d5a9e776b72b5a1c8ecd2db011600042",
+        "docker.io/hyperledger/besu@sha256:fc1813d67d630d7660eea6ee555c01e73bfecda3e54d24f9484c1c4a52c6fcb0",
         "https://api.github.com/repos/besu-eth/besu/releases/latest",
-        "26.8.1",
-        "besu/v26.8.1/",
+        "26.9.0",
+        "besu/v26.9.0/",
         "1000:1000",
         (
-            "--network=dev",
+            "--network=ephemery",
+            "--sync-mode=FULL",
             "--rpc-http-enabled=true",
             "--rpc-http-host=0.0.0.0",
             "--rpc-http-port=8545",
@@ -55,10 +56,10 @@ CLIENTS = (
     ),
     Client(
         "nethermind",
-        "docker.io/nethermind/nethermind@sha256:1b6b01419de4ff75ed3d61995904bccc2fdcc2865fee6dae07d88c14a0758e40",
+        "docker.io/nethermind/nethermind@sha256:25f72063f6fc8ba89f1c08abe1ed3211203b3cf303c9618cc3a2488e1e4ab2e0",
         "https://api.github.com/repos/NethermindEth/nethermind/releases/latest",
-        "1.39.3",
-        "Nethermind/v1.39.3+",
+        "2.1.0",
+        "Nethermind/v2.1.0+",
         None,
         (
             "--config=spaceneth",

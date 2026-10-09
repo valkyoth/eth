@@ -21,6 +21,7 @@ mod bls12_fp2_api;
 mod bls12_frame;
 mod bls12_g1;
 mod bls12_g2;
+mod bls12_g2_precompile;
 mod bls12_gas;
 mod bls12_precompile;
 mod bls12_wire;
@@ -117,12 +118,12 @@ pub use precompile::{
     EvmPrecompileDescriptor, EvmPrecompileGasPolicy, EvmPrecompileImplementation,
     EvmPrecompileInputPolicy, EvmPrecompileKind, EvmPrecompilePlan, EvmPrecompileRegistry,
 };
-pub use precompile_authorization::EvmBls12G1Add;
 pub use precompile_authorization::{
     EvmBlake2F, EvmBn254Add, EvmBn254Mul, EvmBn254Pairing, EvmEcRecover, EvmExecutablePrecompile,
     EvmIdentity, EvmModexp, EvmPrecompileGasQuote, EvmPrecompileOutcome, EvmPrecompileStatus,
     EvmRipemd160, EvmSha256,
 };
+pub use precompile_authorization::{EvmBls12G1Add, EvmBls12G2Add};
 pub use program_counter::ProgramCounter;
 pub use stack::{EVM_STACK_LIMIT, EvmStack};
 pub use state::{EvmAccount, EvmAddress, EvmState, EvmStateContext};

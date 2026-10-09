@@ -127,7 +127,9 @@ non-empty pairing result words with vector-backed canonical zero/one outputs,
 and `v0.51.0` adds first-party dependency-free BLAKE2F execution plus the
 optimized BN254 final-exponentiation remediation. `v0.52.0` adds exact
 EIP-2537 frame, output, fixed-gas, MSM-discount, and pairing-gas planning while
-BLS arithmetic remains fail closed.
+BLS arithmetic remained fail closed in that release. Subsequent field/group
+passes supply public-input arithmetic; v0.58.0 admits charged G1ADD and the
+v0.61.0 candidate supplies charged G2ADD. Other BLS execution remains closed.
 The registry recognizes the
 canonical low-address accounts for Frontier precompiles,
 Byzantium modular exponentiation and BN254 precompiles, Istanbul BLAKE2F,
@@ -140,7 +142,7 @@ Cancun KZG point evaluation, and Prague BLS12-381 precompiles.
 | BN254 add/mul/pairing | `0x06..=0x08` | Byzantium | Add and scalar multiplication execute dependency-free with canonical field and point validation. Pairing validates bounded frames, G2 curve membership, G2 subgroup membership, tuple streaming, line-function arithmetic, sparse Miller-loop accumulation, optimized bounded final exponentiation, Frobenius Q1/-Q2 point mapping, and the projective post-loop line carrier, then writes canonical EIP-197 zero/one result words documented in `docs/bn254-pairing-economics.md`. |
 | BLAKE2F | `0x09` | Istanbul | Executes EIP-152 exact 213-byte frames with final-flag validation, round-count gas, and 64-byte output. |
 | KZG point evaluation | `0x0a` | Cancun | Exact 192-byte input, 64-byte output, and fixed 50,000-gas planning; first-party verification and blob integration are assigned to `v0.143.0..=v0.150.0`. |
-| BLS12-381 precompiles | `0x0b..=0x11` | Prague | Exact/non-empty frame policies, fixed output lengths, and official EIP-2537 gas planning; first-party execution is assigned through `v0.56.0..=v0.70.0`. |
+| BLS12-381 precompiles | `0x0b..=0x11` | Prague | Paid G1ADD (`0x0b`, 375 gas) and candidate G2ADD (`0x0d`, 600 gas) execute without subgroup rejection. Remaining MSM, maps and pairing have exact/non-empty planning and first-party admission through `v0.62.0..=v0.70.0`. |
 
 The registry is still intentionally narrower than a full precompile executor.
 Plans expose fixed

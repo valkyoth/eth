@@ -2,6 +2,12 @@
 
 use crate::{EvmBls12381Fp, EvmBls12381Fp2, bls12_field::Fp};
 
+#[cfg(test)]
+std::thread_local! {
+    pub(crate) static INVERSIONS: core::cell::Cell<usize> = const { core::cell::Cell::new(0) };
+    pub(crate) static ROOTS: core::cell::Cell<usize> = const { core::cell::Cell::new(0) };
+}
+
 #[derive(Clone, Copy, Eq, PartialEq)]
 pub(crate) struct Fp2 {
     c0: Fp,
@@ -85,6 +91,8 @@ impl Fp2 {
     }
 
     pub(crate) fn invert(self) -> Option<Self> {
+        #[cfg(test)]
+        INVERSIONS.with(|count| count.set(count.get().saturating_add(1)));
         // -1 is a nonsquare in Fp, so the norm is zero iff both coefficients are.
         let inverse = self.norm().invert()?;
         let conjugate = self.conjugate();
@@ -95,6 +103,8 @@ impl Fp2 {
     }
 
     pub(crate) fn sqrt(self) -> Option<Self> {
+        #[cfg(test)]
+        ROOTS.with(|count| count.set(count.get().saturating_add(1)));
         let zero = Fp::from_u64(0);
         let root = if self.c1 == zero {
             // Includes zero; a base-field nonsquare has a purely imaginary root.

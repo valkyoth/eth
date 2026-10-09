@@ -17,10 +17,10 @@ The [release plan](RELEASE_PLAN.md) assigns this work to bounded, individually
 pentested milestones. The [September scope review](ROADMAP_REVIEW_2026_09_05.md)
 records the latest splits and full-client/library acceptance requirements;
 the [version map](roadmap-version-map.json) preserves previous assignments.
-The current candidate is `v0.60.0`, public-input BLS12-381 G2 operations;
-pentest is complete; GitHub and release approval are pending. Fp2 is tagged as v0.59.0.
-The public checkpoint includes all five implementation slices, independent
-package bumps and verified crate README examples. G2ADD remains v0.61.0.
+The current candidate is `v0.61.0`, charged BLS12-381 G2 addition;
+implementation checks passed and it is ready for pentest. v0.60.0 is tagged and
+published. Support versions remain at that checkpoint until the cumulative
+v0.65.0 publication; the facade source version follows this internal milestone.
 Unpublished implementation and assurance passes
 continue through `v0.449.0` before RC/1.0;
 that endpoint is a scope inventory, not a deadline or automatic readiness claim.
@@ -61,7 +61,7 @@ The first production value is:
 
 ## Non-Negotiable Engineering Rules
 
-- Rust stable `1.98.1`, edition 2024, workspace resolver `3`.
+- Rust stable `1.99.0`, edition 2024, workspace resolver `3`.
 - MSRV is Rust `1.90.0`; compatibility must be checked through `1.98.1`.
 - Latest crate and tool versions are checked before dependency or tooling edits.
 - Official Ethereum sources are checked before consensus-sensitive
@@ -504,7 +504,7 @@ Release gate:
 - Hive, multi-execution-client, and long-running validator gates pass;
 - Rust `1.90.0` through the newest supported compatibility release pass
   all-feature workspace checks;
-- the full release gate passes on pinned stable Rust `1.98.1`.
+- the full release gate passes on pinned stable Rust `1.99.0`.
 
 Kani is extra assurance. It does not replace fuzzing, official Ethereum
 conformance tests, pentest, cargo-audit/cargo-deny, or independent security

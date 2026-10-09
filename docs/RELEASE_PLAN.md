@@ -15,10 +15,9 @@ previously planned workstream contracts, extracts 98 implementation passes and
 promotes 11 planned patch milestones to minors. Unpublished work now extends
 through `v0.449.0`; published history through `v0.55.0` is unchanged. The
 [version map](roadmap-version-map.json) records every previous assignment.
-The current candidate is `v0.60.0`, BLS12-381 G2 group operations on the
-tagged Fp2 foundation. v0.59.0 is tagged. This public checkpoint also bundles
-all changes since v0.55.0; pentest is complete, GitHub and release approval are pending.
-Standalone G2 arithmetic does not enable the G2 precompile.
+The current candidate is `v0.61.0`, charged BLS12-381 G2 addition on the
+published v0.60.0 foundation. Implementation checks passed; ready for pentest.
+This internal milestone publishes no crates; the next checkpoint is v0.65.0.
 The [partial-capability completion map](partial-capability-completion.md)
 traces all five yellow README rows to implementation and acceptance releases.
 
@@ -3378,7 +3377,7 @@ Exit criteria:
 
 ### v0.60.0 - BLS12-381 G2 Group Operations
 
-Status: implementation checks and pentest complete; public checkpoint, GitHub and release approval pending.
+Status: tagged and published as v0.60.0; per-tag pentest and release checks passed.
 
 Goal: complete G2 point formulas before charged addition.
 
@@ -3424,7 +3423,7 @@ Exit criteria:
 
 ### v0.61.0 - BLS12-381 Fp2, G2, And Addition Completion
 
-Status: planned; internal signed tag, publication at v0.65.0.
+Status: implementation checks passed; ready for pentest; publication at v0.65.0.
 
 Goal: implement dependency-free Fp2/G2 arithmetic and the `0x0d` addition
 precompile, then establish the extension-tower foundation required by pairing.

@@ -154,7 +154,6 @@ fn fork_activation_and_other_bls_backends_remain_explicit() -> Result<(), EvmCor
     );
     for kind in [
         EvmPrecompileKind::Bls12G1Msm,
-        EvmPrecompileKind::Bls12G2Add,
         EvmPrecompileKind::Bls12PairingCheck,
         EvmPrecompileKind::Bls12MapFpToG1,
     ] {

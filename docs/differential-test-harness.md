@@ -1,9 +1,12 @@
 # Differential Test Harness
 
 Status: `v0.55.0` covers structural RLP and arbitrary-length ModExp through
-independent in-process or external-client reference paths. The public
-v0.60.0 candidate retains Fp/Fp2/G1 and charged G1 evidence and adds an
-independent G2 affine oracle, malformed coefficient-order checks and fuzzing.
+independent in-process or external-client reference paths. The v0.61.0 source
+candidate retains the field/group oracles and adds paid G2ADD differential
+fuzzing and fresh Geth/Besu/Nethermind fixture comparisons.
+Run `python3 scripts/run_bls_g2_client_differential.py` for the separate isolated
+G2 client check; `--check` validates the local vector producer without clients.
+See [G2 execution evidence](bls12-g2-addition.md).
 
 ## Scope
 

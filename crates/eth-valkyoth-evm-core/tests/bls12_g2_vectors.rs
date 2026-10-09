@@ -1,5 +1,43 @@
-//! All official G2 addition fixtures: standalone arithmetic, not charged execution.
-use eth_valkyoth_evm_core::{EvmBls12381G2Affine as Affine, EvmCoreError};
+//! All official G2 addition fixtures through standalone and paid execution.
+use eth_valkyoth_evm_core::{
+    EvmBls12G2Add, EvmBls12381G2Affine as Affine, EvmCoreError, EvmFork, EvmGas, EvmGasMeter,
+    EvmPrecompileKind, EvmPrecompileRegistry, EvmPrecompileStatus,
+};
+
+fn paid(input: &[u8], expected: Result<&[u8], EvmCoreError>) -> Result<(), EvmCoreError> {
+    let descriptor = EvmPrecompileRegistry::try_new(EvmFork::PRAGUE)?
+        .descriptor(EvmPrecompileKind::Bls12G2Add)?;
+    let mut gas = EvmGasMeter::try_new(EvmGas::new(1000))?;
+    let mut output = [0xa5; 257];
+    match descriptor.quote::<EvmBls12G2Add>(input) {
+        Err(error) => {
+            assert_eq!(error, EvmCoreError::PrecompileInvalidInputLength);
+            assert_eq!(expected, Err(error));
+            assert_eq!(gas.used(), EvmGas::new(0));
+            assert_eq!(output, [0xa5; 257]);
+        }
+        Ok(quote) => {
+            let result = quote.authorize_and_execute_bls12_g2_add(&mut gas, &mut output)?;
+            match expected {
+                Ok(bytes) => {
+                    assert_eq!(result.status(), EvmPrecompileStatus::Success);
+                    assert_eq!(result.output_len(), 256);
+                    assert_eq!(gas.used(), EvmGas::new(600));
+                    assert_eq!(&output[..256], bytes);
+                    assert_eq!(output[256], 0xa5);
+                }
+                Err(error) => {
+                    assert_eq!(result.status(), EvmPrecompileStatus::CallFailure);
+                    assert_eq!(result.error(), Some(error));
+                    assert_eq!(result.output_len(), 0);
+                    assert_eq!(gas.used(), EvmGas::new(1000));
+                    assert_eq!(output, [0xa5; 257]);
+                }
+            }
+        }
+    }
+    Ok(())
+}
 
 fn decode(hex: &str) -> Result<Vec<u8>, EvmCoreError> {
     let (chunks, remainder) = hex.as_bytes().as_chunks::<2>();
@@ -40,6 +78,7 @@ fn official_addition_and_rejection_vectors() -> Result<(), EvmCoreError> {
         let input = decode(input)?;
         let expected = decode(expected)?;
         assert_eq!(add_frame(&input)?.as_slice(), expected, "{name}");
+        paid(&input, Ok(&expected))?;
         let (left, right) = input.split_at(256);
         let a = Affine::try_from_be_bytes(left)?.to_projective();
         let b = Affine::try_from_be_bytes(right)?.to_projective();
@@ -69,6 +108,7 @@ fn official_addition_and_rejection_vectors() -> Result<(), EvmCoreError> {
             _ => return Err(EvmCoreError::PrecompileBackendUnavailable),
         };
         assert_eq!(add_frame(&decode(input)?), Err(expected), "{name}");
+        paid(&decode(input)?, Err(expected))?;
         negative += 1;
     }
     assert_eq!((positive, negative), (9, 7));

@@ -78,8 +78,10 @@ assert!(point.add_point(point.negate()).is_infinity());
 These fixed-size APIs are variable-time and **public-input only**. They must
 not process signing secrets. Standalone arithmetic is not paid execution
 authority. Charged G1ADD is available at Prague address `0x0b` with exact
-256-byte input, 375 gas and atomic 128-byte output. G2ADD admission is assigned
-to v0.61.0; subgroup, MSM, mapping and pairing follow in v0.62.0 through v0.70.0.
+256-byte input, 375 gas and atomic 128-byte output. The v0.61.0 source milestone
+adds G2ADD at `0x0d`: exact 512-byte input, 600 gas and atomic 256-byte output.
+This source API is scheduled for crates.io at v0.65.0. Subgroup, MSM, mapping
+and pairing follow in v0.62.0 through v0.70.0.
 KZG execution remains unavailable.
 
 See [G2 arithmetic](https://github.com/valkyoth/eth/blob/main/docs/bls12-g2-arithmetic.md),
@@ -130,7 +132,7 @@ engine: call/create planning and recognized unsupported operations fail closed.
   point mapping, and the projective post-loop line carrier, then writes
   canonical EIP-197 zero/one output words. BLAKE2F executes EIP-152 exact-length frames with
   final-flag validation and round-count gas.
-  Charged EIP-2537 G1 addition is admitted. Other KZG/BLS precompiles
+  Charged EIP-2537 G1 and G2 addition are admitted. Other KZG/BLS precompiles
   remain bounded plans and fail closed. EIP-2537 fixed frames,
   non-empty MSM/pairing lists, output lengths, discount gas, and pairing gas
   are enforced at planning time.

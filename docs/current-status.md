@@ -1,19 +1,19 @@
 # Current Status
 
-Latest published checkpoint: `v0.55.0`. Source candidate: `v0.60.0`,
-the next cumulative public release; implementation checks and pentest are complete.
-GitHub and release approval are pending. The tables describe this candidate, not a
+Latest published checkpoint: `v0.60.0`. Source candidate: `v0.61.0`,
+an internal charged-G2-addition milestone; implementation checks passed and
+pentest is pending. The tables describe this candidate, not a
 production-ready node or a promise that the package is already on crates.io.
 
 The candidate combines Fp/Fp2 and G1/G2 public-input arithmetic with charged
-G1ADD. Other BLS precompiles, subgroup checks and signature verification remain
-unavailable. See [G2 scope](bls12-g2-arithmetic.md) and the
+G1ADD and G2ADD. Other BLS precompiles, subgroup checks and signature verification remain
+unavailable. See [G2 execution](bls12-g2-addition.md) and the
 [completion map for every partial README row](partial-capability-completion.md).
 Normal implementation checks do not require a fabricated final pentest report;
 tag admission validates the real report after maintainer review.
 
 Every following roadmap version remains a pentested signed GitHub tag. The next
-cumulative crates.io publication is `v0.60.0`; intermediate minor and patch
+cumulative crates.io publication is `v0.65.0`; intermediate minor and patch
 tags publish no crates.
 
 This document summarizes what the workspace can do now. The
@@ -72,7 +72,7 @@ Legend:
 | ModExp | 🟢 Available | First-party EIP-198/EIP-2565 execution through Prague with 256-bit length admission, virtual padding, and caller-owned gas-bounded workspace; Osaka changes are assigned to `v0.155.0` |
 | BN254 | 🟢 Available | Add, multiplication, subgroup checks, Miller loop, final exponentiation, and pairing result admission |
 | BLAKE2F | 🟢 Available | Exact EIP-152 frame validation and execution |
-| BLS12-381 | 🟡 Partial | Canonical wire parsing, Fp/Fp2 and G1/G2 public-input arithmetic, and charged G1ADD; other BLS execution remains unavailable |
+| BLS12-381 | 🟡 Partial | Canonical wire parsing, Fp/Fp2 and G1/G2 public-input arithmetic, and charged G1ADD/G2ADD; other BLS execution remains unavailable |
 | KZG point evaluation | 🟡 Partial | Exact frame, output, and gas planning; trusted setup and cryptographic verification remain fail closed |
 | Full state transition | 🔴 Planned | Transaction execution, state commits, logs, refunds, roots, and complete fork conformance remain assigned later releases |
 
@@ -108,7 +108,7 @@ Legend:
 | --- | --- |
 | License | `MIT OR Apache-2.0` |
 | MSRV | Rust `1.90.0` |
-| Pinned stable | Rust `1.98.1` |
+| Pinned stable | Rust `1.99.0` |
 | Default target | `no_std` |
 | Unsafe code | Forbidden in first-party crates |
 | Default networking/signing | None |
@@ -183,6 +183,6 @@ pinned Execution APIs Hive fixture verifies a real account-plus-storage
 response end to end. The earlier byte-exact independently rooted APIs remain
 available only as lower-level compatibility boundaries.
 
-The current workspace uses Rust `1.98.1` for the full gate and checks every
-supported Rust toolchain from `1.90.0` through `1.98.0` with
+The current workspace uses Rust `1.99.0` for the full gate and checks every
+supported Rust toolchain from `1.90.0` through `1.98.1` with
 `cargo check --workspace --all-features`.
