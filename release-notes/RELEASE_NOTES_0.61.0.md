@@ -1,6 +1,7 @@
 # eth v0.61.0
 
-Status: implementation checks passed; ready for pentest.
+Status: implementation checks and pentest passed; final report-commit GitHub
+checks and tag approval pending.
 Publication: DEFERRED TO v0.65.0
 
 ## Charged G2 Addition
@@ -29,5 +30,10 @@ See the [maintenance review](../docs/maintenance-review-2026-10-09.md).
 
 No package is selected for crates.io publication. The facade source version is
 0.61.0; support versions remain unchanged until the v0.65.0 checkpoint.
-Stop for the normal incremental pentest, remediate and retest any findings,
-record the permanent report, then wait for GitHub and explicit tag approval.
+The maintainer supplied a clean incremental assessment of v0.60.0 through
+`f6ddc6937341aeec893ec8cc6c49f8a7b365eec3`: no Critical, High or Medium
+findings and no required remediation. Candidate GitHub checks were confirmed
+green. The permanent report records external and local evidence separately;
+the final report commit still needs GitHub checks and explicit tag approval.
+The optional benchmark-threshold recommendation has explicit v0.70.0
+deliverables and verification. Public-input-only restrictions remain intact.

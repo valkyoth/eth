@@ -18,7 +18,8 @@ pentested milestones. The [September scope review](ROADMAP_REVIEW_2026_09_05.md)
 records the latest splits and full-client/library acceptance requirements;
 the [version map](roadmap-version-map.json) preserves previous assignments.
 The current candidate is `v0.61.0`, charged BLS12-381 G2 addition;
-implementation checks passed and it is ready for pentest. v0.60.0 is tagged and
+implementation checks and pentest passed; final report-commit GitHub checks
+and tag approval are pending. v0.60.0 is tagged and
 published. Support versions remain at that checkpoint until the cumulative
 v0.65.0 publication; the facade source version follows this internal milestone.
 Unpublished implementation and assurance passes

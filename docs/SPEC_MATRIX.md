@@ -1,8 +1,9 @@
 # eth Specification Matrix
 
 The internal `v0.61.0` candidate adds charged Prague G2ADD to the published
-v0.60.0 field/group arithmetic and G1ADD. Implementation checks passed; pentest
-is pending. See [G2 execution and verification](bls12-g2-addition.md).
+v0.60.0 field/group arithmetic and G1ADD. Implementation checks and pentest
+passed; final GitHub checks and tag approval are pending.
+See [G2 execution and verification](bls12-g2-addition.md).
 Curve validation is not subgroup validation; execution requires paid authority.
 
 Status: sources pinned in `spec-lock.toml`; scalar, list, and canonical

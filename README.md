@@ -45,7 +45,8 @@ each later pre-1.0 minor divisible by five. Intermediate tags remain source
 milestones and never publish crates.
 
 The `v0.61.0` source candidate adds gas-authorized G2 addition to the existing
-public-input BLS12-381 Fp/Fp2 and G1/G2 arithmetic. Pentest is pending.
+public-input BLS12-381 Fp/Fp2 and G1/G2 arithmetic. Pentest is complete;
+final report-commit GitHub checks and tag approval are pending.
 The latest published checkpoint is `v0.60.0`; new source APIs become available
 on crates.io at `v0.65.0`. Subgroup checks, MSM, mapping, pairing and KZG
 execution still have explicit later releases.

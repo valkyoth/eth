@@ -1,6 +1,7 @@
 # Charged BLS12-381 G2 Addition
 
-Source milestone: v0.61.0, internal candidate. Pentest is pending.
+Source milestone: v0.61.0, internal candidate. Pentest passed; final
+report-commit GitHub checks and tag approval are pending.
 No crates.io publication before v0.65.0.
 
 ## Contract
@@ -60,6 +61,10 @@ validation is v0.62.0; the remaining MSM/map/pairing passes run through v0.70.0.
   polynomial/affine oracle, including malformed input and gas/output limits.
 - The charged G2 benchmark checks 1,000 complete finite-point calls and a
   one-second host ceiling; this is not portable gas or side-channel proof.
+  The clean external review recommended tightening that broad smoke ceiling.
+  Calibrated thresholds, variance evidence and regression-gate tests are
+  assigned to v0.70.0 advanced-precompile admission; current timing is not
+  claimed to be a comprehensive worst-case or cross-host performance bound.
 - `scripts/release_0_61_0_gate.sh --implementation` runs portable checks;
   the rootless client runner is a separate required integration check for this
   milestone. Neither command substitutes for the external pentest.

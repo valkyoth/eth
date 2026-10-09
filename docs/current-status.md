@@ -1,8 +1,9 @@
 # Current Status
 
 Latest published checkpoint: `v0.60.0`. Source candidate: `v0.61.0`,
-an internal charged-G2-addition milestone; implementation checks passed and
-pentest is pending. The tables describe this candidate, not a
+an internal charged-G2-addition milestone; implementation checks and pentest
+passed. Final report-commit GitHub checks and tag approval are pending.
+The tables describe this candidate, not a
 production-ready node or a promise that the package is already on crates.io.
 
 The candidate combines Fp/Fp2 and G1/G2 public-input arithmetic with charged

@@ -16,7 +16,8 @@ promotes 11 planned patch milestones to minors. Unpublished work now extends
 through `v0.449.0`; published history through `v0.55.0` is unchanged. The
 [version map](roadmap-version-map.json) records every previous assignment.
 The current candidate is `v0.61.0`, charged BLS12-381 G2 addition on the
-published v0.60.0 foundation. Implementation checks passed; ready for pentest.
+published v0.60.0 foundation. Implementation checks and pentest passed;
+final report-commit GitHub checks and tag approval are pending.
 This internal milestone publishes no crates; the next checkpoint is v0.65.0.
 The [partial-capability completion map](partial-capability-completion.md)
 traces all five yellow README rows to implementation and acceptance releases.
@@ -3423,7 +3424,8 @@ Exit criteria:
 
 ### v0.61.0 - BLS12-381 Fp2, G2, And Addition Completion
 
-Status: implementation checks passed; ready for pentest; publication at v0.65.0.
+Status: implementation checks and pentest passed; final report-commit GitHub
+checks and tag approval pending; publication at v0.65.0.
 
 Goal: implement dependency-free Fp2/G2 arithmetic and the `0x0d` addition
 precompile, then establish the extension-tower foundation required by pairing.
@@ -3789,6 +3791,10 @@ Deliverables:
 - explicit integration policy for EIP-2537 all-supplied-gas burning on errors;
 - official fixture lock and drift checker;
 - cross-client differential report and performance evidence;
+- calibrated host performance thresholds for each BLS operation, including
+  the v0.61.0 G2ADD benchmark recommendation: replace the broad one-second
+  smoke ceiling with measured regression tolerances on documented reference
+  hosts, without conflating host timing with consensus gas;
 - fuzz corpus promotion for every security-relevant failure class;
 - final dependency-independence, memory, stack, panic, and unsafe-code audit;
 - independent pentest report covering the entire BLS sequence.
@@ -3801,6 +3807,9 @@ Verification:
   implementations where practical;
 - `scripts/checks.sh`, `cargo deny check`, `cargo audit`, and current SBOM;
 - release-mode CPU/gas report for every operation;
+- repeated G2ADD and other BLS measurements with host/toolchain provenance,
+  variance bounds, and a deliberately slowed fixture proving the calibrated
+  performance gate detects a regression;
 - pentest, remediation, and clean retest before tagging.
 
 Exit criteria:

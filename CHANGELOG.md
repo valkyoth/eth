@@ -14,7 +14,8 @@ All notable changes to `eth` are documented here.
   retained Rust 1.90.0 as the MSRV. Refreshed digest-pinned execution clients.
 - This milestone is source-only. Support crate versions remain at v0.60.0's
   published values; cumulative package publication resumes at v0.65.0.
-- Implementation checks passed; ready for the incremental pentest.
+- Incremental pentest passed without Critical, High or Medium findings.
+  Final report-commit GitHub checks and tag approval remain pending.
 
 ### v0.60.0 Public Candidate
 

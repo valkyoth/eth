@@ -1,6 +1,7 @@
 # Crate Version Matrix
 
-Status: `v0.61.0` internal candidate; implementation checks passed; ready for pentest.
+Status: `v0.61.0` internal candidate; implementation checks and pentest passed;
+final report-commit GitHub checks and tag approval pending.
 Published baseline: `v0.60.0`. No package is selected before `v0.65.0`.
 
 `eth` uses independent crate versions. The facade crate remains the main user
